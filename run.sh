@@ -3,7 +3,6 @@
 PROJECT_NAME="trusted-search"
 stop_docker() {
     docker compose -p $PROJECT_NAME down --remove-orphans
-    docker volume prune -f
 }
 
 configure_env(){

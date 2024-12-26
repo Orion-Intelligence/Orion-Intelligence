@@ -7,7 +7,7 @@
   border-radius: 10px;
   padding: 20px;
   border: 1px solid #336BA1;
-  margin: 15px 12px 11em 5em;
+  margin: 15px 12px 11em 6em;
   background: #2A578459;
 }
 
@@ -40,9 +40,8 @@
   font-weight: 400;
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (max-width: 1400px) {
   .search__no-suggestion {
-    margin-left: 12px;
-    background: #f9f9f9;
+    margin-left: 20px;
   }
 }

@@ -38,8 +38,8 @@ services:
       DJANGO_SETTINGS_MODULE: trustly.settings
       DISABLE_TEMPLATE_CACHING: "1"
     networks:
-      backend:
-        ipv4_address: 172.20.1.10
+      - shared_bridge
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "exit 0"]
       interval: 30s
@@ -246,6 +246,8 @@ services:
           memory: 128M
 
 networks:
+  shared_bridge:
+    external: true
   backend:
     driver: bridge
     ipam:

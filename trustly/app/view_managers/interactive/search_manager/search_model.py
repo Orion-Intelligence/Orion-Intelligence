@@ -1,5 +1,7 @@
 from django.http import JsonResponse
 
+from trustly.app.server_manager.external_request_manager.external_request_controller import external_request_controller
+from trustly.app.server_manager.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
 from trustly.services.elastic_manager.elastic_controller import elastic_controller
 from trustly.services.elastic_manager.elastic_enums import ELASTIC_CRUD_COMMANDS, ELASTIC_REQUEST_COMMANDS
 from trustly.app.constants.constant import CONSTANTS
@@ -67,18 +69,29 @@ class search_model(request_handler):
 
   def __query_results(self, p_data):
     m_query_model = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER, [p_data])
-    if m_query_model.m_search_query == GENERAL_STRINGS.S_GENERAL_EMPTY:
-      return False, None
 
-    m_status, m_documents = elastic_controller.get_instance().invoke_trigger(ELASTIC_CRUD_COMMANDS.S_READ, [ELASTIC_REQUEST_COMMANDS.S_SEARCH, [m_query_model], [None]])
-    m_parsed_documents, m_suggestions_content, total_pages = self.__parse_filtered_documents(m_documents)
+    if m_query_model.m_search_type == "persona":
+      email = ""
+      if "@" in m_query_model.m_search_query:
+        email = m_query_model.m_search_query
+      username = m_query_model.m_search_query
+      query = {"email": "msmannan00@gmail.com", "username": "msmannan00"}
+      status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, query)
+      m_status, m_context = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER, [result, m_query_model])
+      return m_status, m_context
+    else:
+      if m_query_model.m_search_query == GENERAL_STRINGS.S_GENERAL_EMPTY:
+        return False, None
 
-    m_query_model.set_total_documents(len(m_parsed_documents))
+      m_status, m_documents = elastic_controller.get_instance().invoke_trigger(ELASTIC_CRUD_COMMANDS.S_READ, [ELASTIC_REQUEST_COMMANDS.S_SEARCH, [m_query_model], [None]])
+      m_parsed_documents, m_suggestions_content, total_pages = self.__parse_filtered_documents(m_documents)
 
-    m_context, m_status = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.M_INIT, [m_parsed_documents, m_query_model, total_pages])
-    m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_query, m_suggestions_content)
+      m_query_model.set_total_documents(len(m_parsed_documents))
 
-    return m_status, m_context
+      m_context, m_status = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.M_INIT, [m_parsed_documents, m_query_model, total_pages])
+      m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_query, m_suggestions_content)
+
+      return m_status, m_context
 
   def __init_page(self, p_data):
     mStatus, mResult = self.__query_results(p_data)

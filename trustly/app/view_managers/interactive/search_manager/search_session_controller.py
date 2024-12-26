@@ -1,3 +1,4 @@
+import json
 import math
 import random
 import string
@@ -246,8 +247,37 @@ class search_session_controller(request_handler):
 
     return mContext, True
 
+  @staticmethod
+  def __init_runtime_parser(p_document_list, p_search_model):
+    m_relevance_contexts = []
+
+    m_documents = json.loads(p_document_list) if isinstance(p_document_list, str) else p_document_list
+
+    for document in m_documents:
+      base_url = document.get("base_url", "")
+      content_type = document.get("content_type", [])
+
+      for card in document.get("cards_data", []):
+        random_id = str(random.randint(1000, 9999))
+        m_title = card.get("m_title", "")
+        m_description = "Total " + str(len(document.get("cards_data", [])))
+        m_update_date_str = card.get("m_last_updated", "")
+        expiry_status = None
+        print(":::::::::::::::::::::::::::::::::::", flush=True)
+        print(card, flush=True)
+        print(":::::::::::::::::::::::::::::::::::", flush=True)
+
+        m_relevance_context = {SEARCH_CALLBACK.M_TITLE: m_title, SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_URL: card.get("m_url", base_url), SEARCH_CALLBACK.M_SECTION: card.get("m_sections", []), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: card.get("m_content_type", ""), SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_EXPIRY: expiry_status, SEARCH_CALLBACK.K_CONTENT_TYPE: card.get("m_content_type", ""), SEARCH_CALLBACK.M_NAME: card.get("m_name", ""), SEARCH_CALLBACK.M_CONTENT: card.get("m_content", ""), SEARCH_CALLBACK.M_DOCUMENT_LEAK: card.get("m_public_records", []), SEARCH_CALLBACK.M_VIDEO: card.get("m_logo_or_images", []), SEARCH_CALLBACK.M_ARCHIVE_URL: card.get("m_archive_url", None), SEARCH_CALLBACK.M_CREATION_DATA: card.get("m_creation_date", None), SEARCH_CALLBACK.M_EMAILS: card.get("m_email_addresses", []), SEARCH_CALLBACK.M_PHONE_NUMBER: card.get("m_phone_numbers", []), }
+        m_relevance_contexts.append(m_relevance_context)
+
+    m_context = {SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: m_relevance_contexts, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, }
+
+    return True, m_context
+
   def invoke_trigger(self, p_command, p_data):
     if p_command == SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER:
       return self.__init_search_parameters(p_data[0])
+    if p_command == SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER:
+      return self.__init_runtime_parser(p_data[0], p_data[1])
     if p_command == SEARCH_SESSION_COMMANDS.M_INIT:
       return self.__init_parameters(p_data[0], p_data[1], p_data[2])

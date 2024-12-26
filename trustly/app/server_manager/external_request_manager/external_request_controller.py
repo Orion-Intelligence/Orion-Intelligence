@@ -1,5 +1,5 @@
+import requests
 from django.http import HttpResponse
-
 from trustly.services.mongo_manager.mongo_controller import mongo_controller
 from trustly.services.mongo_manager.mongo_enums import MONGODB_CRUD
 from trustly.services.mongo_manager.mongo_enums import MONGO_COMMANDS
@@ -32,7 +32,21 @@ class external_request_controller(request_handler):
       return HttpResponse("success")
     return HttpResponse("failed")
 
+  @staticmethod
+  def __fetch_runtime_parser(p_data):
+    param = {"query": p_data}
+    url = "http://trusted-crawler-api:8000/runtime/parse"
+    try:
+      response = requests.post(url, json=param)
+      if response.status_code != 200:
+        return False, []
+      return True, response.json()
+    except Exception as ex:
+      return False, []
+
   # External Request Callbacks
   def invoke_trigger(self, p_command, p_data):
     if p_command == EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS:
       return self.__update_module_status(p_data)
+    if p_command == EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER:
+      return self.__fetch_runtime_parser(p_data)

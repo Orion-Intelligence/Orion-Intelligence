@@ -11,8 +11,8 @@ from trustly.app.view_managers.interactive.search_manager.search_view_model impo
 from trustly.app.view_managers.server.error.error_enums import ERROR_MODEL_CALLBACK
 from trustly.services.block_manager.block_controller import block_controller
 from trustly.app.constants.constant import CONSTANTS
-from trustly.app.server_manager.crawl_index_manager.crawl_controller import crawl_controller
-from trustly.app.server_manager.crawl_index_manager.crawl_enums import CRAWL_COMMANDS
+from trustly.app.server_manager.crawl_controller.crawl_controller import crawl_controller
+from trustly.app.server_manager.crawl_controller.crawl_enums import CRAWL_COMMANDS
 from trustly.app.server_manager.external_request_manager.external_request_controller import external_request_controller
 from trustly.app.server_manager.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
 from trustly.app.view_managers.server.block_manager.block_enums import BLOCK_MODEL_CALLBACK
