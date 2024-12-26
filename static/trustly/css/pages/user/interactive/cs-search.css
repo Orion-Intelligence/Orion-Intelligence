@@ -21,7 +21,24 @@ html {
   width: 50vw;
   padding-bottom: 100px;
 }
-
+.searchbar__search-container-persona{
+  margin-left: 100px;
+}
+.searchbar__search-card-persona{
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3);
+}
+.searchbar__search-card-list-persona li{
+  background: none;
+}
+.searchbar__search-card-header-persona{
+  background: rgba(220, 53, 69, 0.5);
+  padding: 20px;
+}
+.searchbar__search-items-persona{
+  width: 65px!important;
+}
 .search__content__right {
   width: 50vw;
   padding-right: 25px;

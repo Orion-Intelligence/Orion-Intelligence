@@ -5,7 +5,7 @@
         {% if mSearchCallbackRelevantDocument|length > 0 %}
             <p class="safe__search-toolbar-results">About {{ mSearchCallbackResultCount }} results found </p>
         {% endif %}
-        {% if mSearchCallbackQueryError != '' %}
+        {% if mSearchCallbackQueryError != '' and mSearchCallbackRelevantSearchType != 'persona'%}
             <h6 class="safe__search-toolbar-error">
                 <span class="safe__search-toolbar-error-header">Did you mean: </span><span class="safe__search-toolbar-error-info"><a class="gc-clear-selection" href="?q={{ mSearchCallbackQueryErrorURL }}&pSearchParamType={{ mSearchCallbackRelevantSearchType }}&mSearchParamSafeSearch={{ mSearchCallbackSaveSearch }}">{% autoescape off %}
                 {{ mSearchCallbackQueryError }}{% endautoescape %}</a> ?</span></h6>

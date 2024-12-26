@@ -7,6 +7,11 @@ class LoginRequiredMiddleware:
 
     def __call__(self, request):
         login_url = reverse('custom_login')
-        if not request.user.is_authenticated and request.path != login_url:
+        admin_path = '/admin/'  # Path to be excluded
+        if (
+            not request.user.is_authenticated and
+            request.path != login_url and
+            not request.path.startswith(admin_path)
+        ):
             return redirect('custom_login')
         return self.get_response(request)
