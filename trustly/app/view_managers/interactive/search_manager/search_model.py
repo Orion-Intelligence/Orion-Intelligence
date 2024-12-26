@@ -69,7 +69,6 @@ class search_model(request_handler):
 
   def __query_results(self, p_data):
     m_query_model = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER, [p_data])
-
     if m_query_model.m_search_type == "persona":
       email = ""
       if "@" in m_query_model.m_search_query:

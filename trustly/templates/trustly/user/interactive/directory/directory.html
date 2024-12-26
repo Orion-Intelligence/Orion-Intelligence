@@ -11,20 +11,30 @@
 <body class="clear-paddings">
 <span id="top"></span>
 <div class="directory">
-    {% include 'trustly/user/blades/home_template/../../blades/shared_blades/blade_toolbar.html' %}
-    <div class="directory__container">
-        <div class="directory__main-container">
-            <div class="directory__upper-heading">
-                <div class="directory__pagination-heading">
-                    <p class="directory__header"> Live Onion Services </p>
-                </div>
-                <div class="directory-pagination">
-                    {% include 'trustly/user/blades/directory_template/blade_directory_pagination.html' %}
-                </div>
-            </div>
-            {% include 'trustly/user/blades/directory_template/blade_directory_list.html' %}
+  {% include 'trustly/user/blades/home_template/../../blades/shared_blades/blade_toolbar.html' %}
+  <div class="directory__container">
+    <div class="directory__main-container">
+      <div class="directory__upper-heading">
+        <div class="directory__pagination-heading">
+          <p class="directory__header"> Live Onion Services </p>
+
+
         </div>
+
+        <div class="directory-pagination">
+
+
+
+          <form class="disable-highlight clear-paddings directory__header-pagination-form" action="" method="GET">
+
+            {% include 'trustly/user/blades/directory_template/blade_directory_filters.html' %}
+            {% include 'trustly/user/blades/directory_template/blade_directory_pagination.html' %}
+          </form>
+        </div>
+      </div>
+      {% include 'trustly/user/blades/directory_template/blade_directory_list.html' %}
     </div>
+  </div>
 </div>
 <span id="bottom"></span>
 

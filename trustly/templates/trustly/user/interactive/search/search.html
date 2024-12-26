@@ -9,26 +9,26 @@
 <div id="top"></div>
 {#{{ unique_urls }}#}
 <div class="search_container">
-    <div class="search">
+  <div class="search">
 
-        <!-- top bar -->
-        {% include 'trustly/user/blades/search_template/blade_search_header.html' %}
-        {% include 'trustly/user/blades/search_template/blade_search_safe_search.html' %}
-        <div class="row">
-            <div class="search__results">
-                {% include 'trustly/user/blades/search_template/blade_search_content.html' %}
-                {% if mSearchCallbackRelevantDocument|length == 0 %}
-                    {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
-                {% endif %}
-            </div>
-            <div class="search__content__right">
-                {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
-            </div>
-        </div>
+    <!-- top bar -->
+    {% include 'trustly/user/blades/search_template/blade_search_header.html' %}
+    {% include 'trustly/user/blades/search_template/blade_search_safe_search.html' %}
+    <div class="row">
+      <div class="search__results">
+        {% include 'trustly/user/blades/search_template/blade_search_content.html' %}
+        {% if mSearchCallbackRelevantDocument|length == 0 %}
+          {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
+        {% endif %}
+      </div>
+      <div class="search__content__right">
+        {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
+      </div>
     </div>
+  </div>
 
-    <!-- pagination -->
-    {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
+  <!-- pagination -->
+  {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
 </div>
 
 {% include 'trustly/user/blades/shared_blades/blade_footer.html' %}
