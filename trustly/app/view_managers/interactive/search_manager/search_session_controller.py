@@ -4,7 +4,6 @@ import random
 import string
 from datetime import datetime, timezone
 from numpy.core.defchararray import lower
-
 from trustly.app.constants.constant import CONSTANTS
 from trustly.app.constants.strings import GENERAL_STRINGS, SEARCH_STRINGS
 from trustly.app.helper_manager.helper_controller import helper_controller
@@ -29,6 +28,8 @@ class search_session_controller(request_handler):
       m_query_model.set_page_number(p_data.GET[SEARCH_PARAM.M_PAGE])
     if SEARCH_PARAM.M_NETWORK in p_data.GET:
       m_query_model.set_network(p_data.GET[SEARCH_PARAM.M_NETWORK])
+    else:
+      m_query_model.set_network("all")
     if SEARCH_PARAM.M_SAFE_SEARCH in p_data.GET:
       if p_data.GET[SEARCH_PARAM.M_SAFE_SEARCH] == "True":
         m_query_model.m_safe_search = "True"
@@ -88,7 +89,7 @@ class search_session_controller(request_handler):
       end_page = total_pages
 
     page_range = range(start_page, end_page + 1)
-    m_context = {SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: p_relevance_context_list, SEARCH_CALLBACK.M_PAGE_NUM: page_range, SEARCH_CALLBACK.M_MAX_PAGINATION: total_pages, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_RELATED_BUSINESS_SITES: p_related_business_list, SEARCH_CALLBACK.M_RELATED_NEWS_SITES: p_related_news_list, SEARCH_CALLBACK.M_RELATED_FILES: p_related_files_list, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site}
+    m_context = {SEARCH_CALLBACK.M_NETWORK: p_search_model.m_network, SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: p_relevance_context_list, SEARCH_CALLBACK.M_PAGE_NUM: page_range, SEARCH_CALLBACK.M_MAX_PAGINATION: total_pages, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_RELATED_BUSINESS_SITES: p_related_business_list, SEARCH_CALLBACK.M_RELATED_NEWS_SITES: p_related_news_list, SEARCH_CALLBACK.M_RELATED_FILES: p_related_files_list, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site}
 
     return m_context
 
@@ -176,11 +177,10 @@ class search_session_controller(request_handler):
       expiry_status = 1
     else:
       expiry_status = 2
-
     if "m_extra_tags" in p_document:
-      mRelevanceContext = {SEARCH_CALLBACK.M_URL: p_document[SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST], SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_CONTACT_LINK: [p_document["m_contact_link"]], SEARCH_CALLBACK.M_EXTRALINK: p_document["m_extra_tags"], SEARCH_CALLBACK.M_WEBLINK: p_document["m_weblink"], SEARCH_CALLBACK.M_DUMPLINK: p_document["m_dumplink"], SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_FULL_CONTENT: p_document["m_content"], SEARCH_CALLBACK.K_CONTENT_TYPE: [p_document["m_content_type"]], SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: ["leak"], SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_CREATION_DATA: p_document["m_creation_date"], SEARCH_CALLBACK.M_EXPIRY: expiry_status}
+      mRelevanceContext = {SEARCH_CALLBACK.M_NETWORK:p_document["m_network"], SEARCH_CALLBACK.M_URL: p_document[SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST], SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_CONTACT_LINK: [p_document["m_contact_link"]], SEARCH_CALLBACK.M_EXTRALINK: p_document["m_extra_tags"], SEARCH_CALLBACK.M_WEBLINK: p_document["m_weblink"], SEARCH_CALLBACK.M_DUMPLINK: p_document["m_dumplink"], SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_FULL_CONTENT: p_document["m_content"], SEARCH_CALLBACK.K_CONTENT_TYPE: [p_document["m_content_type"]], SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: ["leak"], SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_CREATION_DATA: p_document["m_creation_date"], SEARCH_CALLBACK.M_EXPIRY: expiry_status}
     else:
-      mRelevanceContext = {SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_URL: p_document[SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST], SEARCH_CALLBACK.M_SECTION: p_document["m_section"], SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: "general", SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_EXPIRY: expiry_status, SEARCH_CALLBACK.K_CONTENT_TYPE: p_document["m_content_type"], SEARCH_CALLBACK.M_NAME: p_document["m_names"], SEARCH_CALLBACK.M_CONTENT: p_document["m_content"], SEARCH_CALLBACK.M_DOCUMENT_LEAK: p_document["m_document"], SEARCH_CALLBACK.M_VIDEO: p_document["m_video"], SEARCH_CALLBACK.M_ARCHIVE_URL: p_document["m_archive_url"], SEARCH_CALLBACK.M_CREATION_DATA: p_document["m_creation_date"], SEARCH_CALLBACK.M_EMAILS: p_document["m_emails"], SEARCH_CALLBACK.M_PHONE_NUMBER: p_document["m_phone_numbers"], }
+      mRelevanceContext = {SEARCH_CALLBACK.M_NETWORK:p_document["m_network"], SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_URL: p_document[SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST], SEARCH_CALLBACK.M_SECTION: p_document["m_section"], SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: "general", SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_EXPIRY: expiry_status, SEARCH_CALLBACK.K_CONTENT_TYPE: p_document["m_content_type"], SEARCH_CALLBACK.M_NAME: p_document["m_names"], SEARCH_CALLBACK.M_CONTENT: p_document["m_content"], SEARCH_CALLBACK.M_DOCUMENT_LEAK: p_document["m_document"], SEARCH_CALLBACK.M_VIDEO: p_document["m_video"], SEARCH_CALLBACK.M_ARCHIVE_URL: p_document["m_archive_url"], SEARCH_CALLBACK.M_CREATION_DATA: p_document["m_creation_date"], SEARCH_CALLBACK.M_EMAILS: p_document["m_emails"], SEARCH_CALLBACK.M_PHONE_NUMBER: p_document["m_phone_numbers"], }
 
     if p_search_model.m_safe_search == 'False' or (str(p_search_model.m_safe_search) == 'True'):
       return mRelevanceContext, mRelevanceContextOriginal
@@ -252,28 +252,40 @@ class search_session_controller(request_handler):
 
   @staticmethod
   def __init_runtime_parser(p_document_list, p_search_model):
-    m_relevance_contexts = []
-
     m_documents = json.loads(p_document_list) if isinstance(p_document_list, str) else p_document_list
-
+    merged_data = {}
     for document in m_documents:
       base_url = document.get("base_url", "")
-      content_type = document.get("content_type", [])
-
       for card in document.get("cards_data", []):
-        random_id = str(random.randint(1000, 9999))
-        m_title = card.get("m_title", "")
-        m_description = "Total " + str(len(document.get("cards_data", [])))
-        m_update_date_str = card.get("m_last_updated", "")
-        expiry_status = None
-        print(":::::::::::::::::::::::::::::::::::", flush=True)
-        print(card, flush=True)
-        print(":::::::::::::::::::::::::::::::::::", flush=True)
+        for key, value in card.items():
+          if key not in merged_data:
+            merged_data[key] = []
+          if isinstance(value, list):
+            merged_data[key].extend(value)
+          elif value is not None and len(value) > 2:
+            merged_data[key].append(value)
+        if "m_url" not in card:
+          if "m_url" not in merged_data:
+            merged_data["m_url"] = []
+          merged_data["m_url"].append(base_url)
+    for key in merged_data:
+      merged_data[key] = list(set(merged_data[key]))
+    modified_data = {}
+    for key in merged_data:
+      new_key = key.replace("m_", "")  # Remove "M_" prefix
+      modified_data[new_key] = merged_data[key]
 
-        m_relevance_context = {SEARCH_CALLBACK.M_TITLE: m_title, SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_URL: card.get("m_url", base_url), SEARCH_CALLBACK.M_SECTION: card.get("m_sections", []), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: card.get("m_content_type", ""), SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_EXPIRY: expiry_status, SEARCH_CALLBACK.K_CONTENT_TYPE: card.get("m_content_type", ""), SEARCH_CALLBACK.M_NAME: card.get("m_name", ""), SEARCH_CALLBACK.M_CONTENT: card.get("m_content", ""), SEARCH_CALLBACK.M_DOCUMENT_LEAK: card.get("m_public_records", []), SEARCH_CALLBACK.M_VIDEO: card.get("m_logo_or_images", []), SEARCH_CALLBACK.M_ARCHIVE_URL: card.get("m_archive_url", None), SEARCH_CALLBACK.M_CREATION_DATA: card.get("m_creation_date", None), SEARCH_CALLBACK.M_EMAILS: card.get("m_email_addresses", []), SEARCH_CALLBACK.M_PHONE_NUMBER: card.get("m_phone_numbers", []), }
-        m_relevance_contexts.append(m_relevance_context)
-
-    m_context = {SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: m_relevance_contexts, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, }
+    m_context = {
+      SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query,
+      SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search,
+      SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number,
+      SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type,
+      SEARCH_CALLBACK.M_DOCUMENT: merged_data,
+      SEARCH_CALLBACK.M_PAGE_NUM: 1,
+      SEARCH_CALLBACK.M_MAX_PAGINATION: 1,
+      SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY,
+      SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site,
+    }
 
     return True, m_context
 

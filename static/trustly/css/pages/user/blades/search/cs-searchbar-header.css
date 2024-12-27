@@ -26,7 +26,7 @@
 
 .searchbar {
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   margin-top: -1px;
   padding: 40px 48px 15px 80px;
   padding-top: 25px;
@@ -218,17 +218,33 @@
 }
 
 .search__header-network-content {
-  display: none;
-  position: fixed;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute; /* Changed from fixed to absolute */
   background-image: linear-gradient(90deg, rgba(21, 52, 84, 1) 0%, rgba(22, 56, 88, 1) 100%) !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 10px;
+  padding: 15px;
   z-index: 1;
-  min-width: 150px;
+  min-width: 180px;
+  height: 260px;
   color: #fff;
   border-radius: 8px;
-  margin-top: 6px;
+  margin-top: 10px;
   margin-left: -65px;
+  border-top: 3px solid #ffffff50;
+  transform: translateY(-10px); /* Start slightly above */
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+.search__header-network-toggle:checked ~ .search__header-network-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0); /* Slide into place */
+}
+
+.search__header-network-content form {
+  display: flex;
+  flex-direction: column;
 }
 
 .search__header-network-toggle-group {
@@ -242,6 +258,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.search__header-network-toggle-container-border {
+  margin-top: 5px;
+  border-bottom: 1px solid #ffffff20;
+  padding-bottom: 15px;
 }
 
 .search__header-network-toggle-input {
@@ -282,10 +304,10 @@
 
 .search__header-network-submit-button {
   padding: 8px;
-  background: #12335450;
+  background: #5F84A980;
   outline: none;
   color: white;
-  border: 1px solid #102A4685;
+  border: 1px solid #FCFCFC0D;
   border-radius: 5px;
   cursor: pointer;
   text-align: center;
@@ -305,14 +327,12 @@
 
 .search__header-network-submit-button:hover {
   background: none;
-  border: 1px solid #102A4685;
+  background: #5F84A9;
 }
+
 .search__header-network-submit-button:focus {
-  border: 1px solid #102A4685;
   outline: none;
-}
-.search__header-network-toggle:checked ~ .search__header-network-content {
-  display: block;
+  background: #5F84A9;
 }
 
 .search__header-network-select-label {
@@ -321,11 +341,6 @@
 
 .search__header-network-checkbox-group {
   margin-bottom: 10px;
-}
-
-.search__header-network-content form {
-  display: flex;
-  flex-direction: column;
 }
 
 .search__header-network-button {

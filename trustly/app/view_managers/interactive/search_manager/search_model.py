@@ -74,7 +74,7 @@ class search_model(request_handler):
       if "@" in m_query_model.m_search_query:
         email = m_query_model.m_search_query
       username = m_query_model.m_search_query
-      query = {"email": "msmannan00@gmail.com", "username": "msmannan00"}
+      query = {"email": email, "username": username}
       status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, query)
       m_status, m_context = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER, [result, m_query_model])
       return m_status, m_context

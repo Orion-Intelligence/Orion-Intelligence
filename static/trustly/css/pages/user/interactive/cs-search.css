@@ -1,65 +1,101 @@
 .body {
-  overflow-x: hidden !important;
+    overflow-x: hidden !important;
 }
 
 html {
-  background: #1c4d7d !important;
-  scroll-behavior: smooth;
+    background: #1c4d7d !important;
+    scroll-behavior: smooth;
 }
 
 .search_container {
-  margin: 0;
-  height: 100vh;
-  background-image: linear-gradient(to bottom, #174069 0%, #1c4d7d 100%) !important;
+    margin: 0;
+    height: 100vh;
+    background-image: linear-gradient(to bottom, #174069 0%, #1c4d7d 100%) !important;
 }
 
 .search {
-  min-height: 85vh;
+    min-height: 85vh;
 }
 
 .search__results {
-  width: 50vw;
-  padding-bottom: 100px;
+    width: 50vw;
+    padding-bottom: 0;
 }
-.searchbar__search-container-persona{
-  margin-left: 100px;
+
+.searchbar__search-container-persona {
+    margin-left: 100px;
 }
-.searchbar__search-card-persona{
-  border-radius: 10px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.3);
+
+.searchbar__search-container-persona-body{
+    padding: 0;
 }
-.searchbar__search-card-list-persona li{
-  background: none;
+
+.searchbar__search-container-persona-border{
+    border-left: 1px solid #ffffff25;
 }
-.searchbar__search-card-header-persona{
-  background: rgba(220, 53, 69, 0.5);
-  padding: 20px;
+
+.searchbar__search-container-persona-border-color{
+    border: 1px solid #ffffff25 !important;
+    margin: 0;
 }
-.searchbar__search-items-persona{
-  width: 65px!important;
+
+.searchbar__search-container-persona-item {
+  font-weight: bold;
+  color: #D4D4D4;
+  border-radius: 100px;
+  background: #FCFCFC0D;
+  font-size: 12px;
+  font-family: Roboto, sans-serif;
+  margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 9px 9px 9px 15px;
 }
+
+.searchbar__search-card-persona {
+    color: #fff;
+    border: 1px solid #ffffff50;
+    border-radius: 12px;
+    overflow: hidden;
+    height: auto;
+    background: #2A578480;
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+}
+
+.searchbar__search-card-list-persona li {
+    background: none;
+}
+
+.searchbar__search-card-header-persona {
+    background: rgba(220, 53, 69, 0.5);
+    padding: 15px;
+}
+
+.searchbar__search-items-persona {
+    width: 65px !important;
+}
+
 .search__content__right {
-  width: 50vw;
-  padding-right: 25px;
+    width: 50vw;
+    padding-right: 25px;
 }
 
 @media only screen and (max-width: 1400px) {
-  .search__content__right {
-    width: 100vw !important;
-    padding-right: 30px;
-  }
+    .search__content__right {
+        width: 100vw !important;
+        padding-right: 30px;
+    }
 
-  .search__results {
-    padding-left: 20px;
-  }
+    .search__results {
+        padding-left: 20px;
+    }
 
-  .search__results {
-    width: 100vw !important;
-    padding-bottom: 0px;
-  }
+    .search__results {
+        width: 100vw !important;
+        padding-bottom: 0;
+    }
 
-  .search {
-    min-height: 80vh;
-  }
+    .search {
+        min-height: 80vh;
+    }
 }

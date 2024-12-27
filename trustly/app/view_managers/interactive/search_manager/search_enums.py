@@ -30,6 +30,7 @@ class SEARCH_CALLBACK:
   M_QUERY = "mSearchCallbackQuery"
   M_DOCUMENT = "mSearchCallbackRelevantDocument"
   M_TITLE = "mSearchCallbackRelevantDocumentTitle"
+  M_NETWORK = "mNetwork"
   M_URL = "mSearchCallbackRelevantDocumentURL"
   M_SECTION = "mSection"
   M_DESCRIPTION = "mSearchCallbackRelevantDocumentDescription"
@@ -75,6 +76,7 @@ class SEARCH_DOCUMENT_CALLBACK:
   M_IMAGE = "m_images"
   M_SECTION = "m_section"
   M_DOCUMENT = "m_doc_url"
+  M_NETWORK = "mNetwork"
 
 
 class SEARCH_MODEL_TOKENIZATION_COMMANDS(enum.Enum):

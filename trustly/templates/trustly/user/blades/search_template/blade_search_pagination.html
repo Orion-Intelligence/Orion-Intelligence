@@ -1,36 +1,40 @@
 {% load static %}
 {% if mSearchCallbackMaxPagination > 1 %}
-    <form class="search__pagination disable-highlight">
+    <form class="search__pagination disable-highlight" method="GET" action="">
         <div class="search__pagination-container">
             {% if mSearchCallbackCurrentPageNumber == 1 %}
-                <div class="search__pagination-navigation " disabled>
+                <div class="search__pagination-navigation" disabled>
                     <img src="{% static 'trustly/images/nav-prev.svg' %}" alt="nav-prev">
                 </div>
             {% else %}
-                <a href="?q={{ mSearchCallbackQuery }}&mSearchParamSafeSearch={{ mSearchCallbackSaveSearch }}&pSearchParamType={{ mSearchCallbackRelevantSearchType }}&mSearchParamPage=1" class="search__pagination-navigation ">
+                <button type="submit" class="search__pagination-navigation" name="mSearchParamPage" value="1">
                     <img src="{% static 'trustly/images/nav-first.svg' %}" alt="nav-first">
-                </a>
-                <a href="?q={{ mSearchCallbackQuery }}&mSearchParamSafeSearch={{ mSearchCallbackSaveSearch }}&pSearchParamType={{ mSearchCallbackRelevantSearchType }}&mSearchParamPage=
-                        {% if mSearchCallbackCurrentPageNumber != '1' %}{{ mSearchCallbackCurrentPageNumber|add:-1 }}{% endif %}" class="search__pagination-navigation gc-clear-selection">
+                </button>
+                <button type="submit" class="search__pagination-navigation gc-clear-selection" name="mSearchParamPage" value="{{ mSearchCallbackCurrentPageNumber|add:-1 }}">
                     <img src="{% static 'trustly/images/nav-prev.svg' %}" alt="nav-prev">
-                </a>
+                </button>
             {% endif %}
 
             {% for page in mSearchCallbackPageNumber %}
-                <a href="?q={{ mSearchCallbackQuery }}&mSearchParamSafeSearch={{ mSearchCallbackSaveSearch }}&pSearchParamType={{ mSearchCallbackRelevantSearchType }}&mSearchParamPage={{ page }}" class="search__navigation gc-clear-selection {% if page == mSearchCallbackCurrentPageNumber %}search__navigation--focus{% endif %}">
+                <button type="submit" class="search__navigation gc-clear-selection {% if page == mSearchCallbackCurrentPageNumber %}search__navigation--focus{% endif %}" name="mSearchParamPage" value="{{ page }}">
                     {{ page }}
-                </a>
+                </button>
             {% endfor %}
 
             {% if mSearchCallbackCurrentPageNumber >= mSearchCallbackMaxPagination %}
-                <div class="search__pagination-navigation " disabled>
+                <div class="search__pagination-navigation" disabled>
                     &rsaquo;
                 </div>
             {% else %}
-                <a href="?q={{ mSearchCallbackQuery }}&mSearchParamSafeSearch={{ mSearchCallbackSaveSearch }}&pSearchParamType={{ mSearchCallbackRelevantSearchType }}&mSearchParamPage={{ mSearchCallbackCurrentPageNumber|add:1 }}" class="search__pagination-navigation gc-clear-selection">
+                <button type="submit" class="search__pagination-navigation gc-clear-selection" name="mSearchParamPage" value="{{ mSearchCallbackCurrentPageNumber|add:1 }}">
                     <img src="{% static 'trustly/images/nav-next.svg' %}" alt="nav-next">
-                </a>
+                </button>
             {% endif %}
         </div>
+
+        <!-- Hidden Fields -->
+        <input type="hidden" name="q" value="{{ mSearchCallbackQuery }}">
+        <input type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
+        <input type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
     </form>
 {% endif %}

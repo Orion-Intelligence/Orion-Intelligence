@@ -33,12 +33,6 @@ class search_view_model(request_handler):
       if p_command == SEARCH_MODEL_COMMANDS.M_INIT:
         m_status, m_response = self.__m_search_model.invoke_trigger(SEARCH_MODEL_COMMANDS.M_INIT, p_data)
         if m_status is True:
-          print(":::::::::::::::::::::::::::::::::", flush=True)
-          print(":::::::::::::::::::::::::::::::::", flush=True)
-          print(m_response, flush=True)
-          print(":::::::::::::::::::::::::::::::::", flush=True)
-          print(":::::::::::::::::::::::::::::::::", flush=True)
-
           return render(None, CONSTANTS.S_TEMPLATE_SEARCH_WEBSITE_PATH, m_response)
         else:
           return HttpResponseRedirect(redirect_to=CONSTANTS.S_TEMPLATE_PARENT)

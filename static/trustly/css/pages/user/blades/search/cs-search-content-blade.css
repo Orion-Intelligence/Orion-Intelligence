@@ -45,6 +45,9 @@
   font-family: Roboto, sans-serif;;
 }
 
+.search-content__webpages-description-category-enforced{
+ }
+
 .search-result__content-webpages-container {
   width: 100%;
   max-width: 40vw;

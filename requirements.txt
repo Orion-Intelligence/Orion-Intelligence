@@ -36,3 +36,4 @@ nltk==3.9.0
 sphinx
 myst-parser
 sphinx_rtd_theme
+aiohttp
