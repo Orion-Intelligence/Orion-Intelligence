@@ -22,14 +22,8 @@
         </div>
 
         <div class="directory-pagination">
-
-
-
-          <form class="disable-highlight clear-paddings directory__header-pagination-form" action="" method="GET">
-
-            {% include 'trustly/user/blades/directory_template/blade_directory_filters.html' %}
-            {% include 'trustly/user/blades/directory_template/blade_directory_pagination.html' %}
-          </form>
+          {% include 'trustly/user/blades/directory_template/blade_directory_filters.html' %}
+          {% include 'trustly/user/blades/directory_template/blade_directory_pagination.html' %}
         </div>
       </div>
       {% include 'trustly/user/blades/directory_template/blade_directory_list.html' %}

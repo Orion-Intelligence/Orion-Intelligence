@@ -1,67 +1,62 @@
 {% load static %}
-<div class="directory__main-filter">
-  <input type="checkbox" id="network_dropdown-toggle" class="directory__main-network-filter-checkbox">
-  <label for="network_dropdown-toggle" class="directory__main-filter-header">
-    <img class="directory__main-filter-image" src="{% static 'trustly/images/filter_by.svg' %}">
-    {% if mNetwork %}
-      {{ mNetwork }}
-    {% else %}
-      Filter by Network
-    {% endif %}
-    <img class="directory__main-arrow-image directory__main-arrow-image-network" src="{% static 'trustly/images/dropdown_left.svg' %}" alt="arrow"/>
-  </label>
-  <ul class="directory__main-filter-menu directory__main-filter-menu-network">
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="network" value="onion">
-    </li>
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="network" value="p21">
-    </li>
-  </ul>
-</div>
-<div class="directory__main-filter">
-  <input type="checkbox" id="index-dropdown-toggle" class="directory__main-filter-checkbox">
-  <label for="index-dropdown-toggle" class="directory__main-filter-header">
-    <img class="directory__main-filter-image" src="{% static 'trustly/images/filter_by.svg' %}">
-    {% if mIndex %}
-      {{ mIndex|capfirst }}
-    {% else %}
-      Filter by Index
-    {% endif %}
-    <img class="directory__main-arrow-image" src="{% static 'trustly/images/dropdown_left.svg' %}" alt="arrow"/>
-  </label>
-  <ul class="directory__main-filter-menu">
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="index" value="general">
-    </li>
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="index" value="monitor">
-    </li>
-  </ul>
-</div>
-<div class="directory__main-filter">
-  <input type="checkbox" id="dropdown-toggle" class="directory__main-contentType-filter-checkbox">
-  <label for="dropdown-toggle" class="directory__main-filter-header">
-    <img class="directory__main-filter-image" src="{% static 'trustly/images/filter_by.svg' %}">
-    {% if mContentType %}
-      {{ mContentType|capfirst }}
-    {% else %}
-      Filter by Content
-    {% endif %}
-    <img class="directory__main-arrow-image directory__main-arrow-image-contentType" src="{% static 'trustly/images/dropdown_left.svg' %}" alt="arrow"/>
-  </label>
-  <ul class="directory__main-filter-menu directory__main-filter-menu-contentType">
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="content_type" value="leaks">
-    </li>
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="content_type" value="Marketplaces">
-    </li>
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="content_type" value="Forums">
-    </li>
-    <li>
-      <input class="directory__main-filter-input" type="submit" name="content_type" value="Cryptocurrency">
-    </li>
-  </ul>
-</div>
+<form method="GET" class="directory__main-filter-form">
+  <div class="directory__main-filter">
+    <label for="network-select" class="directory__main-filter-header">
+
+      <select id="network-select" name="network" class="directory__main-filter-input">
+        <option value="">
+          {% if mNetwork %}
+            {{ mNetwork }}
+          {% else %}
+            Filter by Network
+          {% endif %}
+        </option>
+        <option value="onion">Onion</option>
+        <option value="p21">P21</option>
+      </select>
+{#      <img class="directory__main-arrow-image directory__main-arrow-image-network" src="{% static 'trustly/images/dropdown_left.svg' %}" alt="arrow"/>#}
+    </label>
+  </div>
+
+  <div class="directory__main-filter">
+    <label for="index-select" class="directory__main-filter-header">
+{#      <img class="directory__main-filter-image" src="{% static 'trustly/images/filter_by.svg' %}">#}
+      <select id="index-select" name="index" class="directory__main-filter-input">
+        <option value="">
+          {% if mIndex %}
+            {{ mIndex|capfirst }}
+          {% else %}
+            Filter by Index
+          {% endif %}
+        </option>
+        <option value="general">General</option>
+        <option value="monitor">Monitor</option>
+      </select>
+{#      <img class="directory__main-arrow-image" src="{% static 'trustly/images/dropdown_left.svg' %}" alt="arrow"/>#}
+    </label>
+  </div>
+
+  <div class="directory__main-filter">
+    <label for="content-select" class="directory__main-filter-header">
+{#      <img class="directory__main-filter-image" src="{% static 'trustly/images/filter_by.svg' %}">#}
+      <select id="content-select" name="content_type" class="directory__main-filter-input">
+        <option value="">
+          {% if mContentType %}
+            {{ mContentType|capfirst }}
+          {% else %}
+            Filter by Content
+          {% endif %}
+        </option>
+        <option value="leaks">Leaks</option>
+        <option value="Marketplaces">Marketplaces</option>
+        <option value="Forums">Forums</option>
+        <option value="Cryptocurrency">Cryptocurrency</option>
+      </select>
+{#      <img class="directory__main-arrow-image directory__main-arrow-image-contentType" src="{% static 'trustly/images/dropdown_left.svg' %}" alt="arrow"/>#}
+    </label>
+  </div>
+
+  <div class="directory__main-filter-submit">
+    <button type="submit" class="directory__main-submit-button"><img class="directory__main-filter-image" src="{% static 'trustly/images/filter_by.svg' %}"></button>
+  </div>
+</form>

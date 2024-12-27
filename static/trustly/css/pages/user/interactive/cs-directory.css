@@ -71,14 +71,47 @@ html {
 
 .directory__main-filter-header {
   background-color: #12335450;
-  min-width: 180px;
-  border: 1px solid #102A4685;
+  /*border: 1px solid #102A4685;*/
   color: #808080;
-  padding: 10px;
   cursor: pointer;
   border-radius: 10px;
+  padding: 5px 10px 5px 25px;
   user-select: none;
   font-size: 16px;
+  background-image: url("/static/trustly/images/filter_by.svg");
+  background-repeat: no-repeat;
+  background-size: 20px;
+  background-position-x: 10px;
+  background-position-y: 15px;
+}
+
+.directory__main-filter-input:focus {
+  border: none;
+  outline: none;
+}
+
+.directory__main-filter-input option {
+  background-color: #123354;
+
+  border-radius: 10px;
+  color: #fff;
+  padding: 5px;
+}
+
+.directory__main-submit-button {
+  background: #102A4685 !important;
+  color: white !important;
+  border: 0;
+  font-weight: bold;
+  outline: none;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.directory__main-filter-form {
+  display: flex;
+  align-items: baseline;
+
 }
 
 .directory__main-filter-menu {
@@ -94,22 +127,28 @@ html {
   margin: 0;
   list-style: none;
 }
-.directory__main-arrow-image{
+
+.directory__main-arrow-image {
   float: right;
   margin-top: 3px;
 }
-.directory__main-arrow-image-network{
+
+.directory__main-arrow-image-network {
   margin-left: 10px;
 }
-.directory__main-arrow-image-contentType{
+
+.directory__main-arrow-image-contentType {
   margin-left: 10px;
 }
+
 .directory__main-filter-menu-contentType {
   min-width: 200px !important;
 }
+
 .directory__main-filter-menu-network {
   min-width: 200px !important;
 }
+
 .directory__main-contentType-filter-checkbox:checked ~ .directory__main-filter-menu {
   display: block;
 }
@@ -118,7 +157,7 @@ html {
   display: block;
   color: #fff;
   text-decoration: none;
-  padding: 10px 15px;
+  padding: 10px;
   background: none;
   border: none;
 }
@@ -142,8 +181,6 @@ html {
 .directory__main-filter-image {
   height: 18px;
   width: 18px;
-  margin-right: 10px;
-  margin-top: -3px;
   opacity: 0.5;
 }
 
