@@ -46,7 +46,8 @@
 }
 
 .search-content__webpages-description-category-enforced{
- }
+  margin-right: 5px;
+}
 
 .search-result__content-webpages-container {
   width: 100%;

@@ -9,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.card_extraction_model import ca
 from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 
-class weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_interface, ABC):
+class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self):
@@ -18,7 +18,7 @@ class weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_in
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd, cls).__new__(cls)
+            cls._instance = super(_weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 

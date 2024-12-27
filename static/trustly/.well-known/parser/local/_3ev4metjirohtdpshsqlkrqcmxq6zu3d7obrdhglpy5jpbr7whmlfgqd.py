@@ -8,8 +8,17 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 import html
 
 class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_interface, ABC):
+    _instance = None
+
     def __init__(self):
         self.soup = None
+        self._initialized = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(_3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
     @property
     def base_url(self) -> str:
@@ -29,7 +38,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
         cleaned_text = re.sub(r'\s+', ' ', cleaned_text)  # Collapse multiple spaces into one
         return cleaned_text.strip()
 
-    def parse_leak_data(self, html_content: str, p_data_url: str) -> Tuple['leak_data_model', Set[str]]:
+    def parse_leak_data(self, html_content: str, p_data_url: str) -> Tuple[leak_data_model, Set[str]]:
         sub_links = set()
         entry_pattern = r'\{\s*title\s*:\s*([^,]+),\s*short\s*:\s*([^,]+),\s*full\s*:\s*(.+?),\s*links\s*:\s*\[([^\]]*)\]\s*\}'
         cards = []

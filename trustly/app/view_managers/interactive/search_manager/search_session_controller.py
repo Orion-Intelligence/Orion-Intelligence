@@ -272,7 +272,7 @@ class search_session_controller(request_handler):
       merged_data[key] = list(set(merged_data[key]))
     modified_data = {}
     for key in merged_data:
-      new_key = key.replace("m_", "")  # Remove "M_" prefix
+      new_key = key.replace("m_", "").replace("_", " ").title()  # Remove "M_" prefix
       modified_data[new_key] = merged_data[key]
 
     m_context = {
@@ -280,7 +280,7 @@ class search_session_controller(request_handler):
       SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search,
       SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number,
       SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type,
-      SEARCH_CALLBACK.M_DOCUMENT: merged_data,
+      SEARCH_CALLBACK.M_DOCUMENT: modified_data,
       SEARCH_CALLBACK.M_PAGE_NUM: 1,
       SEARCH_CALLBACK.M_MAX_PAGINATION: 1,
       SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY,
