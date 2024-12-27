@@ -1,6 +1,6 @@
 {% load static %}
 <div class="search-result__content-webpages-container p-2 position-relative">
-    <span class="search-content__webpages-description-category search-content__webpages-description-category-enforced">&nbsp;&nbsp;{{ mDoc.mNetwork }}&nbsp;&nbsp;</span>
+    <span class="search-content__webpages-description-category search-content__webpages-description-category-enforced">&nbsp;&nbsp;{{ mDoc.mNetwork|capfirst }}&nbsp;&nbsp;</span>
     {% if mDoc.mContentType|length == 0 %}
         <span class="search-content__webpages-description-category">&nbsp;&nbsp;General&nbsp;&nbsp;</span>
     {% else %}

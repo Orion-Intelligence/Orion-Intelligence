@@ -8,9 +8,18 @@ from crawler.crawler_instance.local_shared_model.card_extraction_model import ca
 from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 
-class ddosecrets(leak_extractor_interface, ABC):
+class _ddosecrets(leak_extractor_interface, ABC):
+    _instance = None
+
     def __init__(self):
         self.soup = None
+        self._initialized = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(_ddosecrets, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
     @property
     def base_url(self) -> str:
@@ -27,7 +36,12 @@ class ddosecrets(leak_extractor_interface, ABC):
     def parse_leak_data(self, html_content: str, p_data_url: str) -> Tuple[leak_data_model, Set[str]]:
         self.soup = BeautifulSoup(html_content, 'html.parser')
 
-        data_model = None
+        data_model = leak_data_model(
+            cards_data=[],
+            contact_link=self.contact_page(),
+            base_url=p_data_url,
+            content_type=["leak"]
+        )
         sub_links = []
         if "/article/" in p_data_url:
             cards = self.extract_cards('content', p_data_url)
@@ -38,27 +52,25 @@ class ddosecrets(leak_extractor_interface, ABC):
                 content_type=["leak"]
             )
         else:
-            all_categories_links = self.extract_links(html_content)
-            sub_links = list(set(all_categories_links))
+            all_categories_links = self.extract_links_from_class('div', 'all-categories')
+            drill_in_article_links = self.extract_links_from_class('article', 'drill-in')
+            drill_in_div_links = self.extract_links_from_class('a', 'drill-in')
+            sub_links = list(set(all_categories_links + drill_in_article_links + drill_in_div_links))
 
         return data_model, set(sub_links)
 
-    def extract_links(self, html_content: str) -> List[str]:
-        from bs4 import BeautifulSoup
-        from urllib.parse import urljoin
-
-        # Parse the HTML content
-        soup = BeautifulSoup(html_content, 'html.parser')
+    def extract_links_from_class(self, tag: str, class_name: str) -> List[str]:
+        elements = self.soup.find_all(tag, class_=class_name)
         links = []
-
-        # Find all anchor tags with href attributes
-        for a in soup.find_all('a', href=True):
-            href = a['href']
-            if 'article/' in href:
-                # Prepend base URL if necessary
-                full_link = urljoin(self.base_url, href) if not href.startswith(self.base_url) else href
-                links.append(full_link)
-
+        for element in elements:
+            if tag == 'a':
+                href = element.get('href')
+                if href:
+                    links.append(urljoin(self.base_url, href))
+            else:
+                links.extend(
+                    urljoin(self.base_url, a['href']) for a in element.find_all('a', href=True)
+                )
         return links
 
     def extract_cards(self, container_class: str, url: str) -> List[card_extraction_model]:

@@ -10,9 +10,18 @@ from crawler.crawler_instance.local_shared_model.leak_data_model import leak_dat
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 
 
-class omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_interface, ABC):
+class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_interface, ABC):
+    _instance = None
+
     def __init__(self):
         self.soup = None
+        self._initialized = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(_omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
     @property
     def base_url(self) -> str:

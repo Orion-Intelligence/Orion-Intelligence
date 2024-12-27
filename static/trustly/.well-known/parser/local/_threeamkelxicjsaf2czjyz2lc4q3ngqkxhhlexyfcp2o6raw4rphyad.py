@@ -9,9 +9,18 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 import re
 
 
-class threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_interface, ABC):
+class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_interface, ABC):
+  _instance = None
+
   def __init__(self):
     self.soup = None
+    self._initialized = None
+
+  def __new__(cls):
+    if cls._instance is None:
+      cls._instance = super(_threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad, cls).__new__(cls)
+      cls._instance._initialized = False
+    return cls._instance
 
   @property
   def base_url(self) -> str:
