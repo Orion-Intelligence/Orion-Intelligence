@@ -10,12 +10,12 @@ html {
 .search_container {
   margin: 0;
   height: 100vh;
-  background-image: linear-gradient(to bottom, #174069 0%, #1c4d7d 100%) !important;
+  background-image: linear-gradient(to bottom, #174069 0%, rgba(41, 87, 132, 255)) !important;
 }
 
 .search {
   min-height: 85vh;
-  padding-bottom: 150px;
+  padding-bottom: 100px;
 }
 
 .search__results {
@@ -55,10 +55,10 @@ html {
 .searchbar__search-card-persona {
   color: #fff;
   border: 1px solid #ffffff50;
-  border-radius: 12px;
   overflow: hidden;
   height: auto;
-  background: #2A578480;
+  background: #2A578480 !important;
+  border-radius: 10px !important;
   font-family: Roboto, sans-serif;
   font-size: 14px;
 }
@@ -68,7 +68,7 @@ html {
 }
 
 .searchbar__search-card-header-persona {
-  background: rgba(220, 53, 69, 0.5);
+  background: rgba(220, 53, 69, 0.5) !important;
   padding: 15px;
 }
 

@@ -18,10 +18,10 @@
   margin-bottom: 23vh;
   margin-top: 20px;
   background: #fff url('/static/trustly/images/lock.svg') no-repeat;
-  background-position-x: 10px;
-  background-position-y: 8px;
-  padding-left: 50px !important;
-  background-size: 25px;
+  background-position-x: 15px;
+  background-position-y: 11px;
+  padding-left: 45px !important;
+  background-size: 20px;
 }
 
 .home__searchbox::placeholder {

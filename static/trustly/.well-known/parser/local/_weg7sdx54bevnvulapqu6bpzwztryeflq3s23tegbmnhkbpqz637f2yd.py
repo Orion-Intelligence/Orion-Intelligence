@@ -8,6 +8,7 @@ from crawler.crawler_instance.local_interface_model.leak_extractor_interface imp
 from crawler.crawler_instance.local_shared_model.card_extraction_model import card_extraction_model
 from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.shared.helper_method import helper_method
 
 class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_interface, ABC):
     _instance = None
@@ -50,7 +51,7 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
         data_model = leak_data_model(
             cards_data=cards_data,
             contact_link=self.contact_page(),
-            base_url=p_data_url,
+            base_url=self.base_url,
             content_type=["leak"]
         )
 
@@ -76,6 +77,7 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
                 m_url=url,
                 m_base_url=self.base_url,
                 m_content=content,
+                m_network=helper_method.get_network_type(self.base_url).value,
                 m_important_content=content,
                 m_weblink=weblinks,
                 m_dumplink=dumplinks,

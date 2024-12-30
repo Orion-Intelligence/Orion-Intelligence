@@ -68,11 +68,9 @@ def feeder(request):
 def block(request):
   return block_controller.getInstance().invoke_trigger(BLOCK_MODEL_CALLBACK.M_INIT, request)
 
-
 @csrf_exempt
 def crawl_index(request):
   return crawl_controller.getInstance().invoke_trigger(CRAWL_COMMANDS.M_INIT, request)
-
 
 def update_status(request):
   return external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS, request)

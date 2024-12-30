@@ -2,7 +2,7 @@
 
 <div class="safe__search-toolbar">
     <div>
-        {% if mSearchCallbackRelevantDocument|length > 0 %}
+        {% if mSearchCallbackRelevantDocument|length > 0 and mSearchCallbackRelevantSearchType != 'persona'%}
             <p class="safe__search-toolbar-results">About {{ mSearchCallbackResultCount }} results found </p>
         {% endif %}
         {% if mSearchCallbackQueryError|length > 0 and mSearchCallbackRelevantSearchType != 'persona'%}

@@ -6,8 +6,8 @@ from crawler.crawler_instance.local_interface_model.leak_extractor_interface imp
 from crawler.crawler_instance.local_shared_model.card_extraction_model import card_extraction_model
 from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.shared.helper_method import helper_method
 import re
-
 
 class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_interface, ABC):
   _instance = None
@@ -61,10 +61,10 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                 file_url = file_name_link['onclick'].split("'")[1] if file_name_link and 'onclick' in file_name_link.attrs else "Unknown URL"
                 dump_links.append(file_url)
 
-        card = card_extraction_model(m_leak_date=leak_date, m_title=title, m_url=self.base_url, m_base_url=self.base_url, m_content=content, m_important_content=content, m_weblink=[], m_dumplink=dump_links, m_extra_tags="", m_content_type="general")
+        card = card_extraction_model(m_leak_date=leak_date, m_title=title, m_url=self.base_url, m_network = helper_method.get_network_type(self.base_url).value,m_base_url=self.base_url, m_content=content, m_important_content=content, m_weblink=[], m_dumplink=dump_links, m_content_type="general")
         cards.append(card)
 
-    data_model = leak_data_model(cards_data=cards, contact_link=self.contact_page(), base_url=p_data_url, content_type=["leak"])
+    data_model = leak_data_model(cards_data=cards, contact_link=self.contact_page(), base_url=self.base_url, content_type=["leak"])
 
     return data_model, set(sub_links)
 

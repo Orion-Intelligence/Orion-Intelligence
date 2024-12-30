@@ -5,6 +5,7 @@ from crawler.crawler_instance.local_interface_model.leak_extractor_interface imp
 from crawler.crawler_instance.local_shared_model.card_extraction_model import card_extraction_model
 from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.shared.helper_method import helper_method
 import html
 
 class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_interface, ABC):
@@ -53,7 +54,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
             links_raw = entry[3].strip() if len(entry) > 3 else ""
             links = [link.strip().strip('"') for link in links_raw.split(",") if link.strip()]
             card = card_extraction_model(m_leak_date="N/A",  # Leak date not available in this JSON structure
-                m_title=title, m_url=p_data_url, m_base_url=p_data_url, m_content=f"{full_content}", m_important_content=full_content, m_weblink=[], m_dumplink=links, m_extra_tags=[""], m_content_type="general")
+                m_title=title, m_url=p_data_url, m_base_url=self.base_url,m_network = helper_method.get_network_type(self.base_url).value, m_content=f"{full_content}", m_important_content=full_content, m_weblink=[], m_dumplink=links, m_extra_tags=[""], m_content_type="general")
             cards.append(card)
 
         data_model = leak_data_model(cards_data=cards, contact_link=self.contact_page(), base_url=p_data_url, content_type=["leak"])

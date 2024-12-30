@@ -6,12 +6,16 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+body{
+  margin: 0;
+}
+
 .home {
   margin-left: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
   background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) !important;
   color: white;
@@ -40,10 +44,10 @@ html::-webkit-scrollbar {
 }
 
 .home__search-form {
-  margin: 105px auto 90px;
   display: grid;
   justify-content: center;
   align-content: center;
+  margin: 0 auto 90px;
 }
 
 .flex-container {
@@ -96,7 +100,7 @@ html::-webkit-scrollbar {
 
   .home__search-form {
     margin-bottom: 0 !important;
-    margin-top: 50px !important;
+    margin-top: 0px !important;
   }
 
   .flex-item {

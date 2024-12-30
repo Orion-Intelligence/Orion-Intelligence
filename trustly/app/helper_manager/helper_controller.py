@@ -1,7 +1,7 @@
 import json
 import re
 import locale
-
+from urllib.parse import urlparse, urlunparse
 import stopwords
 
 
@@ -35,3 +35,9 @@ class helper_controller:
     else:
       return False
 
+  @staticmethod
+  def normalize_url(input_url):
+    parsed = urlparse(input_url)
+    normalized = parsed._replace(query='', fragment='')
+    normalized_url = urlunparse(normalized).rstrip('/')
+    return normalized_url

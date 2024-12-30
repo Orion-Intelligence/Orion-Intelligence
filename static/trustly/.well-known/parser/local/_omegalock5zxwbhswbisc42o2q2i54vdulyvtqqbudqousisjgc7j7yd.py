@@ -1,4 +1,3 @@
-import re
 from abc import ABC
 from typing import List, Set, Tuple
 from urllib.parse import urljoin
@@ -8,6 +7,7 @@ from crawler.crawler_instance.local_interface_model.leak_extractor_interface imp
 from crawler.crawler_instance.local_shared_model.card_extraction_model import card_extraction_model
 from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.shared.helper_method import helper_method
 
 
 class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_interface, ABC):
@@ -53,14 +53,15 @@ class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_i
                 last_updated = columns[4].get_text(strip=True)
                 download_link = urljoin(self.base_url, columns[5].find('a')['href'])
 
+                if isinstance(tags, str):
+                    tags = [tags]
+
                 card = card_extraction_model(
                     m_leak_date=last_updated,
                     m_title=title,
                     m_url=download_link,
-                    m_base_url=self.base_url,
-                    m_content=f"Leaked: {leaked}, Tags: {tags}, Total Size: {total_size}",
-                    m_important_content=f"Leaked: {leaked}, Tags: {tags}, Total Size: {total_size}",
                     m_weblink=[],
+                    m_network=helper_method.get_network_type(self.base_url).value,
                     m_dumplink=[download_link],
                     m_extra_tags=tags,
                     m_content_type="general"
@@ -70,7 +71,7 @@ class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_i
         data_model = leak_data_model(
             cards_data=cards,
             contact_link=self.contact_page(),
-            base_url=p_data_url,
+            base_url=self.base_url,
             content_type=["leak"]
         )
 

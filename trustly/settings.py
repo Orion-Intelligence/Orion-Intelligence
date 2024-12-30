@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'trustly.middleware.service_ready_middleware.service_ready_middleware',
 
 ]
+
 LOGIN_URL = '/login'
 
 ROOT_URLCONF = 'trustly.urls'

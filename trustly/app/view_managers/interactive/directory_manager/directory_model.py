@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta, timezone
 from bson import ObjectId
 from django.http import JsonResponse
@@ -53,17 +52,12 @@ class directory_model(request_handler):
   def __api_directory(self, p_data):
     try:
       m_directory_class_model, m_status, _ = self.__m_session.invoke_trigger(DIRECTORY_SESSION_COMMANDS.M_PRE_INIT, [p_data])
-      m_result, count = self.__load_onion_links(m_directory_class_model)
-
-      results = []
-      if isinstance(m_result, list):
-        results = [item if isinstance(item, dict) else {} for item in m_result]
-
-      response_data = {"results": results}
+      m_result = self.__load_onion_links(m_directory_class_model)
+      response_data = m_result
       return JsonResponse(response_data)
 
-    except Exception as _:
-      return JsonResponse({"error": "An internal error occurred."}, status=500)
+    except Exception as ex:
+      return JsonResponse({"error": "An internal error occurred."+str(ex)}, status=500)
 
   def __init_page(self, p_data):
     m_directory_class_model, m_status, _ = self.__m_session.invoke_trigger(DIRECTORY_SESSION_COMMANDS.M_PRE_INIT, [p_data])

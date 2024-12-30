@@ -30,19 +30,46 @@
   </div>
 
   <div>
-    <span id="catagory_all"><button type="submit" name="pSearchParamType" value="all" class="{% if mSearchCallbackRelevantSearchType == 'all' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--right disable-highlight">All</button></span>
-    <span id="catagory_images"><button type="submit" name="pSearchParamType" value="monitor" class="{% if mSearchCallbackRelevantSearchType == 'monitor' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">Monitor</button></span>
-    <span id="catagory_images"><button type="submit" name="pSearchParamType" value="marketplaces" class="ml-3 {% if mSearchCallbackRelevantSearchType == 'marketplaces' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">Market</button></span>
-    <span id="catagory_finance"><button type="submit" name="pSearchParamType" value="forums" class="ml-2 {% if mSearchCallbackRelevantSearchType == 'forums' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">Forums</button></span>
-    <span id="catagory_news"><button type="submit" name="pSearchParamType" value="news" class="{% if mSearchCallbackRelevantSearchType == 'news' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight">News</button></span>
-    <span id="catagory_news"><button type="submit" name="pSearchParamType" value="persona" class="{% if mSearchCallbackRelevantSearchType == 'persona' %} searchbar__search-items-active-default searchbar__search-items-persona {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right-header">Email</button></span>
+    <span id="catagory_all">
+      <button type="submit" name="pSearchParamType" value="all" class="{% if mSearchCallbackRelevantSearchType == 'all' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--right disable-highlight">
+        All
+      </button>
+    </span>
+    <span id="catagory_images">
+      <button type="submit" name="pSearchParamType" value="monitor" class="{% if mSearchCallbackRelevantSearchType == 'monitor' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
+        Monitor
+      </button>
+    </span>
+    <span id="catagory_images">
+      <button type="submit" name="pSearchParamType" value="marketplaces" class="ml-3 {% if mSearchCallbackRelevantSearchType == 'marketplaces' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
+        Market
+      </button>
+    </span>
+    <span id="catagory_finance">
+      <button type="submit" name="pSearchParamType" value="forums" class="ml-2 {% if mSearchCallbackRelevantSearchType == 'forums' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
+        Forums
+      </button>
+    </span>
+    <span id="catagory_news">
+      <button type="submit" name="pSearchParamType" value="news" class="{% if mSearchCallbackRelevantSearchType == 'news' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight">
+        News
+      </button>
+    </span>
+    <span id="catagory_news">
+      <button type="submit" name="pSearchParamType" value="persona" class="{% if mSearchCallbackRelevantSearchType == 'persona' %} searchbar__search-items-active-default searchbar__search-items-persona {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right-header">
+        Email
+      </button>
+    </span>
     {% include 'trustly/user/blades/search_template/blade_search_header_network.html' %}
 
-    <span id="catagory_analytics" class="searchbar__nav-right"><a href="/#analytics" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Analytics</a></span>
-    <span id="catagory_directory" class="searchbar__nav-right"><a href="/directory" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Links</a></span>
-    <span id="catagory_index" class="searchbar__nav-right"><a href="/" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Home</a></span>
+    <span id="catagory_analytics" class="searchbar__nav-right">
+      <a href="/#analytics" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Analytics</a>
+    </span>
+    <span id="catagory_directory" class="searchbar__nav-right">
+      <a href="/directory" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Links</a>
+    </span>
+    <span id="catagory_index" class="searchbar__nav-right">
+      <a href="/" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Home</a>
+    </span>
   </div>
 </form>
-
-
-

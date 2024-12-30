@@ -30,6 +30,7 @@ class DIRECTORY_CALLBACK:
   M_PAGINATION = "mPagination"
   M_CONTENT_TYPE = "mContentType"
   M_INDEX = "mIndex"
+  M_NETWORK = "mNetwork"
 
 
 class DIRECTORY_MODEL_CALLBACK:

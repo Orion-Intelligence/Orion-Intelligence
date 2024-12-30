@@ -62,7 +62,7 @@ html {
 .directory__main-filter {
   position: relative;
   display: inline-block;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .directory__main-contentType-filter-checkbox {
@@ -70,19 +70,18 @@ html {
 }
 
 .directory__main-filter-header {
-  background-color: #12335450;
-  /*border: 1px solid #102A4685;*/
+  background-color: #123354;
   color: #808080;
   cursor: pointer;
   border-radius: 10px;
-  padding: 5px 10px 5px 25px;
   user-select: none;
   font-size: 16px;
   background-image: url("/static/trustly/images/filter_by.svg");
   background-repeat: no-repeat;
-  background-size: 20px;
+  background-size: 15px;
   background-position-x: 10px;
   background-position-y: 15px;
+  padding: 11px 10px 11px 25px;
 }
 
 .directory__main-filter-input:focus {
@@ -90,34 +89,55 @@ html {
   outline: none;
 }
 
-.directory__main-filter-input option {
-  background-color: #123354;
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #f0f0f0;
+  border: 2px solid #007bff;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333;
+}
 
-  border-radius: 10px;
-  color: #fff;
-  padding: 5px;
+select option {
+  background-color: white;
+  color: black;
 }
 
 .directory__main-submit-button {
-  background: #102A4685 !important;
+  background: #123354 !important;
   color: white !important;
   border: 0;
   font-weight: bold;
-  outline: none;
-  border-radius: 5px;
-  padding: 10px;
+  outline: none !important;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px 14px;
+}
+
+.directory__main-submit-button:hover {
+  background-color: #12335450 !important;
+  color: white !important;
+  border: 0;
+  font-weight: bold;
+  outline: none !important;
+  border-radius: 8px;
+  padding: 11px 14px;
 }
 
 .directory__main-filter-form {
   display: flex;
   align-items: baseline;
-
+  margin-right: 150px;
+  margin-top: -9px;
 }
 
 .directory__main-filter-menu {
   display: none;
   position: absolute;
-  background-image: linear-gradient(90deg, rgba(21, 52, 84, 1) 0%, rgba(22, 56, 88, 1) 100%) !important;
+  background-color: #123354;
   min-width: 180px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
@@ -155,11 +175,22 @@ html {
 
 .directory__main-filter-input {
   display: block;
-  color: #fff;
+  color: #cccccc90;
   text-decoration: none;
-  padding: 10px;
-  background: none;
+  background-color: #123354;
   border: none;
+  padding: 11px 11px 11px 15px;
+  border-radius: 8px;
+  width: 120px;
+
+  background-image: url("/static/trustly/images/arrow_down.svg");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 15px;
+  cursor: pointer;
+  padding-top: 8px;
+  padding-bottom: 8px;
+
 }
 
 .directory__main-filter-menu li {
@@ -202,14 +233,20 @@ html {
   display: none;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 1400px) {
 
+  .directory__main-submit-button{
+    display: none;
+  }
 
   .directory__pagination-heading {
     width: 100%;
   }
 
   .directory__main-filter {
+    display: none;
+  }
+  .directory__main-filter-form{
     display: none;
   }
 
@@ -219,4 +256,78 @@ html {
   display: flex;
   justify-content: end;
   align-items: center;
+}
+
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-select-trigger {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.custom-select-trigger::after {
+  content: '\25BC';
+  font-size: 10px;
+  margin-left: 10px;
+  transition: transform 0.3s ease;
+}
+
+.custom-dropdown[open] .custom-select-trigger::after {
+  transform: rotate(180deg);
+}
+
+.custom-select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 1000;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transform-origin: top;
+  transition: max-height 0.3s ease, opacity 0.3s ease, visibility 0.3s;
+}
+
+.custom-dropdown[open] .custom-select-options {
+  max-height: 300px;
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-option {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.custom-option:last-child {
+  border-bottom: none;
+}
+
+.custom-option:hover {
+  background: #007bff;
+  color: white;
 }

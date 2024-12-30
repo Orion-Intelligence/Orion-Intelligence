@@ -1,6 +1,8 @@
 import datetime
 import math
 import time
+
+from trustly.app.helper_manager.helper_controller import helper_controller
 from trustly.services.mongo_manager.mongo_enums import MONGO_COMMANDS
 from trustly.services.request_manager.request_handler import request_handler
 from trustly.services.mongo_manager.mongo_enums import MONGODB_KEYS, MONGODB_COLLECTIONS
@@ -46,6 +48,8 @@ class mongo_request_generator(request_handler):
 
   @staticmethod
   def __on_update_url_status(url, url_status=None, leak_status=None, content_type=None, network_type=None):
+    url = helper_controller.normalize_url(url)
+
     update_values = {"url": url}
     utc_now = datetime.now(timezone.utc)
     current_date = utc_now
@@ -68,15 +72,23 @@ class mongo_request_generator(request_handler):
     return {MONGODB_KEYS.S_DOCUMENT: MONGODB_COLLECTIONS.S_URL_STATUS, MONGODB_KEYS.S_FILTER: {"url": url}, MONGODB_KEYS.S_VALUE: {"$set": update_values}}
 
   @staticmethod
-  def __on_fetch_url_status(p_content_type, p_index, p_network):
-    content_type_list = [ctype.strip() for ctype in p_content_type.split(',') if p_content_type]
+  def __on_fetch_url_status(p_content_type=None, p_index=None, p_network=None):
+    query_filter = {}
 
-    if content_type_list:
-      query_filter = {"content_type": {"$elemMatch": {"$in": content_type_list}}}
-    else:
-      query_filter = {}
+    if p_content_type and p_content_type.lower() != "all":
+      content_type_list = [ctype.strip() for ctype in p_content_type.split(',') if ctype.strip()]
+      query_filter["content_type"] = {"$elemMatch": {"$in": content_type_list}}
 
-    return {MONGODB_KEYS.S_DOCUMENT: MONGODB_COLLECTIONS.S_URL_STATUS, MONGODB_KEYS.S_FILTER: query_filter}
+    if p_index and p_index.lower() != "all":
+      query_filter["index"] = {"$eq": p_index}
+
+    if p_network and p_network.lower() != "all":
+      query_filter["network_type"] = {"$eq": p_network}
+
+    return {
+      MONGODB_KEYS.S_DOCUMENT: MONGODB_COLLECTIONS.S_URL_STATUS,
+      MONGODB_KEYS.S_FILTER: query_filter
+    }
 
   def invoke_trigger(self, p_commands, p_data=None):
     if p_commands == MONGO_COMMANDS.M_VERIFY_CREDENTIAL:

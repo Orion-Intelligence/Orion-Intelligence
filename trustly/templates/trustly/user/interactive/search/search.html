@@ -1,7 +1,8 @@
 {% load static %}
 
 <!-- local imports -->
-{% include 'trustly/user/blades/blades_shared_initialization.html' %}{% include 'trustly/user/interactive/search/local_imports.html' %}
+{% include 'trustly/user/interactive/search/local_imports.html' %}
+{% include 'trustly/user/blades/blades_shared_initialization.html' %}
 
 <html lang="en">
 
@@ -25,10 +26,9 @@
         {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
       </div>
     </div>
+    <!-- pagination -->
+    {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
   </div>
-
-  <!-- pagination -->
-  {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
 </div>
 
 {% include 'trustly/user/blades/shared_blades/blade_footer.html' %}

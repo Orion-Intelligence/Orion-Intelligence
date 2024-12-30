@@ -9,6 +9,7 @@
             <th scope="col" class="directory-list__column-category">Category</th>
             <th scope="col" class="directory-list__column-url-status">URL Status</th>
             <th scope="col" class="directory-list__column-leak-status">Leak Status</th>
+            <th scope="col" class="directory-list__column-network-type">Network Type</th>
         </tr>
         </thead>
         <tbody>
@@ -48,7 +49,6 @@
                     </td>
                 {% endif %}
 
-
                 {% if mDoc.leak_status_date == 1 %}
                     <td data-label="Leak Status" class="onion__table-leak-status">
                         <span class="directory-list__status-default-pointer"></span>
@@ -60,6 +60,10 @@
                         Inactive
                     </td>
                 {% endif %}
+
+                <td data-label="Network Type">
+                    {{ mDoc.network_type|default:"Unknown" }}
+                </td>
             </tr>
         {% endfor %}
         </tbody>
