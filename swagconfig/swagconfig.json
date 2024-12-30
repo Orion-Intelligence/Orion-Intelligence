@@ -10,6 +10,18 @@
   "schemes": [
     "http"
   ],
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
   "paths": {
     "/api/directory/": {
       "get": {
@@ -70,75 +82,16 @@
           "200": {
             "description": "Successful response",
             "schema": {
-              "type": "object",
-              "properties": {
-                "directories": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "_id": {
-                        "type": "string",
-                        "description": "Unique identifier for the directory entry",
-                        "example": "6755985e8890c1efb5853055"
-                      },
-                      "url": {
-                        "type": "string",
-                        "description": "Onion URL being monitored",
-                        "example": "http://22mwrxptlt7l3nv6bcl5cp3xly3chzno3qdehjanord6qdsrrsr7tqid.onion"
-                      },
-                      "content_type": {
-                        "type": "array",
-                        "description": "Content types associated with the URL",
-                        "items": {
-                          "type": "string",
-                          "example": "leaks"
-                        }
-                      },
-                      "url_status_date": {
-                        "type": "integer",
-                        "description": "Timestamp of the URL status update",
-                        "example": 0
-                      },
-                      "leak_status_date": {
-                        "type": "integer",
-                        "description": "Timestamp of the leak status update",
-                        "example": 0
-                      }
-                    }
-                  }
-                },
-                "page": {
-                  "type": "integer",
-                  "description": "Current page number"
-                },
-                "size": {
-                  "type": "integer",
-                  "description": "Number of items per page"
-                },
-                "total": {
-                  "type": "integer",
-                  "description": "Total number of directories available"
-                }
-              }
-            },
-            "examples": {
+              "$ref": "#/definitions/DirectoryResponse"
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
               "application/json": {
-                "directories": [
-                  {
-                    "_id": "6755985e8890c1efb5853055",
-                    "url": "http://22mwrxptlt7l3nv6bcl5cp3xly3chzno3qdehjanord6qdsrrsr7tqid.onion",
-                    "content_type": [
-                      "leaks",
-                      "marketplaces"
-                    ],
-                    "url_status_date": 0,
-                    "leak_status_date": 0
-                  }
-                ],
-                "page": 1,
-                "size": 1000,
-                "total": 2000
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponse"
+                }
               }
             }
           }
@@ -157,62 +110,15 @@
           "200": {
             "description": "Successful response containing system insights.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "generic_model": {
-                  "type": "array",
-                  "description": "General statistics about the system.",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "Document Count": {
-                        "type": "integer",
-                        "example": 0
-                      },
-                      "Most Recent": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "01 Jan"
-                      },
-                      "Oldest Update": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "01 Jan"
-                      },
-                      "Updated 5 Days ago": {
-                        "type": "integer",
-                        "example": 0
-                      },
-                      "Average Score": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 0
-                      }
-                    }
-                  }
-                },
-                "leak_model": {
-                  "type": "array",
-                  "description": "Statistics about leaked documents.",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "Document Count": {
-                        "type": "integer",
-                        "example": 0
-                      },
-                      "Most Recent": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "01 Jan"
-                      },
-                      "Oldest Update": {
-                        "type": "string",
-                        "format": "date",
-                        "example": "01 Jan"
-                      }
-                    }
-                  }
+              "$ref": "#/definitions/InsightResponse"
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponse"
                 }
               }
             }
@@ -287,84 +193,195 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "Result": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "m_base_url": {
-                        "type": "string",
-                        "description": "Base URL of the resource.",
-                        "example": "http://example.onion"
-                      },
-                      "m_url": {
-                        "type": "string",
-                        "description": "Full URL to the content.",
-                        "example": "http://example.onion/path/to/resource"
-                      },
-                      "m_title": {
-                        "type": "string",
-                        "description": "Title of the search result.",
-                        "example": "Example Title"
-                      },
-                      "m_meta_description": {
-                        "type": "string",
-                        "description": "Meta description of the content.",
-                        "example": "Short description about the content."
-                      },
-                      "m_content": {
-                        "type": "string",
-                        "description": "Full content of the result.",
-                        "example": "This is the full content of the result."
-                      },
-                      "m_important_content": {
-                        "type": "string",
-                        "description": "Highlights or important details from the content.",
-                        "example": "Key highlights and information."
-                      },
-                      "m_images": {
-                        "type": "array",
-                        "description": "Array of image URLs.",
-                        "items": {
-                          "type": "string",
-                          "example": "http://example.onion/image.png"
-                        }
-                      },
-                      "m_sub_url": {
-                        "type": "array",
-                        "description": "Array of related URLs.",
-                        "items": {
-                          "type": "string",
-                          "example": "http://example.onion/related/url"
-                        }
-                      },
-                      "m_validity_score": {
-                        "type": "integer",
-                        "description": "Validity score of the content.",
-                        "example": 77
-                      },
-                      "m_content_type": {
-                        "type": "array",
-                        "description": "Content type tags.",
-                        "items": {
-                          "type": "string",
-                          "example": "marketplaces"
-                        }
-                      },
-                      "m_update_date": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "Last update timestamp.",
-                        "example": "2024-12-14T23:47:52.440163+00:00"
-                      }
-                    }
-                  }
+              "$ref": "#/definitions/SearchResponse"
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ErrorResponse"
                 }
               }
             }
           }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DirectoryResponse": {
+      "type": "object",
+      "properties": {
+        "directories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Directory"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "description": "Current page number"
+        },
+        "size": {
+          "type": "integer",
+          "description": "Number of items per page"
+        },
+        "total": {
+          "type": "integer",
+          "description": "Total number of directories available"
+        }
+      }
+    },
+    "Directory": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "description": "Unique identifier for the directory entry"
+        },
+        "url": {
+          "type": "string",
+          "description": "Onion URL being monitored"
+        },
+        "content_type": {
+          "type": "array",
+          "description": "Content types associated with the URL",
+          "items": {
+            "type": "string"
+          }
+        },
+        "url_status_date": {
+          "type": "integer",
+          "description": "Timestamp of the URL status update"
+        },
+        "leak_status_date": {
+          "type": "integer",
+          "description": "Timestamp of the leak status update"
+        }
+      }
+    },
+    "InsightResponse": {
+      "type": "object",
+      "properties": {
+        "generic_model": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GenericModel"
+          }
+        },
+        "leak_model": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LeakModel"
+          }
+        }
+      }
+    },
+    "GenericModel": {
+      "type": "object",
+      "properties": {
+        "Document Count": {
+          "type": "integer"
+        },
+        "Most Recent": {
+          "type": "string",
+          "format": "date"
+        },
+        "Oldest Update": {
+          "type": "string",
+          "format": "date"
+        },
+        "Updated 5 Days ago": {
+          "type": "integer"
+        },
+        "Average Score": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "LeakModel": {
+      "type": "object",
+      "properties": {
+        "Document Count": {
+          "type": "integer"
+        },
+        "Most Recent": {
+          "type": "string",
+          "format": "date"
+        },
+        "Oldest Update": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "SearchResponse": {
+      "type": "object",
+      "properties": {
+        "Result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchResult"
+          }
+        }
+      }
+    },
+    "SearchResult": {
+      "type": "object",
+      "properties": {
+        "m_base_url": {
+          "type": "string"
+        },
+        "m_url": {
+          "type": "string"
+        },
+        "m_title": {
+          "type": "string"
+        },
+        "m_meta_description": {
+          "type": "string"
+        },
+        "m_content": {
+          "type": "string"
+        },
+        "m_important_content": {
+          "type": "string"
+        },
+        "m_images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "m_sub_url": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "m_validity_score": {
+          "type": "integer"
+        },
+        "m_content_type": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "m_update_date": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
         }
       }
     }

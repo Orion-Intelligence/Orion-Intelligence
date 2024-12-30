@@ -1,5 +1,4 @@
 import requests
-import threading
 from django.http import HttpResponse
 from trustly.services.mongo_manager.mongo_controller import mongo_controller
 from trustly.services.mongo_manager.mongo_enums import MONGODB_CRUD
@@ -7,66 +6,47 @@ from trustly.services.mongo_manager.mongo_enums import MONGO_COMMANDS
 from trustly.app.server_manager.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS, EXTERNAL_REQUEST_PARAM
 from trustly.services.request_manager.request_handler import request_handler
 
+
 class external_request_controller(request_handler):
-    # Private Variables
-    __instance = None
+  # Private Variables
+  __instance = None
 
-    # Initializations
-    @staticmethod
-    def getInstance():
-        if external_request_controller.__instance is None:
-            external_request_controller()
-        return external_request_controller.__instance
+  # Initializations
+  @staticmethod
+  def getInstance():
+    if external_request_controller.__instance is None:
+      external_request_controller()
+    return external_request_controller.__instance
 
-    def __init__(self):
-        if external_request_controller.__instance is not None:
-            pass
-        else:
-            external_request_controller.__instance = self
+  def __init__(self):
+    if external_request_controller.__instance is not None:
+      pass
+    else:
+      external_request_controller.__instance = self
 
-    @staticmethod
-    def __update_module_status(p_data):
-        m_request_type = p_data.GET[EXTERNAL_REQUEST_PARAM.M_REQUEST]
-        if m_request_type == "m_cronjob" or m_request_type == "m_crawler":
-            mongo_controller.getInstance().invoke_trigger(MONGODB_CRUD.S_UPDATE, [MONGO_COMMANDS.M_UPDATE_STATUS, [m_request_type], [None]])
-            return HttpResponse("success")
-        return HttpResponse("failed")
+  @staticmethod
+  def __update_module_status(p_data):
+    m_request_type = p_data.GET[EXTERNAL_REQUEST_PARAM.M_REQUEST]
+    if m_request_type == "m_cronjob" or m_request_type == "m_crawler":
+      mongo_controller.getInstance().invoke_trigger(MONGODB_CRUD.S_UPDATE, [MONGO_COMMANDS.M_UPDATE_STATUS, [m_request_type], [None]])
+      return HttpResponse("success")
+    return HttpResponse("failed")
 
-    @staticmethod
-    def __fetch_runtime_parser(p_data):
-        # Create an Event to wait for the result
-        result_event = threading.Event()
-        result = [None]  # Use a list to hold the result
+  @staticmethod
+  def __fetch_runtime_parser(p_data):
+    param = {"query": p_data}
+    url = "http://trusted-crawler-api:8000/runtime/parse"
+    try:
+      response = requests.post(url, json=param)
+      if response.status_code != 200:
+        return False, []
+      return True, response.json()
+    except Exception as ex:
+      return False, []
 
-        # Define a function to make the API call
-        def api_call():
-            param = {"query": p_data}
-            url = "http://trusted-crawler-api:8000/runtime/parse"
-            try:
-                response = requests.post(url, json=param)
-                if response.status_code != 200:
-                    result[0] = (False, [])
-                else:
-                    result[0] = (True, response.json())
-            except Exception as ex:
-                result[0] = (False, [])
-            finally:
-                result_event.set()  # Signal that the API call is complete
-
-        # Start the API call in a separate thread
-        thread = threading.Thread(target=api_call)
-        thread.start()
-
-        # Wait for the API call to complete
-        result_event.wait()
-
-        # Return the result
-        return result[0]
-
-    # External Request Callbacks
-    def invoke_trigger(self, p_command, p_data):
-        if p_command == EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS:
-            return self.__update_module_status(p_data)
-        if p_command == EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER:
-            return self.__fetch_runtime_parser(p_data)
- 
+  # External Request Callbacks
+  def invoke_trigger(self, p_command, p_data):
+    if p_command == EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS:
+      return self.__update_module_status(p_data)
+    if p_command == EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER:
+      return self.__fetch_runtime_parser(p_data)
