@@ -1,13 +1,13 @@
-from dotenv import load_dotenv
-load_dotenv()
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-import os
+
+from trustly.app.helper_manager.env_handler import env_handler
+
 
 class LoginRequiredMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.is_demo_mode = os.getenv("DEMO", "0") == "1"
+        self.is_demo_mode = env_handler.get_instance().env("DEMO", "0") == "1"
         self.login_url = reverse_lazy('custom_login')
         self.index_url = '/'
 

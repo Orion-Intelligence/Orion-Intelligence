@@ -8,7 +8,7 @@ from trustly.app.constants.constant import CONSTANTS
 from trustly.app.constants.strings import GENERAL_STRINGS, SEARCH_STRINGS
 from trustly.app.helper_manager.helper_controller import helper_controller
 from trustly.app.view_managers.interactive.search_manager.search_data_model.query_model import query_model
-from trustly.app.view_managers.interactive.search_manager.search_enums import SEARCH_PARAM, SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK, SEARCH_SESSION_COMMANDS
+from trustly.app.view_managers.interactive.search_manager.search_enums import SEARCH_PARAM, SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK, SEARCH_SESSION_COMMANDS, API_RESPONSE
 from trustly.services.request_manager.request_handler import request_handler
 import re
 
@@ -252,48 +252,63 @@ class search_session_controller(request_handler):
     return mContext, True
 
   @staticmethod
-  def __init_runtime_parser(p_document_list, p_search_model):
-    m_documents = json.loads(p_document_list) if isinstance(p_document_list, str) else p_document_list
-    merged_data = {}
-    for document in m_documents:
-      base_url = document.get("base_url", "")
-      for card in document.get("cards_data", []):
-        for key, value in card.items():
-          if key not in merged_data:
-            merged_data[key] = []
-          if isinstance(value, list):
-            merged_data[key].extend(value)
-          elif value is not None and len(value) > 2:
-            merged_data[key].append(value)
-        if "m_url" not in card:
-          if "m_url" not in merged_data:
-            merged_data["m_url"] = []
-          merged_data["m_url"].append(base_url)
-    for key in merged_data:
-      merged_data[key] = list(set(merged_data[key]))
-    modified_data = {}
-    for key in merged_data:
-      new_key = key.replace("m_", "").replace("_", " ").title()  # Remove "M_" prefix
-      modified_data[new_key] = merged_data[key]
+  def __init_runtime_parser(p_document_list, p_status, p_search_model):
+    if p_status == API_RESPONSE.M_PENDING:
+      m_context = {
+        SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "false",
+        SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query,
+        SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search,
+        SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number,
+        SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type,
+        SEARCH_CALLBACK.M_PAGE_NUM: 1,
+        SEARCH_CALLBACK.M_MAX_PAGINATION: 1,
+        SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY,
+        SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site,
+      }
+      return True, m_context
+    else:
+      m_documents = json.loads(p_document_list) if isinstance(p_document_list, str) else p_document_list
+      merged_data = {}
+      for document in m_documents:
+        base_url = document.get("base_url", "")
+        for card in document.get("cards_data", []):
+          for key, value in card.items():
+            if key not in merged_data:
+              merged_data[key] = []
+            if isinstance(value, list):
+              merged_data[key].extend(value)
+            elif value is not None and len(value) > 2:
+              merged_data[key].append(value)
+          if "m_url" not in card:
+            if "m_url" not in merged_data:
+              merged_data["m_url"] = []
+            merged_data["m_url"].append(base_url)
+      for key in merged_data:
+        merged_data[key] = list(set(merged_data[key]))
+      modified_data = {}
+      for key in merged_data:
+        new_key = key.replace("m_", "").replace("_", " ").title()  # Remove "M_" prefix
+        modified_data[new_key] = merged_data[key]
 
-    m_context = {
-      SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query,
-      SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search,
-      SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number,
-      SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type,
-      SEARCH_CALLBACK.M_DOCUMENT: modified_data,
-      SEARCH_CALLBACK.M_PAGE_NUM: 1,
-      SEARCH_CALLBACK.M_MAX_PAGINATION: 1,
-      SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY,
-      SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site,
-    }
+      m_context = {
+        SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "true",
+        SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query,
+        SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search,
+        SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number,
+        SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type,
+        SEARCH_CALLBACK.M_DOCUMENT: modified_data,
+        SEARCH_CALLBACK.M_PAGE_NUM: 1,
+        SEARCH_CALLBACK.M_MAX_PAGINATION: 1,
+        SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY,
+        SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site,
+      }
 
-    return True, m_context
+      return True, m_context
 
   def invoke_trigger(self, p_command, p_data):
     if p_command == SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER:
       return self.__init_search_parameters(p_data[0])
     if p_command == SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER:
-      return self.__init_runtime_parser(p_data[0], p_data[1])
+      return self.__init_runtime_parser(p_data[0], p_data[1], p_data[2])
     if p_command == SEARCH_SESSION_COMMANDS.M_INIT:
       return self.__init_parameters(p_data[0], p_data[1], p_data[2])

@@ -10,6 +10,9 @@ class USER_INDEX_MODEL_COMMANDS(enum.Enum):
   M_INIT = 1
   M_FETCH_RESULT = 2
 
+class API_RESPONSE(enum.Enum):
+  M_PENDING = 1
+  M_SUCCESS = 2
 
 class SEARCH_SESSION_COMMANDS(enum.Enum):
   M_INIT = 1
@@ -28,6 +31,7 @@ class SEARCH_PARAM:
 class SEARCH_CALLBACK:
   M_URL_DISPLAY_TYPE = "mUrlDisplayType"
   M_QUERY = "mSearchCallbackQuery"
+  M_DYNAMIC_PARSER_STATUS = "mDynamicParserStatus"
   M_DOCUMENT = "mSearchCallbackRelevantDocument"
   M_TITLE = "mSearchCallbackRelevantDocumentTitle"
   M_NETWORK = "mNetwork"

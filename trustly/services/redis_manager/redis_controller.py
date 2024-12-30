@@ -11,7 +11,7 @@ class redis_controller:
 
   @classmethod
   def destroy_instance(cls):
-    cls.__instance = None
+      cls.__instance = None
 
   def close_connection(self):
     self.__redis.close()
@@ -53,8 +53,7 @@ class redis_controller:
     if not self.__redis.exists(p_key):
       if p_val is not None:
         self.__set_string(p_key, p_val)
-        if expiry is not None:
-          self.__redis.expire(p_key, expiry)
+        self.__redis.expire(p_key, expiry)
       else:
         return None
     return self.__redis.get(p_key)

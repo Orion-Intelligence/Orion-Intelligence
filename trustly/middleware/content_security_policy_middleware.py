@@ -1,13 +1,10 @@
-import os
-
 from django.utils.deprecation import MiddlewareMixin
-from dotenv import load_dotenv
-
-load_dotenv()
+from trustly.app.helper_manager.env_handler import env_handler
 
 
 class content_security_policy_middleware(MiddlewareMixin):
-    DEBUG = os.getenv("PRODUCTION", "0") != "1"
+
+    DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
 
     def process_response(self, request, response):
         response['Content-Security-Policy'] = (

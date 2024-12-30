@@ -119,6 +119,10 @@
   margin: 0 !important;
 }
 
+.searchbar__detail-header-catagories-margin-extended{
+  width: 80px !important;
+}
+
 .searchbar__search-items {
   font-size: 14px;
   color: #A0B8D1;
@@ -134,27 +138,26 @@
   user-select: none;
   margin-right: 30px;
   outline: none;
-  border-bottom: 2px solid #00000000;
+  border-bottom: 3px solid #00000000;
+  transition: border-bottom-color 0.2s ease, color 0.2s ease;
 }
 
 .searchbar__search-items:hover:not(.active) {
   color: #fff;
   text-decoration: none;
-  border-bottom: 2px solid #fff;
-  outline: none;
+  border-bottom-color: #fff;
 }
 
 .searchbar__search-items:hover.active {
   text-decoration: none;
   color: #fff;
-  border-bottom: 2px solid #fff;
-  outline: none;
+  border-bottom-color: #fff;
 }
 
 .searchbar__search-items-active-default {
   text-decoration: none;
   color: #FFFFFF;
-  border-bottom: 2px solid #FFFFFF;
+  border-bottom: 3px solid #FFFFFF;
   pointer-events: none;
 }
 
@@ -169,9 +172,13 @@
 @media only screen and (max-width: 1400px) {
   .searchbar {
     margin-bottom: 5px;
-    padding-bottom: 15px !important;
+    padding-bottom: 29px !important;
     padding-left: 20px;
     padding-right: 1.5em;
+  }
+
+  .searchbar__searchbox-icon {
+    margin-right: 110px;
   }
 
   .search__header-network-image{
@@ -179,7 +186,7 @@
   }
 
   .searchbar__detail-header-search-input {
-    padding-right: 0px;
+    padding-right: 0;
   }
 
   .searchbar__search-items {
@@ -201,7 +208,7 @@
   }
 
   .searchbar__searchbox-button {
-    right: 3px;
+    right: 15px;
   }
 
 }
