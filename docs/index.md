@@ -1,4 +1,4 @@
-# Orion Platform Documentation
+# Orion Platform Documentations
 
 Welcome to the Orion Platform Documentation.
 
