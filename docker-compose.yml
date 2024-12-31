@@ -49,9 +49,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
         reservations:
-          memory: 128M
+          memory: 1G
 
   swagger:
     container_name: trusted-web-swagger
