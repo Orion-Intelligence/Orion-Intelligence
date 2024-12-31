@@ -148,6 +148,10 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.1.11
+    deploy:
+      resources:
+        limits:
+          memory: 4G
 
   redis_server:
     container_name: trusted-web-redis
