@@ -38,8 +38,8 @@ services:
       DJANGO_SETTINGS_MODULE: trustly.settings
       DISABLE_TEMPLATE_CACHING: "1"
     networks:
-      - shared_bridge
       - backend
+      - shared_bridge
     healthcheck:
       test: ["CMD-SHELL", "exit 0"]
       interval: 30s
@@ -100,6 +100,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./dockerFiles/traefik:/etc/traefik
     restart: unless-stopped
+    networks:
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "exit 0"]
       interval: 30s
@@ -110,6 +112,8 @@ services:
   dozzle:
     container_name: trusted-web-dozzle
     image: amir20/dozzle:latest
+    networks:
+      - backend
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
