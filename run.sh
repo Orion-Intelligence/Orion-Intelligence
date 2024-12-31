@@ -25,6 +25,7 @@ else
         docker compose -p $PROJECT_NAME build
     fi
 
+    docker network create --driver bridge shared_bridge
     docker compose -p $PROJECT_NAME up -d
     docker exec -it trusted-web-main /bin/sh -c "python manage.py migrate"
     echo "server started"
