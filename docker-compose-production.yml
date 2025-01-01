@@ -137,6 +137,7 @@ services:
     restart: unless-stopped
     networks:
       - backend
+      - shared_bridge
 
   dozzle:
     container_name: trusted-web-dozzle
