@@ -1,0 +1,10 @@
+  GNU nano 6.2                                                                                       dynamic.yml                                                                                                 tls:
+  certificates:
+    - certFile: "/certs/cert.pem"
+      keyFile: "/certs/privkey.pem"
+http:
+  middlewares:
+    auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$l9Ox5AVO$bv0YBktMem8tKvncaDZzm1"

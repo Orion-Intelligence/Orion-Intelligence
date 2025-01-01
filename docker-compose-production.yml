@@ -1,0 +1,270 @@
+services:
+  web:
+    container_name: trusted-web-main
+    build:
+      context: .
+      dockerfile: dockerFiles/api_docker
+    depends_on:
+      #elasticsearch:
+      #  condition: service_healthy
+      mongo:
+        condition: service_started
+    env_file:
+      - .env
+    command:
+      - /bin/sh
+      - -c
+      - >
+        if [ "$PRODUCTION" = "1" ]; then
+          python manage.py collectstatic --noinput &&
+          echo "Production mode: Running compression..." &&
+          python manage.py compress --follow-links --force &&
+          echo "Production mode: Compressing static files..." &&
+          find /app/staticfiles -type f -exec gzip -k {} \;;
+        else
+          echo "Non-production mode: Skipping compression and gzip.";
+        fi &&
+        gunicorn trustly.wsgi:application --bind 0.0.0.0:8070 --reload &
+        sleep 10 && python manage.py cronjob_manager
+    volumes:
+      - .:/app:cached
+      - ./static:/app/static:cached
+      - ./trustly/templates:/app/trustly/templates:cached
+      - ./staticfiles:/app/staticfiles:cached
+    expose:
+      - "8070"
+    environment:
+      NLTK_DATA: /root/nltk_data
+      DJANGO_SETTINGS_MODULE: trustly.settings
+      DISABLE_TEMPLATE_CACHING: "1"
+    networks:
+      - backend
+      - shared_bridge
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 1G
+
+  swagger:
+    container_name: trusted-web-swagger
+    image: swaggerapi/swagger-ui:latest
+    ports:
+      - "8082:8080"
+    environment:
+      SWAGGER_JSON: /swagconfig/swaggerconfig.json
+      SWAGGER_UI_SYNTAX_HIGHLIGHT: "false"
+      SWAGGER_UI_CORS_ENABLED: "true"
+      SWAGGER_UI_DOC_EXPANSION: "none"
+      SWAGGER_UI_DEFAULT_MODELS_EXPAND_DEPTH: -1
+      SWAGGER_UI_DEFAULT_MODEL_EXPAND_DEPTH: -1
+      SWAGGER_UI_ALLOWED_ORIGINS: "*"
+      SWAGGER_UI_RESPONSE_HIGHLIGHT: "false"
+    volumes:
+      - ./swagconfig:/usr/share/nginx/html
+    restart: unless-stopped
+    depends_on:
+      - web
+    networks:
+      backend:
+        ipv4_address: 172.20.1.15
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.swagger.rule=Host(`swagger.orion.whistleaks.com`)"
+      - "traefik.http.routers.swagger.tls=true"
+      - "traefik.http.routers.swagger.entrypoints=websecure"
+      - "traefik.http.services.swagger.loadbalancer.server.port=8080"
+      - "traefik.http.routers.swagger.middlewares=auth@file"
+
+  elasticsearch:
+    container_name: trusted-web-elastic
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    environment:
+      - discovery.type=single-node
+      - network.host=0.0.0.0
+      - http.port=9400
+      - ELASTIC_USERNAME=${ELASTIC_ROOT_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - indices.memory.index_buffer_size=5%
+      - node.store.allow_mmap=false
+    env_file:
+      - .env
+    ports:
+      - "9400:9400"
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
+    healthcheck:
+      test: curl -f http://localhost:9400/_cluster/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      backend:
+        ipv4_address: 172.20.1.11
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  traefik:
+    image: traefik:v2.10
+    container_name: trusted-web-traefik
+    ports:
+      - "9090:9090"
+      - "9443:9443"
+    command:
+      - "--entrypoints.web.address=:9090"
+      - "--entrypoints.websecure.address=:9443"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--providers.docker=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./dockerFiles/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - /etc/letsencrypt/live/orion.whistleaks.com/cert.pem:/certs/cert.pem:ro
+      - /etc/letsencrypt/live/orion.whistleaks.com/privkey.pem:/certs/privkey.pem:ro
+
+    restart: unless-stopped
+    networks:
+      - backend
+
+  dozzle:
+    container_name: trusted-web-dozzle
+    image: amir20/dozzle:latest
+    networks:
+      - backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dozzle.rule=Host(`dozzle.orion.whistleaks.com`)"
+      - "traefik.http.routers.dozzle.tls=true"
+      - "traefik.http.routers.dozzle.entrypoints=websecure"
+      - "traefik.http.routers.dozzle.middlewares=auth@file"
+      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+
+    restart: unless-stopped
+
+
+  redis_server:
+    container_name: trusted-web-redis
+    image: redis:7.4.0
+    logging:
+      driver: none
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      backend:
+        ipv4_address: 172.20.1.12
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
+  nginx:
+    container_name: trusted-web-nginx
+    image: nginx:latest
+    ports:
+      - "8080:80"
+      - "443:443"
+    depends_on:
+      - web
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/app/static:cached
+      - ./staticfiles:/app/staticfiles:cached
+      - media_volume:/app/media
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /var/www/certbot:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      backend:
+        ipv4_address: 172.20.1.13
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  mongo:
+    image: mongo:latest
+    container_name: trustly-web-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo:/data/db
+    command: >
+      bash -c "
+      mongod --bind_ip_all --fork --logpath /var/log/mongodb.log &&
+      sleep 10 &&
+      mongosh --eval '
+        db = db.getSiblingDB(\"admin\");
+        if (db.getUser(\"${MONGO_ROOT_USERNAME}\") === null) {
+          db.createUser({
+            user: \"${MONGO_ROOT_USERNAME}\",
+            pwd: \"${MONGO_ROOT_PASSWORD}\",
+            roles: [{ role: \"userAdminAnyDatabase\", db: \"admin\" }, { role: \"readWriteAnyDatabase\", db: \"admin\" }]
+          });
+        }
+      ' &&
+      mongod --shutdown &&
+      sleep 5 &&
+      mongod --auth --bind_ip_all --fork --logpath /var/log/mongodb.log &&
+      tail -f /var/log/mongodb.log
+      "
+    networks:
+      backend:
+        ipv4_address: 172.20.1.14
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/27017' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
+networks:
+  shared_bridge:
+    external: true
+  backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.1.0/24
+
+volumes:
+  redis:
+  mongo:
+  elastic:
+  static_volume:
+  media_volume:
