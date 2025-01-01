@@ -148,26 +148,30 @@ class search_session_controller(request_handler):
     return pattern.sub(lambda match: f'<span class="highlight-description">{match.group(0)}</span>', text)
 
   def __generate_url_context(self, p_document, p_tokenized_query, p_search_model):
-    m_title = p_document[SEARCH_DOCUMENT_CALLBACK.M_TITLE]
+    m_title = p_document.get(SEARCH_DOCUMENT_CALLBACK.M_TITLE, "")
     if len(m_title) < 2:
-      m_title = p_document[SEARCH_DOCUMENT_CALLBACK.M_HOST]
+      m_title = p_document.get(SEARCH_DOCUMENT_CALLBACK.M_HOST, "")
 
     if SEARCH_DOCUMENT_CALLBACK.M_SECTION in p_document:
-      m_description = self.__clip_sections(p_document[SEARCH_DOCUMENT_CALLBACK.M_SECTION], p_tokenized_query, 300, p_document[SEARCH_DOCUMENT_CALLBACK.M_IMPORTANT_DESCRIPTION][0:300])
+      m_description = self.__clip_sections(p_document[SEARCH_DOCUMENT_CALLBACK.M_SECTION], p_tokenized_query, 300, p_document.get(SEARCH_DOCUMENT_CALLBACK.M_IMPORTANT_DESCRIPTION, "")[:300])
     else:
-      m_description = p_document[SEARCH_DOCUMENT_CALLBACK.M_IMPORTANT_DESCRIPTION]
-      if len(m_description)>400:
-        m_description = m_description[0:400] + "..."
+      m_description = p_document.get(SEARCH_DOCUMENT_CALLBACK.M_IMPORTANT_DESCRIPTION, "")
+      if len(m_description) > 400:
+        m_description = m_description[:400] + "..."
 
     m_description = m_description.replace('<dir>', ' ').replace('</dir>', ' ')
     m_description = self.highlight_tokens_in_text(m_description, p_tokenized_query)
 
-    mRelevanceContextOriginal = {SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_URL: p_document[SEARCH_DOCUMENT_CALLBACK.M_HOST] + p_document[SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST], SEARCH_CALLBACK.M_DESCRIPTION: m_description, }
+    mRelevanceContextOriginal = {SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_URL: p_document.get(SEARCH_DOCUMENT_CALLBACK.M_HOST, "") + p_document.get(SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST, ""), SEARCH_CALLBACK.M_DESCRIPTION: m_description}
 
     random_id = ''.join(random.choices(string.ascii_letters, k=10))
 
-    m_update_date_str = p_document["m_update_date"]
-    m_update_date = datetime.fromisoformat(m_update_date_str)
+    m_update_date_str = p_document.get("m_update_date", "")
+    try:
+      m_update_date = datetime.fromisoformat(m_update_date_str)
+    except ValueError:
+      m_update_date = datetime.now(timezone.utc)
+
     current_time = datetime.now(timezone.utc)
     time_difference = (current_time - m_update_date).total_seconds() / 60
 
@@ -179,11 +183,12 @@ class search_session_controller(request_handler):
       expiry_status = 2
 
     if "m_extra_tags" in p_document:
-      mRelevanceContext = {SEARCH_CALLBACK.M_NETWORK: p_search_model.m_network, SEARCH_CALLBACK.M_URL: p_document[SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST], SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_CONTACT_LINK: [p_document["m_contact_link"]], SEARCH_CALLBACK.M_EXTRALINK: p_document["m_extra_tags"], SEARCH_CALLBACK.M_WEBLINK: p_document["m_weblink"], SEARCH_CALLBACK.M_DUMPLINK: p_document["m_dumplink"], SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_FULL_CONTENT: p_document["m_content"], SEARCH_CALLBACK.K_CONTENT_TYPE: [p_document["m_content_type"]], SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: ["leak"], SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_CREATION_DATA: p_document["m_creation_date"], SEARCH_CALLBACK.M_EXPIRY: expiry_status}
+      mRelevanceContext = {SEARCH_CALLBACK.M_NETWORK: p_search_model.m_network if hasattr(p_search_model, 'm_network') else "", SEARCH_CALLBACK.M_URL: p_document.get(SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST, ""), SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_CONTACT_LINK: [p_document.get("m_contact_link", "")], SEARCH_CALLBACK.M_EXTRALINK: p_document.get("m_extra_tags", ""), SEARCH_CALLBACK.M_WEBLINK: p_document.get("m_weblink", ""), SEARCH_CALLBACK.M_DUMPLINK: p_document.get("m_dumplink", ""), SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_FULL_CONTENT: p_document.get("m_content", ""), SEARCH_CALLBACK.K_CONTENT_TYPE: [p_document.get("m_content_type", "")], SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: ["leak"], SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_CREATION_DATA: p_document.get("m_creation_date", ""), SEARCH_CALLBACK.M_EXPIRY: expiry_status}
     else:
-      mRelevanceContext = {SEARCH_CALLBACK.M_NETWORK: p_document["m_network"], SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_URL: p_document[SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST], SEARCH_CALLBACK.M_SECTION: p_document["m_section"], SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: "general", SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_EXPIRY: expiry_status, SEARCH_CALLBACK.K_CONTENT_TYPE: p_document["m_content_type"], SEARCH_CALLBACK.M_NAME: p_document["m_names"], SEARCH_CALLBACK.M_CONTENT: p_document["m_content"], SEARCH_CALLBACK.M_DOCUMENT_LEAK: p_document["m_document"], SEARCH_CALLBACK.M_VIDEO: p_document["m_video"], SEARCH_CALLBACK.M_ARCHIVE_URL: p_document["m_archive_url"], SEARCH_CALLBACK.M_CREATION_DATA: p_document["m_creation_date"], SEARCH_CALLBACK.M_EMAILS: p_document["m_emails"], SEARCH_CALLBACK.M_PHONE_NUMBER: p_document["m_phone_numbers"], }
+      mRelevanceContext = {SEARCH_CALLBACK.M_NETWORK: p_document.get("m_network", ""), SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_URL: p_document.get(SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST, ""), SEARCH_CALLBACK.M_SECTION: p_document.get("m_section", ""), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: "general", SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_EXPIRY: expiry_status, SEARCH_CALLBACK.K_CONTENT_TYPE: p_document.get("m_content_type", ""), SEARCH_CALLBACK.M_NAME: p_document.get("m_names", ""), SEARCH_CALLBACK.M_CONTENT: p_document.get("m_content", ""), SEARCH_CALLBACK.M_DOCUMENT_LEAK: p_document.get("m_document", ""), SEARCH_CALLBACK.M_VIDEO: p_document.get("m_video", ""), SEARCH_CALLBACK.M_ARCHIVE_URL: p_document.get("m_archive_url", ""), SEARCH_CALLBACK.M_CREATION_DATA: p_document.get("m_creation_date", ""),
+        SEARCH_CALLBACK.M_EMAILS: p_document.get("m_emails", ""), SEARCH_CALLBACK.M_PHONE_NUMBER: p_document.get("m_phone_numbers", "")}
 
-    if p_search_model.m_safe_search == 'False' or (str(p_search_model.m_safe_search) == 'True'):
+    if str(p_search_model.m_safe_search).lower() in ['false', 'true']:
       return mRelevanceContext, mRelevanceContextOriginal
     else:
       return None, None
@@ -254,17 +259,7 @@ class search_session_controller(request_handler):
   @staticmethod
   def __init_runtime_parser(p_document_list, p_status, p_search_model):
     if p_status == API_RESPONSE.M_PENDING:
-      m_context = {
-        SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "false",
-        SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query,
-        SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search,
-        SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number,
-        SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type,
-        SEARCH_CALLBACK.M_PAGE_NUM: 1,
-        SEARCH_CALLBACK.M_MAX_PAGINATION: 1,
-        SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY,
-        SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site,
-      }
+      m_context = {SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "false", SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, }
       return True, m_context
     else:
       m_documents = json.loads(p_document_list) if isinstance(p_document_list, str) else p_document_list
@@ -290,18 +285,7 @@ class search_session_controller(request_handler):
         new_key = key.replace("m_", "").replace("_", " ").title()  # Remove "M_" prefix
         modified_data[new_key] = merged_data[key]
 
-      m_context = {
-        SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "true",
-        SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query,
-        SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search,
-        SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number,
-        SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type,
-        SEARCH_CALLBACK.M_DOCUMENT: modified_data,
-        SEARCH_CALLBACK.M_PAGE_NUM: 1,
-        SEARCH_CALLBACK.M_MAX_PAGINATION: 1,
-        SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY,
-        SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site,
-      }
+      m_context = {SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "true", SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: modified_data, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, }
 
       return True, m_context
 

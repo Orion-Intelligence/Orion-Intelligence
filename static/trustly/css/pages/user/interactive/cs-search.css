@@ -25,7 +25,6 @@ html {
 
 .searchbar__search-container-persona {
   margin-left: 100px;
-  margin-top: 30px;
 }
 
 .searchbar__search-container-persona-body {
@@ -82,46 +81,7 @@ html {
   padding-right: 25px;
 }
 
-.search-persona__no-suggestion-header {
-  float: left;
-  font-size: 15px;
-  color: #FFFFFF;
-  font-weight: 400;
-}
-
-.search-persona__no-suggestion {
-  max-width: 655px;
-  border-radius: 10px;
-  border: 1px solid #336BA1;
-  margin: 15px 12px 11em 6em;
-  background: #2A578459;
-  padding: 15px 20px 15px;
-}
-
-.search__reload-button {
-  color: #fff;
-  background-color: #336ba170;
-  border: none;
-  padding: 7px 15px;
-  border-radius: 6px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.search__reload-button:active {
-  background-color: red;
-  color: #fff;
-}
-
-.search__reload-button:hover {
-  background-color: #336BA1;
-  color: #fff;
-}
-
 @media only screen and (max-width: 1400px) {
-  .search-persona__no-suggestion {
-    margin-left: 20px;
-  }
-
   .search__content__right {
     width: 100vw !important;
     padding-right: 30px;

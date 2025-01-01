@@ -1,6 +1,5 @@
 {% load static %}
 
-
 {% if analytics.unique_urls|length > 0 %}
     <div class="search-insights__container">
         <input type="checkbox" id="keyword-insights-toggle" checked>
@@ -95,6 +94,57 @@
             {% for i in analytics.m_emails %}
                 <div class="search-insights__email-row">
                     <div class="search-insights__email-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}
+{% if analytics.mPhoneNumber|length > 0 %}
+    <div class="search-insights__phone-accordion">
+        <input type="checkbox" id="unique__phone-toggle" checked>
+        <label class="search-insights__phone-header" for="unique__phone-toggle">
+            Unique Cellular
+            <img src="{% static 'trustly/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__phone-content">
+            {% for i in analytics.mPhoneNumber %}
+                <div class="search-insights__phone-row">
+                    <div class="search-insights__phone-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}
+{% if analytics.mArchiveUrl|length > 0 %}
+    <div class="search-insights__archive-accordion">
+        <input type="checkbox" id="unique__archive-toggle" checked>
+        <label class="search-insights__archive-header" for="unique__email-toggle">
+            Unique Archives
+            <img src="{% static 'trustly/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__archive-content">
+            {% for i in analytics.mArchiveUrl %}
+                <div class="search-insights__archive-row">
+                    <div class="search-insights__email-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}
+{% if analytics.mName|length > 0 %}
+    <div class="search-insights__name-accordion">
+        <input type="checkbox" id="unique__name-toggle" checked>
+        <label class="search-insights__name-header" for="unique__name-toggle">
+            Unique Archives
+            <img src="{% static 'trustly/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__name-content">
+            {% for i in analytics.mName %}
+                <div class="search-insights__name-row">
+                    <div class="search-insights__name-column">{{ forloop.counter }}- {{ i }}</div>
                 </div>
             {% endfor %}
             <br>

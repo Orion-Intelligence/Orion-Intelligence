@@ -365,3 +365,302 @@ input[type="checkbox"]:checked ~ .search-insights__email-header img {
   }
 
 }
+
+
+
+.search-insights__phone-accordion {
+  width: 520px;
+  max-width: 600px;
+  border: 1px solid #FCFCFC12;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 16px 18px;
+  margin: 16px auto 0;
+  float: right;
+}
+
+.search-insights__phone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: Roboto, sans-serif;
+}
+
+
+.search-insights__phone-header img {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+  cursor: pointer;
+  margin-right: -4px;
+}
+
+.search-insights__phone-content {
+  max-height: 0;
+  opacity: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+input[type="checkbox"]:checked ~ .search-insights__phone-content {
+  max-height: 250px;
+  opacity: 1;
+  padding: 15px 15px 0 0;
+  overflow-y: auto;
+  position: relative;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+input[type="checkbox"]:checked ~ .search-insights__phone-header img {
+  transform: rotate(180deg);
+}
+.search-insights__phone-content {
+  scroll-behavior: smooth;
+}
+
+.search-insights__email-accordion label {
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #D0D0D0;
+}
+
+.search-insights__phone-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #FCFCFC12;
+}
+
+.search-insights__phone-row:last-child {
+  border-bottom: none;
+}
+
+.search-insights__phone-column {
+  flex: 1;
+  text-align: left;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.search-insights__phone-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-insights__phone-content::-webkit-scrollbar-track {
+  background: #FCFCFC12;
+  border-radius: 10px;
+}
+
+.search-insights__phone-content::-webkit-scrollbar-thumb {
+  background-color: #FCFCFC80;
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+.search-insights__phone-accordion label {
+    margin-bottom: 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: #D0D0D0;
+}
+
+.search-insights__archive-accordion {
+  width: 520px;
+  max-width: 600px;
+  border: 1px solid #FCFCFC12;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 16px 18px;
+  margin: 16px auto 0;
+  float: right;
+}
+
+.search-insights__archive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: Roboto, sans-serif;
+}
+
+.search-insights__archive-header img {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+  cursor: pointer;
+  margin-right: -4px;
+}
+
+.search-insights__archive-content {
+  max-height: 0;
+  opacity: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+input[type="checkbox"]:checked ~ .search-insights__archive-content {
+  max-height: 250px;
+  opacity: 1;
+  padding: 15px 15px 0 0;
+  overflow-y: auto;
+  position: relative;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+
+input[type="checkbox"]:checked ~ .search-insights__archive-header img {
+  transform: rotate(180deg);
+}
+
+.search-insights__archive-content {
+  scroll-behavior: smooth;
+}
+
+.search-insights__email-accordion label {
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #D0D0D0;
+}
+
+.search-insights__archive-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #FCFCFC12;
+}
+
+.search-insights__archive-row:last-child {
+  border-bottom: none;
+}
+
+.search-insights__archive-column {
+  flex: 1;
+  text-align: left;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.search-insights__archive-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-insights__archive-content::-webkit-scrollbar-track {
+  background: #FCFCFC12;
+  border-radius: 10px;
+}
+
+.search-insights__archive-content::-webkit-scrollbar-thumb {
+  background-color: #FCFCFC80;
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+
+.search-insights__archive-accordion label {
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #D0D0D0;
+}
+.search-insights__name-accordion {
+  width: 520px;
+  max-width: 600px;
+  border: 1px solid #FCFCFC12;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 16px 18px;
+  margin: 16px auto 0;
+  float: right;
+}
+
+.search-insights__name-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: Roboto, sans-serif;
+}
+
+.search-insights__name-header img {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+  cursor: pointer;
+  margin-right: -4px;
+}
+
+.search-insights__name-content {
+  max-height: 0;
+  opacity: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+input[type="checkbox"]:checked ~ .search-insights__name-content {
+  max-height: 250px;
+  opacity: 1;
+  padding: 15px 15px 0 0;
+  overflow-y: auto;
+  position: relative;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+input[type="checkbox"]:checked ~ .search-insights__name-header img {
+  transform: rotate(180deg);
+}
+.search-insights__name-content {
+  scroll-behavior: smooth;
+}
+
+.search-insights__email-accordion label {
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #D0D0D0;
+}
+
+.search-insights__name-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #FCFCFC12;
+}
+
+.search-insights__name-row:last-child {
+  border-bottom: none;
+}
+
+.search-insights__name-column {
+  flex: 1;
+  text-align: left;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.search-insights__name-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-insights__name-content::-webkit-scrollbar-track {
+  background: #FCFCFC12;
+  border-radius: 10px;
+}
+
+.search-insights__name-content::-webkit-scrollbar-thumb {
+  background-color: #FCFCFC80;
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+.search-insights__name-accordion label {
+    margin-bottom: 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: #D0D0D0;
+}
