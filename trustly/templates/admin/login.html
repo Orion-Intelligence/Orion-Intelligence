@@ -1,27 +1,15 @@
 {% load static %}{% load compress %}
-<head>
+{% include 'admin/local_imports.html' %}
 
-    <!--Website Title-->
-    <title>Trustly Search Engine | Dark Web Based Search Engine</title>
+{% include 'trustly/user/interactive/directory/local_imports.html' %}
 
-    <!--libraries initializations-->
-    {% compress css %}
-        <link href="{% static 'trustly/css/pages/user/interactive/cs-homepage.css' %}" rel="stylesheet"/>
-        <link href="{% static 'trustly/css/pages/user/interactive/cs-admin-login.css' %}" rel="stylesheet"/>
-    {% endcompress %}
-
-    <!--Meta Datas-->
-    <meta name="title" content="Trustly Search Engine | Dark Web  Based Search Engine">
-    <meta name="description" content="Darkweb or Deepweb Search Engine working on multiple layered network including i2p,onion and riddle. Optimized Searches with mobile support and seperate Mobile Apps">
-
-</head>
 <body>
-  <div id="content" class="login">
-    <h1>Orion admin</h1>
-    <p>Welcome to the Admin Portal. Please log in to continue.</p>
-    {% if form.errors %}
-      <p class="errornote">Your username and password didn't match. Please try again.</p>
-    {% endif %}
+  {% include 'trustly/user/blades/home_template/blade_home_header.html' %}
+  <div class="login"></div>
+  <img alt="back" class="login-background" src="{% static 'trustly/images/Bg.png' %}">
+
+  <div id="content" class="admin_login__container">
+    <h1 class="admin_login__header">Orion admin</h1>
     <form method="post" action="{% url 'admin:login' %}" class="admin__login-form">
       {% csrf_token %}
       {% if next %}
@@ -29,16 +17,16 @@
       {% else %}
         <input type="hidden" name="next" value="{% url 'admin:index' %}">
       {% endif %}
-      <div class="form-row">
-        <label for="id_username">Username:</label>
-        {{ form.username }}
+      <div class="admin_login__form-row">
+        <label for="id_username" class="admin_login__form-label">Username</label>
+        <input type="text" id="id_username" name="username" class="admin_login__input admin_login__input--text">
       </div>
-      <div class="form-row">
-        <label for="id_password">Password:</label>
-        {{ form.password }}
+      <div class="admin_login__form-row">
+        <label for="id_password" class="admin_login__form-label">Password</label>
+        <input type="password" id="id_password" name="password" class="admin_login__input">
       </div>
       <div class="submit-row">
-        <input type="submit" class="admin__login-form-button" value="Log in"/>
+        <input type="submit" class="admin_login__form-button" value="Log in"/>
       </div>
     </form>
   </div>
