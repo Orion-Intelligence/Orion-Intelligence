@@ -82,6 +82,10 @@
   width: 10%;
 }
 
+.directory-list__table-url{
+  overflow-wrap: break-word;
+}
+
 @media only screen and (max-width: 943px) {
   .directory-list__content-category {
     padding-bottom: 0 !important;
@@ -150,6 +154,13 @@
 
   .directory-list__table tr td {
     font-size: 12px;
+  }
+  .directory-list__table tr:nth-child(even) {
+    background-color: #2A578499;
+  }
+
+  .directory-list__table tr:nth-child(odd) {
+    background-color: #2A578410 !important;
   }
 
 }

@@ -102,6 +102,7 @@
     align-items: flex-start;
     gap: 16px;
   }
-
-
+  .safe__search-toolbar-right {
+    margin-top: 15px;
+  }
 }
