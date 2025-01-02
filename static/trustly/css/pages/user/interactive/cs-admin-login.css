@@ -1,4 +1,4 @@
-input[type="text"] {
+.admin__login-form input[type="text"] {
   padding: 10px;
   border: none;
   border-radius: 8px;
@@ -6,17 +6,17 @@ input[type="text"] {
   margin-bottom: 10px;
 }
 
-input[type="password"]:focus {
+.admin__login-form input[type="password"]:focus {
   border: none;
   outline: none;
 }
 
-input[type="text"]:focus {
+.admin__login-form input[type="text"]:focus {
   border: none;
   outline: none;
 }
 
-input[type="password"] {
+.admin__login-form input[type="password"] {
   padding: 10px;
   border: none;
   border-radius: 8px;
@@ -26,6 +26,8 @@ input[type="password"] {
 .login {
   display: table;
   margin: 0 auto;
+
+  margin-top: 200px;
 }
 
 .form-row {
@@ -34,26 +36,26 @@ input[type="password"] {
 
 .admin__login-form-button {
   display: table;
-  margin: 10 auto;
+  margin: 20px auto;
   color: #fff;
   text-decoration: none;
-  background-color: #123354;
+  background-color: blue;
   border: none;
   padding: 11px 11px 11px 15px;
   border-radius: 8px;
-  width: 120px;
+  width: 100%;
   font-size: 14px;
   font-weight: bold;
 }
-.login h1{
+
+.login h1 {
   color: #fff;
 }
-.login p{
+
+.login p {
   color: #fff;
 }
-.form-row label{
+
+.form-row label {
   color: #fff;
-}
-.login{
-  margin-top: 200px;
 }
