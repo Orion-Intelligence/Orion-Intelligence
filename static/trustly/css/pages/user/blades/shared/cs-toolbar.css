@@ -103,11 +103,5 @@
     gap: 16px;
   }
 
-  .safe__search-toolba-toolbar-left,
-  .safe__search-toolbar-right {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 20px;
-  }
+
 }

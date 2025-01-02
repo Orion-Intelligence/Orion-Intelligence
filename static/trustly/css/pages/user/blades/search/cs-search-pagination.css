@@ -26,6 +26,9 @@
   background-color: #102A4685;
   font-weight: bold;
   outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .search__pagination-navigation:hover {

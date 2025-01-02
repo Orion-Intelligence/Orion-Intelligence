@@ -48,7 +48,7 @@ html {
 @media only screen and (max-width: 943px) {
   .directory__container {
     min-height: 100vh;
-    padding: 40px 20px 100px;
+    padding: 40px 10px 100px;
   }
 
   .directory__upper-heading {

@@ -31,7 +31,11 @@
   font-size: 18px;
   font-weight: 600;
 }
-
+@media only screen and (max-width: 900px) {
+  .safe__search-toolba-toolbar-left, .safe__search-toolbar-right{
+    margin-top: 0;
+  }
+}
 @media only screen and (max-width: 1400px) {
 
   .safe__search-toolbar {

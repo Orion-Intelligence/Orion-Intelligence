@@ -106,7 +106,7 @@
 }
 
 .searchbar__header-category-div {
-  display: flex;
+  /*display: flex;*/
   overflow-x: scroll;
 
 }
@@ -180,6 +180,12 @@
 
 .searchbar__search-items:focus {
   outline: none;
+}
+
+@media only screen and (max-width: 1000px) {
+  #catagory_finance {
+    display: none;
+  }
 }
 
 @media only screen and (max-width: 1400px) {
