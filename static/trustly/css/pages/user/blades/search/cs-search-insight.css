@@ -310,16 +310,16 @@ input[type="checkbox"]:checked ~ .search-insights__email-header img {
   color: #fff;
 }
 
-.search-insights__general-content::-webkit-scrollbar {
+.search-insight__general-content::-webkit-scrollbar {
   width: 8px;
 }
 
-.search-insights__general-content::-webkit-scrollbar-track {
+.search-insight__general-content::-webkit-scrollbar-track {
   background: #FCFCFC12;
   border-radius: 10px;
 }
 
-.search-insights__general-content::-webkit-scrollbar-thumb {
+.search-insight__general-content::-webkit-scrollbar-thumb {
   background-color: #FCFCFC80;
   border-radius: 10px;
   border: 2px solid transparent;

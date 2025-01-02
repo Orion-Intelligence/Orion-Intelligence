@@ -213,7 +213,6 @@ class search_session_controller(request_handler):
     m_documents_length = len(p_document_list)
 
     m_clearnet_links_count = sum(len(doc['m_clearnet_links']) for doc in p_document_list if 'm_clearnet_links' in doc)
-
     m_document_count = sum(len(doc['m_document']) for doc in p_document_list if 'm_document' in doc)
 
     m_links_counter = 0
@@ -221,8 +220,15 @@ class search_session_controller(request_handler):
     seldom_active_links = 0
     inactive_links = 0
 
+    m_emails = set()
+    unique_urls = []
+    m_phone_number = set()
+    m_archive_url = set()
+    m_document = set()
+
     for m_document in p_document_list:
       m_links_counter += 1
+
       if p_search_model.m_search_type != SEARCH_STRINGS.S_SEARCH_CONTENT_TYPE_IMAGE:
         m_relevance_context, m_relevance_context_original = self.__generate_url_context(m_document, p_tokenized_query, p_search_model)
         if m_relevance_context:
@@ -243,14 +249,24 @@ class search_session_controller(request_handler):
         except ValueError:
           pass
 
-    m_emails = list({email for doc in p_document_list if 'm_emails' in doc and isinstance(doc['m_emails'], list) for email in doc['m_emails']})
-    unique_urls = [{'m_title': doc.get('m_title', 'Untitled'), 'm_url': doc.get('m_url')} for doc in p_document_list if 'm_url' in doc]
-    m_phone_number = list({email for doc in p_document_list if 'm_phone_numbers' in doc and isinstance(doc['m_phone_numbers'], list) for email in doc['m_phone_numbers']})
-    m_archive_url = list({email for doc in p_document_list if 'm_archive_url' in doc and isinstance(doc['m_archive_url'], list) for email in doc['m_archive_url']})
-    m_document = list({email for doc in p_document_list if 'm_document' in doc and isinstance(doc['m_document'], list) for email in doc['m_document']})
+      if 'm_emails' in m_document and isinstance(m_document['m_emails'], list):
+        m_emails.update(m_document['m_emails'])
+
+      if 'm_url' in m_document:
+        unique_urls.append({'m_title': m_document.get('m_title', 'Untitled'), 'm_url': m_document['m_url']})
+
+      if 'm_phone_numbers' in m_document and isinstance(m_document['m_phone_numbers'], list):
+        m_phone_number.update(m_document['m_phone_numbers'])
+
+      if 'm_archive_url' in m_document and isinstance(m_document['m_archive_url'], list):
+        m_archive_url.update(m_document['m_archive_url'])
+
+      if 'm_document' in m_document and isinstance(m_document['m_document'], list):
+        m_document.update(m_document['m_document'])
 
     mContext = self.init_callbacks(p_search_model, m_relevance_context_list, m_related_business_list, m_related_news_list, m_related_files_list, total_pages)
-    mContext['analytics'] = {'m_document': m_document, 'mPhoneNumber': m_phone_number, 'mArchiveUrl': m_archive_url, 'm_emails': m_emails, 'unique_urls': unique_urls, 'total_p_document_list_length': total_p_document_list_length, 'm_documents_length': m_documents_length, 'm_clearnet_links_count': m_clearnet_links_count, 'm_document_count': m_document_count, 'active_links': active_links, 'seldom_active_links': seldom_active_links, 'inactive_links': inactive_links, }
+
+    mContext['analytics'] = {'m_document': list(m_document), 'mPhoneNumber': list(m_phone_number), 'mArchiveUrl': list(m_archive_url), 'm_emails': list(m_emails), 'unique_urls': unique_urls, 'total_p_document_list_length': total_p_document_list_length, 'm_documents_length': m_documents_length, 'm_clearnet_links_count': m_clearnet_links_count, 'm_document_count': m_document_count, 'active_links': active_links, 'seldom_active_links': seldom_active_links, 'inactive_links': inactive_links, }
 
     if p_search_model.m_total_documents >= CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE:
       mContext[SEARCH_CALLBACK.M_RESULT_COUNT] = helper_controller.on_create_random_search_count(p_search_model.m_total_documents)
