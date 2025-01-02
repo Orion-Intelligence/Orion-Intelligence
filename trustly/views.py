@@ -100,7 +100,5 @@ def custom_login(request):
     if demo_user and demo_user.check_password(password):
       login(request, demo_user)
       return redirect('home')
-    else:
-      return render(request, CONSTANTS.S_TEMPLATE_LOGIN_PATH, {'error': 'Invalid password'})
 
   return render(request, CONSTANTS.S_TEMPLATE_LOGIN_PATH)

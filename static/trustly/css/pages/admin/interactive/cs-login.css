@@ -1,0 +1,87 @@
+html {
+  background: rgba(41, 87, 132, 255) !important;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) !important;
+  height: 100vh;
+  font-family: 'Roboto', sans-serif;
+}
+
+.home-header{
+  padding-top: 24px !important;
+  padding-bottom: 17px !important;
+}
+
+.login-background {
+  position: absolute;
+  right: 0;
+  width: auto;
+  height: 93vh;
+  opacity: 0.07;
+}
+
+.admin_login__container {
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  color: white;
+  overflow: hidden;
+  display: table;
+  margin: 0 auto;
+  padding: 150px;
+  width: 80vw;
+  max-width: 500px;
+}
+
+.admin_login__input {
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.admin_login__input:focus {
+  border: none;
+  outline: none;
+}
+
+.admin_login__input--text {
+  margin-bottom: 10px;
+}
+
+.admin_login__input--border-bottom {
+  border-bottom: 2px solid #fff;
+}
+
+.admin_login__form-row {
+  display: grid;
+}
+
+.admin_login__form-button {
+  display: table;
+  color: #fff;
+  text-decoration: none;
+  background-color: #123354;
+  border: none;
+  padding: 11px 11px 11px 15px;
+  border-radius: 6px;
+  width: 120px;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 30px 10px 10px 0;
+}
+
+.admin_login__form-label .admin_login__paragraph .admin_login__header {
+  color: #fff;
+}
+
+@media only screen and (max-width: 943px) {
+  .admin_login__container{
+    padding: 50px !important;
+    margin: 0 !important;
+    width: 75vw;
+    height: 100vh;
+  }
+}

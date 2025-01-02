@@ -1,7 +1,8 @@
-  GNU nano 6.2                                                                                       dynamic.yml                                                                                                 tls:
+tls:
   certificates:
     - certFile: "/certs/cert.pem"
       keyFile: "/certs/privkey.pem"
+
 http:
   middlewares:
     auth:
