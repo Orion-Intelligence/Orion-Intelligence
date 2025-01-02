@@ -9,7 +9,7 @@ html {
 
 .search_container {
   margin: 0;
-  height: 100vh;
+  height: 101vh;
   background-image: linear-gradient(to bottom, #174069 0%, rgba(41, 87, 132, 255)) !important;
 }
 
