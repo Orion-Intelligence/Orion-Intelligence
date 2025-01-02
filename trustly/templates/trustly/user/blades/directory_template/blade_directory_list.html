@@ -29,11 +29,17 @@
 
                 <td data-label="search-content__webpages-description--category">
                     <div class="d-flex flex-wrap">
-                        {% for category in mDoc.content_type %}
-                            <div class="directory-list__content-category px-2 py-1">
-                                {{ category|capfirst }}
-                            </div>
-                        {% endfor %}
+                      {% if mDoc.content_type %}
+                          {% for category in mDoc.content_type %}
+                              <div class="directory-list__content-category px-2 py-1">
+                                  {{ category|capfirst }}
+                              </div>
+                          {% endfor %}
+                      {% else %}
+                          <div class="directory-list__content-category px-2 py-1">
+                              No categories available
+                          </div>
+                      {% endif %}
                     </div>
                 </td>
 

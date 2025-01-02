@@ -1,0 +1,46 @@
+{% if mDynamicParserStatus == "false" %}
+<form method="GET" action="" class="search-persona__no-suggestion">
+  <div class="row align-items-center">
+    <div class="col">
+      <p class="search-persona__no-suggestion-header mb-0">
+        we are fetching the results for - <strong>{{ mSearchCallbackQuery }}</strong> - , please wait for few seconds and press sync
+      </p>
+    </div>
+    <div class="col-auto ms-auto">
+      <input type="hidden" name="mSearchParamPage" value="1">
+      <input type="hidden" name="q" value="{{ mSearchCallbackQuery }}">
+      <input type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
+      <input type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
+      <button type="submit" class="search__reload-button">Sync</button>
+    </div>
+  </div>
+</form>
+{% elif mSearchCallbackRelevantDocument %}
+  <div class="searchbar__search-container-persona">
+    <div class="card shadow searchbar__search-card-persona">
+      <div class="card-header searchbar__search-card-header-persona text-white">
+        <h6 class="mb-0">⚠️ Your Email and Username Have Been Leaked!</h6>
+      </div>
+      <div class="card-body searchbar__search-container-persona-body">
+        <table class="table searchbar__search-card-table-persona searchbar__search-container-persona-border-color text-white">
+          <tbody>
+          {% for key, value in mSearchCallbackRelevantDocument.items %}
+            <tr class="{% if loop.index == 1 %}border-0{% endif %}">
+              <td class="searchbar__search-container-persona-border-color"><strong>{{ key|title }}</strong></td>
+              <td class="searchbar__search-container-persona-border searchbar__search-container-persona-border-color">
+                {% if value %}
+                  {% for item in value %}
+                    <div class="searchbar__search-container-persona-item">{{ item }}</div>
+                  {% endfor %}
+                {% else %}
+                  N/A
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endif %}

@@ -93,11 +93,14 @@ class external_request_controller(request_handler):
     external_request_controller.__pending_requests[query] = None
 
     if not external_request_controller.__queue.full():
-      external_request_controller.__queue.put(p_data)
-      external_request_controller.__semaphore.acquire()
-      return API_RESPONSE.M_PENDING, []
+      try:
+        external_request_controller.__queue.put_nowait(p_data)
+      except Exception as e:
+        external_request_controller.__pending_requests[query] = []
     else:
-      return API_RESPONSE.M_PENDING, []
+      external_request_controller.__pending_requests[query] = []
+
+    return API_RESPONSE.M_PENDING, []
 
   def invoke_trigger(self, p_command, p_data):
     if p_command == EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS:
