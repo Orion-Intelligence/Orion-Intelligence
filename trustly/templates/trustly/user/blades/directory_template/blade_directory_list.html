@@ -15,7 +15,7 @@
         <tbody>
         {% for mDoc in mDirectoryCallbackLinks %}
             <tr>
-                <td data-label="ID">{{ forloop.counter }}</td>
+                <td data-label="ID">{{ mDoc.index }}</td>
 
                 {% if mDoc.mContentType in 'i a adult' %}
                     <td data-label="Onion Service">

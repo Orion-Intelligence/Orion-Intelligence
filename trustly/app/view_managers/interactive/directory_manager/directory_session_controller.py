@@ -62,9 +62,14 @@ class directory_session_controller(request_handler):
       start_page = current_page - half_range
       end_page = min(current_page + half_range, total_pages)
 
-    m_context = {DIRECTORY_CALLBACK.M_PAGE_NUMBER: current_page, DIRECTORY_CALLBACK.M_NETWORK: p_links.m_network, DIRECTORY_CALLBACK.M_TOTAL_PAGES: total_pages, DIRECTORY_CALLBACK.M_START_PAGE: start_page, DIRECTORY_CALLBACK.M_ENDPAGE: end_page, DIRECTORY_CALLBACK.M_PAGINATION: range(start_page, end_page + 1), DIRECTORY_CALLBACK.M_SECURE_SERVICE_NOTICE: p_links.m_site, DIRECTORY_CALLBACK.M_ONION_LINKS: p_links.m_row_model_list[0:len(p_links.m_row_model_list)], DIRECTORY_CALLBACK.M_MAX_PAGE_REACHED: len(p_links.m_row_model_list) <= CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE - 2, DIRECTORY_CALLBACK.M_CONTENT_TYPE: p_links.m_content_type,
-      DIRECTORY_CALLBACK.M_INDEX: p_links.m_index,  # Added index
-    }
+    # Calculate the starting index for the current page
+    items_per_page = CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE
+    starting_index = (current_page - 1) * items_per_page + 1
+    indexed_items = [{**item, "index": idx + starting_index} for idx, item in enumerate(p_links.m_row_model_list[0:len(p_links.m_row_model_list)])]
+
+    m_context = {DIRECTORY_CALLBACK.M_PAGE_NUMBER: current_page, DIRECTORY_CALLBACK.M_NETWORK: p_links.m_network, DIRECTORY_CALLBACK.M_TOTAL_PAGES: total_pages, DIRECTORY_CALLBACK.M_START_PAGE: start_page, DIRECTORY_CALLBACK.M_ENDPAGE: end_page, DIRECTORY_CALLBACK.M_PAGINATION: range(start_page, end_page + 1), DIRECTORY_CALLBACK.M_SECURE_SERVICE_NOTICE: p_links.m_site, DIRECTORY_CALLBACK.M_ONION_LINKS: indexed_items,
+      DIRECTORY_CALLBACK.M_MAX_PAGE_REACHED: len(p_links.m_row_model_list) <= items_per_page - 2, DIRECTORY_CALLBACK.M_CONTENT_TYPE: p_links.m_content_type, DIRECTORY_CALLBACK.M_INDEX: p_links.m_index, }
+
     if p_links.m_page_number > 1 and len(p_links.m_row_model_list) == 0:
       return m_context, False
     else:

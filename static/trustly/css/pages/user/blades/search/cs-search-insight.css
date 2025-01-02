@@ -405,3 +405,14 @@ input[type="checkbox"]:checked ~ .search-insights__name-content {
 input[type="checkbox"]:checked ~ .search-insights__name-header img {
   transform: rotate(180deg);
 }
+input[type="checkbox"]:checked ~ .search-insights__document-content {
+  max-height: 250px;
+  opacity: 1;
+  padding: 15px 15px 0 0;
+  overflow-y: auto;
+  position: relative;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+input[type="checkbox"]:checked ~ .search-insights__document-header img {
+  transform: rotate(180deg);
+}

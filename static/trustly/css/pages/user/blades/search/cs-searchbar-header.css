@@ -80,7 +80,7 @@
   padding-right: 45px;
 }
 
-.searchbar__detail-header-search-input::placeholder{
+.searchbar__detail-header-search-input::placeholder {
   color: #ccc;
 }
 
@@ -104,6 +104,22 @@
   margin-right: -2px;
   outline: none;
 }
+
+.searchbar__header-category-div {
+  display: flex;
+  overflow-x: scroll;
+
+}
+
+.searchbar__header-category-div::-webkit-scrollbar {
+  display: none;
+}
+
+.searchbar__header-category-div {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 
 .searchbar__search-items--width {
   width: 55px !important;
@@ -174,7 +190,7 @@
     padding-right: 1.5em;
   }
 
-  .search__header-network-image{
+  .search__header-network-image {
     display: none;
   }
 
