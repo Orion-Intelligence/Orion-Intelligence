@@ -188,7 +188,7 @@
   }
 }
 
-@media only screen and (max-width: 1400px) {
+@media only screen and (max-width: 1000px) {
   .searchbar {
     margin-bottom: 5px;
     padding-bottom: 15px !important;

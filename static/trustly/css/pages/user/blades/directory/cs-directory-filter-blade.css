@@ -173,7 +173,7 @@ select option {
   display: none;
 }
 
-@media only screen and (max-width: 1400px) {
+@media only screen and (max-width: 1000px) {
 
   .directory__main-submit-button{
     display: none;

@@ -50,7 +50,9 @@ input[type="checkbox"]:checked ~ .search-insights__header img {
   color: #D0D0D0;
   font-family: Roboto, sans-serif;
 }
-
+.search__analytics-heading{
+  display: none;
+}
 .search-insights__content .row {
   background: #2A578459;
   border-radius: 8px;
@@ -334,10 +336,21 @@ input[type="checkbox"]:checked ~ .search-insights__email-header img {
   }
 }
 
-@media only screen and (max-width: 1400px) {
+@media only screen and (max-width: 1000px) {
   .search-insights__unique-url-accordion {
     float: left !important;
     margin-left: 30px !important;
+    width: 95vw;
+  }
+  .search-insights__email-accordion{
+    float: left !important;
+    margin-left: 30px !important;
+    width: 95vw;
+  }
+  .search-insight__general-accordian{
+    float: left !important;
+    margin-left: 30px !important;
+    width: 95vw;
   }
 
   .search-insights__coverage-accordion {
@@ -359,6 +372,13 @@ input[type="checkbox"]:checked ~ .search-insights__email-header img {
   @media only screen and (max-width: 1000px) {
     .search-insights__container {
       width: 95vw;
+    }
+    .search__analytics-heading{
+      display: block;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      margin-left: 30px;
     }
   }
 

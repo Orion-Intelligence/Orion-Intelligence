@@ -81,7 +81,7 @@ html {
   padding-right: 25px;
 }
 
-@media only screen and (max-width: 1400px) {
+@media only screen and (max-width: 1000px) {
   .search__content__right {
     width: 100vw !important;
     padding-right: 30px;
