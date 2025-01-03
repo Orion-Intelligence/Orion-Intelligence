@@ -133,7 +133,7 @@ html {
   justify-content: left;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1050px) {
 
   .safe__search-warning {
     height: 80px;
@@ -164,11 +164,5 @@ html {
 
   .search {
     min-height: 80vh;
-  }
-}
-
-@media (min-width: 1000px) and (max-width: 1400px) {
-  .search__results {
-    width: 52vw !important;
   }
 }
