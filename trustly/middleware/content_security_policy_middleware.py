@@ -2,7 +2,7 @@ from django.utils.deprecation import MiddlewareMixin
 from trustly.app.helper_manager.env_handler import env_handler
 
 
-class content_security_policy_middleware(MiddlewareMixin):
+class ContentSecurityPolicyMiddleware(MiddlewareMixin):
 
     DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
 
@@ -30,6 +30,7 @@ class content_security_policy_middleware(MiddlewareMixin):
                 "max-age=31536000; includeSubDomains; preload"
             )
 
+        # Set Permissions-Policy header
         response['Permissions-Policy'] = (
             "accelerometer=(), "
             "camera=(), "
@@ -42,5 +43,7 @@ class content_security_policy_middleware(MiddlewareMixin):
             "fullscreen=(), "
             "xr-spatial-tracking=()"
         )
+
+        response['X-Frame-Options'] = "DENY"
 
         return response
