@@ -2,7 +2,7 @@ from django.utils.deprecation import MiddlewareMixin
 from trustly.app.helper_manager.env_handler import env_handler
 
 
-class ContentSecurityPolicyMiddleware(MiddlewareMixin):
+class content_security_policy_middleware(MiddlewareMixin):
 
     DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
 
