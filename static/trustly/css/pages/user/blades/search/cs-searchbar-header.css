@@ -105,12 +105,6 @@
   outline: none;
 }
 
-.searchbar__header-category-div {
-  /*display: flex;*/
-  overflow-x: scroll;
-  overflow-y: hidden;
-}
-
 .searchbar__header-category-div::-webkit-scrollbar {
   display: none;
 }
@@ -194,6 +188,11 @@
     padding-bottom: 0 !important;
     padding-left: 20px;
     padding-right: 1.5em;
+  }
+
+  .searchbar__header-category-div {
+    overflow-x: scroll;
+    overflow-y: hidden;
   }
 
   .search__header-network-image {

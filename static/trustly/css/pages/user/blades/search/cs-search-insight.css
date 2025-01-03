@@ -363,8 +363,8 @@ input[type="checkbox"]:checked ~ .search-insights__email-header img {
     font-family: 'Roboto', sans-serif;
     color: #fff;
     margin: 30px 40px 10px;
-    border-top: 3px solid #fff;
-    padding: 10px 0 0;
+    border-left: 3px solid #fff;
+    padding: 0 0 0 15px;
   }
 
   .search-insights__coverage-accordion {
