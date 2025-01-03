@@ -74,6 +74,12 @@ select option {
   margin-top: -9px;
 }
 
+@media (min-width: 1000px) and (max-width: 1400px) {
+  .directory__main-filter-form {
+    margin-right: 90px;
+  }
+}
+
 .directory__main-filter-menu {
   display: none;
   position: absolute;
@@ -175,7 +181,7 @@ select option {
 
 @media only screen and (max-width: 1000px) {
 
-  .directory__main-submit-button{
+  .directory__main-submit-button {
     display: none;
   }
 
@@ -186,11 +192,13 @@ select option {
   .directory__main-filter {
     display: none;
   }
-  .directory__main-filter-form{
+
+  .directory__main-filter-form {
     display: none;
   }
 
 }
+
 .custom-dropdown {
   position: relative;
   width: 100%;

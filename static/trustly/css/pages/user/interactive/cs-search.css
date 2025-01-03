@@ -166,3 +166,9 @@ html {
     min-height: 80vh;
   }
 }
+
+@media (min-width: 1000px) and (max-width: 1400px) {
+  .search__results {
+    width: 52vw !important;
+  }
+}
