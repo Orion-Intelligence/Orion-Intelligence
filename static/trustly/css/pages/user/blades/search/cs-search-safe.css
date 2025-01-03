@@ -74,6 +74,7 @@
   }
 
   .search-result__content-webpages-container {
-    padding-left: 0px !important;
+    padding-left: 0 !important;
+    margin-left: 4px;
   }
 }
