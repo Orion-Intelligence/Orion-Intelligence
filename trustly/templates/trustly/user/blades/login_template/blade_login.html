@@ -1,12 +1,15 @@
 {% load static %}
-<form method="post" class="home__search-form">
+<form method="post" class="demo-login__search-form">
   {% csrf_token %}
   <div>
     <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="300" height="70">
   </div>
   <div>
-    <input autocomplete="off" type="password" maxlength="150" class="form-control home__searchbox" name="password" placeholder="passcode"/>
-
+    <input autocomplete="off" type="password" maxlength="150" class="form-control demo-login__searchbox" name="password" placeholder="demo passcode"/>
   </div>
+  <div class="submit-row">
+    <input type="submit" class="demo_login__form-button" value="Log in"/>
+  </div>
+
 </form>
 

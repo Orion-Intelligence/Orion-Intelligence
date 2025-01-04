@@ -4,7 +4,12 @@
         <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="300" height="70">
     </div>
     <div>
-        <input autocomplete="off" autocapitalize="none" type="text" maxlength="150" class="form-control home__searchbox" name="q" placeholder="Search"/>
+      <div class="home__search-container input-group">
+          <input type="text" class="form-control home__searchbox" placeholder="Search" name="q" maxlength="150" autocomplete="off" autocapitalize="none" />
+          <button class="btn btn-primary home__search-container-button" type="submit">
+            <img src="{% static 'trustly/images/magnifyingglasswhite.svg' %}" class="home__search-container-button-icon" alt="Search" />
+          </button>
+      </div>
     </div>
 </form>
 

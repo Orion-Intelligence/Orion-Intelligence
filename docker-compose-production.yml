@@ -26,9 +26,15 @@ services:
         sleep 10 && python manage.py cronjob_manager
     volumes:
       - .:/app:cached
-      - ./static:/app/static:cached
       - ./trustly/templates:/app/trustly/templates:cached
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/app/static:cached
       - ./staticfiles:/app/staticfiles:cached
+      - media_volume:/app/media
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /var/www/certbot:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
     expose:
       - "8070"
     environment:

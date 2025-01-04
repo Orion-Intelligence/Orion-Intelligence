@@ -66,7 +66,7 @@ class external_request_controller(request_handler):
           if response.status == 200:
             response_dict[tuple(sorted(p_data.items()))] = await response.json()
     except Exception:
-      response_dict[tuple(sorted(p_data.items()))] = []
+      pass
     finally:
       external_request_controller.__semaphore.release()
 

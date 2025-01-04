@@ -10,7 +10,9 @@
   <img alt="back" class="login-background" src="{% static 'trustly/images/Bg.png' %}">
 
   <div id="content" class="admin_login__container">
-    <h1 class="admin_login__header">Orion admin</h1>
+    <div>
+      <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="300" height="70">
+    </div><br>
     <form method="post" action="{% url 'admin:login' %}" class="admin__login-form">
       {% csrf_token %}
       {% if next %}
@@ -19,12 +21,10 @@
         <input type="hidden" name="next" value="{% url 'admin:index' %}">
       {% endif %}
       <div class="admin_login__form-row">
-        <label for="id_username" class="admin_login__form-label">Username</label>
-        <input type="text" id="id_username" name="username" class="admin_login__input admin_login__input--text">
+        <input type="text" id="id_username" name="username" class="admin_login__input admin_login__input--text" placeholder="admin username">
       </div>
       <div class="admin_login__form-row">
-        <label for="id_password" class="admin_login__form-label">Password</label>
-        <input type="password" id="id_password" name="password" class="admin_login__input">
+        <input type="password" id="id_password" name="password" class="admin_login__input" placeholder="admin password">
       </div>
       <div class="submit-row">
         <input type="submit" class="admin_login__form-button" value="Log in"/>

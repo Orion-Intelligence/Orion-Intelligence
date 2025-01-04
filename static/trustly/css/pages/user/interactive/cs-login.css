@@ -10,7 +10,7 @@ body{
   margin: 0;
 }
 
-.home {
+.demo-login {
   margin-left: 0;
   display: flex;
   justify-content: center;
@@ -22,7 +22,7 @@ body{
   overflow: hidden;
 }
 
-.home::before {
+.demo-login::before {
   content: "";
   position: absolute;
   top: 0;
@@ -38,16 +38,17 @@ body{
   pointer-events: none;
 }
 
-.home > * {
+.demo-login > * {
   position: relative;
   z-index: 2;
 }
 
-.home__search-form {
-  display: grid;
+.demo-login__search-form {
   justify-content: center;
   align-content: center;
-  margin: 0 auto 90px;
+  margin: 0 auto 40vh;
+  width: 100%;
+  max-width: 30vw;
 }
 
 .flex-container {
@@ -81,26 +82,41 @@ body{
   display: none;
 }
 
-@media only screen and (max-width: 600px) {
-  .home__searchbox {
-    width: 400px !important;
-  }
+.demo-login__searchbox{
+  margin-top: 20px;
+  border-radius: 8px !important;
+  background: #fff url('/static/trustly/images/lock.svg') no-repeat 16px center;
+  background-size: 20px 20px;
+  padding: 10px 10px 10px 45px;
+
 }
 
-@media only screen and (max-width: 430px) {
-  .home__searchbox {
-    width: 300px !important;
-  }
+.demo_login__form-button {
+  display: table;
+  color: #fff;
+  text-decoration: none;
+  background-color: #123354;
+  border: none;
+  padding: 11px 11px 11px 15px;
+  border-radius: 6px;
+  width: 120px;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 30px 10px 10px 0;
 }
 
 @media only screen and (max-width: 943px) {
-  .home {
+  .demo-login {
     min-height: 100%;
   }
 
-  .home__search-form {
-    margin-bottom: 0 !important;
-    margin-top: 0px !important;
+  .demo-login__search-form {
+    padding: 30px !important;
+    max-width: none;
+  }
+
+  .demo-login__searchbox{
+    width: 100%;
   }
 
   .flex-item {

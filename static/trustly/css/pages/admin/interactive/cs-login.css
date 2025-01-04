@@ -9,6 +9,14 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+.home-header__menu {
+  margin-top: -3px;
+}
+
+.home-header{
+  height: 69px;
+}
+
 .home-header{
   padding-top: 24px !important;
   padding-bottom: 17px !important;
@@ -30,16 +38,18 @@ body {
   overflow: hidden;
   display: table;
   margin: 0 auto;
-  padding: 150px;
+  padding: 150px 0 0;
   width: 80vw;
   max-width: 500px;
 }
 
 .admin_login__input {
-  padding: 10px;
   border: none;
   border-radius: 6px;
   margin-top: 10px;
+  background: #fff url('/static/trustly/images/lock.svg') no-repeat 16px center;
+  background-size: 20px 20px;
+  padding: 10px 10px 10px 45px;
 }
 
 .admin_login__input:focus {
@@ -79,9 +89,9 @@ body {
 
 @media only screen and (max-width: 943px) {
   .admin_login__container{
-    padding: 50px !important;
+    padding: 15vh 20px 0;
     margin: 0 !important;
-    width: 75vw;
+    width: 100vw;
     height: 100vh;
   }
 }

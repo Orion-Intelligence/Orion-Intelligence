@@ -160,6 +160,7 @@
   max-width: 90px;
   padding: 13px 5px 8px;
   margin-left: 0;
+  margin-right: 8px;
 }
 
 .search-result__tabs--content-header {
@@ -215,14 +216,14 @@
   position: absolute;
   margin-bottom: 10px;
   right: 20px;
-  margin-top: 10px;
+  margin-top: 12px;
   cursor: pointer;
 }
 
 @media only screen and (max-width: 1000px) {
   .search-result__content-webpages {
-    margin: 15px 13px 0 8px !important;
     max-width: 100vw;
+    margin: 12px 0 0;
   }
 
   .search-result__content-webpages-container {
@@ -234,6 +235,7 @@
   .search-result__dropdown-close {
     width: 24px;
     height: 24px;
+    margin-top: 2px;
   }
 
   .search-content__webpages-header {
@@ -263,7 +265,7 @@
   .search-result__circle-status {
     width: 12px;
     height: 12px;
-    top: 65px;
-    left: 17px;
+    top: 63px;
+    left: 10px;
   }
 }

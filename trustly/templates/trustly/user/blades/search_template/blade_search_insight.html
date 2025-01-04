@@ -1,5 +1,7 @@
 {% load static %}
-<h2 class="search__analytics-heading">Analytics</h2>
+{% if mSearchCallbackRelevantSearchType != 'persona' %}
+  <h2 class="search__analytics-heading">Analytics</h2>
+{% endif %}
 {% if analytics.unique_urls|length > 0 %}
     <div class="search-insights__container search-insights__container-background">
         <input type="checkbox" id="keyword-insights-toggle" checked>

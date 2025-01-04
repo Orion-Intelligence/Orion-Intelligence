@@ -14,8 +14,11 @@ html::-webkit-scrollbar {
   opacity: 0.07;
 }
 
-.home-container{
-  background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) !important;
+.home-container {
+  background: linear-gradient(to bottom,
+  rgba(18, 52, 84, 1),
+  rgba(41, 87, 132, 1) 50vh,
+  rgba(41, 87, 132, 1) 100%);
 }
 
 .home {
@@ -50,7 +53,7 @@ html::-webkit-scrollbar {
 }
 
 .flex-item {
-  background-color: #144372;
+  background-color: #14437290;
   color: white;
   padding: 24px;
   border-radius: 8px;
@@ -70,12 +73,6 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-@media only screen and (max-width: 600px) {
-  .home__searchbox {
-    width: 400px !important;
-  }
-}
-
 @media only screen and (max-width: 430px) {
   .home__searchbox {
     width: 300px !important;
@@ -88,15 +85,21 @@ html::-webkit-scrollbar {
   }
 
   .home__search-form {
+    display: block;
     margin-bottom: 0 !important;
     margin-top: 50px !important;
+    justify-content: start;
+    align-content: start;
+    margin-left: 20px;
+    margin-right: 20px;
   }
 
   .flex-item {
     margin: 0;
+    width: 100%;
   }
 
   .flex-container {
-    padding: 0 20px;
+    padding: 20px !important;
   }
 }

@@ -45,7 +45,7 @@
 }
 
 .home-insight__item-icon {
-  width: 18%;
+  width: 60px;
   flex-shrink: 0;
   padding-right: 12px;
 }
@@ -62,4 +62,13 @@
   flex-direction: column;
   margin-top: 20px;
 }
+
+@media only screen and (max-width: 943px) {
+  .home-insight__analytics-header {
+    margin-left: 0;
+    margin-top: -190px;
+    left: 25px;
+  }
+}
+
 

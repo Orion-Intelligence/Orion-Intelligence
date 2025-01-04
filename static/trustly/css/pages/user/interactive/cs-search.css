@@ -25,18 +25,23 @@ html {
 
 .searchbar__search-container-persona {
   margin-left: 100px;
+  width: 100vw;
+  max-width: 800px;
 }
 
 .searchbar__search-container-persona-body {
   padding: 0;
+  margin: 0;
 }
 
 .searchbar__search-container-persona-border {
-  border-left: 1px solid #ffffff25;
+  border-left: 1px solid #ffffff15;
+  border-radius: 30px !important;
 }
 
 .searchbar__search-container-persona-border-color {
-  border: 1px solid #ffffff25 !important;
+  border: 1px solid #ffffff15 !important;
+  vertical-align: middle !important;
   margin: 0;
 }
 
@@ -50,6 +55,7 @@ html {
   margin-right: 10px;
   margin-bottom: 10px;
   padding: 9px 9px 9px 15px;
+  word-break: break-word
 }
 
 .searchbar__search-card-persona {
@@ -108,7 +114,8 @@ html {
   border: 1px solid #336BA1;
   background: #2A578459;
   padding: 15px 20px 15px;
-  margin: 15px 12px 10px 6em;
+  height: 100px;
+  margin: 40px 12px 10px 6em;
 }
 
 .search__content__right {
@@ -137,10 +144,13 @@ html {
 
   .safe__search-warning {
     height: 80px;
+    padding: 15px;
   }
 
   .search-persona__no-suggestion {
-    margin-left: 20px;
+    margin: 20px 0 0 10px;
+    padding: 15px;
+    height: 130px;
   }
 
   .search__content__right {
@@ -150,7 +160,8 @@ html {
 
   .searchbar__search-container-persona {
     margin-left: 10px;
-    margin-right: 0;
+    width: 100%;
+    padding-right: 10px;
   }
 
   .search__results {

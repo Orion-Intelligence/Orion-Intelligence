@@ -1,7 +1,7 @@
 {% load static %}
 <form class="searchbar" method="GET" action="" enctype="multipart/form-data">
   <div class="searchbar__profile-button">
-    <a>
+    <a href="/admin" aria-label="Go to CMS Home">
       <img src="{% static 'trustly/images/profile-icon.svg' %}" alt="Brand Logo">
     </a>
   </div>
@@ -14,17 +14,19 @@
 
     <div class="searchbar__header">
       <div class="searchbar__searchbox">
-        {% if mSearchCallbackRelevantSearchType == 'persona' %}
-          <input autocomplete="off" autocapitalize="none" type="search" placeholder="Email or Username" class="searchbar__detail-header-search-input" pattern="[^ ]*" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
-        {% else %}
-          <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
-        {% endif %}
-        <input autocomplete="off" autocapitalize="none" type="hidden" class="form-control" name="mSearchParamPage" value="1">
-        <input autocomplete="off" autocapitalize="none" type="hidden" class="form-control" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
-        <input autocomplete="off" autocapitalize="none" type="hidden" class="form-control" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
-        <button class="searchbar__searchbox-button disable-highlight" type="submit">
-          <img class="searchbar__searchbox-icon disable-highlight" src="{% static 'trustly/images/magnifyingglass.svg' %}" alt=""/>
-        </button>
+        <div class="input-group">
+          {% if mSearchCallbackRelevantSearchType == 'persona' %}
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Email or Username" class="form-control searchbar__detail-header-search-input" pattern="[^ ]*" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
+          {% else %}
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
+          {% endif %}
+          <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamPage" value="1">
+          <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
+          <input autocomplete="off" autocapitalize="none" type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
+          <button class="btn btn-primary searchbar__search-button-right" type="submit">
+            <img  class="searchbar__search-button-right-icon" src="{% static 'trustly/images/magnifyingglasswhite.svg' %}" alt="Search">
+          </button>
+        </div>
       </div>
     </div>
   </div>
