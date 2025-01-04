@@ -1,5 +1,5 @@
 .home__search-container {
-  margin-top: 30px;
+  margin-top: 15px;
   width: 600px;
   max-width: 600px;
 }
@@ -49,7 +49,7 @@
 
 @media only screen and (max-width: 1000px) {
   .home__search-container {
-    margin-top: 30px;
+    margin-top: 15px;
     max-width: 100vw;
     width: 100vw;
     margin-bottom: 100px;
