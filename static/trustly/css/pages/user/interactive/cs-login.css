@@ -47,8 +47,8 @@ body{
   justify-content: center;
   align-content: center;
   margin: 0 auto 40vh;
-  width: 100%;
-  max-width: 30vw;
+  width: 600px !important;
+  max-width: 50vw;
 }
 
 .flex-container {
@@ -111,7 +111,7 @@ body{
   }
 
   .demo-login__search-form {
-    padding: 30px !important;
+    padding: 22px !important;
     max-width: none;
   }
 

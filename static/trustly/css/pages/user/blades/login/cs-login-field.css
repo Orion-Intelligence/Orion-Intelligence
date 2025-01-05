@@ -3,8 +3,9 @@
   height: 46px;
   outline: none;
   border-color: #ffffff;
-
-
+  padding-right: 25px;
+  width: 600px !important;
+  max-width: 50vw;
 }
 
 .demo-login__searchbox::placeholder {
