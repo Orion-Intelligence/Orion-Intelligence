@@ -187,12 +187,27 @@ services:
         reservations:
           memory: 128M
 
+  tor:
+    image: dperson/torproxy
+    container_name: tor-hidden-service
+    restart: always
+    environment:
+      TOR_PROXY_CHAIN: "off"
+    networks:
+      - backend
+    volumes:
+      - ./tor-hidden-service:/var/lib/tor/hidden_service
+    command: >
+      --hidden-service-dir /var/lib/tor/hidden_service
+      --hidden-service-port 80 trusted-web-nginx:80
+      --hidden-service-port 443 trusted-web-nginx:443
+
   nginx:
     container_name: trusted-web-nginx
     image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
+    expose:
+      - "80"
+      - "443"
     depends_on:
       - web
     volumes:
