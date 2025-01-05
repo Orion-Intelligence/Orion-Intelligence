@@ -21,3 +21,13 @@ swagconfig/swaggerconfigv1.js.gz
 db.sqlite3
 swagconfig/swagger-initializer.js
 swagconfig/swagger-initializer.js
+# Ignore generated gzip files
+*.gz
+
+# Optional: Ignore logs or temporary files
+*.log
+*.tmp
+
+# Optional: Ignore backups or hidden files
+*.bak
+*.swp
