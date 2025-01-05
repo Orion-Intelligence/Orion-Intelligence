@@ -46,7 +46,10 @@ else
     docker compose -p $PROJECT_NAME -f $COMPOSE_FILE up -d
     docker exec -it trusted-web-nginx /bin/bash
     docker exec -it trusted-web-main /bin/sh -c "python manage.py migrate"
-    sleep 10
-    docker cp staticfiles/. trusted-web-nginx:/app/static/
+    if [[ "$COMMAND" == "production" ]]; then
+      sleep 10
+      docker cp staticfiles/. trusted-web-nginx:/app/static/
+    fi
+
     echo "server started"
 fi
