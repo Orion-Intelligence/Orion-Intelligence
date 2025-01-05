@@ -24,13 +24,10 @@ class content_security_policy_middleware(MiddlewareMixin):
             "report-uri /csp-report-endpoint/; "
             "require-trusted-types-for 'script';"
         )
-
         if not self.DEBUG:
             response['Strict-Transport-Security'] = (
                 "max-age=31536000; includeSubDomains; preload"
             )
-
-        # Set Permissions-Policy header
         response['Permissions-Policy'] = (
             "accelerometer=(), "
             "camera=(), "
@@ -43,7 +40,11 @@ class content_security_policy_middleware(MiddlewareMixin):
             "fullscreen=(), "
             "xr-spatial-tracking=()"
         )
-
         response['X-Frame-Options'] = "DENY"
-
+        if not self.DEBUG:
+            response['Expect-CT'] = (
+                "max-age=86400, enforce, report-uri=\"/ct-report-endpoint/\""
+            )
+        response['X-Permitted-Cross-Domain-Policies'] = "none"
+        response['X-XSS-Protection'] = "1; mode=block"
         return response
