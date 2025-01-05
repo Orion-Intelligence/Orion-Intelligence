@@ -187,20 +187,37 @@ services:
         reservations:
           memory: 128M
 
-  tor:
-    image: dperson/torproxy
-    container_name: tor-hidden-service
-    restart: always
-    environment:
-      TOR_PROXY_CHAIN: "off"
-    networks:
-      - backend
+  tor-hidden-service:
+    container_name: trusted-web-tor
+    image: barneybuffet/tor:latest
+    env_file:
+      - .env
     volumes:
-      - ./tor-hidden-service:/var/lib/tor/hidden_service
-    command: >
-      --hidden-service-dir /var/lib/tor/hidden_service
-      --hidden-service-port 80 trusted-web-nginx:80
-      --hidden-service-port 443 trusted-web-nginx:443
+      - ./tor_hidden_service:/var/lib/tor/hidden_service
+      - ./config/tor/torrc_hidden:/etc/tor/torrc:rw
+    environment:
+      PUID: "20002"
+      PGID: "20003"
+      TOR_CONFIG_OVERWRITE: "true"
+      TOR_LOG_CONFIG: "true"
+      TOR_PROXYL: "true"
+      TOR_PROXY_PORT: "0.0.0.0:9152"
+      TOR_CONTROL: "true"
+      TOR_CONTROL_PORT: "0.0.0.0:9153"
+      TOR_CONTROL_PASSWORD: ${TOR_PASSWORD}
+      TOR_RELAY: "false"
+    ports:
+      - "9152:9152"
+      - "9153:9153"
+    networks:
+      backend:
+        ipv4_address: 172.19.0.11
+    healthcheck:
+      test: ["CMD-SHELL", "curl --proxy http://localhost:9152 http://example.com || exit 1"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
   nginx:
     container_name: trusted-web-nginx

@@ -1,0 +1,4 @@
+HiddenServiceDir /var/lib/tor/hidden_service
+HiddenServicePort 80 trusted-web-nginx:80
+HiddenServicePort 443 trusted-web-nginx:443
+Log notice stdout
