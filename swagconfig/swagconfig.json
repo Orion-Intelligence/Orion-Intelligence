@@ -5,8 +5,8 @@
     "title": "Trusted Web API",
     "description": "API documentation for directory, insight, and search endpoints."
   },
-  "host": "orion.whistleaks.com",
-  "schemes": ["https"],
+  "host": "trusted-web-main:8070",
+  "schemes": ["http"],
   "basePath": "/",
   "paths": {
     "/api/directory/": {
