@@ -65,10 +65,8 @@ class external_request_controller(request_handler):
         async with session.post(url, json=param) as response:
           if response.status == 200:
             response_dict[tuple(sorted(p_data.items()))] = await response.json()
-          else:
-            response_dict.pop(tuple(sorted(p_data.items())), None)
     except Exception:
-      response_dict.pop(tuple(sorted(p_data.items())), None)
+      response_dict[tuple(sorted(p_data.items()))] = []
     finally:
       external_request_controller.__semaphore.release()
 
@@ -83,13 +81,12 @@ class external_request_controller(request_handler):
         )
 
   @staticmethod
-  def __fetch_runtime_parser(p_data):
+  def __fetch_runtime_parser(p_data, p_dynamic_crawl_trigger):
     query = tuple(sorted(p_data.items()))
-
     if query in external_request_controller.__pending_requests:
       if external_request_controller.__pending_requests[query] is None:
         return API_RESPONSE.M_PENDING, []
-      else:
+      elif p_dynamic_crawl_trigger != "1":
         return API_RESPONSE.M_SUCCESS, external_request_controller.__pending_requests[query]
 
     external_request_controller.__pending_requests[query] = None
@@ -101,11 +98,10 @@ class external_request_controller(request_handler):
         external_request_controller.__pending_requests[query] = []
     else:
       external_request_controller.__pending_requests[query] = []
-
     return API_RESPONSE.M_PENDING, []
 
   def invoke_trigger(self, p_command, p_data):
     if p_command == EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS:
       return self.__update_module_status(p_data)
     if p_command == EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER:
-      return self.__fetch_runtime_parser(p_data)
+      return self.__fetch_runtime_parser(p_data[0], p_data[1])

@@ -28,6 +28,9 @@ class search_session_controller(request_handler):
       m_query_model.set_page_number(p_data.GET[SEARCH_PARAM.M_PAGE])
     if SEARCH_PARAM.M_NETWORK in p_data.GET:
       m_query_model.set_network(p_data.GET[SEARCH_PARAM.M_NETWORK])
+    if SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN in p_data.GET:
+      m_query_model.set_dynamic_crawl_trigger(p_data.GET[SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN])
+
     else:
       m_query_model.set_network("all")
     if SEARCH_PARAM.M_SAFE_SEARCH in p_data.GET:

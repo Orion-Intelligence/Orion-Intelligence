@@ -26,6 +26,7 @@ class SEARCH_PARAM:
   M_PAGE = "mSearchParamPage"
   M_SAFE_SEARCH = "mSearchParamSafeSearch"
   M_NETWORK = "mNetwork"
+  M_DYNAMIC_FETCH_AGAIN = "mDynamicCrawlTrigger"
 
 
 class SEARCH_CALLBACK:

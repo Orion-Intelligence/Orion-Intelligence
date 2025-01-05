@@ -1,9 +1,14 @@
-{% if mDynamicParserStatus == "false" %}
+{% if mDynamicParserStatus == "false" or mSearchCallbackRelevantDocument|length == 0 %}
 <form method="GET" action="" class="search-persona__no-suggestion">
   <div class="row align-items-center">
     <div class="col">
       <p class="search-persona__no-suggestion-header mb-0">
-        we are fetching results for - <strong>{{ mSearchCallbackQuery }}</strong> - please wait for few seconds and press sync again
+        {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument|length == 0 %}
+          no record found for - <strong>{{ mSearchCallbackQuery }}</strong> press try again if you want to fetch the data again
+          <input type="hidden" name="mDynamicCrawlTrigger" value="1">
+        {% else %}
+          we are fetching results for - <strong>{{ mSearchCallbackQuery }}</strong> - please wait for few seconds and press sync again.
+        {% endif %}
       </p>
     </div>
     <div class="col-auto ms-auto">
@@ -11,7 +16,11 @@
       <input type="hidden" name="q" value="{{ mSearchCallbackQuery }}">
       <input type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
       <input type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
-      <button type="submit" class="search__reload-button">sync again</button>
+        {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument|length == 0 %}
+          <button type="submit" class="search__reload-button">try again</button>
+        {% else %}
+          <button type="submit" class="search__reload-button">sync again</button>
+        {% endif %}
     </div>
   </div>
 </form>

@@ -19,7 +19,9 @@
       <div class="search__results">
         {% include 'trustly/user/blades/search_template/blade_search_content.html' %}
         {% if mSearchCallbackRelevantDocument|length == 0 %}
-          {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
+          {% if mSearchCallbackRelevantSearchType != 'persona' %}
+            {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
+          {% endif %}
         {% endif %}
       </div>
       <div class="search__content__right">

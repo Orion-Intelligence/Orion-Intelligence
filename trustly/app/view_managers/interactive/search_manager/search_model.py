@@ -75,7 +75,7 @@ class search_model(request_handler):
         email = m_query_model.m_search_query
       username = m_query_model.m_search_query
       query = {"email": email, "username": username}
-      status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, query)
+      status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, [query, m_query_model.m_dynamic_crawl_trigger])
       m_status, m_context = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER, [result, status, m_query_model])
       return m_status, m_context
     else:
