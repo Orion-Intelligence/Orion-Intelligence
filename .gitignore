@@ -19,3 +19,4 @@ swagconfig/swagger-ui-standalone-preset.js.gz
 swagconfig/swagger-ui.css.gz
 swagconfig/swaggerconfigv1.js.gz
 db.sqlite3
+swagconfig/swagger-initializer.js
