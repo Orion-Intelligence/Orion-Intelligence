@@ -65,8 +65,10 @@ class external_request_controller(request_handler):
         async with session.post(url, json=param) as response:
           if response.status == 200:
             response_dict[tuple(sorted(p_data.items()))] = await response.json()
+          else:
+            response_dict.pop(tuple(sorted(p_data.items())), None)
     except Exception:
-      pass
+      response_dict.pop(tuple(sorted(p_data.items())), None)
     finally:
       external_request_controller.__semaphore.release()
 
