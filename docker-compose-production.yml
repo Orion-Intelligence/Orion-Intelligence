@@ -63,7 +63,7 @@ services:
     ports:
       - "8082:8080"
     environment:
-      SWAGGER_JSON: /swagconfig/swagconfig-production.json
+      SWAGGER_JSON: /swagconfig/swaggerconfig.json
       SWAGGER_UI_SYNTAX_HIGHLIGHT: "false"
       SWAGGER_UI_CORS_ENABLED: "true"
       SWAGGER_UI_DOC_EXPANSION: "none"
