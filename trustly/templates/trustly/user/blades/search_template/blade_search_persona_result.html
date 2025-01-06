@@ -14,6 +14,7 @@
     <div class="col-auto ms-auto">
       <input type="hidden" name="mSearchParamPage" value="1">
       <input type="hidden" name="q" value="{{ mSearchCallbackQuery }}">
+      <input type="hidden" name="mUsername" value="{{ mUsernameQuery }}">
       <input type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
       <input type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
         {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument|length == 0 %}
