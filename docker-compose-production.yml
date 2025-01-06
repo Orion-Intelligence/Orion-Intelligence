@@ -81,7 +81,7 @@ services:
         ipv4_address: 172.20.1.15
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.swagger.rule=Host(`swagger.orion.whistleaks.com`)"
+      - "traefik.http.routers.swagger.rule=Host(`swagger.orion.genesistechnologies.org`)"
       - "traefik.http.routers.swagger.tls=true"
       - "traefik.http.routers.swagger.entrypoints=websecure"
       - "traefik.http.services.swagger.loadbalancer.server.port=8080"
@@ -135,8 +135,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./dockerFiles/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
-      - /etc/letsencrypt/live/orion.whistleaks.com/cert.pem:/certs/cert.pem:ro
-      - /etc/letsencrypt/live/orion.whistleaks.com/privkey.pem:/certs/privkey.pem:ro
+      - /etc/letsencrypt/live/orion.genesistechnologies.org/cert.pem:/certs/cert.pem:ro
+      - /etc/letsencrypt/live/orion.genesistechnologies.org/privkey.pem:/certs/privkey.pem:ro
 
     restart: unless-stopped
     networks:
@@ -152,7 +152,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dozzle.rule=Host(`dozzle.orion.whistleaks.com`)"
+      - "traefik.http.routers.dozzle.rule=Host(`dozzle.orion.genesistechnologies.org`)"
       - "traefik.http.routers.dozzle.tls=true"
       - "traefik.http.routers.dozzle.entrypoints=websecure"
       - "traefik.http.routers.dozzle.middlewares=auth@file"
