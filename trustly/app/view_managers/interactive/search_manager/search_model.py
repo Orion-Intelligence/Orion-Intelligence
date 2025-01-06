@@ -11,6 +11,8 @@ from trustly.app.view_managers.interactive.search_manager.search_session_control
 from trustly.app.view_managers.interactive.search_manager.spell_checker import spell_checker
 from trustly.app.view_managers.interactive.search_manager.tokenizer import tokenizer
 from trustly.services.request_manager.request_handler import request_handler
+import re
+
 
 
 class search_model(request_handler):
@@ -70,10 +72,16 @@ class search_model(request_handler):
   def __query_results(self, p_data):
     m_query_model = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER, [p_data])
     if m_query_model.m_search_type == "persona":
+      print(p_data)
       email = ""
       if "@" in m_query_model.m_search_query:
-        email = m_query_model.m_search_query
-      username = m_query_model.m_search_query
+        m_search_query = m_query_model.m_search_query
+        email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+        match = re.search(email_pattern, m_search_query)
+        if match:
+          email = match.group()
+
+      username = m_query_model.m_username
       query = {"email": email, "username": username}
       status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, [query, m_query_model.m_dynamic_crawl_trigger])
       m_status, m_context = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER, [result, status, m_query_model])

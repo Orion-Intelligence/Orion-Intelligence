@@ -27,6 +27,7 @@ class SEARCH_PARAM:
   M_SAFE_SEARCH = "mSearchParamSafeSearch"
   M_NETWORK = "mNetwork"
   M_DYNAMIC_FETCH_AGAIN = "mDynamicCrawlTrigger"
+  M_USERNAME = "mUsername"
 
 
 class SEARCH_CALLBACK:
@@ -69,6 +70,7 @@ class SEARCH_CALLBACK:
   M_EMAILS = "mEmails"
   M_PHONE_NUMBER = "mPhoneNumber"
   M_CONTENT = "mSearchContent"
+  M_USERNAME_QUERY = "mUsernameQuery"
 
 
 class SEARCH_DOCUMENT_CALLBACK:
