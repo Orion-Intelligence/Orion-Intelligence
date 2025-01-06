@@ -65,12 +65,12 @@
   padding-right: 45px;
 }
 .searchbar__detail-header-search-input-email {
-  border-radius: 8px !important;
-  margin-right: 15px;
+  border-radius: 8px 0 0 8px !important;
+  margin-right: 6px;
 }
 .searchbar__detail-header-search-input-username {
-  border-radius: 8px !important;
-  margin-right: 15px;
+  border-radius: 0 !important;
+  margin-right: 0px;
 }
 
 .searchbar__search-button-right{
@@ -84,8 +84,9 @@
   background: #2a5989 !important;
 }
 .searchbar__search-button-right-persona{
-  border-bottom-left-radius: 8px !important;
-  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 0 !important;
+  height: 44.5px;
+  border-top-left-radius: 0 !important;
 }
 
 .searchbar__detail-header-search-input::placeholder {
