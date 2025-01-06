@@ -12,7 +12,7 @@ class LoginRequiredMiddleware:
         self.index_url = '/'
 
     def __call__(self, request):
-        if  request.path == '/admin/' or request.path == '/crawl_index/' or request.path == '/api/insight/' or request.path == '/api/directory/' or request.path == '/api/search/' or request.path == '/parser'  or request.path == '/feeder/unique' or request.path == '/feeder/unique/' or request.path == '/parser/' or request.path == '/feeder/':
+        if  request.path == '/admin/' or request.path == '/admin' or request.path == '/crawl_index/' or request.path == '/api/insight/' or request.path == '/api/directory/' or request.path == '/api/search/' or request.path == '/parser'  or request.path == '/feeder/unique' or request.path == '/feeder/unique/' or request.path == '/parser/' or request.path == '/feeder/':
             return self.get_response(request)
         if self.is_demo_mode:
             if (

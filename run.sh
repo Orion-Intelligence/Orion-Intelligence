@@ -11,7 +11,7 @@ configure_env() {
 
   if [ "$PRODUCTION" = "1" ]; then
     cp nginx/nginx-prod.conf nginx/nginx.conf
-    update_swagger_config "orion.whistleaks.com" "https"
+    update_swagger_config "orion.genesistechnologies.org" "https"
   elif [ "$PRODUCTION" = "0" ]; then
     cp nginx/nginx-dev.conf nginx/nginx.conf
     update_swagger_config "localhost:8080" "http"
