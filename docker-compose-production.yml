@@ -6,9 +6,9 @@ services:
       dockerfile: dockerFiles/api_docker
     depends_on:
       elasticsearch:
-        condition: service_started
+        condition: service_healthy
       mongo:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - .env
     command:
@@ -110,11 +110,11 @@ services:
     volumes:
       - elastic:/usr/share/elasticsearch/data
     healthcheck:
-      test: curl -f http://localhost:9400/_cluster/health || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
+      test: ["CMD", "curl", "-f", "http://localhost:9400/_cluster/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       backend:
         ipv4_address: 172.20.1.11
