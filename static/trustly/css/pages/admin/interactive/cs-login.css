@@ -49,7 +49,12 @@ body {
   margin-top: 10px;
   background: #fff url('/static/trustly/images/lock.svg') no-repeat 16px center;
   background-size: 20px 20px;
-  padding: 10px 10px 10px 45px;
+  padding: 10px 20px 10px 45px;
+}
+
+.admin_login__input-user {
+  background: #fff url('/static/trustly/images/profile.svg') no-repeat 16px center;
+  background-size: 20px 20px;
 }
 
 .admin_login__input:focus {
@@ -59,6 +64,7 @@ body {
 
 .admin_login__input--text {
   margin-bottom: 10px;
+  padding-right: 20px;
 }
 
 .admin_login__input--border-bottom {
