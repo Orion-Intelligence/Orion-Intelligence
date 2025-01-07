@@ -138,6 +138,10 @@
   margin: 0 !important;
 }
 
+.searchbar__detail-header-catagories-margin-right-border{
+  width: 70px !important;
+}
+
 .searchbar__search-items {
   font-size: 14px;
   color: #A0B8D1;

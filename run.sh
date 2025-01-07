@@ -4,6 +4,7 @@ PROJECT_NAME="trusted-search"
 
 stop_docker() {
     docker compose -p $PROJECT_NAME down --remove-orphans
+    rm -rf staticfiles
 }
 
 configure_env() {

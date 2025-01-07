@@ -5,8 +5,10 @@ services:
       context: .
       dockerfile: dockerFiles/api_docker
     depends_on:
-      - elasticsearch
-      - mongo
+      elasticsearch:
+        condition: service_started
+      mongo:
+        condition: service_started
     env_file:
       - .env
     command:
