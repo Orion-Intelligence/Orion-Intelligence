@@ -25,7 +25,9 @@
         {% endif %}
       </div>
       <div class="search__content__right">
-        {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
+        {% if mSearchCallbackRelevantDocument|length != 0 %}
+          {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
+        {% endif %}
       </div>
     </div>
     <!-- pagination -->

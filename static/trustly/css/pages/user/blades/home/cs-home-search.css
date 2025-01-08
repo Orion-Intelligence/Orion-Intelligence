@@ -43,7 +43,7 @@
 
 .home__searchbox::placeholder {
   font-size: 17px;
-  padding-left: 10px;
+  padding-left: 0px;
   color: #000000;
 }
 
