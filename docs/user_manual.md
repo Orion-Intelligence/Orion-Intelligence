@@ -32,9 +32,9 @@ The platform is divided into two primary categories:
 
 1. ### General Index:
 
-2. ![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
+ ![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
 
-3. The "General Index" category contains information related to crawling, where various states can be observed. All these states are associated with the fetched data, which can be reviewed one by one.
+The "General Index" category contains information related to crawling, where various states can be observed. All these states are associated with the fetched data, which can be reviewed one by one.
 
 
 - **Document Count:** This will provide information about the results obtained after fetching the data, specifically the count of documents. It gives us the total number of documents as a single count value..
@@ -60,16 +60,22 @@ The platform is divided into two primary categories:
 
 2. ### Leaked Index:
 
-3.![image](https://github.com/user-attachments/assets/5a04980d-d04a-4dbd-a361-f3194c8115d2)
+![image](https://github.com/user-attachments/assets/5a04980d-d04a-4dbd-a361-f3194c8115d2)
 
 Leak Index Provides us certain states information about leaked data related to the required information.
 
 
-![image](https://github.com/user-attachments/assets/a2960cba-49c8-4eb0-9db2-6f819d3ecc8b)
+
 
 ## Links:
-The Links menu contains crawled links added to the database post-crawling. It is categorized into:
 
+![image](https://github.com/user-attachments/assets/8f296c1d-66b0-49a1-bc39-6d1f6347e8fd)
+
+The Links menu contains crawled links added to the database post-crawling.
+
+![image](https://github.com/user-attachments/assets/a2960cba-49c8-4eb0-9db2-6f819d3ecc8b)
+
+It is categorized into:
 
 ### Network Types:
 
