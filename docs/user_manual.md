@@ -6,7 +6,9 @@ The Orion Platform is a comprehensive, web-based solution designed for Open Sour
 # User Interface Overview:
 ## Main Page
 The main interface of the Orion Platform provides users with easy access to its features. 
-![screencapture-orion-whistleaks-2025-01-05-01_16_40](https://github.com/user-attachments/assets/480a73a2-4525-49cf-9e05-5170b7a1ea05)
+
+![screencapture-orion-genesistechnologies-org-2025-01-08-11_43_05](https://github.com/user-attachments/assets/4477474f-51b7-4f18-9fd6-7d02110ec9ab)
+
 
 Below is an overview of the interface components:
 
@@ -28,17 +30,34 @@ The platform is divided into two primary categories:
 
 1. ### General Index:
 
-- **Document Count:** Displays the total number of documents.
+2. ![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
 
-- **Most Recent Date:** Shows the latest updates to the data.
+3. The "General Index" category contains information related to crawling, where various states can be observed. All these states are associated with the fetched data, which can be reviewed one by one.
 
-- **Date State:** Indicates the last dates on which the searched data was accessed.
+
+- **Document Count:** This will provide information about the results obtained after fetching the data, specifically the count of documents. It gives us the total number of documents as a single count value..
+
+- **Most Recent Date:** This state will inform us about the most recent updates to our crawled data.
+
+- **Oldes Update:** This section will display the results related to the oldest updates in the data, showing when the data was fetched in the past.
+
+**Update five days:**   This section will provide information about the updates from the last 5 days. 
+
+**Update Nine days:** This section will provide information about the updates from the last 9 days.
+
+**Average Score:**  An average score count of our results will be displayed here.
+
+**URL/Documents:**
 
 2. ### Leaked Index:
 
+3.![image](https://github.com/user-attachments/assets/5a04980d-d04a-4dbd-a361-f3194c8115d2)
+
+
+
 - Provides information about leaked data related to the required information.
 
-![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
+
 
 In the General Index, the first statistic is the document count, which indicates the total number of documents. Second is the most recent date will show the latest updates related to the data. The third statistic shows the date state, providing information about the last dates on which the searched data was accessed.
 The states in the Leaked Index will provide information about the leaked data related to the required information.
