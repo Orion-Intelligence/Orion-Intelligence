@@ -41,13 +41,20 @@ The platform is divided into two primary categories:
 
 - **Oldes Update:** This section will display the results related to the oldest updates in the data, showing when the data was fetched in the past.
 
-**Update five days:**   This section will provide information about the updates from the last 5 days. 
+- **Update five days:**   This section will provide information about the updates from the last 5 days. 
 
-**Update Nine days:** This section will provide information about the updates from the last 9 days.
+- **Update Nine days:** This section will provide information about the updates from the last 9 days.
 
-**Average Score:**  An average score count of our results will be displayed here.
+- **Average Score:**  An average score count of our results will be displayed here.
 
-**URL/Documents:**
+- **URL/Documents:** The count of URLs being extracted from our document will be displayed here.
+- **Archive/Documents:**  we will get the count of archived documents.
+- **Email/Documents:**  This section will show us the number of emails in our fetched data.
+- **Phone/Documents:** The phone section will indicate how many phone numbers are being fetched from our data.
+- **Clearnet/Document:**
+- **Common Type:**
+
+
 
 2. ### Leaked Index:
 
