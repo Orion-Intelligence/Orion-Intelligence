@@ -25,6 +25,8 @@ The top navigation bar includes three main menus:
 
 ![image](https://github.com/user-attachments/assets/377c4865-03c4-4d53-89d8-f31c2d27685c)
 
+let's discuss the home page, which is our main page. Basically, the home page consists of three main components. First, there is a search bar that will help us find results for specific queries. Then, the home page features two main categories: General Index and Leaked Index. Furthermore, let's discuss these in detail.
+
 ## Categories:
 The platform is divided into two primary categories:
 
@@ -60,19 +62,14 @@ The platform is divided into two primary categories:
 
 3.![image](https://github.com/user-attachments/assets/5a04980d-d04a-4dbd-a361-f3194c8115d2)
 
+Leak Index Provides us certain states information about leaked data related to the required information.
 
-
-- Provides information about leaked data related to the required information.
-
-
-
-In the General Index, the first statistic is the document count, which indicates the total number of documents. Second is the most recent date will show the latest updates related to the data. The third statistic shows the date state, providing information about the last dates on which the searched data was accessed.
-The states in the Leaked Index will provide information about the leaked data related to the required information.
 
 ![image](https://github.com/user-attachments/assets/a2960cba-49c8-4eb0-9db2-6f819d3ecc8b)
 
 ## Links:
 The Links menu contains crawled links added to the database post-crawling. It is categorized into:
+
 
 ### Network Types:
 
