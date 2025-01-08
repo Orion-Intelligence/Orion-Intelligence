@@ -115,9 +115,6 @@ The Live Onion Search Table displays real-time search results in a structured fo
 | **Leak Status**   | Specifies whether the leak is active or inactive. |
 | **Network Type**   | Indicates the type of network (e.g., Onion, I2P, Clearnet). |
 
-## Search Results
-
-When performing a search, the results are displayed in a split view:
 
 - **Links Panel:** Contains links related to the keyword.
 
@@ -131,7 +128,17 @@ When performing a search, the results are displayed in a split view:
 
 - **Unique Documents:** Displays unique documents related to the keyword
 
-![screencapture-orion-whistleaks-search-2025-01-05-01_05_16](https://github.com/user-attachments/assets/3bd2daf1-fe04-4bf5-a3f3-c0fb24375c16)
+## Search Results
+
+Suppose we type something into the search bar, such as two keywords related to the data, and then press enter. The system will fetch the data related to those keywords and display the results.
+
+![image](https://github.com/user-attachments/assets/e6d76c53-7201-491b-8ccc-c868390e16af)
+
+When performing a search, the results are displayed in a split view:
+
+![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://github.com/user-attachments/assets/5430a7c9-d2d8-4b32-8eed-97fe2c5b4b8c)
+
+
 
 ## Top Bar Options
 
@@ -149,6 +156,11 @@ The top bar, displayed post-search, includes the following options:
 
 ![image](https://github.com/user-attachments/assets/c88f5db2-cafa-4364-894d-11b91576cdf4)
 
+This will provide us with the overall fetch results related to the keyword.
+
+![image](https://github.com/user-attachments/assets/0c29c908-8b91-4504-9f3b-dae253d1eda9)
+
+
 ## Enable Safe Search Button
 
 The Safe Search feature enhances user safety by filtering out inappropriate or explicit content. To enable this feature:
@@ -156,6 +168,28 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 2. - Click the button to activate safe browsing.
   
 ![image](https://github.com/user-attachments/assets/f3deed4b-654d-4305-8d2a-6d69f9530eca)
+
+Here, if we look at our top result, it will first indicate the type of data, such as onion, cryptocurrency, leak, forums, cleannet, stolen, etc.
+
+![image](https://github.com/user-attachments/assets/e53f275a-db3c-4d62-b299-609ab3a01cdf)
+
+Then we have 2 things in bottom part that is Section and contect which are related to our file sizes and content.
+
+![image](https://github.com/user-attachments/assets/759126ba-d827-4287-ab92-9296d54b094d)
+
+
+on the right side of the page, some parameters of the results are displayed. The first is "Keyword Insight," which shows the fetch results related to our search word. It provides information about how many keywords were found, how many related documents were fetched, and how many links or pages were retrieved.
+
+![image](https://github.com/user-attachments/assets/22dbcf1e-a7cd-44d7-b094-b3b7d9c4e198)
+
+
+Then below, we have some results under "General Coverage," which first display the total found items, followed by the breakdown of active and inactive items, and finally show the results for seldom active items.
+
+![image](https://github.com/user-attachments/assets/1594be14-b37b-4874-b80d-1cba0fa096cf)
+
+
+
+
 
 ## Conclusion
 
