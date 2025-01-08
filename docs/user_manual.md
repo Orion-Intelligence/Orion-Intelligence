@@ -187,6 +187,11 @@ Then below, we have some results under "General Coverage," which first display t
 
 ![image](https://github.com/user-attachments/assets/1594be14-b37b-4874-b80d-1cba0fa096cf)
 
+After that, our page displays some unique results. The first section provides information about the extracted URLs. Below that, a table shows unique emails, followed by details about the archive, which highlights unique document files.
+
+![image](https://github.com/user-attachments/assets/793634ef-c4b1-4faf-a6a1-781ad5f69059)
+
+
 
 
 
