@@ -28,13 +28,12 @@ class search_session_controller(request_handler):
       m_query_model.set_page_number(p_data.GET[SEARCH_PARAM.M_PAGE])
     if SEARCH_PARAM.M_NETWORK in p_data.GET:
       m_query_model.set_network(p_data.GET[SEARCH_PARAM.M_NETWORK])
+    else:
+      m_query_model.set_network("all")
     if SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN in p_data.GET:
       m_query_model.set_dynamic_crawl_trigger(p_data.GET[SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN])
     if SEARCH_PARAM.M_USERNAME in p_data.GET:
       m_query_model.set_username(p_data.GET[SEARCH_PARAM.M_USERNAME])
-
-    else:
-      m_query_model.set_network("all")
     if SEARCH_PARAM.M_SAFE_SEARCH in p_data.GET:
       if p_data.GET[SEARCH_PARAM.M_SAFE_SEARCH] == "True":
         m_query_model.m_safe_search = "True"
