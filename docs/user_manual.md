@@ -52,8 +52,8 @@ The "General Index" category contains information related to crawling, where var
 - **Archive/Documents:**  we will get the count of archived documents.
 - **Email/Documents:**  This section will show us the number of emails in our fetched data.
 - **Phone/Documents:** The phone section will indicate how many phone numbers are being fetched from our data.
-- **Clearnet/Document:**
-- **Common Type:**
+- **Clearnet/Document:** This section informs us about the normal rate of URLs being displayed. On average, each link provides around 4 URLs, which belong to the clearnet, a standard type of network.
+- **Common Type:** These are the general types supported by our network.
 
 
 
