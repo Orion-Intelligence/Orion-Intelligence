@@ -5,27 +5,26 @@ The Orion Platform is a comprehensive, web-based solution designed for Open Sour
 
 # User Interface Overview:
 ## Main Page
-The main interface of the Orion Platform provides users with easy access to its features. 
+
+The Orion Platform's main interface offers users straightforward access to its features. It integrates with machine learning models to improve search accuracy and enable advanced content analysis. Orion provides a variety of functions, such as searching, filtering, and visualizing data across multiple categories, making it a powerful tool for exploring data and gathering insights.
 
 ![screencapture-orion-genesistechnologies-org-2025-01-08-11_43_05](https://github.com/user-attachments/assets/4477474f-51b7-4f18-9fd6-7d02110ec9ab)
 
-
-Below is an overview of the interface components:
-
+Here’s an overview of the interface components:
 ## Navbar
 
-The top navigation bar includes three main menus:
+The top navigation bar consists of three main menus:
 
-1. **Home:**  Returns to the main page.
+1. **Home:**  Navigates back to the main page.
 
-2. **Links:** Displays crawled links added to the database.
+2. **Links:** Shows the crawled links stored in the database.
 
-3. **Analytics:** Provides insights and statistical data.
+3. **Analytics:** Offers insights and statistical data.
 
 
 ![image](https://github.com/user-attachments/assets/377c4865-03c4-4d53-89d8-f31c2d27685c)
 
-let's discuss the home page, which is our main page. Basically, the home page consists of three main components. First, there is a search bar that will help us find results for specific queries. Then, the home page features two main categories: General Index and Leaked Index. Furthermore, let's discuss these in detail.
+Let’s talk about the home page, which is the main part of the platform. It has three main sections. First, there’s a search bar to help users look for specific information. Next, the home page is divided into two main categories: General Index and Leaked Index. Let’s explain these sections in more detail.
 
 ## Categories:
 The platform is divided into two primary categories:
@@ -130,7 +129,7 @@ The Live Onion Search Table displays real-time search results in a structured fo
 
 ## Search Results
 
-Suppose we type something into the search bar, such as two keywords related to the data, and then press enter. The system will fetch the data related to those keywords and display the results.
+When you type two keywords into the search bar and press enter, the system will retrieve and display data related to those keywords.
 
 ![image](https://github.com/user-attachments/assets/e6d76c53-7201-491b-8ccc-c868390e16af)
 
