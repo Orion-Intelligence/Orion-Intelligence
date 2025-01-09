@@ -19,7 +19,7 @@ The top navigation bar consists of three main menus:
 
 2. **Links:** Shows the crawled links stored in the database.
 
-3. **Analytics:** Offers insights and statistical data.
+3. **Analytics:** This is displayed on our home page, showing the two types of data results provided: Generic Results and Leaked Index.
 
 
 ![image](https://github.com/user-attachments/assets/377c4865-03c4-4d53-89d8-f31c2d27685c)
