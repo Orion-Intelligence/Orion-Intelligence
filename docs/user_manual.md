@@ -142,7 +142,7 @@ When performing a search, the results are displayed in a split view:
 
 ## Top Bar Options
 
-The top bar, displayed post-search, includes the following options:
+We have a total of 6 classifiers here.The top bar, displayed post-search, includes the following options:
 
 - **All:** Shows overall data related to the entered keyword.
  
@@ -196,6 +196,11 @@ After that, our page displays some unique results. The first section provides in
 Now, we move to the next tab in the top menu, which is named "Monitor." In the monitor option, we are shown a separate script for each site.Custom scripts can also be included in this.
 
 ![image](https://github.com/user-attachments/assets/43a8a6fa-6704-4f6a-895e-9536491a6c22)
+
+
+In the marketp, we can observe whether the buying and selling of any item is taking place, whether it pertains to legal or illegal goods. We can describe this as a store for the sale and purchase of items on the dark web.
+
+![image](https://github.com/user-attachments/assets/0ae606dd-1592-42f3-ba28-a0a328e5eee3)
 
 
 
