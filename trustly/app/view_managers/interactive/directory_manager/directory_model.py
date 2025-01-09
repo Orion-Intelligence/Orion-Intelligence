@@ -57,7 +57,10 @@ class directory_model(request_handler):
       return JsonResponse(response_data)
 
     except Exception as ex:
-      return JsonResponse({"error": "An internal error occurred."+str(ex)}, status=500)
+      # Log the detailed exception message
+      import logging
+      logging.error("An error occurred in __api_directory: %s", str(ex))
+      return JsonResponse({"error": "An internal error occurred."}, status=500)
 
   def __init_page(self, p_data):
     m_directory_class_model, m_status, _ = self.__m_session.invoke_trigger(DIRECTORY_SESSION_COMMANDS.M_PRE_INIT, [p_data])
