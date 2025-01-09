@@ -71,7 +71,7 @@ Leak Index Provides us certain states information about leaked data related to t
 
 ![image](https://github.com/user-attachments/assets/8f296c1d-66b0-49a1-bc39-6d1f6347e8fd)
 
-The Links menu contains crawled links added to the database post-crawling.
+The Links menu contains crawled links added to the database post-crawling.Basically It contains crawling filters.
 
 ![image](https://github.com/user-attachments/assets/a2960cba-49c8-4eb0-9db2-6f819d3ecc8b)
 
@@ -146,7 +146,7 @@ The top bar, displayed post-search, includes the following options:
 
 - **All:** Shows overall data related to the entered keyword.
  
-- **Monitor:** Tracks changes or updates in the data.
+- **Monitor:** We are shown a separate script for each site.
 
 - **Forums:** Displays forum-related results.
 
@@ -178,7 +178,7 @@ Then we have 2 things in bottom part that is Section and contect which are relat
 ![image](https://github.com/user-attachments/assets/759126ba-d827-4287-ab92-9296d54b094d)
 
 
-on the right side of the page, some parameters of the results are displayed. The first is "Keyword Insight," which shows the fetch results related to our search word. It provides information about how many keywords were found, how many related documents were fetched, and how many links or pages were retrieved.
+In generic crawling, basically, three things can be observed through a machine learning model. on the right side of the page, some parameters of the results are displayed. The first is "Keyword Insight," which shows the fetch results related to our search word. It provides information about how many keywords were found, how many related documents were fetched, and how many links or pages were retrieved.
 
 ![image](https://github.com/user-attachments/assets/22dbcf1e-a7cd-44d7-b094-b3b7d9c4e198)
 
@@ -190,6 +190,12 @@ Then below, we have some results under "General Coverage," which first display t
 After that, our page displays some unique results. The first section provides information about the extracted URLs. Below that, a table shows unique emails, followed by details about the archive, which highlights unique document files.
 
 ![image](https://github.com/user-attachments/assets/793634ef-c4b1-4faf-a6a1-781ad5f69059)
+
+
+
+Now, we move to the next tab in the top menu, which is named "Monitor." In the monitor option, we are shown a separate script for each site.Custom scripts can also be included in this.
+
+![image](https://github.com/user-attachments/assets/43a8a6fa-6704-4f6a-895e-9536491a6c22)
 
 
 
