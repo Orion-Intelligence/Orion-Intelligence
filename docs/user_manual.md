@@ -168,11 +168,13 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
   
 ![image](https://github.com/user-attachments/assets/f3deed4b-654d-4305-8d2a-6d69f9530eca)
 
-Here, if we look at our top result, it will first indicate the type of data, such as onion, cryptocurrency, leak, forums, cleannet, stolen, etc.
+When the search results are displayed, if we view a site from the results, it will be based on certain factors. At the top, the first option will indicate the network type, which could be Onion, I2P, or Clearnet. The next two options will provide information about the website’s topic, such as whether it is a forum, a leak, or related to cryptocurrency, etc.
+Next, it will display the update date of the site along with some related data. At the bottom, there are 2 or 3 additional tabs. The first tab is for the section, and the next tab indicates the type of content on that website.
+Basically, these upper and top parameters represent the specific results for each site that appears in our search.
 
-![image](https://github.com/user-attachments/assets/e53f275a-db3c-4d62-b299-609ab3a01cdf)
+![image](https://github.com/user-attachments/assets/3e148fad-9b0c-4b4b-883e-645d15e8922b)
 
-Then we have 2 things in bottom part that is Section and contect which are related to our file sizes and content.
+The "Section" tab essentially shows the different sections of the website, indicating which sections are being extracted from the site within our data.
 
 ![image](https://github.com/user-attachments/assets/759126ba-d827-4287-ab92-9296d54b094d)
 
