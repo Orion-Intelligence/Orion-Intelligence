@@ -202,6 +202,26 @@ In the marketp, we can observe whether the buying and selling of any item is tak
 
 ![image](https://github.com/user-attachments/assets/0ae606dd-1592-42f3-ba28-a0a328e5eee3)
 
+In a forum, any of our platforms can be used, such as a blog, website, or media channel, where we can have discussions related to that data.
+
+![image](https://github.com/user-attachments/assets/6636e260-69bf-46d2-8ba3-f6eb1780a571)
+
+In the news section, we can view any news related to that data if available.
+
+![image](https://github.com/user-attachments/assets/ae1979d5-8dee-4085-b551-8208ff5e5532)
+
+By going to the email option, we can enter any email and check the related information to see where the data from this email has been leaked.
+
+![image](https://github.com/user-attachments/assets/bbcdf2b6-ba60-4bee-adeb-248e0ff3ef09)
+
+
+After this, at the end, there is a button on our platform. When we click on it, a dropdown menu appears, allowing us to filter our network.
+
+![image](https://github.com/user-attachments/assets/b84d6c94-6486-42ec-b4c3-c216e936d56e)
+
+
+
+
 
 
 
