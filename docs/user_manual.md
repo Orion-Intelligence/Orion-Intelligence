@@ -232,7 +232,7 @@ By going to the email option, we can enter any email and check the related infor
 
 After this, at the end, there is a button on our platform. When we click on it, a dropdown menu appears, allowing us to filter our network.
 
-![image](https://github.com/user-attachments/assets/9afdb06d-b22b-49b1-9685-601a071dbcc8)
+![screencapture-orion-genesistechnologies-org-search-2025-01-10-16_32_15](https://github.com/user-attachments/assets/5323f7bd-8576-48e7-bf60-ee1e2d6e7640)
 
 By default, it will be set to "All" for normal results. However, you can change it according to your preference.
 
