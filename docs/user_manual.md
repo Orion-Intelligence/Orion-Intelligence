@@ -176,11 +176,16 @@ When the search results are displayed, if we view a site from the results, it wi
 Next, it will display the update date of the site along with some related data. At the bottom, there are 2 or 3 additional tabs. The first tab is for the section, and the next tab indicates the type of content on that website.
 Basically, these upper and top parameters represent the specific results for each site that appears in our search.
 
-![image](https://github.com/user-attachments/assets/3e148fad-9b0c-4b4b-883e-645d15e8922b)
+![image](https://github.com/user-attachments/assets/e4be9f60-82bb-4a5a-bc99-ebddbec5dad3)
+
 
 The "Section" tab essentially shows the different sections of the website, indicating which sections are being extracted from the site within our data.
 
-![image](https://github.com/user-attachments/assets/759126ba-d827-4287-ab92-9296d54b094d)
+![image](https://github.com/user-attachments/assets/7a71a046-915a-48b8-b4da-b1ee071c9ed2)
+
+Next to it, there is the content tab. Clicking on it displays all the raw content crawled from the respective site.
+
+![image](https://github.com/user-attachments/assets/869f1d79-0d94-4913-b056-b5f8155f116b)
 
 
 In generic crawling, basically, three things can be observed through a machine learning model. on the right side of the page, some parameters of the results are displayed. The first is "Keyword Insight," which shows the fetch results related to our search word. It provides information about how many keywords were found, how many related documents were fetched, and how many links or pages were retrieved.
