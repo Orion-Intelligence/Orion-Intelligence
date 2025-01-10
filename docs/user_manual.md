@@ -32,6 +32,12 @@ The top navigation bar consists of three main menus:
 
 Let’s talk about the home page, which is the main part of the platform. It has three main sections. First, there’s a search bar to help users look for specific information. Next, the home page is divided into two main categories: General Index and Leaked Index. Let’s explain these sections in more detail.
 
+
+![image](https://github.com/user-attachments/assets/09cc9dba-85df-4491-9271-82b1768db146)
+
+On the home page, the first thing visible is the search bar, where we can enter data to view or crawl it. Below that, there are two main categories.
+
+
 ## Categories:
 When we select "Analytics" from the navigation bar, two categories, already available on the home page, are displayed. This section is organized into two main categories:
 
