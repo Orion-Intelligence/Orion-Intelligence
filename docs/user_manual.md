@@ -79,7 +79,7 @@ Leak Index Provides us certain states information about leaked data related to t
 
 ## Links:
 
-These are all the links/URLs that appear in the search results. These represent our complete URLs, essentially the main index pages. This allows us to determine how many websites we have crawled so far.
+This is the second option in our navigation bar, which displays all the links/URLs that appear in the search results. These represent the complete URLs, essentially the main index pages, allowing us to track the total number of websites crawled so far.
 
 ![image](https://github.com/user-attachments/assets/62b7996c-b9d8-4f5e-a29e-2271f0f4b930)
 
