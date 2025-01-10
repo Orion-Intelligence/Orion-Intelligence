@@ -214,24 +214,24 @@ This will indicate how many phone numbers have been extracted from the crawled d
 
 
 
-Now, we move to the next tab in the top menu, which is named "Monitor." In the monitor option, we are shown a separate script for each site.Custom scripts can also be included in this.
+**Monitor**: Now, we move to the next tab in the top menu, which is named "Monitor." In the monitor option, we are shown a separate script for each site.Custom scripts can also be included in this.
 
 ![image](https://github.com/user-attachments/assets/43a8a6fa-6704-4f6a-895e-9536491a6c22)
 
 
-In the marketp, we can observe whether the buying and selling of any item is taking place, whether it pertains to legal or illegal goods. We can describe this as a store for the sale and purchase of items on the dark web.
+**Market**: In the market, we can observe whether the buying and selling of any item is taking place, whether it pertains to legal or illegal goods. We can describe this as a store for the sale and purchase of items on the dark web.
 
 ![image](https://github.com/user-attachments/assets/0ae606dd-1592-42f3-ba28-a0a328e5eee3)
 
-In a forum, any of our platforms can be used, such as a blog, website, or media channel, where we can have discussions related to that data.
+**Forum**: In a forum, any of our platforms can be used, such as a blog, website, or media channel, where we can have discussions related to that data.
 
 ![image](https://github.com/user-attachments/assets/6636e260-69bf-46d2-8ba3-f6eb1780a571)
 
-In the news section, we can view any news related to that data if available.
+**News**: In the news section, we can view any news related to that data if available.
 
 ![image](https://github.com/user-attachments/assets/ae1979d5-8dee-4085-b551-8208ff5e5532)
 
-By going to the email option, we can enter any email and check the related information to see where the data from this email has been leaked.
+**Email**: By going to the email option, we can enter any email and check the related information to see where the data from this email has been leaked.
 
 ![image](https://github.com/user-attachments/assets/bbcdf2b6-ba60-4bee-adeb-248e0ff3ef09)
 
