@@ -27,12 +27,13 @@ The top navigation bar consists of three main menus:
 3. **Analytics:** This is displayed on our home page, showing the two types of data results provided: Generic Results and Leaked Index.
 
 
-![image](https://github.com/user-attachments/assets/377c4865-03c4-4d53-89d8-f31c2d27685c)
+![image](https://github.com/user-attachments/assets/0e453924-31c2-4d6f-a0cf-0a0d14159d81)
+
 
 Let’s talk about the home page, which is the main part of the platform. It has three main sections. First, there’s a search bar to help users look for specific information. Next, the home page is divided into two main categories: General Index and Leaked Index. Let’s explain these sections in more detail.
 
 ## Categories:
-The platform is divided into two primary categories:
+When we select "Analytics" from the navigation bar, two categories, already available on the home page, are displayed. This section is organized into two main categories:
 
 1. ### General Index:
 
@@ -53,14 +54,16 @@ The "General Index" category contains information related to crawling, where var
 
 - **Average Score:**  An average score count of our results will be displayed here.
 
-- **URL/Documents:** The count of URLs being extracted from our document will be displayed here.
-- **Archive/Documents:**  we will get the count of archived documents.
+- **URL/Documents:** The count of URLs being extracted from sites will be displayed here.
+- **Archive/Documents:**  It means how many archived URLs were found on each website.
 - **Email/Documents:**  This section will show us the number of emails in our fetched data.
-- **Phone/Documents:** The phone section will indicate how many phone numbers are being fetched from our data.
-- **Clearnet/Document:** This section informs us about the normal rate of URLs being displayed. On average, each link provides around 4 URLs, which belong to the clearnet, a standard type of network.
+- **Phone/Documents:** The phone section will indicate how many phone numbers are being fetched from every site.
+- **Clearnet/Document:** This section informs us about the clearnet type URLs being displayed. On average, each link provides around 4 URLs, which belong to the clearnet, a standard type of network.
 - **Common Type:** These are the general types supported by our network.
 
+![image](https://github.com/user-attachments/assets/e24d4c82-4494-49ae-9878-c2f350d4881a)
 
+In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers represent updates on a weekly basis.
 
 2. ### Leaked Index:
 
@@ -73,13 +76,14 @@ Leak Index Provides us certain states information about leaked data related to t
 
 ## Links:
 
-![image](https://github.com/user-attachments/assets/8f296c1d-66b0-49a1-bc39-6d1f6347e8fd)
 
-The Links menu contains crawled links added to the database post-crawling.Basically It contains crawling filters.
+These are all the links/URLs that appear in the search results. These represent our complete URLs, essentially the main index pages. This allows us to determine how many websites we have crawled so far.
 
-![image](https://github.com/user-attachments/assets/a2960cba-49c8-4eb0-9db2-6f819d3ecc8b)
+![image](https://github.com/user-attachments/assets/62b7996c-b9d8-4f5e-a29e-2271f0f4b930)
 
-It is categorized into:
+On this page, the live onion search table contains several elements, which we will discuss individually.
+
+In the first row, we have URLs, followed by the network type.
 
 ### Network Types:
 
@@ -89,7 +93,8 @@ It is categorized into:
 
 - **Clearnet:** Surface web links.
 
-![image](https://github.com/user-attachments/assets/54be404e-ada8-4037-ac9a-bef27d671df4)
+![image](https://github.com/user-attachments/assets/82703f4e-ee8f-4d36-a6d6-83ce4d305b3f)
+
 
 ### Index Menu:
 
@@ -99,12 +104,18 @@ The Index Menu includes two categories:
 
 - **Leaked Index**
 
-![image](https://github.com/user-attachments/assets/061b00f9-c376-4651-b435-5227e8aede86)
+![image](https://github.com/user-attachments/assets/8fa343fa-70cd-4036-837d-167e4ff89b57)
 
 ### Content Option Bar
-Users can select their research content via the Content Option Bar, enabling them to focus on specific topics or data sets.
+The content bar provides 10 different options that allow users to view links based on their selection. By default, it is set to the "General" option. Users can open the dropdown menu and select their desired option from the list.
 
-![image](https://github.com/user-attachments/assets/d770fd5c-a4c5-42a9-9fc5-b5267305e677)
+![image](https://github.com/user-attachments/assets/307b3aa6-3f8c-4d05-afba-90c0f5e575a1)
+
+Next to the content option, there is a small filter icon. Clicking on it filters the data in a standard way.
+
+![11111](https://github.com/user-attachments/assets/94b19bee-171b-4a7f-a0a9-9f5d05b2ed3f)
+
+
 
 ## Live Onion Search Table
 
