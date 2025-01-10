@@ -216,20 +216,19 @@ Now, after the search results, let's go through the options available in the top
 
 **Monitor**: Now, we move to the next tab in the top menu, which is named "Monitor." In the monitor option, we are shown a separate script for each site.Custom scripts can also be included in this.
 
-![image](https://github.com/user-attachments/assets/43a8a6fa-6704-4f6a-895e-9536491a6c22)
-
+![image](https://github.com/user-attachments/assets/6aa830be-d846-4cc2-9d28-6f56b96cdab1)
 
 **Market**: In the market, we can observe whether the buying and selling of any item is taking place, whether it pertains to legal or illegal goods. We can describe this as a store for the sale and purchase of items on the dark web.
 
-![image](https://github.com/user-attachments/assets/0ae606dd-1592-42f3-ba28-a0a328e5eee3)
+![image](https://github.com/user-attachments/assets/b2c65eca-363e-46ef-9c57-6ec3236bbd72)
 
 **Forum**: In a forum, any of our platforms can be used, such as a blog, website, or media channel, where we can have discussions related to that data.
 
-![image](https://github.com/user-attachments/assets/6636e260-69bf-46d2-8ba3-f6eb1780a571)
+![image](https://github.com/user-attachments/assets/84938ad2-d76b-4099-8424-d47d1666ce83)
 
 **News**: In the news section, we can view any news related to that data if available.
 
-![image](https://github.com/user-attachments/assets/ae1979d5-8dee-4085-b551-8208ff5e5532)
+![image](https://github.com/user-attachments/assets/8c86b7df-e7c6-4442-a8a1-5ec14f01493f)
 
 **Email**: By going to the email option, we can enter any email and check the related information to see where the data from this email has been leaked.
 
