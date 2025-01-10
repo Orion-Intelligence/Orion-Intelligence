@@ -71,11 +71,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 Leak Index Provides us certain states information about leaked data related to the required information.
 
-
-
-
 ## Links:
-
 
 These are all the links/URLs that appear in the search results. These represent our complete URLs, essentially the main index pages. This allows us to determine how many websites we have crawled so far.
 
@@ -119,6 +115,9 @@ Next to the content option, there is a small filter icon. Clicking on it filters
 
 ## Live Onion Search Table
 
+![image](https://github.com/user-attachments/assets/2419e18f-d78a-40ad-8dea-95ad0247b03b)
+
+
 The Live Onion Search Table displays real-time search results in a structured format:
 
 | Column        | Description                              |
@@ -131,17 +130,6 @@ The Live Onion Search Table displays real-time search results in a structured fo
 | **Network Type**   | Indicates the type of network (e.g., Onion, I2P, Clearnet). |
 
 
-- **Links Panel:** Contains links related to the keyword.
-
-- **Statistical Panel:** Displays statistical insights such as:
-
-- **Keyword Insights:** Provides analytical data about the keyword.
-
-- **Results General Coverage:** Highlights the overall data coverage.
-
-- **Unique URLs:** Lists distinct URLs.
-
-- **Unique Documents:** Displays unique documents related to the keyword
 
 ## Search Results
 
@@ -196,6 +184,19 @@ The "Section" tab essentially shows the different sections of the website, indic
 
 
 In generic crawling, basically, three things can be observed through a machine learning model. on the right side of the page, some parameters of the results are displayed. The first is "Keyword Insight," which shows the fetch results related to our search word. It provides information about how many keywords were found, how many related documents were fetched, and how many links or pages were retrieved.
+
+
+- **Links Panel:** Contains links related to the keyword.
+
+- **Statistical Panel:** Displays statistical insights such as:
+
+- **Keyword Insights:** Provides analytical data about the keyword.
+
+- **Results General Coverage:** Highlights the overall data coverage.
+
+- **Unique URLs:** Lists distinct URLs.
+
+- **Unique Documents:** Displays unique documents related to the keyword
 
 ![image](https://github.com/user-attachments/assets/22dbcf1e-a7cd-44d7-b094-b3b7d9c4e198)
 
