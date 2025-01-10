@@ -190,19 +190,6 @@ Next to it, there is the content tab. Clicking on it displays all the raw conten
 
 In generic crawling, basically, three things can be observed through a machine learning model. on the right side of the page, some parameters of the results are displayed. The first is "Keyword Insight," which shows the fetch results related to our search word. It provides information about how many keywords were found, how many related documents were fetched, and how many links or pages were retrieved.
 
-
-- **Links Panel:** Contains links related to the keyword.
-
-- **Statistical Panel:** Displays statistical insights such as:
-
-- **Keyword Insights:** Provides analytical data about the keyword.
-
-- **Results General Coverage:** Highlights the overall data coverage.
-
-- **Unique URLs:** Lists distinct URLs.
-
-- **Unique Documents:** Displays unique documents related to the keyword
-
 ![image](https://github.com/user-attachments/assets/22dbcf1e-a7cd-44d7-b094-b3b7d9c4e198)
 
 
@@ -213,6 +200,11 @@ Then below, we have some results under "General Coverage," which first display t
 After that, our page displays some unique results. The first section provides information about the extracted URLs. Below that, a table shows unique emails, followed by details about the archive, which highlights unique document files.
 
 ![image](https://github.com/user-attachments/assets/793634ef-c4b1-4faf-a6a1-781ad5f69059)
+
+This will indicate how many phone numbers have been extracted from the crawled data.
+
+![image](https://github.com/user-attachments/assets/008afd38-e2b5-4470-ad5a-a9b525f47579)
+
 
 
 
@@ -240,15 +232,9 @@ By going to the email option, we can enter any email and check the related infor
 
 After this, at the end, there is a button on our platform. When we click on it, a dropdown menu appears, allowing us to filter our network.
 
-![image](https://github.com/user-attachments/assets/b84d6c94-6486-42ec-b4c3-c216e936d56e)
+![image](https://github.com/user-attachments/assets/9afdb06d-b22b-49b1-9685-601a071dbcc8)
 
-
-
-
-
-
-
-
+By default, it will be set to "All" for normal results. However, you can change it according to your preference.
 
 ## Conclusion
 
