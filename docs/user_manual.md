@@ -102,9 +102,9 @@ In the first row, we have URLs, followed by the network type.
 
 The Index Menu includes two categories:
 
-- **General Index**
+- **General Index**  This section allows us to view all the links crawled in general mode.
 
-- **Leaked Index**
+- **Leaked Index**   In this section, we can view only the links containing leaked data.
 
 ![image](https://github.com/user-attachments/assets/8fa343fa-70cd-4036-837d-167e4ff89b57)
 
