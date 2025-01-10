@@ -212,7 +212,7 @@ This will indicate how many phone numbers have been extracted from the crawled d
 ![image](https://github.com/user-attachments/assets/008afd38-e2b5-4470-ad5a-a9b525f47579)
 
 
-
+Now, after the search results, let's go through the options available in the top navbar one by one.
 
 **Monitor**: Now, we move to the next tab in the top menu, which is named "Monitor." In the monitor option, we are shown a separate script for each site.Custom scripts can also be included in this.
 
