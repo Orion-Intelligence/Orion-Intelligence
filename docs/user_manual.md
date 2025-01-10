@@ -3,6 +3,11 @@
 
 The Orion Platform is a comprehensive, web-based solution designed for Open Source Intelligence (OSINT) experts. Combining the functionality of a browser, search engine, crawler, and data aggregation tool, Orion empowers users to explore, search, and visualize data efficiently. Built on Docker, Orion features a user-friendly interface for seamless interaction with its powerful Orion Crawler.
 
+First, let's take a look at the admin panel. The diagram below shows the login process for the admin panel, which is exclusively for the admin side and not for users.
+
+![screencapture-orion-genesistechnologies-org-admin-login-2025-01-10-15_36_48](https://github.com/user-attachments/assets/e183130b-3ae4-40ae-881a-2aa7887ae32d)
+
+
 # User Interface Overview:
 ## Main Page
 
