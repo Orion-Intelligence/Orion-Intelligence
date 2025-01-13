@@ -73,11 +73,12 @@ The Leaked Index provides detailed information about the states of leaked data r
 
 ## Links:
 
-This is the second option in our navigation bar, which displays all the links/URLs that appear in the search results. These represent the complete URLs, essentially the main index pages, allowing us to track the total number of websites crawled so far.
+
+This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
 
 ![image](https://github.com/user-attachments/assets/62b7996c-b9d8-4f5e-a29e-2271f0f4b930)
 
-On this page, the live onion search table contains several elements, which we will discuss individually.
+On this page, the live onion search table includes various elements that we will discuss individually. Each element plays a crucial role in the search and data retrieval process.
 
 In the first row, we have URLs, followed by the network type.
 
@@ -96,18 +97,18 @@ In the first row, we have URLs, followed by the network type.
 
 The Index Menu includes two categories:
 
-- **General Index**  This section allows us to view all the links crawled in general mode.
+- **General Index**  This section allows us to view all the links crawled in general mode, providing a broad overview of all indexed URLs. It helps track and manage the overall set of data collected during the crawling process.
 
-- **Leaked Index**   In this section, we can view only the links containing leaked data.
+- **Leaked Index**  In this section, we can view only the links containing leaked data, filtering out non-relevant results. This allows users to focus on sensitive or critical information, streamlining the analysis of potentially high-risk data.
 
 ![image](https://github.com/user-attachments/assets/8fa343fa-70cd-4036-837d-167e4ff89b57)
 
 ### Content Option Bar
-The content bar provides 10 different options that allow users to view links based on their selection. By default, it is set to the "General" option. Users can open the dropdown menu and select their desired option from the list.
+The content bar offers 10 different options, enabling users to view links based on their specific selection. By default, it is set to the "General" option, displaying a broad range of links. Users can open the dropdown menu to choose from a variety of categories or filters, allowing them to tailor the content to their needs. This feature enhances navigation and makes it easier to access relevant data. It ensures a flexible and user-friendly experience for viewing links.
 
 ![image](https://github.com/user-attachments/assets/307b3aa6-3f8c-4d05-afba-90c0f5e575a1)
 
-Next to the content option, there is a small filter icon. Clicking on it filters the data in a standard way.
+Next to the content option, there is a small filter icon. Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the process of refining results for more targeted insights.
 
 ![11111](https://github.com/user-attachments/assets/94b19bee-171b-4a7f-a0a9-9f5d05b2ed3f)
 
@@ -118,8 +119,7 @@ Next to the content option, there is a small filter icon. Clicking on it filters
 ![image](https://github.com/user-attachments/assets/2419e18f-d78a-40ad-8dea-95ad0247b03b)
 
 
-The Live Onion Search Table displays real-time search results in a structured format:
-
+The Live Onion Search Table presents real-time search results in an organized, easy-to-read format. It allows users to quickly view and analyze data as it is fetched.
 | Column        | Description                              |
 |-------------|------------------------------------------|
 | **ID**      | Unique identifier for each result.       |
@@ -133,11 +133,11 @@ The Live Onion Search Table displays real-time search results in a structured fo
 
 ## Search Results
 
-When you type two keywords into the search bar and press enter, the system will retrieve and display data related to those keywords.
+When you enter any keywords into the search bar and press enter, the system processes the input and retrieves relevant data. It then displays the search results that match the specified keywords. This allows users to efficiently find information based on their search criteria. The results are presented in an organized format for easy analysis.
 
 ![image](https://github.com/user-attachments/assets/e6d76c53-7201-491b-8ccc-c868390e16af)
 
-When performing a search, the results are displayed in a split view:
+When performing a search, the results are displayed in a split view for better organization. This layout allows users to easily compare and analyze different sets of data.
 
 ![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://github.com/user-attachments/assets/5430a7c9-d2d8-4b32-8eed-97fe2c5b4b8c)
 
