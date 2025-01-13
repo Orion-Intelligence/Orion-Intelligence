@@ -28,7 +28,12 @@ The top navigation bar consists of three main menus:
 ![image](https://github.com/user-attachments/assets/0e453924-31c2-4d6f-a0cf-0a0d14159d81)
 
 
-Let’s talk about the home page, which serves as the central hub of the platform and is designed to provide users with quick access to its core functionalities. At the top, there’s a search bar that allows users to look for specific information, making data retrieval efficient and straightforward. Below the search bar, the home page is divided into two key sections: General Index and Leaked Index. The General Index provides an overview of the broad data collected, offering users a summary of standard findings. On the other hand, the Leaked Index highlights sensitive or critical information, ensuring users can identify and act on high-priority data with ease. This structured layout ensures an intuitive and productive user experience.
+The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. At the top, there is a search bar designed for users to quickly search for specific information, streamlining the process of data retrieval. Below the search bar, the page is divided into two main sections: the General Index and the Leaked Index. The General Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
+**Key Features**:
+- The **search bar** at the top allows for quick and efficient searching of specific information.
+- The **General Index** provides an overview of the broad data collected, offering a summary of standard findings.
+The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
+The **structured layout** divides the page into sections, ensuring an intuitive and efficient user experience.
 
 ![image](https://github.com/user-attachments/assets/09cc9dba-85df-4491-9271-82b1768db146)
 
@@ -72,7 +77,6 @@ In this diagram, the values displayed within the boxes represent the crawling da
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
 ## Links:
-
 
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
 
