@@ -204,54 +204,53 @@ These observations offer a clear understanding of how the data is gathered and p
 
 ![image](https://github.com/user-attachments/assets/22dbcf1e-a7cd-44d7-b094-b3b7d9c4e198)
 
-
-Then below, we have some results under "General Coverage," which first display the total found items, followed by the breakdown of active and inactive items, and finally show the results for seldom active items.
+Below this, the "General Coverage" section displays the results in a structured format.
+- It first shows the total number of items found during the search.
+- Then, it provides a breakdown of active and inactive items, along with the results for seldom active items, offering a clear summary of the data.
 
 ![image](https://github.com/user-attachments/assets/1594be14-b37b-4874-b80d-1cba0fa096cf)
 
-After that, our page displays some unique results. The first section provides information about the extracted URLs. Below that, a table shows unique emails, followed by details about the archive, which highlights unique document files.
+Afterward, the page presents some unique results for further analysis. The first section displays information about the extracted URLs. Below it, a table lists the unique emails identified during the crawl. This is followed by details about the archive, highlighting unique document files retrieved from the data.
 
 ![image](https://github.com/user-attachments/assets/793634ef-c4b1-4faf-a6a1-781ad5f69059)
 
-This will indicate how many phone numbers have been extracted from the crawled data.
+This section displays the total number of phone numbers extracted from the crawled data. It provides a clear count for easy reference and analysis.
 
 ![image](https://github.com/user-attachments/assets/008afd38-e2b5-4470-ad5a-a9b525f47579)
 
 
-Now, after the search results, let's go through the options available in the top navbar one by one.
 
-**Monitor**: Now, we move to the next tab in the top menu, which is named "Monitor." In the monitor option, we are shown a separate script for each site.Custom scripts can also be included in this.
+After viewing the search results, let’s explore the options available in the top navbar step by step. Each option provides specific functionalities for navigating and analyzing data.
+
+**Monitor**: Next, we move to the "Monitor" tab in the top menu. This option displays a separate script for each site, providing detailed insights and monitoring capabilities. Additionally, it allows users to include custom scripts, offering flexibility to tailor the monitoring process as needed.
 
 ![image](https://github.com/user-attachments/assets/6aa830be-d846-4cc2-9d28-6f56b96cdab1)
 
-**Market**: In the market, we can observe whether the buying and selling of any item is taking place, whether it pertains to legal or illegal goods. We can describe this as a store for the sale and purchase of items on the dark web.
+**Market**: The "Market" section provides insights into the buying and selling activities of various items, whether they involve legal or illegal goods. It acts as a monitoring tool to observe transactions and trends within the marketplace. Essentially, this section serves as a virtual store for tracking the sale and purchase of items on the dark web, offering a comprehensive overview of the trading environment.
 
 ![image](https://github.com/user-attachments/assets/b2c65eca-363e-46ef-9c57-6ec3236bbd72)
 
-**Forum**: In a forum, any of our platforms can be used, such as a blog, website, or media channel, where we can have discussions related to that data.
+**Forum**: In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
 
 ![image](https://github.com/user-attachments/assets/84938ad2-d76b-4099-8424-d47d1666ce83)
 
-**News**: In the news section, we can view any news related to that data if available.
+**News**: The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
 
 ![image](https://github.com/user-attachments/assets/8c86b7df-e7c6-4442-a8a1-5ec14f01493f)
 
-**Email**: By going to the email option, we can enter any email and check the related information to see where the data from this email has been leaked.
+**Email**: By selecting the email option, users can enter any email address to investigate related information. This feature helps identify where the data associated with that email has been leaked or exposed. It provides valuable insights into potential data breaches involving the specified email.
 
 ![image](https://github.com/user-attachments/assets/bbcdf2b6-ba60-4bee-adeb-248e0ff3ef09)
 
-
-After this, at the end, there is a button on our platform. When we click on it, a dropdown menu appears, allowing us to filter our network.
+At the end of the page, there is a button on the platform. When clicked, a dropdown menu appears, providing options to filter the network based on specific criteria. This feature allows users to refine their search or display preferences according to their needs.
 
 ![screencapture-orion-genesistechnologies-org-search-2025-01-10-16_32_15](https://github.com/user-attachments/assets/5323f7bd-8576-48e7-bf60-ee1e2d6e7640)
 
-By default, it will be set to "All" for normal results. However, you can change it according to your preference.
+By default, the setting will be set to "All" to display normal results. However, users have the option to modify this setting based on their preferences. This flexibility allows for more customized viewing of the data.
 
 ## Conclusion
 
-The Orion Platform offers a robust toolset for OSINT professionals, enabling efficient exploration and analysis of data. By following this manual, users can maximize their productivity while maintaining a safe and ethical approach to dark web research.
-
-
+The Orion Platform provides a powerful suite of tools for Open Source Intelligence (OSINT) professionals, designed to streamline the exploration and analysis of data. With its user-friendly interface and advanced features, the platform allows users to efficiently gather, track, and visualize critical information. This manual serves as a comprehensive guide to help users make the most of the platform's capabilities. By following the instructions, users can enhance their productivity while ensuring they maintain ethical standards and safety during dark web research. The Orion Platform empowers professionals to work with confidence, maximizing the potential of their investigative efforts.
 
 
 
