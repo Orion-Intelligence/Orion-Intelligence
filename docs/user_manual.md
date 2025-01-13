@@ -20,52 +20,46 @@ Here’s an overview of the interface components:
 
 The top navigation bar consists of three main menus:
 
-1. **Home:**  Navigates back to the main page.
-
+1. **Home:**  Navigates back to the main page, allowing users to restart their workflow or access key features quickly and efficiently without losing context.
 2. **Links:** Shows the crawled links stored in the database.
 
-3. **Analytics:** This is displayed on our home page, showing the two types of data results provided: Generic Results and Leaked Index.
-
+3. **Analytics:** This is displayed on our home page, showcasing two types of data results: Generic Results, which provide a broad summary of findings, and Leaked Index, highlighting sensitive or critical information for immediate attention.
 
 ![image](https://github.com/user-attachments/assets/0e453924-31c2-4d6f-a0cf-0a0d14159d81)
 
 
-Let’s talk about the home page, which is the main part of the platform. It has three main sections. First, there’s a search bar to help users look for specific information. Next, the home page is divided into two main categories: General Index and Leaked Index. Let’s explain these sections in more detail.
-
+Let’s talk about the home page, which serves as the central hub of the platform and is designed to provide users with quick access to its core functionalities. At the top, there’s a search bar that allows users to look for specific information, making data retrieval efficient and straightforward. Below the search bar, the home page is divided into two key sections: General Index and Leaked Index. The General Index provides an overview of the broad data collected, offering users a summary of standard findings. On the other hand, the Leaked Index highlights sensitive or critical information, ensuring users can identify and act on high-priority data with ease. This structured layout ensures an intuitive and productive user experience.
 
 ![image](https://github.com/user-attachments/assets/09cc9dba-85df-4491-9271-82b1768db146)
 
-On the home page, the first thing visible is the search bar, where we can enter data to view or crawl it. Below that, there are two main categories.
-
+The home page features a prominent search bar at the top, allowing users to input data for viewing or crawling. Below the search bar, the page is organized into two primary categories. These categories structure the platform’s core data for easy access and analysis.
 
 ## Categories:
-When we select "Analytics" from the navigation bar, two categories, already available on the home page, are displayed. This section is organized into two main categories:
+Selecting "Analytics" from the navigation bar displays two categories already available on the home page. This section provides a clear view of the platform’s data results. It is organized into two main categories for streamlined analysis.
 
 1. ### General Index:
 
  ![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
 
-The "General Index" category contains information related to crawling, where various states can be observed. All these states are associated with the fetched data, which can be reviewed one by one.
+The "General Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
 
+- **Document Count:** This section provides detailed information about the results obtained after fetching the data, focusing on the document count. It displays the total number of documents retrieved, presented as a single count value. This summary helps users quickly understand the volume of data collected.
 
-- **Document Count:** This will provide information about the results obtained after fetching the data, specifically the count of documents. It gives us the total number of documents as a single count value..
+- **Most Recent Date:** This state will inform us about the most recent updates to our crawled data, ensuring users stay up-to-date with the latest information. It helps quickly identify new entries in the dataset.
 
-- **Most Recent Date:** This state will inform us about the most recent updates to our crawled data.
+- **Oldes Update:** This section will display the results related to the oldest updates in the data, showing when the data was fetched in the past. This is useful for tracking long-term changes or identifying outdated information.
 
-- **Oldes Update:** This section will display the results related to the oldest updates in the data, showing when the data was fetched in the past.
+- **Update five days:**   This section will provide information about the updates from the last 5 days,It helps users focus on the most relevant and recent data.
 
-- **Update five days:**   This section will provide information about the updates from the last 5 days. 
+- **Update Nine days:**  This section will provide information about the updates from the last 9 days, allowing users to monitor a slightly longer period for any significant changes.
+- **Average Score:**  An average score count of our results will be displayed here, helping users assess the overall quality of the fetched data. This metric is valuable for evaluating the effectiveness of the crawling process.
 
-- **Update Nine days:** This section will provide information about the updates from the last 9 days.
-
-- **Average Score:**  An average score count of our results will be displayed here.
-
-- **URL/Documents:** The count of URLs being extracted from sites will be displayed here.
-- **Archive/Documents:**  It means how many archived URLs were found on each website.
-- **Email/Documents:**  This section will show us the number of emails in our fetched data.
-- **Phone/Documents:** The phone section will indicate how many phone numbers are being fetched from every site.
-- **Clearnet/Document:** This section informs us about the clearnet type URLs being displayed. On average, each link provides around 4 URLs, which belong to the clearnet, a standard type of network.
-- **Common Type:** These are the general types supported by our network.
+- **URL/Documents:** The count of URLs being extracted from sites will be displayed here, offering a clear view of the total number of URLs found. This helps users understand the volume of data being sourced from different websites.
+- **Archive/Documents:**  This refers to how many archived URLs were found on each website, allowing users to assess the historical relevance of the crawled data. It provides insight into the longevity and preservation of online content.
+- **Email/Documents:**  This section will show us the number of emails in our fetched data, assisting in identifying key communication points within the dataset. 
+- **Phone/Documents:** The phone section will indicate how many phone numbers are being fetched from every site, offering a detailed count of contact information in the data.
+- **Clearnet/Document:** This section informs us about the clearnet-type URLs being displayed. On average, each link provides around 4 URLs, which belong to the clearnet, a standard type of network.
+- **Common Type:** These are the general types supported by our network, helping categorize the different types of content available. This section ensures users can understand the variety and scope of data collected from different sources.
 
 ![image](https://github.com/user-attachments/assets/e24d4c82-4494-49ae-9878-c2f350d4881a)
 
@@ -75,7 +69,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 ![image](https://github.com/user-attachments/assets/5a04980d-d04a-4dbd-a361-f3194c8115d2)
 
-Leak Index Provides us certain states information about leaked data related to the required information.
+The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
 ## Links:
 
