@@ -172,23 +172,35 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
   
 ![image](https://github.com/user-attachments/assets/f3deed4b-654d-4305-8d2a-6d69f9530eca)
 
-When the search results are displayed, if we view a site from the results, it will be based on certain factors. At the top, the first option will indicate the network type, which could be Onion, I2P, or Clearnet. The next two options will provide information about the website’s topic, such as whether it is a forum, a leak, or related to cryptocurrency, etc.
-Next, it will display the update date of the site along with some related data. At the bottom, there are 2 or 3 additional tabs. The first tab is for the section, and the next tab indicates the type of content on that website.
-Basically, these upper and top parameters represent the specific results for each site that appears in our search.
+Here’s the rephrased content in points:
+
+When viewing a site from the search results, its display is based on specific factors.
+**Network Type**: The first option at the top shows the network type, such as Onion, I2P, or Clearnet.
+**Website Topic**: The next two options provide details about the site’s topic, e.g., forum, leak, cryptocurrency, etc.
+**Update Date**: Displays the last update date of the site, along with some additional related data.
+**Bottom Tabs**: At the bottom, 2-3 tabs are available:
+- The first tab shows the sections of the website.
+- The next tab provides information about the type of content available on that website.
+- These parameters collectively represent specific details for each site that appears in the search results.
 
 ![image](https://github.com/user-attachments/assets/e4be9f60-82bb-4a5a-bc99-ebddbec5dad3)
 
 
-The "Section" tab essentially shows the different sections of the website, indicating which sections are being extracted from the site within our data.
+The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being extracted during the data crawling process. This feature helps users identify and understand the structure of the website within the fetched data. 
 
 ![image](https://github.com/user-attachments/assets/7a71a046-915a-48b8-b4da-b1ee071c9ed2)
 
-Next to it, there is the content tab. Clicking on it displays all the raw content crawled from the respective site.
+Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
 
 ![image](https://github.com/user-attachments/assets/869f1d79-0d94-4913-b056-b5f8155f116b)
 
+In generic crawling, three key aspects can be observed using a machine learning model. On the right side of the page, several parameters of the results are displayed for user convenience:
 
-In generic crawling, basically, three things can be observed through a machine learning model. on the right side of the page, some parameters of the results are displayed. The first is "Keyword Insight," which shows the fetch results related to our search word. It provides information about how many keywords were found, how many related documents were fetched, and how many links or pages were retrieved.
+**Keyword Insight**: This section highlights the fetch results related to the entered search word. It provides detailed insights, including:
+- The number of keywords identified during the crawl.
+- The total count of documents fetched containing those keywords.
+- The number of links or pages retrieved that are associated with the keywords.
+These observations offer a clear understanding of how the data is gathered and processed, ensuring that users can analyze the results efficiently and make informed decisions based on the displayed metrics.
 
 ![image](https://github.com/user-attachments/assets/22dbcf1e-a7cd-44d7-b094-b3b7d9c4e198)
 
