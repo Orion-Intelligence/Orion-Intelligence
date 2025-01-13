@@ -137,7 +137,7 @@ When you enter any keywords into the search bar and press enter, the system proc
 
 ![image](https://github.com/user-attachments/assets/e6d76c53-7201-491b-8ccc-c868390e16af)
 
-When performing a search, the results are displayed in a split view for better organization. This layout allows users to easily compare and analyze different sets of data.
+When performing a search, the results are shown in a split view, helping organize the information more effectively. This layout separates different data sets, making it easier for users to focus on specific results. By displaying the data side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by simplifying the navigation of search results.
 
 ![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://github.com/user-attachments/assets/5430a7c9-d2d8-4b32-8eed-97fe2c5b4b8c)
 
