@@ -250,7 +250,30 @@ At the end of the page, there is a button on the platform. When clicked, a dropd
 
 ![screencapture-orion-genesistechnologies-org-search-2025-01-10-16_32_15](https://github.com/user-attachments/assets/5323f7bd-8576-48e7-bf60-ee1e2d6e7640)
 
+
 By default, the setting will be set to "All" to display normal results. However, users have the option to modify this setting based on their preferences. This flexibility allows for more customized viewing of the data.
+
+This is an overview of our project's original scope. Now, let us proceed to discuss some additional features and elements that we have developed specifically for the client.
+
+**Dozzel** 
+We have added an extra API to the server to provide insights into server usage. This API tracks the processing activities within the system or software, particularly where machine learning algorithms are running.
+
+- Additionally, it provides detailed logs, monitors system stability, and highlights areas where bugs or issues have occurred.
+
+- It also offers real-time updates on system performance, helps identify potential bottlenecks, and ensures a proactive approach to system optimization and troubleshooting.
+- 
+![WhatsApp Image 2025-01-14 at 11 24 32 PM](https://github.com/user-attachments/assets/58c3964e-3f14-494e-a91b-2cdadd197b40)
+
+![Uploading WhatsApp Image 2025-01-14 at 11.24.32 PM.jpeg…]()
+
+
+
+
+
+
+
+
+
 
 ## Conclusion
 
