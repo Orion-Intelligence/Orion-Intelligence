@@ -274,6 +274,18 @@ We have added an extra API to the server to provide insights into server usage. 
 
 In Swagger, we have several APIs that we can directly use for testing. The biggest advantage of Swagger's APIs is that if you don't want to use our system, you can still run Swagger's APIs on your own system and utilize them.
 
+Swagger operates on our HTTP scheme and provides three main APIs:
+
+GET /api/directory: This API allows us to view a list of all available APIs.
+GET /api/insight: This API provides key insights, which are the results we saw on Orion's front page.
+GET /api/search: This API enables us to view the search results, showing what we find in response to our search queries.
+
+![image](https://github.com/user-attachments/assets/75e89e94-6727-4278-a01a-4e62781c11b2)
+
+
+After this, on the same page, we have several models that are active, including DirectoryResponse, Directory, InsightResponse, GenericModel, LeakModel, SearchResponse, SearchResult, and ErrorResponse.
+
+![Uploading image.png…]()
 
 
 
