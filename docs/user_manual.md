@@ -145,8 +145,6 @@ When performing a search, the results are shown in a split view, helping organiz
 
 ![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://github.com/user-attachments/assets/5430a7c9-d2d8-4b32-8eed-97fe2c5b4b8c)
 
-
-
 ## Top Bar Options
 
 We have a total of 6 classifiers here.The top bar, displayed post-search, includes the following options:
@@ -166,7 +164,6 @@ We have a total of 6 classifiers here.The top bar, displayed post-search, includ
 This will provide us with the overall fetch results related to the keyword.
 
 ![image](https://github.com/user-attachments/assets/0c29c908-8b91-4504-9f3b-dae253d1eda9)
-
 
 ## Enable Safe Search Button
 
@@ -188,7 +185,6 @@ When viewing a site from the search results, its display is based on specific fa
 - These parameters collectively represent specific details for each site that appears in the search results.
 
 ![image](https://github.com/user-attachments/assets/e4be9f60-82bb-4a5a-bc99-ebddbec5dad3)
-
 
 The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being extracted during the data crawling process. This feature helps users identify and understand the structure of the website within the fetched data. 
 
@@ -222,8 +218,6 @@ This section displays the total number of phone numbers extracted from the crawl
 
 ![image](https://github.com/user-attachments/assets/008afd38-e2b5-4470-ad5a-a9b525f47579)
 
-
-
 After viewing the search results, let’s explore the options available in the top navbar step by step. Each option provides specific functionalities for navigating and analyzing data.
 
 **Monitor**: Next, we move to the "Monitor" tab in the top menu. This option displays a separate script for each site, providing detailed insights and monitoring capabilities. Additionally, it allows users to include custom scripts, offering flexibility to tailor the monitoring process as needed.
@@ -249,7 +243,6 @@ After viewing the search results, let’s explore the options available in the t
 At the end of the page, there is a button on the platform. When clicked, a dropdown menu appears, providing options to filter the network based on specific criteria. This feature allows users to refine their search or display preferences according to their needs.
 
 ![screencapture-orion-genesistechnologies-org-search-2025-01-10-16_32_15](https://github.com/user-attachments/assets/5323f7bd-8576-48e7-bf60-ee1e2d6e7640)
-
 
 By default, the setting will be set to "All" to display normal results. However, users have the option to modify this setting based on their preferences. This flexibility allows for more customized viewing of the data.
 
@@ -291,8 +284,6 @@ To run Swagger, we have been provided with its link. Below, the keys for it are 
 
 https://swagger.orion.genesistechnologies.org:9443/
 
-
-
 **Flower**: Next, we have the third tool, called Flowers. This tool helps in situations where we are running multiple crawlers, such as 40 at a time, and some of them either break down or get stuck. It allows us to monitor and debug the crawlers effectively.
 
 Key features of the tool:
@@ -304,7 +295,6 @@ Key features of the tool:
 ![WhatsApp Image 2025-01-14 at 11 30 35 PM (1)](https://github.com/user-attachments/assets/1e4b2f66-349b-44b8-b043-f58e2eb3774f)
 
 In this way, if we need to access a system, a key is required for that system. With the help of this key, we can access its features or resources.
-
 
 **TRAEFIK KEYS**:
 TRAEFIK_USERNAME=admin
