@@ -285,10 +285,58 @@ GET /api/search: This API enables us to view the search results, showing what we
 
 After this, on the same page, we have several models that are active, including DirectoryResponse, Directory, InsightResponse, GenericModel, LeakModel, SearchResponse, SearchResult, and ErrorResponse.
 
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/c5114a92-abac-40fd-89de-f60cc31c1e6b)
+
+To run Swagger, we have been provided with its link. Below, the keys for it are mentioned.
+
+https://swagger.orion.genesistechnologies.org:9443/
 
 
 
+Next, we have the third tool, called Flowers. This tool helps in situations where we are running multiple crawlers, such as 40 at a time, and some of them either break down or get stuck. It allows us to monitor and debug the crawlers effectively.
+
+Key features of the tool:
+
+- Identify which crawler is hitting how many sites simultaneously.
+- Monitor how many links each crawler is extracting and bringing back.
+- Debug issues such as broken or stuck crawlers during operation.
+  
+![WhatsApp Image 2025-01-14 at 11 30 35 PM (1)](https://github.com/user-attachments/assets/1e4b2f66-349b-44b8-b043-f58e2eb3774f)
+
+In this way, if we need to access a system, a key is required for that system. With the help of this key, we can access its features or resources.
+
+
+# TRAEFIK KEYS
+TRAEFIK_USERNAME=admin
+TRAEFIK_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
+
+# DEMO KEYS
+DEMO_USERNAME=demo
+DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
+
+# PRODUCTION MODE
+DEMO="0"
+API_SWAGGER="1"
+PRODUCTION="0"
+MAINTAINANCE="0"
+PRODUCTION_DOMAIN=*
+
+Here’s the translation and rewritten version of the information in points:
+
+We will now discuss some keys related to open sources, specifically TRAEFIK KEYS, DEMO KEYS, and PRODUCTION MODE. These three concepts help us manage demo server access and control features in production.
+
+**TRAEFIK KEYS**:
+These keys are used for both Flower and Dozzle. They allow access to the demo server, enabling users to use it for demonstration purposes.
+
+**DEMO KEYS**:
+Demo keys are used to provide users with a demo version of the service. By using these keys, users can access a limited, demo server environment to explore features.
+
+**PRODUCTION MODE**:
+In production mode, we use environmental variables to control and manage the system. This setup is crucial for optimizing performance and making production decisions.
+
+**Control Management System**:
+All these configurations fall under a centralized control management system, which helps in controlling both demo and production environments.
+You can use these keys and configurations for demo purposes or to manage a live, production environment.
 
 
 
