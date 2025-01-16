@@ -293,7 +293,7 @@ https://swagger.orion.genesistechnologies.org:9443/
 
 
 
-Next, we have the third tool, called Flowers. This tool helps in situations where we are running multiple crawlers, such as 40 at a time, and some of them either break down or get stuck. It allows us to monitor and debug the crawlers effectively.
+**Flower**: Next, we have the third tool, called Flowers. This tool helps in situations where we are running multiple crawlers, such as 40 at a time, and some of them either break down or get stuck. It allows us to monitor and debug the crawlers effectively.
 
 Key features of the tool:
 
@@ -306,15 +306,15 @@ Key features of the tool:
 In this way, if we need to access a system, a key is required for that system. With the help of this key, we can access its features or resources.
 
 
-# TRAEFIK KEYS
+**TRAEFIK KEYS**:
 TRAEFIK_USERNAME=admin
 TRAEFIK_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
 
-# DEMO KEYS
+**DEMO KEYS**:
 DEMO_USERNAME=demo
 DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
 
-# PRODUCTION MODE
+**PRODUCTION MODE**:
 DEMO="0"
 API_SWAGGER="1"
 PRODUCTION="0"
@@ -337,11 +337,6 @@ In production mode, we use environmental variables to control and manage the sys
 **Control Management System**:
 All these configurations fall under a centralized control management system, which helps in controlling both demo and production environments.
 You can use these keys and configurations for demo purposes or to manage a live, production environment.
-
-
-
-
-
 
 ## Conclusion
 
