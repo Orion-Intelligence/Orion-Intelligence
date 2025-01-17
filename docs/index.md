@@ -5,7 +5,7 @@ Welcome to the Orion Platform Documentation.
 ## Table of Contents
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 4
 :caption: Contents:
 
 introduction_to_platform
