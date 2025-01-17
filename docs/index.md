@@ -8,7 +8,7 @@ Welcome to the Orion Platform Documentation.
 :maxdepth: 2
 :caption: Contents:
 
-introduction
-overview
+introduction_to_platform
+introduction_to_modules
+user_manual
 developer_documentation
-user_manual.md

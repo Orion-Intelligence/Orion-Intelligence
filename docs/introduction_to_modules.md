@@ -1,4 +1,4 @@
-# Data Intelligence Platform Documentation
+# Introduction To Modules
 
 ## Introduction
 
@@ -131,71 +131,3 @@ The Orion Collector streamlines the integration of custom collection scripts and
 4. **Data Pipeline Update:** The newly configured script runs within the existing pipeline, adding its data to Orion Search.
 
 ---
-
-## Passive Intelligence
-
-### Overview
-
-While Active Intelligence focuses on proactive data gathering, Passive Intelligence centers around securely receiving and managing whistleblowing submissions. In situations where anonymous individuals need a safe channel to leak documents or reveal information, the Passive Intelligence section provides a robust platform built on top of proven whistleblowing frameworks.
-
-**Key Highlights:**
-- Secure, anonymous submission channels for sensitive documents or evidence
-- Established, open-source foundations for whistleblowing functionality
-- Integrated workflows that allow for external data to complement the Active Intelligence datasets
-
-### Whistleaks
-
-**Purpose:**  
-Whistleaks is a whistleblowing platform implemented atop the Globaleaks framework. It provides a secure environment for sources to submit sensitive documents and information without revealing their identities. Whistleblowers can trust the platform’s encryption, anonymity, and metadata stripping features, ensuring maximum confidentiality and protection.
-
-**Key Features:**
-- **Globaleaks Integration:** Leverages Globaleaks’ robust anonymity tools, onion routing, and secure communication channels.
-- **Strong Encryption:** Ensures that all submitted data is encrypted at rest and in transit.
-- **Metadata Anonymization:** Removes identifying information from uploaded files before storing them.
-- **Source Protection:** Utilizes Tor hidden services and secure browsers to prevent source fingerprinting.
-
-**Technology Stack:**
-- **Base Framework:** Globaleaks
-- **Security & Anonymity:** Tor integration, secure TLS configurations
-- **User Interface:** Web-based submission portal accessible via Tor browser or other anonymity tools
-
-**Workflow:**
-1. **Whistleblower Submission:** The source accesses the Whistleaks portal via a Tor hidden service.
-2. **Document Upload & Metadata Stripping:** The submitted files are automatically cleaned of identifying metadata.
-3. **Encrypted Storage:** All documents are stored securely, awaiting review by authorized analysts.
-4. **Review & Analysis:** Approved analysts review submissions, cross-referencing them with data from the Active Intelligence suite to build a comprehensive intelligence picture.
-
----
-
-## Integration & Data Flow
-
-**End-to-End Pipeline Example:**
-1. **Active Collection:** Orion Crawler systematically collects large volumes of hidden web content.  
-2. **Browsing & Refinement:** Analysts explore leads using Orion Browser, adding contextually relevant data as they navigate.  
-3. **Automated Indexing:** Orion Search indexes newly acquired data, making it searchable and analyzable.  
-4. **Script Customization:** Developers add specialized scrapers to Orion Collector for niche sites, further enriching the dataset.  
-5. **Passive Contributions:** Whistleblowers submit sensitive documents to Whistleaks, providing insider information that complements the crawled and indexed datasets.  
-6. **Holistic Analysis:** By combining actively collected data with passively provided whistleblower documents, analysts gain a complete, multidimensional understanding of their targets, leading to actionable intelligence insights.
-
----
-
-## Deployment & Maintenance
-
-**Recommended Practices:**
-- **Containerization:** Deploy Orion Crawler, Collector, and Search indexing components using Docker or Kubernetes for scalable, repeatable environments.
-- **Continuous Integration & Deployment (CI/CD):** Use CI/CD pipelines to test new scripts, crawler configurations, and upgrades to ensure stability.
-- **Security Hardening:** Regularly update dependencies, apply Tor configuration best practices, and audit logs to maintain secure operations.
-- **Backups & Redundancy:** Regularly back up indexes, ML model states, and whistleblowing submissions. Utilize redundant storage systems to prevent data loss.
-
-**Monitoring & Observability:**
-- **Logging:** Centralized logging (e.g., ELK stack, Splunk) for system events, crawler activities, and submission logs.
-- **Metrics & Alerts:** Use Prometheus or Grafana for resource utilization, system performance, and anomaly detection.
-- **ML Model Retraining:** Periodic retraining of ML models ensures they stay effective as target ecosystems evolve.
-
----
-
-## Conclusion
-
-The Data Intelligence Platform brings together advanced crawling, indexing, searching, and whistleblowing tools to form a cohesive intelligence environment. Active Intelligence components proactively harvest and structure hidden data, while Passive Intelligence avenues allow secure, anonymous submissions of insider information.
-
-This integrated approach enables researchers, journalists, OSINT professionals, and security analysts to combine large-scale automated collection with carefully curated whistleblower insights. By continuously refining crawler logic, expanding the set of scraping scripts, and leveraging secure anonymized submissions, the platform remains a powerful, adaptable solution for modern intelligence gathering and analysis.

@@ -1,7 +1,7 @@
 
-# Orion-Search Documentation
+# Developer Documentation
 
-## Overview
+## Orion Search Documentation
 
 **Orion-Search** is a Docker-based search engine platform that visualizes and searches data collected from various sources. Built on top of **Django** and **Elasticsearch**, it provides efficient search, advanced filtering, and customizable parsers. It also leverages **Redis** for caching, **MongoDB** for data storage, and **NGINX** for reverse proxy, with **Traefik** for load balancing.
 
@@ -188,14 +188,7 @@ bash run.sh
 
 ---
 
-## Conclusion
-
-Orion-Search is a scalable, secure, and modular search platform designed for efficient data indexing and retrieval. By leveraging Docker, it ensures portability and seamless deployment across environments.
-
-
-# Orion-Crawler Documentation
-
-## Overview
+## Orion-Crawler Documentation
 
 **Orion-Crawler** is a high-performance, multithreaded web crawler designed to automate the process of data collection, particularly from Onion and other hidden networks. Built with Python, **Celery** for task distribution, and **TOR proxies** for anonymity, it ensures scalable, distributed, and secure crawling.
 
@@ -405,14 +398,7 @@ The `requirements.txt` file lists dependencies needed for the crawler:
 
 ---
 
-## Conclusion
-
-Orion-Crawler is a robust and scalable crawler designed for large-scale, anonymous data collection. By leveraging **TOR**, **Celery**, and **MongoDB**, it ensures high performance, security, and efficiency. The system is modular, allowing easy customization and deployment in various environments.
-
-
-# Orion-Collector Documentation
-
-## Overview
+## Orion-Collector Documentation
 
 **Orion-Collector** is a modular data collection tool that simplifies the creation and execution of web crawling scripts. The collector supports two primary crawling approaches:
 
@@ -572,14 +558,7 @@ Follow these steps to integrate a new website:
 
 ---
 
-## Conclusion
-
-Orion-Collector simplifies data collection by providing modular static and dynamic crawling options. Developers need only to specify URLs, write parsing scripts, and submit pull requests for integration. The system's flexibility and TOR integration make it an ideal tool for scalable and anonymous data extraction.
-
-
-# Orion-Browser Documentation
-
-## Overview
+## Orion-Browser Documentation
 
 **Orion-Browser** is a native Android browser built with **Java** and **GeckoView** that integrates **Orbot** as a library to route all browsing activity through the **Tor network**. This ensures anonymous and secure browsing, particularly for accessing Onion websites.
 
@@ -626,55 +605,3 @@ Orion-Collector simplifies data collection by providing modular static and dynam
 
 ---
 
-## Conclusion
-
-Orion-Browser is ready to use out of the box. Simply build the project in Android Studio, and start browsing securely and anonymously. The integration of **Orbot** as a library ensures Tor connectivity without requiring any additional installations.
-
-
-# Passive Data Intelligence
-
-## Overview
-
-For **Passive Data Intelligence**, Orion leverages **GlobaLeaks**, an open-source platform designed to facilitate secure and anonymous whistleblowing.
-
----
-
-## Official Documentation
-
-To ensure secure deployment, configuration, and usage, please refer to the **official GlobaLeaks documentation**:
-
-🔗 [**GlobaLeaks Official Documentation**](https://docs.globaleaks.org)
-
----
-
-## Key Features of GlobaLeaks
-
-- **Secure Submissions**: Anonymous and encrypted submission of sensitive information.  
-- **End-to-End Encryption**: Protects all data in transit and at rest.  
-- **User-Friendly Interface**: Intuitive platform for whistleblowers, reviewers, and administrators.  
-- **Customizable Workflows**: Configurable roles and workflows for different use cases.  
-- **Scalable**: Suitable for organizations of any size.
-
----
-
-## Deployment Steps
-
-1. Follow the **Installation Guide** provided in the official documentation.  
-2. Configure your instance for secure submissions and data handling.  
-3. Customize roles, workflows, and notifications as per your requirements.  
-4. Test the setup to ensure anonymous submissions work as intended.
-
----
-
-## Additional Resources
-
-- GlobaLeaks GitHub Repository: [https://github.com/globaleaks](https://github.com/globaleaks)  
-- Community Support: [GlobaLeaks Support Forums](https://forum.globaleaks.org)
-
----
-
-## Conclusion
-
-For secure, anonymous whistleblowing, Orion seamlessly integrates with GlobaLeaks. By following the **official documentation**, you can deploy and manage your own GlobaLeaks instance effectively.
-
-For further assistance, refer to the GlobaLeaks forums or community resources.
