@@ -259,8 +259,6 @@ We have added an extra API to the server to provide insights into server usage. 
 
 ![WhatsApp Image 2025-01-14 at 11 24 32 PM](https://github.com/user-attachments/assets/58c3964e-3f14-494e-a91b-2cdadd197b40)
 
-![Uploading WhatsApp Image 2025-01-14 at 11.24.32 PM.jpeg…]()
-
 **Swagger.org**: After this, we move on to Swagger, which plays a critical role by essentially handling the actual backend operations. Earlier, we discussed Orion, a comprehensive front-side software that provided us with the ability to view and analyze all the data effectively. Orion serves as the interface for interacting with the data, making it user-friendly and accessible. On the other hand, Swagger allows us to dive deeper into the backend processes, giving insights into how the data is being handled and processed behind the scenes. This distinction between front-end visualization and backend operation highlights the complementary roles of Orion and Swagger in managing and understanding the system's functionality.
 
 ![WhatsApp Image 2025-01-14 at 11 26 16 PM (1)](https://github.com/user-attachments/assets/16450bc8-8058-4223-a37d-84394ba973ea)
