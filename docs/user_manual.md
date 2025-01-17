@@ -12,10 +12,12 @@ The Orion Platform's main interface offers users straightforward access to its f
 
 ![screencapture-orion-genesistechnologies-org-2025-01-08-11_43_05](https://github.com/user-attachments/assets/4477474f-51b7-4f18-9fd6-7d02110ec9ab)
 
-Here’s an overview of the interface components:
-## Navbar
+## Directory Page
+Here’s an overview of the interface components
 
-The top navigation bar consists of three main menus:
+### Navbar Filter
+
+The top navigation bar consists of three main menus
 
 1. **Home:**  Navigates back to the main page, allowing users to restart their workflow or access key features quickly and efficiently without losing context.
 2. **Links:** Shows the crawled links stored in the database.
@@ -26,7 +28,7 @@ The top navigation bar consists of three main menus:
 
 
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. At the top, there is a search bar designed for users to quickly search for specific information, streamlining the process of data retrieval. Below the search bar, the page is divided into two main sections: the General Index and the Leaked Index. The General Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
-**Key Features**:
+**Key Features**
 - The **search bar** at the top allows for quick and efficient searching of specific information.
 - The **General Index** provides an overview of the broad data collected, offering a summary of standard findings.
 The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
@@ -36,10 +38,10 @@ The **structured layout** divides the page into sections, ensuring an intuitive 
 
 The home page features a prominent search bar at the top, allowing users to input data for viewing or crawling. Below the search bar, the page is organized into two primary categories. These categories structure the platform’s core data for easy access and analysis.
 
-## Categories:
+### Categories Filter
 Selecting "Analytics" from the navigation bar displays two categories already available on the home page. This section provides a clear view of the platform’s data results. It is organized into two main categories for streamlined analysis.
 
-1. ### General Index:
+1. #### General Index
 
  ![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
 
@@ -67,13 +69,13 @@ The "General Index" category displays information related to the crawling proces
 
 In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers represent updates on a weekly basis.
 
-2. ### Leaked Index:
+2. #### Leaked Index
 
 ![image](https://github.com/user-attachments/assets/5a04980d-d04a-4dbd-a361-f3194c8115d2)
 
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
-## Links:
+### Links Filter
 
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
 
@@ -83,7 +85,7 @@ On this page, the live onion search table includes various elements that we will
 
 In the first row, we have URLs, followed by the network type.
 
-### Network Types:
+#### Network Types
 
 - **Onion:** Dark web links.
 
@@ -94,7 +96,7 @@ In the first row, we have URLs, followed by the network type.
 ![image](https://github.com/user-attachments/assets/82703f4e-ee8f-4d36-a6d6-83ce4d305b3f)
 
 
-### Index Menu:
+#### Index Menu
 
 The Index Menu includes two categories:
 
@@ -104,7 +106,7 @@ The Index Menu includes two categories:
 
 ![image](https://github.com/user-attachments/assets/8fa343fa-70cd-4036-837d-167e4ff89b57)
 
-### Content Option Bar
+#### Content Option Bar
 The content bar offers 10 different options, enabling users to view links based on their specific selection. By default, it is set to the "General" option, displaying a broad range of links. Users can open the dropdown menu to choose from a variety of categories or filters, allowing them to tailor the content to their needs. This feature enhances navigation and makes it easier to access relevant data. It ensures a flexible and user-friendly experience for viewing links.
 
 ![image](https://github.com/user-attachments/assets/307b3aa6-3f8c-4d05-afba-90c0f5e575a1)
@@ -115,7 +117,7 @@ Next to the content option, there is a small filter icon. Clicking on this icon 
 
 
 
-## Live Onion Search Table
+### Onion Crawl Statistics
 
 ![image](https://github.com/user-attachments/assets/2419e18f-d78a-40ad-8dea-95ad0247b03b)
 
@@ -131,8 +133,9 @@ The Live Onion Search Table presents real-time search results in an organized, e
 | **Network Type**   | Indicates the type of network (e.g., Onion, I2P, Clearnet). |
 
 
+## Orion Search
 
-## Search Results
+### Search Results
 
 When you enter any keywords into the search bar and press enter, the system processes the input and retrieves relevant data. It then displays the search results that match the specified keywords. This allows users to efficiently find information based on their search criteria. The results are presented in an organized format for easy analysis.
 
@@ -142,7 +145,7 @@ When performing a search, the results are shown in a split view, helping organiz
 
 ![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://github.com/user-attachments/assets/5430a7c9-d2d8-4b32-8eed-97fe2c5b4b8c)
 
-## Top Bar Options
+### Top Bar Options
 
 We have a total of 6 classifiers here.The top bar, displayed post-search, includes the following options:
 
@@ -162,7 +165,7 @@ This will provide us with the overall fetch results related to the keyword.
 
 ![image](https://github.com/user-attachments/assets/0c29c908-8b91-4504-9f3b-dae253d1eda9)
 
-## Enable Safe Search Button
+### Enable Safe Search Button
 
 The Safe Search feature enhances user safety by filtering out inappropriate or explicit content. To enable this feature:
 1. - Locate the Safe Search button.
@@ -281,7 +284,7 @@ https://swagger.orion.genesistechnologies.org:9443/
 
 **Flower**: Next, we have the third tool, called Flowers. This tool helps in situations where we are running multiple crawlers, such as 40 at a time, and some of them either break down or get stuck. It allows us to monitor and debug the crawlers effectively.
 
-Key features of the tool:
+Key features of the tool
 
 - Identify which crawler is hitting how many sites simultaneously.
 - Monitor how many links each crawler is extracting and bringing back.
@@ -291,15 +294,15 @@ Key features of the tool:
 
 In this way, if we need to access a system, a key is required for that system. With the help of this key, we can access its features or resources.
 
-**TRAEFIK KEYS**:
+**TRAEFIK KEYS**
 TRAEFIK_USERNAME=admin
 TRAEFIK_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
 
-**DEMO KEYS**:
+**DEMO KEYS**
 DEMO_USERNAME=demo
 DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
 
-**PRODUCTION MODE**:
+**PRODUCTION MODE**
 DEMO="0"
 API_SWAGGER="1"
 PRODUCTION="0"
@@ -310,15 +313,15 @@ Here’s the translation and rewritten version of the information in points:
 
 We will now discuss some keys related to open sources, specifically TRAEFIK KEYS, DEMO KEYS, and PRODUCTION MODE. These three concepts help us manage demo server access and control features in production.
 
-**TRAEFIK KEYS**:
+**TRAEFIK KEYS**
 These keys are used for both Flower and Dozzle. They allow access to the demo server, enabling users to use it for demonstration purposes.
 
-**DEMO KEYS**:
+**DEMO KEYS**
 Demo keys are used to provide users with a demo version of the service. By using these keys, users can access a limited, demo server environment to explore features.
 
-**PRODUCTION MODE**:
+**PRODUCTION MODE**
 In production mode, we use environmental variables to control and manage the system. This setup is crucial for optimizing performance and making production decisions.
 
-**Control Management System**:
+**Control Management System**
 All these configurations fall under a centralized control management system, which helps in controlling both demo and production environments.
 You can use these keys and configurations for demo purposes or to manage a live, production environment.
