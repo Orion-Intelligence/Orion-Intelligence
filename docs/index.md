@@ -11,3 +11,4 @@ Welcome to the Orion Platform Documentation.
 introduction
 overview
 developer_documentation
+user_manual.md
