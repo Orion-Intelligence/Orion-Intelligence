@@ -1,7 +1,5 @@
-# Welcome to Orion Platform
+# User Documentation
 ## Introduction
-
-The Orion Platform is an advanced and comprehensive web-based solution tailored specifically for Open Source Intelligence (OSINT) experts. Designed with cutting-edge technology, it seamlessly combines the functionalities of a browser, a search engine, a web crawler, and a data aggregation tool into a single, unified platform. This integration empowers users to efficiently explore vast datasets, conduct in-depth searches, and visualize complex information patterns with ease. The platform's robust capabilities make it a vital tool for professionals working in data analysis, intelligence gathering, and research-intensive domains.
 
 let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that provide full control over the system's functionality, ensuring smooth and efficient management of operations.
 
