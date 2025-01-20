@@ -330,6 +330,6 @@ PRODUCTION_DOMAIN=*
 **Description:** In production mode, we use environmental variables to control and manage the system. This setup is crucial for optimizing performance and making production decisions.
 
 
-**Control Management System**
+### Control Management System
 All these configurations fall under a centralized control management system, which helps in controlling both demo and production environments.
 You can use these keys and configurations for demo purposes or to manage a live, production environment.
