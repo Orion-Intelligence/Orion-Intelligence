@@ -302,7 +302,7 @@ Key features of the tool
 - Monitor how many links each crawler is extracting and bringing back.
 - Debug issues such as broken or stuck crawlers during operation.
   
-![WhatsApp Image 2025-01-14 at 11 30 35 PM (1)](https://github.com/user-attachments/assets/1e4b2f66-349b-44b8-b043-f58e2eb3774f)
+![image](https://github.com/user-attachments/assets/1c8804cd-bb65-4331-9df9-c0e55a4084cc)
 
 In this way, if we need to access a system, a key is required for that system. With the help of this key, we can access its features or resources.
 ### Keys
