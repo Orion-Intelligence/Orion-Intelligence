@@ -109,6 +109,7 @@ The content bar offers 10 different options, enabling users to view links based 
 
 ![image](https://github.com/user-attachments/assets/307b3aa6-3f8c-4d05-afba-90c0f5e575a1)
 
+#### Filter
 Next to the content option, there is a small filter icon. Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the process of refining results for more targeted insights.
 
 ![11111](https://github.com/user-attachments/assets/94b19bee-171b-4a7f-a0a9-9f5d05b2ed3f)
