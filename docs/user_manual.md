@@ -28,7 +28,7 @@ The top navigation bar consists of three main menus
 
 
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. At the top, there is a search bar designed for users to quickly search for specific information, streamlining the process of data retrieval. Below the search bar, the page is divided into two main sections: the General Index and the Leaked Index. The General Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
-**Key Features**
+### Key Features
 - The **search bar** at the top allows for quick and efficient searching of specific information.
 - The **General Index** provides an overview of the broad data collected, offering a summary of standard findings.
 The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
@@ -42,9 +42,9 @@ The home page features a prominent search bar at the top, allowing users to inpu
 Selecting "Analytics" from the navigation bar displays two categories already available on the home page. This section provides a clear view of the platform’s data results. It is organized into two main categories for streamlined analysis.
 
 1. #### General Index
-
+   
  ![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
-
+ 
 The "General Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
 
 - **Document Count:** This section provides detailed information about the results obtained after fetching the data, focusing on the document count. It displays the total number of documents retrieved, presented as a single count value. This summary helps users quickly understand the volume of data collected.
