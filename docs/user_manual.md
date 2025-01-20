@@ -76,13 +76,11 @@ In this diagram, the values displayed within the boxes represent the crawling da
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
 ### Links Filter
-
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
 
 ![image](https://github.com/user-attachments/assets/62b7996c-b9d8-4f5e-a29e-2271f0f4b930)
 
 On this page, the live onion search table includes various elements that we will discuss individually. Each element plays a crucial role in the search and data retrieval process.
-
 In the first row, we have URLs, followed by the network type.
 
 #### Network Types
