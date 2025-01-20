@@ -17,7 +17,7 @@
         <div class="input-group">
           {% if mSearchCallbackRelevantSearchType == 'persona' %}
             <input autocomplete="off" autocapitalize="none" type="search" placeholder="Email" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-email" pattern="[^ ]*" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
-            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username"  maxlength="150" name="mUsername" value="{{ mUsernameQuery }}">
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username" maxlength="150" name="mUsername" value="{{ mUsernameQuery }}">
           {% else %}
             <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
           {% endif %}
@@ -25,7 +25,7 @@
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
           <input autocomplete="off" autocapitalize="none" type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
           <button class="btn btn-primary searchbar__search-button-right {% if mSearchCallbackRelevantSearchType == 'persona' %}searchbar__search-button-right-persona{% endif %}" type="submit">
-            <img  class="searchbar__search-button-right-icon" src="{% static 'trustly/images/magnifyingglasswhite.svg' %}" alt="Search">
+            <img class="searchbar__search-button-right-icon" src="{% static 'trustly/images/magnifyingglasswhite.svg' %}" alt="Search">
           </button>
         </div>
       </div>
@@ -58,11 +58,13 @@
         News
       </button>
     </span>
-    <span id="catagory_news">
+    {% if API_ACCESS == '1' %}
+      <span id="catagory_news">
       <button type="submit" name="pSearchParamType" value="persona" class="{% if mSearchCallbackRelevantSearchType == 'persona' %} searchbar__search-items-active-default searchbar__search-items-persona {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right-header">
         Email
       </button>
     </span>
+    {% endif %}
     {% include 'trustly/user/blades/search_template/blade_search_header_network.html' %}
 
     <span id="catagory_analytics" class="searchbar__nav-right">
