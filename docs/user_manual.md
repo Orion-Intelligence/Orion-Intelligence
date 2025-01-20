@@ -94,7 +94,7 @@ In the first row, we have URLs, followed by the network type.
 ![image](https://github.com/user-attachments/assets/82703f4e-ee8f-4d36-a6d6-83ce4d305b3f)
 
 
-#### Index Menu
+### Index Menu
 
 The Index Menu includes two categories:
 
