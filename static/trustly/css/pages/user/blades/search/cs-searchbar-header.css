@@ -87,7 +87,7 @@
   color: #ccc;
 }
 
-..searchbar__searchbox .searchbar__detail-header-search-input:focus {
+.searchbar__searchbox .searchbar__detail-header-search-input:focus {
   outline: none;
   border: none;
   box-shadow: none ;
