@@ -34,7 +34,7 @@ The home page acts as the central hub of the platform, providing users with easy
 The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
 The **structured layout** divides the page into sections, ensuring an intuitive and efficient user experience.
 
-![image](https://github.com/user-attachments/assets/09cc9dba-85df-4491-9271-82b1768db146)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/searchbar.png)
 
 The home page features a prominent search bar at the top, allowing users to input data for viewing or crawling. Below the search bar, the page is organized into two primary categories. These categories structure the platform’s core data for easy access and analysis.
 
@@ -43,7 +43,7 @@ Selecting "Analytics" from the navigation bar displays two categories already av
 
 1. #### General Index
    
- ![image](https://github.com/user-attachments/assets/2d2aad3e-3e1f-4558-8885-a2e6c99f5cd6)
+ ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/genericresults.png)
  
 The "General Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
 
