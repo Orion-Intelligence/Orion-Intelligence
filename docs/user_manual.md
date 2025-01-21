@@ -6,6 +6,7 @@ let's take a look at the admin panel, designed exclusively for administrative us
 https://github.com/msmannan00/Orion-Search/blob/documentation_v2/docs/screenshots/adminpage.png
 
 
+
 ## Homepage Page
 
 The Orion Platform's main interface offers users straightforward access to its features. It integrates with machine learning models to improve search accuracy and enable advanced content analysis. Orion provides a variety of functions, such as searching, filtering, and visualizing data across multiple categories, making it a powerful tool for exploring data and gathering insights.
