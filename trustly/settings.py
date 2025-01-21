@@ -47,7 +47,6 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'trustly.middleware.login_middleware.LoginRequiredMiddleware',
-    'trustly.middleware.email_api_access_middleware.EmailApiAccessMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'trustly.middleware.content_security_policy_middleware.content_security_policy_middleware',
     'trustly.middleware.maintenance_mode_middleware.maintenance_mode_middleware',

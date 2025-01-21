@@ -71,6 +71,7 @@ class SEARCH_CALLBACK:
   M_PHONE_NUMBER = "mPhoneNumber"
   M_CONTENT = "mSearchContent"
   M_USERNAME_QUERY = "mUsernameQuery"
+  M_API_ACCESSs= "mApiAccesss"
 
 
 class SEARCH_DOCUMENT_CALLBACK:

@@ -13,9 +13,9 @@ from trustly.services.request_manager.request_handler import request_handler
 import re
 from dotenv import load_dotenv
 import os
+from trustly.app.helper_manager.env_handler import env_handler
 
-load_dotenv()
-API_ACCESS = os.getenv("API_ACCESS")
+
 
 
 class search_session_controller(request_handler):
@@ -282,7 +282,8 @@ class search_session_controller(request_handler):
     else:
       mContext[SEARCH_CALLBACK.M_RESULT_COUNT] = p_search_model.m_total_documents
 
-    mContext["API_ACCESS"] = API_ACCESS
+    mContext["mApiAccess"] =    env_handler.get_instance().env('API_ACCESS')
+
 
     return mContext, True
 
