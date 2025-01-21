@@ -23,7 +23,6 @@
           {% endif %}
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamPage" value="1">
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
-          <input autocomplete="off" autocapitalize="none" type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
           <button class="btn btn-primary searchbar__search-button-right {% if mSearchCallbackRelevantSearchType == 'persona' %}searchbar__search-button-right-persona{% endif %}" type="submit">
             <img class="searchbar__search-button-right-icon" src="{% static 'trustly/images/magnifyingglasswhite.svg' %}" alt="Search">
           </button>

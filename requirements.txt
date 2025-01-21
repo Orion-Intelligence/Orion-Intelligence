@@ -37,4 +37,3 @@ sphinx
 myst-parser
 sphinx_rtd_theme
 aiohttp
-python-decouple

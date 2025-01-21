@@ -71,13 +71,10 @@ class search_model(request_handler):
 
   def __query_results(self, p_data):
     m_query_model = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER, [p_data])
-
-    # Get API_ACCESS value and include it in the context
     api_access = env_handler.get_instance().env('API_ACCESS')
-
     if m_query_model.m_search_type == "persona":
       if api_access == '0':
-        return True, None
+        return True, {}
 
       email = ""
       if "@" in m_query_model.m_search_query:
@@ -92,9 +89,6 @@ class search_model(request_handler):
       status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, [query, m_query_model.m_dynamic_crawl_trigger])
       m_status, m_context = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER, [result, status, m_query_model])
 
-      # Add the API_ACCESS value to the context under the key 'mApiAccess'
-      m_context['mApiAccess'] = api_access
-
       return m_status, m_context
 
     else:
@@ -107,9 +101,6 @@ class search_model(request_handler):
       m_query_model.set_total_documents(len(m_parsed_documents))
 
       m_context, m_status = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.M_INIT, [m_parsed_documents, m_query_model, total_pages])
-
-      # Add the API_ACCESS value to the context under the key 'mApiAccess'
-      m_context['mApiAccess'] = api_access
 
       m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_query, m_suggestions_content)
 
