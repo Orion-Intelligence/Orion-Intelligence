@@ -3,8 +3,7 @@
 
 let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that provide full control over the system's functionality, ensuring smooth and efficient management of operations.
 
-![adminpage](https://github.com/user-attachments/assets/7f62c701-ecc0-49be-9d1e-1867ebd61b8f)
-
+![https://github.com/msmannan00/Orion-Search/blob/documentation_v2/docs/screenshots/adminpage.png] 
 
 
 ## Homepage Page
