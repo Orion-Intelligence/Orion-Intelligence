@@ -35,18 +35,10 @@ class search_session_controller(request_handler):
       m_query_model.set_network(p_data.GET[SEARCH_PARAM.M_NETWORK])
     else:
       m_query_model.set_network("all")
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     if SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN in p_data.GET:
       m_query_model.set_dynamic_crawl_trigger(p_data.GET[SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN])
     if SEARCH_PARAM.M_USERNAME in p_data.GET:
       m_query_model.set_username(p_data.GET[SEARCH_PARAM.M_USERNAME])
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     if SEARCH_PARAM.M_SAFE_SEARCH in p_data.GET:
       if p_data.GET[SEARCH_PARAM.M_SAFE_SEARCH] == "True":
         m_query_model.m_safe_search = "True"
@@ -85,11 +77,13 @@ class search_session_controller(request_handler):
   @staticmethod
   def init_callbacks(p_search_model: query_model, p_relevance_context_list, p_related_business_list, p_related_news_list, p_related_files_list, total_pages):
     current_page = p_search_model.m_page_number
-    total_pages = math.ceil(total_pages)
+    total_pages = math.ceil(total_pages)  # Ensure total_pages is an integer
 
+    # Determine start and end page for pagination display
     start_page = max(1, current_page - 2)
     end_page = min(total_pages, current_page + 2)
 
+    # Ensure a full range of 5 pages is displayed if possible
     if end_page - start_page < 4:
       if start_page == 1:
         end_page = min(total_pages, start_page + 4)
@@ -211,15 +205,6 @@ class search_session_controller(request_handler):
   @staticmethod
   def __normalize_text(p_text):
     return p_text.encode("ascii", "ignore").decode()
-
-  import os
-  from dotenv import load_dotenv
-  from datetime import datetime
-
-  # Load environment variables
-  load_dotenv()
-
-  API_ACCESS = os.getenv("API_ACCESS")
 
   def __init_parameters(self, p_document_list, p_search_model, total_pages):
     m_relevance_context_list = []
