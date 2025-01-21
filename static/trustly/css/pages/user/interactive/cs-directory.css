@@ -53,9 +53,9 @@ html {
 
   .directory__upper-heading {
     flex-direction: column;
-    align-items: start !important;
+    align-items: start ;
     gap: 16px;
-    height: 120px !important;
+    height: 120px;
   }
 }
 

@@ -23,7 +23,7 @@
   border-radius: 10px;
   text-decoration: none;
   font-size: 14px;
-  margin-left: -6px !important;
+  margin-left: -6px ;
   font-weight: bold;
   outline: none;
   transition: background-color 0.3s, transform 0.3s;
@@ -43,15 +43,15 @@
 
 .directory-pagination li.disabled button {
   border: 0;
-  opacity: 0.4 !important;
+  opacity: 0.4 ;
   color: white;
   pointer-events: none;
   outline: none;
 }
 
 .directory-pagination li.active button{
-  background: #102A4685 !important;
-  color: white !important;
+  background: #102A4685 ;
+  color: white ;
   border: 0;
   pointer-events: none;
   font-weight: bold;
@@ -63,7 +63,7 @@
     display: flex;
     width: 50%;
     justify-content: start;
-    align-items: flex-start !important;
-    float: left !important;
+    align-items: flex-start ;
+    float: left ;
   }
 }

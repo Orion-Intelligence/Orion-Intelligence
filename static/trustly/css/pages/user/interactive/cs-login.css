@@ -1,5 +1,5 @@
 html {
-  background-image: linear-gradient(90deg, rgba(21, 52, 84, 1) 0%, rgba(22, 56, 88, 1) 100%) !important;
+  background-image: linear-gradient(90deg, rgba(21, 52, 84, 1) 0%, rgba(22, 56, 88, 1) 100%);
 }
 
 html::-webkit-scrollbar {
@@ -17,7 +17,7 @@ body{
   align-items: center;
   height: 100vh;
   position: relative;
-  background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) !important;
+  background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) ;
   color: white;
   overflow: hidden;
 }
@@ -47,7 +47,7 @@ body{
   justify-content: center;
   align-content: center;
   margin: 0 auto 40vh;
-  width: 600px !important;
+  width: 600px ;
   max-width: 50vw;
 }
 
@@ -84,7 +84,7 @@ body{
 
 .demo-login__searchbox{
   margin-top: 20px;
-  border-radius: 8px !important;
+  border-radius: 8px ;
   background: #fff url('/static/trustly/images/lock.svg') no-repeat 16px center;
   background-size: 20px 20px;
   padding: 10px 10px 10px 45px;
@@ -112,7 +112,7 @@ body{
   }
 
   .demo-login__search-form {
-    padding: 22px !important;
+    padding: 22px ;
     max-width: none;
   }
 

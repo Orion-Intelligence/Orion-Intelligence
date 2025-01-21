@@ -1,16 +1,16 @@
 .body {
-  overflow-x: hidden !important;
+  overflow-x: hidden ;
 }
 
 html {
-  background: #1c4d7d !important;
+  background: #1c4d7d;
   scroll-behavior: smooth;
 }
 
 .search_container {
   margin: 0;
   height: auto;
-  background-image: linear-gradient(to bottom, #174069 0%, rgba(41, 87, 132, 255)) !important;
+  background-image: linear-gradient(to bottom, #174069 0%, rgba(41, 87, 132, 255));
 }
 
 .search {
@@ -36,19 +36,19 @@ html {
 
 .searchbar__search-container-persona-border {
   border-left: 1px solid #ffffff15;
-  border-radius: 30px !important;
+  border-radius: 30px ;
 }
 
 .searchbar__search-container-persona-border-color {
-  border: 1px solid #ffffff15 !important;
-  vertical-align: middle !important;
+  border: 1px solid #ffffff15 ;
+  vertical-align: middle;
   margin: 0;
 }
 
 .searchbar__search-container-persona-item {
   font-weight: bold;
   color: #D4D4D4;
-  border-radius: 12px;
+  border-radius: 100px;
   background: #FCFCFC0D;
   font-size: 12px;
   font-family: Roboto, sans-serif;
@@ -63,8 +63,8 @@ html {
   border: 1px solid #ffffff50;
   overflow: hidden;
   height: auto;
-  background: #2A578480 !important;
-  border-radius: 10px !important;
+  background: #2A578480;
+  border-radius: 10px;
   font-family: Roboto, sans-serif;
   font-size: 14px;
 }
@@ -74,12 +74,12 @@ html {
 }
 
 .searchbar__search-card-header-persona {
-  background: rgba(220, 53, 69, 0.5) !important;
+  background: rgba(220, 53, 69, 0.5);
   padding: 15px;
 }
 
 .searchbar__search-items-persona {
-  width: 65px !important;
+  width: 65px;
 }
 
 .search-persona__no-suggestion-header {
@@ -154,7 +154,7 @@ html {
   }
 
   .search__content__right {
-    width: 100vw !important;
+    width: 100vw;
     padding-right: 30px;
   }
 
@@ -169,11 +169,11 @@ html {
   }
 
   .search__results {
-    width: 100vw !important;
+    width: 100vw ;
     padding-bottom: 0;
   }
 
   .search {
-    min-height: 100vh;
+    min-height: 80vh;
   }
 }

@@ -35,12 +35,12 @@
   cursor: pointer;
   text-decoration: none;
   color: #fff;
-  background: #102A4685 !important;
+  background: #102A4685 ;
   opacity: 1;
 }
 
 button{
-  outline: none !important;
+  outline: none ;
 }
 
 .search__navigation {
@@ -61,12 +61,12 @@ button{
 }
 
 .search__navigation--focus{
-  background: #102A4685 !important;
+  background: #102A4685 ;
   color: #fff;
 }
 
 .search__navigation:active {
-  background: #102A4685 !important;
+  background: #102A4685 ;
 }
 
 .search__navigation:hover {

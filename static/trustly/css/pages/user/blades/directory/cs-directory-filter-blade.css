@@ -47,22 +47,22 @@ select option {
 }
 
 .directory__main-submit-button {
-  background: #123354 !important;
-  color: white !important;
+  background: #123354 ;
+  color: white ;
   border: 0;
   font-weight: bold;
-  outline: none !important;
+  outline: none ;
   border-radius: 8px;
   cursor: pointer;
   padding: 8px 14px;
 }
 
 .directory__main-submit-button:hover {
-  background-color: #12335450 !important;
-  color: white !important;
+  background-color: #12335450 ;
+  color: white ;
   border: 0;
   font-weight: bold;
-  outline: none !important;
+  outline: none ;
   border-radius: 8px;
   padding: 11px 14px;
 }
@@ -108,11 +108,11 @@ select option {
 }
 
 .directory__main-filter-menu-contentType {
-  min-width: 200px !important;
+  min-width: 200px ;
 }
 
 .directory__main-filter-menu-network {
-  min-width: 200px !important;
+  min-width: 200px ;
 }
 
 .directory__main-contentType-filter-checkbox:checked ~ .directory__main-filter-menu {
