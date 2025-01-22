@@ -309,22 +309,22 @@ In this way, if we need to access a system, a key is required for that system. W
 
 ### Keys
 **TRAEFIK KEYS**
-TRAEFIK_USERNAME=admin
-TRAEFIK_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
+1. TRAEFIK_USERNAME=admin
+2. TRAEFIK_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
 
 **Description:** These keys are used for both Flower and Dozzle. They allow access to the demo server, enabling users to use it for demonstration purposes.
 
 **DEMO KEYS**
-DEMO_USERNAME=demo
-DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
+1. DEMO_USERNAME=demo
+2. DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
 
 **Description:** Demo keys are used to provide users with a demo version of the service. By using these keys, users can access a limited, demo server environment to explore features.
 
 **PRODUCTION MODE**
-##### DEMO="0"
-##### API_SWAGGER="1"
-##### PRODUCTION="0"
-##### MAINTAINANCE="0"
+1. DEMO="0"
+2. API_SWAGGER="1"
+3. PRODUCTION="0"
+4. MAINTAINANCE="0"
 
 **Description:** In production mode, we use environmental variables to control and manage the system. This setup is crucial for optimizing performance and making production decisions.
 
