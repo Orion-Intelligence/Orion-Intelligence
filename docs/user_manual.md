@@ -1,4 +1,4 @@
-# User Documentations
+# User Documentation
 ## Introduction
 
 let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that provide full control over the system's functionality, ensuring smooth and efficient management of operations.
@@ -321,11 +321,10 @@ DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
 **Description:** Demo keys are used to provide users with a demo version of the service. By using these keys, users can access a limited, demo server environment to explore features.
 
 **PRODUCTION MODE**
-DEMO="0"
-API_SWAGGER="1"
-PRODUCTION="0"
-MAINTAINANCE="0"
-PRODUCTION_DOMAIN=*
+##### DEMO="0"
+##### API_SWAGGER="1"
+##### PRODUCTION="0"
+##### MAINTAINANCE="0"
 
 **Description:** In production mode, we use environmental variables to control and manage the system. This setup is crucial for optimizing performance and making production decisions.
 
