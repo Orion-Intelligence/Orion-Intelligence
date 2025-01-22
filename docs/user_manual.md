@@ -71,7 +71,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 2. #### Leaked Index
 
-![image](https://github.com/user-attachments/assets/5a04980d-d04a-4dbd-a361-f3194c8115d2)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/leakedindex1.png)
 
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
