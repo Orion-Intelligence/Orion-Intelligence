@@ -227,32 +227,32 @@ After viewing the search results, let’s explore the options available in the t
 
 Next, we move to the "Monitor" tab in the top menu. This option displays a separate script for each site, providing detailed insights and monitoring capabilities. Additionally, it allows users to include custom scripts, offering flexibility to tailor the monitoring process as needed.
 
-![image](https://github.com/user-attachments/assets/6aa830be-d846-4cc2-9d28-6f56b96cdab1)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/monitor.png)
 
 ### Market Section:
 The "Market" section provides insights into the buying and selling activities of various items, whether they involve legal or illegal goods. It acts as a monitoring tool to observe transactions and trends within the marketplace. Essentially, this section serves as a virtual store for tracking the sale and purchase of items on the dark web, offering a comprehensive overview of the trading environment.
 
-![image](https://github.com/user-attachments/assets/b2c65eca-363e-46ef-9c57-6ec3236bbd72)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/market.png)
 
 ### Forum Section:
 In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
 
-![image](https://github.com/user-attachments/assets/84938ad2-d76b-4099-8424-d47d1666ce83)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/forum.png)
 
 ### News Section:
 The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
 
-![image](https://github.com/user-attachments/assets/8c86b7df-e7c6-4442-a8a1-5ec14f01493f)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/news.png)
 
 ### Email Section: 
 By selecting the email option, users can enter any email address to investigate related information. This feature helps identify where the data associated with that email has been leaked or exposed. It provides valuable insights into potential data breaches involving the specified email.
 
-![image](https://github.com/user-attachments/assets/bbcdf2b6-ba60-4bee-adeb-248e0ff3ef09)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/email.png)
 
 ### Network type
 At the end of the page, there is a button on the platform. When clicked, a dropdown menu appears, providing options to filter the network based on specific criteria. This feature allows users to refine their search or display preferences according to their needs.
 
-![screencapture-orion-genesistechnologies-org-search-2025-01-10-16_32_15](https://github.com/user-attachments/assets/5323f7bd-8576-48e7-bf60-ee1e2d6e7640)
+![screencapture-orion-genesistechnologies-org-search-2025-01-10-16_32_15](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/settings.png)
 
 By default, the setting will be set to "All" to display normal results. However, users have the option to modify this setting based on their preferences. This flexibility allows for more customized viewing of the data.
 
