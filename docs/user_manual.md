@@ -102,7 +102,7 @@ The Index Menu includes two categories:
 
 - **Leaked Index**  In this section, we can view only the links containing leaked data, filtering out non-relevant results. This allows users to focus on sensitive or critical information, streamlining the analysis of potentially high-risk data.
 
-![image](https://github.com/user-attachments/assets/8fa343fa-70cd-4036-837d-167e4ff89b57)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/index.png)
 
 #### Content Option Bar
 The content bar offers 10 different options, enabling users to view links based on their specific selection. By default, it is set to the "General" option, displaying a broad range of links. Users can open the dropdown menu to choose from a variety of categories or filters, allowing them to tailor the content to their needs. This feature enhances navigation and makes it easier to access relevant data. It ensures a flexible and user-friendly experience for viewing links.
