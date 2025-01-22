@@ -208,7 +208,7 @@ Below this, the "General Coverage" section displays the results in a structured 
 - It first shows the total number of items found during the search.
 - Then, it provides a breakdown of active and inactive items, along with the results for seldom active items, offering a clear summary of the data.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/resultgeneral.png)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/resultgeneral2.png)
 
 #### Unique Results
 Afterward, the page presents some unique results for further analysis. The first section displays information about the extracted URLs. Below it, a table lists the unique emails identified during the crawl. This is followed by details about the archive, highlighting unique document files retrieved from the data.
