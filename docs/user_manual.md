@@ -267,12 +267,12 @@ We have added an extra API to the server to provide insights into server usage. 
 - It also offers real-time updates on system performance, helps identify potential bottlenecks, and ensures a proactive approach to system optimization and troubleshooting.
 - It is providing us data without a server.
 
-![WhatsApp Image 2025-01-14 at 11 24 32 PM](https://github.com/user-attachments/assets/58c3964e-3f14-494e-a91b-2cdadd197b40)
+![WhatsApp Image 2025-01-14 at 11 24 32 PM](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/dozzle.png)
 
 ### Swagger.org
 After this, we move on to Swagger, which plays a critical role by essentially handling the actual backend operations. Earlier, we discussed Orion, a comprehensive front-side software that provided us with the ability to view and analyze all the data effectively. Orion serves as the interface for interacting with the data, making it user-friendly and accessible. On the other hand, Swagger allows us to dive deeper into the backend processes, giving insights into how the data is being handled and processed behind the scenes. This distinction between front-end visualization and backend operation highlights the complementary roles of Orion and Swagger in managing and understanding the system's functionality.
 
-![WhatsApp Image 2025-01-14 at 11 26 16 PM (1)](https://github.com/user-attachments/assets/16450bc8-8058-4223-a37d-84394ba973ea)
+![WhatsApp Image 2025-01-14 at 11 26 16 PM (1)](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/swegger.png)
 
 In Swagger, we have several APIs that we can directly use for testing. The biggest advantage of Swagger's APIs is that if you don't want to use our system, you can still run Swagger's APIs on your own system and utilize them.
 
@@ -282,12 +282,12 @@ Swagger operates on our HTTP scheme and provides three main APIs:
 **GET /api/insight:** This API provides key insights, which are the results we saw on Orion's front page.
 **GET /api/search:** This API enables us to view the search results, showing what we find in response to our search queries.
 
-![image](https://github.com/user-attachments/assets/75e89e94-6727-4278-a01a-4e62781c11b2)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/swegger1.png)
 
 ### Models
 After this, on the same page, we have several models that are active, including DirectoryResponse, Directory, InsightResponse, GenericModel, LeakModel, SearchResponse, SearchResult, and ErrorResponse.
 
-![image](https://github.com/user-attachments/assets/c5114a92-abac-40fd-89de-f60cc31c1e6b)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/models.png)
 
 To run Swagger, we have been provided with its link. Below, the keys for it are mentioned.
 
@@ -302,7 +302,7 @@ Key features of the tool
 - Monitor how many links each crawler is extracting and bringing back.
 - Debug issues such as broken or stuck crawlers during operation.
   
-![image](https://github.com/user-attachments/assets/1c8804cd-bb65-4331-9df9-c0e55a4084cc)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/flowers.png)
 
 In this way, if we need to access a system, a key is required for that system. With the help of this key, we can access its features or resources. These keys related to open sources, specifically TRAEFIK KEYS, DEMO KEYS, and PRODUCTION MODE. These three concepts help us manage demo server access and control features in production.
 
