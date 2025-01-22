@@ -118,7 +118,7 @@ Next to the content option, there is a small filter icon. Clicking on this icon 
 
 ### Onion Crawl Statistics
 
-![image](https://github.com/user-attachments/assets/2419e18f-d78a-40ad-8dea-95ad0247b03b)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/crawlstatistics.png)
 
 
 The Live Onion Search Table presents real-time search results in an organized, easy-to-read format. It allows users to quickly view and analyze data as it is fetched.
