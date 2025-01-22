@@ -2,8 +2,8 @@
   color: #000000;
   height: 60px;
   text-align: right;
-  background-image: linear-gradient(to bottom, #ffb31a, #ffb31a) !important;
-  border-bottom-color: #e69900 !important;
+  background-image: linear-gradient(to bottom, #ffb31a, #ffb31a);
+  border-bottom-color: #e69900 ;
   border-style: solid;
   border-right-width: 0;
   border-left-width: 0;
@@ -89,23 +89,23 @@
   border: 1px solid #ffffff;
   border-left: 6px solid #ffffff;
   margin-top: 7px;
-  color: #595959 !important;
+  color: #595959;
 }
 
 ::placeholder {
-  color: #b3b3b3 !important;
+  color: #b3b3b3;
   opacity: 1;
 }
 
 .privacy__statusbar-searchbox:hover {
-  outline: 0 !important;
+  outline: 0;
   box-shadow: 0 0 0 #ffffff;
   border: 1px solid #ffffff;
   border-left: 6px solid #ffffff;
 }
 
 .privacy__statusbar-searchbox:focus {
-  outline: 0 !important;
+  outline: 0 ;
   box-shadow: 0 0 0 #ffffff;
   border: 1px solid #ffffff;
   border-left: 6px solid #ffffff;
@@ -113,7 +113,7 @@
 
 
 .privacy__searchbox-icon {
-  width: 17px !important;
+  width: 17px ;
   margin-top: 2px;
   margin-right: 38px;
 }
@@ -122,7 +122,7 @@
 .privacy__searchbox-button {
   height: 38px;
   width: 30px;
-  float: left !important;
+  float: left ;
   opacity: 1;
   cursor: pointer;
   padding-left: -10px;

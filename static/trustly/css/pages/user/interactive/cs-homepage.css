@@ -1,5 +1,5 @@
 html {
-  background-image: linear-gradient(90deg, rgba(21, 52, 84, 1) 0%, rgba(22, 56, 88, 1) 100%) !important;
+  background-image: linear-gradient(90deg, rgba(21, 52, 84, 1) 0%, rgba(22, 56, 88, 1) 100%);
 }
 
 html::-webkit-scrollbar {
@@ -75,7 +75,7 @@ html::-webkit-scrollbar {
 
 @media only screen and (max-width: 430px) {
   .home__searchbox {
-    width: 300px !important;
+    width: 300px;
   }
 }
 
@@ -84,15 +84,7 @@ html::-webkit-scrollbar {
     min-height: 100%;
   }
 
-  .home__search-form {
-    display: block;
-    margin-top: 50px !important;
-    justify-content: start;
-    align-content: start;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-bottom: 8vh;
-  }
+
 
   .flex-item {
     margin: 0;
@@ -100,6 +92,6 @@ html::-webkit-scrollbar {
   }
 
   .flex-container {
-    padding: 20px !important;
+    padding: 20px;
   }
 }

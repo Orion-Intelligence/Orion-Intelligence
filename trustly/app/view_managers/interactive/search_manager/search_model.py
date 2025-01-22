@@ -12,7 +12,7 @@ from trustly.app.view_managers.interactive.search_manager.spell_checker import s
 from trustly.app.view_managers.interactive.search_manager.tokenizer import tokenizer
 from trustly.services.request_manager.request_handler import request_handler
 import re
-
+from trustly.app.helper_manager.env_handler import env_handler
 
 
 class search_model(request_handler):
@@ -71,8 +71,11 @@ class search_model(request_handler):
 
   def __query_results(self, p_data):
     m_query_model = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER, [p_data])
+    api_access = env_handler.get_instance().env('API_ACCESS')
     if m_query_model.m_search_type == "persona":
-      print(p_data)
+      if api_access == '0':
+        return True, {}
+
       email = ""
       if "@" in m_query_model.m_search_query:
         m_search_query = m_query_model.m_search_query
@@ -85,7 +88,9 @@ class search_model(request_handler):
       query = {"email": email, "username": username}
       status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, [query, m_query_model.m_dynamic_crawl_trigger])
       m_status, m_context = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER, [result, status, m_query_model])
+
       return m_status, m_context
+
     else:
       if m_query_model.m_search_query == GENERAL_STRINGS.S_GENERAL_EMPTY:
         return False, None
@@ -96,6 +101,7 @@ class search_model(request_handler):
       m_query_model.set_total_documents(len(m_parsed_documents))
 
       m_context, m_status = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.M_INIT, [m_parsed_documents, m_query_model, total_pages])
+
       m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_query, m_suggestions_content)
 
       return m_status, m_context
@@ -110,8 +116,7 @@ class search_model(request_handler):
       return False, None
     m_status, m_documents = elastic_controller.get_instance().invoke_trigger(ELASTIC_CRUD_COMMANDS.S_READ, [ELASTIC_REQUEST_COMMANDS.S_SEARCH, [m_query_model], [None]])
     m_parsed_documents, m_suggestions_content, total_pages = self.__parse_filtered_documents(m_documents)
-    return JsonResponse({"Result":m_parsed_documents, "Suggestions":m_suggestions_content, "Page Count":total_pages})
-
+    return JsonResponse({"Result": m_parsed_documents, "Suggestions": m_suggestions_content, "Page Count": total_pages})
 
   # External Request Callbacks
   def invoke_trigger(self, p_command, p_data):

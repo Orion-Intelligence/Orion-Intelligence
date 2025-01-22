@@ -11,7 +11,7 @@ from trustly.app.view_managers.interactive.search_manager.search_data_model.quer
 from trustly.app.view_managers.interactive.search_manager.search_enums import SEARCH_PARAM, SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK, SEARCH_SESSION_COMMANDS, API_RESPONSE
 from trustly.services.request_manager.request_handler import request_handler
 import re
-
+from trustly.app.helper_manager.env_handler import env_handler
 
 class search_session_controller(request_handler):
 
@@ -93,7 +93,8 @@ class search_session_controller(request_handler):
       end_page = total_pages
 
     page_range = range(start_page, end_page + 1)
-    m_context = {SEARCH_CALLBACK.M_NETWORK: p_search_model.m_network, SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: p_relevance_context_list, SEARCH_CALLBACK.M_PAGE_NUM: page_range, SEARCH_CALLBACK.M_MAX_PAGINATION: total_pages, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_RELATED_BUSINESS_SITES: p_related_business_list, SEARCH_CALLBACK.M_RELATED_NEWS_SITES: p_related_news_list, SEARCH_CALLBACK.M_RELATED_FILES: p_related_files_list, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site}
+    api_access = env_handler.get_instance().env('API_ACCESS')
+    m_context = {SEARCH_CALLBACK.M_API_ACCESS:api_access, SEARCH_CALLBACK.M_NETWORK: p_search_model.m_network, SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: p_relevance_context_list, SEARCH_CALLBACK.M_PAGE_NUM: page_range, SEARCH_CALLBACK.M_MAX_PAGINATION: total_pages, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_RELATED_BUSINESS_SITES: p_related_business_list, SEARCH_CALLBACK.M_RELATED_NEWS_SITES: p_related_news_list, SEARCH_CALLBACK.M_RELATED_FILES: p_related_files_list, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site}
 
     return m_context
 
@@ -281,10 +282,9 @@ class search_session_controller(request_handler):
 
   @staticmethod
   def __init_runtime_parser(p_document_list, p_status, p_search_model):
-
+    api_access = env_handler.get_instance().env('API_ACCESS')
     if p_status == API_RESPONSE.M_PENDING:
-      m_context = {SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "false", SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, SEARCH_CALLBACK.M_USERNAME_QUERY: p_search_model.m_username,  # Added username here
-      }
+      m_context = {SEARCH_CALLBACK.M_API_ACCESS: api_access, SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "false", SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, SEARCH_CALLBACK.M_USERNAME_QUERY: p_search_model.m_username}
       return True, m_context
 
     else:
@@ -314,8 +314,8 @@ class search_session_controller(request_handler):
         new_key = key.replace("m_", "").replace("_", " ").title()
         modified_data[new_key] = merged_data[key]
 
-      m_context = {SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "true", SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: modified_data, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, SEARCH_CALLBACK.M_USERNAME_QUERY: p_search_model.m_username,  # Added username here
-      }
+      api_access = env_handler.get_instance().env('API_ACCESS')
+      m_context = {SEARCH_CALLBACK.M_API_ACCESS: api_access, SEARCH_CALLBACK.M_DYNAMIC_PARSER_STATUS: "true", SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: modified_data, SEARCH_CALLBACK.M_PAGE_NUM: 1, SEARCH_CALLBACK.M_MAX_PAGINATION: 1, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site, SEARCH_CALLBACK.M_USERNAME_QUERY: p_search_model.m_username}
 
       return True, m_context
 
