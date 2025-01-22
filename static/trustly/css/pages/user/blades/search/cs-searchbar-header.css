@@ -29,8 +29,8 @@
   margin-top: -1px;
   padding: 40px 48px 15px 80px;
   padding-top: 25px;
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
+  padding-bottom: 0;
+  margin-bottom: 0;
   border-bottom: 1px solid #19334D;
   background: #174069;
   padding-right: 0;
@@ -55,33 +55,32 @@
   align-self: center;
   border-radius: 8px 0 0 7px;
   -moz-border-radius-bottomright: 0;
-  height: 44px ;
+  height: 44px;
   width: 100%;
   font-size: 16px;
   color: black;
-  padding-left: 20px ;
+  padding-left: 20px;
   margin-left: 0;
-  border: 0 ;
+  border: 0;
   padding-right: 45px;
 }
+
 .searchbar__searchbox .searchbar__detail-header-search-input-email {
-  border-radius: 8px !important;
-  margin-right: 15px;
+  border-radius: 8px;
+  margin-right: 6px;
 }
 
-.searchbar__searchbox .searchbar__search-button-right{
-  border: 0 ;
-  outline: 0 ;
+.searchbar__searchbox .searchbar__search-button-right {
+  border: 0;
+  outline: 0;
   width: 50px;
-  border-radius: 8px ;
-  border-bottom-left-radius: 0 ;
-  border-top-left-radius: 0 ;
-  background: #2a5989 ;
+  border-radius: 8px;
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  background: #2a5989;
 }
-.searchbar__searchbox .searchbar__search-button-right-persona{
-  border-bottom-left-radius: 8px !important;
-  border-top-left-radius: 8px !important;
-}
+
+
 
 .searchbar__searchbox .searchbar__detail-header-search-input::placeholder {
   color: #ccc;
@@ -90,14 +89,14 @@
 .searchbar__searchbox .searchbar__detail-header-search-input:focus {
   outline: none;
   border: none;
-  box-shadow: none ;
+  box-shadow: none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
 }
 
 .searchbar__searchbox .searchbar__detail-header-search-input:hover {
   outline: none;
-  box-shadow: none ;
+  box-shadow: none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   border: none;
@@ -118,8 +117,18 @@
 }
 
 
-.searchbar__searchbox .searchbar__search-items--width {
-  width: 55px ;
+#catagory_images .searchbar__search-items--width {
+  width: 55px;
+  outline: none;
+}
+
+#catagory_news .searchbar__search-items--width {
+  width: 55px;
+  outline: none;
+}
+
+#catagory_finance .searchbar__search-items--width {
+  width: 55px;
   outline: none;
 }
 
@@ -128,8 +137,8 @@
   outline: none;
 }
 
-.searchbar__detail-header-catagories-margin-right-header {
-  margin: 0 ;
+#catagory_email .searchbar__detail-header-catagories-margin-right-header {
+  margin: 0;
 }
 
 .searchbar__search-items {
@@ -148,6 +157,10 @@
   margin-right: 30px;
   outline: none;
   border-bottom: 3px solid #00000000;
+}
+
+.searchbar__detail-header-catagories-margin-right-border {
+  width: 70px;
 }
 
 .searchbar__search-items:hover:not(.active) {
@@ -183,10 +196,12 @@
   #catagory_finance {
     display: none;
   }
-  .searchbar__detail-header-search-input-email{
-    width: 100%!important;
-    margin-bottom: 20px!important;
+
+  .searchbar__detail-header-search-input-email {
+    width: 100% !important;
+    margin-bottom: 20px !important;
   }
+
   .searchbar__search-button-right-persona {
     height: 50px;
   }

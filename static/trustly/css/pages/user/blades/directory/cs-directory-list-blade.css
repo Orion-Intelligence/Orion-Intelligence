@@ -34,7 +34,7 @@
   min-height: 45px;
 }
 
-.directory-list__table tr:nth-child(odd) {
+.directory-list__table tbody tr:nth-child(odd) {
   background-color: #2A578429 ;
   min-height: 45px;
 }

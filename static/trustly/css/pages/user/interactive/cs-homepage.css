@@ -84,15 +84,7 @@ html::-webkit-scrollbar {
     min-height: 100%;
   }
 
-  .home__search-form {
-    display: block;
-    margin-top: 50px;
-    justify-content: start;
-    align-content: start;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-bottom: 8vh;
-  }
+
 
   .flex-item {
     margin: 0;

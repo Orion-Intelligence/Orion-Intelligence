@@ -17,9 +17,7 @@
   -moz-transition: .0s;
   transition: .0s;
 }
-.home__search-container{
-  margin-bottom: 15vh;
-}
+
 .home__search-form .home__search-container-button {
   border-radius: 0 7px 7px 0;
   background: #30669c;
