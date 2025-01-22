@@ -181,17 +181,17 @@ When viewing a site from the search results, its display is based on specific fa
 - The next tab provides information about the type of content available on that website.
 - These parameters collectively represent specific details for each site that appears in the search results.
 
-![image](https://github.com/user-attachments/assets/e4be9f60-82bb-4a5a-bc99-ebddbec5dad3)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/companies.png)
 
 #### Section Tab
 The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being extracted during the data crawling process. This feature helps users identify and understand the structure of the website within the fetched data. 
 
-![image](https://github.com/user-attachments/assets/7a71a046-915a-48b8-b4da-b1ee071c9ed2)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/sections.png)
 
 #### Content Tab
 Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
 
-![image](https://github.com/user-attachments/assets/869f1d79-0d94-4913-b056-b5f8155f116b)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/content1.png)
 
 In generic crawling, three key aspects can be observed using a machine learning model. On the right side of the page, several parameters of the results are displayed for user convenience:
 
@@ -201,24 +201,24 @@ In generic crawling, three key aspects can be observed using a machine learning 
 - The number of links or pages retrieved that are associated with the keywords.
 These observations offer a clear understanding of how the data is gathered and processed, ensuring that users can analyze the results efficiently and make informed decisions based on the displayed metrics.
 
-![image](https://github.com/user-attachments/assets/22dbcf1e-a7cd-44d7-b094-b3b7d9c4e198)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/keywordinsight.png)
 
 #### General Coverage
 Below this, the "General Coverage" section displays the results in a structured format.
 - It first shows the total number of items found during the search.
 - Then, it provides a breakdown of active and inactive items, along with the results for seldom active items, offering a clear summary of the data.
 
-![image](https://github.com/user-attachments/assets/1594be14-b37b-4874-b80d-1cba0fa096cf)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/resultgeneral.png)
 
 #### Unique Results
 Afterward, the page presents some unique results for further analysis. The first section displays information about the extracted URLs. Below it, a table lists the unique emails identified during the crawl. This is followed by details about the archive, highlighting unique document files retrieved from the data.
 
-![image](https://github.com/user-attachments/assets/793634ef-c4b1-4faf-a6a1-781ad5f69059)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/uniqueurls.png)
 
 #### Unique Cellular
 This section displays the total number of phone numbers extracted from the crawled data. It provides a clear count for easy reference and analysis.
 
-![image](https://github.com/user-attachments/assets/008afd38-e2b5-4470-ad5a-a9b525f47579)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/uniquenumbers.png)
 
 After viewing the search results, let’s explore the options available in the top navbar step by step. Each option provides specific functionalities for navigating and analyzing data.
 
