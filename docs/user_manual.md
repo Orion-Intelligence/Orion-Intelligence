@@ -65,7 +65,7 @@ The "General Index" category displays information related to the crawling proces
 - **Clearnet/Document:** This section informs us about the clearnet-type URLs being displayed. On average, each link provides around 4 URLs, which belong to the clearnet, a standard type of network.
 - **Common Type:** These are the general types supported by our network, helping categorize the different types of content available. This section ensures users can understand the variety and scope of data collected from different sources.
 
-![image](https://github.com/user-attachments/assets/e24d4c82-4494-49ae-9878-c2f350d4881a)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/generalindex.png)
 
 In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers represent updates on a weekly basis.
 
