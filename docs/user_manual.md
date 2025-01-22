@@ -138,11 +138,11 @@ The Live Onion Search Table presents real-time search results in an organized, e
 
 When you enter any keywords into the search bar and press enter, the system processes the input and retrieves relevant data. It then displays the search results that match the specified keywords. This allows users to efficiently find information based on their search criteria. The results are presented in an organized format for easy analysis.
 
-![image](https://github.com/user-attachments/assets/e6d76c53-7201-491b-8ccc-c868390e16af)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/searchtype.png)
 
 When performing a search, the results are shown in a split view, helping organize the information more effectively. This layout separates different data sets, making it easier for users to focus on specific results. By displaying the data side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by simplifying the navigation of search results.
 
-![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://github.com/user-attachments/assets/5430a7c9-d2d8-4b32-8eed-97fe2c5b4b8c)
+![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/searchresult.png)
 
 ### Top Bar Options
 
