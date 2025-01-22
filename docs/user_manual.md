@@ -158,11 +158,11 @@ We have a total of 6 classifiers here.The top bar, displayed post-search, includ
 
 - **Emails:** Lists email-related results.
 
-![image](https://github.com/user-attachments/assets/c88f5db2-cafa-4364-894d-11b91576cdf4)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/datasearch.png)
 
 This will provide us with the overall fetch results related to the keyword.
 
-![image](https://github.com/user-attachments/assets/0c29c908-8b91-4504-9f3b-dae253d1eda9)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/foundresults.png)
 
 ### Enable Safe Search Button
 
@@ -170,7 +170,7 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 1. - Locate the Safe Search button.
 2. - Click the button to activate safe browsing.
   
-![image](https://github.com/user-attachments/assets/f3deed4b-654d-4305-8d2a-6d69f9530eca)
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/documentation_v2/docs/screenshots/enable.png)
 
 When viewing a site from the search results, its display is based on specific factors.
 **Network Type**: The first option at the top shows the network type, such as Onion, I2P, or Clearnet.
