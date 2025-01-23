@@ -34,15 +34,10 @@
 .home__searchbox::placeholder {
   font-family: 'Roboto', sans-serif;
   font-size: 17px;
-  color: #000000;
+  color: #d0c4bf;
   opacity: 1;
 }
 
-.home__searchbox::placeholder {
-  font-size: 17px;
-  padding-left: 10px;
-  color: #000000;
-}
 
 @media only screen and (max-width: 1000px) {
   .home__search-container {
