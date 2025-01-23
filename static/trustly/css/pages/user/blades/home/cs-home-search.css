@@ -25,7 +25,9 @@
   border: none;
   outline: none;
 }
-
+.home__search-form .home__search-container-button:hover{
+  background: #1e3f66;
+}
 
 .home__search-container-button-icon {
   margin-top: -5px;

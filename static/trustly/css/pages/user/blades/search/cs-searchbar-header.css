@@ -80,6 +80,9 @@
   background: #2a5989;
 }
 
+.searchbar__searchbox .searchbar__search-button-right:hover {
+  background: #1e3f66;
+}
 
 .searchbar__searchbox .searchbar__detail-header-search-input::placeholder {
   color: #ccc;

@@ -1,7 +1,3 @@
-.footer__scroll-top {
-  display: flex;
-  align-items: center;
-}
 
 .footer__scroll-top__icon img {
   width: 24px;
@@ -22,14 +18,27 @@
   width: 100%;
   z-index: 10000;
   left: 0;
+  margin-left: 0;
   background: rgba(33, 75, 116, 0.81);
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 16px;
+  padding: 0;
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background 0.3s ease;
 }
 
+.footer__docs-icon {
+  font-size: 12px;
+  font-weight: 400;
+  color: #fff;
+  margin-right: 10px;
+
+}
+
+.footer__docs-icon:hover {
+  text-decoration: none;
+  color: #fff;
+}
