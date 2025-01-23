@@ -13,11 +13,11 @@ body {
   margin-top: -3px;
 }
 
-.home-header{
+.home-header {
   height: 69px;
 }
 
-.home-header{
+.home-header {
   padding-top: 24px !important;
   padding-bottom: 17px !important;
 }
@@ -79,7 +79,7 @@ body {
   display: table;
   color: #fff;
   text-decoration: none;
-  background-color: #123354;
+  background-color: #30669c;
   border: none;
   padding: 11px 11px 11px 15px;
   border-radius: 6px;
@@ -89,12 +89,16 @@ body {
   margin: 30px 10px 10px 0;
 }
 
+.admin_login__form-button:hover {
+  background: #1e3f66;
+}
+
 .admin_login__form-label .admin_login__paragraph .admin_login__header {
   color: #fff;
 }
 
 @media only screen and (max-width: 943px) {
-  .admin_login__container{
+  .admin_login__container {
     padding: 15vh 20px 0;
     margin: 0 !important;
     width: 100vw;
