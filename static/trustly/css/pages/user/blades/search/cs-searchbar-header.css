@@ -81,7 +81,6 @@
 }
 
 
-
 .searchbar__searchbox .searchbar__detail-header-search-input::placeholder {
   color: #ccc;
 }
@@ -197,9 +196,22 @@
     display: none;
   }
 
-  .searchbar__detail-header-search-input-email {
-    width: 100% !important;
-    margin-bottom: 20px !important;
+  .searchbar__header .searchbar__searchbox .searchbar__detail-header-search-input-email {
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px !important;
+    margin-right: 0;
+  }
+
+  .searchbar__search-button-right-persona {
+    height: 50px;
+    border-radius: 8px !important;
+  }
+
+  .searchbar__header .searchbar__searchbox .searchbar__detail-header-search-input-username {
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px !important;
   }
 
   .searchbar__search-button-right-persona {
