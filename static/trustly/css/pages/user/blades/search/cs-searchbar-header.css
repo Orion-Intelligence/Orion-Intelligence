@@ -81,7 +81,10 @@
 }
 
 .searchbar__searchbox .searchbar__search-button-right:hover {
-  background: #1e3f66;
+  background: #3673b0;
+}
+.searchbar__searchbox .searchbar__search-button-right:active {
+  background: #3673b0;
 }
 
 .searchbar__searchbox .searchbar__detail-header-search-input::placeholder {

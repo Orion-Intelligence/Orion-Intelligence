@@ -65,8 +65,14 @@ html::-webkit-scrollbar {
   box-sizing: border-box;
 }
 
+.flex-item {
+  box-shadow: rgba(0, 0, 0, 0.1) 0 1px 3px, rgba(0, 0, 0, 0.1) 0 1px 3px;
+  transition: box-shadow 0.2s ease;
+}
+
 .flex-item:hover {
-  box-shadow: rgba(0, 0, 0, 0.16) 0 3px 6px, rgba(0, 0, 0, 0.23) 0 3px 6px;;
+  box-shadow: rgba(0, 0, 0, 0.11) 0 3px 6px, rgba(0, 0, 0, 0.16) 0 3px 6px;
+  cursor: pointer;
 }
 
 .flex-container::-webkit-scrollbar {

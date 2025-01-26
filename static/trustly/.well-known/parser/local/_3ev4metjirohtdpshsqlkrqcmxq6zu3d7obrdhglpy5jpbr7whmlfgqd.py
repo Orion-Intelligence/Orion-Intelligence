@@ -1,65 +1,93 @@
 from abc import ABC
-from typing import Tuple, Set
-import  re
+from typing import List
+from bs4 import BeautifulSoup
+from playwright.sync_api import Page
+
 from crawler.crawler_instance.local_interface_model.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.card_extraction_model import card_extraction_model
-from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
-import html
+
 
 class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self):
+        self._card_data = []
         self.soup = None
-        self._initialized = None
+        self._redis_instance = redis_controller()
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(_3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd, cls).__new__(cls)
-            cls._instance._initialized = False
         return cls._instance
 
     @property
+    def seed_url(self) -> str:
+        return "http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion/"
+
+    @property
     def base_url(self) -> str:
-        return "http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion"
+        return "http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion/"
 
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM)
 
-    @staticmethod
-    def clean_data(raw_text: str) -> str:
-        cleaned_text = html.unescape(raw_text)
-        cleaned_text = re.sub(r'<[^>]*>', '', cleaned_text)  # Remove HTML tags
-        cleaned_text = re.sub(r'\s*\+\s*', '', cleaned_text)  # Remove concatenation
-        cleaned_text = re.sub(r"['\"]", '', cleaned_text)  # Remove single and double quotes
-        cleaned_text = re.sub(r'\n', ' ', cleaned_text)  # Replace newlines with space
-        cleaned_text = re.sub(r'\s+', ' ', cleaned_text)  # Collapse multiple spaces into one
-        return cleaned_text.strip()
+    @property
+    def card_data(self) -> List[card_extraction_model]:
+        return self._card_data
 
-    def parse_leak_data(self, html_content: str, p_data_url: str) -> Tuple[leak_data_model, Set[str]]:
-        sub_links = set()
-        entry_pattern = r'\{\s*title\s*:\s*([^,]+),\s*short\s*:\s*([^,]+),\s*full\s*:\s*(.+?),\s*links\s*:\s*\[([^\]]*)\]\s*\}'
-        cards = []
-        html_content = self.clean_data(html_content)
-        entries = re.findall(entry_pattern, html_content, re.DOTALL)
-
-        for entry in entries:
-            title = entry[0].strip() if len(entry) > 0 else "Unknown Title"
-            short_description = entry[1].strip() if len(entry) > 1 else "Unknown Description"
-            full_content = entry[2].replace("Link â„–1 Filelist", "").replace("<br>", "\n").replace("'+", "").strip() if len(entry) > 2 else "Unknown Content"
-            full_content = short_description + ". " + full_content
-            links_raw = entry[3].strip() if len(entry) > 3 else ""
-            links = [link.strip().strip('"') for link in links_raw.split(",") if link.strip()]
-            card = card_extraction_model(m_leak_date="N/A",  # Leak date not available in this JSON structure
-                m_title=title, m_url=p_data_url, m_base_url=self.base_url,m_network = helper_method.get_network_type(self.base_url).value, m_content=f"{full_content}", m_important_content=full_content, m_weblink=[], m_dumplink=links, m_extra_tags=[""], m_content_type="general")
-            cards.append(card)
-
-        data_model = leak_data_model(cards_data=cards, contact_link=self.contact_page(), base_url=p_data_url, content_type=["leak"])
-
-        return data_model, sub_links
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion"
+
+    def parse_leak_data(self, page: Page):
+        page.goto(self.seed_url, wait_until="networkidle")
+        self.soup = BeautifulSoup(page.content(), "html.parser")
+
+        buttons = self.soup.find_all("button", class_="btn btn-lg btn-outline-light")
+
+        for index, button in enumerate(buttons, start=1):
+            try:
+                page.locator(f'button:has-text("Show")').nth(index - 1).click()
+                page.wait_for_selector(".modal-content", timeout=5000)
+
+                modal_content = BeautifulSoup(page.content(), "html.parser").find("div", class_="modal-content")
+                if not modal_content:
+                    print(f"No modal content found for button {index}")
+                    continue
+
+                title_element = modal_content.find("h5", id="full-card-title")
+                title_text = helper_method.clean_text(title_element.get_text(strip=True)) if title_element else ""
+
+                body_element = modal_content.find("p", id="full-card-text")
+                body_text = helper_method.clean_text(body_element.get_text(strip=True)) if body_element else ""
+
+                links_element = modal_content.find("p", id="full-card-links")
+                dump_links = [link["href"] for link in links_element.find_all("a", href=True)] if links_element else []
+
+                card_data = card_extraction_model(
+                    m_title=title_text,
+                    m_url=self.seed_url,
+                    m_base_url=self.base_url,
+                    m_content=body_text,
+                    m_network=helper_method.get_network_type(self.base_url).value,
+                    m_important_content=body_text,
+                    m_weblink=[self.seed_url],
+                    m_dumplink=dump_links,
+                    m_email_addresses=helper_method.extract_emails(body_text),
+                    m_phone_numbers=helper_method.extract_phone_numbers(body_text),
+                    m_extra_tags=[],
+                    m_content_type="organization",
+                )
+
+                self._card_data.append(card_data)
+                page.locator(".modal .btn-close").click()
+
+            except Exception as e:
+                print(f"Error processing button {index}: {e}")

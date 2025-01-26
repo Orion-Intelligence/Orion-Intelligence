@@ -40,6 +40,7 @@ class SEARCH_CALLBACK:
   M_URL = "mSearchCallbackRelevantDocumentURL"
   M_SECTION = "mSection"
   M_DESCRIPTION = "mSearchCallbackRelevantDocumentDescription"
+  M_DESCRIPTION_HIGHLIGHT = "mSearchCallbackRelevantDocumentDescriptionHighlight"
   K_SEARCH_TYPE = "mSearchCallbackRelevantSearchType"
   K_CONTENT_TYPE = "mContentType"
   M_MAX_PAGINATION = "mSearchCallbackMaxPagination"

@@ -26,7 +26,10 @@
   outline: none;
 }
 .home__search-form .home__search-container-button:hover{
-  background: #1e3f66;
+  background: #3673b0;
+}
+.home__search-form .home__search-container .home__search-container-button:active {
+  background: #3673b0;
 }
 
 .home__search-container-button-icon {

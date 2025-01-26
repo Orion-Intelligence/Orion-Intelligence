@@ -1,20 +1,23 @@
-import re
 from abc import ABC
-from typing import List, Set, Tuple
+from typing import List
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
+from playwright.sync_api import Page
+
 from crawler.crawler_instance.local_interface_model.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.card_extraction_model import card_extraction_model
-from crawler.crawler_instance.local_shared_model.leak_data_model import leak_data_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
-from crawler.crawler_services.shared.helper_method import helper_method
+from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 
 class _ddosecrets(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self):
+        self._card_data = []
         self.soup = None
         self._initialized = None
+        self._redis_instance = redis_controller()
 
     def __new__(cls):
         if cls._instance is None:
@@ -23,108 +26,113 @@ class _ddosecrets(leak_extractor_interface, ABC):
         return cls._instance
 
     @property
+    def seed_url(self) -> str:
+        return "https://ddosecrets.com/all_articles/a-z"
+
+    @property
     def base_url(self) -> str:
         return "https://ddosecrets.com"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_sub_url_length=10000, m_fetch_proxy=FetchProxy.NONE, m_fetch_config = FetchConfig.SELENIUM)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.SELENIUM)
 
-    @staticmethod
-    def clean_text(text: str) -> str:
-        return " ".join(text.split()).strip()
+    @property
+    def card_data(self) -> List[card_extraction_model]:
+        return self._card_data
 
-    def parse_leak_data(self, html_content: str, p_data_url: str) -> Tuple[leak_data_model, Set[str]]:
-        self.soup = BeautifulSoup(html_content, 'html.parser')
-
-        data_model = leak_data_model(
-            cards_data=[],
-            contact_link=self.contact_page(),
-            base_url=self.base_url,
-            content_type=["leak"]
-        )
-        sub_links = []
-        if "/article/" in p_data_url:
-            cards = self.extract_cards('content', p_data_url)
-            data_model = leak_data_model(
-                cards_data=cards,
-                contact_link=self.contact_page(),
-                base_url=self.base_url,
-                content_type=["leak"]
-            )
-        else:
-            all_categories_links = self.extract_links_from_class('div', 'all-categories')
-            drill_in_article_links = self.extract_links_from_class('article', 'drill-in')
-            drill_in_div_links = self.extract_links_from_class('a', 'drill-in')
-            sub_links = list(set(all_categories_links + drill_in_article_links + drill_in_div_links))
-
-        return data_model, set(sub_links)
-
-    def extract_links_from_class(self, tag: str, class_name: str) -> List[str]:
-        elements = self.soup.find_all(tag, class_=class_name)
-        links = []
-        for element in elements:
-            if tag == 'a':
-                href = element.get('href')
-                if href:
-                    links.append(urljoin(self.base_url, href))
-            else:
-                links.extend(
-                    urljoin(self.base_url, a['href']) for a in element.find_all('a', href=True)
-                )
-        return links
-
-    def extract_cards(self, container_class: str, url: str) -> List[card_extraction_model]:
-        container = self.soup.find_all(lambda tag: tag.has_attr('class') and tag['class'] == [container_class])
-        new_cards_data = []
-
-        for card in container:
-            title = card.find('h1').get_text(strip=True) if card.find('h1') else ""
-            metadata = card.find(class_="metadata")
-            leakdate = card.find(class_="meta")
-            article_content = ""
-            if card.find(class_="article-content"):
-                article_content = re.sub(r'[\n\r]+', '', card.find(class_="article-content").text)
-
-            metadata_dict = {}
-            if metadata:
-                for p in metadata.find_all('p'):
-                    label_element = p.find('span', class_='label')
-                    link_element = p.find('a', href=True)
-
-                    if label_element:
-                        label_text = label_element.get_text(strip=True).replace(":", "")
-
-                        if link_element:
-                            link_href = urljoin(self.base_url, link_element['href'])
-                            metadata_dict[label_text] = f"{link_href}"
-                        else:
-                            metadata_dict[label_text] = p.get_text(strip=True).replace(label_element.get_text(strip=True), "").strip()
-
-            source_url = metadata_dict.get("Source", "")
-            download_link = metadata_dict.get("Download", "")
-            magnet_link = metadata_dict.get("Magnet", "")
-            torrent_link = metadata_dict.get("Torrent", "")
-            external_link = metadata_dict.get("External Collaboration Link", "")
-            if isinstance(external_link, str):
-                external_link = [external_link]
-
-            card_data = card_extraction_model(
-                m_leak_date = leakdate.text.replace("Published on ",""),
-                m_title=title,
-                m_url=url,
-                m_network=helper_method.get_network_type(self.base_url).value,
-                m_base_url=self.base_url,
-                m_content=article_content,
-                m_important_content=article_content,
-                m_weblink=[source_url],
-                m_dumplink=[download_link, magnet_link, torrent_link],
-                m_extra_tags=external_link,
-                m_content_type="general"
-            )
-            new_cards_data.append(card_data)
-
-        return new_cards_data
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
-        return urljoin(self.base_url, "/?contact")
+        return "https://ddosecrets.com/about"
+
+    def parse_leak_data(self, page: Page):
+        page.goto(self.seed_url, wait_until="networkidle")
+        self.soup = BeautifulSoup(page.content(), 'html.parser')
+
+        # Extract links to individual articles
+        article_divs = self.soup.find_all("div", class_="article")
+        article_links = [
+            urljoin(self.base_url, div.find("h2").find("a")["href"])
+            for div in article_divs
+            if div.find("h2") and div.find("h2").find("a")
+        ]
+
+        for article_url in article_links:
+            try:
+                page.goto(article_url, wait_until="networkidle")
+                self.soup = BeautifulSoup(page.content(), 'html.parser')
+
+                content_div = self.soup.find(
+                    "div",
+                    class_=lambda c: c == "content",
+                    attrs={"id": lambda i: i is None or i != "promo"}
+                )
+                if not content_div:
+                    print(f"No content div found for {article_url}")
+                    continue
+
+                title_element = content_div.find("h1")
+                title = title_element.get_text(strip=True) if title_element else ""
+
+                meta_element = content_div.find("p", class_="meta")
+                published_date = meta_element.get_text(strip=True) if meta_element else ""
+
+                metadata_div = content_div.find("div", class_="metadata")
+                source = ""
+                countries = []
+                types = []
+                download_size = ""
+                dumplinks = []
+
+                if metadata_div:
+                    source_element = metadata_div.find("p", string=lambda t: t and "Source:" in t)
+                    if source_element and source_element.find("a"):
+                        source = source_element.find("a").get_text(strip=True)
+
+                    country_elements = metadata_div.find_all("a", href=lambda h: h and "/country/" in h)
+                    countries = [country.get_text(strip=True) for country in country_elements]
+
+                    type_elements = metadata_div.find_all("a", href=lambda h: h and "/type/" in h)
+                    types = [leak_type.get_text(strip=True) for leak_type in type_elements]
+
+                    size_element = metadata_div.find("p", string=lambda t: t and "Download Size:" in t)
+                    if size_element:
+                        download_size = size_element.get_text(strip=True).replace("Download Size:", "").strip()
+
+                    dumplinks.extend(
+                        urljoin(self.base_url, a["href"]) for a in metadata_div.find_all("a", href=True)
+                    )
+
+                article_content = content_div.find("div", class_="article-content")
+                content_text = ""
+                weblinks = []
+                if article_content:
+                    content_text = " ".join(
+                        p.get_text(strip=True) for p in article_content.find_all("p")
+                    )
+                    weblinks.extend(
+                        urljoin(self.base_url, a["href"]) for a in article_content.find_all("a", href=True)
+                    )
+
+                card = card_extraction_model(
+                    m_title=title,
+                    m_url=article_url,
+                    m_base_url=self.base_url,
+                    m_content=content_text,
+                    m_content_type="leak",
+                    m_important_content=content_text,
+                    m_weblink=weblinks,
+                    m_dumplink=dumplinks,
+                    m_extra_tags=types,
+                    m_last_updated=published_date,
+                    m_company_name=source,
+                    m_addresses=countries,
+                    m_services_or_products=[download_size],
+                )
+
+                self._card_data.append(card)
+
+            except Exception as e:
+                print(f"Error processing {article_url}: {e}")
