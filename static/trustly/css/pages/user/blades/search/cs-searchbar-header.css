@@ -77,12 +77,13 @@
   border-radius: 8px;
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
-  background: #2a5989;
+  background: #3673b0;
 }
 
 .searchbar__searchbox .searchbar__search-button-right:hover {
   background: #3673b0;
 }
+
 .searchbar__searchbox .searchbar__search-button-right:active {
   background: #3673b0;
 }
@@ -162,6 +163,7 @@
   margin-right: 30px;
   outline: none;
   border-bottom: 3px solid #00000000;
+  transition: border-bottom 0.3s ease-in-out;
 }
 
 .searchbar__detail-header-catagories-margin-right-border {
@@ -284,6 +286,10 @@
   margin-top: 6px;
   margin-bottom: 2px;
   margin-left: 35px;
+}
+
+.search__header-network-image:hover {
+  transform: rotate(10deg); /* Rotate clockwise */
 }
 
 .search__header-network-content {
