@@ -1,7 +1,7 @@
 from django.urls import path
 from trustly import views, api
 from django.contrib import admin
-
+from .views import robots_txt
 urlpatterns = [
   path('admin/', admin.site.urls),
   # redirections
@@ -23,6 +23,7 @@ urlpatterns = [
 
   path('api/search/', api.get_search_result, name='api/search'),
   path('login', views.custom_login, name='custom_login'),
+  path("robots.txt", robots_txt, name="robots_txt"),
 
 ]
 

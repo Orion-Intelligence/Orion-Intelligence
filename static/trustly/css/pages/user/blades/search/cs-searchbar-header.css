@@ -77,7 +77,7 @@
   border-radius: 8px;
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
-  background: #3673b0;
+  background: #2a5989;
 }
 
 .searchbar__searchbox .searchbar__search-button-right:hover {
@@ -85,7 +85,8 @@
 }
 
 .searchbar__searchbox .searchbar__search-button-right:active {
-  background: #3673b0;
+  background-color: #3673b0;
+  border: none;
 }
 
 .searchbar__searchbox .searchbar__detail-header-search-input::placeholder {
