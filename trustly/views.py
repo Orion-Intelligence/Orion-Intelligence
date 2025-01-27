@@ -24,8 +24,6 @@ from trustly.app.view_managers.interactive.policy_manager.policy_enums import PO
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from django.http import HttpResponse
-
 
 def index(request):
   return homepage_view_model.getInstance().invoke_trigger(HOMEPAGE_MODEL_COMMANDS.M_INIT, request)
@@ -70,11 +68,9 @@ def feeder(request):
 def block(request):
   return block_controller.getInstance().invoke_trigger(BLOCK_MODEL_CALLBACK.M_INIT, request)
 
-
 @csrf_exempt
 def crawl_index(request):
   return crawl_controller.getInstance().invoke_trigger(CRAWL_COMMANDS.M_INIT, request)
-
 
 def update_status(request):
   return external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS, request)
@@ -106,8 +102,3 @@ def custom_login(request):
       return redirect('home')
 
   return render(request, CONSTANTS.S_TEMPLATE_LOGIN_PATH)
-
-
-def robots_txt(request):
-  content = "User-agent: *\nDisallow: /admin/\nAllow: /"
-  return HttpResponse(content, content_type="text/plain")
