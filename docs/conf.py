@@ -1,7 +1,7 @@
 # Configuration file for Sphinx documentation builder.
 
 # -- Project information -----------------------------------------------------
-project = 'Orion Platform Documentation'
+project = 'Orion Documentation'
 author = 'Your Name'
 release = '1.0.0'
 
