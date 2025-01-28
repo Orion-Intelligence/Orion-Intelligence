@@ -2,7 +2,7 @@
 
 # -- Project information -----------------------------------------------------
 project = 'Orion Documentation'
-author = 'Your Name'
+author = 'Abdul Mannan'
 release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
