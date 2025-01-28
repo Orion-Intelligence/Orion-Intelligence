@@ -1,7 +1,5 @@
 # Orion Platform Documentations
 
-![Orion Platform Logo](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/Logo-orion-Intelligence.png)
-
 Welcome to the Orion Platform Documentation.
 
 ## Table of Contents
