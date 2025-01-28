@@ -5,14 +5,15 @@
 {% include 'trustly/user/interactive/directory/local_imports.html' %}
 
 <body>
-  {% include 'trustly/user/blades/home_template/blade_home_header.html' %}
-  <div class="login"></div>
-  <img alt="back" class="login-background" src="{% static 'trustly/images/Bg.png' %}">
+{% include 'trustly/user/blades/home_template/blade_home_header.html' %}
+<div class="login"></div>
+<img alt="back" class="login-background" src="{% static 'trustly/images/Bg.png' %}">
 
-  <div id="content" class="admin_login__container">
-    <div>
-      <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="340" height="70">
-    </div><br>
+<div id="content" class="admin_login__container">
+  <div class="admin_login__sub__container">
+    <div class="d-flex justify-content-center">
+      <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="200" height="70">
+    </div>
     <form method="post" action="{% url 'admin:login' %}" class="admin__login-form">
       {% csrf_token %}
       {% if next %}
@@ -31,4 +32,6 @@
       </div>
     </form>
   </div>
+</div>
+<footer class="admin_login__footer"></footer>
 </body>

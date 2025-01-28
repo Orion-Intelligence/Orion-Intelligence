@@ -1,5 +1,8 @@
 html {
   background: rgba(41, 87, 132, 255) !important;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 body {
@@ -7,6 +10,17 @@ body {
   background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) !important;
   height: 100vh;
   font-family: 'Roboto', sans-serif;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 .home-header__menu {
@@ -31,40 +45,44 @@ body {
 }
 
 .admin_login__container {
-  justify-content: center;
-  align-items: center;
   position: relative;
   color: white;
   overflow: hidden;
-  display: table;
-  margin: 0 auto;
-  padding: 150px 0 0;
-  width: 80vw;
-  max-width: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  width: 100%;
+
+}
+
+.admin_login__sub__container {
+  background: linear-gradient(90deg, rgba(21, 52, 84, 0.5) 0%, rgba(22, 56, 88, 0.5) 100%);
+  padding: 42px 32px;
+  border-radius: 16px;
+  width: 420px;
 }
 
 .admin_login__input {
   border: none;
-  border-radius: 6px;
-  margin-top: 10px;
-  background: #fff url('/static/trustly/images/lock.svg') no-repeat 16px center;
+  border-radius: 8px;
+  background: #fff url('/static/trustly/images/eye_icon.svg') no-repeat;
+  background-position: calc(100% - 10px) center;
   background-size: 20px 20px;
-  padding: 10px 20px 10px 45px;
+  padding: 12px 10px;
 }
 
 .admin_login__input-user {
-  background: #fff url('/static/trustly/images/profile.svg') no-repeat 16px center;
+  background: #fff url('/static/trustly/images/profile.svg') no-repeat;
+  background-position: calc(100% - 10px) center;
   background-size: 20px 20px;
+  margin-bottom: 24px;
 }
+
 
 .admin_login__input:focus {
   border: none;
   outline: none;
-}
-
-.admin_login__input--text {
-  margin-bottom: 10px;
-  padding-right: 20px;
 }
 
 .admin_login__input--border-bottom {
@@ -79,29 +97,42 @@ body {
   display: table;
   color: #fff;
   text-decoration: none;
-  background-color: #30669c;
+  background: linear-gradient(92.32deg, #4EA2F1 2.58%, #2C7AC5 66.77%, #1E6CB7 130.97%);
   border: none;
-  padding: 11px 11px 11px 15px;
-  border-radius: 6px;
-  width: 120px;
+  padding: 12px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: bold;
-  margin: 30px 10px 10px 0;
+  margin-top: 36px;
+  width: 100%;
+  transition: background-position 0.4s ease-in-out;
 }
 
 .admin_login__form-button:hover {
-  background: #1e3f66;
+  background: linear-gradient(306deg, #4EA2F1 2.58%, #2C7AC5 66.77%, #1E6CB7 130.97%);
+
 }
+
 
 .admin_login__form-label .admin_login__paragraph .admin_login__header {
   color: #fff;
 }
 
+.admin__login-form {
+  margin: 36px 0 0 0;
+}
+
+.admin_login__footer {
+  position: fixed;
+  bottom: 0;
+  background: rgba(33, 75, 116, 0.31);
+  height: 48px;
+  width: 100%;
+}
+
 @media only screen and (max-width: 943px) {
-  .admin_login__container {
-    padding: 15vh 20px 0;
-    margin: 0 !important;
-    width: 100vw;
-    height: 100vh;
+  .admin_login__sub__container {
+    margin: 0 20px;
+    padding: 42px 20px;
   }
 }
