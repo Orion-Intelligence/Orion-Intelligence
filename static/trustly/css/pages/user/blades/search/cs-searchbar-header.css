@@ -84,7 +84,7 @@
   background: #3673b0;
 }
 
-.searchbar__searchbox .searchbar__search-button-right:active {
+div.searchbar__searchbox .btn.btn-primary.searchbar__search-button-right:focus {
   background-color: #3673b0;
   border: none;
 }

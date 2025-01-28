@@ -1,11 +1,7 @@
 from django.urls import path
 from trustly import views, api
 from django.contrib import admin
-from django.conf import settings
-from django.conf.urls.static import static
-from django.views.generic import TemplateView
-from django.urls import re_path
-from django.views.static import serve
+
 urlpatterns = [
   path('admin/', admin.site.urls),
   # redirections
@@ -27,7 +23,8 @@ urlpatterns = [
 
   path('api/search/', api.get_search_result, name='api/search'),
   path('login', views.custom_login, name='custom_login'),
-  re_path(r'^robots.txt$', serve, {'document_root': settings.STATICFILES_DIRS[0], 'path': 'trustly/robots.txt'}),]+ static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+
+]
 
 handler400 = views.error_page_400
 handler403 = views.error_page_403
