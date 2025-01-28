@@ -1,14 +1,27 @@
-# Orion Platform Documentations
+project = 'Orion Platform Documentation'
+copyright = '2025, Orion'
+author = 'Orion Team'
 
-Welcome to the Orion Platform Documentation.
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx_rtd_theme',
+]
 
-## Table of Contents
+templates_path = ['_templates']
+exclude_patterns = []
 
-```{toctree}
-:maxdepth: 4
-:caption: Contents:
+html_theme = 'sphinx_rtd_theme'
 
-introduction_to_platform
-introduction_to_modules
-user_manual
-developer_documentation
+html_logo = 'https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/Logo-orion-Intelligence.png'
+
+html_theme_options = {
+    'logo_only': True,
+    'style_nav_header_background': '#004080',
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+}
+
+html_static_path = ['_static']
