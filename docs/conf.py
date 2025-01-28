@@ -1,27 +1,15 @@
-project = 'Orion Platform Documentation'
-copyright = '2025, Orion'
-author = 'Orion Team'
+# Configuration file for Sphinx documentation builder.
 
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx_rtd_theme',
-]
+# -- Project information -----------------------------------------------------
+project = 'Orion Documentation'
+author = 'Your Name'
+release = '1.0.0'
 
-templates_path = ['_templates']
-exclude_patterns = []
-
+# -- General configuration ---------------------------------------------------
+extensions = ['myst_parser']
+source_suffix = ['.rst', '.md']
+master_doc = 'index'
 html_theme = 'sphinx_rtd_theme'
 
-html_logo = 'https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/Logo-orion-Intelligence.png'
-
-html_theme_options = {
-    'logo_only': True,
-    'style_nav_header_background': '#004080',
-    'collapse_navigation': False,
-    'sticky_navigation': True,
-    'navigation_depth': 4,
-}
-
+# -- Options for HTML output -------------------------------------------------
 html_static_path = ['_static']
