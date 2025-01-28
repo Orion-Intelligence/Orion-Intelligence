@@ -1,15 +1,29 @@
-{% load static %}
-<form method="post" class="demo-login__search-form">
-  {% csrf_token %}
-  <div>
-    <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="340" height="70">
-  </div>
-  <div>
-    <input autocomplete="off" type="password" maxlength="150" class="form-control demo-login__searchbox" name="password" placeholder="demo passcode"/>
-  </div>
-  <div class="submit-row">
-    <input type="submit" class="demo_login__form-button" value="Log in"/>
-  </div>
+{% load static %}{% load compress %}
+{% include 'admin/local_imports.html' %}
 
-</form>
+{% include 'trustly/user/blades/blades_shared_initialization.html' %}
+{% include 'trustly/user/interactive/directory/local_imports.html' %}
 
+<body>
+{% include 'trustly/user/blades/home_template/blade_home_header.html' %}
+<div class="login"></div>
+<img alt="back" class="login-background" src="{% static 'trustly/images/Bg.png' %}">
+
+<div id="content" class="auth_form__container">
+  <div class="auth_form__sub__container">
+    <div class="d-flex justify-content-center">
+      <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="232" height="41">
+    </div>
+    <form method="post" class="auth_form-form demo_auth_form">
+      {% csrf_token %}
+      <div class="auth_form__form-row">
+        <input type="password" id="id_password" name="password" class="auth_form__input" placeholder="demo passcode">
+      </div>
+      <div class="submit-row">
+        <input type="submit" class="auth_form__form-button" value="Log in"/>
+      </div>
+    </form>
+  </div>
+</div>
+<footer class="auth_form__footer"></footer>
+</body>

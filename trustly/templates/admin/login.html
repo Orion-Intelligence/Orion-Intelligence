@@ -9,29 +9,29 @@
 <div class="login"></div>
 <img alt="back" class="login-background" src="{% static 'trustly/images/Bg.png' %}">
 
-<div id="content" class="admin_login__container">
-  <div class="admin_login__sub__container">
+<div id="content" class="auth_form__container">
+  <div class="auth_form__sub__container">
     <div class="d-flex justify-content-center">
-      <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="200" height="70">
+      <img src="{% static 'trustly/images/home-logo.svg' %}" alt="" width="232" height="41">
     </div>
-    <form method="post" action="{% url 'admin:login' %}" class="admin__login-form">
+    <form method="post" action="{% url 'admin:login' %}" class="auth_form-form">
       {% csrf_token %}
       {% if next %}
         <input type="hidden" name="next" value="{{ next }}">
       {% else %}
         <input type="hidden" name="next" value="{% url 'admin:index' %}">
       {% endif %}
-      <div class="admin_login__form-row">
-        <input type="text" id="id_username" name="username" class="admin_login__input admin_login__input--text admin_login__input-user" placeholder="admin username">
+      <div class="auth_form__form-row">
+        <input type="text" id="id_username" name="username" class="auth_form__input auth_form__input--text auth_form__input-user" placeholder="Enter Username">
       </div>
-      <div class="admin_login__form-row">
-        <input type="password" id="id_password" name="password" class="admin_login__input" placeholder="admin password">
+      <div class="auth_form__form-row">
+        <input type="password" id="id_password" name="password" class="auth_form__input" placeholder="Password">
       </div>
       <div class="submit-row">
-        <input type="submit" class="admin_login__form-button" value="Log in"/>
+        <input type="submit" class="auth_form__form-button" value="Log in"/>
       </div>
     </form>
   </div>
 </div>
-<footer class="admin_login__footer"></footer>
+<footer class="auth_form__footer"></footer>
 </body>
