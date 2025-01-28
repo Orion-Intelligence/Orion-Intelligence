@@ -72,13 +72,13 @@ html::-webkit-scrollbar {
   padding:12px 30px 12px 20px;
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 12px;
+  font-size: 15px;
 }
 .auth_form__input::placeholder {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 12px;
-  color: #aaa; 
+  font-size: 15px;
+  color: #aaa;
 }
 
 .auth_form__input-user {

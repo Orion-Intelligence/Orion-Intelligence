@@ -26,6 +26,11 @@
   cursor: pointer;
 }
 
+.safe__search-toolbar-error-info-ref:hover
+{
+  color: #00b0b0;
+}
+
 .safe__search-toolbar-error-header {
   color: #ffc107;
   font-size: 18px;
