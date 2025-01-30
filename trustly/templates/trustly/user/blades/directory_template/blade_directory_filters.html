@@ -1,16 +1,17 @@
 {% load static %}
-<div class="directory__main-filter-header d-flex align-items-center">
-  <div class="col-6 d-flex justify-content-start">
-    <h2 class="directory__main-filter-heading">Filters</h2>
+<!-- Radio input outside the div to prevent conflicts -->
+<input id="directory__filters-close-input" type="radio" name="filter" hidden>
 
+<!-- Make entire div a label -->
+<label for="directory__filters-close-input" class="directory__main-filter-header d-flex align-items-center">
+  <div class="justify-content-start">
+    <h2 class="directory__main-filter-heading">Filters</h2>
   </div>
-  <div class="col-6 d-flex justify-content-end">
-    <label for="directory__filters-close-input" class="directory__filters-close-label">
-      <img src="{% static 'trustly/images/filter_close_icon.svg' %}" alt="close" />
-    </label>
-    <input class="directory__filters-close-input" id="directory__filters-close-input" type="radio" name="filter">
+  <div class="col-10 d-flex justify-content-end directory__filters-close-label">
+    <img src="/static/trustly/images/nav-next.svg" alt="close">
   </div>
-</div>
+</label>
+
 <form method="GET" class="directory__main-filter-form">
   <div class="directory__main-filter">
     <div class="custom-dropdown">
