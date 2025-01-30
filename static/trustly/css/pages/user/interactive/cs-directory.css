@@ -43,6 +43,7 @@ html {
   display: flex;
   justify-content: start;
   align-items: center;
+  padding: 0px;
 }
 
 @media only screen and (max-width: 943px) {

@@ -31,12 +31,12 @@
   margin: 7px 0 0;
 }
 
-.directory__filters-button{
+.directory__filters-button {
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 }
 
-.directory__filters-button:hover{
+.directory__filters-button:hover {
   background: #14335299 !important;
 }
 
@@ -155,10 +155,12 @@ select option {
 .directory__filters-close-label {
   margin-bottom: 0;
 }
-.directory__filters-close-label img{
+
+.directory__filters-close-label img {
   height: 25px;
   width: 25px;
 }
+
 .directory__main-submit-button:focus {
   border: none;
   outline: none;
@@ -263,6 +265,9 @@ select option {
 }
 
 @media only screen and (max-width: 1000px) {
+  .directory__filters-button-div .directory__filters-button {
+    display: none;
+  }
 
   .directory__main-submit-button {
     display: none;
@@ -270,6 +275,7 @@ select option {
 
   .directory__pagination-heading {
     width: 100%;
+    flex: 0 0;
   }
 
   .directory__main-filter {
