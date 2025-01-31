@@ -21,8 +21,8 @@
   align-items: center;
   width: 35px;
   height: 35px;
-  background: #12335450;
-  color: grey;
+  background: #102A4699;
+  color: #fff;
   border-radius: 10px;
   text-decoration: none;
   font-size: 14px;
@@ -38,9 +38,8 @@
 }
 
 .directory-pagination li button:hover {
-  background: #12335450;
+  background: #102A4685;
   color: white;
-  transform: scale(1.1);
   border: 0;
 }
 

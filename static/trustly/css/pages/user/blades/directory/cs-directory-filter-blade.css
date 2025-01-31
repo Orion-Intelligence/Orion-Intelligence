@@ -156,6 +156,7 @@ select option {
 
 .directory__filters-close-label {
   margin-bottom: 0;
+  padding-right: 50px;
 }
 
 .directory__filters-close-label img {
@@ -273,13 +274,25 @@ select option {
   }
 }
 
-@media only screen and (max-width: 1000px) {
+@media (min-width: 900px) and (max-width: 1000px) {
   .directory__filters-container {
     width: 100vw;
-    right: -100vw;
-    transition: right 0.3s ease;
+    max-width: 100vw;
+    right: -150vw;
+    transition: right 0s ease;
   }
+}
 
+@media (max-width: 900px) {
+  .directory__filters-container {
+    width: 100vw;
+    max-width: 100vw;
+    right: -150vw;
+    transition: right 0.2s ease;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
   .directory__pagination-heading {
     width: 100%;
     flex: 0 0;
