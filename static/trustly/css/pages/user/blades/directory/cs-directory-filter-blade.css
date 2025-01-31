@@ -273,7 +273,10 @@ select option {
 }
 
 @media only screen and (max-width: 1000px) {
-
+.directory__filters-container{
+  width: 100vw;
+  right: -100vw;
+}
   .directory__pagination-heading {
     width: 100%;
     flex: 0 0;
