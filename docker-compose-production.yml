@@ -111,10 +111,10 @@ services:
       - elastic:/usr/share/elasticsearch/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9400/_cluster/health"]
-      interval: 20s
-      timeout: 10s
+      interval: 50s
+      timeout: 50s
       retries: 5
-      start_period: 10s
+      start_period: 50s
     networks:
       backend:
         ipv4_address: 172.20.1.11
@@ -122,7 +122,6 @@ services:
       resources:
         limits:
           memory: 1G
-          
   traefik:
     image: traefik:v2.10
     container_name: trusted-web-traefik
