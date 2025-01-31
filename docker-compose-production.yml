@@ -15,6 +15,10 @@ services:
       - /bin/sh
       - -c
       - >
+        echo "Waiting for Elasticsearch to be ready..." &&
+        while ! curl -s http://elasticsearch:9400/_cluster/health | grep '"status":"green"' ; do
+          sleep 5;
+        done;
         if [ "$PRODUCTION" = "1" ]; then
           python manage.py collectstatic --noinput &&
           echo "Production mode: Running compression..." &&
