@@ -29,6 +29,7 @@
   align-items: center;
   padding: 0;
   margin: 7px 0 0;
+  width: 100%;
 }
 
 .directory__filters-button {
@@ -264,27 +265,24 @@ select option {
   display: none;
 }
 
-@media only screen and (max-width: 1000px) {
-  .directory__filters-button-div .directory__filters-button {
-    display: none;
+@media only screen and (max-width: 943px) {
+  .directory__filters-button-div {
+    margin-top: -97px;
+    z-index: 10;
   }
+}
 
-  .directory__main-submit-button {
-    display: none;
-  }
+@media only screen and (max-width: 1000px) {
 
   .directory__pagination-heading {
     width: 100%;
     flex: 0 0;
   }
 
-  .directory__main-filter {
-    display: none;
+  .directory__main-filter-submit {
+    height: 50%;
   }
 
-  .directory__main-filter-form {
-    display: none;
-  }
 
 }
 

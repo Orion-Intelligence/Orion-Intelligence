@@ -24,6 +24,7 @@ html {
   color: #fff;
   font-size: 18px;
   margin-bottom: 0;
+  width: 200px;
 }
 
 .directory__main-container {
@@ -65,6 +66,7 @@ html {
   display: flex;
   justify-content: end;
   align-items: center;
+
 }
 
 
