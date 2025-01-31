@@ -7,16 +7,17 @@
 }
 
 .directory__filters-container {
-  width: 300px;
+  width: 100vw;
+  max-width: 300px;
   position: fixed;
   top: 1px;
-  right: -338px;
+  right: -50vw;
   background: #2A5784;
   height: 95vh;
   border-bottom-left-radius: 0;
   border-top-left-radius: 15px;
   box-shadow: rgba(0, 0, 0, 0.24) 0 3px 8px;
-  transition: right 0.3s ease;
+  transition: right 0.6s ease;
 }
 
 .directory__filters-close-input {
@@ -61,12 +62,12 @@
 
 .directory__filters-button-div #directory__filters-checkbox:checked + .directory__filters-container {
   right: 0;
-  transition: right 0.3s ease;
+  transition: right 0.2s ease;
 }
 
 #directory__filters-close-input:checked + .directory__filters-container {
   right: -50px;
-  transition: right 0.3s ease;
+  transition: right 0.2s ease;
 }
 
 .directory__filters-button-div .directory__filters-button img {
@@ -273,10 +274,12 @@ select option {
 }
 
 @media only screen and (max-width: 1000px) {
-.directory__filters-container{
-  width: 100vw;
-  right: -100vw;
-}
+  .directory__filters-container {
+    width: 100vw;
+    right: -100vw;
+    transition: right 0.3s ease;
+  }
+
   .directory__pagination-heading {
     width: 100%;
     flex: 0 0;
@@ -285,8 +288,6 @@ select option {
   .directory__main-filter-submit {
     height: 50%;
   }
-
-
 }
 
 .custom-dropdown {
