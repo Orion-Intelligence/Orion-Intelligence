@@ -3,7 +3,6 @@
   justify-content: center;
   align-items: center;
   width: 50%;
-  align-items: center;
   float: right;
   margin-top: 8px
 }
@@ -12,7 +11,9 @@
   margin: 0 5px;
 }
 
-
+.directory-pagination-navbtn{
+  cursor: pointer !important;
+}
 
 .directory-pagination li button {
   display: flex;
@@ -21,7 +22,7 @@
   align-items: center;
   width: 35px;
   height: 35px;
-  background: #102A4699;
+  background: #17406980;
   color: #fff;
   border-radius: 10px;
   text-decoration: none;
@@ -52,10 +53,17 @@
 }
 
 .directory-pagination li.active button {
+  background: #102A4699;
+  color: white;
+  border: 0;
+  font-weight: bold;
+  outline: none;
+}
+
+.directory-pagination li.active button:hover {
   background: #102A4685;
   color: white;
   border: 0;
-  pointer-events: none;
   font-weight: bold;
   outline: none;
 }
