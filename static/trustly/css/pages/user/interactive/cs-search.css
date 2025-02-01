@@ -40,7 +40,7 @@ html {
 }
 
 .searchbar__search-container-persona-border-color {
-  border: 1px solid #ffffff15 ;
+  border: 1px solid #ffffff15 !important;
   vertical-align: middle;
   margin: 0;
 }
@@ -63,8 +63,8 @@ html {
   border: 1px solid #ffffff50;
   overflow: hidden;
   height: auto;
-  background: #2A578480;
-  border-radius: 10px;
+  background: #2A578480 !important;
+  border-radius: 10px !important;
   font-family: Roboto, sans-serif;
   font-size: 14px;
 }
@@ -74,7 +74,7 @@ html {
 }
 
 .searchbar__search-card-header-persona {
-  background: rgba(220, 53, 69, 0.5);
+  background: rgba(220, 53, 69, 0.5) !important;
   padding: 15px;
 }
 
