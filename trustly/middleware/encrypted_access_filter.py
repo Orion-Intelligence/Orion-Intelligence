@@ -1,12 +1,12 @@
 from django.utils.deprecation import MiddlewareMixin
 
-from trustly.app.view_managers.server.error.error_enums import ERROR_MODEL_CALLBACK
+from trustly.app.view_managers.server.error_manager.error_enums import ERROR_MODEL_CALLBACK
 from trustly.services.block_manager.block_controller import block_controller
 from trustly.services.block_manager.block_enums import BLOCK_COMMAND
 from django.urls import resolve
-from trustly.app.view_managers.server.error.error_view_model import error_view_model
-from trustly.app.view_managers.server.maintenance.maintenance_view_model import maintenance_view_model
-from trustly.app.view_managers.server.maintenance.maintenance_enums import MAINTENANCE_MODEL_CALLBACK
+from trustly.app.view_managers.server.error_manager.error_view_model import error_view_model
+from trustly.app.view_managers.server.maintenance_manager.maintenance_view_model import maintenance_view_model
+from trustly.app.view_managers.server.maintenance_manager.maintenance_enums import MAINTENANCE_MODEL_CALLBACK
 
 
 class EncryptedAccessFilter(MiddlewareMixin):

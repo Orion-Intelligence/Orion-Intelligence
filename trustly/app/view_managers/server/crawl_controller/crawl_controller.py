@@ -9,8 +9,8 @@ from trustly.services.mongo_manager.mongo_controller import mongo_controller
 from trustly.services.mongo_manager.mongo_enums import MONGODB_CRUD
 from trustly import settings
 from trustly.services.mongo_manager.mongo_enums import MONGO_COMMANDS
-from trustly.app.server_manager.crawl_controller.crawl_enums import CRAWL_COMMANDS, CRAWL_ERROR_CALLBACK
-from trustly.app.server_manager.crawl_controller.crawl_session_controller import crawl_session_controller
+from trustly.app.view_managers.server.crawl_controller.crawl_enums import CRAWL_COMMANDS, CRAWL_ERROR_CALLBACK
+from trustly.app.view_managers.server.crawl_controller.crawl_session_controller import crawl_session_controller
 from trustly.services.request_manager.request_handler import request_handler
 
 

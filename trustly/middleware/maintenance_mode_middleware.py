@@ -1,5 +1,5 @@
-from trustly.app.view_managers.server.maintenance.maintenance_enums import MAINTENANCE_MODEL_CALLBACK
-from trustly.app.view_managers.server.maintenance.maintenance_view_model import maintenance_view_model
+from trustly.app.view_managers.server.maintenance_manager.maintenance_enums import MAINTENANCE_MODEL_CALLBACK
+from trustly.app.view_managers.server.maintenance_manager.maintenance_view_model import maintenance_view_model
 from trustly.services.state_manager.states import APP_STATUS
 from django.utils.deprecation import MiddlewareMixin
 

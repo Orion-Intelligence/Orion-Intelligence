@@ -33,6 +33,7 @@ pymongo==4.8.0
 django-appconf==1.0.6
 bunch==1.0.0
 nltk==3.9.0
+djangorestframework
 sphinx
 myst-parser
 sphinx_rtd_theme

@@ -8,7 +8,7 @@ body {
   height: 100% !important;
 }
 
-.maintenance__header-divider {
+.notice__header-divider {
   width: 150px;
   height: 5px;
   background-color: orange;
@@ -16,29 +16,29 @@ body {
   margin-bottom: 5px;
 }
 
-.maintenance__action-button {
+.notice__action-button {
   margin-top: 10px;
   width: 300px
 }
 
-.maintenance {
+.notice {
   margin-top: 100px;
   padding: 40px 15px;
   text-align: center;
 }
 
-.maintenance__actions {
+.notice__actions {
   margin-top: 15px;
   margin-bottom: 15px;
   margin-left: 20px !important;
 }
 
-.maintenance__actions .btn {
+.notice__actions .btn {
   margin-right: 10px;
 }
 
 @media only screen and (max-width: 943px) {
-  .maintenance {
+  .notice {
     margin-top: 30px;
     padding: 40px 15px;
     text-align: center;

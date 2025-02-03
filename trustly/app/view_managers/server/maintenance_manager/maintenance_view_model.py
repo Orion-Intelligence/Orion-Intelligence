@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 from trustly.app.constants.constant import CONSTANTS
-from trustly.app.view_managers.server.maintenance.maintenance_enums import MAINTENANCE_MODEL_CALLBACK
-from trustly.app.view_managers.server.maintenance.maintenance_model import maintenance_model
+from trustly.app.view_managers.server.maintenance_manager.maintenance_enums import MAINTENANCE_MODEL_CALLBACK
+from trustly.app.view_managers.server.maintenance_manager.maintenance_model import maintenance_model
 from trustly.services.request_manager.request_handler import request_handler
 
 

@@ -1,4 +1,4 @@
-from trustly.app.view_managers.server.maintenance.maintenance_enums import MAINTENANCE_SESSION_COMMANDS, MAINTENANCE_PARAM, MAINTENANCE_CALLBACK
+from trustly.app.view_managers.server.maintenance_manager.maintenance_enums import MAINTENANCE_SESSION_COMMANDS, MAINTENANCE_PARAM, MAINTENANCE_CALLBACK
 from trustly.services.request_manager.request_handler import request_handler
 
 

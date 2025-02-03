@@ -1,7 +1,7 @@
 import json
 
-from trustly.app.server_manager.crawl_controller.class_model.crawl_model import crawl_model
-from trustly.app.server_manager.crawl_controller.crawl_enums import CRAWL_PARAM, CRAWL_COMMANDS
+from trustly.app.view_managers.server.crawl_controller.class_model.crawl_model import crawl_model
+from trustly.app.view_managers.server.crawl_controller.crawl_enums import CRAWL_PARAM, CRAWL_COMMANDS
 from trustly.services.request_manager.request_handler import request_handler
 
 

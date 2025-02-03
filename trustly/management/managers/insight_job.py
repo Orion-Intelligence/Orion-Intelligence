@@ -33,7 +33,7 @@ class insight_job(request_handler, ABC):
       for doc in m_documents:
         query_type = doc.get("query", {}).get(ELASTIC_KEYS.S_DOCUMENT, "unknown")
         result = doc.get("result", None)
-        error = doc.get("error", None)
+        error = doc.get("error_manager", None)
 
         if result:
           result_body = result.body if hasattr(result, 'body') else result
@@ -60,7 +60,7 @@ class insight_job(request_handler, ABC):
                 value = agg_value.get("value", None) or 0
                 grouped_results[query_type].append({agg_name: value})
         elif error:
-          grouped_results[query_type].append({"error": error})
+          grouped_results[query_type].append({"error_manager": error})
 
       for query_type, results in grouped_results.items():
         document_count = next((item.get("Document Count") for item in results if "Document Count" in item), 0) or 1

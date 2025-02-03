@@ -19,7 +19,7 @@ class CONSTANTS:
   S_TEMPLATE_NOTICE_WEBSITE_PATH = "trustly/user/interactive/notice/notice.html"
   S_TEMPLATE_POLICY_WEBSITE_PATH = "trustly/user/interactive/privacy/privacy.html"
   S_TEMPLATE_SECRET_KEY_WEBSITE_PATH = "trustly/user/server/secretkey/secretkey.html"
-  S_TEMPLATE_MAINTENANCE_WEBSITE_PATH = "trustly/user/server/maintenance/maintenance.html"
+  S_TEMPLATE_MAINTENANCE_WEBSITE_PATH = "trustly/user/server/maintenance_manager/maintenance_manager.html"
   S_TEMPLATE_LOGIN_WEBSITE_PATH = "trustly/cms/login/login.html"
   S_TEMPLATE_DASHBOARD_WEBSITE_PATH = "trustly/cms/dashboard/dashboard.html"
   S_TEMPLATE_MANAGE_SEARCH_WEBSITE_PATH = "trustly/cms/manage_search/manage_search.html"

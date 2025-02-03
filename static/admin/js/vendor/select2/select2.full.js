@@ -116,7 +116,7 @@ var requirejs, require, define;
                     // keep them so that when converted to a path it may
                     // still work when converted to a path, even though
                     // as an ID it is less than ideal. In larger point
-                    // releases, may be better to just kick out an error.
+                    // releases, may be better to just kick out an error_manager.
                     if (i === 0 || (i === 1 && name[2] === '..') || name[i - 1] === '..') {
                         continue;
                     } else if (i > 0) {

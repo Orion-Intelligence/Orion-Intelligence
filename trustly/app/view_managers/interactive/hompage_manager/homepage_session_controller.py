@@ -17,7 +17,7 @@ class homepage_session_controller(request_handler):
 
     combined_statistics = homepage_session_controller.merge_statistics(results_dict_day, results_dict_week)
 
-    m_context = {HOMEPAGE_CALLBACK.M_REFERENCE: helper_controller.load_json(CONSTANTS.S_REFERENCE_WEBSITE_URL), HOMEPAGE_CALLBACK.M_SECURE_SERVICE_NOTICE: GENERAL_STRINGS.S_GENERAL_HTTP, HOMEPAGE_CALLBACK.M_STATISTICS: combined_statistics, }
+    m_context = {HOMEPAGE_CALLBACK.M_SECURE_SERVICE_NOTICE: GENERAL_STRINGS.S_GENERAL_HTTP, HOMEPAGE_CALLBACK.M_STATISTICS: combined_statistics, }
 
     if HOMEPAGE_PARAM.M_SECURE_SERVICE in p_data.GET:
       m_context[HOMEPAGE_CALLBACK.M_SECURE_SERVICE_NOTICE] = p_data.GET[HOMEPAGE_PARAM.M_SECURE_SERVICE]

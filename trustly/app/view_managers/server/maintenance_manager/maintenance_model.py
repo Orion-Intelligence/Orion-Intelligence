@@ -1,5 +1,5 @@
-from trustly.app.view_managers.server.maintenance.maintenance_enums import MAINTENANCE_MODEL_CALLBACK, MAINTENANCE_SESSION_COMMANDS
-from trustly.app.view_managers.server.maintenance.maintenance_session_controller import maintenance_session_controller
+from trustly.app.view_managers.server.maintenance_manager.maintenance_enums import MAINTENANCE_MODEL_CALLBACK, MAINTENANCE_SESSION_COMMANDS
+from trustly.app.view_managers.server.maintenance_manager.maintenance_session_controller import maintenance_session_controller
 from trustly.services.request_manager.request_handler import request_handler
 
 

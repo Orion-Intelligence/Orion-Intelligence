@@ -5,10 +5,6 @@ class ERROR_MODEL_CALLBACK(enum.Enum):
   M_INIT = 1
 
 
-class ERROR_SESSION_COMMANDS(enum.Enum):
-  M_INIT = 1
-
-
 class ERROR_PARAM:
   M_SECURE_SERVICE = "pSite"
 

@@ -6,12 +6,9 @@ urlpatterns = [
   path('admin/', admin.site.urls),
   # redirections
   path('', views.index, name='home'),
-  path('privacy/', views.privacy, name='privacy'),
-  path('notice/', views.notice, name='notice'),
   path('directory/', views.directory, name='directory'),
   path('search/', views.search, name='search'),
   path('restricted/', views.block, name='restricted'),
-  path('cms/', views.block, name='cms'),
   path('update_status/', views.update_status, name='manage_search'),
   path('parser/', views.parser, name='parser'),
   path('feeder/unique', views.feeder_unique, name='feeder_unique'),

@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 
-from trustly.app.server_manager.external_request_manager.external_request_controller import external_request_controller
-from trustly.app.server_manager.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
+from trustly.app.view_managers.server.external_request_manager.external_request_controller import external_request_controller
+from trustly.app.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
 from trustly.services.elastic_manager.elastic_controller import elastic_controller
 from trustly.services.elastic_manager.elastic_enums import ELASTIC_CRUD_COMMANDS, ELASTIC_REQUEST_COMMANDS
 from trustly.app.constants.constant import CONSTANTS

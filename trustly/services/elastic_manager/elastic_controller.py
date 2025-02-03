@@ -95,7 +95,7 @@ class elastic_controller(request_handler):
           results.append({"query": query, "result": result})
         except Exception as ex:
           print("ELASTIC 3 : Failed to execute query : " + str(query) + " : " + str(ex), flush=True)
-          results.append({"query": query, "error": str(ex)})
+          results.append({"query": query, "error_manager": str(ex)})
       return True, results
     except Exception as ex:
       log.g().e("ELASTIC 3 : " + MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE + " : " + str(ex))

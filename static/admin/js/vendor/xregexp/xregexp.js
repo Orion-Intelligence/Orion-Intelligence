@@ -495,12 +495,12 @@ function hasNativeFlag(flag) {
   // Can't check based on the presence of properties/getters since browsers might support such
   // properties even when they don't support the corresponding flag in regex construction (tested
   // in Chrome 48, where `'unicode' in /x/` is true but trying to construct a regex with flag `u`
-  // throws an error)
+  // throws an error_manager)
   var isSupported = true;
 
   try {
     // Can't use regex literals for testing even in a `try` because regex literals with
-    // unsupported flags cause a compilation error in IE
+    // unsupported flags cause a compilation error_manager in IE
     new RegExp('', flag); // Work around a broken/incomplete IE11 polyfill for sticky introduced in core-js 3.6.0
 
     if (flag === 'y') {
@@ -716,7 +716,7 @@ function getContextualTokenSeparator(match, scope, flags) {
     return '';
   } // Keep tokens separated. This avoids e.g. inadvertedly changing `\1 1` or `\1(?#)1` to `\11`.
   // This also ensures all tokens remain as discrete atoms, e.g. it prevents converting the
-  // syntax error `(? :` into `(?:`.
+  // syntax error_manager `(? :` into `(?:`.
 
 
   return '(?:)';
@@ -794,7 +794,7 @@ function isType(value, type) {
   return Object.prototype.toString.call(value) === "[object ".concat(type, "]");
 }
 /**
- * Returns the object, or throws an error if it is `null` or `undefined`. This is used to follow
+ * Returns the object, or throws an error_manager if it is `null` or `undefined`. This is used to follow
  * the ES5 abstract operation `ToObject`.
  *
  * @private
@@ -899,7 +899,7 @@ function prepareOptions(value) {
   return value;
 }
 /**
- * Registers a flag so it doesn't throw an 'unknown flag' error.
+ * Registers a flag so it doesn't throw an 'unknown flag' error_manager.
  *
  * @private
  * @param {String} flag Single-character flag to register.
@@ -958,7 +958,7 @@ function runTokens(pattern, flags, pos, scope, context) {
 }
 /**
  * Enables or disables implicit astral mode opt-in. When enabled, flag A is automatically added to
- * all new regexes created by XRegExp. This causes an error to be thrown when creating regexes if
+ * all new regexes created by XRegExp. This causes an error_manager to be thrown when creating regexes if
  * the Unicode Base addon is not available, since flag A is registered by that addon.
  *
  * @private
@@ -1035,7 +1035,7 @@ function XRegExp(pattern, flags) {
   flags = flags === undefined ? '' : String(flags);
 
   if (XRegExp.isInstalled('astral') && !((0, _indexOf["default"])(flags).call(flags, 'A') !== -1)) {
-    // This causes an error to be thrown if the Unicode Base addon is not available
+    // This causes an error_manager to be thrown if the Unicode Base addon is not available
     flags += 'A';
   }
 
@@ -1146,10 +1146,10 @@ XRegExp._pad4 = pad4;
  * @param {Object} [options] Options object with optional properties:
  *   - `scope` {String} Scope where the token applies: 'default', 'class', or 'all'.
  *   - `flag` {String} Single-character flag that triggers the token. This also registers the
- *     flag, which prevents XRegExp from throwing an 'unknown flag' error when the flag is used.
+ *     flag, which prevents XRegExp from throwing an 'unknown flag' error_manager when the flag is used.
  *   - `optionalFlags` {String} Any custom flags checked for within the token `handler` that are
  *     not required to trigger the token. This registers the flags, to prevent XRegExp from
- *     throwing an 'unknown flag' error when any of the flags are used.
+ *     throwing an 'unknown flag' error_manager when any of the flags are used.
  *   - `reparse` {Boolean} Whether the `handler` function's output should not be treated as
  *     final, and instead be reparseable by other tokens (including the current token). Allows
  *     token chaining or deferring.
@@ -1272,7 +1272,7 @@ XRegExp.cache.flush = function (cacheName) {
  */
 // Following are the contexts where each metacharacter needs to be escaped because it would
 // otherwise have a special meaning, change the meaning of surrounding characters, or cause an
-// error. Context 'default' means outside character classes only.
+// error_manager. Context 'default' means outside character classes only.
 // - `\` - context: all
 // - `[()*+?.$|` - context: default
 // - `]` - context: default with flag u or if forming the end of a character class
@@ -2128,9 +2128,9 @@ fixed.replace = function (search, replacement) {
               return args[_n] || '';
             }
           } // Handle backreference to named capture. If the name does not refer to an
-          // existing capturing group, it's an error. Also handles the error for numbered
+          // existing capturing group, it's an error_manager. Also handles the error_manager for numbered
           // backference that does not refer to an existing group.
-          // Using `indexOf` since having groups with the same name is already an error,
+          // Using `indexOf` since having groups with the same name is already an error_manager,
           // otherwise would need `lastIndexOf`.
 
 
@@ -2178,10 +2178,10 @@ fixed.replace = function (search, replacement) {
 
         dollarToken = +dollarToken; // XRegExp behavior for `$n` and `$nn`:
         // - Backrefs end after 1 or 2 digits. Use `${..}` or `$<..>` for more digits.
-        // - `$1` is an error if no capturing groups.
-        // - `$10` is an error if less than 10 capturing groups. Use `${1}0` or `$<1>0`
+        // - `$1` is an error_manager if no capturing groups.
+        // - `$10` is an error_manager if less than 10 capturing groups. Use `${1}0` or `$<1>0`
         //   instead.
-        // - `$01` is `$1` if at least one capturing group, else it's an error.
+        // - `$01` is `$1` if at least one capturing group, else it's an error_manager.
         // - `$0` (not followed by 1-9) and `$00` are the entire match.
         // Native behavior, for comparison:
         // - Backrefs end after 1 or 2 digits. Cannot reference capturing group 100+.
@@ -2196,7 +2196,7 @@ fixed.replace = function (search, replacement) {
           }
 
           return args[dollarToken] || '';
-        } // `$` followed by an unsupported char is an error, unlike native JS
+        } // `$` followed by an unsupported char is an error_manager, unlike native JS
 
 
         throw new SyntaxError("Invalid token ".concat($0));
@@ -2360,7 +2360,7 @@ if (!hasNativeS) {
 XRegExp.addToken(/\\k<([^>]+)>/, function (match) {
   var _context6, _context7;
 
-  // Groups with the same name is an error, else would need `lastIndexOf`
+  // Groups with the same name is an error_manager, else would need `lastIndexOf`
   var index = isNaN(match[1]) ? (0, _indexOf["default"])(_context6 = this.captureNames).call(_context6, match[1]) + 1 : +match[1];
   var endIndex = match.index + match[0].length;
 
@@ -2376,7 +2376,7 @@ XRegExp.addToken(/\\k<([^>]+)>/, function (match) {
 });
 /*
  * Numbered backreference or octal, plus any following digits: `\0`, `\11`, etc. Octals except `\0`
- * not followed by 0-9 and backreferences to unopened capture groups throw an error. Other matches
+ * not followed by 0-9 and backreferences to unopened capture groups throw an error_manager. Other matches
  * are returned unaltered. IE < 9 doesn't support backreferences above `\99` in regex syntax.
  */
 
@@ -3150,7 +3150,7 @@ module.exports = function (originalArray, length) {
 var anObject = require('../internals/an-object');
 var iteratorClose = require('../internals/iterator-close');
 
-// call something on iterator step with safe closing on error
+// call something on iterator step with safe closing on error_manager
 module.exports = function (iterator, fn, value, ENTRIES) {
   try {
     return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
@@ -3222,7 +3222,7 @@ var Object = global.Object;
 // ES3 wrong here
 var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) == 'Arguments';
 
-// fallback for IE11 Script Access Denied error
+// fallback for IE11 Script Access Denied error_manager
 var tryGet = function (it, key) {
   try {
     return it[key];
@@ -3841,7 +3841,7 @@ var split = uncurryThis(''.split);
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
 module.exports = fails(function () {
-  // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
+  // throws an error_manager in rhino, see https://github.com/mozilla/rhino/issues/346
   // eslint-disable-next-line no-prototype-builtins -- safe
   return !Object('z').propertyIsEnumerable(0);
 }) ? function (it) {

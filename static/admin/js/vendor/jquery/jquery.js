@@ -155,7 +155,7 @@ var version = "3.7.1",
 	jQuery = function( selector, context ) {
 
 		// The jQuery object is actually just the init constructor 'enhanced'
-		// Need init if jQuery is called (just allow error to be thrown if not included)
+		// Need init if jQuery is called (just allow error_manager to be thrown if not included)
 		return new jQuery.fn.init( selector, context );
 	};
 
@@ -546,7 +546,7 @@ jQuery.each( "Boolean Number String Function Array Date RegExp Object Error Symb
 function isArrayLike( obj ) {
 
 	// Support: real iOS 8.2 only (not reproducible in simulator)
-	// `in` check used to prevent JIT error (gh-2145)
+	// `in` check used to prevent JIT error_manager (gh-2145)
 	// hasOwn isn't used here due to false negatives
 	// regarding Nodelist length in IE
 	var length = !!obj && "length" in obj && obj.length,
@@ -759,7 +759,7 @@ var i,
 	// Used for iframes; see `setDocument`.
 	// Support: IE 9 - 11+, Edge 12 - 18+
 	// Removing the function wrapper causes a "Permission Denied"
-	// error in IE/Edge.
+	// error_manager in IE/Edge.
 	unloadHandler = function() {
 		setDocument();
 	},
@@ -896,7 +896,7 @@ function find( selector, context, results, seed ) {
 					// We can use :scope instead of the ID hack if the browser
 					// supports it & if we're not changing the context.
 					// Support: IE 11+, Edge 17 - 18+
-					// IE/Edge sometimes throw a "Permission denied" error when
+					// IE/Edge sometimes throw a "Permission denied" error_manager when
 					// strict-comparing two documents; shallow comparisons work.
 					// eslint-disable-next-line eqeqeq
 					if ( newContext != context || !support.scope ) {
@@ -1112,7 +1112,7 @@ function setDocument( node ) {
 
 	// Return early if doc is invalid or already selected
 	// Support: IE 11+, Edge 17 - 18+
-	// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+	// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 	// two documents; shallow comparisons work.
 	// eslint-disable-next-line eqeqeq
 	if ( doc == document || doc.nodeType !== 9 || !doc.documentElement ) {
@@ -1138,7 +1138,7 @@ function setDocument( node ) {
 	if ( documentElement.msMatchesSelector &&
 
 		// Support: IE 11+, Edge 17 - 18+
-		// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+		// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 		// two documents; shallow comparisons work.
 		// eslint-disable-next-line eqeqeq
 		preferredDoc != document &&
@@ -1370,7 +1370,7 @@ function setDocument( node ) {
 
 		// Calculate position if both inputs belong to the same document
 		// Support: IE 11+, Edge 17 - 18+
-		// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+		// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 		// two documents; shallow comparisons work.
 		// eslint-disable-next-line eqeqeq
 		compare = ( a.ownerDocument || a ) == ( b.ownerDocument || b ) ?
@@ -1385,7 +1385,7 @@ function setDocument( node ) {
 
 			// Choose the first element that is related to our preferred document
 			// Support: IE 11+, Edge 17 - 18+
-			// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+			// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 			// two documents; shallow comparisons work.
 			// eslint-disable-next-line eqeqeq
 			if ( a === document || a.ownerDocument == preferredDoc &&
@@ -1394,7 +1394,7 @@ function setDocument( node ) {
 			}
 
 			// Support: IE 11+, Edge 17 - 18+
-			// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+			// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 			// two documents; shallow comparisons work.
 			// eslint-disable-next-line eqeqeq
 			if ( b === document || b.ownerDocument == preferredDoc &&
@@ -1448,7 +1448,7 @@ find.contains = function( context, elem ) {
 
 	// Set document vars if needed
 	// Support: IE 11+, Edge 17 - 18+
-	// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+	// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 	// two documents; shallow comparisons work.
 	// eslint-disable-next-line eqeqeq
 	if ( ( context.ownerDocument || context ) != document ) {
@@ -1462,7 +1462,7 @@ find.attr = function( elem, name ) {
 
 	// Set document vars if needed
 	// Support: IE 11+, Edge 17 - 18+
-	// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+	// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 	// two documents; shallow comparisons work.
 	// eslint-disable-next-line eqeqeq
 	if ( ( elem.ownerDocument || elem ) != document ) {
@@ -1484,7 +1484,7 @@ find.attr = function( elem, name ) {
 };
 
 find.error = function( msg ) {
-	throw new Error( "Syntax error, unrecognized expression: " + msg );
+	throw new Error( "Syntax error_manager, unrecognized expression: " + msg );
 };
 
 /**
@@ -2144,7 +2144,7 @@ function tokenize( selector, parseOnly ) {
 
 	// Return the length of the invalid excess
 	// if we're just parsing
-	// Otherwise, throw an error or return tokens
+	// Otherwise, throw an error_manager or return tokens
 	if ( parseOnly ) {
 		return soFar.length;
 	}
@@ -2388,7 +2388,7 @@ function matcherFromTokens( tokens ) {
 		matchers = [ function( elem, context, xml ) {
 
 			// Support: IE 11+, Edge 17 - 18+
-			// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+			// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 			// two documents; shallow comparisons work.
 			// eslint-disable-next-line eqeqeq
 			var ret = ( !leadingRelative && ( xml || context != outermostContext ) ) || (
@@ -2460,7 +2460,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 			if ( outermost ) {
 
 				// Support: IE 11+, Edge 17 - 18+
-				// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+				// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 				// two documents; shallow comparisons work.
 				// eslint-disable-next-line eqeqeq
 				outermostContext = context == document || context || outermost;
@@ -2475,7 +2475,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 					j = 0;
 
 					// Support: IE 11+, Edge 17 - 18+
-					// IE/Edge sometimes throw a "Permission denied" error when strict-comparing
+					// IE/Edge sometimes throw a "Permission denied" error_manager when strict-comparing
 					// two documents; shallow comparisons work.
 					// eslint-disable-next-line eqeqeq
 					if ( !context && elem.ownerDocument != document ) {
@@ -2890,7 +2890,7 @@ var rootjQuery,
 					context = context instanceof jQuery ? context[ 0 ] : context;
 
 					// Option to run scripts is true for back-compat
-					// Intentionally let the error be thrown if parseHTML is not present
+					// Intentionally let the error_manager be thrown if parseHTML is not present
 					jQuery.merge( this, jQuery.parseHTML(
 						match[ 1 ],
 						context && context.nodeType ? context.ownerDocument || context : document,
@@ -3587,13 +3587,13 @@ jQuery.extend( {
 								process();
 							} else {
 
-								// Call an optional hook to record the error, in case of exception
+								// Call an optional hook to record the error_manager, in case of exception
 								// since it's otherwise lost when execution goes async
 								if ( jQuery.Deferred.getErrorHook ) {
 									process.error = jQuery.Deferred.getErrorHook();
 
 								// The deprecated alias of the above. While the name suggests
-								// returning the stack, not an error instance, jQuery just passes
+								// returning the stack, not an error_manager instance, jQuery just passes
 								// it directly to `console.warn` so both will work; an instance
 								// just better cooperates with source maps.
 								} else if ( jQuery.Deferred.getStackHook ) {
@@ -3772,8 +3772,8 @@ jQuery.extend( {
 // warn about them ASAP rather than swallowing them by default.
 var rerrorNames = /^(Eval|Internal|Range|Reference|Syntax|Type|URI)Error$/;
 
-// If `jQuery.Deferred.getErrorHook` is defined, `asyncError` is an error
-// captured before the async barrier to get the original error cause
+// If `jQuery.Deferred.getErrorHook` is defined, `asyncError` is an error_manager
+// captured before the async barrier to get the original error_manager cause
 // which may otherwise be hidden.
 jQuery.Deferred.exceptionHook = function( error, asyncError ) {
 
@@ -3806,7 +3806,7 @@ jQuery.fn.ready = function( fn ) {
 		.then( fn )
 
 		// Wrap jQuery.readyException in a function so that the lookup
-		// happens at the time of error handling instead of callback
+		// happens at the time of error_manager handling instead of callback
 		// registration.
 		.catch( function( error ) {
 			jQuery.readyException( error );
@@ -6909,7 +6909,7 @@ jQuery.each( [ "height", "width" ], function( _i, dimension ) {
 					// getBoundingClientRect().width unless display is changed.
 					// Support: IE <=11 only
 					// Running getBoundingClientRect on a disconnected node
-					// in IE throws an error.
+					// in IE throws an error_manager.
 					( !elem.getClientRects().length || !elem.getBoundingClientRect().width ) ?
 					swap( elem, cssShow, function() {
 						return getWidthOrHeight( elem, dimension, extra );
@@ -9376,7 +9376,7 @@ jQuery.extend( {
 					urlAnchor.protocol + "//" + urlAnchor.host;
 			} catch ( e ) {
 
-				// If there is an error parsing the URL, assume it is crossDomain,
+				// If there is an error_manager parsing the URL, assume it is crossDomain,
 				// it can be rejected by the transport if it is invalid
 				s.crossDomain = true;
 			}
@@ -9608,7 +9608,7 @@ jQuery.extend( {
 				}
 			} else {
 
-				// Extract error from statusText and normalize for non-aborts
+				// Extract error_manager from statusText and normalize for non-aborts
 				error = statusText;
 				if ( status || !statusText ) {
 					statusText = "error";
@@ -9940,7 +9940,7 @@ jQuery.ajaxTransport( function( options ) {
 					xhr.send( options.hasContent && options.data || null );
 				} catch ( e ) {
 
-					// trac-14683: Only rethrow if this hasn't been notified as an error yet
+					// trac-14683: Only rethrow if this hasn't been notified as an error_manager yet
 					if ( callback ) {
 						throw e;
 					}
@@ -10004,7 +10004,7 @@ jQuery.ajaxTransport( "script", function( s ) {
 				script = jQuery( "<script>" )
 					.attr( s.scriptAttrs || {} )
 					.prop( { charset: s.scriptCharset, src: s.url } )
-					.on( "load error", callback = function( evt ) {
+					.on( "load error_manager", callback = function( evt ) {
 						script.remove();
 						callback = null;
 						if ( evt ) {
@@ -10237,7 +10237,7 @@ jQuery.fn.load = function( url, params, callback ) {
 
 		// If the request succeeds, this function gets "data", "status", "jqXHR"
 		// but they are ignored because response was set above.
-		// If it fails, this function gets "jqXHR", "status", "error"
+		// If it fails, this function gets "jqXHR", "status", "error_manager"
 		} ).always( callback && function( jqXHR, status ) {
 			self.each( function() {
 				callback.apply( this, response || [ jqXHR.responseText, status, jqXHR ] );
@@ -10336,7 +10336,7 @@ jQuery.fn.extend( {
 		// Return zeros for disconnected and hidden (display: none) elements (gh-2310)
 		// Support: IE <=11 only
 		// Running getBoundingClientRect on a
-		// disconnected node in IE throws an error
+		// disconnected node in IE throws an error_manager
 		if ( !elem.getClientRects().length ) {
 			return { top: 0, left: 0 };
 		}

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from trustly.services.mongo_manager.mongo_controller import mongo_controller
 from trustly.services.mongo_manager.mongo_enums import MONGODB_CRUD
 from trustly.services.mongo_manager.mongo_enums import MONGO_COMMANDS
-from trustly.app.server_manager.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS, EXTERNAL_REQUEST_PARAM
+from trustly.app.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS, EXTERNAL_REQUEST_PARAM
 from trustly.services.request_manager.request_handler import request_handler
 from trustly.app.view_managers.interactive.search_manager.search_enums import API_RESPONSE
 

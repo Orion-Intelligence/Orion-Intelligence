@@ -1,45 +1,29 @@
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login as auth_login
-from trustly.app.constants.constant import CONSTANTS
 from trustly.app.view_managers.interactive.directory_manager.directory_view_model import directory_view_model
 from trustly.app.view_managers.interactive.hompage_manager.homepage_enums import HOMEPAGE_MODEL_COMMANDS
 from trustly.app.view_managers.interactive.hompage_manager.homepage_view_model import homepage_view_model
-from trustly.app.view_managers.interactive.notice_manager.notice_view_model import notice_view_model
-from trustly.app.view_managers.interactive.policy_manager.policy_view_model import policy_view_model
 from trustly.app.view_managers.interactive.search_manager.search_enums import SEARCH_MODEL_COMMANDS
 from trustly.app.view_managers.interactive.search_manager.search_view_model import search_view_model
-from trustly.app.view_managers.server.error.error_enums import ERROR_MODEL_CALLBACK
+from trustly.app.view_managers.server.crawl_controller.crawl_controller import crawl_controller
+from trustly.app.view_managers.server.crawl_controller.crawl_enums import CRAWL_COMMANDS
+from trustly.app.view_managers.server.error_manager.error_enums import ERROR_MODEL_CALLBACK
 from trustly.services.block_manager.block_controller import block_controller
 from trustly.app.constants.constant import CONSTANTS
-from trustly.app.server_manager.crawl_controller.crawl_controller import crawl_controller
-from trustly.app.server_manager.crawl_controller.crawl_enums import CRAWL_COMMANDS
-from trustly.app.server_manager.external_request_manager.external_request_controller import external_request_controller
-from trustly.app.server_manager.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
+from trustly.app.view_managers.server.external_request_manager.external_request_controller import external_request_controller
+from trustly.app.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
 from trustly.app.view_managers.server.block_manager.block_enums import BLOCK_MODEL_CALLBACK
-from trustly.app.view_managers.server.error.error_view_model import error_view_model
+from trustly.app.view_managers.server.error_manager.error_view_model import error_view_model
 from trustly.app.view_managers.interactive.directory_manager.directory_enums import DIRECTORY_MODEL_COMMANDS
-from trustly.app.view_managers.interactive.notice_manager.notice_enums import NOTICE_MODEL_CALLBACK
-from trustly.app.view_managers.interactive.policy_manager.policy_enums import POLICY_MODEL_CALLBACK
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 
 def index(request):
-  return homepage_view_model.getInstance().invoke_trigger(HOMEPAGE_MODEL_COMMANDS.M_INIT, request)
+  return error_view_model.getInstance().invoke_trigger(ERROR_MODEL_CALLBACK.M_INIT, [request, 404])
 
 
 def command(request):
   return homepage_view_model.getInstance().invoke_trigger(HOMEPAGE_MODEL_COMMANDS.M_INIT, request)
-
-
-def privacy(request):
-  return policy_view_model.getInstance().invoke_trigger(POLICY_MODEL_CALLBACK.M_INIT, request)
-
-
-def notice(request):
-  return notice_view_model.getInstance().invoke_trigger(NOTICE_MODEL_CALLBACK.M_INIT, request)
-
 
 def directory(request):
   return directory_view_model.getInstance().invoke_trigger(DIRECTORY_MODEL_COMMANDS.M_INIT, request)
@@ -84,7 +68,7 @@ def error_page_403(request, exception=None):
   return error_view_model.getInstance().invoke_trigger(ERROR_MODEL_CALLBACK.M_INIT, [request, 403])
 
 
-def error_page_404(request, exception, template_name='trustly/error/error.html'):
+def error_page_404(request, exception, template_name='trustly/error_manager/error_manager.html'):
   return error_view_model.getInstance().invoke_trigger(ERROR_MODEL_CALLBACK.M_INIT, [request, 404])
 
 

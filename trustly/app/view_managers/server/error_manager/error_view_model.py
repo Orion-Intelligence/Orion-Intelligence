@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 from trustly.app.constants.constant import CONSTANTS
-from trustly.app.view_managers.server.error.error_enums import ERROR_MODEL_CALLBACK
-from trustly.app.view_managers.server.error.error_model import error_model
+from trustly.app.view_managers.server.error_manager.error_enums import ERROR_MODEL_CALLBACK
+from trustly.app.view_managers.server.error_manager.error_model import error_model
 from trustly.services.request_manager.request_handler import request_handler
 
 
@@ -28,5 +28,5 @@ class error_view_model(request_handler):
   # External Request Callbacks
   def invoke_trigger(self, p_command, p_data):
     if p_command == ERROR_MODEL_CALLBACK.M_INIT:
-      m_response, m_status = self.__m_error_model.invoke_trigger(ERROR_MODEL_CALLBACK.M_INIT, p_data)
+      m_response = self.__m_error_model.invoke_trigger(ERROR_MODEL_CALLBACK.M_INIT, p_data)
       return render(None, CONSTANTS.S_TEMPLATE_ERROR_WEBSITE_PATH, m_response, status=m_response['mErrorCode'])

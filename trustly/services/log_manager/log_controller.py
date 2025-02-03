@@ -64,7 +64,7 @@ class log:
 
   def __write_to_file(self, log_message, lines_per_file=10000):
     try:
-      log_directory = os.path.join(os.getcwd(), 'logs', datetime.datetime.now().strftime("%Y-%m-%d"))
+      log_directory = os.path.join(os.getcwd(), 'trustly/logs', datetime.datetime.now().strftime("%Y-%m-%d"))
       if not os.path.exists(log_directory):
         os.makedirs(log_directory, exist_ok=True)
         self.__cleanup_old_logs()

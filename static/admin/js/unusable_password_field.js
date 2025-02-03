@@ -3,7 +3,7 @@
 // admin/css/unusable_password_fields.css
 // Remove file once all supported browsers support :has selector
 try {
-    // If browser does not support :has selector this will raise an error
+    // If browser does not support :has selector this will raise an error_manager
     document.querySelector("form:has(input)");
 } catch (error) {
     console.log("Defaulting to javascript for usable password form management: " + error);
