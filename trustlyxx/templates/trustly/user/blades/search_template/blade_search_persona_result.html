@@ -1,0 +1,56 @@
+{% if mDynamicParserStatus == "false" or mSearchCallbackRelevantDocument|length == 0 %}
+<form method="GET" action="" class="search-persona__no-suggestion">
+  <div class="row align-items-center">
+    <div class="col">
+      <p class="search-persona__no-suggestion-header mb-0">
+        {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument|length == 0 %}
+          no record found for - <strong>{{ mSearchCallbackQuery }}</strong> press try again if you want to fetch the data again
+          <input type="hidden" name="mDynamicCrawlTrigger" value="1">
+        {% else %}
+          we are fetching results for - <strong>{{ mSearchCallbackQuery }}</strong> - please wait for few seconds and press sync again.
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-auto ms-auto">
+      <input type="hidden" name="mSearchParamPage" value="1">
+      <input type="hidden" name="q" value="{{ mSearchCallbackQuery }}">
+      <input type="hidden" name="mUsername" value="{{ mUsernameQuery }}">
+      <input type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
+      <input type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
+        {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument|length == 0 %}
+          <button type="submit" class="search__reload-button">try again</button>
+        {% else %}
+          <button type="submit" class="search__reload-button">sync again</button>
+        {% endif %}
+    </div>
+  </div>
+</form>
+{% elif mSearchCallbackRelevantDocument %}
+  <div class="searchbar__search-container-persona">
+    <div class="card shadow searchbar__search-card-persona">
+      <div class="card-header searchbar__search-card-header-persona text-white">
+        <h6 class="mb-0">⚠️ Data Breach Detected</h6>
+      </div>
+      <div class="card-body searchbar__search-container-persona-body">
+        <table class="table searchbar__search-card-table-persona searchbar__search-container-persona-border-color text-white">
+          <tbody>
+          {% for key, value in mSearchCallbackRelevantDocument.items %}
+            <tr class=" {% if loop.index == 1 %}border-0{% endif %}">
+              <td class="searchbar__search-container-persona-border-color">{{ key|title }}</td>
+              <td class="searchbar__search-container-persona-border searchbar__search-container-persona-border-color">
+                {% if value %}
+                  {% for item in value %}
+                    <div class="searchbar__search-container-persona-item">{{ item }}</div>
+                  {% endfor %}
+                {% else %}
+                  N/A
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endif %}

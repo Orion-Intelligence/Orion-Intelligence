@@ -1,0 +1,34 @@
+{% include 'trustly/user/blades/blades_shared_initialization.html' %}
+{% include 'trustly/user/server/error/local_imports.html' %}
+
+<html lang="en">
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="notice">
+                        <h2 class="maintenance__header-title">
+                            Oops! Server Error {{ vars.mErrorCode }}</h2><br>
+                            <hr class="notice__header-divider"><br>
+                        <h1 class="maintenance__main-title">
+                            Something went wrong!</h1>
+                        <div class="maintenance__message">
+                            <p>{{ vars.mErrorMessage }}</p>
+                        </div><br>
+                        <div class="notice__actions">
+                            <a href="https://github.com/msmannan00/Orion-Search"  class="btn btn-info btn-lg notice__action-button"><span class="glyphicon glyphicon-home">
+                            </span>Explore Project</a>
+                        </div>
+                        <div class="notice__actions">
+                            <a href="/static" class="btn btn-info btn-lg notice__action-button"><span class="glyphicon glyphicon-home">
+                            </span>Homepage</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                  <img src="{{ url_for('static', path='trustly/images/server-icon.svg') }}" alt="Brand Logo" class="maintenance__image">
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

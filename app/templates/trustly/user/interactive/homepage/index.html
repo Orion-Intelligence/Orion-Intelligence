@@ -1,0 +1,19 @@
+{% load static %}{% include 'trustly/user/blades/blades_shared_initialization.html' %}
+{% include 'trustly/user/interactive/homepage/local_imports.html' %}
+{% include 'trustly/user/interactive/directory/local_imports.html' %}
+<html lang="en">
+    <body class="gc-clear-selection">
+        {% include 'trustly/user/blades/home_template/blade_home_header.html' %}
+        <div class="gc-clear-selection home-container">
+            <img alt="back" class="home-background" src="{% static 'backend/images/Bg.png' %}">
+            <div class="home">
+                {% include 'trustly/user/blades/home_template/../../blades/shared_blades/blade_toolbar.html' %}
+                {% include 'trustly/user/blades/home_template/blade_home_search.html' %}
+                {% include 'trustly/user/blades/home_template/blade_home_insight.html' %}
+            </div>
+        </div>
+        <span id="bottom"></span>
+
+        {% include 'trustly/user/blades/shared_blades/blade_footer.html' %}
+    </body>
+</html>

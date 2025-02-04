@@ -27,12 +27,12 @@ services:
         gunicorn trustly.wsgi:application --bind 0.0.0.0:8070 --reload &
         sleep 10 && python manage.py cronjob_manager
     volumes:
-      - .:/app:cached
-      - ./trustly/templates:/app/trustly/templates:cached
+      - .:/backend:cached
+      - ./backend/templates:/backend/backend/templates:cached
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/app/static:cached
-      - ./staticfiles:/app/staticfiles:cached
-      - media_volume:/app/media
+      - ./static:/backend/static:cached
+      - ./staticfiles:/backend/staticfiles:cached
+      - media_volume:/backend/media
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -41,7 +41,7 @@ services:
       - "8070"
     environment:
       NLTK_DATA: /root/nltk_data
-      DJANGO_SETTINGS_MODULE: trustly.settings
+      DJANGO_SETTINGS_MODULE: backend.settings
       DISABLE_TEMPLATE_CACHING: "1"
     networks:
       - backend
@@ -199,9 +199,9 @@ services:
       - web
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/app/static:cached
-      - ./staticfiles:/app/staticfiles:cached
-      - media_volume:/app/media
+      - ./static:/backend/static:cached
+      - ./staticfiles:/backend/staticfiles:cached
+      - media_volume:/backend/media
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -216,7 +216,7 @@ services:
 
   mongo:
     image: mongo:latest
-    container_name: trustly-web-mongodb
+    container_name: backend-web-mongodb
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}

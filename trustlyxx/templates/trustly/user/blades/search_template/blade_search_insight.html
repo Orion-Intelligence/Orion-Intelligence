@@ -1,0 +1,172 @@
+{% load static %}
+{% if mSearchCallbackRelevantSearchType != 'persona' %}
+  <h2 class="search__analytics-heading">Analytics</h2>
+{% endif %}
+{% if analytics.unique_urls|length > 0 %}
+    <div class="search-insights__container search-insights__container-background">
+        <input type="checkbox" id="keyword-insights-toggle" checked>
+        <label class="search-insights__header" for="keyword-insights-toggle">
+            Keyword Insights
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+    
+        </label>
+        <div class="search-insights__content">
+            <div class="row">
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">{{ analytics.total_p_document_list_length }}</p></div>
+                    <div><p class="search-insights__text">Total Found</p></div>
+                </div>
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">{{ analytics.m_documents_length }}</p></div>
+                    <div><p class="search-insights__text">Documents</p></div>
+                </div>
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">{{ analytics.m_clearnet_links_count }}</p></div>
+                    <div><p class="search-insights__text">Links</p></div>
+                </div>
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">3432</p></div>
+                    <div><p class="search-insights__text">Pages</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="search-insights__container search-insights__container-background">
+        <input type="checkbox" id="Results_General_Coverage-toggle" checked>
+        <label class="search-insights__header" for="Results_General_Coverage-toggle">
+            Results General Coverage
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+    
+        </label>
+        <div class="search-insights__content">
+            <div class="row">
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">{{ analytics.total_p_document_list_length }}</p></div>
+                    <div><p class="search-insights__text">Total Found</p></div>
+                </div>
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">{{ analytics.active_links }}</p></div>
+                    <div><p class="search-insights__text"><span class="search-insights__active-span"></span>Active</p></div>
+                </div>
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">{{ analytics.inactive_links }}</p></div>
+                    <div><p class="search-insights__text"><span class="search-insights__inactive-span"></span>Inactive</p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div><p class="search-insights__coverage-numbers">{{ analytics.seldom_active_links }}</p></div>
+                    <div><p class="search-insights__text">
+                        <span class="search-insights__seldom-active-span"></span>Seldom Active</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-insights__unique-url-accordion search-insights__container-background">
+        <input type="checkbox" id="unique_url-toggle" checked>
+        <label class="search-insights__unique-url-header" for="unique_url-toggle">
+            Unique URLs
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__unique-url-content">
+            <ul class="search-insights__unique-url-ul">
+                {% for urls in analytics.unique_urls %}
+                    <li>
+                        <p class=" search-insights__unique-url-text">
+                            <span class="search-insights__unique-url-span"></span>{{ urls.m_title }}</p>
+                        <h6 class="search-insight__unique_url__url">
+                            {{ urls.m_url }}</h6>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endif %}
+
+{% if analytics.m_emails|length > 0 %}
+    <div class="search-insights__email-accordion search-insight__general-accordian search-insights__container-background">
+        <input type="checkbox" id="unique__email-toggle" checked>
+        <label class="search-insights__email-header search-insight__general-header" for="unique__email-toggle">
+            Unique Emails
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__email-content search-insight__general-content">
+            {% for i in analytics.m_emails %}
+                <div class="search-insights__email-row search-insights__general-row">
+                    <div class="search-insights__email-column search-insights__general-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}
+{% if analytics.mPhoneNumber|length > 0 %}
+    <div class="search-insights__phone-accordion search-insight__general-accordian search-insights__container-background">
+        <input type="checkbox" id="unique__phone-toggle" checked>
+        <label class="search-insights__phone-header search-insight__general-header" for="unique__phone-toggle">
+            Unique Cellular
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__phone-content search-insight__general-content">
+            {% for i in analytics.mPhoneNumber %}
+                <div class="search-insights__phone-row search-insights__general-row">
+                    <div class="search-insights__phone-column search-insights__general-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}
+{% if analytics.mArchiveUrl|length > 0 %}
+    <div class="search-insights__archive-accordion search-insight__general-accordian search-insights__container-background">
+        <input type="checkbox" id="unique__archive-toggle" checked>
+        <label class="search-insights__archive-header search-insight__general-header" for="unique__archive-toggle">
+            Unique Archives
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__archive-content search-insight__general-content">
+            {% for i in analytics.mArchiveUrl %}
+                <div class="search-insights__archive-row search-insights__general-row">
+                    <div class="search-insights__email-column search-insights__general-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}
+{% if analytics.mName|length > 0 %}
+    <div class="search-insights__name-accordion search-insight__general-accordian search-insights__container-background">
+        <input type="checkbox" id="unique__name-toggle" checked>
+        <label class="search-insights__name-header search-insight__general-header" for="unique__name-toggle">
+            Unique Archives
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__name-content search-insight__general-content">
+            {% for i in analytics.mName %}
+                <div class="search-insights__name-row search-insights__general-row">
+                    <div class="search-insights__name-column search-insights__general-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}
+{% if analytics.m_document|length > 0 %}
+    <div class="search-insights__document-accordion search-insight__general-accordian search-insights__container-background">
+        <input type="checkbox" id="unique__document-toggle" checked>
+        <label class="search-insights__document-header search-insight__general-header" for="unique__document-toggle">
+            Unique Documents
+            <img src="{% static 'backend/images/dropdown_left.svg' %}" alt="Dropdown Arrow">
+        </label>
+        <div class="search-insights__document-content search-insight__general-content">
+            {% for i in analytics.m_document %}
+                <div class="search-insights__document-row search-insights__general-row">
+                    <div class="search-insights__document-column search-insights__general-column">{{ forloop.counter }}- {{ i }}</div>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,114 @@
+.intelligence {
+  height: 47vh;
+}
+
+.intelligence__header {
+  padding-bottom: 12px;
+  padding-top: 8px;
+  font-weight: 600;
+  background: none;
+  width: 60%;
+  color: #336699;
+  border-left: none;
+  padding-left: 3.2em;
+  border-radius: 0 25px 25px 0;
+  font-size: 19px;
+  margin-top: 30px;
+  margin-bottom: 0;
+}
+
+.intelligence__description {
+  font: 14px arial, sans-serif;
+  color: #404040;
+  max-width: 650px;
+  padding-left: 4.4em;
+  margin-bottom: 20px;
+}
+
+.footer__catagories--intelligence {
+  border-bottom: 4px solid whitesmoke;
+}
+
+.intelligence__pointers {
+  font: 14px arial, sans-serif;
+  color: #808080;
+  max-width: 650px;
+  border-radius: 6px;
+  margin-left: -45px;
+}
+
+.intelligence__pointers--container {
+  border-radius: 8px;
+  max-width: 550px;
+  margin: 50px 10px 10px 3.6em;
+  padding: 10px 10px 10px 5px;
+}
+
+.intelligence__pointers--points {
+  margin-top: 10px;
+  font-weight: bold;
+  border-left: 4px solid orange;
+  padding-left: 15px;
+  background: #fef3e1;
+  cursor: pointer;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom-right-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.intelligence-form__submit {
+  border-radius: 5px;
+  background-color: #2d5986;
+  height: 40px;
+  width: 110%;
+  text-align: center;
+  max-width: 140px;
+  font-weight: bold;
+  border-width: 0;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: 4em;
+}
+
+.intelligence-form__submit:hover {
+  background-color: #004d99;
+}
+
+@media only screen and (max-width: 943px) {
+
+  .intelligence__header {
+    border-left: 5px solid #b36b00;
+    background: #ff9900;
+    padding-top: 11px;
+    max-width: 3300px;
+    font-size: 16px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    padding-left: 10px;
+  }
+
+  .intelligence__description {
+    padding-left: 15px;
+    padding-right: 20px;
+  }
+
+  .intelligence__pointers {
+  }
+
+  .intelligence__pointers--container {
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 650px;
+    margin: 30px 10px 10px;
+  }
+
+  .intelligence-form__submit {
+    margin-left: 15px;
+  }
+
+  .intelligence {
+    height: 82vh;
+  }
+}

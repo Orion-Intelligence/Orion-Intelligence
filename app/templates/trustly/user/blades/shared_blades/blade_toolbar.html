@@ -1,0 +1,16 @@
+{% load static %}
+
+<div class="toolbar">
+    <div class="safe__search-toolba-toolbar-left">
+        <a href="/static" class="gc-clear-selection">
+            <div class="toolbar__button {% if request.path == '/' %}toolbar__button__selected{% endif %}">Home</div>
+        </a>
+        <a href="/directory" class="gc-clear-selection">
+            <div class="toolbar__button {% if request.path == '/directory/' %}toolbar__button__selected{% endif %}">Links</div>
+        </a>
+        <a href="/static#analytics" class="gc-clear-selection">
+            <button class="toolbar__button {% if request.path == '/xx' %}toolbar__button__selected{% endif %}">Analytics</button>
+            <img class="toolbar__button-rotate" width="24" height="24" src="{% static 'backend/images/arrow_up.svg' %}" alt="Icon">
+        </a>
+    </div>
+</div>

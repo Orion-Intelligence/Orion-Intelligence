@@ -1,0 +1,80 @@
+.directory-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  float: right;
+  margin-top: 8px
+}
+
+.directory-pagination li {
+  margin: 0 5px;
+}
+
+.directory-pagination-navbtn{
+  cursor: pointer !important;
+}
+
+.directory-pagination li button {
+  display: flex;
+  border: 0;
+  justify-content: center;
+  align-items: center;
+  width: 35px;
+  height: 35px;
+  background: #17406980;
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 14px;
+  margin-left: -6px;
+  font-weight: bold;
+  outline: none;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.directory-pagination li button img {
+  width: 20px;
+  height: 20px;
+}
+
+.directory-pagination li button:hover {
+  background: #102A4685;
+  color: white;
+  border: 0;
+}
+
+.directory-pagination li.disabled button {
+  border: 0;
+  opacity: 0.4;
+  color: white;
+  pointer-events: none;
+  outline: none;
+}
+
+.directory-pagination li.active button {
+  background: #102A4699;
+  color: white;
+  border: 0;
+  font-weight: bold;
+  outline: none;
+}
+
+.directory-pagination li.active button:hover {
+  background: #102A4685;
+  color: white;
+  border: 0;
+  font-weight: bold;
+  outline: none;
+}
+
+@media only screen and (max-width: 1000px) {
+  .directory-pagination {
+    display: flex;
+    width: 50%;
+    justify-content: start;
+    align-items: flex-start;
+    float: left;
+    margin: 0;
+  }
+}

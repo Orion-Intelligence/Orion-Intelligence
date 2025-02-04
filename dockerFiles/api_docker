@@ -1,10 +1,13 @@
-# Use a slim version of Python to reduce image size
+# Use a lightweight Python image
 FROM python:3.11-slim AS base
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies
+# Disable output buffering so logs print immediately
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies (cached)
 RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
@@ -12,24 +15,21 @@ RUN apt-get update && apt-get install -y \
     libblas-dev \
     liblapack-dev \
     gfortran \
-    gettext \
+    curl \
     --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install Python dependencies
-COPY requirements.txt ./
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Copy only requirements first (to cache dependencies)
+COPY app/requirements.txt /tmp/requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy the application code
-COPY . .
-COPY static/trustly/libs/nltk_data /root/nltk_data
+# Now copy the full app (this ensures dependencies are cached separately)
+COPY app/ /app/
 
-# Set environment variables
-ENV DJANGO_SETTINGS_MODULE=trustly.settings
-ENV PYTHONUNBUFFERED=1
+# Ensure uvicorn is in $PATH
+RUN ln -s /usr/local/bin/uvicorn /usr/bin/uvicorn
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
-# Expose the application port for Gunicorn
+# Expose the FastAPI application port
 EXPOSE 8070
+
+# Run FastAPI with live reload
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8070", "--reload", "--log-level", "debug"]
