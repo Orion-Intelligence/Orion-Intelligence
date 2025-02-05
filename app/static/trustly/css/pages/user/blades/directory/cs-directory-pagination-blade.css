@@ -22,7 +22,7 @@
   align-items: center;
   width: 35px;
   height: 35px;
-  background: #17406980;
+  background: #15345480;
   color: #fff;
   border-radius: 10px;
   text-decoration: none;
@@ -46,7 +46,7 @@
 
 .directory-pagination li.disabled button {
   border: 0;
-  opacity: 0.4;
+  opacity: 0.6;
   color: white;
   pointer-events: none;
   outline: none;

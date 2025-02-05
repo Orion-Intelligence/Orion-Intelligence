@@ -3,11 +3,19 @@ import re
 import locale
 from urllib.parse import urlparse, urlunparse
 import stopwords
+from starlette.requests import Request
 
 
 class helper_controller:
   # Private Variables
   __instance = None
+
+  @staticmethod
+  def create_template_context(request: Request, response_data: dict) -> dict:
+    return {
+      "request": request,
+      "vars": response_data
+    }
 
   @staticmethod
   def load_json(p_file_path):

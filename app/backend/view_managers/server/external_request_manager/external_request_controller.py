@@ -2,13 +2,12 @@ import aiohttp
 import asyncio
 from threading import Thread, Semaphore
 from queue import Queue
-from django.http import HttpResponse
-from app.services.mongo_manager.mongo_controller import mongo_controller
-from app.services.mongo_manager.mongo_enums import MONGODB_CRUD
-from app.services.mongo_manager.mongo_enums import MONGO_COMMANDS
-from app.backend.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS, EXTERNAL_REQUEST_PARAM
-from app.services.request_manager.request_handler import request_handler
-from app.backend.view_managers.interactive.search_manager.search_enums import API_RESPONSE
+from backend.services.mongo_manager.mongo_controller import mongo_controller
+from backend.services.mongo_manager.mongo_enums import MONGODB_CRUD
+from backend.services.mongo_manager.mongo_enums import MONGO_COMMANDS
+from backend.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS, EXTERNAL_REQUEST_PARAM
+from backend.services.request_manager.request_handler import request_handler
+from backend.view_managers.interactive.search_manager.search_enums import API_RESPONSE
 
 class external_request_controller(request_handler):
   __instance = None

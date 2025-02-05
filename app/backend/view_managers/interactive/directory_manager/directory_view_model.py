@@ -1,11 +1,13 @@
-from django.shortcuts import render, redirect
-from app.backend.constants.constant import CONSTANTS
-from app.backend.view_managers.interactive.directory_manager.directory_enums import DIRECTORY_MODEL_COMMANDS
-from app.backend.view_managers.interactive.directory_manager.directory_model import directory_model
-from app.services.request_manager.request_handler import request_handler
+from starlette.requests import Request
+from starlette.templating import Jinja2Templates
+
+from backend.constants.constant import CONSTANTS
+from backend.helper_manager.helper_controller import helper_controller
+from backend.view_managers.interactive.directory_manager.directory_model import directory_model
+from backend.view_managers.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 
 
-class directory_view_model(request_handler):
+class directory_view_model:
   # Private Variables
   __instance = None
   __m_directory_model = None
@@ -23,17 +25,14 @@ class directory_view_model(request_handler):
     else:
       directory_view_model.__instance = self
       self.__m_directory_model = directory_model()
+      self.templates = Jinja2Templates(directory="templates")
 
-  # External Request Callbacks
-  def invoke_trigger(self, p_command, p_data):
-    if p_command == DIRECTORY_MODEL_COMMANDS.M_FETCH_LIST:
-      return self.__m_directory_model.invoke_trigger(DIRECTORY_MODEL_COMMANDS.M_FETCH_LIST, p_data)
-    elif p_command == DIRECTORY_MODEL_COMMANDS.M_INIT:
-      m_response, m_status = self.__m_directory_model.invoke_trigger(DIRECTORY_MODEL_COMMANDS.M_INIT, p_data)
-      if m_status:
-        return render(p_data, CONSTANTS.S_TEMPLATE_DIRECTORY_WEBSITE_PATH, m_response)
-      else:
-        return redirect('/directory/?page=1')
+  async def api_invoke_trigger(self, request: Request, param: directory_param_model):
+    return await self.__m_directory_model.api_directory(param)
+
+  async def invoke_trigger(self, request: Request, param: directory_param_model):
+    m_response, m_status = await self.__m_directory_model.init_page(param)
+    if m_status:
+      return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_DIRECTORY_WEBSITE_PATH, helper_controller.create_template_context(request, m_response))
     else:
-      m_response = None
-    return m_response
+      return self.templates.TemplateResponse('/directory/?page=1', helper_controller.create_template_context(request, m_response))

@@ -1,12 +1,13 @@
-from django.shortcuts import render
+from starlette.requests import Request
 
-from app.backend.constants.constant import CONSTANTS
-from app.backend.view_managers.server.maintenance_manager.maintenance_enums import MAINTENANCE_MODEL_CALLBACK
-from app.backend.view_managers.server.maintenance_manager.maintenance_model import maintenance_model
-from app.services.request_manager.request_handler import request_handler
+from backend.constants.constant import CONSTANTS
+from backend.helper_manager.helper_controller import helper_controller
+from backend.view_managers.server.maintenance_manager.maintenance_model import maintenance_model
+from fastapi.templating import Jinja2Templates
 
 
-class maintenance_view_model(request_handler):
+class maintenance_view_model:
+
   # Private Variables
   __instance = None
   __m_maintenance_model = None
@@ -24,9 +25,9 @@ class maintenance_view_model(request_handler):
     else:
       maintenance_view_model.__instance = self
       self.__m_maintenance_model = maintenance_model()
+      self.templates = Jinja2Templates(directory="templates")
 
   # External Request Callbacks
-  def invoke_trigger(self, p_command, p_data):
-    if p_command == MAINTENANCE_MODEL_CALLBACK.M_INIT:
-      m_response, m_status = self.__m_maintenance_model.invoke_trigger(MAINTENANCE_MODEL_CALLBACK.M_INIT, p_data)
-      return render(None, CONSTANTS.S_TEMPLATE_MAINTENANCE_WEBSITE_PATH, m_response, status=500)
+  async def invoke_trigger(self, request: Request):
+    response = await self.__m_maintenance_model.invoke_trigger()
+    return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_MAINTENANCE_WEBSITE_PATH, helper_controller.create_template_context(request, response))

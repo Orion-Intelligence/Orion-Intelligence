@@ -1,6 +1,7 @@
 from starlette.responses import Response
 
 from backend.constants.constant import CONSTANTS
+from backend.helper_manager.helper_controller import helper_controller
 from backend.view_managers.server.error_manager.error_model import error_model
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
@@ -27,12 +28,5 @@ class error_view_model:
             self.templates = Jinja2Templates(directory="templates")
 
     async def invoke_trigger(self, request: Request, param: error_param_model) -> Response:
-        response = await self.__m_error_model.init_page(param)
-
-        return self.templates.TemplateResponse(
-            CONSTANTS.S_TEMPLATE_ERROR_WEBSITE_PATH,
-            {
-                "request": request,
-                "vars": response
-            }
-        )
+        response = await self.__m_error_model.invoke_trigger(param)
+        return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_ERROR_WEBSITE_PATH, helper_controller.create_template_context(request, response))

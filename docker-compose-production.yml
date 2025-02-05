@@ -24,8 +24,7 @@ services:
         else
           echo "Non-production mode: Skipping compression and gzip.";
         fi &&
-        gunicorn trustly.wsgi:application --bind 0.0.0.0:8070 --reload &
-        sleep 10 && python manage.py cronjob_manager
+        gunicorn trustly.wsgi:application --bind 0.0.0.0:8070 --reload
     volumes:
       - .:/backend:cached
       - ./backend/templates:/backend/backend/templates:cached

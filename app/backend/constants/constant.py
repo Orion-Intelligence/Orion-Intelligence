@@ -3,6 +3,23 @@ from pathlib import Path
 
 
 class CONSTANTS:
+  S_TEMPLATE_ERROR_WEBSITE_PATH = "trustly/user/server/error/error.html"
+  S_TEMPLATE_MAINTENANCE_WEBSITE_PATH = "trustly/user/server/maintenance/maintenance.html"
+  S_TEMPLATE_DIRECTORY_WEBSITE_PATH = "trustly/user/interactive/directory/directory.html"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   # General URL
   S_GENERAL_DEFAULT_LANGUAGE = "en"
 
@@ -15,16 +32,13 @@ class CONSTANTS:
   # Template URL
   S_TEMPLATE_INDEX_PATH = "backend/user/interactive/homepage/index.html"
   S_TEMPLATE_REPORT_WEBSITE_PATH = "backend/user/interactive/report/report.html"
-  S_TEMPLATE_DIRECTORY_WEBSITE_PATH = "backend/user/interactive/directory/directory.html"
   S_TEMPLATE_NOTICE_WEBSITE_PATH = "backend/user/interactive/notice/notice.html"
   S_TEMPLATE_POLICY_WEBSITE_PATH = "backend/user/interactive/privacy/privacy.html"
   S_TEMPLATE_SECRET_KEY_WEBSITE_PATH = "backend/user/server/secretkey/secretkey.html"
-  S_TEMPLATE_MAINTENANCE_WEBSITE_PATH = "backend/user/server/maintenance_manager/maintenance_manager.html"
   S_TEMPLATE_LOGIN_WEBSITE_PATH = "backend/cms/login/login.html"
   S_TEMPLATE_DASHBOARD_WEBSITE_PATH = "backend/cms/dashboard/dashboard.html"
   S_TEMPLATE_MANAGE_SEARCH_WEBSITE_PATH = "backend/cms/manage_search/manage_search.html"
   S_TEMPLATE_MANAGE_STATUS_WEBSITE_PATH = "backend/cms/manage_status/manage_status.html"
-  S_TEMPLATE_ERROR_WEBSITE_PATH = "trustly/user/server/error/error.html"
   S_TEMPLATE_SITEMAP_WEBSITE_PATH = "trustly/user/interactive/sitemap/sitemap.html"
   S_TEMPLATE_SEARCH_WEBSITE_PATH = "backend/user/interactive/search/search.html"
   S_TEMPLATE_LOGIN_PATH = "backend/user/interactive/login/index.html"

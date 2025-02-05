@@ -1,6 +1,5 @@
-{% load static %}
-
-{% include 'trustly/user/blades/blades_shared_initialization.html' %}{% include 'trustly/user/interactive/directory/local_imports.html' %}
+{% include 'trustly/user/blades/blades_shared_initialization.html' %}
+{% include 'trustly/user/interactive/directory/local_imports.html' %}
 
 
 <!--script initialization-->
@@ -11,21 +10,20 @@
 <body class="clear-paddings">
 <span id="top"></span>
 <div class="directory">
-  {% include 'trustly/user/blades/home_template/../../blades/shared_blades/blade_toolbar.html' %}
+  {% include 'trustly/user/blades/shared_blades/blade_toolbar.html' %}
   <div class="directory__container">
     <div class="directory__main-container">
       <div class="directory__upper-heading">
         <div class="directory__pagination-heading col-md-4 col-sm-12 col-xs-12">
           <p class="directory__header"> Live Onion Services </p>
-
-
         </div>
 
         <div class="directory-pagination col-4">
           {% include 'trustly/user/blades/directory_template/blade_directory_pagination.html' %}
         </div>
         <div class="directory__filters-button-div">
-          <label for="directory__filters-checkbox" class="directory__filters-button"><img src="{% static 'backend/images/filter_icon.svg' %}">
+          <label for="directory__filters-checkbox" class="directory__filters-button">
+            <img src="{{ url_for('static', path='trustly/images/filter_icon.svg') }}" alt="filter" class="maintenance__image">
             Filter
           </label>
           <input type="radio" name="filter" class="directory__filters-checkbox" id="directory__filters-checkbox"/>

@@ -1,3 +1,7 @@
-class crawl_model:
-  m_command = None
-  m_data = None
+from pydantic import BaseModel
+from typing import Optional
+
+class crawl_model(BaseModel):
+    m_command: Optional[str] = None
+    m_data: Optional[str] = None
+

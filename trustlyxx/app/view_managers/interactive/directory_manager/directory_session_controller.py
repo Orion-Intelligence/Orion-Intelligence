@@ -2,7 +2,7 @@ import math
 
 from app.backend.constants.constant import CONSTANTS
 from app.backend.view_managers.interactive.directory_manager.directory_enums import DIRECTORY_CALLBACK, DIRECTORY_PARAMS, DIRECTORY_SESSION_COMMANDS
-from app.backend.view_managers.interactive.directory_manager.directory_shared_model.directory_class_model import directory_class_model
+from app.backend.view_managers.interactive.directory_manager.directory_shared_model.directory_param_model import directory_class_model
 from app.services.request_manager.request_handler import request_handler
 
 

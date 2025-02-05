@@ -10,6 +10,7 @@
 }
 .directory-list__table tr {
   border-bottom: 1px solid #FCFCFC12;
+  height: 50px;
   border-top: 1px solid #FCFCFC12;
 }
 
@@ -30,12 +31,12 @@
 }
 
 .directory-list__table tr:nth-child(even) {
-  background-color: #2A578459;
+  background-color: #2A578429;
   min-height: 45px;
 }
 
 .directory-list__table tbody tr:nth-child(odd) {
-  background-color: #2A578429 ;
+  background-color: #2A578479 ;
   min-height: 45px;
 }
 

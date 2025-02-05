@@ -1,10 +1,8 @@
-{% load static %}
-
 <div class="footer__scroll-top">
   <div class="col-6">
     <a href="https://orion-search.readthedocs.io/en/latest/user_manual.html" class="footer__docs-icon" target="_blank">
       <span class="footer__scroll-top__icon">
-             <img src="{% static 'backend/images/docs_icon.svg' %}" alt="" width="24" height="24">
+            <img src="{{ url_for('static', path='trustly/images/docs_icon.svg') }}" alt="" width="24" height="24" class="maintenance__image">
         </span>
       <span>Documentation</span>
 
@@ -14,8 +12,8 @@
     <a href="#top" class=" gc-clear-selection">
       <span class="footer__scroll-top__text">Scroll to top</span>
       <span class="footer__scroll-top__icon">
-             <img src="{% static 'backend/images/arrow_up.svg' %}" alt="" width="24" height="24">
-        </span>
+        <img src="{{ url_for('static', path='trustly/images/arrow_up.svg') }}" alt="" width="24" height="24" class="maintenance__image">
+      </span>
     </a>
   </div>
 </div>

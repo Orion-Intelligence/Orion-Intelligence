@@ -13,5 +13,5 @@ class error_model:
     self.__m_templates = Jinja2Templates(directory="backend/user/server/error")
     pass
 
-  async def init_page(self, request: error_param_model):
+  async def invoke_trigger(self, request: error_param_model):
     return await self.__m_session.init_callback(request)

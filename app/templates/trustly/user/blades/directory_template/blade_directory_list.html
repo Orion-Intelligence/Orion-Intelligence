@@ -1,5 +1,3 @@
-{% load static %}
-
 <div class="directory-list__container clear-paddings">
     <table class="table table-striped directory-list__table clear-paddings">
         <thead>
@@ -13,13 +11,13 @@
         </tr>
         </thead>
         <tbody>
-        {% for mDoc in mDirectoryCallbackLinks %}
+        {% for mDoc in vars.mDirectoryCallbackLinks %}
             <tr>
                 <td data-label="ID">{{ mDoc.index }}</td>
 
-                {% if mDoc.mContentType in 'i a adult' %}
+                {% if mDoc.mContentType in ['i', 'a', 'adult'] %}
                     <td data-label="Onion Service">
-                        <a href="/restricted" class="directory-list__table-url text-decoration-none text-reset">{{ mDoc.url|slice:"0:20" }}</a>...
+                        <a href="/restricted" class="directory-list__table-url text-decoration-none text-reset">{{ mDoc.url[:20] }}</a>...
                     </td>
                 {% else %}
                     <td data-label="Onion Service">
@@ -32,7 +30,7 @@
                       {% if mDoc.content_type %}
                           {% for category in mDoc.content_type %}
                               <div class="directory-list__content-category px-2 py-1">
-                                  {{ category|capfirst }}
+                                {{ category|capitalize }}
                               </div>
                           {% endfor %}
                       {% else %}
@@ -68,7 +66,7 @@
                 {% endif %}
 
                 <td data-label="Network Type">
-                    {{ mDoc.network_type|default:"Unknown" }}
+                    {{ "Unknown" if not mDoc.network_type else mDoc.network_type }}
                 </td>
             </tr>
         {% endfor %}

@@ -1,14 +1,13 @@
-{% load static %}
 <div class="home-header">
     <div class="home-header__menu gs-disable-highlight">
         <span>
-            <a href="/static" class="gc-clear-selection" aria-label="Go to Homepage">
-                <img src="{% static 'backend/images/brand-header-1.svg' %}" alt="Trustly Logo" width="57" height="20"/>
+            <a href="/" class="gc-clear-selection" aria-label="Go to Homepage">
+              <img src="{{ url_for('static', path='trustly/images/brand-header-1.svg') }}" alt="Brand Logo" class="maintenance__image">
             </a>
         </span>
         <span>
             <a href="/admin" aria-label="Go to CMS Home" class="home-header__menu-category light-header__menu-category--bold" id="home-header__catagory">
-                <img src="{% static 'backend/images/brand-header-2.svg' %}" alt="Go to CMS Home" width="24" height="24">
+              <img src="{{ url_for('static', path='trustly/images/brand-header-2.svg') }}" alt="Brand Logo" class="maintenance__image">
             </a>
         </span>
     </div>

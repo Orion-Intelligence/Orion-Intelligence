@@ -3,23 +3,18 @@ from app import views, api
 from django.contrib import admin
 
 urlpatterns = [
-  path('admin/', admin.site.urls),
-  # redirections
+  #path('admin/', admin.site.urls),
+
   path('', views.index, name='home'),
+  path('login', views.custom_login, name='custom_login'),
   path('directory/', views.directory, name='directory'),
   path('search/', views.search, name='search'),
-  path('restricted/', views.block, name='restricted'),
-  path('update_status/', views.update_status, name='manage_search'),
-  path('parser/', views.parser, name='parser'),
-  path('feeder/unique', views.feeder_unique, name='feeder_unique'),
-  path('feeder/publish', views.feeder_publish, name='feeder_publish'),
-  path('feeder/', views.feeder, name='feeder'),
-  path('crawl_index/', views.crawl_index, name='crawl_index'),
+
+  #path('update_status/', views.update_status, name='manage_search'),
+
   path('api/directory/', api.get_directory, name='api/directory'),
   path('api/insight/', api.get_insight, name='api/insight'),
-
   path('api/search/', api.get_search_result, name='api/search'),
-  path('login', views.custom_login, name='custom_login'),
 
 ]
 

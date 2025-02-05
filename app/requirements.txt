@@ -1,5 +1,15 @@
 fastapi~=0.115.8
-uvicorn
-jinja2
 starlette~=0.45.3
 pydantic~=2.10.6
+stopwords==1.0.0
+python-dotenv==1.0.0
+cryptography==43.0.1
+elasticsearch==8.15.0
+termcolor==2.3.0
+redis==5.1.1
+motor==3.7.0
+
+aiohttp
+uvicorn
+jinja2
+httpx

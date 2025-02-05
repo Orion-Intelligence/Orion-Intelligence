@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta, timezone
 from bson import ObjectId
-from django.http import JsonResponse
-from app.services.mongo_manager.mongo_controller import mongo_controller
-from app.services.mongo_manager.mongo_enums import MONGODB_CRUD
-from app.backend.constants.constant import CONSTANTS
-from app.services.mongo_manager.mongo_enums import MONGO_COMMANDS
-from app.backend.view_managers.interactive.directory_manager.directory_enums import DIRECTORY_SESSION_COMMANDS, DIRECTORY_MODEL_COMMANDS
-from app.backend.view_managers.interactive.directory_manager.directory_session_controller import directory_session_controller
-from app.services.request_manager.request_handler import request_handler
+from backend.services.mongo_manager.mongo_controller import mongo_controller
+from backend.services.mongo_manager.mongo_enums import MONGODB_CRUD
+from backend.constants.constant import CONSTANTS
+from backend.services.mongo_manager.mongo_enums import MONGO_COMMANDS
+from backend.view_managers.interactive.directory_manager.directory_session_controller import directory_session_controller
+from backend.view_managers.interactive.directory_manager.directory_shared_model.directory_api_callback_model import directory_api_callback_model
+from backend.view_managers.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 
 
-class directory_model(request_handler):
+class directory_model:
   # Private Variables
   __instance = None
   __m_session = None
@@ -21,8 +20,8 @@ class directory_model(request_handler):
     pass
 
   @staticmethod
-  def __load_onion_links(p_directory_class_model):
-    m_documents, count, m_status = mongo_controller.getInstance().invoke_trigger(MONGODB_CRUD.S_READ, [MONGO_COMMANDS.M_GET_URL_STATUS, [p_directory_class_model.m_content_type, p_directory_class_model.m_index, p_directory_class_model.m_network], [(p_directory_class_model.m_page_number - 1) * CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE, CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE]])
+  async def __load_onion_links(p_directory_class_model):
+    m_documents, count, m_status = await mongo_controller.getInstance().invoke_trigger(MONGODB_CRUD.S_READ, [MONGO_COMMANDS.M_GET_URL_STATUS, [p_directory_class_model.m_content_type, p_directory_class_model.m_index, p_directory_class_model.m_network], [(p_directory_class_model.m_page_number - 1) * CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE, CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE]])
     if m_status:
       m_documents = list(m_documents)
       utc_now = datetime.now(timezone.utc)
@@ -49,29 +48,19 @@ class directory_model(request_handler):
     else:
       return {"documents": [], "count": count, "content_type_parameter": p_directory_class_model.m_content_type, "index_parameter": p_directory_class_model.m_index}
 
-  def __api_directory(self, p_data):
+  async def api_directory(self, param:directory_param_model):
     try:
-      m_directory_class_model, m_status, _ = self.__m_session.invoke_trigger(DIRECTORY_SESSION_COMMANDS.M_PRE_INIT, [p_data])
-      m_result = self.__load_onion_links(m_directory_class_model)
+      m_result = await self.__load_onion_links(param)
       response_data = m_result
-      return JsonResponse(response_data)
-
+      return directory_api_callback_model(**response_data)
     except Exception as ex:
-      return JsonResponse({"error_manager": "An internal error_manager occurred."+str(ex)}, status=500)
+      return {"error_manager": "An internal error_manager occurred."+str(ex)}
 
-  def __init_page(self, p_data):
-    m_directory_class_model, m_status, _ = self.__m_session.invoke_trigger(DIRECTORY_SESSION_COMMANDS.M_PRE_INIT, [p_data])
-    result = self.__load_onion_links(m_directory_class_model)
+  async def init_page(self, param:directory_param_model):
+    result = await self.__load_onion_links(param)
 
-    m_directory_class_model.m_row_model_list = result["documents"]
+    m_row_model_list = result["documents"]
     count = result["count"]
 
-    m_context, m_status = self.__m_session.invoke_trigger(DIRECTORY_SESSION_COMMANDS.M_INIT, [m_directory_class_model, count])
+    m_context, m_status = self.__m_session.init_callback(param, m_row_model_list, count)
     return m_context, m_status
-
-  # External Request Callbacks
-  def invoke_trigger(self, p_command, p_data):
-    if p_command == DIRECTORY_MODEL_COMMANDS.M_INIT:
-      return self.__init_page(p_data)
-    if p_command == DIRECTORY_MODEL_COMMANDS.M_FETCH_LIST:
-      return self.__api_directory(p_data)
