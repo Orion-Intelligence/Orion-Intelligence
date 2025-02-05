@@ -1,12 +1,13 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+
 import config
+
 
 class security_headers_middleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response: Response = await call_next(request)
 
-        # Secure HTTP Headers
         if not config.DEBUG:
             response.headers["Strict-Transport-Security"] = f"max-age={config.SECURE_HSTS_SECONDS}; includeSubDomains; preload"
         else:

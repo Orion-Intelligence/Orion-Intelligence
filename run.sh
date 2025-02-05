@@ -7,20 +7,20 @@ stop_docker() {
     rm -rf staticfiles
 }
 
-configure_env() {
-  PRODUCTION=$(grep '^PRODUCTION=' .env | cut -d '=' -f2 | tr -cd '[:digit:]')
-
-  if [ "$PRODUCTION" = "1" ]; then
-    cp nginx/nginx-prod.conf nginx/nginx.conf
-    update_swagger_config "orion.genesistechnologies.org" "https"
-  elif [ "$PRODUCTION" = "0" ]; then
-    cp nginx/nginx-dev.conf nginx/nginx.conf
-    update_swagger_config "localhost:8080" "http"
-  else
-    echo "Invalid PRODUCTION value in .env. Defaulting to development."
-    update_swagger_config "localhost:8080" "http"
-  fi
-}
+#configure_env() {
+#  PRODUCTION=$(grep '^PRODUCTION=' .env | cut -d '=' -f2 | tr -cd '[:digit:]')
+#
+#  if [ "$PRODUCTION" = "1" ]; then
+#    cp nginx/nginx-prod.conf nginx/nginx.conf
+##    update_swagger_config "orion.genesistechnologies.org" "https"
+#  elif [ "$PRODUCTION" = "0" ]; then
+#    cp nginx/nginx-dev.conf nginx/nginx.conf
+#    update_swagger_config "localhost:8080" "http"
+#  else
+#    echo "Invalid PRODUCTION value in .env. Defaulting to development."
+#    update_swagger_config "localhost:8080" "http"
+#  fi
+#}
 
 use_compose_file() {
   if [[ "$1" == "production" ]]; then
@@ -30,26 +30,26 @@ use_compose_file() {
   fi
 }
 
-update_swagger_config() {
-  HOST=$1
-  SCHEME=$2
-  SWAGGER_FILE="swagconfig/swagconfig.json"
-
-  if [ -f "$SWAGGER_FILE" ]; then
-    echo "Updating Swagger configuration with host: $HOST and schemes: $SCHEME"
-    sed -i "s/\"host\": \".*\"/\"host\": \"$HOST\"/" "$SWAGGER_FILE"
-    sed -i "s/\"schemes\": \[.*\]/\"schemes\": [\"$SCHEME\"]/" "$SWAGGER_FILE"
-  else
-    echo "Swagger configuration file not found: $SWAGGER_FILE"
-    exit 1
-  fi
-}
+#update_swagger_config() {
+#  HOST=$1
+#  SCHEME=$2
+#  SWAGGER_FILE="swagconfig/swagconfig.json"
+#
+#  if [ -f "$SWAGGER_FILE" ]; then
+#    echo "Updating Swagger configuration with host: $HOST and schemes: $SCHEME"
+#    sed -i "s/\"host\": \".*\"/\"host\": \"$HOST\"/" "$SWAGGER_FILE"
+#    sed -i "s/\"schemes\": \[.*\]/\"schemes\": [\"$SCHEME\"]/" "$SWAGGER_FILE"
+#  else
+#    echo "Swagger configuration file not found: $SWAGGER_FILE"
+#    exit 1
+#  fi
+#}
 
 stop_docker
 if [ "$1" == "stop" ]; then
     echo "Crawler service stopped"
 else
-    configure_env
+#    configure_env
     COMMAND=$1
     SUBCOMMAND=$2
 

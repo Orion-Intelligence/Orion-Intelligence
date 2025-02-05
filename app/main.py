@@ -15,5 +15,5 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 setup_middlewares(app)
 
-app.include_router(routes.router)
+app.include_router(routes.router, include_in_schema=False)
 app.include_router(api.api)

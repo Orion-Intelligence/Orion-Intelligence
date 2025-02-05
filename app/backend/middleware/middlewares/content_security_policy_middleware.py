@@ -3,13 +3,23 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from backend.helper_manager.env_handler import env_handler
 
-class content_security_policy_middleware(BaseHTTPMiddleware):  # Class name remains unchanged
+class content_security_policy_middleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
         self.DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
 
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
+
+        # Disable CSP for Swagger-related files
+        if any(path in request.url.path for path in [
+            "/docs",  # Swagger UI
+            "/redoc",  # ReDoc UI
+            "/openapi.json",  # OpenAPI Schema
+            "/npm/swagger-ui-dist@5/swagger-ui.css",
+            "/npm/swagger-ui-dist@5/swagger-ui-bundle.js"
+        ]):
+            return response  # Skip adding security headers for Swagger files
 
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "

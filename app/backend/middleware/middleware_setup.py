@@ -5,8 +5,8 @@ from backend.middleware.middlewares.content_security_policy_middleware import co
 from backend.middleware.middlewares.maintenance_mode_middleware import maintenance_mode_middleware
 from backend.middleware.middlewares.security_headers_middleware import security_headers_middleware
 from backend.middleware.middlewares.service_ready_middleware import service_ready_middleware
-
 import config
+
 
 def setup_middlewares(app):
     app.add_middleware(content_security_policy_middleware)

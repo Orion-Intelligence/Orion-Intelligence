@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime, timezone
 from elasticsearch import AsyncElasticsearch
 from backend.services.log_manager.log_controller import log
