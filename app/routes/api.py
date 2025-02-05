@@ -4,7 +4,7 @@ from starlette.requests import Request
 from backend.management.jobs.insight_job import insight_job
 from backend.view_managers.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from backend.view_managers.interactive.directory_manager.directory_view_model import directory_view_model
-from app_config.auth import authenticate
+from configs.auth import authenticate
 
 api = APIRouter()
 

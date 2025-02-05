@@ -1,7 +1,7 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-import config
+from configs import config
 
 
 class security_headers_middleware(BaseHTTPMiddleware):
