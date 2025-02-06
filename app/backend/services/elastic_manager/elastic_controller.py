@@ -45,7 +45,7 @@ class elastic_controller(request_handler):
                                                                  "m_url": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_content": {"type": "text"},
                                                                  "m_update_date": {"type": "date"}, "m_creation_date": {"type": "date"}}}}
             mapping_generic_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000},
-                                      "mappings": {"properties": {"m_hash": {"type": "text"}, "m_hash_url": {"type": "keyword"}, "m_title": {"type": "text"},
+                                      "mappings": {"dynamic": "true", "properties": {"m_hash": {"type": "text"}, "m_hash_url": {"type": "keyword"}, "m_title": {"type": "text"},
                                                                   "m_meta_description": {"type": "text"}, "m_content": {"type": "text"}, "m_update_date": {"type": "date"},
                                                                   "m_creation_date": {"type": "date"}, "m_content_type": {"type": "keyword"}}}}
 

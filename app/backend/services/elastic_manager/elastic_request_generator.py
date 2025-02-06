@@ -86,8 +86,13 @@ class elastic_request_generator(request_handler):
 
     for card in p_index_data.get("cards_data", []):
       data_hash = self.generate_data_hash(card)
-      entry = {"m_title": card.get("m_title", ""), "m_url": card.get("m_url", ""), "m_base_url": card.get("m_base_url", ""), "m_content": card.get("m_content", ""), "m_important_content": card.get("m_important_content", ""), "m_weblink": card.get("m_weblink", ""), "m_dumplink": card.get("m_dumplink", ""), "m_content_type": card.get("m_content_type", ""), "m_extra_tags": card.get("m_extra_tags", []), "m_contact_link": contact_link, "m_update_date": current_timestamp, "m_hash": data_hash}
-      index_entries.append({ELASTIC_KEYS.S_DOCUMENT: p_index_name, ELASTIC_KEYS.S_VALUE: entry})
+      card["m_hash"] = data_hash
+      card["m_update_date"] = current_timestamp
+      card["m_contact_link"] = contact_link
+      index_entries.append({
+        ELASTIC_KEYS.S_DOCUMENT: p_index_name,
+        ELASTIC_KEYS.S_VALUE: card
+      })
 
     return index_entries
 
