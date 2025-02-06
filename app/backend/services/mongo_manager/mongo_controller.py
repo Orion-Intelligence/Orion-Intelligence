@@ -28,6 +28,7 @@ class mongo_controller:
             password=MONGO_CONNECTIONS.S_MONGO_PASSWORD
         )[MONGO_CONNECTIONS.S_MONGO_DATABASE_NAME]
 
+
     async def __create(self, p_data):
         try:
             await self.__m_connection[p_data[MONGODB_KEYS.S_DOCUMENT]].insert_one(p_data[MONGODB_KEYS.S_VALUE])
