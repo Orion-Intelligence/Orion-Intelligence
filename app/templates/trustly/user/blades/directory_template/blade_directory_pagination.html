@@ -4,13 +4,13 @@
     <ul class="directory-pagination">
       <li class="{% if vars.page == 1 %}disabled{% endif %}">
         <button class="directory-pagination-navbtn" type="submit" name="page" value="1" {% if vars.page == 1 %}disabled{% endif %}>
-          <img src="{{ url_for('static', path='trustly/images/nav-first.svg') }}" alt="start" class="maintenance__image">
+          <img src="{{ url_for('static', path='trustly/images/nav-first.svg') }}" alt="start">
         </button>
       </li>
 
       <li class="{% if vars.page == 1 %}disabled{% endif %}">
         <button class="directory-pagination-navbtn" type="submit" name="page" value="{{ vars.page - 1 }}" {% if vars.page == 1 %}disabled{% endif %}>
-          <img src="{{ url_for('static', path='trustly/images/nav-prev.svg') }}" alt="prev" class="maintenance__image">
+          <img src="{{ url_for('static', path='trustly/images/nav-prev.svg') }}" alt="prev">
         </button>
       </li>
 
@@ -28,13 +28,13 @@
 
       <li class="{% if vars.page == vars.mTotalPage %}disabled{% endif %}">
         <button class="directory-pagination-navbtn" type="submit" name="page" value="{{ vars.page + 1 }}" {% if vars.page == 1 %}disabled{% endif %}>
-          <img src="{{ url_for('static', path='trustly/images/nav-next.svg') }}" alt="next" class="maintenance__image">
+          <img src="{{ url_for('static', path='trustly/images/nav-next.svg') }}" alt="next">
         </button>
       </li>
 
       <li class="{% if page == mTotalPage %}disabled{% endif %}">
         <button class="directory-pagination-navbtn" type="submit" name="page" value="{{ mTotalPage }}" {% if page == mTotalPage %}disabled{% endif %}>
-          <img src="{{ url_for('static', path='trustly/images/nav-last.svg') }}" alt="end" class="maintenance__image">
+          <img src="{{ url_for('static', path='trustly/images/nav-last.svg') }}"  alt="end">
         </button>
       </li>
     </ul>

@@ -1,12 +1,14 @@
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from app.backend.constants.constant import CONSTANTS
-from app.backend.view_managers.interactive.search_manager.search_enums import SEARCH_MODEL_COMMANDS
-from app.backend.view_managers.interactive.search_manager.search_model import search_model
-from app.services.request_manager.request_handler import request_handler
+from starlette.requests import Request
+from starlette.templating import Jinja2Templates
+
+from backend.constants.constant import CONSTANTS
+from backend.helper_manager.helper_controller import helper_controller
+from backend.view_managers.interactive.search_manager.parsers.search_api_param_model import search_api_param_model
+from backend.view_managers.interactive.search_manager.parsers.search_param_model import search_param_model
+from backend.view_managers.interactive.search_manager.search_model import search_model
 
 
-class search_view_model(request_handler):
+class search_view_model:
   # Private Variables
   __instance = None
   __m_search_model = None
@@ -24,19 +26,12 @@ class search_view_model(request_handler):
     else:
       search_view_model.__instance = self
       self.__m_search_model = search_model()
+      self.templates = Jinja2Templates(directory="templates")
+
+  async def api_invoke_trigger(self, param):
+    return await self.__m_search_model.api_result(param)
 
   # External Request Callbacks
-  def invoke_trigger(self, p_command, p_data):
-    if p_command == SEARCH_MODEL_COMMANDS.M_FETCH_RESULT:
-      return self.__m_search_model.invoke_trigger(SEARCH_MODEL_COMMANDS.M_FETCH_RESULT, p_data)
-    else:
-      if p_command == SEARCH_MODEL_COMMANDS.M_INIT:
-        m_status, m_response = self.__m_search_model.invoke_trigger(SEARCH_MODEL_COMMANDS.M_INIT, p_data)
-        if m_status is True:
-          return render(None, CONSTANTS.S_TEMPLATE_SEARCH_WEBSITE_PATH, m_response)
-        else:
-          return HttpResponseRedirect(redirect_to=CONSTANTS.S_TEMPLATE_PARENT)
-      else:
-        m_response = None
-
-    return m_response
+  async def invoke_trigger(self, request: Request, param:search_param_model):
+    response = await self.__m_search_model.init_page(param)
+    return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_SEARCH_WEBSITE_PATH, helper_controller.create_template_context(request, response))

@@ -27,7 +27,7 @@ class directory_view_model:
       self.__m_directory_model = directory_model()
       self.templates = Jinja2Templates(directory="templates")
 
-  async def api_invoke_trigger(self, request: Request, param: directory_param_model):
+  async def api_invoke_trigger(self, param: directory_param_model):
     return await self.__m_directory_model.api_directory(param)
 
   async def invoke_trigger(self, request: Request, param: directory_param_model):

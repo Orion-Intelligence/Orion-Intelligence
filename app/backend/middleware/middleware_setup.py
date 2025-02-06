@@ -1,3 +1,4 @@
+from brotli_asgi import BrotliMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -32,3 +33,4 @@ def setup_middlewares(app):
         )
 
     app.add_middleware(security_headers_middleware)
+    app.add_middleware(BrotliMiddleware, quality=5, minimum_size=0)

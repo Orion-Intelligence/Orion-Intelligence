@@ -6,9 +6,9 @@
         <a href="/directory" class="gc-clear-selection">
             <div class="toolbar__button {% if request.path == '/directory/' %}toolbar__button__selected{% endif %}">Links</div>
         </a>
-        <a href="/static#analytics" class="gc-clear-selection">
+        <a href="/#analytics" class="gc-clear-selection">
             <button class="toolbar__button {% if request.path == '/xx' %}toolbar__button__selected{% endif %}">Analytics</button>
-            <img src="{{ url_for('static', path='trustly/images/arrow_up.svg') }}" alt="Brand Logo" class="maintenance__image">
+            <img src="{{ url_for('static', path='trustly/images/arrow_up.svg') }}" alt="Icon" class="toolbar__button-rotate" width="24" height="24">
         </a>
     </div>
 </div>

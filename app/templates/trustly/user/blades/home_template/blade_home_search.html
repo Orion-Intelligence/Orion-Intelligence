@@ -1,13 +1,12 @@
-{% load static %}
 <form method="GET" action="/search" class="home__search-form">
     <div>
-        <img src="{% static 'backend/images/home-logo.svg' %}" alt="" width="340" height="70">
+        <img src="{{ url_for('static', path='trustly/images/home-logo.svg') }}" alt="" width="340" height="70">
     </div>
     <div>
       <div class="home__search-container input-group">
           <input type="text" class="form-control home__searchbox" placeholder="Search" name="q" maxlength="150" autocomplete="off" autocapitalize="none" />
           <button class="btn btn-primary home__search-container-button" type="submit">
-            <img src="{% static 'backend/images/magnifyingglasswhite.svg' %}" class="home__search-container-button-icon" alt="Search" />
+            <img src="{{ url_for('static', path='trustly/images/magnifyingglasswhite.svg') }}" alt="Search" class="home__search-container-button-icon">
           </button>
       </div>
     </div>

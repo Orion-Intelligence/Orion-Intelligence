@@ -1,42 +1,36 @@
-{% load static %}
+{% block content %}
+    <!-- Local Imports -->
+    {% include 'trustly/user/interactive/search/local_imports.html' %}
+    {% include 'trustly/user/blades/blades_shared_initialization.html' %}
 
-<!-- local imports -->
-{% include 'trustly/user/interactive/search/local_imports.html' %}
-{% include 'trustly/user/blades/blades_shared_initialization.html' %}
+    <div id="top"></div>
 
-<html lang="en">
+    <div class="search_container">
+        <div class="search">
+            <!-- Top Bar -->
+            {% include 'trustly/user/blades/search_template/blade_search_header.html' %}
+            {% include 'trustly/user/blades/search_template/blade_search_safe_search.html' %}
 
-<body class="body">
-<div id="top"></div>
-{#{{ unique_urls }}#}
-<div class="search_container">
-  <div class="search">
+            <div class="row">
+                <div class="search__results">
+                    {% include 'trustly/user/blades/search_template/blade_search_content.html' %}
+                    {% if vars.mSearchCallbackRelevantDocument|length == 0 %}
+                        {% if vars.mSearchCallbackRelevantSearchType != 'persona' %}
+                            {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="search__content__right">
+                    {% if vars.mSearchCallbackRelevantDocument|length != 0 %}
+                        {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
+                    {% endif %}
+                </div>
+            </div>
 
-    <!-- top bar -->
-    {% include 'trustly/user/blades/search_template/blade_search_header.html' %}
-    {% include 'trustly/user/blades/search_template/blade_search_safe_search.html' %}
-    <div class="row">
-      <div class="search__results">
-        {% include 'trustly/user/blades/search_template/blade_search_content.html' %}
-        {% if mSearchCallbackRelevantDocument|length == 0 %}
-          {% if mSearchCallbackRelevantSearchType != 'persona' %}
-            {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
-          {% endif %}
-        {% endif %}
-      </div>
-      <div class="search__content__right">
-        {% if mSearchCallbackRelevantDocument|length != 0 %}
-          {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
-        {% endif %}
-      </div>
+            <!-- Pagination -->
+            {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
+        </div>
     </div>
-    <!-- pagination -->
-    {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
-  </div>
-</div>
 
-{% include 'trustly/user/blades/shared_blades/blade_footer.html' %}
-
-</body>
-
-</html>
+    {% include 'trustly/user/blades/shared_blades/blade_footer.html' %}
+{% endblock %}

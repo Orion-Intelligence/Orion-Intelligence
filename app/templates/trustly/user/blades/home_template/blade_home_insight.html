@@ -1,11 +1,9 @@
-{% load static %}
-
 <div id="analytics">
-    {% for model_name, stats in mHomepageCallbackStatistics.items %}
+    {% for model_name, stats in vars.mHomepageCallbackStatistics.items() %}
         <div class="flex-container">
             {% for item in stats %}
                 <div class="flex-item">
-                    {% if forloop.first %}
+                    {% if loop.first %}
                         {% if model_name == "generic_model" %}
                             <div class="home-insight__analytics-header">Generic Index</div>
                         {% elif model_name == "leak_model" %}
@@ -14,7 +12,7 @@
                     {% endif %}
                     <div class="home-insight__item-content">
                         <div class="home-insight__item-icon">
-                            <img src="{% static 'backend/images/statistics/'|add:item.icon|add:'.svg' %}" alt="Brand Logo" width="32" height="32">
+                            <img src="{{ url_for('static', path='backend/images/statistics/' + item.icon + '.svg') }}" alt="Brand Logo" width="32" height="32">
                         </div>
                         <div class="home-insight__item-text">
                             <div class="home-insight__item-text-primary">
@@ -25,11 +23,11 @@
                             </div>
                         </div>
                         <div class="home-insight__item-percentage">
-                            <div class="{% if item.daily_change|slice:":1" == "+" %}text-success{% elif item.daily_change|slice:":1" == "-" %}text-warning{% else %}item-percentage--text-body{% endif %}">
-                                {{ item.daily_change|default:"-" }}
+                            <div class="{% if item.daily_change[:1] == '+' %}text-success{% elif item.daily_change[:1] == '-' %}text-warning{% else %}item-percentage--text-body{% endif %}">
+                                {{ item.daily_change | default('-') }}
                             </div>
-                            <div class="{% if item.weekly_change|slice:":1" == "+" %}text-success{% elif item.weekly_change|slice:":1" == "-" %}text-warning{% else %}item-percentage--text-body{% endif %}">
-                                {{ item.weekly_change|default:"-" }}
+                            <div class="{% if item.weekly_change[:1] == '+' %}text-success{% elif item.weekly_change[:1] == '-' %}text-warning{% else %}item-percentage--text-body{% endif %}">
+                                {{ item.weekly_change | default('-') }}
                             </div>
                             <br><br>
                         </div>
@@ -37,7 +35,7 @@
                 </div>
             {% endfor %}
         </div>
-        {% if forloop.first %}
+        {% if loop.first %}
             <br> <br> <br>
         {% endif %}
     {% endfor %}

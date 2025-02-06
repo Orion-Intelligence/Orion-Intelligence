@@ -6,6 +6,8 @@ class CONSTANTS:
   S_TEMPLATE_ERROR_WEBSITE_PATH = "trustly/user/server/error/error.html"
   S_TEMPLATE_MAINTENANCE_WEBSITE_PATH = "trustly/user/server/maintenance/maintenance.html"
   S_TEMPLATE_DIRECTORY_WEBSITE_PATH = "trustly/user/interactive/directory/directory.html"
+  S_TEMPLATE_INDEX_PATH = "trustly/user/interactive/homepage/index.html"
+  S_TEMPLATE_SEARCH_WEBSITE_PATH = "trustly/user/interactive/search/search.html"
 
 
 
@@ -30,7 +32,6 @@ class CONSTANTS:
   S_LOCAL_FILE_PATH = str(Path(__file__).parent.parent.parent.parent.parent) + "/user_crawler_directory"
 
   # Template URL
-  S_TEMPLATE_INDEX_PATH = "backend/user/interactive/homepage/index.html"
   S_TEMPLATE_REPORT_WEBSITE_PATH = "backend/user/interactive/report/report.html"
   S_TEMPLATE_NOTICE_WEBSITE_PATH = "backend/user/interactive/notice/notice.html"
   S_TEMPLATE_POLICY_WEBSITE_PATH = "backend/user/interactive/privacy/privacy.html"
@@ -40,7 +41,6 @@ class CONSTANTS:
   S_TEMPLATE_MANAGE_SEARCH_WEBSITE_PATH = "backend/cms/manage_search/manage_search.html"
   S_TEMPLATE_MANAGE_STATUS_WEBSITE_PATH = "backend/cms/manage_status/manage_status.html"
   S_TEMPLATE_SITEMAP_WEBSITE_PATH = "trustly/user/interactive/sitemap/sitemap.html"
-  S_TEMPLATE_SEARCH_WEBSITE_PATH = "backend/user/interactive/search/search.html"
   S_TEMPLATE_LOGIN_PATH = "backend/user/interactive/login/index.html"
 
   # Direct Links

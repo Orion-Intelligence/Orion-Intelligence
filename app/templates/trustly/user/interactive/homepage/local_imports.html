@@ -1,17 +1,13 @@
-{% load static %}{% load compress %}
-
 <head>
 
     <!--Website Title-->
     <title>Trustly Search Engine | Dark Web Based Search Engine</title>
 
     <!--libraries initializations-->
-    {% compress css %}
-        <link href="{% static 'backend/css/pages/user/interactive/cs-homepage.css' %}" rel="stylesheet"/>
-        <link href="{% static 'backend/css/pages/user/blades/home/cs-home-header-blade.css' %}" rel="stylesheet"/>
-        <link href="{% static 'backend/css/pages/user/blades/home/cs-home-insight.css' %}" rel="stylesheet"/>
-        <link href="{% static 'backend/css/pages/user/blades/home/cs-home-search.css' %}" rel="stylesheet"/>
-    {% endcompress %}
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/interactive/cs-homepage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/home/cs-home-header-blade.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/home/cs-home-insight.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/home/cs-home-search.css') }}">
 
     <!--Meta Datas-->
     <meta name="title" content="Trustly Search Engine | Dark Web  Based Search Engine">

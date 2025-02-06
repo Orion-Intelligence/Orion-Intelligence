@@ -1,19 +1,17 @@
-{% load static %}
-
 <head>
 
     <!--Website Title-->
     <title>Trustly Search Engine | Dark Web Based Search Engine</title>
 
     <!--libraries initializations-->
-    <link href="{% static 'backend/css/pages/user/blades/search/cs-search-pagination.css' %}" rel="stylesheet"/>
-    <link href="{% static 'backend/css/pages/user/blades/shared/cs-footer-blade.css' %}" rel="stylesheet"/>
-    <link href="{% static 'backend/css/pages/user/blades/search/cs-search-content-blade.css' %}" rel="stylesheet"/>
-    <link href="{% static 'backend/css/pages/user/blades/search/cs-search-no-suggestions.css' %}" rel="stylesheet"/>
-    <link href="{% static 'backend/css/pages/user/blades/search/cs-searchbar-header.css' %}" rel="stylesheet"/>
-    <link href="{% static 'backend/css/pages/user/blades/search/cs-search-safe.css' %}" rel="stylesheet"/>
-    <link href="{% static 'backend/css/pages/user/blades/search/cs-search-insight.css' %}" rel="stylesheet"/>
-    <link href="{% static 'backend/css/pages/user/interactive/cs-search.css' %}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/search/cs-search-pagination.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/shared/cs-footer-blade.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/search/cs-search-content-blade.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/search/cs-search-no-suggestions.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/search/cs-searchbar-header.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/search/cs-search-safe.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/search/cs-search-insight.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/interactive/cs-search.css') }}">
 
 
     <!--Meta Datas-->

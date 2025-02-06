@@ -1,47 +1,17 @@
 import json
 import math
 import random
+import re
 import string
 from datetime import datetime, timezone
-from numpy.core.defchararray import lower
-from app.backend.constants.constant import CONSTANTS
-from app.backend.constants.strings import GENERAL_STRINGS, SEARCH_STRINGS
-from app.backend.helper_manager.helper_controller import helper_controller
-from app.backend.view_managers.interactive.search_manager.search_data_model.query_model import query_model
-from app.backend.view_managers.interactive.search_manager.search_enums import SEARCH_PARAM, SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK, SEARCH_SESSION_COMMANDS, API_RESPONSE
-from app.services.request_manager.request_handler import request_handler
-import re
-from app.backend.helper_manager.env_handler import env_handler
+from backend.constants.constant import CONSTANTS
+from backend.constants.strings import GENERAL_STRINGS, SEARCH_STRINGS
+from backend.helper_manager.helper_controller import helper_controller
+from backend.view_managers.interactive.search_manager.search_data_model.query_model import query_model
+from backend.view_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK, SEARCH_SESSION_COMMANDS, API_RESPONSE
+from backend.helper_manager.env_handler import env_handler
 
-class search_session_controller(request_handler):
-
-  # Helper Methods
-  @staticmethod
-  def __init_search_parameters(p_data):
-    m_query_model = query_model()
-
-    if SEARCH_PARAM.M_QUERY in p_data.GET:
-      m_query_model.set_query(p_data.GET[SEARCH_PARAM.M_QUERY][0:150])
-    if SEARCH_PARAM.M_TYPE in p_data.GET:
-      m_query_model.m_search_type = p_data.GET[SEARCH_PARAM.M_TYPE]
-    if SEARCH_PARAM.M_PAGE in p_data.GET:
-      m_query_model.set_page_number(p_data.GET[SEARCH_PARAM.M_PAGE])
-    if SEARCH_PARAM.M_NETWORK in p_data.GET:
-      m_query_model.set_network(p_data.GET[SEARCH_PARAM.M_NETWORK])
-    else:
-      m_query_model.set_network("all")
-    if SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN in p_data.GET:
-      m_query_model.set_dynamic_crawl_trigger(p_data.GET[SEARCH_PARAM.M_DYNAMIC_FETCH_AGAIN])
-    if SEARCH_PARAM.M_USERNAME in p_data.GET:
-      m_query_model.set_username(p_data.GET[SEARCH_PARAM.M_USERNAME])
-    if SEARCH_PARAM.M_SAFE_SEARCH in p_data.GET:
-      if p_data.GET[SEARCH_PARAM.M_SAFE_SEARCH] == "True":
-        m_query_model.m_safe_search = "True"
-      else:
-        m_query_model.m_safe_search = "False"
-
-    print(m_query_model)
-    return m_query_model
+class search_session_controller:
 
   @staticmethod
   def __get_page_number(p_search_model):
@@ -71,7 +41,7 @@ class search_session_controller(request_handler):
 
   @staticmethod
   def init_callbacks(p_search_model: query_model, p_relevance_context_list, p_related_business_list, p_related_news_list, p_related_files_list, total_pages):
-    current_page = p_search_model.m_page_number
+    current_page = p_search_model.m_search_param_model.mSearchParamPage
     total_pages = math.ceil(total_pages)  # Ensure total_pages is an integer
 
     # Determine start and end page for pagination display
@@ -85,23 +55,23 @@ class search_session_controller(request_handler):
       elif end_page == total_pages:
         start_page = max(1, end_page - 4)
 
-    if p_search_model.m_page_number > total_pages:
+    if p_search_model.m_search_param_model.mSearchParamPage > total_pages:
       p_search_model.m_page_number = total_pages
 
     if len(p_relevance_context_list) < 5:
-      total_pages = p_search_model.m_page_number
+      total_pages = p_search_model.m_search_param_model.mSearchParamPage
       end_page = total_pages
 
     page_range = range(start_page, end_page + 1)
     api_access = env_handler.get_instance().env('API_ACCESS')
-    m_context = {SEARCH_CALLBACK.M_API_ACCESS:api_access, SEARCH_CALLBACK.M_NETWORK: p_search_model.m_network, SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_query, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_safe_search, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_page_number, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_type, SEARCH_CALLBACK.M_DOCUMENT: p_relevance_context_list, SEARCH_CALLBACK.M_PAGE_NUM: page_range, SEARCH_CALLBACK.M_MAX_PAGINATION: total_pages, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_RELATED_BUSINESS_SITES: p_related_business_list, SEARCH_CALLBACK.M_RELATED_NEWS_SITES: p_related_news_list, SEARCH_CALLBACK.M_RELATED_FILES: p_related_files_list, SEARCH_CALLBACK.M_SECURE_SERVICE_NOTICE: p_search_model.m_site}
+    m_context = {SEARCH_CALLBACK.M_API_ACCESS:api_access, SEARCH_CALLBACK.M_NETWORK: p_search_model.m_search_param_model.mNetwork, SEARCH_CALLBACK.M_QUERY: p_search_model.m_search_param_model.q, SEARCH_CALLBACK.M_SAFE_SEARCH: p_search_model.m_search_param_model.mSearchParamSafeSearch, SEARCH_CALLBACK.M_CURRENT_PAGE_NUM: p_search_model.m_search_param_model.mSearchParamPage, SEARCH_CALLBACK.K_SEARCH_TYPE: p_search_model.m_search_param_model.pSearchParamType, SEARCH_CALLBACK.M_DOCUMENT: p_relevance_context_list, SEARCH_CALLBACK.M_PAGE_NUM: page_range, SEARCH_CALLBACK.M_MAX_PAGINATION: total_pages, SEARCH_CALLBACK.M_RESULT_COUNT: GENERAL_STRINGS.S_GENERAL_EMPTY, SEARCH_CALLBACK.M_RELATED_BUSINESS_SITES: p_related_business_list, SEARCH_CALLBACK.M_RELATED_NEWS_SITES: p_related_news_list, SEARCH_CALLBACK.M_RELATED_FILES: p_related_files_list}
 
     return m_context
 
   @staticmethod
   def __clip_sections(sections, words_to_highlight, max_width, fallback_text):
     sections = [section.lower() for section in sections]
-    words_to_highlight = lower(words_to_highlight)
+    words_to_highlight = [word.lower() for word in words_to_highlight]
     pattern = re.compile(r'\b(' + '|'.join(map(re.escape, words_to_highlight)) + r')\b', re.IGNORECASE)
     combined_text = ". ".join(sections)
     match = pattern.search(combined_text)
@@ -193,7 +163,7 @@ class search_session_controller(request_handler):
       mRelevanceContext = {SEARCH_CALLBACK.M_NETWORK: p_document.get("m_network", ""), SEARCH_CALLBACK.M_TITLE: self.__normalize_text(m_title), SEARCH_CALLBACK.M_MORE_ID: random_id, SEARCH_CALLBACK.M_URL: p_document.get(SEARCH_DOCUMENT_CALLBACK.M_SUB_HOST, ""), SEARCH_CALLBACK.M_SECTION: p_document.get("m_section", ""), SEARCH_CALLBACK.M_DESCRIPTION: m_description, SEARCH_CALLBACK.M_DESCRIPTION_HIGHLIGHT: m_description_highlight, SEARCH_CALLBACK.M_URL_DISPLAY_TYPE: "general", SEARCH_CALLBACK.M_UPDATE_DATA: m_update_date_str, SEARCH_CALLBACK.M_EXPIRY: expiry_status, SEARCH_CALLBACK.K_CONTENT_TYPE: p_document.get("m_content_type", ""), SEARCH_CALLBACK.M_NAME: p_document.get("m_names", ""), SEARCH_CALLBACK.M_CONTENT: p_document.get("m_content", ""), SEARCH_CALLBACK.M_DOCUMENT_LEAK: p_document.get("m_document", ""), SEARCH_CALLBACK.M_VIDEO: p_document.get("m_video", ""), SEARCH_CALLBACK.M_ARCHIVE_URL: p_document.get("m_archive_url", ""), SEARCH_CALLBACK.M_CREATION_DATA: p_document.get("m_creation_date", ""),
         SEARCH_CALLBACK.M_EMAILS: p_document.get("m_emails", ""), SEARCH_CALLBACK.M_PHONE_NUMBER: p_document.get("m_phone_numbers", "")}
 
-    if str(p_search_model.m_safe_search).lower() in ['false', 'true']:
+    if str(p_search_model.m_search_param_model.mSearchParamSafeSearch).lower() in ['false', 'true']:
       return mRelevanceContext, mRelevanceContextOriginal
     else:
       return None, None
@@ -202,17 +172,17 @@ class search_session_controller(request_handler):
   def __normalize_text(p_text):
     return p_text.encode("ascii", "ignore").decode()
 
-  def __init_parameters(self, p_document_list, p_search_model, total_pages):
+  def init_callback(self, p_document_list, p_search_model:query_model, total_pages):
     m_relevance_context_list = []
     m_related_business_list = []
     m_related_news_list = []
     m_related_files_list = []
 
-    p_tokenized_query = p_search_model.m_search_query.lower().split(" ")
+    p_tokenized_query = p_search_model.m_search_param_model.q.lower().split(" ")
 
     total_p_document_list_length = len(p_document_list)
 
-    if p_search_model.m_page_number != 1:
+    if p_search_model.m_search_param_model.mSearchParamPage != 1:
       p_document_list = p_document_list[:CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE]
 
     m_documents_length = len(p_document_list)
@@ -234,7 +204,7 @@ class search_session_controller(request_handler):
     for m_document in p_document_list:
       m_links_counter += 1
 
-      if p_search_model.m_search_type != SEARCH_STRINGS.S_SEARCH_CONTENT_TYPE_IMAGE:
+      if p_search_model.m_search_param_model.pSearchParamType != SEARCH_STRINGS.S_SEARCH_CONTENT_TYPE_IMAGE:
         m_relevance_context, m_relevance_context_original = self.__generate_url_context(m_document, p_tokenized_query, p_search_model)
         if m_relevance_context:
           m_relevance_context_list.append(m_relevance_context)
@@ -320,9 +290,5 @@ class search_session_controller(request_handler):
       return True, m_context
 
   def invoke_trigger(self, p_command, p_data):
-    if p_command == SEARCH_SESSION_COMMANDS.INIT_SEARCH_PARAMETER:
-      return self.__init_search_parameters(p_data[0])
     if p_command == SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER:
       return self.__init_runtime_parser(p_data[0], p_data[1], p_data[2])
-    if p_command == SEARCH_SESSION_COMMANDS.M_INIT:
-      return self.__init_parameters(p_data[0], p_data[1], p_data[2])

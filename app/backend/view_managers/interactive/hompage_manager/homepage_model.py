@@ -1,9 +1,7 @@
-from app.backend.view_managers.interactive.hompage_manager.homepage_enums import HOMEPAGE_SESSION_COMMANDS, HOMEPAGE_MODEL_COMMANDS
-from app.backend.view_managers.interactive.hompage_manager.homepage_session_controller import homepage_session_controller
-from app.services.request_manager.request_handler import request_handler
+from backend.view_managers.interactive.hompage_manager.homepage_session_controller import homepage_session_controller
 
 
-class homepage_model(request_handler):
+class homepage_model:
   # Private Variables
   __instance = None
   __m_session = None
@@ -13,12 +11,7 @@ class homepage_model(request_handler):
     self.__m_session = homepage_session_controller()
     pass
 
-  def __init_page(self, p_data):
-    m_context, m_status = self.__m_session.invoke_trigger(HOMEPAGE_SESSION_COMMANDS.M_INIT, p_data)
+  async def init_page(self):
+    m_context = await self.__m_session.init_callback()
 
-    return m_context, m_status
-
-  # External Request Handler
-  def invoke_trigger(self, p_command, p_data):
-    if p_command == HOMEPAGE_MODEL_COMMANDS.M_INIT:
-      return self.__init_page(p_data)
+    return m_context

@@ -1,14 +1,13 @@
-{% load static %}
 <form class="searchbar" method="GET" action="" enctype="multipart/form-data">
   <div class="searchbar__profile-button">
     <a href="/admin" aria-label="Go to CMS Home">
-      <img src="{% static 'backend/images/profile-icon.svg' %}" alt="Brand Logo">
+      <img src="{{ url_for('static', path='trustly/images/profile-icon.svg') }}" alt="Brand Logo">
     </a>
   </div>
   <div class="searchbar__logo-grid">
     <div class="searchbar__logo-container">
       <a href="../../.." class="searchbar__logo">
-        <img src="{% static 'backend/images/search-logo.svg' %}" alt="Brand Logo">
+        <img src="{{ url_for('static', path='trustly/images/search-logo.svg') }}" alt="Brand Logo">
       </a>
     </div>
 
@@ -24,7 +23,7 @@
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamPage" value="1">
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
           <button class="btn btn-primary searchbar__search-button-right {% if mSearchCallbackRelevantSearchType == 'persona' %}searchbar__search-button-right-persona{% endif %}" type="submit">
-            <img class="searchbar__search-button-right-icon" src="{% static 'backend/images/magnifyingglasswhite.svg' %}" alt="Search">
+            <img src="{{ url_for('static', path='trustly/images/magnifyingglasswhite.svg') }}" class="searchbar__search-button-right-icon" alt="Search">
           </button>
         </div>
       </div>
@@ -67,7 +66,7 @@
     {% include 'trustly/user/blades/search_template/blade_search_header_network.html' %}
 
     <span id="catagory_analytics" class="searchbar__nav-right">
-      <a href="/static#analytics" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right searchbar__detail-header-catagories-margin-right-border">Analytics</a>
+      <a href="/#analytics" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right searchbar__detail-header-catagories-margin-right-border">Analytics</a>
     </span>
     <span id="catagory_directory" class="searchbar__nav-right">
       <a href="/directory" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Links</a>

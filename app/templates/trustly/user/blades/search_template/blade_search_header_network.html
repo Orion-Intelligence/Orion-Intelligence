@@ -1,8 +1,7 @@
-{% load static %}
 <div class="search__header-network-dropdown">
   <input type="checkbox" id="search__header-network-toggle" class="search__header-network-toggle">
   <label for="search__header-network-toggle">
-    <img src="{% static 'backend/images/tools_icon.svg' %}" alt="Tools" class="search__header-network-image">
+    <img src="{{ url_for('static', path='trustly/images/tools_icon.svg') }}" alt="Tools" class="search__header-network-image">
   </label>
   <div class="search__header-network-content">
     <form method="GET" action="">

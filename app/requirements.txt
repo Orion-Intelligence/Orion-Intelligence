@@ -8,8 +8,9 @@ elasticsearch==8.15.0
 termcolor==2.3.0
 redis==5.1.1
 motor==3.7.0
-
-aiohttp
-uvicorn
-jinja2
-httpx
+brotli-asgi==1.4.0
+aiohttp==3.11.11
+uvicorn==0.34.0
+jinja2==3.1.5
+httpx==0.28.1
+gunicorn==23.0.0

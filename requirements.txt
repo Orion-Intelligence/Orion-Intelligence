@@ -27,8 +27,8 @@ gunicorn==22.0.0
 simplejson==3.8.0
 django-compressor
 scikit-learn==1.5.1
-elasticsearch==8.15.0
-pymongo==4.8.0
+elasticsearch~=8.17.1
+pymongo~=4.11
 django
 django-appconf==1.0.6
 bunch==1.0.0
@@ -36,4 +36,8 @@ nltk==3.9.0
 sphinx
 myst-parser
 sphinx_rtd_theme
-aiohttp
+aiohttp~=3.11.11
+fastapi~=0.115.8
+starlette~=0.45.3
+motor~=3.7.0
+pydantic~=2.10.6

@@ -1,33 +1,34 @@
-{% load static %}
-{% if mSearchCallbackMaxPagination > 1 %}
+{% if vars.mSearchCallbackMaxPagination > 1 %}
     <form class="search__pagination disable-highlight" method="GET" action="">
         <div class="search__pagination-container">
-            {% if mSearchCallbackCurrentPageNumber == 1 %}
+            {% if vars.mSearchCallbackCurrentPageNumber == 1 %}
                 <div class="search__pagination-navigation" disabled>
-                    <img src="{% static 'backend/images/nav-prev.svg' %}" alt="nav-prev">
+                    <img src="{{ url_for('static', path='trustly/images/nav-prev.svg') }}" alt="nav-prev">
                 </div>
             {% else %}
                 <button type="submit" class="search__pagination-navigation" name="mSearchParamPage" value="1">
-                    <img src="{% static 'backend/images/nav-first.svg' %}" alt="nav-first">
+                    <img src="{{ url_for('static', path='trustly/images/nav-first.svg') }}" alt="nav-first">
                 </button>
-                <button type="submit" class="search__pagination-navigation gc-clear-selection" name="mSearchParamPage" value="{{ mSearchCallbackCurrentPageNumber|add:-1 }}">
-                    <img src="{% static 'backend/images/nav-prev.svg' %}" alt="nav-prev">
+                <button type="submit" class="search__pagination-navigation gc-clear-selection" name="mSearchParamPage" value="{{ vars.mSearchCallbackCurrentPageNumber - 1 }}">
+                    <img src="{{ url_for('static', path='trustly/images/nav-prev.svg') }}" alt="nav-prev">
+
                 </button>
             {% endif %}
 
             {% for page in mSearchCallbackPageNumber %}
-                <button type="submit" class="search__navigation gc-clear-selection {% if page == mSearchCallbackCurrentPageNumber %}search__navigation--focus{% endif %}" name="mSearchParamPage" value="{{ page }}">
+                <button type="submit" class="search__navigation gc-clear-selection {% if page == vars.mSearchCallbackCurrentPageNumber %}search__navigation--focus{% endif %}" name="mSearchParamPage" value="{{ page }}">
                     {{ page }}
                 </button>
             {% endfor %}
 
-            {% if mSearchCallbackCurrentPageNumber >= mSearchCallbackMaxPagination %}
+            {% if vars.mSearchCallbackCurrentPageNumber >= vars.mSearchCallbackMaxPagination %}
                 <div class="search__pagination-navigation" disabled>
                     &rsaquo;
                 </div>
             {% else %}
-                <button type="submit" class="search__pagination-navigation gc-clear-selection" name="mSearchParamPage" value="{{ mSearchCallbackCurrentPageNumber|add:1 }}">
-                    <img src="{% static 'backend/images/nav-next.svg' %}" alt="nav-next">
+                <button type="submit" class="search__pagination-navigation gc-clear-selection" name="mSearchParamPage" value="{{ vars.mSearchCallbackCurrentPageNumber + 1 }}">
+                    <img src="{{ url_for('static', path='trustly/images/nav-next.svg') }}" alt="nav-next">
+
                 </button>
             {% endif %}
         </div>
