@@ -11,16 +11,18 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
 
-        # Disable CSP for Swagger-related files
+        # Exempt specific paths from CSP
         if any(path in request.url.path for path in [
-            "/docs",  # Swagger UI
-            "/redoc",  # ReDoc UI
-            "/openapi.json",  # OpenAPI Schema
+            "/docs",
+            "/redoc",
+            "/openapi.json",
             "/npm/swagger-ui-dist@5/swagger-ui.css",
-            "/npm/swagger-ui-dist@5/swagger-ui-bundle.js"
+            "/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
+            ""
         ]):
-            return response  # Skip adding security headers for Swagger files
+            return response
 
+        # Set Content-Security-Policy with a **relative report-uri**
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self'; "
@@ -35,8 +37,8 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
             "form-action 'self'; "
             "base-uri 'self'; "
             "upgrade-insecure-requests; "
-            "report-uri /csp-report-endpoint/; "
-            "require-trusted-types-for 'script';"
+            "require-trusted-types-for 'script'; "
+            "report-uri /csp-report-endpoint/;"
         )
 
         if not self.DEBUG:

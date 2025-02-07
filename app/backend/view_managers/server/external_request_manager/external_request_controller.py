@@ -2,10 +2,7 @@ import aiohttp
 import asyncio
 from threading import Thread, Semaphore
 from queue import Queue
-from backend.services.mongo_manager.mongo_controller import mongo_controller
-from backend.services.mongo_manager.mongo_enums import MONGODB_CRUD
-from backend.services.mongo_manager.mongo_enums import MONGO_COMMANDS
-from backend.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS, EXTERNAL_REQUEST_PARAM
+from backend.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
 from backend.services.request_manager.request_handler import request_handler
 from backend.view_managers.interactive.search_manager.search_enums import API_RESPONSE
 
@@ -48,14 +45,6 @@ class external_request_controller(request_handler):
       external_request_controller.__instance = self
 
   @staticmethod
-  def __update_module_status(p_data):
-    m_request_type = p_data.GET[EXTERNAL_REQUEST_PARAM.M_REQUEST]
-    if m_request_type == "m_cronjob" or m_request_type == "m_crawler":
-      mongo_controller.getInstance().invoke_trigger(MONGODB_CRUD.S_UPDATE, [MONGO_COMMANDS.M_UPDATE_STATUS, [m_request_type], [None]])
-      return HttpResponse("success")
-    return HttpResponse("failed")
-
-  @staticmethod
   async def __fetch_runtime_parser_async(p_data, response_dict):
     url = "http://trusted-crawler-api:8000/runtime/parse"
     param = {"query": p_data}
@@ -93,14 +82,12 @@ class external_request_controller(request_handler):
     if not external_request_controller.__queue.full():
       try:
         external_request_controller.__queue.put_nowait(p_data)
-      except Exception as e:
+      except Exception as _:
         external_request_controller.__pending_requests[query] = []
     else:
       external_request_controller.__pending_requests[query] = []
     return API_RESPONSE.M_PENDING, []
 
   def invoke_trigger(self, p_command, p_data):
-    if p_command == EXTERNAL_REQUEST_COMMANDS.M_UPDATE_MODULE_STATUS:
-      return self.__update_module_status(p_data)
     if p_command == EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER:
       return self.__fetch_runtime_parser(p_data[0], p_data[1])

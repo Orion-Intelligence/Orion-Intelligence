@@ -1,21 +1,14 @@
 # Local Imports
 import hashlib
-import json
 from datetime import datetime, timedelta, timezone
 
 from backend.constants.constant import CONSTANTS
+from backend.helper_manager.helper_controller import helper_controller
 from backend.services.request_manager.request_handler import request_handler
 from backend.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_REQUEST_COMMANDS, ELASTIC_INDEX
-from backend.view_managers.interactive.search_manager.parsers.search_api_param_model import search_api_param_model
 
 
 class elastic_request_generator(request_handler):
-
-  @staticmethod
-  def generate_data_hash(data):
-    data_copy = {key: value for key, value in data.items() if key not in {'m_update_date', 'm_base_url', 'm_url'}}
-    data_string = json.dumps(data_copy, sort_keys=True)
-    return hashlib.sha256(data_string.encode('utf-8')).hexdigest()
 
   @staticmethod
   def __on_search(p_query_model):
@@ -85,7 +78,7 @@ class elastic_request_generator(request_handler):
     current_timestamp = utc_now.isoformat()
 
     for card in p_index_data.get("cards_data", []):
-      data_hash = self.generate_data_hash(card)
+      data_hash = helper_controller.generate_data_hash(card)
       card["m_hash"] = data_hash
       card["m_update_date"] = current_timestamp
       card["m_contact_link"] = contact_link

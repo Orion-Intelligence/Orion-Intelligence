@@ -1,14 +1,10 @@
-{% load static %}{% load compress %}
-
 <head>
 
     <!--Website Title-->
     <title>Trustly Search Engine | Dark Web Based Search Engine</title>
 
     <!--libraries initializations-->
-    {% compress css %}
-        <link href="{% static 'backend/css/pages/user/blades/shared/cs-auth-form.css' %}" rel="stylesheet"/>
-    {% endcompress %}
+    <link rel="stylesheet" href="{{ url_for('static', path='trustly/css/pages/user/blades/shared/cs-auth-form.css') }}">
 
     <!--Meta Datas-->
     <meta name="title" content="Trustly Search Engine | Dark Web  Based Search Engine">

@@ -23,15 +23,15 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-.home-header__menu {
+.header__menu {
   margin-top: -3px;
 }
 
-.home-header {
+.header {
   height: 69px;
 }
 
-.home-header {
+.header {
   padding-top: 24px !important;
   padding-bottom: 17px !important;
 }
@@ -44,7 +44,7 @@ html::-webkit-scrollbar {
   opacity: 0.07;
 }
 
-.home-header__menu-category{
+.header__menu-category{
   display: none;
 }
 

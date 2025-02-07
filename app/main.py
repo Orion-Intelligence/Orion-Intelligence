@@ -3,8 +3,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from backend.middleware.middleware_setup import setup_middlewares
-from routes import routes
-from routes import api
+from routes.routes import router as main_router
+from routes.auth_routes import router as auth_router
 
 app = FastAPI()
 
@@ -14,5 +14,8 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 setup_middlewares(app)
-app.include_router(routes.router, include_in_schema=False)
-app.include_router(api.api)
+
+app.include_router(main_router, include_in_schema=False)
+app.include_router(auth_router)
+# app.include_router(api)
+

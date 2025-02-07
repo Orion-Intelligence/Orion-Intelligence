@@ -1,6 +1,0 @@
-class BLOCK_COMMAND:
-  S_VERIFY_REQUEST = 1
-
-
-class BLOCK_PARAM:
-  M_SECRET_TOKEN = "pSecretToken"

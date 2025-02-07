@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 import locale
@@ -16,6 +17,12 @@ class helper_controller:
       "request": request,
       "vars": response_data
     }
+
+  @staticmethod
+  def generate_data_hash(data):
+    data_copy = {key: value for key, value in data.items() if key not in {'m_update_date', 'm_base_url', 'm_url'}}
+    data_string = json.dumps(data_copy, sort_keys=True)
+    return hashlib.sha256(data_string.encode('utf-8')).hexdigest()
 
   @staticmethod
   def load_json(p_file_path):

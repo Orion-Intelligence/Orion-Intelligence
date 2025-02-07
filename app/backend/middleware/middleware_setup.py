@@ -2,6 +2,8 @@ from brotli_asgi import BrotliMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+from backend.middleware.middlewares.admin_auth_middleware import admin_auth_middleware
 from backend.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
 from backend.middleware.middlewares.maintenance_mode_middleware import maintenance_mode_middleware
 from backend.middleware.middlewares.security_headers_middleware import security_headers_middleware
@@ -13,6 +15,7 @@ def setup_middlewares(app):
     app.add_middleware(content_security_policy_middleware)
     app.add_middleware(maintenance_mode_middleware)
     app.add_middleware(service_ready_middleware)
+    app.add_middleware(admin_auth_middleware)
 
     if not config.DEBUG:
         app.add_middleware(HTTPSRedirectMiddleware)

@@ -1,18 +1,17 @@
-{% load static %}{% load compress %}
 {% include 'admin/local_imports.html' %}
 
 {% include 'trustly/user/blades/blades_shared_initialization.html' %}
 {% include 'trustly/user/interactive/directory/local_imports.html' %}
 
 <body>
-{% include 'trustly/user/blades/home_template/blade_home_header.html' %}
+{% include 'trustly/user/blades/home_template/../trustly/user/blades/shared_blades/blade_header.html' %}
 <div class="login"></div>
-<img alt="back" class="login-background" src="{% static 'backend/images/Bg.png' %}">
+<img src="{{ url_for('static', path='trustly/images/Bg.png') }}" alt="back" class="login-background">
 
 <div id="content" class="auth_form__container">
   <div class="auth_form__sub__container">
     <div class="d-flex justify-content-center">
-      <img src="{% static 'backend/images/home-logo.svg' %}" alt="" width="232" height="41">
+      <img src="{{ url_for('static', path='trustly/images/home-logo.svg') }}" alt="" width="232" height="41">
     </div>
     <form method="post" action="{% url 'admin:login' %}" class="auth_form-form">
       {% csrf_token %}

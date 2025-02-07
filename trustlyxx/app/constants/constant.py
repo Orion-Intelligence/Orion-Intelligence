@@ -15,7 +15,7 @@ class CONSTANTS:
   # Template URL
   S_TEMPLATE_INDEX_PATH = "backend/user/interactive/homepage/index.html"
   S_TEMPLATE_REPORT_WEBSITE_PATH = "backend/user/interactive/report/report.html"
-  S_TEMPLATE_DIRECTORY_WEBSITE_PATH = "backend/user/interactive/directory/directory.html"
+  S_TEMPLATE_DIRECTORY_WEBSITE_PATH = "backend/user/interactive/directory/index.html"
   S_TEMPLATE_NOTICE_WEBSITE_PATH = "backend/user/interactive/notice/notice.html"
   S_TEMPLATE_POLICY_WEBSITE_PATH = "backend/user/interactive/privacy/privacy.html"
   S_TEMPLATE_SECRET_KEY_WEBSITE_PATH = "backend/user/server/secretkey/secretkey.html"

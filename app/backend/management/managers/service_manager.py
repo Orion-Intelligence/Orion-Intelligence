@@ -4,6 +4,7 @@ from backend.management.managers.cronjob_manager import cronjob_manager
 from backend.services.elastic_manager.elastic_controller import elastic_controller
 from backend.services.mongo_manager.mongo_controller import mongo_controller
 from backend.services.redis_manager.redis_controller import redis_controller
+from backend.services.session_manager.session_manager import session_manager
 
 
 class service_manager:
@@ -38,6 +39,8 @@ class service_manager:
 
                 await elastic_controller.get_instance().initialize()
                 await mongo_controller.getInstance().link_connection()
+                admin = await session_manager.getInstance().get_default_admin()
+                await mongo_controller.getInstance().initialize(admin)
                 await redis_controller.getInstance().initialize()
                 await asyncio.sleep(5)
 
