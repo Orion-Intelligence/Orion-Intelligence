@@ -12,6 +12,9 @@ services:
       - mongo
     volumes:
       - ./app:/app:cached
+      - ./app/backend:/app/backend:cached
+      - ./app/routes:/app/routes:cached
+      - ./app/configs:/app/configs:cached
       - ./app/templates:/app/templates:cached
       - ./app/static:/app/static:cached
     expose:

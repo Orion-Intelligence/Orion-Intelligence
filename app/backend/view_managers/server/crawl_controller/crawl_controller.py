@@ -1,23 +1,18 @@
-# import json
 import json
 import os
 import zipfile
 import io
-from abc import ABC
-
 from starlette.responses import StreamingResponse
-
 from backend.services.elastic_manager.elastic_controller import elastic_controller
 from backend.services.elastic_manager.elastic_enums import ELASTIC_REQUEST_COMMANDS, ELASTIC_INDEX
 from backend.services.mongo_manager.mongo_controller import mongo_controller
 from backend.view_managers.server.crawl_controller.crawl_enums import CRAWL_COMMANDS, CRAWL_ERROR_CALLBACK
-from backend.services.request_manager.request_handler import request_handler
 from fastapi.responses import FileResponse
 
 from backend.view_managers.server.crawl_controller.crawl_session_controller import crawl_session_controller
 
 
-class crawl_controller(request_handler, ABC):
+class crawl_controller:
   # Private Variables
   __instance = None
   __m_session = None
@@ -30,15 +25,15 @@ class crawl_controller(request_handler, ABC):
     return crawl_controller.__instance
 
   def __init__(self):
-    self.__m_session = crawl_session_controller()
     if crawl_controller.__instance is not None:
       pass
     else:
       crawl_controller.__instance = self
+      self.__m_session = crawl_session_controller()
 
   async def __handle_request(self, request):
     body = await request.json()
-    m_status, m_crawl_model = self.__m_session.invoke_trigger(CRAWL_COMMANDS.M_INIT, body)
+    m_status, m_crawl_model = self.__m_session.init_parameters(body)
     if m_status is False:
       m_context = [False, CRAWL_ERROR_CALLBACK.M_INVALID_PARAM]
       return json.dumps(m_context)

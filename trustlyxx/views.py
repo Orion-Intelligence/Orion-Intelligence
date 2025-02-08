@@ -50,7 +50,7 @@ def feeder(request):
 
 
 def block(request):
-  return block_controller.getInstance().invoke_trigger(BLOCK_MODEL_CALLBACK.M_INIT, request)
+  return block_controller.get_instance().invoke_trigger(BLOCK_MODEL_CALLBACK.M_INIT, request)
 
 @csrf_exempt
 def crawl_index(request):

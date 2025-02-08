@@ -52,7 +52,7 @@ class external_request_controller(request_handler):
   def __update_module_status(p_data):
     m_request_type = p_data.GET[EXTERNAL_REQUEST_PARAM.M_REQUEST]
     if m_request_type == "m_cronjob" or m_request_type == "m_crawler":
-      mongo_controller.getInstance().invoke_trigger(MONGODB_CRUD.S_UPDATE, [MONGO_COMMANDS.M_UPDATE_STATUS, [m_request_type], [None]])
+      mongo_controller.get_instance().invoke_trigger(MONGODB_CRUD.S_UPDATE, [MONGO_COMMANDS.M_UPDATE_STATUS, [m_request_type], [None]])
       return HttpResponse("success")
     return HttpResponse("failed")
 

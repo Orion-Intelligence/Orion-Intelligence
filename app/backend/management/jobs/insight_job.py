@@ -1,13 +1,11 @@
-from abc import ABC
 from datetime import datetime, timezone
 from backend.services.elastic_manager.elastic_controller import elastic_controller
 from backend.services.elastic_manager.elastic_enums import ELASTIC_CRUD_COMMANDS, ELASTIC_REQUEST_COMMANDS, ELASTIC_KEYS
 from backend.services.redis_manager.redis_controller import redis_controller
 from backend.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS, REDIS_DEFAULT
-from backend.services.request_manager.request_handler import request_handler
 
 
-class insight_job(request_handler, ABC):
+class insight_job:
   __instance = None
 
   # Initializations

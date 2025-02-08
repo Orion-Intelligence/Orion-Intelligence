@@ -16,7 +16,7 @@ class EncryptedAccessFilter(MiddlewareMixin):
     resolved_path = resolve(request.path_info).url_name
 
     if resolved_path in allowed_paths:
-      if not block_controller.getInstance().invoke_trigger(BLOCK_COMMAND.S_VERIFY_REQUEST, request):
+      if not block_controller.get_instance().invoke_trigger(BLOCK_COMMAND.S_VERIFY_REQUEST, request):
         if resolved_path == 'cms':
           return maintenance_view_model.getInstance().invoke_trigger(MAINTENANCE_MODEL_CALLBACK.M_INIT, request)
         return error_view_model.getInstance().invoke_trigger(ERROR_MODEL_CALLBACK.M_INIT, [request, 404])

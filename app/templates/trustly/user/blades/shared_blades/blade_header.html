@@ -1,14 +1,23 @@
 <div class="header">
-    <div class="header__menu gs-disable-highlight">
+  <div class="header__menu gs-disable-highlight">
         <span>
             <a href="/static" class="gc-clear-selection" aria-label="Go to Homepage">
-              <img src="{{ url_for('static', path='trustly/images/brand-header-1.svg') }}" alt="Trustly Logo" width="57" height="20">
+                <img src="{{ url_for('static', path='trustly/images/brand-header-1.svg') }}" alt="Trustly Logo" width="57" height="20">
             </a>
         </span>
-        <span>
-            <a href="/admin" aria-label="Go to CMS Home" class="header__menu-category light-header__menu-category--bold" id="home-header__catagory">
-              <img src="{{ url_for('static', path='trustly/images/brand-header-2.svg') }}" alt="Go to CMS Home" width="24" height="24">
-            </a>
-        </span>
-    </div>
+
+      <form id="logout-form" action="/logout" method="post" class="header_form">
+        <input type="submit">
+      </form>
+      <span>
+        {% if request.state.admin_vars and request.state.admin_vars.username %}
+            <span class="text-white fw-bold header_form-user">
+                {{ request.state.admin_vars.username[:20] }}
+            </span>
+        {% endif %}
+        <a href="#" onclick="document.getElementById('logout-form').submit();" aria-label="Logout" class="header__menu-category light-header__menu-category--bold" id="logout-button">
+          <img src="{{ url_for('static', path='trustly/images/logout.svg') }}" alt="Logout" width="24" height="24">
+        </a>
+    </span>
+  </div>
 </div>

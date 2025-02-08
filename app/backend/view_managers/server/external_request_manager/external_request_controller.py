@@ -3,10 +3,9 @@ import asyncio
 from threading import Thread, Semaphore
 from queue import Queue
 from backend.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
-from backend.services.request_manager.request_handler import request_handler
 from backend.view_managers.interactive.search_manager.search_enums import API_RESPONSE
 
-class external_request_controller(request_handler):
+class external_request_controller:
   __instance = None
   __pending_requests = {}
   __queue = None

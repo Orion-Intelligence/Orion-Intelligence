@@ -12,18 +12,27 @@ class mongo_request_generator:
   @staticmethod
   def on_update_url_status(url, url_status=None, leak_status=None, content_type=None, network_type=None):
     url = helper_controller.normalize_url(url)
+
+    update_values = {"url": url}
     utc_now = datetime.now(timezone.utc)
+    current_date = utc_now
 
-    update_values = {
-      "url": url,
-      "index": "monitor" if leak_status is not None else "general",
-      "url_status_date": utc_now if url_status is not None else None,
-      "leak_status_date": utc_now if leak_status is not None else None,
-      "content_type": content_type,
-      "network_type": network_type
-    }
+    if url_status is not None:
+      update_values["url_status_date"] = current_date
 
-    return {k: v for k, v in update_values.items() if v is not None}
+    if leak_status is not None:
+      update_values["leak_status_date"] = current_date
+      update_values["index"] = "monitor"
+    else:
+      update_values["index"] = "general"
+
+    if content_type is not None:
+      update_values["content_type"] = content_type
+
+    if network_type is not None:
+      update_values["network_type"] = network_type
+
+    return MONGODB_COLLECTIONS.S_URL_STATUS, {"url": url},  {"$set": update_values}
 
   @staticmethod
   def on_fetch_url_status(p_content_type=None, p_index=None, p_network=None):

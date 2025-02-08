@@ -11,6 +11,16 @@
   padding: 20px 0;
 }
 
+.header_form {
+  display: none;
+}
+
+.header_form-user {
+  margin-top: 5px;
+  padding-right: 10px;
+  vertical-align: bottom;
+}
+
 .header__menu {
   display: flex;
   justify-content: space-between;
@@ -25,7 +35,6 @@
 .header__menu-category {
   cursor: pointer;
   font-size: 14px;
-  padding: 17px 10px 15px;
 }
 
 .header__menu-category:focus {
