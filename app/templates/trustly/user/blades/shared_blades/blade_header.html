@@ -15,8 +15,8 @@
                 {{ request.state.admin_vars.username[:20] }}
             </span>
         {% endif %}
-      <form id="logout-form" action="/logout" method="POST" style="display: inline;">
-          <button type="submit" aria-label="Logout" class="header__menu-category light-header__menu-category--bold" id="logout-button" style="background: none; border: none; padding: 0; cursor: pointer;">
+      <form id="logout-form" action="/logout" method="POST" class="header_form-user--logout">
+          <button type="submit" aria-label="Logout" class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold" id="logout-button">
               <img src="{{ url_for('static', path='trustly/images/logout.svg') }}" alt="Logout" width="24" height="24">
           </button>
       </form>

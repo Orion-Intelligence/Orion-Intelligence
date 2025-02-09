@@ -21,6 +21,17 @@
   vertical-align: bottom;
 }
 
+.header_form-user--logout {
+  display: inline;
+}
+
+.header_form-user--logout_icon {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 .header__menu {
   display: flex;
   justify-content: space-between;
