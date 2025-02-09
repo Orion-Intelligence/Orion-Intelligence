@@ -142,11 +142,8 @@ services:
     depends_on:
       - web
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/backend/static:cached
-      - ./staticfiles:/backend/staticfiles:cached
-      - media_volume:/backend/media
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./app/static:/app/static:cached
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
