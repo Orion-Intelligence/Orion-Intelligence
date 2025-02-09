@@ -23,7 +23,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
             "default-src 'none'; "
             "script-src 'none'; "
             "style-src 'self'; "
-            "img-src 'self' data:;"
+            "img-src 'self' data: http://orion.genesistechnologies.org;"
             "font-src 'self'; "
             "connect-src 'self'; "
             "media-src 'self'; "
@@ -63,5 +63,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
 
         response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
         return response
