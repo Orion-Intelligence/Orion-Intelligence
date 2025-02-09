@@ -19,13 +19,13 @@ def setup_middlewares(app):
     app.add_middleware(user_auth_middleware)
     PRODUCTION_DOMAIN = env_handler.get_instance().env("PRODUCTION_DOMAIN", "-")
 
-    # app.add_middleware(
-    #     CORSMiddleware,
-    #     allow_origins=config.ALLOWED_CORS_ORIGINS,
-    #     allow_credentials=True,
-    #     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    #     allow_headers=["Authorization", "Content-Type"]
-    # )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=PRODUCTION_DOMAIN,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["Authorization", "Content-Type"]
+    )
 
     if not config.DEBUG:
         app.add_middleware(
