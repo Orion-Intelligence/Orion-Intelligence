@@ -17,10 +17,6 @@ def setup_middlewares(app):
     app.add_middleware(service_ready_middleware)
     app.add_middleware(user_auth_middleware)
 
-    # if not config.DEBUG:
-    #     app.add_middleware(HTTPSRedirectMiddleware)
-
-    #
     # app.add_middleware(
     #     CORSMiddleware,
     #     allow_origins=config.ALLOWED_CORS_ORIGINS,
@@ -29,11 +25,11 @@ def setup_middlewares(app):
     #     allow_headers=["Authorization", "Content-Type"]
     # )
 
-    # if not config.DEBUG:
-    #     app.add_middleware(
-    #         TrustedHostMiddleware,
-    #         allowed_hosts=config.CSRF_TRUSTED_ORIGINS if config.DEBUG else ["*"]
-    #     )
+    if not config.DEBUG:
+        app.add_middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=config.CSRF_TRUSTED_ORIGINS
+        )
 
-    # app.add_middleware(security_headers_middleware)
-    # app.add_middleware(BrotliMiddleware, quality=5, minimum_size=0)
+    app.add_middleware(security_headers_middleware)
+    app.add_middleware(BrotliMiddleware, quality=5, minimum_size=0)
