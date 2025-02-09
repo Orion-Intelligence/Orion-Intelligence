@@ -26,8 +26,8 @@ CSRF_TRUSTED_ORIGINS = (
     ]
     if DEBUG
     else [
-        # f'https://{PRODUCTION_DOMAIN}',
+        "*"
     ]
 )
 
-# ALLOWED_CORS_ORIGINS = CSRF_TRUSTED_ORIGINS if DEBUG else [f'https://{PRODUCTION_DOMAIN}']
+ALLOWED_CORS_ORIGINS = CSRF_TRUSTED_ORIGINS if DEBUG else ["*"]

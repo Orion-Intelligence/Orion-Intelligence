@@ -1,7 +1,7 @@
 from brotli_asgi import BrotliMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
-# from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from backend.middleware.middlewares.user_auth_middleware import user_auth_middleware
 from backend.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
@@ -23,17 +23,17 @@ def setup_middlewares(app):
 
     app.add_middleware(
         CORSMiddleware,
-        # allow_origins=config.ALLOWED_CORS_ORIGINS,
+        allow_origins=config.ALLOWED_CORS_ORIGINS,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE"],
         allow_headers=["Authorization", "Content-Type"]
     )
 
-    # if not config.DEBUG:
-    #     app.add_middleware(
-    #         TrustedHostMiddleware,
-    #         allowed_hosts=config.CSRF_TRUSTED_ORIGINS if config.DEBUG else [f"{config.PRODUCTION_DOMAIN}", f"www.{config.PRODUCTION_DOMAIN}"]
-    #     )
+    if not config.DEBUG:
+        app.add_middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=config.CSRF_TRUSTED_ORIGINS if config.DEBUG else ["*"]
+        )
 
     app.add_middleware(security_headers_middleware)
     app.add_middleware(BrotliMiddleware, quality=5, minimum_size=0)
