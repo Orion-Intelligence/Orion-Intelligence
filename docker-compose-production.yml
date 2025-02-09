@@ -15,13 +15,8 @@ services:
       sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
     volumes:
       - ./app:/app:cached
-
     expose:
       - "8070"
-    environment:
-      NLTK_DATA: /root/nltk_data
-      DJANGO_SETTINGS_MODULE: backend.settings
-      DISABLE_TEMPLATE_CACHING: "1"
     networks:
       - backend
       - shared_bridge
