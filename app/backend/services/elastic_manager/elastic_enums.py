@@ -1,25 +1,9 @@
 from backend.helper_manager.env_handler import env_handler
 
 
-class ELASTIC_CRUD_COMMANDS:
-  S_CREATE = 1
-  S_READ = 2
-  S_UPDATE = 3
-  S_DELETE = 4
-  S_SUGGEST = 5
-  S_READ_RAW = 6
-  S_INDEX = 7
-  S_INSIGHT = 8
-
-
 class ELASTIC_INDEX:
   S_GENERIC_INDEX = "generic_model"
   S_LEAK_INDEX = "leak_model"
-
-
-class ELASTIC_INDEX_COLLECTION:
-  M_HOST = "m_host"
-  M_CONTENT_TYPE = "m_content_type"
 
 
 class ELASTIC_CONNECTIONS:
@@ -37,15 +21,6 @@ class ELASTIC_KEYS:
   S_VALUE = 'm_value'
 
 
-class ELASTIC_REQUEST_COMMANDS:
-  S_SEARCH = 1
-  S_ONION_LIST = 2
-  S_INDEX_GENERAL = 4
-  S_INDEX_LEAK = 5
-  S_CLEAR_EXPIRE_INDEX = 6
-  S_GENERATE_INSIGHT = 7
-
-
 class MANAGE_ELASTIC_MESSAGES:
   S_INSERT_FAILURE = "[1] Something unexpected happened while inserting"
   S_INSERT_SUCCESS = "[2] Document Created Successfully"
@@ -56,3 +31,68 @@ class MANAGE_ELASTIC_MESSAGES:
   S_READ_FAILURE = "[5] Something unexpected happened while reading"
   S_READ_SUCCESS = "[6] Data Read Successfully"
   S_COUNT_FAILURE = "[1] Something unexpected happened while counting"
+
+class ELASTIC_ENUMS:
+  mapping_leakdatamodel = {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "max_result_window": 1000000
+    },
+    "mappings": {
+      "dynamic": "true",
+      "dynamic_templates": [
+        {
+          "strings_as_keywords": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "m_content_type": {"type": "keyword"},
+        "m_network": {"type": "keyword"},
+        "m_title": {"type": "text"},
+        "m_hash": {"type": "keyword"},
+        "m_url": {"type": "keyword"},
+        "m_base_url": {"type": "keyword"},
+        "m_content": {"type": "text"},
+        "m_update_date": {"type": "date"},
+        "m_creation_date": {"type": "date"}
+      }
+    }
+  }
+
+  mapping_generic_model = {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "max_result_window": 1000000
+    },
+    "mappings": {
+      "dynamic": "true",
+      "dynamic_templates": [
+        {
+          "strings_as_keywords": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "m_hash": {"type": "keyword"},
+        "m_network": {"type": "keyword"},
+        "m_hash_url": {"type": "keyword"},
+        "m_title": {"type": "text"},
+        "m_meta_description": {"type": "text"},
+        "m_content": {"type": "text"},
+        "m_update_date": {"type": "date"},
+        "m_creation_date": {"type": "date"},
+        "m_content_type": {"type": "keyword"}
+      }
+    }
+  }

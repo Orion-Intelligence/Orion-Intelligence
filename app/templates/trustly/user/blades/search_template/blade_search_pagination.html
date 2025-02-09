@@ -1,4 +1,4 @@
-{% if vars.mSearchCallbackMaxPagination > 1 %}
+{% if vars and vars.mSearchCallbackMaxPagination > 1 %}
     <form class="search__pagination disable-highlight" method="GET" action="">
         <div class="search__pagination-container">
             {% if vars.mSearchCallbackCurrentPageNumber == 1 %}
@@ -15,7 +15,7 @@
                 </button>
             {% endif %}
 
-            {% for page in mSearchCallbackPageNumber %}
+            {% for page in vars.mSearchCallbackPageNumber %}
                 <button type="submit" class="search__navigation gc-clear-selection {% if page == vars.mSearchCallbackCurrentPageNumber %}search__navigation--focus{% endif %}" name="mSearchParamPage" value="{{ page }}">
                     {{ page }}
                 </button>
@@ -34,8 +34,8 @@
         </div>
 
         <!-- Hidden Fields -->
-        <input type="hidden" name="q" value="{{ mSearchCallbackQuery }}">
-        <input type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
-        <input type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
+        <input type="hidden" name="q" value="{{ vars.mSearchCallbackQuery }}">
+        <input type="hidden" name="mSearchParamSafeSearch" value="{{ vars.mSearchCallbackSaveSearch }}">
+        <input type="hidden" name="pSearchParamType" value="{{ vars.mSearchCallbackRelevantSearchType }}">
     </form>
 {% endif %}

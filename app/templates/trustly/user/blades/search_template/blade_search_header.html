@@ -1,9 +1,11 @@
 <form class="searchbar" method="GET" action="" enctype="multipart/form-data">
-  <div class="searchbar__profile-button">
-    <a href="/admin" aria-label="Go to CMS Home">
-      <img src="{{ url_for('static', path='trustly/images/profile-icon.svg') }}" alt="Brand Logo">
-    </a>
-  </div>
+  {% if request.state.admin_vars and request.state.admin_vars.domain != "public" %}
+    <div class="searchbar__profile-button">
+      <a href="/admin" aria-label="Go to CMS Home">
+        <img src="{{ url_for('static', path='trustly/images/profile-icon.svg') }}" alt="Brand Logo">
+      </a>
+    </div>
+  {% endif %}
   <div class="searchbar__logo-grid">
     <div class="searchbar__logo-container">
       <a href="../../.." class="searchbar__logo">
@@ -14,15 +16,15 @@
     <div class="searchbar__header">
       <div class="searchbar__searchbox">
         <div class="input-group">
-          {% if mSearchCallbackRelevantSearchType == 'persona' %}
-            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Email" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-email" pattern="[^ ]*" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
-            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username" maxlength="150" name="mUsername" value="{{ mUsernameQuery }}">
+          {% if vars.mSearchCallbackRelevantSearchType == 'persona' %}
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Email" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-email" pattern="[^ ]*" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username" maxlength="150" name="mUsername" value="{{ vars.mUsernameQuery }}">
           {% else %}
-            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
           {% endif %}
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamPage" value="1">
-          <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
-          <button class="btn btn-primary searchbar__search-button-right {% if mSearchCallbackRelevantSearchType == 'persona' %}searchbar__search-button-right-persona{% endif %}" type="submit">
+          <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ vars.mSearchCallbackSaveSearch }}">
+          <button class="btn btn-primary searchbar__search-button-right {% if vars.mSearchCallbackRelevantSearchType == 'persona' %}searchbar__search-button-right-persona{% endif %}" type="submit">
             <img src="{{ url_for('static', path='trustly/images/magnifyingglasswhite.svg') }}" class="searchbar__search-button-right-icon" alt="Search">
           </button>
         </div>
@@ -32,33 +34,33 @@
 
   <div class="searchbar__header-category-div">
     <span id="catagory_all">
-      <button type="submit" name="pSearchParamType" value="all" class="{% if mSearchCallbackRelevantSearchType == 'all' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--right disable-highlight">
+      <button type="submit" name="pSearchParamType" value="all" class="{% if vars.mSearchCallbackRelevantSearchType == 'all' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--right disable-highlight">
         All
       </button>
     </span>
     <span id="catagory_images">
-      <button type="submit" name="pSearchParamType" value="monitor" class="{% if mSearchCallbackRelevantSearchType == 'monitor' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
+      <button type="submit" name="pSearchParamType" value="monitor" class="{% if vars.mSearchCallbackRelevantSearchType == 'monitor' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
         Monitor
       </button>
     </span>
     <span id="catagory_images">
-      <button type="submit" name="pSearchParamType" value="marketplaces" class="ml-3 {% if mSearchCallbackRelevantSearchType == 'marketplaces' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
+      <button type="submit" name="pSearchParamType" value="marketplaces" class="ml-3 {% if vars.mSearchCallbackRelevantSearchType == 'marketplaces' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
         Market
       </button>
     </span>
     <span id="catagory_finance">
-      <button type="submit" name="pSearchParamType" value="forums" class="ml-2 {% if mSearchCallbackRelevantSearchType == 'forums' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
+      <button type="submit" name="pSearchParamType" value="forums" class="ml-2 {% if vars.mSearchCallbackRelevantSearchType == 'forums' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
         Forums
       </button>
     </span>
     <span id="catagory_news">
-      <button type="submit" name="pSearchParamType" value="news" class="{% if mSearchCallbackRelevantSearchType == 'news' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight">
+      <button type="submit" name="pSearchParamType" value="news" class="{% if vars.mSearchCallbackRelevantSearchType == 'news' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight">
         News
       </button>
     </span>
-    {% if mApiAccess == '1' %}
+    {% if vars.mApiAccess == '1' %}
       <span id="catagory_email">
-      <button type="submit" name="pSearchParamType" value="persona" class="{% if mSearchCallbackRelevantSearchType == 'persona' %} searchbar__search-items-active-default searchbar__search-items-persona {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right-header">
+      <button type="submit" name="pSearchParamType" value="persona" class="{% if vars.mSearchCallbackRelevantSearchType == 'persona' %} searchbar__search-items-active-default searchbar__search-items-persona {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right-header">
         Email
       </button>
     </span>

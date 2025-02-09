@@ -3,8 +3,8 @@ from starlette.templating import Jinja2Templates
 
 from backend.constants.constant import CONSTANTS
 from backend.helper_manager.helper_controller import helper_controller
-from backend.view_managers.interactive.search_manager.parsers.search_api_param_model import search_api_param_model
-from backend.view_managers.interactive.search_manager.parsers.search_param_model import search_param_model
+from backend.view_managers.interactive.search_manager.search_data_model import search_dynamic_param_model
+from backend.view_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
 from backend.view_managers.interactive.search_manager.search_model import search_model
 
 
@@ -28,10 +28,17 @@ class search_view_model:
       self.__m_search_model = search_model()
       self.templates = Jinja2Templates(directory="templates")
 
-  async def api_invoke_trigger(self, param):
-    return await self.__m_search_model.api_result(param)
+  async def api_search(self, param):
+    return await self.__m_search_model.api_seach_result(param)
+
+  async def dynamic_search(self, request, param:search_dynamic_param_model):
+    response = self.__m_search_model.dynamic_search_result(param)
+    return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_SEARCH_WEBSITE_PATH, helper_controller.create_template_context(request, response))
+
+  async def api_dynamic_search(self, param:search_dynamic_param_model):
+    return await self.__m_search_model.api_dynamic_search_result(param)
 
   # External Request Callbacks
-  async def invoke_trigger(self, request: Request, param:search_param_model):
+  async def search(self, request: Request, param:search_param_model):
     response = await self.__m_search_model.init_page(param)
     return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_SEARCH_WEBSITE_PATH, helper_controller.create_template_context(request, response))

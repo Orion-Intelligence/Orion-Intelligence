@@ -1,92 +1,54 @@
+import json
 import aiohttp
 import asyncio
-from threading import Thread, Semaphore
-from queue import Queue
-from backend.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
-from backend.view_managers.interactive.search_manager.search_enums import API_RESPONSE
+import hashlib
+
+from backend.constants.constant import CONSTANTS
+from backend.services.redis_manager.redis_controller import redis_controller
+from backend.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 class external_request_controller:
-  __instance = None
-  __pending_requests = {}
-  __queue = None
-  __semaphore = Semaphore(1)
-  __max_queue_size = 10
+    __instance = None
+    _semaphore = asyncio.Semaphore(CONSTANTS.S_SETTINGS_SEARCH_MAX_DYNAMIC_RESOURCE_LIMIT)
 
-  __loop = None
-  __thread = None
+    @staticmethod
+    def getInstance():
+        if external_request_controller.__instance is None:
+            external_request_controller()
+        return external_request_controller.__instance
 
-  @staticmethod
-  def start_background_loop():
-    if external_request_controller.__loop is None:
-      external_request_controller.__loop = asyncio.new_event_loop()
-      external_request_controller.__thread = Thread(target=external_request_controller.__loop.run_forever)
-      external_request_controller.__thread.daemon = True
-      external_request_controller.__thread.start()
+    def __init__(self):
+        if external_request_controller.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            external_request_controller.__instance = self
+        self.redis = redis_controller.getInstance()
 
-  @staticmethod
-  def init_queue():
-    if external_request_controller.__queue is None:
-      external_request_controller.__queue = Queue(maxsize=external_request_controller.__max_queue_size)
+    @staticmethod
+    def generate_cache_key(url: str, params: dict):
+        hash_input = f"{url}{json.dumps(params, sort_keys=True)}"
+        return hashlib.sha256(hash_input.encode()).hexdigest()
 
-  @staticmethod
-  def getInstance():
-    if external_request_controller.__instance is None:
-      external_request_controller.start_background_loop()
-      external_request_controller.init_queue()
-      external_request_controller()
-    return external_request_controller.__instance
+    async def fetch_runtime_parser_async(self, p_data):
+        url = "http://trusted-crawler-api:8000/runtime/parse"
+        param = {"query": p_data.model_dump()}
+        cache_key = self.generate_cache_key(url, param)
 
-  def __init__(self):
-    if external_request_controller.__instance is not None:
-      pass
-    else:
-      Thread(target=external_request_controller.__process_queue, daemon=True).start()
-      external_request_controller.__instance = self
+        cached_response = await self.redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [cache_key, None, None])
+        if cached_response:
+            return json.loads(cached_response)
 
-  @staticmethod
-  async def __fetch_runtime_parser_async(p_data, response_dict):
-    url = "http://trusted-crawler-api:8000/runtime/parse"
-    param = {"query": p_data}
-    try:
-      async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=param) as response:
-          if response.status == 200:
-            response_dict[tuple(sorted(p_data.items()))] = await response.json()
-    except Exception:
-      response_dict[tuple(sorted(p_data.items()))] = []
-    finally:
-      external_request_controller.__semaphore.release()
+        if self._semaphore.locked():
+            return {"server busy": "Server is currently processing maximum requests allowed. Please try again later."}
 
-  @staticmethod
-  def __process_queue():
-    while True:
-      p_data = external_request_controller.__queue.get()
-      if p_data is not None:
-        asyncio.run_coroutine_threadsafe(
-          external_request_controller.__fetch_runtime_parser_async(p_data, external_request_controller.__pending_requests),
-          external_request_controller.__loop
-        )
-
-  @staticmethod
-  def __fetch_runtime_parser(p_data, p_dynamic_crawl_trigger):
-    query = tuple(sorted(p_data.items()))
-    if query in external_request_controller.__pending_requests:
-      if external_request_controller.__pending_requests[query] is None:
-        return API_RESPONSE.M_PENDING, []
-      elif p_dynamic_crawl_trigger != "1":
-        return API_RESPONSE.M_SUCCESS, external_request_controller.__pending_requests[query]
-
-    external_request_controller.__pending_requests[query] = None
-
-    if not external_request_controller.__queue.full():
-      try:
-        external_request_controller.__queue.put_nowait(p_data)
-      except Exception as _:
-        external_request_controller.__pending_requests[query] = []
-    else:
-      external_request_controller.__pending_requests[query] = []
-    return API_RESPONSE.M_PENDING, []
-
-  def invoke_trigger(self, p_command, p_data):
-    if p_command == EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER:
-      return self.__fetch_runtime_parser(p_data[0], p_data[1])
+        async with self._semaphore:
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(url, json=param) as response:
+                        result = await response.json()
+                        await self.redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [cache_key, result, None])
+                        return json.loads(result)
+            except aiohttp.ClientError as e:
+                return {"error": f"Request failed: {str(e)}"}
+            except Exception as e:
+                return {"error": f"Unexpected error: {str(e)}"}

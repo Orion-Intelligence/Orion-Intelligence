@@ -1,8 +1,8 @@
 import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import Request, HTTPException
-from jwt import ExpiredSignatureError, DecodeError
 from starlette.responses import RedirectResponse
+from starlette.status import HTTP_303_SEE_OTHER
 from starlette.templating import Jinja2Templates
 
 from backend.services.mongo_manager.mongo_controller import mongo_controller
@@ -42,15 +42,21 @@ class session_manager:
   @staticmethod
   async def get_current_user(request_or_token: Request | str):
     token = None
+    login_redirect_url = CONSTANTS.S_TEMPLATE_LOGIN_PATH
+    def redirect_to_login():
+      response = RedirectResponse(url=login_redirect_url, status_code=HTTP_303_SEE_OTHER)
+      response.delete_cookie("access_token")
+      return response
 
     if isinstance(request_or_token, Request):
       token = request_or_token.cookies.get("access_token")
+      if token:
+        token = token.replace("Bearer ", "").strip()
 
       if not token:
         auth_header = request_or_token.headers.get("Authorization")
-        if auth_header:
-          if auth_header.startswith("Bearer "):
-            token = auth_header[len("Bearer "):].strip()
+        if auth_header and auth_header.startswith("Bearer "):
+          token = auth_header[len("Bearer "):].strip()
 
     else:
       token = request_or_token.strip()
@@ -59,24 +65,21 @@ class session_manager:
         token = token[len("Bearer "):].strip()
 
     if not token:
-      raise HTTPException(status_code=401, detail="Not authenticated")
+      return redirect_to_login()
 
     try:
       payload = jwt.decode(token, CONSTANTS.S_AUTH_SECRET_KEY, algorithms=[CONSTANTS.S_AUTH_ALGORITHM])
       username: str = payload.get("sub")
       if not username:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        return redirect_to_login()
 
       return await mongo_controller.getInstance().get_user(username)
 
-    except ExpiredSignatureError:
-      raise HTTPException(status_code=401, detail="Token expired. Please log in again.")
-    except DecodeError:
-      raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as xxx:
+      return redirect_to_login()
 
-  @staticmethod
-  async def get_current_role(request_or_token: Request | str) -> str:
-      user = await session_manager.get_instance().get_current_user(request_or_token)
+  async def get_current_role(self, request_or_token: Request | str) -> str:
+      user = await self.get_current_user(request_or_token)
       if not user or "role" not in user:
           raise HTTPException(status_code=403, detail="Role not found or unauthorized")
       return user["role"]

@@ -1,19 +1,15 @@
-import re
-
-from backend.view_managers.interactive.search_manager.parsers.search_api_callback_model import search_api_callback_model
-from backend.view_managers.interactive.search_manager.parsers.search_api_param_model import search_api_param_model
-from backend.view_managers.interactive.search_manager.parsers.search_param_model import search_param_model
+from backend.view_managers.interactive.search_manager.search_data_model import search_dynamic_param_model
+from backend.view_managers.interactive.search_manager.search_data_model.search_api_callback_model import search_api_callback_model
+from backend.view_managers.interactive.search_manager.search_data_model.search_api_param_model import search_api_param_model
+from backend.view_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
 from backend.view_managers.interactive.search_manager.search_data_model.query_model import query_model
-from backend.view_managers.server.external_request_manager.external_request_controller import external_request_controller
-from backend.view_managers.server.external_request_manager.external_request_enums import EXTERNAL_REQUEST_COMMANDS
 from backend.services.elastic_manager.elastic_controller import elastic_controller
-from backend.services.elastic_manager.elastic_enums import ELASTIC_CRUD_COMMANDS, ELASTIC_REQUEST_COMMANDS
 from backend.constants.constant import CONSTANTS
 from backend.constants.strings import GENERAL_STRINGS
-from backend.view_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK, SEARCH_SESSION_COMMANDS
+from backend.view_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK
 from backend.view_managers.interactive.search_manager.search_session_controller import search_session_controller
 from backend.view_managers.interactive.search_manager.spell_checker import spell_checker
-from backend.helper_manager.env_handler import env_handler
+from backend.view_managers.server.external_request_manager.external_request_controller import external_request_controller
 
 
 class search_model:
@@ -71,49 +67,40 @@ class search_model:
   async def __query_results(self, param:search_param_model):
     m_query_model = query_model()
     m_query_model.m_search_param_model = param
-    api_access = env_handler.get_instance().env('API_ACCESS')
-    if m_query_model.m_search_param_model.pSearchParamType == "persona":
-      pass
-      # if api_access == '0':
-      #   return True, {}
-      #
-      # email = ""
-      # if "@" in m_query_model.m_search_param_model.q:
-      #   m_search_query = m_query_model.m_search_param_model.q
-      #   email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-      #   match = re.search(email_pattern, m_search_query)
-      #   if match:
-      #     email = match.group()
-      #
-      # username = m_query_model.m_search_param_model.mUsername
-      # query = {"email": email, "username": username}
-      # status, result = external_request_controller.getInstance().invoke_trigger(EXTERNAL_REQUEST_COMMANDS.M_RUNTIME_PARSER, [query, m_query_model.m_dynamic_crawl_trigger])
-      # m_status, m_context = self.__m_session.invoke_trigger(SEARCH_SESSION_COMMANDS.INIT_RUNTIME_PARSER, [result, status, m_query_model])
-      #
-      # return m_status, m_context
-
-    else:
+    if m_query_model.m_search_param_model.pSearchParamType != "persona":
       if m_query_model.m_search_param_model.q == GENERAL_STRINGS.S_GENERAL_EMPTY:
         return False, None
-
-      m_status, m_documents = await elastic_controller.get_instance().invoke_trigger(ELASTIC_CRUD_COMMANDS.S_READ, [ELASTIC_REQUEST_COMMANDS.S_SEARCH, [m_query_model.m_search_param_model], [None]])
-      m_parsed_documents, m_suggestions_content, total_pages = await self.__parse_filtered_documents(m_documents)
-
-      m_query_model.set_total_documents(len(m_parsed_documents))
-
-      m_context, m_status = self.__m_session.init_callback(m_parsed_documents, m_query_model, total_pages)
-
-      m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_param_model.q, m_suggestions_content)
-
-      return m_status, m_context
+      else:
+        result = await elastic_controller.get_instance().search_query(m_query_model.m_search_param_model)
+        m_status, m_documents = result
+        m_parsed_documents, m_suggestions_content, total_pages = await self.__parse_filtered_documents(m_documents)
+        m_query_model.set_total_documents(len(m_parsed_documents))
+        m_context, m_status = self.__m_session.init_static_callback(m_parsed_documents, m_query_model, total_pages)
+        m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_param_model.q, m_suggestions_content)
+        return m_status, m_context
 
   async def init_page(self, param:search_param_model):
     mStatus, mResult = await self.__query_results(param)
     return mResult
 
-  async def api_result(self, param:search_api_param_model):
-    m_status, m_documents = await elastic_controller.get_instance().invoke_trigger(ELASTIC_CRUD_COMMANDS.S_READ, [ELASTIC_REQUEST_COMMANDS.S_SEARCH, [param], [None]])
-    m_parsed_documents, m_suggestions_content, total_pages = await self.__parse_filtered_documents(m_documents)
+  @staticmethod
+  async def dynamic_search_result(param: search_dynamic_param_model):
+    result = await external_request_controller.getInstance().fetch_runtime_parser_async(param)
+    return result
+
+  @staticmethod
+  async def api_dynamic_search_result(param: search_dynamic_param_model):
+    result = await external_request_controller.getInstance().fetch_runtime_parser_async(param)
+    return result
+
+  async def api_seach_result(self, param: search_api_param_model):
+    m_status, m_documents = await elastic_controller.get_instance().search_query_api(param)
+    if not m_status:
+      return search_api_callback_model(Result=[], Suggestions=[], Page_Count=0)
+
+    parsed_result = await self.__parse_filtered_documents(m_documents)
+    m_parsed_documents, m_suggestions_content, total_pages = parsed_result
+
     return search_api_callback_model(
       Result=m_parsed_documents,
       Suggestions=m_suggestions_content,

@@ -16,12 +16,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install dependencies separately (for caching)
 COPY app/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install pydantic[email]
 
 # Copy the actual application code
 COPY app/ /app/
+COPY .env /app/.env
+COPY README.md /app/README.md
 
 # Expose FastAPI's application port
 EXPOSE 8070
 
-# Run FastAPI using Gunicorn + Uvicorn Workers
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8070"]

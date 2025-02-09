@@ -1,7 +1,7 @@
 <div class="header">
   <div class="header__menu gs-disable-highlight">
         <span>
-            <a href="/static" class="gc-clear-selection" aria-label="Go to Homepage">
+            <a href="/" class="gc-clear-selection" aria-label="Go to Homepage">
                 <img src="{{ url_for('static', path='trustly/images/brand-header-1.svg') }}" alt="Trustly Logo" width="57" height="20">
             </a>
         </span>
@@ -15,9 +15,11 @@
                 {{ request.state.admin_vars.username[:20] }}
             </span>
         {% endif %}
-        <a href="#" onclick="document.getElementById('logout-form').submit();" aria-label="Logout" class="header__menu-category light-header__menu-category--bold" id="logout-button">
-          <img src="{{ url_for('static', path='trustly/images/logout.svg') }}" alt="Logout" width="24" height="24">
-        </a>
+      <form id="logout-form" action="/logout" method="POST" style="display: inline;">
+          <button type="submit" aria-label="Logout" class="header__menu-category light-header__menu-category--bold" id="logout-button" style="background: none; border: none; padding: 0; cursor: pointer;">
+              <img src="{{ url_for('static', path='trustly/images/logout.svg') }}" alt="Logout" width="24" height="24">
+          </button>
+      </form>
     </span>
   </div>
 </div>

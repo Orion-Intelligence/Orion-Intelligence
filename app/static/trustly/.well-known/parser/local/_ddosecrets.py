@@ -42,7 +42,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
         return self._card_data
 
     def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+        return self._redis_instance.search(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "https://ddosecrets.com/about"

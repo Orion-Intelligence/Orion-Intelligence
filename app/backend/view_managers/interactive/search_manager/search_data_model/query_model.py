@@ -1,5 +1,5 @@
-from backend.constants.strings import SEARCH_STRINGS, GENERAL_STRINGS
-from backend.view_managers.interactive.search_manager.parsers.search_param_model import search_param_model
+from backend.constants.strings import SEARCH_STRINGS
+from backend.view_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
 
 
 class query_model:

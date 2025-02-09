@@ -1,11 +1,10 @@
 import asyncio
+from asyncio import sleep
 
 from backend.management.managers.cronjob_manager import cronjob_manager
 from backend.services.elastic_manager.elastic_controller import elastic_controller
 from backend.services.mongo_manager.mongo_controller import mongo_controller
 from backend.services.redis_manager.redis_controller import redis_controller
-from backend.services.session_manager.session_enums import admin_mock
-from backend.services.session_manager.session_manager import session_manager
 
 
 class service_manager:
@@ -40,12 +39,16 @@ class service_manager:
                 await asyncio.sleep(5)
 
                 self._is_available = True
-                await cronjob_manager.get_instance().init()
                 return True
             except (OSError, ConnectionRefusedError):
                 await asyncio.sleep(5)
 
         return False
+
+    async def init_cronjobs(self):
+        while not self._is_available:
+            await sleep(5)
+        await cronjob_manager.get_instance().init()
 
     def check_status(self):
         return self._is_available

@@ -1,19 +1,16 @@
-# Local Imports
 import hashlib
 from datetime import datetime, timedelta, timezone
 
 from backend.constants.constant import CONSTANTS
 from backend.helper_manager.helper_controller import helper_controller
-from backend.services.request_manager.request_handler import request_handler
-from backend.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_REQUEST_COMMANDS, ELASTIC_INDEX
+from backend.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 
 
-class elastic_request_generator(request_handler):
+class elastic_request_generator:
 
   @staticmethod
-  def __on_search(p_query_model):
-    m_user_query, m_search_type, m_safe_search, m_page_number, m_network = (p_query_model.q.lower(), p_query_model.pSearchParamType, p_query_model.mSearchParamSafeSearch, p_query_model.mSearchParamPage,p_query_model.mNetwork,)
-
+  def on_search(p_query_model):
+    m_user_query, m_search_type, m_safe_search, m_page_number, m_network = p_query_model.q.lower(), p_query_model.pSearchParamType, p_query_model.mSearchParamSafeSearch, p_query_model.mSearchParamPage,p_query_model.mNetwork
     must_clauses = []
     if m_search_type != "all":
       must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
@@ -28,33 +25,26 @@ class elastic_request_generator(request_handler):
     if m_search_type != "all":
       must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
     if m_network != "" and m_network != "all":
-      must_clauses.append({"terms": {"m_network": [m_network]}})
+      must_clauses.append({"term": {"m_network": m_network}})
     must_not_clause = []
     if m_safe_search == "True":
       must_not_clause.append({"term": {"m_content_type": "adult"}})
 
     if m_search_type == "monitor":
       m_query_statement = {"min_score": 0, "query": {"function_score": {"query": {"bool": {"must": [], "should": [{"query_string": {"query": m_user_query, "fields": ["m_title^3", "m_meta_description^2", "m_content^1.5", "m_important_content^1.5", "m_content_tokens^2", "m_keywords^1.8"], "default_operator": "OR", "lenient": True}}], "must_not": must_not_clause}}, "functions": [{"gauss": {"m_update_date": {"origin": "now", "scale": "30d", "offset": "10d", "decay": 0.5}}, "weight": 2}], "boost_mode": "sum"}}, "from": (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC, "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE, "track_total_hits": True}
-      return {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: m_query_statement}
-    if m_network == "all":
+      return ELASTIC_INDEX.S_LEAK_INDEX, m_query_statement
+    else:
       query_statement["query"]["function_score"]["query"]["bool"]["should"].append({"bool": {"must": must_clauses, "should": [{"query_string": {"query": m_user_query, "fields": ["m_title^3", "m_meta_description^2", "m_content^1.5", "m_important_content^1.5", "m_content_tokens^2", "m_keywords^1.8", ], "default_operator": "OR", "lenient": True, }}], "must_not": must_not_clause, }})
-
-      return {ELASTIC_KEYS.S_DOCUMENT: [ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_INDEX.S_GENERIC_INDEX], ELASTIC_KEYS.S_FILTER: query_statement, }
-
-  @staticmethod
-  def __onion_list(p_page_number):
-    m_query = {"from": (p_page_number - 1) * 5000, "size": 5001, "query": {"match": {"m_sub_host": ''}}, "_source": ["m_host", "m_content_type"]}
-
-    return {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: m_query}
+      return [ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_INDEX.S_GENERIC_INDEX], query_statement
 
   @staticmethod
-  def __clear_expire_index():
+  def clear_expire_index():
     utc_now = datetime.now(timezone.utc)
     threshold_time = utc_now - timedelta(seconds=CONSTANTS.S_SETTINGS_INDEX_EXPIRY)
     return {"query": {"range": {"m_update_date": {"lt": threshold_time.isoformat()}}}}
 
   @staticmethod
-  def __index_query_general(p_index_data, p_index_name):
+  def index_query_general(p_index_data):
     index_entries = []
     utc_now = datetime.now(timezone.utc)
     current_timestamp = utc_now.isoformat()
@@ -67,11 +57,12 @@ class elastic_request_generator(request_handler):
       p_index_data['m_hash_url'] = hashlib.sha256((p_index_data['m_url'] + p_index_data['m_title']).encode()).hexdigest()
       p_index_data['m_hash'] = p_index_data['m_url']
 
-      index_entries.append({ELASTIC_KEYS.S_DOCUMENT: p_index_name, ELASTIC_KEYS.S_VALUE: p_index_data})
+      index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_VALUE: p_index_data})
 
     return index_entries
 
-  def __index_query_leak(self, p_index_data, p_index_name):
+  @staticmethod
+  def index_query_leak(p_index_data):
     contact_link = p_index_data.get("contact_link", "")
     index_entries = []
     utc_now = datetime.now(timezone.utc)
@@ -83,33 +74,19 @@ class elastic_request_generator(request_handler):
       card["m_update_date"] = current_timestamp
       card["m_contact_link"] = contact_link
       index_entries.append({
-        ELASTIC_KEYS.S_DOCUMENT: p_index_name,
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_KEYS.S_VALUE: card
       })
 
     return index_entries
 
   @staticmethod
-  def __generate_insight_queries():
-    queries = [{ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": {"value_count": {"field": "_id"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Most Recent": {"max": {"field": "m_update_date"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Oldest Update": {"min": {"field": "m_update_date"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": {"value_count": {"field": "_id"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}}, "aggs": {"Updated 9 Days ago": {"value_count": {"field": "_id"}}}}},
+  def generate_insight_queries():
+    queries = [{ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": {"value_count": {"field": "m_hash"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Most Recent": {"max": {"field": "m_update_date"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Oldest Update": {"min": {"field": "m_update_date"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": {"value_count": {"field": "m_hash"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}}, "aggs": {"Updated 9 Days ago": {"value_count": {"field": "m_hash"}}}}},
       {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Average Score": {"avg": {"field": "m_validity_score"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"URL/Document": {"value_count": {"field": "m_sub_url"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Archive/Document": {"value_count": {"field": "m_archive_url"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Email/Document": {"value_count": {"field": "m_emails"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Phone/Document": {"value_count": {"field": "m_phone_numbers"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Clearnet/Document": {"value_count": {"field": "m_clearnet_links"}}}}},
       {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Common Type": {"terms": {"field": "m_content_type.keyword", "size": 10}}}}},
 
-      {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": {"value_count": {"field": "_id"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Unique Base URLs": {"value_count": {"field": "m_base_url"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Dumps/Document": {"value_count": {"field": "m_dumplink"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": {"value_count": {"field": "_id"}}}}},
-      {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}}, "aggs": {"Updated 9 Days ago": {"value_count": {"field": "_id"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Most Recent": {"max": {"field": "m_update_date"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Oldest Update": {"min": {"field": "m_update_date"}}}}}]
+      {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": {"value_count": {"field": "m_hash"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Unique Base URLs": {"value_count": {"field": "m_base_url"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Dumps/Document": {"value_count": {"field": "m_dumplink"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": {"value_count": {"field": "m_hash"}}}}},
+      {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}}, "aggs": {"Updated 9 Days ago": {"value_count": {"field": "m_hash"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Most Recent": {"max": {"field": "m_update_date"}}}}}, {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Oldest Update": {"min": {"field": "m_update_date"}}}}}]
 
     return queries
-
-  def invoke_trigger(self, p_commands, p_data=None):
-    if p_commands == ELASTIC_REQUEST_COMMANDS.S_SEARCH:
-      return self.__on_search(p_data[0])
-    if p_commands == ELASTIC_REQUEST_COMMANDS.S_GENERATE_INSIGHT:
-      return self.__generate_insight_queries()
-    if p_commands == ELASTIC_REQUEST_COMMANDS.S_ONION_LIST:
-      return self.__onion_list(p_data[0])
-    if p_commands == ELASTIC_REQUEST_COMMANDS.S_CLEAR_EXPIRE_INDEX:
-      return self.__clear_expire_index()
-    if p_commands == ELASTIC_REQUEST_COMMANDS.S_INDEX_GENERAL:
-      return self.__index_query_general(p_data[0], p_data[1])
-    if p_commands == ELASTIC_REQUEST_COMMANDS.S_INDEX_LEAK:
-      return self.__index_query_leak(p_data[0], p_data[1])

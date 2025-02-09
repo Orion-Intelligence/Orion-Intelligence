@@ -84,11 +84,12 @@ class mongo_controller:
 
   async def update_url_status(self, url, url_status=None, leak_status=None, content_type=None, network_type=None):
     try:
-      m_status, m_document, m_values = self.__m_mongo_request_generator.on_update_url_status(url, url_status, leak_status, content_type, network_type)
+      m_document, m_key, m_values = self.__m_mongo_request_generator.on_update_url_status(url, url_status, leak_status, content_type, network_type)
       await self.__m_connection[m_document].update_one(
-        m_status, m_values, upsert=True
+        m_key, m_values, upsert=True
       )
       return True, MANAGE_MONGO_MESSAGES.S_UPDATE_SUCCESS
     except Exception as ex:
       log.g().e(f"MONGO EXCEPTION : {MANAGE_MONGO_MESSAGES.S_UPDATE_FAILURE}: {ex}")
       return False, MANAGE_MONGO_MESSAGES.S_UPDATE_FAILURE
+

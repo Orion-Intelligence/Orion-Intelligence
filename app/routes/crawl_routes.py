@@ -23,7 +23,3 @@ async def parser(request: Request):
 @crawl_routes.post("/crawl_index", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser(request: Request):
     return await crawl_controller.getInstance().invoke_trigger(CRAWL_COMMANDS.M_INIT, request)
-
-@crawl_routes.get("/current-role")
-async def get_role(_: Request, role: user_role = Depends(get_current_role)):
-    return {"role": role}

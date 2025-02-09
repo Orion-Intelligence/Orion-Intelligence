@@ -97,7 +97,7 @@ The `run.sh` file automates the process of starting the Orion system. It is typi
 
 **Usage**:
 ```bash
-bash run.sh
+bash cronjobs.sh
 ```
 
 **Purpose**:  
@@ -159,7 +159,7 @@ bash run.sh
 
 2. Run the setup script:  
    ```bash
-   bash run.sh
+   bash cronjobs.sh
    ```
 
 3. Access the services:  
@@ -336,7 +336,7 @@ The `run.sh` script automates the startup of the Orion-Crawler system. It perfor
 
 **Usage**:
 ```bash
-bash run.sh
+bash cronjobs.sh
 ```
 
 **Purpose**:
@@ -373,7 +373,7 @@ The `requirements.txt` file lists dependencies needed for the crawler:
 
 2. Run the setup script:  
    ```bash
-   bash run.sh
+   bash cronjobs.sh
    ```
 
 3. Access the services:  

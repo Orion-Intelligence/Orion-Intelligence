@@ -12,11 +12,6 @@ services:
       - mongo
     volumes:
       - ./app:/app:cached
-      - ./app/backend:/app/backend:cached
-      - ./app/routes:/app/routes:cached
-      - ./app/configs:/app/configs:cached
-      - ./app/templates:/app/templates:cached
-      - ./app/static:/app/static:cached
     expose:
       - "8070"
     networks:
@@ -28,6 +23,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    command: >
+      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
 
   nginx:
     container_name: trusted-web-nginx

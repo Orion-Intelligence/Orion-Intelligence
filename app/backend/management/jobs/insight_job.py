@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from backend.services.elastic_manager.elastic_controller import elastic_controller
-from backend.services.elastic_manager.elastic_enums import ELASTIC_CRUD_COMMANDS, ELASTIC_REQUEST_COMMANDS, ELASTIC_KEYS
+from backend.services.elastic_manager.elastic_enums import ELASTIC_KEYS
 from backend.services.redis_manager.redis_controller import redis_controller
 from backend.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS, REDIS_DEFAULT
 
@@ -24,7 +24,7 @@ class insight_job:
 
   @staticmethod
   async def __fetch_elastic_insight(grouped_results):
-    m_status, m_documents = await elastic_controller.get_instance().invoke_trigger(ELASTIC_CRUD_COMMANDS.S_INSIGHT, [ELASTIC_REQUEST_COMMANDS.S_GENERATE_INSIGHT, [], [None]])
+    m_status, m_documents = await elastic_controller.get_instance().get_insight()
 
     if m_status and isinstance(m_documents, list):
       for doc in m_documents:
