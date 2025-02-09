@@ -10,24 +10,20 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
-
-        # Exempt specific paths from CSP
         if any(path in request.url.path for path in [
             "/docs",
             "/redoc",
             "/openapi.json",
             "/npm/swagger-ui-dist@5/swagger-ui.css",
-            "/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
-            ""
+            "/npm/swagger-ui-dist@5/swagger-ui-bundle.js"
         ]):
             return response
 
-        # Set Content-Security-Policy with a **relative report-uri**
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self'; "
+            "default-src 'none'; "
+            "script-src 'none'; "
             "style-src 'self'; "
-            "img-src 'self' data:; "
+            "img-src 'self' data:;"
             "font-src 'self'; "
             "connect-src 'self'; "
             "media-src 'self'; "
