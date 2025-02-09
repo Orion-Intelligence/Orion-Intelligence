@@ -12,29 +12,9 @@ services:
     env_file:
       - .env
     command:
-      - /bin/sh
-      - -c
-      - >
-        if [ "$PRODUCTION" = "1" ]; then
-          python manage.py collectstatic --noinput &&
-          echo "Production mode: Running compression..." &&
-          python manage.py compress --follow-links --force &&
-          echo "Production mode: Compressing static files..." &&
-          find /app/staticfiles -type f -exec gzip -k {} \;;
-        else
-          echo "Non-production mode: Skipping compression and gzip.";
-        fi &&
-        gunicorn trustly.wsgi:application --bind 0.0.0.0:8070 --reload
+      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
     volumes:
-      - .:/backend:cached
-      - ./backend/templates:/backend/backend/templates:cached
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/backend/static:cached
-      - ./staticfiles:/backend/staticfiles:cached
-      - media_volume:/backend/media
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - /var/www/certbot:/var/www/certbot
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./app:/app:cached
 
     expose:
       - "8070"
@@ -57,36 +37,6 @@ services:
           memory: 1G
         reservations:
           memory: 1G
-
-  swagger:
-    container_name: trusted-web-swagger
-    image: swaggerapi/swagger-ui:latest
-    ports:
-      - "8082:8080"
-    environment:
-      SWAGGER_JSON: /swagconfig/swaggerconfig.json
-      SWAGGER_UI_SYNTAX_HIGHLIGHT: "false"
-      SWAGGER_UI_CORS_ENABLED: "true"
-      SWAGGER_UI_DOC_EXPANSION: "none"
-      SWAGGER_UI_DEFAULT_MODELS_EXPAND_DEPTH: -1
-      SWAGGER_UI_DEFAULT_MODEL_EXPAND_DEPTH: -1
-      SWAGGER_UI_ALLOWED_ORIGINS: "*"
-      SWAGGER_UI_RESPONSE_HIGHLIGHT: "false"
-    volumes:
-      - ./swagconfig:/usr/share/nginx/html
-    restart: unless-stopped
-    depends_on:
-      - web
-    networks:
-      backend:
-        ipv4_address: 172.20.1.15
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.swagger.rule=Host(`swagger.orion.genesistechnologies.org`)"
-      - "traefik.http.routers.swagger.tls=true"
-      - "traefik.http.routers.swagger.entrypoints=websecure"
-      - "traefik.http.services.swagger.loadbalancer.server.port=8080"
-      - "traefik.http.routers.swagger.middlewares=auth@file"
 
   elasticsearch:
     container_name: trusted-web-elastic
