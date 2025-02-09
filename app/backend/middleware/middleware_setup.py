@@ -3,6 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from backend.helper_manager.env_handler import env_handler
 from backend.middleware.middlewares.user_auth_middleware import user_auth_middleware
 from backend.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
 from backend.middleware.middlewares.maintenance_mode_middleware import maintenance_mode_middleware
@@ -16,6 +17,7 @@ def setup_middlewares(app):
     app.add_middleware(maintenance_mode_middleware)
     app.add_middleware(service_ready_middleware)
     app.add_middleware(user_auth_middleware)
+    PRODUCTION_DOMAIN = env_handler.get_instance().env("PRODUCTION_DOMAIN", "-")
 
     # app.add_middleware(
     #     CORSMiddleware,
@@ -28,7 +30,7 @@ def setup_middlewares(app):
     if not config.DEBUG:
         app.add_middleware(
             TrustedHostMiddleware,
-            allowed_hosts=config.CSRF_TRUSTED_ORIGINS
+            allowed_hosts=PRODUCTION_DOMAIN
         )
 
     app.add_middleware(security_headers_middleware)
