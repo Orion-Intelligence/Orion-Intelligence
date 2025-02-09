@@ -33,7 +33,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
             "form-action 'self'; "
             "base-uri 'self'; "
             "upgrade-insecure-requests; "
-            "require-trusted-types-for 'script'; "
             "report-uri /csp-report-endpoint/;"
         )
 
