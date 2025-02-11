@@ -41,7 +41,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
         return self._card_data
 
     def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
-        return self._redis_instance.search(command, [key.value + self.__class__.__name__, default_value])
+        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion"
@@ -76,14 +76,13 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
                     m_url=self.seed_url,
                     m_base_url=self.base_url,
                     m_content=body_text,
-                    m_network=helper_method.get_network_type(self.base_url).value,
+                    m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=body_text,
                     m_weblink=[self.seed_url],
                     m_dumplink=dump_links,
                     m_email_addresses=helper_method.extract_emails(body_text),
                     m_phone_numbers=helper_method.extract_phone_numbers(body_text),
-                    m_extra_tags=[],
-                    m_content_type="organization",
+                    m_content_type=["leaks"],
                 )
 
                 self._card_data.append(card_data)

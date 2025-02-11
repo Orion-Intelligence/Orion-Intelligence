@@ -1,4 +1,4 @@
-.safe__search-toolbar-results {
+.suggested__search-toolbar-results {
   font-weight: 400;
   margin-left: 60px;
   color: #D0D0D0;
@@ -8,17 +8,17 @@
 
 }
 
-.safe__search-toolbar {
+.suggested__search-toolbar {
   display: flex;
   justify-content: space-between;
-  padding: 25px 48px 30px 20px;
+  padding: 0 48px 30px 20px;
 }
 
-.safe__search-toolbar-error {
+.suggested__search-toolbar-error {
   margin-left: 60px;
 }
 
-.safe__search-toolbar-error-info {
+.suggested__search-toolbar-error-info {
   color: #fff;
   font-size: 17px;
   font-weight: 600;
@@ -26,42 +26,30 @@
   cursor: pointer;
 }
 
-.safe__search-toolbar-error-info-ref:hover
+.suggested__search-toolbar-error-info-ref:hover
 {
   color: #00b0b0;
 }
 
-.safe__search-toolbar-error-header {
+.suggested__search-toolbar-error-header {
   color: #ffc107;
   font-size: 18px;
   font-weight: 600;
 }
 
-@media only screen and (max-width: 900px) {
-  .safe__search-toolba-toolbar-left, .safe__search-toolbar-right {
-    margin-top: 0;
-  }
-}
-
 @media only screen and (max-width: 1000px) {
 
-  .safe__search-toolbar {
+  .suggested__search-toolbar {
     flex-direction: column;
     margin-left: 10px;
     padding: 20px 48px 0 8px;
   }
 
-  .safe__search-toolbar-results {
+  .suggested__search-toolbar-results {
     margin: 0 ;
   }
 
-  .safe__search-toolba-toolbar-left, .safe__search-toolbar-right {
-    justify-content: left;
-    margin-bottom: 16px;
-    margin-top: 10px;
-  }
-
-  .safe__search-toolbar-error {
+  .suggested__search-toolbar-error {
     margin-left: 14px ;
     padding-right: 25px;
   }

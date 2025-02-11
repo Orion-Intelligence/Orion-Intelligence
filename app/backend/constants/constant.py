@@ -12,7 +12,6 @@ class CONSTANTS:
   S_TEMPLATE_SEARCH_WEBSITE_PATH = "trustly/user/interactive/search/search.html"
   S_TEMPLATE_LOGIN_PATH = "trustly/user/interactive/login/index.html"
 
-  # Settings Constants
   S_SETTINGS_INDEX_EXPIRY = 864000
   S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT = 86400
   S_SETTINGS_INDEX_STATS_WEEKLY_TIMEOUT = 604800

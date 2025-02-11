@@ -79,7 +79,7 @@ class crawl_controller:
 
     if p_command == CRAWL_COMMANDS.M_FETCH_PARSER:
 
-      parser_folder = os.path.join(static_folder, 'backend', '.well-known', 'parser')
+      parser_folder = os.path.join(static_folder, 'trustly', '.well-known', 'parser')
 
       zip_buffer = io.BytesIO()
 

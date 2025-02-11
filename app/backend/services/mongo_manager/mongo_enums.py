@@ -1,12 +1,7 @@
 from backend.helper_manager.env_handler import env_handler
-import enum
 
 
 class MONGODB_COLLECTIONS:
-  S_UNIQUE_URL = 'm_unique_url'
-  S_SUBMIT = 'm_submitted_websites'
-  S_USER_MODEL = 'm_users'
-  S_STATUS = 'm_status'
   S_URL_STATUS = 'm_url_status'
 
 class MONGO_CONNECTIONS:
@@ -16,20 +11,10 @@ class MONGO_CONNECTIONS:
   S_MONGO_USERNAME = env_handler.get_instance().env('MONGO_ROOT_USERNAME')
   S_MONGO_PASSWORD = env_handler.get_instance().env('MONGO_ROOT_PASSWORD')
 
-
 class MONGODB_KEYS:
   S_DOCUMENT = 'm_document'
   S_FILTER = 'm_filter'
   S_VALUE = 'm_value'
-
-
-class MONGODB_CRUD:
-  S_CREATE = 1
-  S_READ = 2
-  S_UPDATE = 3
-  S_DELETE = 4
-  S_REPLACE = 5
-
 
 class MANAGE_MONGO_MESSAGES:
   S_INSERT_FAILURE = "[1] Something unexpected happened while inserting"

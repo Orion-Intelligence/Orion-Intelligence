@@ -40,7 +40,7 @@ html::-webkit-scrollbar {
   position: absolute;
   right: 0;
   width: auto;
-  height: 93vh;
+  height: 100vh;
   opacity: 0.07;
 }
 
@@ -56,8 +56,9 @@ html::-webkit-scrollbar {
   justify-content: center;
   align-items: center;
   height: 70vh;
+  min-height: 400px;
   width: 100%;
-
+  min-width: 300px;
 }
 
 .auth_form__sub__container {
@@ -152,9 +153,10 @@ html::-webkit-scrollbar {
   width: 100%;
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (max-width: 643px) {
   .auth_form__sub__container {
     margin: 0 20px;
     padding: 42px 20px;
+    width: 100%;
   }
 }

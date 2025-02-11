@@ -1,17 +1,18 @@
 from fastapi import Depends, HTTPException, status
+from starlette.requests import Request
 
 from backend.helper_manager.env_handler import env_handler
 from backend.services.session_manager.session_manager import session_manager
 from backend.services.session_manager.shared_model.auth_models import user_role
 
 
-async def get_current_role():
+async def get_current_role(request: Request):
   auth = env_handler.get_instance().env("AUTH")
 
-  if auth == "1":
+  if auth == "0":
     return user_role.DEMO
 
-  role = await session_manager.get_instance().get_current_role()
+  role = await session_manager.get_instance().get_current_role(request)
   if role is None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
 

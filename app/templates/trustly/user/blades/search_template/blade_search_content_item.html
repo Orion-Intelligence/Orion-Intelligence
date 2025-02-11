@@ -120,17 +120,19 @@
           </div>
 
           <div class="search-result__accordion search__result-tabs">
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="section-{{ loop.index }}-1">
-            <label for="section-{{ loop.index }}-1" class="search-result__label">Section </label>
-            <div class="search-result__tabs-content">
-              {% for section in mDoc.mSection %}
-                <p class="search-result__tabs--content-header search-result__tabs-header-spacing">
-                  Section {{ loop.index }}</p>
-                <p class="accordian__body__search__content{% if not loop.last %} tabs__content--divider{% endif %}">
-                  {{ section }}
-                </p>
-              {% endfor %}
-            </div>
+            {% if mDoc.mSection|length > 0 %}
+              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="section-{{ loop.index }}-1">
+              <label for="section-{{ loop.index }}-1" class="search-result__label">Section </label>
+              <div class="search-result__tabs-content">
+                {% for section in mDoc.mSection %}
+                  <p class="search-result__tabs--content-header search-result__tabs-header-spacing">
+                    Section {{ loop.index }}</p>
+                  <p class="accordian__body__search__content{% if not loop.last %} tabs__content--divider{% endif %}">
+                    {{ section }}
+                  </p>
+                {% endfor %}
+              </div>
+            {% endif %}
 
             {% if mDoc.mEmails|length > 0 %}
               <div class="search-result-tabs-label"></div>
@@ -159,7 +161,6 @@
                 </div>
               </div>
             {% endif %}
-
             {% if mDoc.mPhoneNumber|length > 0 %}
               <div class="search-result-tabs-label"></div>
               <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="phone-{{ loop.index }}-1">

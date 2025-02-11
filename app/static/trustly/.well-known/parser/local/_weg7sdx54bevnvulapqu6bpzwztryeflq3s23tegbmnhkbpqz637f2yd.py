@@ -42,7 +42,7 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
         return self._card_data
 
     def invoke_db(self, command:REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
-        return self._redis_instance.search(command, [key.value + self.__class__.__name__, default_value])
+        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd.onion/?contact"
@@ -61,7 +61,6 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
                 title = card.find(class_="title")
                 text_elements = card.find_all(class_="text")
                 link_elements = card.find_all(class_="links")
-                extra_tags = [helper_method.clean_text(tag.get_text(strip=True)) for tag in card.find_all(class_="extra")]
 
                 title_text = helper_method.clean_text(title.get_text(strip=True)) if title else ""
                 content = ' '.join(helper_method.clean_text(text.get_text(strip=True)) for text in text_elements if text)
@@ -73,13 +72,12 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
                     m_url=page_url,
                     m_base_url=self.base_url,
                     m_content=content,
-                    m_network=helper_method.get_network_type(self.base_url).value,
+                    m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=content,
                     m_weblink=weblinks,
                     m_dumplink=dumplinks,
                     m_email_addresses= helper_method.extract_emails(content),
                     m_phone_numbers= helper_method.extract_phone_numbers(content),
-                    m_extra_tags=extra_tags,
-                    m_content_type="organization"
+                    m_content_type=["leaks"]
                 )
                 self._card_data.append(card_data)

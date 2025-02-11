@@ -102,10 +102,10 @@ class elastic_controller:
 
     async def __index(self, p_data):
         try:
-            def ensure_creation_date(entry):
-                if "m_creation_date" not in entry[ELASTIC_KEYS.S_VALUE]:
-                    entry[ELASTIC_KEYS.S_VALUE]["m_creation_date"] = datetime.now(timezone.utc).isoformat()
-                return entry
+            def ensure_creation_date(p_entry):
+                if "m_creation_date" not in p_entry[ELASTIC_KEYS.S_VALUE]:
+                    p_entry[ELASTIC_KEYS.S_VALUE]["m_creation_date"] = datetime.now(timezone.utc).isoformat()
+                return p_entry
 
             if isinstance(p_data, list):
                 for entry in p_data:

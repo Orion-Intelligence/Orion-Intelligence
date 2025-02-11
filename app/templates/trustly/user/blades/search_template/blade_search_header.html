@@ -8,7 +8,7 @@
   {% endif %}
   <div class="searchbar__logo-grid">
     <div class="searchbar__logo-container">
-      <a href="../../.." class="searchbar__logo">
+      <a href="/" class="searchbar__logo">
         <img src="{{ url_for('static', path='trustly/images/search-logo.svg') }}" alt="Brand Logo">
       </a>
     </div>
@@ -17,10 +17,13 @@
       <div class="searchbar__searchbox">
         <div class="input-group">
           {% if vars.mSearchCallbackRelevantSearchType == 'persona' %}
-            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Email" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-email" pattern="[^ ]*" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
-            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username" maxlength="150" name="mUsername" value="{{ vars.mUsernameQuery }}">
+            <label for="emailSearch" class="sr-only">Email</label>
+            <input id="emailSearch" autocomplete="off" autocapitalize="none" type="search" placeholder="Email" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-email" pattern="[^ ]*" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
+            <label for="usernameSearch" class="sr-only">Username</label>
+            <input id="usernameSearch" autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username" maxlength="150" name="mUsername" value="{{ vars.mUsernameQuery }}">
           {% else %}
-            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
+            <label for="generalSearch" class="sr-only">Search</label>
+            <input id="generalSearch" autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
           {% endif %}
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamPage" value="1">
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ vars.mSearchCallbackSaveSearch }}">
@@ -76,5 +79,15 @@
     <span id="catagory_index" class="searchbar__nav-right">
       <a href="/" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right ">Home</a>
     </span>
+  </div>
+
+  <div class="searchbar__search-toolbar-right">
+    <label for="safe-search" class="searchbar__search-toolbar-switch">
+      <a href="/search?q={{ vars.mSearchCallbackQuery }}&mSearchParamPage=1&pSearchParamType={{ vars.mSearchCallbackRelevantSearchType }}&mSearchParamSafeSearch={% if vars.mSearchCallbackSaveSearch == True %}False{% else %}True{% endif %}">
+        <input type="checkbox" id="safe-search" {% if vars.mSearchCallbackSaveSearch == True %}checked{% endif %}/>
+        <span class="searchbar__search-toolbar--slider"></span>
+      </a>
+    </label>
+    <span id="safe-search-label" class="searchbar__search-toolbar--text">Enable Safe Search</span>
   </div>
 </form>

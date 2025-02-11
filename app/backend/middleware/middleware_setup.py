@@ -1,8 +1,6 @@
 from brotli_asgi import BrotliMiddleware
 from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-
 from backend.helper_manager.env_handler import env_handler
 from backend.middleware.middlewares.user_auth_middleware import user_auth_middleware
 from backend.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware

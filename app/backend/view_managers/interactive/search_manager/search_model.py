@@ -77,6 +77,7 @@ class search_model:
         m_query_model.set_total_documents(len(m_parsed_documents))
         m_context, m_status = self.__m_session.init_static_callback(m_parsed_documents, m_query_model, total_pages)
         m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_param_model.q, m_suggestions_content)
+
         return m_status, m_context
 
   async def init_page(self, param:search_param_model):

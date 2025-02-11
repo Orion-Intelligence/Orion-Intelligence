@@ -9,6 +9,8 @@ from crawler.crawler_instance.local_shared_model.card_extraction_model import ca
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.shared.helper_method import helper_method
+
 
 class _ddosecrets(leak_extractor_interface, ABC):
     _instance = None
@@ -42,7 +44,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
         return self._card_data
 
     def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
-        return self._redis_instance.search(command, [key.value + self.__class__.__name__, default_value])
+        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "https://ddosecrets.com/about"
@@ -51,7 +53,6 @@ class _ddosecrets(leak_extractor_interface, ABC):
         page.goto(self.seed_url, wait_until="networkidle")
         self.soup = BeautifulSoup(page.content(), 'html.parser')
 
-        # Extract links to individual articles
         article_divs = self.soup.find_all("div", class_="article")
         article_links = [
             urljoin(self.base_url, div.find("h2").find("a")["href"])
@@ -121,15 +122,15 @@ class _ddosecrets(leak_extractor_interface, ABC):
                     m_url=article_url,
                     m_base_url=self.base_url,
                     m_content=content_text,
-                    m_content_type="leak",
+                    m_content_type=["leaks"],
                     m_important_content=content_text,
                     m_weblink=weblinks,
+                    m_network=helper_method.get_network_type(self.base_url),
                     m_dumplink=dumplinks,
-                    m_extra_tags=types,
-                    m_last_updated=published_date,
+                    m_leak_date=published_date,
                     m_company_name=source,
                     m_addresses=countries,
-                    m_services_or_products=[download_size],
+                    m_data_size=download_size,
                 )
 
                 self._card_data.append(card)
