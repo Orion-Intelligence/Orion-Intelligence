@@ -11,7 +11,7 @@ class directory_session_controller:
   def init_callback(p_links, m_row_model_list, p_count):
     total_pages = max(1, math.ceil(p_count / CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE))
 
-    current_page = p_links.m_page_number
+    current_page = p_links.page_number
     max_display_pages = 5
     half_range = max_display_pages // 2
 
@@ -37,18 +37,18 @@ class directory_session_controller:
     ]
     m_context = directory_callback_model(
       page=current_page,
-      mNetwork=p_links.m_network,
+      mNetwork=p_links.network,
       mTotalPage=total_pages,
       mStartPage=start_page,
       mEndPage=end_page,
       mPagination=list(range(start_page, end_page + 1)),
-      mUseSecureServiceNotice=p_links.m_site,
+      mUseSecureServiceNotice=p_links.site,
       mDirectoryCallbackLinks=indexed_items,
       mDirectoryCallbackPageNumberMaxReached=len(m_row_model_list) <= items_per_page - 2,
-      mContentType=p_links.m_content_type,
-      mIndex=p_links.m_index
+      mContentType=p_links.content_type,
+      mIndex=p_links.index
     )
-    if p_links.m_page_number > 1 and len(m_row_model_list) == 0:
+    if p_links.page_number > 1 and len(m_row_model_list) == 0:
       return m_context, False
     else:
       return m_context, True

@@ -19,7 +19,7 @@ class directory_model:
 
   @staticmethod
   async def __load_onion_links(p_directory_class_model):
-    m_documents, count, m_status = await mongo_controller.getInstance().get_url_status(p_directory_class_model.m_content_type, p_directory_class_model.m_index, p_directory_class_model.m_network, (p_directory_class_model.m_page_number - 1) * CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE, CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE)
+    m_documents, count, m_status = await mongo_controller.getInstance().get_url_status(p_directory_class_model.content_type, p_directory_class_model.index, p_directory_class_model.network, (p_directory_class_model.page_number - 1) * CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE, CONSTANTS.S_SETTINGS_DIRECTORY_LIST_MAX_SIZE)
     if m_status:
       m_documents = list(m_documents)
       utc_now = datetime.now(timezone.utc)
@@ -42,9 +42,9 @@ class directory_model:
           if isinstance(value, ObjectId):
             mDoc[key] = str(value)
 
-      return {"documents": m_documents, "count": count, "content_type_parameter": p_directory_class_model.m_content_type, "index_parameter": p_directory_class_model.m_index}
+      return {"documents": m_documents, "count": count, "content_type_parameter": p_directory_class_model.content_type, "index_parameter": p_directory_class_model.index}
     else:
-      return {"documents": [], "count": count, "content_type_parameter": p_directory_class_model.m_content_type, "index_parameter": p_directory_class_model.m_index}
+      return {"documents": [], "count": count, "content_type_parameter": p_directory_class_model.content_type, "index_parameter": p_directory_class_model.index}
 
   async def api_directory(self, param:directory_param_model):
     try:

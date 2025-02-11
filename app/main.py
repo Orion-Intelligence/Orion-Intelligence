@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from backend.middleware.middleware_setup import setup_middlewares
 from backend.management.managers.service_manager import service_manager
 from backend.services.mongo_manager.mongo_controller import mongo_controller
-from backend.services.session_manager.session_manager import session_manager
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router

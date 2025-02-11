@@ -20,7 +20,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         ]):
             return response
 
-        # Set different CSP for /admin route
         if request.url.path.startswith("/admin"):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
@@ -56,7 +55,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "report-uri /csp-report-endpoint/;"
             )
 
-        # Apply Strict-Transport-Security if not in debug mode
         if not self.DEBUG:
             response.headers["Strict-Transport-Security"] = (
                 "max-age=31536000; includeSubDomains; preload"
