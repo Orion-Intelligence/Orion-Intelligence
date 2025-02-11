@@ -1,8 +1,12 @@
-from datetime import datetime, timezone
+import asyncio
+import json
+from datetime import datetime
+from backend.constants.constant import CONSTANTS
+from backend.management.models.insight_model import GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, InsightData
+from backend.management.models.insight_model_comparison import InsightComparisonModel
 from backend.services.elastic_manager.elastic_controller import elastic_controller
-from backend.services.elastic_manager.elastic_enums import ELASTIC_KEYS
 from backend.services.redis_manager.redis_controller import redis_controller
-from backend.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS, REDIS_DEFAULT
+from backend.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
 
 class insight_job:
@@ -23,124 +27,85 @@ class insight_job:
       self.__m_session = insight_job()
 
   @staticmethod
-  async def __fetch_elastic_insight(grouped_results):
+  async def __fetch_elastic_insight():
     m_status, m_documents = await elastic_controller.get_instance().get_insight()
-
-    if m_status and isinstance(m_documents, list):
-      for doc in m_documents:
-        query_type = doc.get("query", {}).get(ELASTIC_KEYS.S_DOCUMENT, "unknown")
-        result = doc.get("result", None)
-        error = doc.get("error_manager", None)
-
-        if result:
-          result_body = result.body if hasattr(result, 'body') else result
-          aggregations = result_body.get("aggregations", {})
-
-          if aggregations:
-            for agg_name, agg_value in aggregations.items():
-              if agg_name in ["Most Recent", "Oldest Update"]:
-                epoch_value = agg_value.get("value", None)
-                epoch_value = epoch_value or 0
-                if epoch_value:
-                  date_value = datetime.fromtimestamp(epoch_value / 1000, timezone.utc).strftime("%d %b")
-                  grouped_results[query_type].append({agg_name: date_value})
-                else:
-                  grouped_results[query_type].append({agg_name: "0"})
-              elif agg_name == "Common Type":
-                buckets = agg_value.get("buckets", [])
-                if buckets:
-                  most_common_type = buckets[0].get("key", "general")
-                  grouped_results[query_type].append({agg_name: most_common_type})
-                else:
-                  grouped_results[query_type].append({agg_name: "general"})
-              else:
-                value = agg_value.get("value", None) or 0
-                grouped_results[query_type].append({agg_name: value})
-        elif error:
-          grouped_results[query_type].append({"error_manager": error})
-
-      for query_type, results in grouped_results.items():
-        document_count = next((item.get("Document Count") for item in results if "Document Count" in item), 0) or 1
-        for item in results:
-          for key, value in item.items():
-            if key.endswith("/Document") and document_count > 0:
-              item[key] = round(value / document_count, 4)
-
-    return grouped_results
+    return m_documents
 
   @staticmethod
-  async def generate_insight_comparison(insight_old, insight_new):
-    try:
-      old_data = eval(insight_old)
-      new_data = eval(insight_new)
+  def populate_comparison_model(insight_old, insight_new, daily: bool):
+    comparison = InsightComparisonModel()
 
-      key_order_generic = ['Document Count', 'Most Recent', 'Oldest Update', 'Updated 5 Days ago', 'Updated 9 Days ago', 'Average Score', 'URL/Document', 'Archive/Document', 'Email/Document', 'Phone/Document', 'Clearnet/Document', 'Common Type']
-      key_order_leak = ['Most Recent', 'Unique Base URLs', 'Dumps/Document', 'Updated 5 Days ago', 'Oldest Update', 'URL/Documents', 'Document Count', 'Updated 9 Days ago']
+    REVERSE_GENERIC_MAPPING = {v: k for k, v in GENERIC_AGGREGATION_MAPPING.items()}
+    REVERSE_LEAK_MAPPING = {v: k for k, v in LEAK_AGGREGATION_MAPPING.items()}
 
-      comparison_result = {"generic_model": [], "leak_model": []}
+    for section in ["general", "leak"]:
+      old_model = getattr(insight_old, section)
+      new_model = getattr(insight_new, section)
+      comparison_model = getattr(comparison, section)
+      mapping = REVERSE_GENERIC_MAPPING if section == "general" else REVERSE_LEAK_MAPPING
 
-      for key, key_order in zip(comparison_result.keys(), [key_order_generic, key_order_leak]):
-        old_entries = {list(e.keys())[0]: list(e.values())[0] for e in old_data.get(key, []) if isinstance(e, dict)}
-        new_entries = {list(e.keys())[0]: list(e.values())[0] for e in new_data.get(key, []) if isinstance(e, dict)}
+      for field in new_model.__dict__:
+        new_value = getattr(new_model, field)
+        old_value = getattr(old_model, field)
 
-        for metric in key_order:
-          new_value = round(new_entries.get(metric, 0), 5) if isinstance(new_entries.get(metric, 0), (int, float)) else new_entries.get(metric, 0)
-          old_value = round(old_entries.get(metric, 0), 5) if isinstance(old_entries.get(metric, 0), (int, float)) else old_entries.get(metric, 0)
+        if isinstance(new_value, datetime):
+          new_value = new_value.date().isoformat()
 
-          if isinstance(new_value, (int, float)) and isinstance(old_value, (int, float)):
-            if old_value == 0:
-              change = f"+{new_value:0.2f}%" if new_value > 0 else f"{new_value:0.2f}%"
-            else:
-              percentage_change = ((new_value - old_value) / abs(old_value)) * 100
-              sign = "+" if percentage_change > 0 else ""
-              change = f"{sign}{percentage_change:0.2f}%"
+        if isinstance(new_value, int) and isinstance(old_value, int):
+          if new_value == 0 and old_value == 0:
+            change_percentage = "0%"
+          elif old_value != 0:
+            change_percentage = f"{((new_value - old_value) / abs(old_value)) * 100:.2f}%"
+          elif old_value == 0 and new_value != 0:
+            change_percentage = "100%"
           else:
-            change = "-"
+            change_percentage = "-"
+        else:
+          change_percentage = "-"
 
-          comparison_result[key].append({metric: {"value": new_value, "change": change}})
+        metric = getattr(comparison_model, field)
+        metric.key = mapping.get(field, field)
+        metric.value = new_value
 
-      return str(comparison_result)
+        if isinstance(new_value, int):
+          if daily:
+            metric.change_daily = change_percentage
+          else:
+            metric.change_weekly = change_percentage
 
-    except Exception as e:
-      return f"Error processing insights: {str(e)}"
+    return comparison
 
   @staticmethod
   async def get_trending_insights():
-    insight_old = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_NEW_DAY, REDIS_DEFAULT.INSIGHT_DEFAULT, None])
-    print(insight_old)
+    insight_old = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_NEW_DAY, json.dumps(InsightData().model_dump()), None])
     insight = eval(insight_old)
 
     return insight
 
-  async def init_trending_insights_daily(self):
-    results_dict, grouped_results = {}, {"generic_model": [], "leak_model": []}
-
+  async def update_trending_insights(self, args):
     try:
-      results_dict = await self.__fetch_elastic_insight(grouped_results)
-    except Exception as _:
+      insight_new = await self.__fetch_elastic_insight()
+      insight_old = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [args, None, None])
+      if insight_old is None:
+        insight_old = InsightData()
+      else:
+        insight_old = InsightData.model_validate(json.loads(insight_old))
+
+      insight_comparison = self.populate_comparison_model(insight_old, insight_new, args == REDIS_KEYS.INSIGHT_NEW_DAY)
+      await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, insight_old.model_dump_json(), None])
+      await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_NEW_DAY, insight_new.model_dump_json(), None])
+      await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_STAT, insight_comparison.model_dump_json(), None])
+    except Exception as ex:
+      print(ex)
       return
 
-    insight_old = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_NEW_DAY, REDIS_DEFAULT.INSIGHT_DEFAULT, None])
+  async def update_trending_insights_daily(self, args):
+    while True:
+      await self.update_trending_insights(args)
+      await asyncio.sleep(CONSTANTS.S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT)
 
-    insight_new = str(results_dict)
-    trending_insight = await self.generate_insight_comparison(insight_old, insight_new)
 
-    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, insight_old, None])
-    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_NEW_DAY, insight_new, None])
-    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_STAT_DAY, trending_insight, None])
-
-  async def init_trending_insights_weekly(self):
-    results_dict, grouped_results = {}, {"generic_model": [], "leak_model": []}
-
-    try:
-      results_dict = await self.__fetch_elastic_insight(grouped_results)
-    except Exception as _:
-      return
-
-    insight_old = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_NEW_WEEK, REDIS_DEFAULT.INSIGHT_DEFAULT, None])
-    insight_new = str(results_dict)
-    trending_insight = await self.generate_insight_comparison(insight_old, insight_new)
-
-    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_OLD_WEEK, insight_old, None])
-    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_NEW_WEEK, insight_new, None])
-    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_STAT_WEEK, trending_insight, None])
+  async def update_trending_insights_weekly(self, args):
+    while True:
+      await self.update_trending_insights(args)
+      await asyncio.sleep(CONSTANTS.S_SETTINGS_INDEX_STATS_WEEKLY_TIMEOUT)

@@ -1,17 +1,18 @@
-import ast
+import json
+
+from backend.management.models.insight_model_comparison import InsightComparisonModel
 from backend.services.redis_manager.redis_controller import redis_controller
 from backend.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS, REDIS_DEFAULT
-from backend.view_managers.interactive.hompage_manager.shared_model.homepage_callback_model import homepage_callback_model
 
 
 class homepage_session_controller:
 
-  async def init_callback(self):
-    results_dict_day = ast.literal_eval(await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT_DAY, REDIS_DEFAULT.INSIGHT_STAT_DEFAULT, None]))
-    results_dict_week = ast.literal_eval(await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT_WEEK, REDIS_DEFAULT.INSIGHT_STAT_DEFAULT, None]))
-    combined_statistics = await self.__merge_statistics(results_dict_day, results_dict_week)
+  @staticmethod
+  async def init_callback():
+    results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, REDIS_DEFAULT.INSIGHT_STAT_DEFAULT, None])
+    results = InsightComparisonModel.model_validate(json.loads(results))
 
-    return homepage_callback_model(mHomepageCallbackStatistics=combined_statistics).model_dump()
+    return results
 
   @staticmethod
   async def __merge_statistics(daily_stats, weekly_stats):

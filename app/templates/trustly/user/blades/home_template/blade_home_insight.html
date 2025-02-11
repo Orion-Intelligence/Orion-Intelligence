@@ -1,33 +1,28 @@
 <div id="analytics">
-    {% for model_name, stats in vars.mHomepageCallbackStatistics.items() %}
+    {% for model_name, model in {'General Index': vars.general, 'Leaked Index': vars.leak}.items() %}
+        <div class="home-insight__analytics-header">{{ model_name }}</div>
         <div class="flex-container">
-            {% for item in stats %}
+            {% for field_name, metric in model.__dict__.items() %}
                 <div class="flex-item">
-                    {% if loop.first %}
-                        {% if model_name == "generic_model" %}
-                            <div class="home-insight__analytics-header">Generic Index</div>
-                        {% elif model_name == "leak_model" %}
-                            <div class="home-insight__analytics-header">Leaked Index</div>
-                        {% endif %}
-                    {% endif %}
                     <div class="home-insight__item-content">
                         <div class="home-insight__item-icon">
-                            <img src="{{ url_for('static', path='trustly/images/statistics/' + item.icon + '.svg') }}" alt="Brand Logo" width="32" height="32">
+                            <img src="{{ url_for('static', path='trustly/images/statistics/' + metric.key | lower | replace('/', '') + '.svg') }}"
+                                 alt="{{ metric.key }}" width="32" height="32">
                         </div>
                         <div class="home-insight__item-text">
                             <div class="home-insight__item-text-primary">
-                                {{ item.value }}
+                                {{ metric.value }}
                             </div>
                             <div class="home-insight__item-text-secondary">
-                                {{ item.name }}<br>
+                                {{ metric.key }}
                             </div>
                         </div>
                         <div class="home-insight__item-percentage">
-                            <div class="{% if item.daily_change[:1] == '+' %}text-success{% elif item.daily_change[:1] == '-' %}text-warning{% else %}item-percentage--text-body{% endif %}">
-                                {{ item.daily_change | default('-') }}
+                            <div class="{% if metric.change_daily[:1] == '+' %}text-success{% elif metric.change_daily[:1] == '-' %}text-warning{% else %}item-percentage--text-body{% endif %}">
+                                {{ metric.change_daily | default('-') }}
                             </div>
-                            <div class="{% if item.weekly_change[:1] == '+' %}text-success{% elif item.weekly_change[:1] == '-' %}text-warning{% else %}item-percentage--text-body{% endif %}">
-                                {{ item.weekly_change | default('-') }}
+                            <div class="{% if metric.change_weekly[:1] == '+' %}text-success{% elif metric.change_weekly[:1] == '-' %}text-warning{% else %}item-percentage--text-body{% endif %}">
+                                {{ metric.change_weekly | default('-') }}
                             </div>
                             <br><br>
                         </div>
@@ -35,8 +30,6 @@
                 </div>
             {% endfor %}
         </div>
-        {% if loop.first %}
-            <br> <br> <br>
-        {% endif %}
+        <br> <br> <br>
     {% endfor %}
 </div>

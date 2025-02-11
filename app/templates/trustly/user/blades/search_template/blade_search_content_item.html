@@ -32,86 +32,7 @@
           </label>
         </div>
       </div>
-
-      {% if 'leak' in mDoc.mUrlDisplayType %}
-        <div class="search-result__top-right-corner">
-          <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="close-{{ loop.index }}-0">
-          <label for="close-{{ loop.index }}-0">
-            <img src="{{ url_for('static', path='trustly/images/arrow_up.svg') }}" alt="" width="24" height="24" class="search-result__dropdown-close">
-          </label>
-        </div>
-
-        <div class="search-result__accordion search__result-tabs">
-          <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="section-{{ loop.index }}-1">
-          <label for="section-{{ loop.index }}-1" class="search-result__label">Leak </label>
-          <div class="search-result__tabs-content">
-            <p class="search-result__tabs--content-header">Important Content</p>
-            <p class="search-result__accordian-body">{{ mDoc.mSearchCallbackRelevantDocumentDescription }}</p>
-          </div>
-
-          {% if mDoc.mDumpLink|length > 0 %}
-            <div class="search-result-tabs-label"></div>
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="dumps-{{ loop.index }}-1">
-            <label for="dumps-{{ loop.index }}-1" class="search-result__label">Dumps</label>
-            <div class="search-result__tabs-content">
-              <div class="row mt-3 list-row">
-                {% for dump in mDoc.mDumpLink %}
-                  <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ dump }} </p>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if mDoc.mContactLink|length > 0 %}
-            <div class="search-result-tabs-label"></div>
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="contact-{{ loop.index }}-1">
-            <label for="contact-{{ loop.index }}-1" class="search-result__label">Contacts</label>
-            <div class="search-result__tabs-content">
-              <div class="row mt-3 list-row">
-                {% for contact in mDoc.mContactLink %}
-                  <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ contact }} </p>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if mDoc.mWebLink|length > 0 %}
-            <div class="search-result-tabs-label"></div>
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="weblink-{{ loop.index }}-1">
-            <label for="weblink-{{ loop.index }}-1" class="search-result__label">Web Links</label>
-            <div class="search-result__tabs-content">
-              <div class="row mt-3 list-row">
-                {% for weblink in mDoc.mWebLink %}
-                  <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ weblink }} </p>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if mDoc.mExtraLink|length > 0 %}
-            <div class="search-result-tabs-label"></div>
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="extralink-{{ loop.index }}-1">
-            <label for="extralink-{{ loop.index }}-1" class="search-result__label">Extra Links</label>
-            <div class="search-result__tabs-content">
-              <div class="row mt-3 list-row">
-                {% for extralink in mDoc.mExtraLink %}
-                  <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ extralink }} </p>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-
-          <div class="search-result-tabs-label"></div>
-          <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="content-{{ loop.index }}-1">
-          <label for="content-{{ loop.index }}-1" class="search-result__label">Content</label>
-          <div class="search-result__tabs-content">
-            <p class="search-result__tabs--content-header">Raw Content</p>
-            <p class="search-result__accordian-body">{{ mDoc.mContent }}</p>
-          </div>
-        </div>
-      {% else %}
-        <div class="accordion-container">
+      <div class="accordion-container">
           <div class="search-result__top-right-corner">
             <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="close-{{ loop.index }}-0">
             <label for="close-{{ loop.index }}-0">
@@ -120,7 +41,15 @@
           </div>
 
           <div class="search-result__accordion search__result-tabs">
+            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="content-{{ loop.index }}-1">
+            <label for="content-{{ loop.index }}-1" class="search-result__label">Content</label>
+            <div class="search-result__tabs-content">
+              <p class="search-result__tabs--content-header">Raw Content</p>
+              <p class="search-result__accordian-body">{{ mDoc.mSearchContent }}</p>
+            </div>
+
             {% if mDoc.mSection|length > 0 %}
+              <div class="search-result-tabs-label"></div>
               <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="section-{{ loop.index }}-1">
               <label for="section-{{ loop.index }}-1" class="search-result__label">Section </label>
               <div class="search-result__tabs-content">
@@ -216,19 +145,9 @@
                 </div>
               </div>
             {% endif %}
-
-            <div class="search-result-tabs-label"></div>
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="content-{{ loop.index }}-1">
-            <label for="content-{{ loop.index }}-1" class="search-result__label">Content</label>
-            <div class="search-result__tabs-content">
-              <p class="search-result__tabs--content-header">Raw Content</p>
-              <p class="search-result__accordian-body">{{ mDoc.mSearchContent }}</p>
-            </div>
           </div>
         </div>
-
-      {% endif %}
-    </div>
+      </div>
 
   {% endfor %}
 {% endif %}

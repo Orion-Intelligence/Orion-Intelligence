@@ -1,6 +1,5 @@
 from backend.management.jobs.insight_job import insight_job
-from backend.constants.constant import CONSTANTS
-from backend.management.managers.scheduler import RepeatedTimer
+from backend.services.redis_manager.redis_enums import REDIS_KEYS
 
 
 class cronjob_manager:
@@ -22,11 +21,9 @@ class cronjob_manager:
 
   @staticmethod
   async def __init_handles():
-      await insight_job.get_instance().init_trending_insights_daily()
-      await insight_job.get_instance().init_trending_insights_weekly()
+      await insight_job.get_instance().update_trending_insights_daily(REDIS_KEYS.INSIGHT_NEW_DAY)
+      await insight_job.get_instance().update_trending_insights_weekly(REDIS_KEYS.INSIGHT_NEW_WEEK)
 
   async def init(self):
     await self.__init_handles()
-    RepeatedTimer(CONSTANTS.S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT, insight_job.get_instance().init_trending_insights_daily, False)
-    RepeatedTimer(CONSTANTS.S_SETTINGS_INDEX_STATS_WEEKLY_TIMEOUT, insight_job.get_instance().init_trending_insights_weekly, False)
     # RepeatedTimer(CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT, elastic_controller.get_instance().purge_old_records, False)

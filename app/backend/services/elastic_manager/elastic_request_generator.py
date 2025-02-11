@@ -333,7 +333,7 @@ class elastic_request_generator:
           "size": 0,
           "aggs": {
             "Common Type": {
-              "terms": {"field": "m_content_type.keyword", "size": 10}
+              "terms": {"field": "m_content_type", "size": 1}
             }
           },
         },
