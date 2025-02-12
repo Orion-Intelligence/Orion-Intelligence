@@ -12,6 +12,9 @@ configure_env() {
 
   if [ "$PRODUCTION" = "1" ]; then
     cp nginx/nginx-prod.conf nginx/nginx.conf
+    find static/ -type f -name "*.html" -o -name "*.css" -o -name "*.js" -o -name "*.json" | while read file; do gzip -9 -c "$file" > "$file.gz"; done
+    find static/ -type f -name "*.html" -o -name "*.css" -o -name "*.js" -o -name "*.json" | while read file; do brotli -9 -c "$file" > "$file.br"; done
+
   elif [ "$PRODUCTION" = "0" ]; then
     cp nginx/nginx-dev.conf nginx/nginx.conf
   else

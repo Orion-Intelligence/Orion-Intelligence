@@ -135,7 +135,7 @@ services:
 
   nginx:
     container_name: trusted-web-nginx
-    image: nginx:latest
+    image: fholzer/nginx-brotli:latest
     ports:
       - "80:80"
       - "443:443"
@@ -154,6 +154,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    environment:
+      - ENABLE_BROTLI=1
 
   mongo:
     image: mongo:latest
