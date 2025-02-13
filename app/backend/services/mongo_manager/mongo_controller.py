@@ -4,6 +4,8 @@ from odmantic.exceptions import DuplicateKeyError
 from starlette_admin.contrib.odmantic import Admin, ModelView
 from backend.services.log_manager.log_controller import log
 from backend.services.mongo_manager.mongo_enums import (MONGO_CONNECTIONS)
+from backend.services.mongo_manager.shared_model.db_system import db_system
+from backend.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from backend.services.session_manager.session_enums import admin_mock, crawler_mock
 from backend.services.mongo_manager.shared_model.db_auth_models import (db_user_account, user_role)
 
@@ -66,4 +68,5 @@ class mongo_controller:
   def get_admin(self):
     admin = Admin(self.__engine, title="Admin Panel")
     admin.add_view(ModelView(db_user_account))
+    admin.add_view(ModelView(db_url_data_model))
     return admin
