@@ -1,9 +1,18 @@
 <div id="analytics">
-    {% for model_name, model in {'General Index': vars.general, 'Leaked Index': vars.leak}.items() %}
-        <div class="home-insight__analytics-header">{{ model_name }}</div>
+{% set models = {'General': vars.general, 'Leak': vars.leak} %}
+
+    {% for model_name, model in models.items() %}
         <div class="flex-container">
             {% for field_name, metric in model.__dict__.items() %}
                 <div class="flex-item">
+
+                    {% if loop.first %}
+                      {% if model_name == "General" %}
+                        <div class="home-insight__analytics-header">Generic Index</div>
+                      {% elif model_name == "Leak" %}
+                        <div class="home-insight__analytics-header">Leaked Index</div>
+                      {% endif %}
+                    {% endif %}
                     <div class="home-insight__item-content">
                         <div class="home-insight__item-icon">
                             <img src="{{ url_for('static', path='trustly/images/statistics/' + metric.key | lower | replace('/', '') + '.svg') }}"

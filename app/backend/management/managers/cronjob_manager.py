@@ -1,3 +1,5 @@
+import asyncio
+
 from backend.management.jobs.insight_job import insight_job
 from backend.services.redis_manager.redis_enums import REDIS_KEYS
 
@@ -21,8 +23,8 @@ class cronjob_manager:
 
   @staticmethod
   async def __init_handles():
-      await insight_job.get_instance().update_trending_insights_daily(REDIS_KEYS.INSIGHT_NEW_DAY)
-      await insight_job.get_instance().update_trending_insights_weekly(REDIS_KEYS.INSIGHT_NEW_WEEK)
+    asyncio.create_task(insight_job.get_instance().update_trending_insights_daily(REDIS_KEYS.INSIGHT_NEW_DAY))
+    asyncio.create_task(insight_job.get_instance().update_trending_insights_weekly(REDIS_KEYS.INSIGHT_NEW_WEEK))
 
   async def init(self):
     await self.__init_handles()

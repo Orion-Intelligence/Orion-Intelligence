@@ -1,7 +1,7 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-from backend.view_managers.server.maintenance_manager.maintenance_view_model import maintenance_view_model
+from backend.route_managers.server.maintenance_manager.maintenance_view_model import maintenance_view_model
 from backend.services.state_manager.states import APP_STATUS
 
 

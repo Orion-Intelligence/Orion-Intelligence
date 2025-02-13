@@ -8,16 +8,23 @@ from backend.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC
 
 class elastic_request_generator:
   @staticmethod
-  def on_search(p_query_model):
-    m_user_query, m_search_type, m_safe_search, m_page_number, m_network = (p_query_model.q.lower(), p_query_model.pSearchParamType, p_query_model.mSearchParamSafeSearch, p_query_model.mSearchParamPage, p_query_model.mNetwork )
+  def on_search_leakdata(p_query_model):
+    m_user_query = p_query_model.q.lower() + "*"
+    m_safe_search = p_query_model.mSearchParamSafeSearch
+    m_page_number = p_query_model.mSearchParamPage
+    m_network = p_query_model.mNetwork
     must_clauses = []
-    if m_search_type != "all":
-      must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-
     must_not_clause = []
+
+    # Safe search filtering
     if m_safe_search == "True":
       must_not_clause.append({"term": {"m_content_type": "adult"}})
 
+    # Network filtering
+    if m_network and m_network != "all":
+      must_clauses.append({"term": {"m_network": m_network}})
+
+    # Query statement construction
     query_statement = {
       "min_score": 0,
       "query": {
@@ -39,6 +46,7 @@ class elastic_request_generator:
                     ],
                     "default_operator": "OR",
                     "lenient": True,
+                    "analyze_wildcard": True,
                   }
                 }
               ],
@@ -66,116 +74,29 @@ class elastic_request_generator:
           "text": m_user_query,
           "term": {
             "field": "m_important_content",
-            "min_word_length": 4,
-            "max_term_freq": 0.01,
+            "min_word_length": 3,
+            "max_term_freq": 0.05,
             "sort": "score",
-            "string_distance": "internal",
+            "string_distance": "levenshtein",
           },
         },
         "content_suggestion": {
           "text": m_user_query,
           "term": {
             "field": "m_content",
-            "min_word_length": 4,
-            "max_term_freq": 0.01,
+            "min_word_length": 3,
+            "max_term_freq": 0.05,
             "sort": "score",
-            "string_distance": "internal",
+            "string_distance": "levenshtein",
           },
         },
       },
-      "from": (m_page_number - 1)
-              * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC,
+      "from": (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC,
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
     }
-    m_user_query = m_user_query.lower()
-    if m_search_type != "all":
-      must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-    if m_network != "" and m_network != "all":
-      must_clauses.append({"term": {"m_network": m_network}})
-    must_not_clause = []
-    if m_safe_search == "True":
-      must_not_clause.append({"term": {"m_content_type": "adult"}})
 
-    if m_search_type == "monitor":
-      m_query_statement = {
-        "min_score": 0,
-        "query": {
-          "function_score": {
-            "query": {
-              "bool": {
-                "must": [],
-                "should": [
-                  {
-                    "query_string": {
-                      "query": m_user_query,
-                      "fields": [
-                        "m_title^3",
-                        "m_meta_description^2",
-                        "m_content^1.5",
-                        "m_important_content^1.5",
-                        "m_content_tokens^2",
-                        "m_keywords^1.8",
-                      ],
-                      "default_operator": "OR",
-                      "lenient": True,
-                    }
-                  }
-                ],
-                "must_not": must_not_clause,
-              }
-            },
-            "functions": [
-              {
-                "gauss": {
-                  "m_update_date": {
-                    "origin": "now",
-                    "scale": "30d",
-                    "offset": "10d",
-                    "decay": 0.5,
-                  }
-                },
-                "weight": 2,
-              }
-            ],
-            "boost_mode": "sum",
-          }
-        },
-        "from": (m_page_number - 1)
-                * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC,
-        "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-        "track_total_hits": True,
-      }
-      return ELASTIC_INDEX.S_LEAK_INDEX, m_query_statement
-    else:
-      query_statement["query"]["function_score"]["query"]["bool"][
-        "should"
-      ].append(
-        {
-          "bool": {
-            "must": must_clauses,
-            "should": [
-              {
-                "query_string": {
-                  "query": m_user_query,
-                  "fields": [
-                    "m_title^3",
-                    "m_meta_description^2",
-                    "m_content^1.5",
-                    "m_important_content^1.5",
-                    "m_content_tokens^2",
-                    "m_keywords^1.8",
-                  ],
-                  "default_operator": "OR",
-                  "lenient": True,
-                }
-              }
-            ],
-            "must_not": must_not_clause,
-          }
-        }
-      )
-      return [ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_INDEX.S_GENERIC_INDEX], query_statement
+    return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
   @staticmethod
   def clear_expire_index():

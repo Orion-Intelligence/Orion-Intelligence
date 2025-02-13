@@ -3,6 +3,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import RedirectResponse
 
 from backend.helper_manager.env_handler import env_handler
+from backend.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from backend.services.session_manager.session_manager import session_manager
 
 
@@ -18,11 +19,10 @@ class user_auth_middleware(BaseHTTPMiddleware):
                     return RedirectResponse(url="/login", status_code=303)
 
                 user = await session_manager.get_instance().get_current_user(token)
-
-                if not isinstance(user, dict):  # Ensure 'user' is a dictionary
+                if not isinstance(user, db_user_account):
                     return RedirectResponse(url="/login", status_code=303)
 
-                request.state.admin_vars["username"] = user.get("username")
+                request.state.admin_vars["username"] = user.username
 
                 if request.url.path.startswith("/admin") and user.get("role") != "admin":
                     return RedirectResponse(url="/login", status_code=303)

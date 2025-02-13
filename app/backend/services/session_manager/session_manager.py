@@ -6,7 +6,7 @@ from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 from backend.services.mongo_manager.mongo_controller import mongo_controller
 from backend.constants.constant import CONSTANTS
-from backend.services.session_manager.shared_model.auth_models import user_role
+from backend.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account
 
 
 class session_manager:
@@ -26,9 +26,9 @@ class session_manager:
         if session_manager.__instance is not None:
             raise Exception("This class is a singleton!")
         session_manager.__instance = self
+        self._engine = mongo_controller.getInstance().get_engine()
 
-    @staticmethod
-    async def get_current_user(request_or_token: Request | str):
+    async def get_current_user(self, request_or_token: Request | str):
         token = None
         login_redirect_url = CONSTANTS.S_TEMPLATE_LOGIN_PATH
 
@@ -68,8 +68,7 @@ class session_manager:
 
             if not username:
                 return redirect_to_login()
-
-            user = await mongo_controller.getInstance().get_user(username)
+            user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 return redirect_to_login()
 
@@ -87,10 +86,10 @@ class session_manager:
         if not user:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
 
-        if isinstance(user, RedirectResponse):  # Check if it's a redirect response
+        if isinstance(user, RedirectResponse):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
 
-        role = user.get("role")
+        role = user.role
         try:
             _ = user_role(role)
         except ValueError:

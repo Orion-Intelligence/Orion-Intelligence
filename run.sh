@@ -22,6 +22,21 @@ configure_env() {
   fi
 }
 
+create_parser_zip() {
+    PARSER_DIR="app/static/trustly/.well-known/parser"
+    OUTPUT_DIR="app/static/trustly/.well-known"
+    ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
+    if [ -d "$PARSER_DIR" ]; then
+        echo "Creating $ZIP_FILE..."
+        [ -f "$ZIP_FILE" ] && rm -f "$ZIP_FILE"
+        (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .)
+        echo "$ZIP_FILE created successfully in $OUTPUT_DIR."
+    else
+        echo "Directory $PARSER_DIR does not exist."
+    fi
+}
+
+
 use_compose_file() {
   if [[ "$1" == "production" ]]; then
     COMPOSE_FILE="docker-compose-production.yml"
@@ -31,6 +46,7 @@ use_compose_file() {
 }
 
 stop_docker
+create_parser_zip
 if [ "$1" == "stop" ]; then
     echo "Crawler service stopped"
 else
@@ -49,7 +65,6 @@ else
     fi
 
     docker network create --driver bridge shared_bridge || true
-    docker compose -p $PROJECT_NAME -f $COMPOSE_FILE up -d
-
+    docker compose -p $PROJECT_NAME -f $COMPOSE_FILE up
     echo "Server started"
 fi

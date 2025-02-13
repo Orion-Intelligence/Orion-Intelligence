@@ -52,7 +52,7 @@ class insight_job:
           new_value = new_value.date().isoformat()
 
         if isinstance(new_value, int) and isinstance(old_value, int):
-          if new_value == 0 and old_value == 0:
+          if (new_value < 0 and old_value == 0) or (new_value ==  old_value):
             change_percentage = "0%"
           elif old_value != 0:
             change_percentage = f"{((new_value - old_value) / abs(old_value)) * 100:.2f}%"

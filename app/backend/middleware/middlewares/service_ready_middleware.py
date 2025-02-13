@@ -3,7 +3,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from backend.management.managers.service_manager import service_manager
-from backend.view_managers.server.maintenance_manager.maintenance_view_model import maintenance_view_model
+from backend.route_managers.server.maintenance_manager.maintenance_view_model import maintenance_view_model
 
 class service_ready_middleware(BaseHTTPMiddleware):
     def __init__(self, app):

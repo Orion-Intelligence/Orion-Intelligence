@@ -3,6 +3,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from backend.services.mongo_manager.mongo_controller import mongo_controller
 from backend.constants.constant import CONSTANTS
+from backend.services.mongo_manager.shared_model.db_auth_models import db_user_account
 
 
 class auth_manager:
@@ -22,6 +23,7 @@ class auth_manager:
         if auth_manager.__instance is not None:
             raise Exception("This class is a singleton!")
         auth_manager.__instance = self
+        self._engine = mongo_controller.getInstance().get_engine()
 
     @staticmethod
     def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -30,9 +32,8 @@ class auth_manager:
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
-    @staticmethod
-    async def authenticate_user(username: str, password: str):
-      user = await mongo_controller.getInstance().get_user(username)
-      if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user["password"]):
+    async def authenticate_user(self, username: str, password: str):
+      user = await self._engine.find_one(db_user_account, db_user_account.username == username)
+      if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
         return None
       return user

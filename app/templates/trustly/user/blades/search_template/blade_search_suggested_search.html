@@ -9,8 +9,8 @@
       {% endif %}
       {% if vars.mSearchCallbackQueryError|length > 0 and vars.mSearchCallbackRelevantSearchType != 'persona' %}
         <h6 class="suggested__search-toolbar-error">
-          <span class="suggested__search-toolbar-error-header">Did you mean: </span><span class="suggested__search-toolbar-error-info"><a class="gc-clear-selection suggested__search-toolbar-error-info-ref" href="?q={{ vars.mSearchCallbackQueryErrorURL }}&pSearchParamType={{ vars.mSearchCallbackRelevantSearchType }}&mSearchParamSafeSearch={{ vars.mSearchCallbackSaveSearch }}">{% autoescape off %}
-          &nbsp;{{ vars.mSearchCallbackQueryError }}{% endautoescape %}&nbsp;?</a></span></h6>
+          <span class="suggested__search-toolbar-error-header">Did you mean: </span><span class="suggested__search-toolbar-error-info"><a class="gc-clear-selection suggested__search-toolbar-error-info-ref" href="?q={{ vars.mSearchCallbackQueryErrorURL }}&pSearchParamType={{ vars.mSearchCallbackRelevantSearchType }}&mSearchParamSafeSearch={{ vars.mSearchCallbackSaveSearch }}">
+          &nbsp;<b>{{ vars.mSearchCallbackQueryError }}</b>&nbsp;?</a></span></h6>
       {% endif %}
     </div>
   </div>

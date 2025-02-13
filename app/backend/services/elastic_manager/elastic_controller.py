@@ -6,8 +6,8 @@ from backend.management.models.insight_model import InsightData, GENERIC_AGGREGA
 from backend.services.log_manager.log_controller import log
 from backend.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from backend.services.elastic_manager.elastic_request_generator import elastic_request_generator
-from backend.view_managers.interactive.search_manager.search_data_model.search_api_param_model import search_api_param_model
-from backend.view_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
+from backend.route_managers.interactive.search_manager.search_data_model.search_api_param_model import search_api_param_model
+from backend.route_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
 
 
 class elastic_controller:
@@ -51,8 +51,9 @@ class elastic_controller:
 
     async def search_query_api(self, p_data: search_api_param_model):
         try:
-            document, data_filter = self.__m_elastic_request_generator.on_search(p_data)
+            document, data_filter = self.__m_elastic_request_generator.on_search_leakdata(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)
+            print(m_data)
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC 3 : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
@@ -60,7 +61,7 @@ class elastic_controller:
 
     async def search_query(self, p_data:search_param_model):
         try:
-            document, data_filter = self.__m_elastic_request_generator.on_search(p_data)
+            document, data_filter = self.__m_elastic_request_generator.on_search_leakdata(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)
             return True, m_data
         except Exception as ex:
@@ -94,7 +95,7 @@ class elastic_controller:
                 key = list(key.keys())[0]
 
                 if key in ["Most Recent", "Oldest Update"] and value:
-                    value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).date().isoformat()
+                    value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
                 if isinstance(value, float):
                     value = round(value, 2)
 

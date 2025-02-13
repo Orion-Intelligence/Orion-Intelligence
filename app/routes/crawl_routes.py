@@ -1,25 +1,28 @@
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
-from backend.services.session_manager.shared_model.auth_models import user_role
-from backend.view_managers.server.crawl_controller.crawl_controller import crawl_controller
-from backend.view_managers.server.crawl_controller.crawl_enums import CRAWL_COMMANDS
-from configs.app_dependency import role_required, get_current_role
+from backend.route_managers.server.crawl_controller.class_model.general_model import GeneralDataModel
+from backend.services.mongo_manager.shared_model.db_auth_models import user_role
+from backend.route_managers.server.crawl_controller.class_model.leak_model import LeakDataModel
+from backend.route_managers.server.crawl_controller.crawl_controller import crawl_controller
+from configs.app_dependency import role_required
 
 crawl_routes = APIRouter()
 
-@crawl_routes.get("/feeder/unique", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+@crawl_routes.get("/api/feeder/unique", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser(request: Request):
-    return await crawl_controller.getInstance().invoke_trigger(CRAWL_COMMANDS.M_FETCH_FEEDER_UNIQUE, request)
+  return await crawl_controller.getInstance().invoke_fetch_parser()
 
-@crawl_routes.get("/feeder", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+@crawl_routes.get("/api/parser", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser(request: Request):
-    return await crawl_controller.getInstance().invoke_trigger(CRAWL_COMMANDS.M_FETCH_FEEDER, request)
+    return await crawl_controller.getInstance().invoke_fetch_feeder()
 
-@crawl_routes.get("/parser", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
-async def parser(request: Request):
-    return await crawl_controller.getInstance().invoke_trigger(CRAWL_COMMANDS.M_FETCH_PARSER, request)
+@crawl_routes.post("/api/index/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def get_leak_data(request: Request):
+  body = await request.json()
+  return await crawl_controller.getInstance().invoke_leak_index(LeakDataModel(**body))
 
-@crawl_routes.post("/crawl_index", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+@crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser(request: Request):
-    return await crawl_controller.getInstance().invoke_trigger(CRAWL_COMMANDS.M_INIT, request)
+  body = await request.json()
+  return await crawl_controller.getInstance().invoke_generic_index(GeneralDataModel(**body))

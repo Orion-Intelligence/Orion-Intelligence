@@ -26,7 +26,7 @@ async def token(login_request: login_token_model):
 
   access_token_expires = timedelta(minutes=30)
   access_token = auth_manager.get_instance().create_access_token(
-    data={"sub": user["username"]}, expires_delta=access_token_expires
+    data={"sub": user.username}, expires_delta=access_token_expires
   )
 
   return JSONResponse({"access_token": access_token, "token_type": "bearer"})
@@ -42,7 +42,7 @@ async def login_submit(request: Request, username: str = Form(...), password: st
     return templates.TemplateResponse(CONSTANTS.S_TEMPLATE_LOGIN_PATH, {"request": request})
 
   access_token_expires = timedelta(minutes=30)
-  access_token = auth_manager.get_instance().create_access_token(data={"sub": user["username"]}, expires_delta=access_token_expires)
+  access_token = auth_manager.get_instance().create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
 
   response = RedirectResponse(url="/", status_code=303)
   response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
