@@ -12,11 +12,11 @@ default_routes = APIRouter()
 
 @default_routes.get("/")
 async def parser(request: Request):
-    return await homepage_view_model.getInstance().invoke_trigger(request)
+    return await homepage_view_model.getInstance().invoke_UI(request)
 
 @default_routes.get("/directory")
 async def parser(request: Request, param: directory_param_model = Depends()):
-    return await directory_view_model.getInstance().invoke_trigger(request, param)
+    return await directory_view_model.getInstance().invoke_UI(request, param)
 
 @default_routes.get("/search")
 async def parser(request: Request, param: search_param_model = Depends()):

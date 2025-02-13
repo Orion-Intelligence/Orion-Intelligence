@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from backend.constants.constant import CONSTANTS
 from backend.constants.strings import GENERAL_STRINGS, SEARCH_STRINGS
 from backend.helper_manager.helper_controller import helper_controller
-from backend.route_managers.interactive.search_manager.local_helper_methods.local_helper_methods import local_helper_methods
+from backend.route_managers.interactive.search_manager.local_helper_methods.search_helper_methods import search_helper_methods
 from backend.route_managers.interactive.search_manager.search_data_model.query_model import query_model
 from backend.route_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK
 from backend.helper_manager.env_handler import env_handler
@@ -13,7 +13,7 @@ from backend.helper_manager.env_handler import env_handler
 class static_parser:
 
   def __init__(self):
-    self.__local_helper_methods = local_helper_methods()
+    self.__local_helper_methods = search_helper_methods()
 
   def __generate_url_context(self, p_document, p_tokenized_query, p_search_model):
     m_title = p_document.get(SEARCH_DOCUMENT_CALLBACK.M_TITLE, "")

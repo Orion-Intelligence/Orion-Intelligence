@@ -11,10 +11,10 @@
         </tr>
         </thead>
         <tbody>
+        {% set start_id = ((vars.page - 1) * vars.mItemPerPage) + 1 %}
         {% for mDoc in vars.mDirectoryCallbackLinks %}
             <tr>
-                <td data-label="ID">{{ mDoc.index }}</td>
-
+                <td data-label="ID">{{ start_id - loop.index0  }}</td>
                 {% if mDoc.mContentType in ['i', 'a', 'adult'] %}
                     <td data-label="Onion Service">
                         <a href="/restricted" class="directory-list__table-url text-decoration-none text-reset">{{ mDoc.url[:20] }}</a>...

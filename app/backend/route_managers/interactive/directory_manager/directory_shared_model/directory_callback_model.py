@@ -1,24 +1,30 @@
+from datetime import datetime
 from pydantic import BaseModel
-from typing import List, Union
+from typing import List, Optional
+from backend.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 
 class directory_callback_link(BaseModel):
-    _id: str
     url: str
     content_type: List[str]
-    index: Union[str, int]
-    leak_status_date: int
-    network_type: str
-    url_status_date: int
+    index_type: List[str]
+    leak_model_last_update: Optional[datetime]
+    geneic_model_last_update: Optional[datetime]
+    network_type: Optional[str]
+
+    @classmethod
+    def from_odmantic(cls, odmantic_doc: db_url_data_model):
+        return cls.model_validate(odmantic_doc.model_dump())
 
 class directory_callback_model(BaseModel):
     page: int
     mNetwork: str
+    mContentType: str
+    mIndex: str
+    mItemPerPage: int
+
     mTotalPage: int
     mStartPage: int
     mEndPage: int
     mPagination: List[int]
-    mUseSecureServiceNotice: str
     mDirectoryCallbackLinks: List[directory_callback_link]
     mDirectoryCallbackPageNumberMaxReached: bool
-    mContentType: str
-    mIndex: str

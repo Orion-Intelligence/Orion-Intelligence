@@ -1,4 +1,5 @@
 from starlette.requests import Request
+from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
 from backend.constants.constant import CONSTANTS
@@ -30,9 +31,9 @@ class directory_view_model:
   async def api_invoke_trigger(self, param: directory_param_model):
     return await self.__m_directory_model.api_directory(param)
 
-  async def invoke_trigger(self, request: Request, param: directory_param_model):
+  async def invoke_UI(self, request: Request, param: directory_param_model):
     m_response, m_status = await self.__m_directory_model.init_page(param)
     if m_status:
       return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_DIRECTORY_WEBSITE_PATH, helper_controller.create_template_context(request, m_response))
     else:
-      return self.templates.TemplateResponse('/directory/?page=1', helper_controller.create_template_context(request, m_response))
+      return RedirectResponse(url="/directory", status_code=302)

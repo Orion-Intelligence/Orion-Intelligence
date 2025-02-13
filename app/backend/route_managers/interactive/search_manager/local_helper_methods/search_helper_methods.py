@@ -1,7 +1,7 @@
 import re
 
 
-class local_helper_methods:
+class search_helper_methods:
 
   @staticmethod
   def clip_sections(sections, words_to_highlight, max_width, fallback_text):
