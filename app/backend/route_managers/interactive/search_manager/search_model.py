@@ -1,3 +1,5 @@
+from backend.route_managers.interactive.search_manager.parsers.dynamic_parser import dynamic_parser
+from backend.route_managers.interactive.search_manager.parsers.static_parser import static_parser
 from backend.route_managers.interactive.search_manager.search_data_model import search_dynamic_param_model
 from backend.route_managers.interactive.search_manager.search_data_model.search_api_callback_model import search_api_callback_model
 from backend.route_managers.interactive.search_manager.search_data_model.search_api_param_model import search_api_param_model
@@ -7,7 +9,6 @@ from backend.services.elastic_manager.elastic_controller import elastic_controll
 from backend.constants.constant import CONSTANTS
 from backend.constants.strings import GENERAL_STRINGS
 from backend.route_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK
-from backend.route_managers.interactive.search_manager.search_session_controller import search_session_controller
 from backend.route_managers.interactive.search_manager.spell_checker import spell_checker
 from backend.route_managers.server.external_request_manager.external_request_controller import external_request_controller
 
@@ -20,8 +21,9 @@ class search_model:
 
   # Initializations
   def __init__(self):
-    self.__m_session = search_session_controller()
     self.__m_spell_checker = spell_checker()
+    self.__static_parser = static_parser()
+    self.__dynamic_parser = dynamic_parser()
 
   @staticmethod
   async def __parse_filtered_documents(p_paged_documents):
@@ -75,7 +77,7 @@ class search_model:
         m_status, m_documents = result
         m_parsed_documents, m_suggestions_content, total_pages = await self.__parse_filtered_documents(m_documents)
         m_query_model.set_total_documents(len(m_parsed_documents))
-        m_context, m_status = self.__m_session.init_static_callback(m_parsed_documents, m_query_model, total_pages)
+        m_context, m_status = self.__static_parser.init_callback(m_parsed_documents, m_query_model, total_pages)
         m_context[SEARCH_CALLBACK.M_QUERY_ERROR_URL], m_context[SEARCH_CALLBACK.M_QUERY_ERROR] = self.__m_spell_checker.generate_suggestions(m_query_model.m_search_param_model.q, m_suggestions_content)
 
         return m_status, m_context
