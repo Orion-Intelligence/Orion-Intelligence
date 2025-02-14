@@ -41,7 +41,7 @@
   border-radius: 100px;
   background: #FCFCFC0D;
   font-size: 12px;
-  width: 50px ;
+  width: 50px;
   font-family: Roboto, sans-serif;;
 }
 
@@ -49,24 +49,26 @@
   background: #FCFCFC15;
 }
 
-.search-content__webpages-description-category-enforced{
+.search-content__webpages-description-category-enforced {
   margin-right: 5px;
 }
 
 .search-result__content-webpages-container {
-  width: 100%;
-  max-width: 40vw;
-  margin-left: 85px;
-  padding: 30px;
+  max-width: 650px;
+  padding: 24px;
   margin-bottom: 30px;
+  background: rgba(23, 64, 105, 1);
+  border-radius: 16px;
+
 }
+
 
 .search-result__content-webpages {
 
   box-shadow: none;
   cursor: pointer;
   max-width: 40vw;
-  padding: 10px 0;
+  padding: 16px 0;
   background: none;
   overflow-wrap: break-word;
 }
@@ -101,6 +103,7 @@
   font-size: 12px;
   line-height: 20px;
   font-family: arial, sans-serif;
+  margin-bottom: 16px;
 }
 
 .search-content__webpages-divider {
@@ -119,7 +122,11 @@
   justify-content: space-evenly;
   width: 100%;
   font-weight: 400;
+  overflow: hidden;
   font-size: 14px;
+  margin-bottom: 16px;
+  height: 60px;
+  text-overflow: ellipsis;
 }
 
 .search-result__circle-status {
@@ -127,6 +134,7 @@
   height: 12px;
   top: 53px;
   left: 9px;
+  margin-right: 4px;
 }
 
 .search-result__url-date {
@@ -215,7 +223,7 @@
   justify-content: flex-end;
   position: absolute;
   margin-bottom: 10px;
-  right: 20px;
+  right: 35px;
   margin-top: 12px;
   cursor: pointer;
 }
@@ -226,12 +234,11 @@
     margin: 12px 0 0;
   }
 
-  .search-result__content-webpages-container {
-    margin-left: 10px;
-    padding: 10px;
-    max-width: 100vw;
-  }
-
+  /*.search-result__content-webpages-container {*/
+  /*  margin-left: 10px;*/
+  /*  padding: 10px;*/
+  /*  max-width: 100vw;*/
+  /*}*/
   .search-result__dropdown-close {
     width: 24px;
     height: 24px;
@@ -268,4 +275,35 @@
     top: 63px;
     left: 10px;
   }
+}
+
+.search_container .search .search__results-main {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.search_container .search .search__results {
+  overflow-y: scroll;
+  height: 50vh;
+  margin-left: 0;
+  margin-right: 0;
+  justify-content: space-around;
+}
+
+.search-content__webpages-data {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.search-content__webpages-data p {
+  color: rgba(208, 208, 208, 1);
+  font-size: 10px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.search-content__webpages-data h6 {
+  color: rgba(255, 255, 255, 1);
+  font-size: 12px;
+  font-weight: 500;
 }

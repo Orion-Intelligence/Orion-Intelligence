@@ -1,13 +1,13 @@
-{% if vars.mDynamicParserStatus == "false" or vars.mSearchCallbackRelevantDocument|length == 0 %}
+{% if mDynamicParserStatus == "false" or mSearchCallbackRelevantDocument | length == 0 %}
 <form method="GET" action="" class="search-persona__no-suggestion">
   <div class="row align-items-center">
     <div class="col">
       <p class="search-persona__no-suggestion-header mb-0">
-        {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument|length == 0 %}
-          no record found for - <strong>{{ mSearchCallbackQuery }}</strong> press try again if you want to fetch the data again
+        {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument | length == 0 %}
+          No record found for - <strong>{{ mSearchCallbackQuery }}</strong>. Press "Try Again" if you want to fetch the data again.
           <input type="hidden" name="mDynamicCrawlTrigger" value="1">
         {% else %}
-          we are fetching results for - <strong>{{ mSearchCallbackQuery }}</strong> - please wait for few seconds and press sync again.
+          We are fetching results for - <strong>{{ mSearchCallbackQuery }}</strong>. Please wait for a few seconds and press "Sync Again."
         {% endif %}
       </p>
     </div>
@@ -17,11 +17,11 @@
       <input type="hidden" name="mUsername" value="{{ mUsernameQuery }}">
       <input type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
       <input type="hidden" name="pSearchParamType" value="{{ mSearchCallbackRelevantSearchType }}">
-        {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument|length == 0 %}
-          <button type="submit" class="search__reload-button">try again</button>
-        {% else %}
-          <button type="submit" class="search__reload-button">sync again</button>
-        {% endif %}
+      {% if mDynamicParserStatus != "false" and mSearchCallbackRelevantDocument | length == 0 %}
+        <button type="submit" class="search__reload-button">Try Again</button>
+      {% else %}
+        <button type="submit" class="search__reload-button">Sync Again</button>
+      {% endif %}
     </div>
   </div>
 </form>
@@ -34,9 +34,9 @@
       <div class="card-body searchbar__search-container-persona-body">
         <table class="table searchbar__search-card-table-persona searchbar__search-container-persona-border-color text-white">
           <tbody>
-          {% for key, value in mSearchCallbackRelevantDocument.items %}
-            <tr class=" {% if loop.index == 1 %}border-0{% endif %}">
-              <td class="searchbar__search-container-persona-border-color">{{ key|title }}</td>
+          {% for key, value in mSearchCallbackRelevantDocument.items() %}
+            <tr class="{% if loop.index == 1 %}border-0{% endif %}">
+              <td class="searchbar__search-container-persona-border-color">{{ key.title() }}</td>
               <td class="searchbar__search-container-persona-border searchbar__search-container-persona-border-color">
                 {% if value %}
                   {% for item in value %}

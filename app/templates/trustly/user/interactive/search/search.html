@@ -1,36 +1,52 @@
-{% block content %}
-    <!-- Local Imports -->
-    {% include 'trustly/user/interactive/search/local_imports.html' %}
-    {% include 'trustly/user/blades/blades_shared_initialization.html' %}
+<!-- local imports -->
+{% include 'trustly/user/interactive/search/local_imports.html' %}
+{% include 'trustly/user/blades/blades_shared_initialization.html' %}
 
-    <div id="top"></div>
+<html lang="en">
+<body class="body">
+<div id="top"></div>
+{#{{ unique_urls }}#}
+<div class="row search__side-nav-container-main" id="search__side-nav-container-main">
+  <label for="search__nav-menu-checkbox" class="search__nav-menu-label">
+    <img class="search__nav-menu-icon" src="
+            {{ url_for('static', path='trustly/images/seach_nav_menu_icon.svg') }}" alt="nav-menu"/>
+  </label>
+  <input type="radio" name="menu-input" class="search__nav-menu-checkbox" id="search__nav-menu-checkbox">
+  <div class="search__side-nav-container">
 
-    <div class="search_container">
-        <div class="search">
-            <!-- Top Bar -->
-            {% include 'trustly/user/blades/search_template/blade_search_header.html' %}
-            {% include 'trustly/user/blades/search_template/blade_search_suggested_search.html' %}
+    {% include 'trustly/user/blades/search_template/blade_search_side_bar.html' %}
+  </div>
+  <div class="search_container">
+    <div class="search">
 
-            <div class="row">
-                <div class="search__results">
-                    {% include 'trustly/user/blades/search_template/blade_search_content.html' %}
-                    {% if vars.mSearchCallbackRelevantDocument|length == 0 %}
-                        {% if vars.mSearchCallbackRelevantSearchType != 'persona' %}
-                            {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
-                        {% endif %}
-                    {% endif %}
-                </div>
-                <div class="search__content__right">
-                    {% if vars.mSearchCallbackRelevantDocument|length != 0 %}
-                        {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Pagination -->
-            {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
+      <!-- top bar -->
+      {% include 'trustly/user/blades/search_template/blade_search_header.html' %}
+      {% include 'trustly/user/blades/search_template/blade_search_safe_search.html' %}
+      <div class="d-flex search__results-main">
+        <div class="search__results row">
+          {% include 'trustly/user/blades/search_template/blade_search_content.html' %}
+          {% if vars.mSearchCallbackRelevantDocument|length == 0 %}
+            {% if vars.mSearchCallbackRelevantSearchType != 'persona' %}
+              {% include 'trustly/user/blades/search_template/blade_search_no_suggestion.html' %}
+            {% endif %}
+          {% endif %}
         </div>
-    </div>
+        {#        <div class="search__content__right">#}
+        {#          {% if mSearchCallbackRelevantDocument|length != 0 %}#}
+        {#            {% include 'trustly/user/blades/search_template/blade_search_insight.html' %}#}
+        {#          {% endif %}#}
+        {#        </div>#}
+      </div>
+      <!-- pagination -->
+      <div class="search__pagination-div">
+        {% include 'trustly/user/blades/search_template/blade_search_pagination.html' %}
+      </div>
 
-    {% include 'trustly/user/blades/shared_blades/blade_footer.html' %}
-{% endblock %}
+    </div>
+  </div>
+</div>
+{#{% include 'trustly/user/blades/shared_blades/blade_footer.html' %}#}
+
+</body>
+
+</html>

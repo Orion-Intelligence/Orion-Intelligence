@@ -8,22 +8,22 @@
       <div class="search__header-network-toggle-group">
         <div>Network</div>
         <div class="search__header-network-toggle-container">
-          <input type="radio" id="all-toggle" name="mNetwork" value="all" class="search__header-network-toggle-input" {% if vars.mNetwork == "all" %}checked{% endif %}>
+          <input type="radio" id="all-toggle" name="mNetwork" value="all" class="search__header-network-toggle-input" {% if mNetwork == "all" %}checked{% endif %}>
           <label for="all-toggle" class="search__header-network-toggle-label"></label>
           <p class="search__header-network-toggle-p">All</p>
         </div>
         <div class="search__header-network-toggle-container">
-          <input type="radio" id="onion-toggle" name="mNetwork" value="onion" class="search__header-network-toggle-input" {% if vars.mNetwork == "onion" %}checked{% endif %}>
+          <input type="radio" id="onion-toggle" name="mNetwork" value="onion" class="search__header-network-toggle-input" {% if mNetwork == "onion" %}checked{% endif %}>
           <label for="onion-toggle" class="search__header-network-toggle-label"></label>
           <p class="search__header-network-toggle-p">Onion</p>
         </div>
         <div class="search__header-network-toggle-container">
-          <input type="radio" id="i2p-toggle" name="mNetwork" value="i2p" class="search__header-network-toggle-input" {% if vars.mNetwork == "i2p" %}checked{% endif %}>
+          <input type="radio" id="i2p-toggle" name="mNetwork" value="i2p" class="search__header-network-toggle-input" {% if mNetwork == "i2p" %}checked{% endif %}>
           <label for="i2p-toggle" class="search__header-network-toggle-label"></label>
           <p class="search__header-network-toggle-p">I2P</p>
         </div>
         <div class="search__header-network-toggle-container">
-          <input type="radio" id="clearnet-toggle" name="mNetwork" value="clearnet" class="search__header-network-toggle-input" {% if vars.mNetwork == "clearnet" %}checked{% endif %}>
+          <input type="radio" id="clearnet-toggle" name="mNetwork" value="clearnet" class="search__header-network-toggle-input" {% if mNetwork == "clearnet" %}checked{% endif %}>
           <label for="clearnet-toggle" class="search__header-network-toggle-label"></label>
           <p class="search__header-network-toggle-p">Clearnet</p>
         </div>
