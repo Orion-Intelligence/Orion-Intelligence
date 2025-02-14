@@ -1,0 +1,125 @@
+.safe__search-toolbar-results {
+  font-weight: 400;
+  color: #D0D0D0;
+  font-size: 12px;
+  font-family: Roboto, Helvetica Neue, Arial, sans-serif;
+  margin-bottom: 0;
+  margin-left: 16px;
+
+}
+
+.safe__search-toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 36px 48px 33px 20px;
+}
+
+.safe__search-toolbar-error {
+  margin-left: 60px;
+}
+
+.safe__search-toolbar-error-info {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.safe__search-toolbar-error-info-ref:hover {
+  color: #00b0b0;
+}
+
+.safe__search-toolbar-error-header {
+  color: #ffc107;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+@media only screen and (max-width: 900px) {
+  .safe__search-toolba-toolbar-left, .safe__search-toolbar-right {
+    margin-top: 0;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+
+  .safe__search-toolbar {
+    flex-direction: column;
+    margin-left: 10px;
+    padding: 20px 48px 24px 8px;
+  }
+
+  .safe__search-toolbar-results {
+    margin: 0;
+  }
+
+
+  .safe__search-toolbar-error {
+    margin-left: 14px;
+    padding-right: 25px;
+  }
+
+}
+
+@media only screen and (max-width: 600px) {
+  .search-result__content-webpages-container {
+    justify-content: start;
+  }
+}
+
+.safe__search-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px
+}
+
+.safe__search-toolbar-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  margin: 0
+}
+
+.safe__search-toolbar-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0
+}
+
+.safe__search-toolbar--slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #5F84A9;
+  border-radius: 20px;
+  transition: 0.4s
+}
+
+.safe__search-toolbar--slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s
+}
+
+.safe__search-toolbar-switch input:checked + .safe__search-toolbar--slider {
+  background-color: #2665A0
+}
+
+.safe__search-toolbar-switch input:checked + .safe__search-toolbar--slider:before {
+  transform: translateX(20px)
+}
+
+.safe__search-toolbar--text {
+  font-size: 14px;
+  color: white
+}

@@ -1,93 +1,44 @@
 <form class="searchbar" method="GET" action="" enctype="multipart/form-data">
-  {% if request.state.admin_vars and request.state.admin_vars.domain != "public" %}
-    <div class="searchbar__profile-button">
-      <a href="/admin" aria-label="Go to CMS Home">
-        <img src="{{ url_for('static', path='trustly/images/profile-icon.svg') }}" alt="Brand Logo">
-      </a>
-    </div>
-  {% endif %}
+  <div class="searchbar__profile-button">
+    <a href="/admin" aria-label="Go to CMS Home">
+      <img src="{{ url_for('static', path='trustly/images/profile-icon.svg') }}" alt="Brand Logo">
+    </a>
+  </div>
   <div class="searchbar__logo-grid">
-    <div class="searchbar__logo-container">
-      <a href="/" class="searchbar__logo">
-        <img src="{{ url_for('static', path='trustly/images/search-logo.svg') }}" alt="Brand Logo">
-      </a>
+    <div class="searchbar__logo-container d-flex">
+      <div class="search__nav-menu-div">
+
+
+{#        <div class="search__nav-mobile-container">#}
+{#          {% include 'trustly/user/blades/search_template/blade_search_side_bar.html' %}#}
+{#        </div>#}
+      </div>
+      <p class="searchbar__logo">
+        General Intelligence
+      </p>
     </div>
 
     <div class="searchbar__header">
       <div class="searchbar__searchbox">
         <div class="input-group">
-          {% if vars.mSearchCallbackRelevantSearchType == 'persona' %}
-            <label for="emailSearch" class="sr-only">Email</label>
-            <input id="emailSearch" autocomplete="off" autocapitalize="none" type="search" placeholder="Email" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-email" pattern="[^ ]*" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
-            <label for="usernameSearch" class="sr-only">Username</label>
-            <input id="usernameSearch" autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username" maxlength="150" name="mUsername" value="{{ vars.mUsernameQuery }}">
+          {% if mSearchCallbackRelevantSearchType == 'persona' %}
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Email" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-email" pattern="[^ ]*" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Username" class="form-control searchbar__detail-header-search-input searchbar__detail-header-search-input-username" maxlength="150" name="mUsername" value="{{ mUsernameQuery }}">
           {% else %}
-            <label for="generalSearch" class="sr-only">Search</label>
-            <input id="generalSearch" autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ vars.mSearchCallbackQuery }}">
+            <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control searchbar__detail-header-search-input" maxlength="150" name="q" value="{{ mSearchCallbackQuery }}">
           {% endif %}
           <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamPage" value="1">
-          <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ vars.mSearchCallbackSaveSearch }}">
-          <button class="btn btn-primary searchbar__search-button-right {% if vars.mSearchCallbackRelevantSearchType == 'persona' %}searchbar__search-button-right-persona{% endif %}" type="submit">
-            <img src="{{ url_for('static', path='trustly/images/magnifyingglasswhite.svg') }}" class="searchbar__search-button-right-icon" alt="Search">
+          <input autocomplete="off" autocapitalize="none" type="hidden" name="mSearchParamSafeSearch" value="{{ mSearchCallbackSaveSearch }}">
+          <button class="btn btn-primary searchbar__search-button-right {% if mSearchCallbackRelevantSearchType == 'persona' %}searchbar__search-button-right-persona{% endif %}" type="submit">
+            <img class="searchbar__search-button-right-icon" src="
+              {{ url_for('static', path='trustly/images/magnifyingglassblack.svg') }}" alt="Search">
           </button>
         </div>
       </div>
+      <div class="searchbar__searchbox_switch-search">
+        <a class="searchbar__searchbox_switch-search-button searchbar__searchbox_switch-search-button-active">Results</a>
+        <a class="searchbar__searchbox_switch-search-button">Analytics</a>
+      </div>
     </div>
-  </div>
-
-  <div class="searchbar__header-category-div">
-    <span id="catagory_all">
-      <button type="submit" name="pSearchParamType" value="all" class="{% if vars.mSearchCallbackRelevantSearchType == 'all' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--right disable-highlight">
-        All
-      </button>
-    </span>
-    <span id="catagory_images">
-      <button type="submit" name="pSearchParamType" value="monitor" class="{% if vars.mSearchCallbackRelevantSearchType == 'monitor' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
-        Monitor
-      </button>
-    </span>
-    <span id="catagory_images">
-      <button type="submit" name="pSearchParamType" value="marketplaces" class="ml-3 {% if vars.mSearchCallbackRelevantSearchType == 'marketplaces' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
-        Market
-      </button>
-    </span>
-    <span id="catagory_finance">
-      <button type="submit" name="pSearchParamType" value="forums" class="ml-2 {% if vars.mSearchCallbackRelevantSearchType == 'forums' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--width searchbar__search-items--left disable-highlight">
-        Forums
-      </button>
-    </span>
-    <span id="catagory_news">
-      <button type="submit" name="pSearchParamType" value="news" class="{% if vars.mSearchCallbackRelevantSearchType == 'news' %} searchbar__search-items-active-default {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight">
-        News
-      </button>
-    </span>
-    {% if vars.mApiAccess == '1' %}
-      <span id="catagory_email">
-      <button type="submit" name="pSearchParamType" value="persona" class="{% if vars.mSearchCallbackRelevantSearchType == 'persona' %} searchbar__search-items-active-default searchbar__search-items-persona {% endif %} gc-clear-selection searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right-header">
-        Email
-      </button>
-    </span>
-    {% endif %}
-    {% include 'trustly/user/blades/search_template/blade_search_header_network.html' %}
-
-    <span id="catagory_analytics" class="searchbar__nav-right">
-      <a href="/#analytics" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right searchbar__detail-header-catagories-margin-right-border">Analytics</a>
-    </span>
-    <span id="catagory_directory" class="searchbar__nav-right">
-      <a href="/directory" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right">Links</a>
-    </span>
-    <span id="catagory_index" class="searchbar__nav-right">
-      <a href="/" class="searchbar__search-items searchbar__search-items--left disable-highlight searchbar__detail-header-catagories-margin-right ">Home</a>
-    </span>
-  </div>
-
-  <div class="searchbar__search-toolbar-right">
-    <label for="safe-search" class="searchbar__search-toolbar-switch">
-      <a href="/search?q={{ vars.mSearchCallbackQuery }}&mSearchParamPage=1&pSearchParamType={{ vars.mSearchCallbackRelevantSearchType }}&mSearchParamSafeSearch={% if vars.mSearchCallbackSaveSearch == True %}False{% else %}True{% endif %}">
-        <input type="checkbox" id="safe-search" {% if vars.mSearchCallbackSaveSearch == True %}checked{% endif %}/>
-        <span class="searchbar__search-toolbar--slider"></span>
-      </a>
-    </label>
-    <span id="safe-search-label" class="searchbar__search-toolbar--text">Enable Safe Search</span>
   </div>
 </form>

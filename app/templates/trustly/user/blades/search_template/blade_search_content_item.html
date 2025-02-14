@@ -1,153 +1,184 @@
+{% macro render_category_tags(mDoc) %}
+  <span class="search-content__webpages-description-category search-content__webpages-description-category-enforced search-content__webpages-description-category-dark">&nbsp;&nbsp;{{ mDoc.mNetwork|capitalize }}&nbsp;&nbsp;</span>
+  {% if mDoc.mContentType|length == 0 %}
+    <span class="search-content__webpages-description-category">&nbsp;&nbsp;General&nbsp;&nbsp;</span>
+  {% else %}
+    {% for tag in mDoc.mContentType %}
+      <span class="search-content__webpages-description-category">
+        &nbsp;&nbsp;{{ tag|capitalize }}&nbsp;&nbsp;
+      </span>&nbsp;
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
+
+{% macro render_status_circle(mDoc) %}
+  <div class="d-flex align-items-center">
+    <div class="rounded-circle search-result__circle-status {% if mDoc.mExpiry == 0 %}bg-success{% elif mDoc.mExpiry == 1 %}bg-warning{% elif mDoc.mExpiry == 2 %}bg-danger{% endif %}"></div>
+    <h6 class="mb-0">
+      {% if mDoc.mExpiry == 0 %}Active{% elif mDoc.mExpiry == 1 %}Inactive{% elif mDoc.mExpiry == 2 %}Dead{% endif %}
+    </h6>
+  </div>
+{% endmacro %}
+
+{% macro render_tabs_content(label, items, loop_index, tab_id) %}
+  <div class="search-result-tabs-label"></div>
+  <input type="radio" class="search-result__tabs-radio" name="{{ loop_index }}-1" id="{{ tab_id }}-{{ loop_index }}-1">
+  <label for="{{ tab_id }}-{{ loop_index }}-1" class="search-result__label">{{ label }}</label>
+  <div class="search-result__tabs-content">
+    <div class="row mt-3 list-row">
+      {% for item in items %}
+        <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ item }} </p>
+      {% endfor %}
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro render_accordion_section(mDoc, loop_index) %}
+  <div class="search-result__top-right-corner">
+    <input type="radio" class="search-result__tabs-radio" name="{{ loop_index }}-1" id="close-{{ loop_index }}-0">
+    <label for="close-{{ loop_index }}-0">
+      <img src="
+
+        {{ url_for('static', path='trustly/images/arrow_up.svg') }}" alt="" width="24" height="24" class="search-result__dropdown-close">
+    </label>
+  </div>
+
+  <div class="search-result__accordion search__result-tabs">
+    <input type="radio" class="search-result__tabs-radio" name="{{ loop_index }}-1" id="content-{{ loop_index }}-1">
+    <label for="content-{{ loop_index }}-1" class="search-result__label">Content</label>
+    <div class="search-result__tabs-content">
+      <p class="search-result__tabs--content-header">Raw Content</p>
+      <p class="search-result__accordian-body">{{ mDoc.mSearchContent }}</p>
+    </div>
+
+    {% if mDoc.mEmails|length > 0 %}
+      {{ render_tabs_content("Emails", mDoc.mEmails, loop_index, "emails") }}
+    {% endif %}
+
+    {% if mDoc.mName|length > 0 %}
+      {{ render_tabs_content("Names", mDoc.mName, loop_index, "names") }}
+    {% endif %}
+
+    {% if mDoc.mPhoneNumber|length > 0 %}
+      {{ render_tabs_content("Cellular", mDoc.mPhoneNumber, loop_index, "phone") }}
+    {% endif %}
+
+    {% if mDoc.mArchiveUrl|length > 0 %}
+      {{ render_tabs_content("Archives", mDoc.mArchiveUrl, loop_index, "archiveurl") }}
+    {% endif %}
+
+    {% if mDoc.mVideo|length > 0 %}
+      {{ render_tabs_content("Videos", mDoc.mVideo, loop_index, "videos") }}
+    {% endif %}
+
+    {% if mDoc.mDocumentLeak|length > 0 %}
+      {{ render_tabs_content("Documents", mDoc.mDocumentLeak, loop_index, "leakdocuments") }}
+    {% endif %}
+
+    {% if mDoc.mSection|length > 0 %}
+      <div class="search-result-tabs-label"></div>
+      <input type="radio" class="search-result__tabs-radio" name="{{ loop_index }}-1" id="section-{{ loop_index }}-1">
+      <label for="section-{{ loop_index }}-1" class="search-result__label">Section</label>
+      <div class="search-result__tabs-content">
+        {% for section in mDoc.mSection %}
+          <p class="search-result__tabs--content-header search-result__tabs-header-spacing">
+            Section {{ loop.index }}</p>
+          <p class="accordian__body__search__content{% if not loop.last %} tabs__content--divider{% endif %}">
+            {{ section }}
+          </p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+
+
 {% if vars.mSearchCallbackRelevantDocument %}
   {% for mDoc in vars.mSearchCallbackRelevantDocument %}
-    <div class="search-result__content-webpages-container p-2 position-relative">
-      <span class="search-content__webpages-description-category search-content__webpages-description-category-enforced search-content__webpages-description-category-dark">&nbsp;&nbsp;{{ mDoc.mNetwork|capitalize }}&nbsp;&nbsp;</span>
-      {% if mDoc.mContentType|length == 0 %}
-        <span class="search-content__webpages-description-category">&nbsp;&nbsp;General&nbsp;&nbsp;</span>
-      {% else %}
-        {% for tag in mDoc.mContentType %}
-          <span class="search-content__webpages-description-category">
-            &nbsp;&nbsp;{{ tag|capitalize }}&nbsp;&nbsp;
-        </span>&nbsp;
-        {% endfor %}
-      {% endif %}
-      <div class="rounded-circle position-absolute search-result__circle-status {% if mDoc.mExpiry == 0 %}bg-success{% elif mDoc.mExpiry == 1 %}bg-warning{% elif mDoc.mExpiry == 2 %}bg-danger{% endif %}"></div>
+    <div class="search-result__content-webpages-container position-relative">
+      {{ render_category_tags(mDoc) }}
 
       <div>
         <div class="search-result__content-webpages {% if mDoc.mContentType == 'toxic' %}search-result__content-webpages--danger{% else %}search-result__content-webpages--normal{% endif %}">
-
-          <label class="search-content__webpages-header ml-4">{{ mDoc.mSearchCallbackRelevantDocumentTitle }}</label>
-          <label class="search-content__webpages-url">
-            <img src="{{ url_for('static', path='trustly/images/clock.svg') }}" alt="clock" class="search-content__webpages-url-clock">
-
-            <span class="search-result__url-date">
-                    {{ mDoc.mCreationDate[:10] }} - {{ mDoc.mUpdateDate[:10] }}
-                </span>
-          </label><br>
-          <label class="search-content__webpages-url">{{ mDoc.mSearchCallbackRelevantDocumentURL }}</label>
+          <label class="search-content__webpages-header ">{{ mDoc.mSearchCallbackRelevantDocumentTitle }}</label>
+          <br>
 
           <hr class="search-content__webpages-divider">
           <label class="search-content__webpages-description">
-            {{ mDoc.mSearchCallbackRelevantDocumentDescriptionHighlight }}
+            {% autoescape off %}{{ mDoc.mSearchCallbackRelevantDocumentDescriptionHighlight }}{% endautoescape %}
+          </label>
+          <label class="search-content__webpages-url">{{ mDoc.mSearchCallbackRelevantDocumentURL }}</label>
+          <div class="row search-content__webpages-data">
+            <div class="col-3">
+              <p>Published on:</p>
+              <h6>{{ mDoc.mCreationDate[:10] }}</h6>
+            </div>
+            <div class="col-3">
+              <p>Network:</p>
+              <h6>{{ mDoc.mNetwork|capitalize }}</h6>
+            </div>
+            <div class="col-3">
+              <p>Updated on:</p>
+              <h6>{{ mDoc.mUpdateDate[:10] }}</h6>
+            </div>
+            <div class="col-3">
+              <p>Status:</p>
+              <h6>
+                {{ render_status_circle(mDoc) }}
+              </h6>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if 'leak' in mDoc.mUrlDisplayType %}
+        <div class="search-result__top-right-corner">
+          <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="close-{{ loop.index }}-0">
+          <label for="close-{{ loop.index }}-0">
+            <img src="
+
+              {{ url_for('static', path='trustly/images/arrow_up.svg') }}" alt="" width="24" height="24" class="search-result__dropdown-close">
           </label>
         </div>
-      </div>
-      <div class="accordion-container">
-          <div class="search-result__top-right-corner">
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="close-{{ loop.index }}-0">
-            <label for="close-{{ loop.index }}-0">
-              <img src="{{ url_for('static', path='trustly/images/arrow_up.svg') }}" alt="" width="24" height="24" class="search-result__dropdown-close">
-            </label>
+
+        <div class="search-result__accordion search__result-tabs">
+          <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="section-{{ loop.index }}-1">
+          <label for="section-{{ loop.index }}-1" class="search-result__label">Leak </label>
+          <div class="search-result__tabs-content">
+            <p class="search-result__tabs--content-header">Important Content</p>
+            <p class="search-result__accordian-body">{{ mDoc.mSearchCallbackRelevantDocumentDescription }}</p>
           </div>
 
-          <div class="search-result__accordion search__result-tabs">
-            <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="content-{{ loop.index }}-1">
-            <label for="content-{{ loop.index }}-1" class="search-result__label">Content</label>
-            <div class="search-result__tabs-content">
-              <p class="search-result__tabs--content-header">Raw Content</p>
-              <p class="search-result__accordian-body">{{ mDoc.mSearchContent }}</p>
-            </div>
+          {% if mDoc.mDumpLink|length > 0 %}
+            {{ render_tabs_content("Dumps", mDoc.mDumpLink, loop.index, "dumps") }}
+          {% endif %}
 
-            {% if mDoc.mSection|length > 0 %}
-              <div class="search-result-tabs-label"></div>
-              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="section-{{ loop.index }}-1">
-              <label for="section-{{ loop.index }}-1" class="search-result__label">Section </label>
-              <div class="search-result__tabs-content">
-                {% for section in mDoc.mSection %}
-                  <p class="search-result__tabs--content-header search-result__tabs-header-spacing">
-                    Section {{ loop.index }}</p>
-                  <p class="accordian__body__search__content{% if not loop.last %} tabs__content--divider{% endif %}">
-                    {{ section }}
-                  </p>
-                {% endfor %}
-              </div>
-            {% endif %}
+          {% if mDoc.mContactLink|length > 0 %}
+            {{ render_tabs_content("Contacts", mDoc.mContactLink, loop.index, "contact") }}
+          {% endif %}
 
-            {% if mDoc.mEmails|length > 0 %}
-              <div class="search-result-tabs-label"></div>
-              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="emails-{{ loop.index }}-1">
-              <label for="emails-{{ loop.index }}-1" class="search-result__label">Emails</label>
-              <div class="search-result__tabs-content">
-                <div class="row mt-3 list-row">
-                  {% for email in mDoc.mEmails %}
-                    <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ email }} </p>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
+          {% if mDoc.mWebLink|length > 0 %}
+            {{ render_tabs_content("Web Links", mDoc.mWebLink, loop.index, "weblink") }}
+          {% endif %}
 
-            {% if mDoc.mName|length > 0 %}
-              <div class="search-result-tabs-label"></div>
-              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="names-{{ loop.index }}-1">
-              <label for="names-{{ loop.index }}-1" class="search-result__label">Names</label>
-              <div class="search-result__tabs-content">
-                <div class="row mt-3 list-row">
-                  {% for email in mDoc.mName %}
-                    <div class="col-md-4 col-sm-6 col-12 mb-3">
-                      <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ email }} </p>
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-            {% if mDoc.mPhoneNumber|length > 0 %}
-              <div class="search-result-tabs-label"></div>
-              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="phone-{{ loop.index }}-1">
-              <label for="phone-{{ loop.index }}-1" class="search-result__label">Cellular</label>
-              <div class="search-result__tabs-content">
-                <div class="row mt-3 list-row">
-                  {% for email in mDoc.mPhoneNumber %}
-                    <div class="col-md-4 col-sm-6 col-12 mb-3">
-                      <p class="search-result__accordian-body search-result__accordian-body-padding">
-                        {{ loop.index }}.&nbsp;{{ email }}
-                      </p>
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
+          {% if mDoc.mExtraLink|length > 0 %}
+            {{ render_tabs_content("Extra Links", mDoc.mExtraLink, loop.index, "extralink") }}
+          {% endif %}
 
-            {% if mDoc.mArchiveUrl|length > 0 %}
-              <div class="search-result-tabs-label"></div>
-              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="archiveurl-{{ loop.index }}-1">
-              <label for="archiveurl-{{ loop.index }}-1" class="search-result__label">Archives</label>
-              <div class="search-result__tabs-content">
-                <div class="row mt-3 list-row">
-                  {% for email in mDoc.mArchiveUrl %}
-                    <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ email }} </p>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if mDoc.mVideo|length > 0 %}
-              <div class="search-result-tabs-label"></div>
-              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="videos-{{ loop.index }}-1">
-              <label for="videos-{{ loop.index }}-1" class="search-result__label">Videos</label>
-              <div class="search-result__tabs-content">
-                <div class="row mt-3 list-row">
-                  {% for email in mDoc.mVideo %}
-                    <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ email }} </p>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if mDoc.mDocumentLeak|length > 0 %}
-              <div class="search-result-tabs-label"></div>
-              <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="leakdocuments-{{ loop.index }}-1">
-              <label for="leakdocuments-{{ loop.index }}-1" class="search-result__label">Documents</label>
-              <div class="search-result__tabs-content">
-                <div class="row mt-3 list-row">
-                  {% for email in mDoc.mDocumentLeak %}
-                    <p class="search-result__accordian-body search-result__accordian-body-padding"> {{ loop.index }}.&nbsp;{{ email }} </p>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
+          <div class="search-result-tabs-label"></div>
+          <input type="radio" class="search-result__tabs-radio" name="{{ loop.index }}-1" id="content-{{ loop.index }}-1">
+          <label for="content-{{ loop.index }}-1" class="search-result__label">Content</label>
+          <div class="search-result__tabs-content">
+            <p class="search-result__tabs--content-header">Raw Content</p>
+            <p class="search-result__accordian-body">{{ mDoc.mContent }}</p>
           </div>
         </div>
-      </div>
-
+      {% else %}
+        <div class="accordion-container">
+          {{ render_accordion_section(mDoc, loop.index) }}
+        </div>
+      {% endif %}
+    </div>
   {% endfor %}
 {% endif %}

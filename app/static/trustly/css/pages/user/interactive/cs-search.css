@@ -1,5 +1,5 @@
 .body {
-  overflow-x: hidden ;
+  overflow-x: hidden;
 }
 
 html {
@@ -9,9 +9,11 @@ html {
 
 .search_container {
   margin: 0;
+  flex: 1;
   height: auto;
-  background-image: linear-gradient(to bottom, #174069 0%, rgba(41, 87, 132, 255));
+  background: rgba(28, 77, 125, 1);
 }
+
 
 .search {
   min-height: 100vh;
@@ -19,8 +21,14 @@ html {
 }
 
 .search__results {
-  width: 50vw;
+  /*width: 50vw;*/
   padding-bottom: 0;
+}
+
+.search__pagination-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .searchbar__search-container-persona {
@@ -36,7 +44,7 @@ html {
 
 .searchbar__search-container-persona-border {
   border-left: 1px solid #ffffff15;
-  border-radius: 30px ;
+  border-radius: 30px;
 }
 
 .searchbar__search-container-persona-border-color {
@@ -164,16 +172,26 @@ html {
     padding-right: 10px;
   }
 
-  .search__results {
-    padding-left: 20px;
-  }
 
   .search__results {
-    width: 100vw ;
+    width: 100vw;
     padding-bottom: 0;
   }
 
   .search {
     min-height: 100vh;
   }
+}
+
+.search_container .search .search__results {
+  overflow-y: scroll;
+  height: 62vh;
+  margin-left: 0;
+  margin-right: 0;
+  justify-content: space-around;
+  scrollbar-width: none;
+}
+
+.search_container .search .search__results::-webkit-scrollbar {
+  display: none;
 }
