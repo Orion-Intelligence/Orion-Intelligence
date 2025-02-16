@@ -1,0 +1,20 @@
+<div class="header">
+  <div class="header__menu gs-disable-highlight">
+        <span>
+            <a href="/" class="gc-clear-selection" aria-label="Go to Homepage">
+                <img ngSrc="assets/images/shared/brand-header-1.svg" alt="Trustly Logo" width="57" height="12">
+            </a>
+        </span>
+
+      <span>
+        <span class="text-white fw-bold header_form-user">
+          {{ username$|async }}
+        </span>
+      <form id="logout-form" action="/logout" method="POST" class="header_form-user--logout">
+          <button type="submit" aria-label="Logout" class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold" id="logout-button">
+              <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logout" width="24" height="24">
+          </button>
+      </form>
+    </span>
+  </div>
+</div>

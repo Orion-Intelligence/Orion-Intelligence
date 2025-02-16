@@ -1,0 +1,45 @@
+<div id="analytics">
+  <div *ngFor="let model of models">
+    <div class="flex-container">
+      <div class="flex-item" *ngFor="let key of getKeys(insights[model]); let first = first">
+        <div class="home-insight__item-content">
+
+          <div *ngIf="first" class="home-insight__analytics-header">
+            {{ model === 'general' ? 'Generic Index' : 'Leaked Index' }}
+          </div>
+
+          <div class="home-insight__item-icon">
+            <img ngSrc="/assets/images/statistics/{{ key }}.svg" alt="{{ key }}" width="32" height="32">
+          </div>
+          <div class="home-insight__item-text">
+            <div class="home-insight__item-text-primary">
+              {{ insights[model][key].value || '-' }}
+            </div>
+            <div class="home-insight__item-text-secondary">
+              {{ insights[model][key].key || key }}
+            </div>
+          </div>
+
+          <div class="home-insight__item-percentage">
+            <div [ngClass]="{
+                'text-success': insights[model][key].change_daily?.startsWith('+'),
+                'text-warning': insights[model][key].change_daily?.startsWith('-'),
+                'item-percentage--text-body': !insights[model][key].change_daily
+              }">
+              {{ insights[model][key].change_daily || '-' }}
+            </div>
+            <div [ngClass]="{
+                'text-success': insights[model][key].change_weekly?.startsWith('+'),
+                'text-warning': insights[model][key].change_weekly?.startsWith('-'),
+                'item-percentage--text-body': !insights[model][key].change_weekly
+              }">
+              {{ insights[model][key].change_weekly || '-' }}
+            </div>
+            <br><br>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br><br><br>
+  </div>
+</div>

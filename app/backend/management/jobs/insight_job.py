@@ -6,7 +6,7 @@ from backend.management.models.insight_model import GENERIC_AGGREGATION_MAPPING,
 from backend.management.models.insight_model_comparison import InsightComparisonModel
 from backend.services.elastic_manager.elastic_controller import elastic_controller
 from backend.services.redis_manager.redis_controller import redis_controller
-from backend.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
+from backend.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS, REDIS_DEFAULT
 
 
 class insight_job:
@@ -77,10 +77,10 @@ class insight_job:
 
   @staticmethod
   async def get_trending_insights():
-    insight_old = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_NEW_DAY, json.dumps(InsightData().model_dump()), None])
-    insight = eval(insight_old)
+    results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, REDIS_DEFAULT.INSIGHT_STAT_DEFAULT, None])
+    results = InsightComparisonModel.model_validate(json.loads(results))
 
-    return insight
+    return results
 
   async def update_trending_insights(self, args):
     try:

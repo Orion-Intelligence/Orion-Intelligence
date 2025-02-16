@@ -1,0 +1,73 @@
+html {
+  background: rgba(41, 87, 132, 255) !important;
+  scrollbar-width: none;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) !important;
+  height: 100vh;
+  scrollbar-width: none;
+}
+
+html, body, * {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none;
+}
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/fonts/Roboto/Roboto-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/fonts/Roboto/Roboto-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/fonts/Roboto/Roboto-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/fonts/Roboto/Roboto-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+}
+
+.gc-clear-selection {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  outline: none;
+  text-decoration: none !important;
+  text-underline: none;
+  user-select: none;
+  color: white;
+}
+
+html {
+  background: rgba(41, 87, 132, 255) !important;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.clear-paddings {
+  margin: 0 !important;
+  padding: 0 !important;
+}

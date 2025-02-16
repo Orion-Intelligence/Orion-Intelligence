@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
-
-from backend.management.jobs.insight_job import insight_job
+from backend.route_managers.interactive.hompage_manager.homepage_view_model import homepage_view_model
 from backend.services.mongo_manager.shared_model.db_auth_models import user_role
 from backend.route_managers.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from backend.route_managers.interactive.directory_manager.directory_view_model import directory_view_model
@@ -18,7 +17,7 @@ async def parser(request: Request, param: directory_param_model = Depends()):
 
 @api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def parser(request: Request, ):
-    return await insight_job.get_instance().get_trending_insights()
+    return await homepage_view_model.getInstance().invoke_analytics_api(request)
 
 @api_routes.get("/api/search", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def parser(request: Request, param: search_api_param_model = Depends()):

@@ -10,7 +10,6 @@ from configs.exception_handlers import global_exception_handler, validation_exce
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
-from routes.default_routes import default_routes
 from fastapi.exceptions import RequestValidationError
 
 @asynccontextmanager
@@ -33,7 +32,6 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 setup_middlewares(app)
 
-app.include_router(default_routes, include_in_schema=False)
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(api_routes)

@@ -52,6 +52,7 @@ html::-webkit-scrollbar {
   bottom: 50px;
 }
 
+
 .flex-item {
   background-color: #14437290;
   color: white;
@@ -73,10 +74,6 @@ html::-webkit-scrollbar {
 .flex-item:hover {
   box-shadow: rgba(0, 0, 0, 0.11) 0 3px 6px, rgba(0, 0, 0, 0.16) 0 3px 6px;
   cursor: pointer;
-}
-
-.flex-container::-webkit-scrollbar {
-  display: none;
 }
 
 @media only screen and (max-width: 430px) {

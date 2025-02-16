@@ -26,6 +26,5 @@ class homepage_view_model:
       self.templates = Jinja2Templates(directory="templates")
 
   # External Request Callbacks
-  async def invoke_UI(self, request: Request):
-    response = await self.__m_homepage_model.init_page()
-    return self.templates.TemplateResponse(CONSTANTS.S_TEMPLATE_INDEX_PATH, helper_controller.create_template_context(request, response))
+  async def invoke_analytics_api(self, request: Request):
+    return await self.__m_homepage_model.invoke_analytics()
