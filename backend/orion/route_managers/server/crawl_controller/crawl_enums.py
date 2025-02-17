@@ -2,6 +2,6 @@ class CRAWL_CALLBACK_RESPONSES:
   M_WEBSITE_INDEXED = "website indexed succesfully"
 
 class CRAWL_PATHS:
-  M_PARSER_FILE_PATH = "static/trustly/.well-known/parser_files.zip"
-  M_FEEDER_FILE_PATH = "static/trustly/.well-known/feeder/crawl_data_unique.txt"
+  M_PARSER_FILE_PATH = "static/.well-known/parser_files.zip"
+  M_FEEDER_FILE_PATH = "static/.well-known/feeder/crawl_data_unique.txt"
 

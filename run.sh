@@ -23,8 +23,8 @@ configure_env() {
 }
 
 create_parser_zip() {
-    PARSER_DIR="backend/static/trustly/.well-known/parser"
-    OUTPUT_DIR="backend/static/trustly/.well-known"
+    PARSER_DIR="backend/static/.well-known/parser"
+    OUTPUT_DIR="backend/static/.well-known"
     ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
     if [ -d "$PARSER_DIR" ]; then
         echo "Creating $ZIP_FILE..."

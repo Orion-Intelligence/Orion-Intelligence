@@ -103,8 +103,8 @@
 @media only screen and (max-width: 943px) {
   .home-insight__analytics-header {
     margin-left: 0;
-    margin-top: -190px;
-    left: 25px;
+    margin-top: -50px;
+    left: -15px;
   }
 
   .flex-item {

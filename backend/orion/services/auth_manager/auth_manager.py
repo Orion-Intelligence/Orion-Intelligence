@@ -28,8 +28,8 @@ class auth_manager:
     @staticmethod
     def create_access_token(data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=6))
-        to_encode.update({"exp": expire})
+        expire = datetime.now(timezone.utc) + expires_delta
+        to_encode.update({"exp": expire.timestamp()})
         return jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
     async def authenticate_user(self, username: str, password: str):

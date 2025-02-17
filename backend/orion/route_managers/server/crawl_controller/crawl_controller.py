@@ -32,4 +32,7 @@ class crawl_controller:
     return await self.__crawl_model.fetch_feeder()
 
   async def invoke_fetch_feeder(self):
+    print("1:::::::::::::::::::::::::::::::::::::::")
+    print("1:::::::::::::::::::::::::::::::::::::::")
+    print("1:::::::::::::::::::::::::::::::::::::::")
     return await self.__crawl_model.fetch_parser()

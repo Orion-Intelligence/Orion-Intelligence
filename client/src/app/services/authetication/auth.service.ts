@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, map, Observable} from 'rxjs';
-import { tap } from 'rxjs/operators';
+import {BehaviorSubject, Observable, map, tap} from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
-import {AuthModel} from '../../shared/model/auth.model';
-
+import { AuthModel } from '../../shared/model/auth.model';
+import { TokenRefreshService } from './token-refresh.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,19 +11,23 @@ export class AuthService {
     token: this.getStoredToken(),
     username: localStorage.getItem('username'),
     isAuthenticated: !!this.getStoredToken(),
-    error: null
+    error: null,
   });
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private tokenRefreshService: TokenRefreshService
+  ) {
+    this.startTokenRefresh();
+  }
 
   get authState$(): Observable<AuthModel> {
     return this.authState.asObservable();
   }
 
   getUsername$(): Observable<string | null> {
-    return this.authState$.pipe(
-      map(state => state.username)
-    );
+    return this.authState$.pipe(map((state) => state.username));
   }
 
   login(username: string, password: string): Observable<any> {
@@ -32,10 +35,11 @@ export class AuthService {
       tap({
         next: (response) => {
           this.setToken(response.access_token, username);
+          this.startTokenRefresh();
         },
         error: () => {
           this.authState.next({ token: null, username: null, isAuthenticated: false, error: 'Invalid credentials' });
-        }
+        },
       })
     );
   }
@@ -44,6 +48,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     this.authState.next({ token: null, username: null, isAuthenticated: false, error: null });
+    this.tokenRefreshService.stopTokenRefresh();
     this.router.navigate(['/login']).then();
   }
 
@@ -62,7 +67,29 @@ export class AuthService {
   }
 
   private getStoredToken(): string | null {
-    const token = localStorage.getItem('token');
-    return token ? token : null;
+    return localStorage.getItem('token');
+  }
+
+  private startTokenRefresh(): void {
+    if (this.isAuthenticated()) {
+      this.tokenRefreshService.startTokenRefresh(() => this.refreshToken());
+    }
+  }
+
+  private refreshToken(): Observable<string | null> {
+    const token = this.getStoredToken();
+    if (!token) {
+      return new Observable<string | null>((observer) => {
+        observer.next(null);
+        observer.complete();
+      });
+    }
+    return this.tokenRefreshService.refreshToken().pipe(
+      tap((newToken) => {
+        if (newToken) {
+          this.setToken(newToken, localStorage.getItem('username') || '');
+        }
+      })
+    );
   }
 }

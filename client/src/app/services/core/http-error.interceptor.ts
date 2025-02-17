@@ -15,7 +15,6 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
     console.warn("⚠️ No authentication token found! You may need to log in.");
   }
 
-  // Clone request and add Authorization header if token exists
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;

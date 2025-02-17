@@ -29,3 +29,4 @@ swagconfig/swagger-initializer.js
 # Optional: Ignore backups or hidden files
 *.bak
 *.swp
+client/node_modules/*

@@ -16,6 +16,6 @@ export class HeaderComponent {
   username$: Observable<string | null>;
 
   constructor(private authService: AuthService) {
-    this.username$ = this.authService.getUsername$(); // Subscribe to username from state
+    this.username$ = this.authService.getUsername$();
   }
 }
