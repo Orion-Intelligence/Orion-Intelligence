@@ -3,9 +3,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from contextlib import asynccontextmanager
-from backend.middleware.middleware_setup import setup_middlewares
-from backend.management.managers.service_manager import service_manager
-from backend.services.mongo_manager.mongo_controller import mongo_controller
+from orion.middleware.middleware_setup import setup_middlewares
+from orion.management.managers.service_manager import service_manager
+from orion.services.mongo_manager.mongo_controller import mongo_controller
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router

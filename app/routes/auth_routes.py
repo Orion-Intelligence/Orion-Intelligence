@@ -2,9 +2,9 @@ from fastapi import APIRouter
 from datetime import timedelta
 from starlette.exceptions import HTTPException
 from starlette.responses import Response, JSONResponse
-from backend.services.auth_manager.auth_manager import auth_manager
-from backend.services.session_manager.session_manager import session_manager
-from backend.services.session_manager.shared_model.login_token_model import login_token_model
+from orion.services.auth_manager.auth_manager import auth_manager
+from orion.services.session_manager.session_manager import session_manager
+from orion.services.session_manager.shared_model.login_token_model import login_token_model
 
 auth_router = APIRouter()
 

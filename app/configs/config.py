@@ -1,4 +1,4 @@
-from backend.helper_manager.env_handler import env_handler
+from orion.helper_manager.env_handler import env_handler
 
 DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
 PRODUCTION_DOMAIN = env_handler.get_instance().env("PRODUCTION_DOMAIN", "-")

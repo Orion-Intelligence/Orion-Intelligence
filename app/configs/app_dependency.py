@@ -1,9 +1,9 @@
 from fastapi import Depends, HTTPException, status
 from starlette.requests import Request
 
-from backend.helper_manager.env_handler import env_handler
-from backend.services.session_manager.session_manager import session_manager
-from backend.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.helper_manager.env_handler import env_handler
+from orion.services.session_manager.session_manager import session_manager
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 
 async def get_current_role(request: Request):

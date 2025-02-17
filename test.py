@@ -1,6 +1,6 @@
 import json
-from backend.management.models.insight_model import InsightData, AGGREGATION_MAPPING
-from backend.management.models.insight_model_comparison import InsightComparisonModel
+from orion.management.models.insight_model import InsightData, AGGREGATION_MAPPING
+from orion.management.models.insight_model_comparison import InsightComparisonModel
 
 from datetime import datetime
 

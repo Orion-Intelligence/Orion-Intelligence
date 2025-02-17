@@ -1,5 +1,5 @@
 import asyncio
-from backend.management.managers.service_manager import service_manager
+from orion.management.managers.service_manager import service_manager
 
 async def main():
     manager = service_manager.get_instance()
