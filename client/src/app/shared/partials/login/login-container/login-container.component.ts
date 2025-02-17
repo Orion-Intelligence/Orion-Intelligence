@@ -14,6 +14,7 @@ import {AuthService} from '../../../../services/authetication/auth.service';
 export class LoginContainerComponent implements OnInit {
   user = { username: '', password: '' };
   errorMessage: string | null = null;
+  authenticated:boolean = true
 
   constructor(public authService: AuthService, private router: Router) {}
 
@@ -21,6 +22,8 @@ export class LoginContainerComponent implements OnInit {
     this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
         this.router.navigate(['']).then();
+      }else {
+        this.authenticated = false
       }
       this.errorMessage = authState.error || null;
     });

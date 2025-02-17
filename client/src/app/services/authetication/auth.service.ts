@@ -44,7 +44,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     this.authState.next({ token: null, username: null, isAuthenticated: false, error: null });
-    this.router.navigate(['/login']).then(); // Redirect to login page
+    this.router.navigate(['/login']).then();
   }
 
   getToken(): string | null {

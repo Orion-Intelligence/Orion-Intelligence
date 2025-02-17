@@ -17,7 +17,6 @@ export class HomeInsightComponent implements OnInit {
 
   ngOnInit() {
     this.insights = this.route.snapshot.data['insights'];
-    console.log('Resolved Insights:', this.insights);
   }
 
   getKeys(obj: GenericModel | LeakModel): string[] {

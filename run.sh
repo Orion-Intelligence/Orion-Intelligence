@@ -23,8 +23,8 @@ configure_env() {
 }
 
 create_parser_zip() {
-    PARSER_DIR="app/static/trustly/.well-known/parser"
-    OUTPUT_DIR="app/static/trustly/.well-known"
+    PARSER_DIR="backend/static/trustly/.well-known/parser"
+    OUTPUT_DIR="backend/static/trustly/.well-known"
     ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
     if [ -d "$PARSER_DIR" ]; then
         echo "Creating $ZIP_FILE..."
@@ -55,6 +55,8 @@ else
     SUBCOMMAND=$2
 
     if [[ "$COMMAND" == "build" ]]; then
+        docker pull python:3.11-slim
+        docker volume prune -f
         use_compose_file "$SUBCOMMAND"
         sleep 5
         docker compose -p $PROJECT_NAME -f $COMPOSE_FILE build

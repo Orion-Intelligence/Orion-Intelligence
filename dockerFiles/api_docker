@@ -14,12 +14,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies separately (for caching)
-COPY app/requirements.txt /tmp/requirements.txt
+COPY backend/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
 RUN pip install pydantic[email]
 
 # Copy the actual application code
-COPY app/ /app/
+COPY backend/ /app/
 COPY .env /app/.env
 COPY README.md /app/README.md
 

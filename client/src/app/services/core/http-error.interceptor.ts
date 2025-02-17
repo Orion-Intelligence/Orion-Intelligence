@@ -6,13 +6,10 @@ import { catchError } from 'rxjs/operators';
 import { AuthService } from '../authetication/auth.service';
 
 export const httpInterceptor: HttpInterceptorFn = (req, next) => {
-  console.log("🚀 Interceptor Executed! Request URL:", req.url); // ✅ Log first thing to check if it's running
-
   const router = inject(Router);
   const authService = inject(AuthService);
 
   const token = authService.getToken();
-  console.log("🔑 Retrieved Token:", token); // ✅ Log token value
 
   if (!token) {
     console.warn("⚠️ No authentication token found! You may need to log in.");
@@ -22,8 +19,6 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
-
-  console.log("📩 Modified Request Headers:", authReq.headers.get('Authorization')); // ✅ Log headers
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {

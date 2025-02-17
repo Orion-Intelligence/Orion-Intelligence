@@ -2,7 +2,7 @@
   <img ngSrc="/assets/images/shared/Bg.png" alt="background" class="login-background" priority="true" fill="true">
 </div>
 
-<div *ngIf="!authService.isAuthenticated" id="content" class="auth_form__container">
+<div *ngIf="!authenticated" id="content" class="auth_form__container">
   <div class="auth_form__sub__container">
     <div class="d-flex justify-content-center mb-5">
       <img ngSrc="/assets/images/shared/home-logo.svg" alt="logo" width="232" height="41" priority="true">

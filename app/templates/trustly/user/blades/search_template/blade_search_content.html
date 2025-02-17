@@ -1,9 +1,0 @@
-<!-- safe Trustly -->
-
-{% if vars and vars.mSearchCallbackRelevantSearchType == 'persona' %}
-  {% include 'trustly/user/blades/search_template/blade_search_persona_result.html' %}
-{% else %}
-    {% for mDoc in vars.mSearchCallbackRelevantDocument %}
-        {% include 'trustly/user/blades/search_template/blade_search_content_item.html' %}
-    {% endfor %}
-{% endif %}
