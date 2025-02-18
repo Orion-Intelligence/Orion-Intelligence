@@ -10,4 +10,5 @@ import {LoginContainerComponent} from '../../shared/partials/login/login-contain
   ]
 })
 export class LoginComponent {
+
 }

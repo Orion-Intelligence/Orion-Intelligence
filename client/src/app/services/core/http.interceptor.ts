@@ -2,12 +2,14 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { AuthService } from '../authetication/auth.service';
+import { catchError, finalize } from 'rxjs/operators';
+import {AuthService} from '../authetication/auth.service';
+import {LoadingService} from '../../shared/services/loading.service';
 
 export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const authService = inject(AuthService);
+  const loadingService = inject(LoadingService);
 
   const token = authService.getToken();
 
@@ -19,12 +21,14 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
 
+  loadingService.show();
+
   return next(authReq).pipe(
+    finalize(() => loadingService.hide()),
     catchError((error: HttpErrorResponse) => {
       console.error("❌ HTTP Error Occurred:", error.status, error.message);
 
       if (error.status === 401) {
-        alert("Session expired! Redirecting to login...");
         authService.logout();
         router.navigate(['/login'], { queryParams: { sessionExpired: 'true' } }).then();
       }

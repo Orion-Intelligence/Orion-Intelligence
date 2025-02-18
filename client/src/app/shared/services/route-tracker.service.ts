@@ -1,22 +1,21 @@
-import { Injectable } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
+import {BehaviorSubject} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class RouteTrackerService {
   private currentPageSubject = new BehaviorSubject<string>('');
   currentPage$ = this.currentPageSubject.asObservable();
 
   constructor(private router: Router) {
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this.currentPageSubject.next(event.urlAfterRedirects);
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        map((event: NavigationEnd) => event.urlAfterRedirects.split('#')[0])
+      )
+      .subscribe(cleanUrl => {
+        this.currentPageSubject.next(cleanUrl);
       });
-  }
-
-  getCurrentPage(): string {
-    return this.currentPageSubject.value;
   }
 }

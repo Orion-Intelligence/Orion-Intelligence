@@ -8,10 +8,10 @@
       <img ngSrc="/assets/images/shared/home-logo.svg" alt="logo" width="232" height="41" priority="true">
     </div>
 
-    <!-- Display error message if login fails -->
-    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <p *ngIf="errorMessage" [ngClass]="{'text-warning': errorMessage}">
+      {{ errorMessage }}
+    </p>
 
-    <!-- Template-driven form -->
     <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
       <div class="auth_form__form-row">
         <label for="id_username" class="d-none">Username</label>
@@ -24,7 +24,7 @@
       </div>
 
       <div class="submit-row">
-        <input type="submit" class="auth_form__form-button" [disabled]="!loginForm.valid" value="Log in"/>
+        <input type="submit" [ngClass]="loginForm.valid ? 'auth_form__form-button' : 'auth_form__form-button-disabled'" [disabled]="!loginForm.valid" value="Log in"/>
       </div>
     </form>
   </div>

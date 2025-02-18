@@ -1,2 +1,13 @@
-<app-header></app-header>
-<router-outlet></router-outlet>
+<div *ngIf="isVisible" @fadeIn >
+  <ng-container *ngIf="!(error$ | async)">
+    <app-header></app-header>
+  </ng-container>
+
+  <app-loader></app-loader>
+
+  <router-outlet #outlet="outlet"></router-outlet>
+
+  <ng-container *ngIf="!(error$ | async)">
+    <app-footer></app-footer>
+  </ng-container>
+</div>

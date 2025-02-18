@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
-import {Observable, interval, switchMap, tap, map} from 'rxjs';
+import { Observable, timer, interval, switchMap, tap, map } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })
 export class TokenRefreshService {
   private refreshTokenSubscription: any;
+  private readonly FIRST_REFRESH_DELAY = 5000;
+  private readonly REFRESH_INTERVAL = 500000;
 
   constructor(private apiService: ApiService) {}
 
   startTokenRefresh(refreshAction: () => Observable<string | null>): void {
     if (!this.refreshTokenSubscription || this.refreshTokenSubscription.closed) {
-      this.refreshTokenSubscription = interval(900000)
+      this.refreshTokenSubscription = timer(this.FIRST_REFRESH_DELAY)
         .pipe(
           switchMap(() => refreshAction()),
           tap({
@@ -22,7 +24,8 @@ export class TokenRefreshService {
             error: () => {
               this.stopTokenRefresh();
             },
-          })
+          }),
+          switchMap(() => interval(this.REFRESH_INTERVAL).pipe(switchMap(() => refreshAction()))) // Subsequent refresh every 15 min
         )
         .subscribe();
     }

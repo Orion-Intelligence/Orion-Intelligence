@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {NgIf, NgOptimizedImage} from '@angular/common';
+import {NgClass, NgIf, NgOptimizedImage} from '@angular/common';
 import {FormsModule, NgForm} from '@angular/forms';
 import { Router } from '@angular/router';
 import {AuthService} from '../../../../services/authetication/auth.service';
@@ -7,7 +7,7 @@ import {AuthService} from '../../../../services/authetication/auth.service';
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [NgOptimizedImage, FormsModule, NgIf],
+  imports: [NgOptimizedImage, FormsModule, NgIf, NgClass],
   templateUrl: './login-container.component.html',
   styleUrls: ['./login-container.component.css']
 })
@@ -21,7 +21,7 @@ export class LoginContainerComponent implements OnInit {
   ngOnInit() {
     this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.router.navigate(['']).then();
+        this.router.navigate([''], { replaceUrl: true }).then();
       }else {
         this.authenticated = false
       }
