@@ -4,7 +4,6 @@ from odmantic.exceptions import DuplicateKeyError
 from starlette_admin.contrib.odmantic import Admin, ModelView
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import (MONGO_CONNECTIONS)
-from orion.services.mongo_manager.shared_model.db_system import db_system
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.services.session_manager.session_enums import admin_mock, crawler_mock
 from orion.services.mongo_manager.shared_model.db_auth_models import (db_user_account, user_role)
