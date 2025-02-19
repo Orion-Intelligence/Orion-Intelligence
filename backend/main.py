@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pathlib import Path
 from contextlib import asynccontextmanager
 from orion.middleware.middleware_setup import setup_middlewares
@@ -25,14 +26,25 @@ async def init_cronjob():
 
 app = FastAPI(lifespan=lifespan)
 
+# Define paths for Angular build
 BASE_DIR = Path(__file__).resolve().parent
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+ANGULAR_BUILD_DIR = BASE_DIR / "client"
 
+# ✅ Serve static files correctly (JS, CSS, images, fonts)
+app.mount("/client", StaticFiles(directory=ANGULAR_BUILD_DIR, html=True), name="client")
+
+# API Routes
 setup_middlewares(app)
-
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
+
+# ✅ Serve Angular `index.html` for unknown routes
+@app.get("/")
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    index_path = ANGULAR_BUILD_DIR / "index.html"
+    return FileResponse(index_path)

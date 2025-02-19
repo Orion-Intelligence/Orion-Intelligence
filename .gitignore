@@ -30,3 +30,5 @@ swagconfig/swagger-initializer.js
 *.bak
 *.swp
 client/node_modules/*
+backend/client/*
+client/client/*

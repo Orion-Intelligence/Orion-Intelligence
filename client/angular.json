@@ -16,9 +16,11 @@
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             },
-            "outputPath": "dist/client",
+            "outputPath": "client",
+            "baseHref": "/",
+            "deployUrl": "client/",
             "index": "src/index.html",
-            "browser": "src/main.ts",
+            "main": "src/main.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -28,9 +30,12 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/assets/libs/bootstrap.min.css",
+              "src/assets/libs/app.component.css"
             ],
-            "scripts": []
+            "scripts": [
+            ]
           },
           "configurations": {
             "production": {
@@ -47,14 +52,22 @@
                 }
               ],
               "outputHashing": "all",
-              "optimization": true,
+              "optimization": {
+                "styles": {
+                  "inlineCritical": false
+                },
+                "scripts": true,
+                "fonts": true
+              },
               "sourceMap": false,
               "extractLicenses": true,
-              "namedChunks": false
+              "namedChunks": false,
+              "styles": [
+                "src/styles.css"              ]
             },
             "development": {
               "optimization": false,
-              "sourceMap": true,
+              "sourceMap": false,
               "extractLicenses": false,
               "namedChunks": true
             }

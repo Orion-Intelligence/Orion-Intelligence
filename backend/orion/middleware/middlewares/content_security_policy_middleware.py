@@ -39,8 +39,8 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
             )
         else:
             response.headers["Content-Security-Policy"] = (
-                "default-src 'none'; "
-                "script-src 'none'; "
+                "default-src 'self'; "
+                "script-src 'self'; "
                 "style-src 'self'; "
                 "img-src 'self' data: http://orion.genesistechnologies.org; "
                 "font-src 'self'; "
