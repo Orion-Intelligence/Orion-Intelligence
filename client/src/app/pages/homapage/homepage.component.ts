@@ -13,7 +13,6 @@ import {NgOptimizedImage} from '@angular/common';
     NgOptimizedImage
   ],
   templateUrl: './homepage.component.html',
-  styleUrl: './homepage.component.css'
 })
 export class HomepageComponent {
 

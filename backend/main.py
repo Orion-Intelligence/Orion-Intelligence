@@ -26,12 +26,10 @@ async def init_cronjob():
 
 app = FastAPI(lifespan=lifespan)
 
-# Define paths for Angular build
 BASE_DIR = Path(__file__).resolve().parent
-ANGULAR_BUILD_DIR = BASE_DIR / "client"
+ANGULAR_BUILD_DIR = BASE_DIR / "build"
 
-# ✅ Serve static files correctly (JS, CSS, images, fonts)
-app.mount("/client", StaticFiles(directory=ANGULAR_BUILD_DIR, html=True), name="client")
+app.mount("/build", StaticFiles(directory=ANGULAR_BUILD_DIR, html=True), name="client")
 
 # API Routes
 setup_middlewares(app)
@@ -42,7 +40,6 @@ app.include_router(api_routes)
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
-# ✅ Serve Angular `index.html` for unknown routes
 @app.get("/")
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):

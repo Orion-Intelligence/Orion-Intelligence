@@ -10,7 +10,6 @@ import {AsyncPipe, NgIf} from '@angular/common';
   imports: [
     AsyncPipe
   ],
-  styleUrl: './loader.component.css'
 })
 export class LoaderComponent {
   isLoading$: Observable<boolean>;

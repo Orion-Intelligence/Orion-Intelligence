@@ -10,7 +10,6 @@ import {Observable} from 'rxjs';
     AsyncPipe
   ],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css'
 })
 export class HeaderComponent {
   username$: Observable<string | null>;

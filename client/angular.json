@@ -16,9 +16,9 @@
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             },
-            "outputPath": "client",
+            "outputPath": "build",
             "baseHref": "/",
-            "deployUrl": "client/",
+            "deployUrl": "build/",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -27,15 +27,17 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/assets/images",
+              "src/assets/fonts",
+              "src/assets/fonts/FontAwesome",
+              "src/assets/fonts/Roboto"
             ],
             "styles": [
-              "src/styles.css",
-              "src/assets/libs/bootstrap.min.css",
-              "src/assets/libs/app.component.css"
+              "src/styles.scss",
+              "src/assets/libs/bootstrap.min.css"
             ],
-            "scripts": [
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -62,8 +64,18 @@
               "sourceMap": false,
               "extractLicenses": true,
               "namedChunks": false,
+              "assets": [
+                "src/favicon.ico",
+                "src/assets",
+                "src/assets/images",
+                "src/assets/fonts",
+                "src/assets/fonts/FontAwesome",
+                "src/assets/fonts/Roboto"
+              ],
               "styles": [
-                "src/styles.css"              ]
+                "src/styles.scss",
+                "src/assets/libs/bootstrap.min.css"
+              ]
             },
             "development": {
               "optimization": false,
@@ -106,10 +118,15 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets/images",
+              "src/assets",
+              "src/assets/fonts",
+              "src/assets/fonts/FontAwesome",
+              "src/assets/fonts/Roboto"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss",
+              "src/assets/libs/bootstrap.min.css"
             ],
             "scripts": []
           }

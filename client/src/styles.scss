@@ -1,12 +1,32 @@
+@import 'app/pages/error-handler/error-handler.component.css';
+@import 'app/pages/homapage/homepage.component.css';
+@import 'app/shared/partials/footer/footer.component.css';
+@import 'app/shared/partials/header/header.component.css';
+@import 'app/shared/partials/header/header.component.css';
+@import 'app/shared/partials/home/home-insight/home-insight.component.css';
+@import 'app/shared/partials/home/home-search/home-search.component.css';
+@import 'app/shared/partials/loader/loader.component.css';
+@import 'app/shared/partials/login/login-container/login-container.component.css';
+@import 'app/shared/partials/toolbar/toolbar.component.css';
+
+
 html {
   background: rgba(41, 87, 132, 255) !important;
   scrollbar-width: none;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  background: linear-gradient(to bottom, rgba(18, 52, 84, 255), rgba(41, 87, 132, 255), rgba(41, 87, 132, 255)) !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(18, 52, 84, 255),
+    rgba(41, 87, 132, 255),
+    rgba(41, 87, 132, 255)
+  ) !important;
   height: 100vh;
+  min-height: 100vh;
   scrollbar-width: none;
 }
 
@@ -18,6 +38,7 @@ body::-webkit-scrollbar,
 html::-webkit-scrollbar {
   display: none;
 }
+
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto/Roboto-Regular.ttf') format('truetype');
@@ -51,27 +72,14 @@ html::-webkit-scrollbar {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  user-select: none;
   outline: none;
   text-decoration: none !important;
   text-underline: none;
-  user-select: none;
   color: white;
-}
-
-html {
-  background: rgba(41, 87, 132, 255) !important;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100vh;
 }
 
 .clear-paddings {
   margin: 0 !important;
   padding: 0 !important;
-}
-
-html {
-  scroll-behavior: smooth;
 }

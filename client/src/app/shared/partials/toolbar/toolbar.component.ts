@@ -13,7 +13,6 @@ import {RouterLink} from '@angular/router';
     AsyncPipe
   ],
   templateUrl: './toolbar.component.html',
-  styleUrl: './toolbar.component.css'
 })
 export class ToolbarComponent {
   currentPage$: Observable<string>;

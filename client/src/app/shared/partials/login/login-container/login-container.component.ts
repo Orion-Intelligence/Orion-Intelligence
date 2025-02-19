@@ -9,7 +9,6 @@ import {AuthService} from '../../../../services/authetication/auth.service';
   standalone: true,
   imports: [NgOptimizedImage, FormsModule, NgIf, NgClass],
   templateUrl: './login-container.component.html',
-  styleUrls: ['./login-container.component.css']
 })
 export class LoginContainerComponent implements OnInit {
   user = { username: '', password: '' };

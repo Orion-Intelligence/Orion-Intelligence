@@ -7,7 +7,6 @@ import { InsightData, GenericModel, LeakModel } from '../../../model/insight';
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
   imports: [NgForOf, NgIf, NgOptimizedImage, NgClass],
-  styleUrls: ['./home-insight.component.css']
 })
 export class HomeInsightComponent implements OnInit {
   insights!: InsightData;

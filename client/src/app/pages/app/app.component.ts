@@ -20,7 +20,6 @@ import { trigger, transition, style, animate } from '@angular/animations';
     LoaderComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
