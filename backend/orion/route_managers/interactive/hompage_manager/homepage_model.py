@@ -16,6 +16,18 @@ class homepage_model:
   @staticmethod
   async def invoke_analytics():
     results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, REDIS_DEFAULT.INSIGHT_STAT_DEFAULT, None])
-    results = InsightComparisonModel.model_validate(json.loads(results))
 
-    return results
+    print(f"Raw Results: {results}")
+
+    if not results:
+      print("Error: No data retrieved from Redis")
+      return None
+
+    try:
+      parsed_results = json.loads(results)
+      validated_results = InsightComparisonModel.model_validate(parsed_results)
+      return validated_results
+    except json.JSONDecodeError as e:
+      print(f"JSON Decode Error: {e}")
+      return None
+

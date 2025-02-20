@@ -1,0 +1,64 @@
+<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="directory__main-filter-form">
+
+  <!-- Network Filter -->
+  <div class="directory__main-filter">
+    <div class="custom-dropdown">
+      <label for="networkSelect" class="d-none">Select Network</label>
+      <select id="networkSelect" formControlName="network" class="form-select directory__main-filter-input">
+        <option hidden value="">Network</option>
+        <option value="all">All</option>
+        <option value="onion">Onion</option>
+        <option value="i2p">I2P</option>
+        <option value="clearnet">Clearnet</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Index Filter -->
+  <div class="directory__main-filter">
+    <div class="custom-dropdown">
+      <label class="directory__main-filter-label directory__main-filter-label-mt-6">Index</label>
+      <div class="mb-3">
+        <label for="indexSelect" class="d-none">Select Index</label>
+        <select id="indexSelect" formControlName="index" class="form-select directory__main-filter-input">
+          <option hidden value="">Index</option>
+          <option value="all">All</option>
+          <option value="general">General</option>
+          <option value="leak">Leak</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Type Filter -->
+  <div class="directory__main-filter">
+    <div class="custom-dropdown">
+      <label class="directory__main-filter-label directory__main-filter-label-mt-6">Content</label>
+      <label for="contentTypeSelect" class="d-none">Select Content Type</label>
+      <select id="contentTypeSelect" formControlName="content_type" class="form-select directory__main-filter-input">
+        <option value="all">All</option>
+        <option value="general">General</option>
+        <option value="forums">Forums</option>
+        <option value="news">News</option>
+        <option value="stolen">Stolen</option>
+        <option value="drugs">Drugs</option>
+        <option value="hacking">Hacking</option>
+        <option value="marketplaces">Marketplaces</option>
+        <option value="cryptocurrency">Cryptocurrency</option>
+        <option value="leaks">Leaks</option>
+        <option value="adult">Adult</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="directory__main-filter-submit d-flex flex-column">
+    <button type="button" class="btn btn-secondary mb-4 directory__main-submit-button" (click)="resetFilters()">
+      Reset
+    </button>
+    <button type="submit" class="btn btn-primary directory__main-submit-button">
+      Apply
+    </button>
+  </div>
+
+</form>
