@@ -11,7 +11,10 @@ services:
       - elasticsearch
       - mongo
     volumes:
-      - ./backend:/app:cached
+      - ./backend/orion:/app/orion:cached
+      - ./backend/routes:/app/routes:cached
+      - ./backend/static:/app/static:cached
+      - ./client/build:/client_build:delegated
     expose:
       - "8070"
     networks:
