@@ -16,9 +16,9 @@
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             },
-            "outputPath": "build",
+            "outputPath": "dist",
             "baseHref": "/",
-            "deployUrl": "build/",
+            "deployUrl": "/",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [

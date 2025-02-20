@@ -9,7 +9,6 @@
 @import 'app/shared/partials/login/login-container/login-container.component.css';
 @import 'app/shared/partials/toolbar/toolbar.component.css';
 
-
 html {
   background: rgba(41, 87, 132, 255) !important;
   scrollbar-width: none;
@@ -41,28 +40,32 @@ html::-webkit-scrollbar {
 
 @font-face {
   font-family: 'Roboto';
-  src: url('/assets/fonts/Roboto/Roboto-Regular.ttf') format('truetype');
+  src: url('/assets/fonts/Roboto/Roboto-Regular.woff2') format('woff2'),
+       url('/assets/fonts/Roboto/Roboto-Regular.woff') format('woff');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Roboto';
-  src: url('/assets/fonts/Roboto/Roboto-Bold.ttf') format('truetype');
+  src: url('/assets/fonts/Roboto/Roboto-Bold.woff2') format('woff2'),
+       url('/assets/fonts/Roboto/Roboto-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Roboto';
-  src: url('/assets/fonts/Roboto/Roboto-Italic.ttf') format('truetype');
+  src: url('/assets/fonts/Roboto/Roboto-Italic.woff2') format('woff2'),
+       url('/assets/fonts/Roboto/Roboto-Italic.woff') format('woff');
   font-weight: 400;
   font-style: italic;
 }
 
 @font-face {
   font-family: 'Roboto';
-  src: url('/assets/fonts/Roboto/Roboto-BoldItalic.ttf') format('truetype');
+  src: url('/assets/fonts/Roboto/Roboto-BoldItalic.woff2') format('woff2'),
+       url('/assets/fonts/Roboto/Roboto-BoldItalic.woff') format('woff');
   font-weight: 700;
   font-style: italic;
 }
