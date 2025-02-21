@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, Observable, map, tap} from 'rxjs';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
 import { AuthModel } from '../../shared/model/auth.model';
@@ -7,19 +7,16 @@ import { TokenRefreshService } from './token-refresh.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private authState = new BehaviorSubject<AuthModel>({
-    token: this.getStoredToken(),
-    username: localStorage.getItem('username'),
-    isAuthenticated: !!this.getStoredToken(),
-    error: null,
-  });
+  private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
   constructor(
     private apiService: ApiService,
     private router: Router,
     private tokenRefreshService: TokenRefreshService
   ) {
-    this.startTokenRefresh();
+    if (this.isAuthenticated()) {
+      this.startTokenRefresh();
+    }
   }
 
   get authState$(): Observable<AuthModel> {
@@ -61,13 +58,23 @@ export class AuthService {
   }
 
   private setToken(token: string, username: string): void {
+    this.authState.next({ token, username, isAuthenticated: true, error: null });
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
-    this.authState.next({ token, username, isAuthenticated: true, error: null });
   }
 
   private getStoredToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  private loadAuthState(): AuthModel {
+    const token = this.getStoredToken();
+    return {
+      token,
+      username: localStorage.getItem('username'),
+      isAuthenticated: !!token,
+      error: null
+    };
   }
 
   private startTokenRefresh(): void {
@@ -77,13 +84,6 @@ export class AuthService {
   }
 
   private refreshToken(): Observable<string | null> {
-    const token = this.getStoredToken();
-    if (!token) {
-      return new Observable<string | null>((observer) => {
-        observer.next(null);
-        observer.complete();
-      });
-    }
     return this.tokenRefreshService.refreshToken().pipe(
       tap((newToken) => {
         if (newToken) {

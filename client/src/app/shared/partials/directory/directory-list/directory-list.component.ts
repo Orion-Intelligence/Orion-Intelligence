@@ -17,11 +17,11 @@ interface DirectoryItem {
   styleUrls: ['./directory-list.component.css']
 })
 export class DirectoryListComponent {
-  @Input() directoryItems: DirectoryItem[] = [];
-  @Input() page: number = 1;
-  @Input() itemsPerPage: number = 10;
+  // @Input() directoryItems: DirectoryItem[] = [];
+  // @Input() page: number = 1;
+  // @Input() itemsPerPage: number = 10;
 
-  get startId(): number {
-    return (this.page - 1) * this.itemsPerPage + 1;
-  }
+  // get startId(): number {
+  //   return (this.page - 1) * this.itemsPerPage + 1;
+  // }
 }

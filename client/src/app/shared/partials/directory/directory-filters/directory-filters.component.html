@@ -1,8 +1,17 @@
-<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="directory__main-filter-form">
+<input id="directory__filters-close-input" type="radio" name="filter" hidden="">
+<label for="directory__filters-close-input" class="directory__main-filter-header d-flex align-items-center">
+  <div class="justify-content-start">
+    <h2 class="directory__main-filter-heading">Filters</h2>
+  </div>
+  <div class="col-12 d-flex justify-content-end directory__filters-close-label">
+    <img ngSrc="/assets/images/shared/nav-next.svg" alt="close" height="16" width="16">
+  </div>
+</label>
 
-  <!-- Network Filter -->
+<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="directory__main-filter-form">
   <div class="directory__main-filter">
     <div class="custom-dropdown">
+      <label class="directory__main-filter-label directory__main-filter-label-mt-6">Network</label>
       <label for="networkSelect" class="d-none">Select Network</label>
       <select id="networkSelect" formControlName="network" class="form-select directory__main-filter-input">
         <option hidden value="">Network</option>
@@ -14,7 +23,6 @@
     </div>
   </div>
 
-  <!-- Index Filter -->
   <div class="directory__main-filter">
     <div class="custom-dropdown">
       <label class="directory__main-filter-label directory__main-filter-label-mt-6">Index</label>
@@ -30,7 +38,6 @@
     </div>
   </div>
 
-  <!-- Content Type Filter -->
   <div class="directory__main-filter">
     <div class="custom-dropdown">
       <label class="directory__main-filter-label directory__main-filter-label-mt-6">Content</label>
@@ -51,7 +58,6 @@
     </div>
   </div>
 
-  <!-- Buttons -->
   <div class="directory__main-filter-submit d-flex flex-column">
     <button type="button" class="btn btn-secondary mb-4 directory__main-submit-button" (click)="resetFilters()">
       Reset

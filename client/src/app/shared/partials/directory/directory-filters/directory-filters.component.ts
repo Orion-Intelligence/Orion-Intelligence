@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {NgOptimizedImage} from '@angular/common';
 
 
 @Component({
@@ -7,9 +8,10 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angul
   templateUrl: './directory-filters.component.html',
   styleUrls: ['./directory-filters.component.css'],
   imports: [
-        FormsModule,
-        ReactiveFormsModule
-    ],
+    FormsModule,
+    ReactiveFormsModule,
+    NgOptimizedImage
+  ],
 })
 export class FiltersComponent {
   filterForm: FormGroup;

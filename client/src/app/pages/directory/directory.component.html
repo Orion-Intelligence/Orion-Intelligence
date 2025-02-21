@@ -1,4 +1,3 @@
-<!--<app-header></app-header>-->
 <span id="top"></span>
 <div class="directory">
   <app-toolbar></app-toolbar>
@@ -10,16 +9,12 @@
         </div>
 
         <div class="directory-pagination col-4">
-          <app-directory-pagination [page]="currentPage"
-                                    [totalPages]="totalPages"
-                                    [paginationNumbers]="paginationNumbers"
-                                    (pageChange)="onPageChange($event)">
-          </app-directory-pagination>
+<!--          <app-directory-pagination [page]="currentPage" [totalPages]="totalPages" [paginationNumbers]="paginationNumbers" (pageChange)="onPageChange($event)"></app-directory-pagination>-->
         </div>
 
         <div class="directory__filters-button-div">
           <label for="directory__filters-checkbox" class="directory__filters-button">
-           <img ngSrc="assets/images/shared/filter_icon.svg" alt="Trustly Logo" width="24" height="24" priority="true">
+            <img ngSrc="assets/images/shared/filter_icon.svg" alt="Trustly Logo" width="24" height="24" priority="true">
             Filter
           </label>
           <input type="radio" name="filter" class="directory__filters-checkbox" id="directory__filters-checkbox"/>
@@ -28,7 +23,7 @@
           </div>
         </div>
       </div>
-      <app-directory-list [directoryItems]="directoryData" [page]="currentPage" [itemsPerPage]="10"></app-directory-list>
+<!--      <app-directory-list [directoryItems]="directoryData" [page]="currentPage" [itemsPerPage]="10"></app-directory-list>-->
     </div>
   </div>
 </div>

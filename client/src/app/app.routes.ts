@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import {LoginComponent} from './pages/login/login.component';
-import {HomepageComponent} from './pages/homapage/homepage.component';
+import {HomepageComponent} from './pages/homepage/homepage.component';
 import {ErrorHandlerComponent} from './pages/error-handler/error-handler.component';
 import {AuthGuard} from './shared/guards/auth-guard.guard';
 import {DashboardComponent} from './pages/dashboard/dashboard.component';

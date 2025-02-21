@@ -8,7 +8,7 @@ export interface DocumentModel {
   url_status_date: number;
 }
 
-export interface DirectoryApiCallbackModel {
+export interface DirectoryData {
   documents: DocumentModel[];
   count: number;
   content_type_parameter: string;

@@ -230,7 +230,7 @@ justify-content: flex-end;
   height: 43px;
   box-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
   border: 1px solid #fff;
-  background-image: url("/static/trustly/images/filter_dropdown.svg");
+  background-image: url("/assets/images/shared/filter_dropdown.svg");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 15px;

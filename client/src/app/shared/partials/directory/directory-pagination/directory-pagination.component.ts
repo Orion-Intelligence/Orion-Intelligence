@@ -9,15 +9,10 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
   imports: [CommonModule, NgOptimizedImage],
 })
 export class DirectoryPaginationComponent {
-  @Input() page: number = 1;
-  @Input() totalPages: number = 1;
-  @Input() paginationNumbers: number[] = [];
-
-  @Output() pageChange = new EventEmitter<number>();
-
-  changePage(newPage: number) {
-    if (newPage >= 1 && newPage <= this.totalPages) {
-      this.pageChange.emit(newPage);
-    }
-  }
+  //
+  // changePage(newPage: number) {
+  //   if (newPage >= 1 && newPage <= this.totalPages) {
+  //     this.pageChange.emit(newPage);
+  //   }
+  // }
 }

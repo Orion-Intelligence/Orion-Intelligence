@@ -5,6 +5,7 @@
 }
 .home__search-form .home__searchbox {
   height: 46px;
+  width: 500px !important;
   outline: none;
   border-color: #ffffff;
   font-family: 'Roboto', sans-serif;
@@ -39,7 +40,7 @@
 .home__searchbox::placeholder {
   font-family: 'Roboto', sans-serif;
   font-size: 17px;
-  color: #d0c4bf;
+  color: #d0c4bf !important;
   opacity: 1;
 }
 
@@ -53,13 +54,13 @@
 @media only screen and (max-width: 1000px) {
   .home__search-form {
     display: block;
-    margin: 50px 20px 8vh;
+    margin: 50px 0 8vh 20px;
   }
   .home__search-container {
     margin-top: 15px;
     max-width: 100vw;
     width: 100vw;
     margin-bottom: 100px;
-    padding-right: 37px;
+    padding-right: 17px;
   }
 }

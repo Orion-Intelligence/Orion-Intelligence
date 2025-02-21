@@ -29,6 +29,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
       console.error("❌ HTTP Error Occurred:", error.status, error.message);
 
       if (error.status === 401) {
+        alert("asdsaasddsa")
         authService.logout();
         router.navigate(['/login'], { queryParams: { sessionExpired: 'true' } }).then();
       }
