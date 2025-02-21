@@ -1,0 +1,49 @@
+<nav class="search__side-nav">
+  <div class="search__side-nav-logo">
+    <div class="col-6">
+      <a href="/">
+         <img ngSrc="/assets/images/statistics/search_nav_logo.svg" alt="background" class="home-background" priority="true" fill="true">
+      </a>
+    </div>
+    <div class="col-6 close_menu_div">
+      <label for="search__nav-close" class="search__nav-close-label">Close</label>
+      <input type="radio" name="menu-input" class="search__nav-close" id="search__nav-close" />
+    </div>
+  </div>
+
+  <ul class="search__side-nav-items">
+    <li *ngFor="let item of menuItems" class="search__side-nav-item" [class.search__side-nav-dropdown]="item.dropdown">
+      <!-- Normal Item -->
+      <a *ngIf="!item.dropdown" [href]="item.link">
+        <img [src]="'assets/trustly/images/' + item.icon" [alt]="item.name" />
+        {{ item.name }}
+      </a>
+
+      <!-- Dropdown Item -->
+      <div *ngIf="item.dropdown">
+        <label (click)="toggleDropdown(item.name)" class="search__side-nav-item-dropdown">
+          <img [src]="'assets/trustly/images/' + item.icon" [alt]="item.name" />
+          {{ item.name }}
+          <img class="search_side_dropdown_icon" src="assets/trustly/images/search_side_dropdown_icon.svg" alt="Dropdown">
+        </label>
+
+        <ul class="search__side-nav-subitems" *ngIf="activeDropdown === item.name">
+          <li *ngFor="let subItem of item.subItems">
+            <a [href]="subItem.link">{{ subItem.name }}</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+</nav>
+
+<div class="search__nav-bottom_div">
+  <ul class="search__side-nav-items">
+    <li *ngFor="let item of menuItems.slice(3)" class="search__side-nav-item">
+      <a [href]="item.link">
+        <img [src]="'assets/trustly/images/' + item.icon" [alt]="item.name" />
+        {{ item.name }}
+      </a>
+    </li>
+  </ul>
+</div>

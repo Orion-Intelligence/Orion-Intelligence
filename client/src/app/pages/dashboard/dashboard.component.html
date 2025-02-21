@@ -1,1 +1,36 @@
-<p>dashboard works!</p>
+<!-- app.component.html -->
+<app-dashboard-side-bar></app-dashboard-side-bar>
+<!--<app-search-container></app-search-container>-->
+
+<!-- search-sidebar.component.html -->
+<div id="top"></div>
+<div class="row search__side-nav-container-main" id="search__side-nav-container-main">
+  <label for="search__nav-menu-checkbox" class="search__nav-menu-label">
+    <img ngSrc="/assets/images/statistics/seach_nav_menu_icon.svg" alt="background" class="home-background" priority="true" fill="true">
+  </label>
+  <input type="radio" name="menu-input" class="search__nav-menu-checkbox" id="search__nav-menu-checkbox">
+  <div class="search__side-nav-container">
+<!--    <app-blade-search-sidebar></app-blade-search-sidebar>-->
+  </div>
+</div>
+
+<!-- search-container.component.html -->
+<div class="search_container">
+  <div class="search">
+    <app-dashboard-header></app-dashboard-header>
+<!--    <app-safe-search></app-safe-search>-->
+    <div class="d-flex search__results-main">
+      <div class="search__results row">
+<!--        <app-search-content></app-search-content>-->
+        <ng-container *ngIf="vars.mSearchCallbackRelevantDocument.length === 0">
+          <ng-container *ngIf="vars.mSearchCallbackRelevantSearchType !== 'persona'">
+<!--            <app-no-suggestion></app-no-suggestion>-->
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+    <div class="search__pagination-div">
+<!--      <app-pagination></app-pagination>-->
+    </div>
+  </div>
+</div>
