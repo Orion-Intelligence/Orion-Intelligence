@@ -15,9 +15,6 @@ async def parser(request: Request):
 
 @crawl_routes.get("/api/parser", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser(request: Request):
-    print(":::::::::::::::::::::::::::::::::::::::")
-    print(":::::::::::::::::::::::::::::::::::::::")
-    print(":::::::::::::::::::::::::::::::::::::::")
     return await crawl_controller.getInstance().invoke_fetch_feeder()
 
 @crawl_routes.post("/api/index/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])

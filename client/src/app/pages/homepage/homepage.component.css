@@ -1,11 +1,10 @@
 .home-background {
   position: absolute;
+  top: 0;
   right: 0;
-  width: auto;
-  height: 100%;
   opacity: 0.07;
   object-fit: contain;
-  object-position: right;
+  object-position: top right;
   pointer-events: none;
 }
 
@@ -32,5 +31,9 @@
 @media only screen and (max-width: 943px) {
   .home {
     min-height: 100%;
+  }
+  .home-background{
+    width: 175% !important;
+    height: 175% !important;
   }
 }

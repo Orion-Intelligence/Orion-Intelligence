@@ -4,7 +4,9 @@ import {FiltersComponent} from '../../shared/partials/directory/directory-filter
 import {FooterComponent} from '../../shared/partials/footer/footer.component';
 import {DirectoryListComponent} from '../../shared/partials/directory/directory-list/directory-list.component';
 import {DirectoryPaginationComponent} from '../../shared/partials/directory/directory-pagination/directory-pagination.component';
-import {NgOptimizedImage} from '@angular/common';
+import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import {DirectoryService} from '../../services/directory/directory.service';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-directory',
@@ -16,11 +18,18 @@ import {NgOptimizedImage} from '@angular/common';
     FooterComponent,
     DirectoryPaginationComponent,
     NgOptimizedImage,
-  ],
-  styleUrls: ['./directory.component.css']
+    AsyncPipe,
+  ]
 })
 export class DirectoryComponent {
-  constructor() {
+  isFilterOpen$: Observable<boolean>;
 
+  constructor(private directoryService: DirectoryService) {
+    this.isFilterOpen$ = this.directoryService.sidebarState$;
   }
+
+  openSidebar() {
+    this.directoryService.openSidebar();
+  }
+
 }

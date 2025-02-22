@@ -1,19 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { NgOptimizedImage } from '@angular/common';
 import {ToolbarComponent} from '../../shared/partials/toolbar/toolbar.component';
 import {HomeSearchComponent} from '../../shared/partials/home/home-search/home-search.component';
 import {HomeInsightComponent} from '../../shared/partials/home/home-insight/home-insight.component';
-import {NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-index',
-  imports: [
-    ToolbarComponent,
-    HomeSearchComponent,
-    HomeInsightComponent,
-    NgOptimizedImage
-  ],
+  standalone: true,
+  imports: [ToolbarComponent, HomeSearchComponent, HomeInsightComponent, NgOptimizedImage],
   templateUrl: './homepage.component.html',
 })
-export class HomepageComponent {
+export class HomepageComponent implements OnInit, AfterViewInit {
+  constructor(private router: Router) {}
 
+  ngOnInit() {
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => this.router.url.includes('#') && this.scrollToElement());
+  }
+
+  ngAfterViewInit() {
+    this.router.url.includes('#') && this.scrollToElement();
+  }
+
+  scrollToElement() {
+    document.getElementById('analytics')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }

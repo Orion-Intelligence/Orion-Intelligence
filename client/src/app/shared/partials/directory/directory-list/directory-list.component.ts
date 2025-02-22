@@ -1,27 +1,27 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-interface DirectoryItem {
-  id: number;
-  url: string;
-  content_type: string[];
-  url_status_date: number;
-  leak_status_date: number;
-  network_type: string;
-}
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Observable} from 'rxjs';
+import {DirectoryCallbackModel} from '../../../model/callback/directory';
+import {DirectoryService} from '../../../../services/directory/directory.service';
 
 @Component({
   selector: 'app-directory-list',
   templateUrl: './directory-list.component.html',
+  standalone: true,
   imports: [CommonModule],
-  styleUrls: ['./directory-list.component.css']
 })
 export class DirectoryListComponent {
-  // @Input() directoryItems: DirectoryItem[] = [];
-  // @Input() page: number = 1;
-  // @Input() itemsPerPage: number = 10;
+  directoryData$: Observable<DirectoryCallbackModel | null>;
 
-  // get startId(): number {
-  //   return (this.page - 1) * this.itemsPerPage + 1;
-  // }
+  constructor(private directoryService: DirectoryService) {
+    this.directoryData$ = this.directoryService.directoryData$;
+  }
+
+  isRecent(timestamp: any): boolean {
+    if (!timestamp) return false;
+    const date = new Date(timestamp);
+    const fifteenDaysAgo = new Date();
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+    return date >= fifteenDaysAgo;
+  }
 }

@@ -34,10 +34,9 @@
               "src/assets/fonts/Roboto"
             ],
             "styles": [
-              "src/styles.scss",
-              "src/assets/libs/bootstrap.min.css"
+              "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": ["src/assets/libs/bootstrap.min.js"]
           },
           "configurations": {
             "production": {
@@ -73,9 +72,9 @@
                 "src/assets/fonts/Roboto"
               ],
               "styles": [
-                "src/styles.scss",
-                "src/assets/libs/bootstrap.min.css"
-              ]
+                "src/styles.scss"
+              ],
+              "scripts": ["src/assets/libs/bootstrap.min.js"]
             },
             "development": {
               "optimization": false,
@@ -125,10 +124,9 @@
               "src/assets/fonts/Roboto"
             ],
             "styles": [
-              "src/styles.scss",
-              "src/assets/libs/bootstrap.min.css"
+              "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": ["src/assets/libs/bootstrap.min.js"]
           }
         }
       }

@@ -1,5 +1,4 @@
-<input id="directory__filters-close-input" type="radio" name="filter" hidden="">
-<label for="directory__filters-close-input" class="directory__main-filter-header d-flex align-items-center">
+<label class="directory__main-filter-header d-flex align-items-center" (click)="closeSidebar()">
   <div class="justify-content-start">
     <h2 class="directory__main-filter-heading">Filters</h2>
   </div>
@@ -8,53 +7,71 @@
   </div>
 </label>
 
-<form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="directory__main-filter-form">
-  <div class="directory__main-filter">
-    <div class="custom-dropdown">
-      <label class="directory__main-filter-label directory__main-filter-label-mt-6">Network</label>
-      <label for="networkSelect" class="d-none">Select Network</label>
-      <select id="networkSelect" formControlName="network" class="form-select directory__main-filter-input">
-        <option hidden value="">Network</option>
-        <option value="all">All</option>
-        <option value="onion">Onion</option>
-        <option value="i2p">I2P</option>
-        <option value="clearnet">Clearnet</option>
-      </select>
+<form (ngSubmit)="onSubmit()" class="directory__main-filter-form">
+
+  <div class="directory__main-filter mb-3">
+    <label class="directory__main-filter-label directory__main-filter-label-mt-6">Network</label>
+    <div class="dropdown">
+      <button class="directory__main-filter-input btn btn-white border dropdown-toggle d-flex justify-content-between align-items-center w-100 text-start" type="button" id="networkDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ filterModel.network ? filterModel.network : 'Select Network' }}
+      </button>
+      <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="networkDropdown" style="border-radius: 8px;">
+        <li><a class="dropdown-item" (click)="filterModel.network='all'">All</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.network='onion'">Onion</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.network='i2p'">I2P</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.network='clearnet'">Clearnet</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="directory__main-filter mb-3">
+    <label class="directory__main-filter-label directory__main-filter-label-mt-6">Index</label>
+    <div class="dropdown">
+      <button class="directory__main-filter-input btn btn-white border dropdown-toggle d-flex justify-content-between align-items-center w-100 text-start" type="button" id="indexDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ filterModel.index ? filterModel.index : 'Select Index' }}
+      </button>
+      <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="indexDropdown" style="border-radius: 8px;">
+        <li><a class="dropdown-item" (click)="filterModel.index='all'">All</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.index='general'">General</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.index='leak'">Leak</a></li>
+      </ul>
     </div>
   </div>
 
   <div class="directory__main-filter">
-    <div class="custom-dropdown">
-      <label class="directory__main-filter-label directory__main-filter-label-mt-6">Index</label>
-      <div class="mb-3">
-        <label for="indexSelect" class="d-none">Select Index</label>
-        <select id="indexSelect" formControlName="index" class="form-select directory__main-filter-input">
-          <option hidden value="">Index</option>
-          <option value="all">All</option>
-          <option value="general">General</option>
-          <option value="leak">Leak</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="directory__main-filter">
-    <div class="custom-dropdown">
-      <label class="directory__main-filter-label directory__main-filter-label-mt-6">Content</label>
-      <label for="contentTypeSelect" class="d-none">Select Content Type</label>
-      <select id="contentTypeSelect" formControlName="content_type" class="form-select directory__main-filter-input">
-        <option value="all">All</option>
-        <option value="general">General</option>
-        <option value="forums">Forums</option>
-        <option value="news">News</option>
-        <option value="stolen">Stolen</option>
-        <option value="drugs">Drugs</option>
-        <option value="hacking">Hacking</option>
-        <option value="marketplaces">Marketplaces</option>
-        <option value="cryptocurrency">Cryptocurrency</option>
-        <option value="leaks">Leaks</option>
-        <option value="adult">Adult</option>
-      </select>
+    <label class="directory__main-filter-label directory__main-filter-label-mt-6">Content</label>
+    <div class="dropdown">
+      <button class="directory__main-filter-input btn btn-white border dropdown-toggle d-flex justify-content-between align-items-center w-100 text-start" type="button" id="contentDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ filterModel.content_type ? filterModel.content_type : 'Select Content' }}
+      </button>
+      <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="contentDropdown" style="border-radius: 8px;">
+        <li><a class="dropdown-item" (click)="filterModel.content_type='all'">All</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='general'">General</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='forums'">Forums</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='news'">News</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='stolen'">Stolen</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='drugs'">Drugs</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='hacking'">Hacking</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='marketplaces'">Marketplaces</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='cryptocurrency'">Cryptocurrency</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='leaks'">Leaks</a></li>
+          <li><hr class="dropdown-divider mx-3"></li>
+        <li><a class="dropdown-item" (click)="filterModel.content_type='adult'">Adult</a></li>
+      </ul>
     </div>
   </div>
 

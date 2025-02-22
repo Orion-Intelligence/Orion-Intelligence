@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 
+
 class directory_callback_link(BaseModel):
     url: str
     content_type: List[str]
@@ -13,18 +14,10 @@ class directory_callback_link(BaseModel):
 
     @classmethod
     def from_odmantic(cls, odmantic_doc: db_url_data_model):
-        return cls.model_validate(odmantic_doc.model_dump())
+        return cls.model_validate(odmantic_doc.model_dump(by_alias=True, exclude={"id"}))
+
 
 class directory_callback_model(BaseModel):
+    total_count: int
     page: int
-    mNetwork: str
-    mContentType: str
-    mIndex: str
-    mItemPerPage: int
-
-    mTotalPage: int
-    mStartPage: int
-    mEndPage: int
-    mPagination: List[int]
     mDirectoryCallbackLinks: List[directory_callback_link]
-    mDirectoryCallbackPageNumberMaxReached: bool

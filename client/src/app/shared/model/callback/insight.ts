@@ -35,7 +35,7 @@ export interface LeakModel {
   [key: string]: InsightMetric;
 }
 
-export interface InsightData {
+export interface InsightCallbackModel {
   general: GenericModel;
   leak: LeakModel;
 }

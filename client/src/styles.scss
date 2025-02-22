@@ -1,3 +1,4 @@
+@import 'assets/libs/bootstrap.min.css';
 @import 'app/pages/error-handler/error-handler.component.css';
 @import 'app/pages/homepage/homepage.component.css';
 @import 'app/shared/partials/footer/footer.component.css';
@@ -8,6 +9,10 @@
 @import 'app/shared/partials/loader/loader.component.css';
 @import 'app/shared/partials/login/login-container/login-container.component.css';
 @import 'app/shared/partials/toolbar/toolbar.component.css';
+@import 'app/shared/partials/directory/directory-list/directory-list.component.css';
+@import 'app/shared/partials/directory/directory-pagination/directory-pagination.component.css';
+@import 'app/shared/partials/directory/directory-filters/directory-filters.component.css';
+@import 'app/pages/directory/directory.component.css';
 
 html {
   background: rgba(41, 87, 132, 255) !important;
@@ -86,3 +91,4 @@ html::-webkit-scrollbar {
   margin: 0 !important;
   padding: 0 !important;
 }
+

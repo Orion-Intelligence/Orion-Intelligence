@@ -1,61 +1,54 @@
-<!--<div class="directory-list__container clear-paddings">-->
-<!--  <table class="table table-striped directory-list__table clear-paddings">-->
-<!--    <thead>-->
-<!--    <tr>-->
-<!--      <th scope="col" class="directory-list__column-id">ID</th>-->
-<!--      <th scope="col" class="directory-list__column-service-url">Service URL</th>-->
-<!--      <th scope="col" class="directory-list__column-category">Category</th>-->
-<!--      <th scope="col" class="directory-list__column-url-status">URL Status</th>-->
-<!--      <th scope="col" class="directory-list__column-leak-status">Leak Status</th>-->
-<!--      <th scope="col" class="directory-list__column-network-type">Network</th>-->
-<!--    </tr>-->
-<!--    </thead>-->
-<!--    <tbody>-->
-<!--    <tr *ngFor="let item of directoryItems; let i = index">-->
-<!--      <td data-label="ID">{{ startId + i }}</td>-->
+<div class="directory-list__container clear-paddings">
+  <table class="table table-striped directory-list__table clear-paddings">
+    <thead>
+      <tr>
+        <th scope="col" class="directory-list__column-id">ID</th>
+        <th scope="col" class="directory-list__column-service-url">Service URL</th>
+        <th scope="col" class="directory-list__column-category">Category</th>
+        <th scope="col" class="directory-list__column-url-status">General</th>
+        <th scope="col" class="directory-list__column-leak-status">Leak</th>
+        <th scope="col" class="directory-list__column-network-type">Network</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of (directoryData$ | async)?.mDirectoryCallbackLinks let i = index">
+        <td data-label="ID">{{ i + 1 }}</td>
 
-<!--      <td data-label="Service URL">-->
-<!--        <a *ngIf="item.content_type.includes('i') || item.content_type.includes('a') || item.content_type.includes('adult'); else normalLink"-->
-<!--           href="/restricted" class="directory-list__table-url text-decoration-none text-reset">-->
-<!--          {{ item.url | slice:0:20 }}...-->
-<!--        </a>-->
-<!--        <ng-template #normalLink>-->
-<!--          <a [href]="item.url" class="directory-list__table-url text-decoration-none text-reset">-->
-<!--            {{ item.url }}-->
-<!--          </a>-->
-<!--        </ng-template>-->
-<!--      </td>-->
+        <td data-label="Service URL">
+          <a [href]="item.url" class="directory-list__table-url text-decoration-none text-reset">
+            {{ item.url }}
+          </a>
+        </td>
 
-<!--      <td data-label="Category">-->
-<!--        <div class="d-flex flex-wrap">-->
-<!--          <ng-container *ngIf="item.content_type.length; else noCategory">-->
-<!--            <div class="directory-list__content-category px-2 py-1" *ngFor="let category of item.content_type">-->
-<!--              {{ category | titlecase }}-->
-<!--            </div>-->
-<!--          </ng-container>-->
-<!--          <ng-template #noCategory>-->
-<!--            <div class="directory-list__content-category px-2 py-1">No categories available</div>-->
-<!--          </ng-template>-->
-<!--        </div>-->
-<!--      </td>-->
+        <td data-label="Category">
+          <div class="d-flex flex-wrap">
+            <ng-container *ngIf="item.content_type.length; else noCategory">
+              <div class="directory-list__content-category px-2 py-1" *ngFor="let category of item.content_type">
+                {{ category | titlecase }}
+              </div>
+            </ng-container>
+            <ng-template #noCategory>
+              <div class="directory-list__content-category px-2 py-1">No categories available</div>
+            </ng-template>
+          </div>
+        </td>
 
+        <td data-label="General Model Status" class="onion__table-leak-status">
+          <span class="directory-list__status-default-pointer" [class.directory-list__status-inactive-pointer]="!isRecent(item.geneic_model_last_update)">
+          </span>
+          {{ isRecent(item.geneic_model_last_update) ? 'Active' : 'Dead' }}
+        </td>
 
-<!--      <td data-label="URL Status" class="onion__table-leak-status">-->
-<!--          <span class="directory-list__status-default-pointer"-->
-<!--                [class.directory-list__status-inactive-pointer]="item.url_status_date !== 1"></span>-->
-<!--        {{ item.url_status_date === 1 ? 'Active' : 'Inactive' }}-->
-<!--      </td>-->
+        <td data-label="Leak Model Status" class="onion__table-leak-status">
+          <span class="directory-list__status-default-pointer" [class.directory-list__status-inactive-pointer]="!isRecent(item.leak_model_last_update)">
+          </span>
+          {{ isRecent(item.leak_model_last_update) ? 'Active' : 'Dead' }}
+        </td>
 
-<!--      <td data-label="Leak Status" class="onion__table-leak-status">-->
-<!--          <span class="directory-list__status-default-pointer"-->
-<!--                [class.directory-list__status-inactive-pointer]="item.leak_status_date !== 1"></span>-->
-<!--        {{ item.leak_status_date === 1 ? 'Active' : 'Inactive' }}-->
-<!--      </td>-->
-
-<!--      <td data-label="Network Type">-->
-<!--        {{ item.network_type ? item.network_type : 'Unknown' }}-->
-<!--      </td>-->
-<!--    </tr>-->
-<!--    </tbody>-->
-<!--  </table>-->
-<!--</div>-->
+        <td data-label="Network Type">
+          {{ item.network_type ? item.network_type : 'Unknown' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

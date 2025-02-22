@@ -116,6 +116,19 @@
     padding: 1px;
   }
 
+  table tr {
+    height: auto !important;
+  }
+
+  .directory-list__table tr:nth-child(even) {
+    background-color: #2A578499 ;
+    min-height: 45px;
+  }
+
+  .directory-list__table tbody tr:nth-child(odd) {
+    background-color: #2A578415 !important;
+    min-height: 45px;
+  }
 
   table td[data-label] {
     display: flex;

@@ -1,7 +1,3 @@
-html {
-  scroll-behavior: smooth;
-}
-
 .directory {
   margin: 0;
   max-height: 100vh;
@@ -27,11 +23,6 @@ html {
   width: 200px;
 }
 
-.directory__main-container {
-  border-radius: 8px;
-  border: 1px solid #FCFCFC12;
-}
-
 .directory__upper-heading {
   display: flex;
   align-items: center;
@@ -44,23 +35,8 @@ html {
   display: flex;
   justify-content: start;
   align-items: center;
-  padding: 0px;
+  padding: 0;
 }
-
-@media only screen and (max-width: 943px) {
-  .directory__container {
-    min-height: 100vh;
-    padding: 40px 10px 100px;
-  }
-
-  .directory__upper-heading {
-    flex-direction: column;
-    align-items: start ;
-    gap: 16px;
-    height: 120px;
-  }
-}
-
 
 .directory__header-pagination-form {
   display: flex;
@@ -68,8 +44,6 @@ html {
   align-items: center;
 
 }
-
-
 
 .directory__filters-button-div {
   display: flex;
@@ -103,20 +77,6 @@ html {
   font-size: 15px;
 }
 
-.directory__filters-checkbox {
-  display: none;
-}
-
-.directory__filters-button-div #directory__filters-checkbox:checked + .directory__filters-container {
-  right: 0;
-  transition: right 0.2s ease;
-}
-
-#directory__filters-close-input:checked + .directory__filters-container {
-  right: -50px;
-  transition: right 0.2s ease;
-}
-
 .directory__filters-button-div .directory__filters-button img {
   width: 16px;
   height: 16px;
@@ -144,16 +104,57 @@ html {
   border: none;
   outline: none;
 }
+
 .directory__filters-container {
-  width: 100vw;
-  max-width: 300px;
+  width: 300px;
   position: fixed;
   top: 1px;
-  right: -50vw;
   background: #2A5784;
   height: 95vh;
   border-bottom-left-radius: 0;
   border-top-left-radius: 15px;
   box-shadow: rgba(0, 0, 0, 0.24) 0 3px 8px;
-  transition: right 0.6s ease;
+  transition: right 0.2s ease;
+}
+
+.directory__filters-container-enable {
+  right: 0;
+}
+
+.directory__filters-container-disable {
+  right: -300px;
+}
+
+.directory__main-container {
+  border-radius: 8px;
+  border: 1px solid #FCFCFC12;
+}
+
+@media only screen and (max-width: 943px) {
+  .directory__container {
+    min-height: 100vh;
+    padding: 40px 10px 100px;
+  }
+
+  .directory__upper-heading {
+    flex-direction: column;
+    align-items: start;
+    gap: 16px;
+    height: 120px;
+  }
+
+  .directory__filters-button-div {
+    margin-top: -97px;
+    z-index: 10;
+  }
+
+  .directory__filters-container {
+    width: 100vw;
+    transition: right 0.2s ease;
+  }
+
+  .directory__filters-container-disable {
+    right: -100vw;
+    transition: none;
+  }
 }

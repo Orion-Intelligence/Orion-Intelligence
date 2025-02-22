@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {NgClass, NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
-import { InsightData, GenericModel, LeakModel } from '../../../model/insight';
+import { InsightCallbackModel, GenericModel, LeakModel } from '../../../model/callback/insight';
 
 @Component({
   selector: 'app-home-insight',
@@ -9,7 +9,7 @@ import { InsightData, GenericModel, LeakModel } from '../../../model/insight';
   imports: [NgForOf, NgIf, NgOptimizedImage, NgClass],
 })
 export class HomeInsightComponent implements OnInit {
-  insights!: InsightData;
+  insights!: InsightCallbackModel;
   models: ("general" | "leak")[] = ["general", "leak"];
 
   constructor(private route: ActivatedRoute) {}

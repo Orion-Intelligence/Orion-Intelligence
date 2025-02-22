@@ -4,7 +4,7 @@
   align-items: center;
   width: 50%;
   float: right;
-  margin-top: 8px
+  margin-top: 15px
 }
 
 .directory-pagination li {
@@ -68,7 +68,7 @@
   outline: none;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 943px) {
   .directory-pagination {
     display: flex;
     width: 50%;

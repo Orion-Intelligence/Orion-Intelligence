@@ -1,12 +1,11 @@
 .login-background {
   position: absolute;
+  top: 0;
   right: 0;
-  width: 100vw;
-  height: 100vh;
   opacity: 0.07;
   object-fit: contain;
+  object-position: top right;
   pointer-events: none;
-  object-position: right;
 }
 
 .auth_form__container {
@@ -90,7 +89,7 @@
   filter: brightness(88%);
 }
 
-.auth_form__form-button-disabled{
+.auth_form__form-button-disabled {
   opacity: 0.5;
 }
 
@@ -119,5 +118,10 @@
     margin: 0 20px;
     padding: 42px 20px;
     width: 100%;
+  }
+
+  .login-background {
+    width: 175% !important;
+    height: 175% !important;
   }
 }

@@ -1,4 +1,4 @@
-export interface AuthModel {
+export interface AuthCallbackModel {
   token: string | null;
   username: string | null;
   isAuthenticated: boolean;
