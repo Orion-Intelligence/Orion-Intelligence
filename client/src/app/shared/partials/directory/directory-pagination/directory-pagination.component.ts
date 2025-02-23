@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule} from '@angular/common';
 
 
 @Component({
   selector: 'app-directory-pagination',
   templateUrl: './directory-pagination.component.html',
   styleUrls: ['./directory-pagination.component.css'],
-  imports: [CommonModule, NgOptimizedImage],
+  imports: [CommonModule],
 })
 export class DirectoryPaginationComponent {
   //

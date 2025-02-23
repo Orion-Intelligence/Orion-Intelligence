@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import { FormsModule } from '@angular/forms';  // Import FormsModule
 
 @Component({
@@ -9,17 +9,11 @@ import { FormsModule } from '@angular/forms';  // Import FormsModule
   imports: [
     CommonModule,
     FormsModule,
-    NgOptimizedImage
   ]
 })
 export class DashboardHeaderComponent {
-  mSearchCallbackRelevantSearchType = 'persona'; // Example value
+  mSearchCallbackRelevantSearchType = 'persona';
   mSearchCallbackQuery = '';
   mUsernameQuery = '';
   mSearchCallbackSaveSearch = 'safe';
-
-  // Function to generate static asset URLs dynamically
-  getStaticUrl(path: string): string {
-    return `/assets/${path}`;
-  }
 }

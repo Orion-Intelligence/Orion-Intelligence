@@ -1,36 +1,53 @@
-<!-- app.component.html -->
-<app-dashboard-side-bar></app-dashboard-side-bar>
-<!--<app-search-container></app-search-container>-->
-
-<!-- search-sidebar.component.html -->
 <div id="top"></div>
 <div class="row search__side-nav-container-main" id="search__side-nav-container-main">
   <label for="search__nav-menu-checkbox" class="search__nav-menu-label">
-    <img ngSrc="/assets/images/statistics/seach_nav_menu_icon.svg" alt="background" class="home-background" priority="true" fill="true">
+    <img ngSrc="/assets/images/statistics/seach_nav_menu_icon.svg" alt="background" class="search__nav-menu-icon" priority="true" fill="true">
   </label>
   <input type="radio" name="menu-input" class="search__nav-menu-checkbox" id="search__nav-menu-checkbox">
   <div class="search__side-nav-container">
-<!--    <app-blade-search-sidebar></app-blade-search-sidebar>-->
+    <app-dashboard-side-bar></app-dashboard-side-bar>
   </div>
-</div>
 
-<!-- search-container.component.html -->
-<div class="search_container">
-  <div class="search">
-    <app-dashboard-header></app-dashboard-header>
-<!--    <app-safe-search></app-safe-search>-->
-    <div class="d-flex search__results-main">
-      <div class="search__results row">
-<!--        <app-search-content></app-search-content>-->
-        <ng-container *ngIf="vars.mSearchCallbackRelevantDocument.length === 0">
-          <ng-container *ngIf="vars.mSearchCallbackRelevantSearchType !== 'persona'">
-<!--            <app-no-suggestion></app-no-suggestion>-->
+
+  <!-- search-container.component.html -->
+  <div class="search_container">
+    <div class="search">
+      <app-dashboard-header></app-dashboard-header>
+      <app-dashboard-safe-search></app-dashboard-safe-search>
+      <div class="d-flex search__results-main">
+        <div class="search__results row">
+          <!-- safe Trustly -->
+
+          <div *ngIf="vars && vars.mSearchCallbackRelevantSearchType === 'persona'; else contentList">
+            <ng-container *ngTemplateOutlet="personaResult"></ng-container>
+          </div>
+
+          <ng-template #contentList>
+            <ng-container *ngFor="let mDoc of vars.mSearchCallbackRelevantDocument">
+              <ng-container *ngTemplateOutlet="contentItem; context: { $implicit: mDoc }"></ng-container>
+            </ng-container>
+          </ng-template>
+
+          <ng-template #personaResult>
+            <!-- Include your Persona result component here -->
+            <app-dashboard-search-persona-result></app-dashboard-search-persona-result>
+          </ng-template>
+
+          <ng-template #contentItem let-mDoc>
+            <!-- Include your Content Item component here, passing mDoc as input -->
+            <app-dashboard-search-content-item></app-dashboard-search-content-item>
+          </ng-template>
+
+          <ng-container *ngIf="vars.mSearchCallbackRelevantDocument.length === 0">
+            <ng-container *ngIf="vars.mSearchCallbackRelevantSearchType !== 'persona'">
+              <app-dashboard-no-suggestion></app-dashboard-no-suggestion>
+            </ng-container>
           </ng-container>
-        </ng-container>
+        </div>
       </div>
-    </div>
-    <div class="search__pagination-div">
-<!--      <app-pagination></app-pagination>-->
+      <div class="search__pagination-div">
+        <app-dashboard-pagination></app-dashboard-pagination>
+      </div>
     </div>
   </div>
 </div>
