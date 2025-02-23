@@ -2,7 +2,7 @@ import json
 
 from orion.management.models.insight_model_comparison import InsightComparisonModel
 from orion.services.redis_manager.redis_controller import redis_controller
-from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS, REDIS_DEFAULT
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
 
 class homepage_model:
@@ -15,7 +15,7 @@ class homepage_model:
 
   @staticmethod
   async def invoke_analytics():
-    results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, REDIS_DEFAULT.INSIGHT_STAT_DEFAULT, None])
+    results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, InsightComparisonModel(), None])
 
     print(f"Raw Results: {results}")
 

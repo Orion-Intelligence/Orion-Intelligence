@@ -4,6 +4,7 @@ import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
 import { AuthCallbackModel } from '../../shared/model/callback/authCallbackModel';
 import { TokenRefreshService } from './token-refresh.service';
+import {HttpHeaders} from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -28,7 +29,13 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<any> {
-    return this.apiService.post<{ access_token: string }>('token', { username, password }).pipe(
+    const body = new URLSearchParams();
+    body.set('username', username);
+    body.set('password', password);
+
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+
+    return this.apiService.post<{ access_token: string }>('token', body.toString(), { headers }).pipe(
       tap({
         next: (response) => {
           this.setToken(response.access_token, username);

@@ -23,8 +23,7 @@ class cronjob_manager:
 
   @staticmethod
   async def __init_handles():
-    asyncio.create_task(insight_job.get_instance().update_trending_insights_daily(REDIS_KEYS.INSIGHT_NEW_DAY))
-    asyncio.create_task(insight_job.get_instance().update_trending_insights_weekly(REDIS_KEYS.INSIGHT_NEW_WEEK))
+    asyncio.create_task(insight_job.get_instance().update_insights())
 
   async def init(self):
     await self.__init_handles()

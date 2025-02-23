@@ -1,8 +1,8 @@
 import threading
 import time
-from fastapi import HTTPException, status
+
 import jwt
-from starlette.requests import Request
+from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.constants.constant import CONSTANTS
@@ -29,7 +29,6 @@ class session_manager:
     self._engine = mongo_controller.getInstance().get_engine()
 
   async def get_current_user(self, token: str):
-
     if not token:
       raise HTTPException(status_code=401, detail="Missing or invalid token")
 
@@ -64,8 +63,10 @@ class session_manager:
       session_manager.__cache[token] = (user, current_time + 60)
       return user
 
-    except Exception:
-      raise HTTPException(status_code=401, detail="Missing or invalid token")
+    except jwt.ExpiredSignatureError:
+      raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+      raise HTTPException(status_code=401, detail="Invalid token")
 
   async def get_current_role(self, token: str) -> str:
     user = await self.get_current_user(token)
@@ -79,14 +80,11 @@ class session_manager:
       raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
     return role
 
-  async def refresh_token(self, request: Request):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-      raise HTTPException(status_code=401, detail="Missing or invalid token")
-
-    token = auth_header[len("Bearer "):].strip()
-
+  async def refresh_token(self, token: str):
     try:
+      print("::::::::::::::::::::::::::::::::::::::::::::::::")
+      print(token)
+      print("::::::::::::::::::::::::::::::::::::::::::::::::")
       payload = jwt.decode(
         token,
         CONSTANTS.S_AUTH_SECRET_KEY,
@@ -96,6 +94,7 @@ class session_manager:
       username = payload.get("sub")
 
       if not username:
+        print("1::::::::::::::::::::::::::::::::::::::::::::::::")
         raise HTTPException(status_code=401, detail="Invalid token")
 
       user = await self._engine.find_one(db_user_account, db_user_account.username == username)
@@ -108,9 +107,11 @@ class session_manager:
 
       session_manager.__cache[new_token] = (user, new_token_expiry)
 
-      return JSONResponse({"access_token": new_token, "token_type": "bearer"})
+      return {"access_token": new_token, "token_type": "bearer"}
 
     except jwt.ExpiredSignatureError:
+      print("2::::::::::::::::::::::::::::::::::::::::::::::::")
       raise HTTPException(status_code=401, detail="Token has expired, please log in again")
     except jwt.InvalidTokenError:
+      print("3::::::::::::::::::::::::::::::::::::::::::::::::")
       raise HTTPException(status_code=401, detail="Invalid token")
