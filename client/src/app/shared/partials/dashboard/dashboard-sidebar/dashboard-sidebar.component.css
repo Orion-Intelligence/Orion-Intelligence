@@ -98,7 +98,7 @@ input[type="radio"] {
 }
 
 .search__side-nav-item {
-  margin: 15px 0;
+  margin: 5px 0;
 }
 
 .search__side-nav-item .search__side-nav-item-dropdown {
@@ -107,6 +107,8 @@ input[type="radio"] {
   font-family: 'Inter', sans-serif;
   display: block;
   padding: 14px 10px;
+  font-weight: 500;
+  font-size: 14px;
   border-radius: 8px;
   transition: background 0.3s;
   cursor: pointer;
@@ -121,6 +123,8 @@ input[type="radio"] {
   text-decoration: none;
   color: rgba(160, 184, 209, 1);
   font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
   display: block;
   padding: 12px;
   border-radius: 5px;
