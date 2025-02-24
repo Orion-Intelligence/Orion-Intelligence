@@ -190,11 +190,12 @@ input[type="radio"] {
   margin-right: 0;
   height: 100vh;
   overflow-y: hidden;
+  background: rgba(28, 77, 125, 1);
 }
 
 .search__side-nav-container {
-  width: 355px;
-  background: linear-gradient(to bottom, rgba(18, 52, 84, 1) 0%, #2A5784 800px);
+  width: 300px;
+  background: linear-gradient(to bottom, hsla(210, 69%, 18%, 1) 0%, hsla(211, 70%, 22%, 1) 800px);
   position: sticky;
   padding: 24px 20px;
   height: 100vh;
