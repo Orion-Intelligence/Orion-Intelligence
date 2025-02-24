@@ -1,14 +1,11 @@
 import motor.motor_asyncio
 from odmantic import AIOEngine
 from odmantic.exceptions import DuplicateKeyError
-from starlette_admin.contrib.odmantic import Admin, ModelView
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import (MONGO_CONNECTIONS)
-from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.services.session_manager.session_enums import admin_mock, crawler_mock
 from orion.services.mongo_manager.shared_model.db_auth_models import (db_user_account, user_role)
-from orion.view_managers.admin.db_public_admin import SystemSettingsView
 
 
 class mongo_controller:
@@ -16,7 +13,7 @@ class mongo_controller:
   __m_connection = None
 
   @staticmethod
-  def getInstance():
+  def get_instance():
     if mongo_controller.__instance is None:
       mongo_controller()
     return mongo_controller.__instance
@@ -67,10 +64,11 @@ class mongo_controller:
         print("⚠️ Duplicate admin user detected. Skipping insert.")
 
   def get_admin(self):
+    from starlette_admin.contrib.odmantic import Admin, ModelView
     admin = Admin(self.__engine, title="Admin Panel")
     admin.add_view(ModelView(db_user_account, icon="fa fa-user-circle"))
     admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
-    admin.add_view(SystemSettingsView(db_system_model, icon="fa fa-building"))
+    #admin.add_view(SystemSettingsView(db_system_model, icon="fa fa-building"))
 
 
     return admin

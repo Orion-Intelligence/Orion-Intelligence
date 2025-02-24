@@ -26,7 +26,7 @@ class session_manager:
     if session_manager.__instance is not None:
       raise Exception("This class is a singleton!")
     session_manager.__instance = self
-    self._engine = mongo_controller.getInstance().get_engine()
+    self._engine = mongo_controller.get_instance().get_engine()
 
   async def get_current_user(self, token: str):
     if not token:
@@ -82,9 +82,6 @@ class session_manager:
 
   async def refresh_token(self, token: str):
     try:
-      print("::::::::::::::::::::::::::::::::::::::::::::::::")
-      print(token)
-      print("::::::::::::::::::::::::::::::::::::::::::::::::")
       payload = jwt.decode(
         token,
         CONSTANTS.S_AUTH_SECRET_KEY,
@@ -94,7 +91,6 @@ class session_manager:
       username = payload.get("sub")
 
       if not username:
-        print("1::::::::::::::::::::::::::::::::::::::::::::::::")
         raise HTTPException(status_code=401, detail="Invalid token")
 
       user = await self._engine.find_one(db_user_account, db_user_account.username == username)
@@ -110,8 +106,6 @@ class session_manager:
       return {"access_token": new_token, "token_type": "bearer"}
 
     except jwt.ExpiredSignatureError:
-      print("2::::::::::::::::::::::::::::::::::::::::::::::::")
       raise HTTPException(status_code=401, detail="Token has expired, please log in again")
     except jwt.InvalidTokenError:
-      print("3::::::::::::::::::::::::::::::::::::::::::::::::")
       raise HTTPException(status_code=401, detail="Invalid token")
