@@ -1,5 +1,5 @@
-from orion.route_managers.interactive.search_manager.search_data_model import search_dynamic_param_model
-from orion.route_managers.interactive.search_manager.search_model import search_model
+from orion.view_managers.interactive.search_manager.search_data_model import search_dynamic_param_model
+from orion.view_managers.interactive.search_manager.search_model import search_model
 
 
 class search_view_model:

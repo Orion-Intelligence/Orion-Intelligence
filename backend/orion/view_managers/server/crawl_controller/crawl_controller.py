@@ -1,6 +1,6 @@
-from orion.route_managers.server.crawl_controller.class_model.general_model import GeneralDataModel
-from orion.route_managers.server.crawl_controller.class_model.leak_model import LeakDataModel
-from orion.route_managers.server.crawl_controller.crawl_model import crawl_model
+from orion.view_managers.server.crawl_controller.class_model.general_model import GeneralDataModel
+from orion.view_managers.server.crawl_controller.class_model.leak_model import LeakDataModel
+from orion.view_managers.server.crawl_controller.crawl_model import crawl_model
 
 
 class crawl_controller:

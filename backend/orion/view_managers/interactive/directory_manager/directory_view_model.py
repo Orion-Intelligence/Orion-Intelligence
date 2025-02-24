@@ -1,5 +1,5 @@
-from orion.route_managers.interactive.directory_manager.directory_model import directory_model
-from orion.route_managers.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
+from orion.view_managers.interactive.directory_manager.directory_model import directory_model
+from orion.view_managers.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 
 
 class directory_view_model:

@@ -1,5 +1,5 @@
 from starlette.requests import Request
-from orion.route_managers.interactive.hompage_manager.homepage_model import homepage_model
+from orion.view_managers.interactive.hompage_manager.homepage_model import homepage_model
 
 
 class homepage_view_model:

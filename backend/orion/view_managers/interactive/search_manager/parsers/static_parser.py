@@ -5,9 +5,9 @@ from datetime import datetime, timezone
 from orion.constants.constant import CONSTANTS
 from orion.constants.strings import GENERAL_STRINGS, SEARCH_STRINGS
 from orion.helper_manager.helper_controller import helper_controller
-from orion.route_managers.interactive.search_manager.local_helper_methods.search_helper_methods import search_helper_methods
-from orion.route_managers.interactive.search_manager.search_data_model.query_model import query_model
-from orion.route_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK
+from orion.view_managers.interactive.search_manager.local_helper_methods.search_helper_methods import search_helper_methods
+from orion.view_managers.interactive.search_manager.search_data_model.query_model import query_model
+from orion.view_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK, SEARCH_DOCUMENT_CALLBACK
 from orion.helper_manager.env_handler import env_handler
 
 class static_parser:

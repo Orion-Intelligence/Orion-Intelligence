@@ -1,6 +1,6 @@
 import json
 from orion.constants.strings import GENERAL_STRINGS
-from orion.route_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK, API_RESPONSE
+from orion.view_managers.interactive.search_manager.search_enums import SEARCH_CALLBACK, API_RESPONSE
 from orion.helper_manager.env_handler import env_handler
 
 class dynamic_parser:

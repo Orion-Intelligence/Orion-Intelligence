@@ -1,11 +1,11 @@
 import os
 from datetime import datetime, timezone
 from starlette.responses import JSONResponse
-from orion.route_managers.server.crawl_controller.class_model.general_model import GeneralDataModel
-from orion.route_managers.server.crawl_controller.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
+from orion.view_managers.server.crawl_controller.class_model.general_model import GeneralDataModel
+from orion.view_managers.server.crawl_controller.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.route_managers.server.crawl_controller.class_model.leak_model import LeakDataModel
+from orion.view_managers.server.crawl_controller.class_model.leak_model import LeakDataModel
 from fastapi.responses import FileResponse
 
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model

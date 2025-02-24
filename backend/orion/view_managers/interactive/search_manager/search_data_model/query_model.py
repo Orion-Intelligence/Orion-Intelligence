@@ -1,5 +1,5 @@
 from orion.constants.strings import SEARCH_STRINGS
-from orion.route_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
+from orion.view_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
 
 
 class query_model:

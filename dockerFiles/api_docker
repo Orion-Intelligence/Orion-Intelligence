@@ -21,6 +21,7 @@ RUN pip install pydantic[email]
 # Copy the actual application code
 COPY backend/ /app/
 COPY .env /app/.env
+COPY pyproject.toml /app/pyproject.toml
 COPY README.md /app/s.md
 COPY client/build/ /app/build/
 

@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from contextlib import asynccontextmanager
-
 from configs.swagger_config import configure_swagger
 from orion.middleware.middleware_setup import setup_middlewares
 from orion.management.managers.service_manager import service_manager
@@ -19,13 +18,8 @@ async def lifespan(p_app: FastAPI):
     service_manager_instance = service_manager.get_instance()
     await service_manager_instance.init_services()
     mongo_controller.getInstance().get_admin().mount_to(p_app)
+    app.include_router(interface)
     yield
-
-
-async def init_cronjob():
-    manager = service_manager.get_instance()
-    await manager.init_services()
-    await manager.init_cronjobs()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -41,7 +35,6 @@ configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(api_routes)
-app.include_router(interface)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

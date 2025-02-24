@@ -6,8 +6,8 @@ from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATI
 from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
-from orion.route_managers.interactive.search_manager.search_data_model.search_api_param_model import search_api_param_model
-from orion.route_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
+from orion.view_managers.interactive.search_manager.search_data_model.search_api_param_model import search_api_param_model
+from orion.view_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
 
 
 class elastic_controller:
