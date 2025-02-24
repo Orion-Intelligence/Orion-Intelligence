@@ -33,13 +33,10 @@
   width: 100%;
   overflow: visible;
   margin-top: -1px;
-  padding: 40px 48px 15px 32px;
-  padding-top: 25px;
-  padding-bottom: 0;
   margin-bottom: 0;
   border-bottom: 1px solid rgba(252, 252, 252, 0.07);
   background: rgba(28, 77, 125, 1);
-  padding-right: 0;
+  padding: 25px 0 0 32px;
 }
 
 .searchbar__searchbox-icon {
@@ -78,9 +75,7 @@
   border: 0;
   outline: 0;
   width: 50px;
-  border-radius: 8px;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
+  border-radius: 0 8px 8px 0;
   background: #fff;
 }
 
@@ -437,7 +432,7 @@ div.searchbar__searchbox .btn.btn-primary.searchbar__search-button-right:focus {
   background-color: #0056b3;
 }
 .searchbar__searchbox_switch-search-button {
-  padding: 12px 14px;
+  padding: 9px 7px 9px 12px;
   background: none;
   text-decoration: none;
   border: none;
@@ -447,12 +442,13 @@ div.searchbar__searchbox .btn.btn-primary.searchbar__search-button-right:focus {
   font-weight: 400;
   color: rgba(23, 64, 105, 1);
   width: 50%;
+  margin-left: 2px;
   cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
 .searchbar__searchbox_switch-search {
-  height: 48px;
+  height: 45px;
   width: 177px;
   border-radius: 8px;
   background: #fff;

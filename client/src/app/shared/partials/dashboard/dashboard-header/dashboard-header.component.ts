@@ -1,11 +1,12 @@
 import {Component} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NgOptimizedImage} from '@angular/common';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-header',
   standalone: true, // Ensure standalone component if applicable
-  imports: [FormsModule, NgOptimizedImage], // Import FormsModule for ngModel support
+  imports: [FormsModule, NgOptimizedImage, RouterLink], // Import FormsModule for ngModel support
   templateUrl: './dashboard-header.component.html',
   styleUrl: './dashboard-header.component.css'
 })

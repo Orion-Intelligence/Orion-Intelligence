@@ -26,6 +26,7 @@
   border: none;
   outline: none;
 }
+
 .home__search-form .home__search-container-button:hover{
   background: #3673b0;
 }

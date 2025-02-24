@@ -25,7 +25,7 @@
   }
 
   #search__side-nav-container-main .search__nav-menu-checkbox:checked + .search__side-nav-container {
-    right: 0vw;
+    right: 0;
     transition: right 1s ease;
 
   }
@@ -172,6 +172,7 @@ input[type="radio"] {
 .search__side-nav-subitems.show {
   opacity: 1;
   max-height: 500px;
+  padding-left: 22px;
 }
 
 .search__side-nav-subitems li {
