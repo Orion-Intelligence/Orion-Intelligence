@@ -14,6 +14,7 @@ services:
       - ./backend/orion:/app/orion:cached
       - ./backend/routes:/app/routes:cached
       - ./backend/static:/app/static:cached
+      - ./backend/migrations:/app/migrations:cached
       - ./client/build:/client_build:delegated
     expose:
       - "8070"
@@ -27,7 +28,8 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+      sh -c "python3 /app/cronjobs.py"
+#      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
 
   nginx:
     container_name: trusted-web-nginx
