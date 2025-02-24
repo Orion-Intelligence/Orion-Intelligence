@@ -1,61 +1,58 @@
 <nav class="search__side-nav">
   <div class="search__side-nav-logo">
-    <div class="col-6">
-      <a href="../../..">
-        <img ngSrc="assets/images/shared/search_nav_logo.svg" alt="Logo" priority="true" fill="true" />
-
-      </a>
-    </div>
+    <a href="../../..">
+      <img ngSrc="assets/images/shared/search_nav_logo.svg" alt="Logo" priority="true" height="50" width="314"/>
+    </a>
     <div class="col-6 close_menu_div">
       <label for="search__nav-close" class="search__nav-close-label">Close</label>
-      <input type="radio" name="menu-input" class="search__nav-close" id="search__nav-close" />
     </div>
   </div>
+
   <ul class="search__side-nav-items">
-<!--    <li class="search__side-nav-item">-->
-<!--      <a href="#"><img ngSrc="assets/images/shared/search_side_nav_home_icon.svg" alt="Home" priority="true" fill="true" > Home</a>-->
-<!--    </li>-->
+    <!-- General Intelligence Dropdown -->
     <li class="search__side-nav-item search__side-nav-dropdown">
-      <input type="radio" id="general_intelligence" name="nav_toggle" class="search__side-nav-radio">
-      <label for="general_intelligence" class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence')">
+      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence')">
         <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" height="24" width="24">
         General Intelligence
         <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="24" width="24">
-      </label>
-      <ul class="search__side-nav-subitems" *ngIf="activeDropdown === 'general_intelligence'">
-        <li><a href="">Dashboard</a></li>
-        <li><a href="">Add Client</a></li>
-        <li><a href="">Update Client</a></li>
-      </ul>
-    </li>
-    <li class="search__side-nav-item search__side-nav-dropdown">
-      <input type="radio" id="monitor" name="nav_toggle" class="search__side-nav-radio">
-      <label for="monitor" class="search__side-nav-item-dropdown" (click)="toggleDropdown('monitor')">
-        <img ngSrc="assets/images/shared/search_side_monitor_icon.svg" alt="Monitor" height="24" width="24">
-        Monitor
-        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="24" width="24">
-      </label>
-      <ul class="search__side-nav-subitems" *ngIf="activeDropdown === 'monitor'">
+      </div>
+      <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'general_intelligence'}">
         <li><a href="#">Dashboard</a></li>
         <li><a href="#">Add Client</a></li>
         <li><a href="#">Update Client</a></li>
       </ul>
     </li>
+
+    <!-- Monitor Dropdown -->
+    <li class="search__side-nav-item search__side-nav-dropdown">
+      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('monitor')">
+        <img ngSrc="assets/images/shared/search_side_monitor_icon.svg" alt="Monitor" height="24" width="24">
+        Monitor
+        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="24" width="24">
+      </div>
+      <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'monitor'}">
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Add Client</a></li>
+        <li><a href="#">Update Client</a></li>
+      </ul>
+    </li>
+
     <li class="search__side-nav-item">
-      <a href=""><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20"> Live APIs</a>
+      <a href="#"><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="24" width="24"> Live APIs</a>
     </li>
     <li class="search__side-nav-item">
-      <a href=""><img ngSrc="assets/images/shared/search_side_email_icon.svg" alt="Email" height="24" width="24"> Email</a>
+      <a href="#"><img ngSrc="assets/images/shared/search_side_email_icon.svg" alt="Email" height="24" width="24"> Email</a>
     </li>
   </ul>
 </nav>
+
 <div class="search__nav-bottom_div">
   <ul class="search__side-nav-items">
     <li class="search__side-nav-item">
-      <a href="#"><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20"> Live APIs</a>
+      <a href="#"><img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="links" height="24" width="24"> Links</a>
     </li>
     <li class="search__side-nav-item">
-      <a href=""><img ngSrc="assets/images/shared/search_side_email_icon.svg" alt="Email" height="24" width="24"> Email</a>
+      <a href="#"><img ngSrc="assets/images/shared/document_count.svg" alt="documentation" height="24" width="24"> Documentation</a>
     </li>
   </ul>
 </div>

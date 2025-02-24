@@ -1,19 +1,22 @@
 import { Component } from '@angular/core';
-import {NgIf, NgOptimizedImage} from '@angular/common';
+import { NgIf, NgOptimizedImage, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-sidebar',
+  standalone: true,
   imports: [
     NgOptimizedImage,
-    NgIf
+    NgClass // ✅ Import NgClass to fix the error
   ],
   templateUrl: './dashboard-sidebar.component.html',
-  styleUrl: './dashboard-sidebar.component.css'
+  styleUrls: ['./dashboard-sidebar.component.css']
 })
 export class DashboardSidebarComponent {
- activeDropdown: string | null = null;
+  activeDropdown: string | null = null;
 
   toggleDropdown(item: string) {
-    this.activeDropdown = this.activeDropdown === item ? null : item;
+    setTimeout(() => {
+      this.activeDropdown = this.activeDropdown === item ? null : item;
+    });
   }
 }

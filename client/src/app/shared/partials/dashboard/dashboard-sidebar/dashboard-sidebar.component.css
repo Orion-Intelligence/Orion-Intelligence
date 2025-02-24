@@ -41,7 +41,10 @@
     display: block;
   }
 }
-
+.search__nav-bottom_div{
+  bottom: 30px;
+  position: fixed;
+}
 .close_menu_div {
   display: none;
 }
@@ -123,11 +126,6 @@ input[type="radio"] {
   color: rgba(255, 255, 255, 1);
 }
 
-.search__side-nav-dropdown ul {
-  list-style: circle;
-  margin-left: 16px;
-  display: none;
-}
 
 
 .search__side-nav-item a img {
@@ -142,7 +140,27 @@ input[type="radio"] {
 .search_side_dropdown_icon {
   float: right;
 }
-
 .search__side-nav-subitems {
-  list-style: none;
+  list-style: circle;
+  margin-left: 16px;
+  display: none;
 }
+.search__side-nav-subitems li{
+  color: #fff;
+}
+.search__side-nav-subitems.show {
+  display: block;
+}
+.search__side-nav-item-dropdown {
+  cursor: pointer;
+  position: relative;
+}
+
+.search_side_dropdown_icon {
+  transition: transform 0.3s ease;
+}
+
+.search__side-nav-item-dropdown.active .search_side_dropdown_icon {
+  transform: rotate(180deg);
+}
+

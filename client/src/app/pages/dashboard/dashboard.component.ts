@@ -8,6 +8,7 @@ import {DashboardSidebarComponent} from '../../shared/partials/dashboard/dashboa
     DashboardSidebarComponent
   ],
   templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent {
 
