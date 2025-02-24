@@ -1,0 +1,50 @@
+<form class="searchbar" method="GET" action="" enctype="multipart/form-data">
+  <div class="searchbar__profile-button">
+    <a routerLink="/admin" aria-label="Go to CMS Home">
+      <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logo" priority="true" height="24" width="24"/>
+    </a>
+  </div>
+  <div class="searchbar__logo-grid">
+    <div class="searchbar__logo-container d-flex">
+      <div class="search__nav-menu-div"></div>
+      <p class="searchbar__logo">General Intelligence</p>
+    </div>
+
+    <div class="searchbar__header">
+      <div class="searchbar__searchbox">
+        <div class="input-group">
+          <input
+            autocomplete="off"
+            autocapitalize="none"
+            type="search"
+            placeholder="Search..."
+            class="form-control searchbar__detail-header-search-input"
+            maxlength="150"
+            name="q"
+            [(ngModel)]="searchQuery">
+          <input type="hidden" name="mSearchParamPage" value="1">
+          <input type="hidden" name="mSearchParamSafeSearch" [value]="mSearchCallbackSaveSearch">
+          <button class="btn btn-primary searchbar__search-button-right" type="submit">
+            <img class="searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglassblack.svg" alt="Search" priority="true" height="24" width="24">
+          </button>
+        </div>
+      </div>
+      <div class="searchbar__searchbox_switch-search">
+        <button
+          class="searchbar__searchbox_switch-search-button"
+          [class.searchbar__searchbox_switch-search-button-active]="activeTab === 'results'"
+          (click)="setActiveTab('results')">
+          Results
+        </button>
+
+        <button
+          class="searchbar__searchbox_switch-search-button"
+          [class.searchbar__searchbox_switch-search-button-active]="activeTab === 'analytics'"
+          (click)="setActiveTab('analytics')">
+          Analytics
+        </button>
+      </div>
+
+    </div>
+  </div>
+</form>
