@@ -11,9 +11,8 @@
   <ul class="search__side-nav-items">
     <!-- General Intelligence Dropdown -->
     <li class="search__side-nav-item search__side-nav-dropdown">
-      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence')">
-        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" height="24" width="24">
-        General Intelligence
+      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence')" [ngClass]="{'active': activeDropdown === 'general_intelligence'}">
+        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="24" width="24">General Intelligence
         <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="24" width="24">
       </div>
       <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'general_intelligence'}">
@@ -25,9 +24,8 @@
 
     <!-- Monitor Dropdown -->
     <li class="search__side-nav-item search__side-nav-dropdown">
-      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('monitor')">
-        <img ngSrc="assets/images/shared/search_side_monitor_icon.svg" alt="Monitor" height="24" width="24">
-        Monitor
+      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('monitor')" [ngClass]="{'active': activeDropdown === 'monitor'}">
+        <img ngSrc="assets/images/shared/search_side_monitor_icon.svg" alt="Monitor" height="24" width="24" class="search_side_icon">Monitor
         <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="24" width="24">
       </div>
       <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'monitor'}">
@@ -38,21 +36,22 @@
     </li>
 
     <li class="search__side-nav-item">
-      <a href="#"><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="24" width="24"> Live APIs</a>
+      <a href="#"><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="24" width="24" class="search_side_icon">Live APIs</a>
     </li>
     <li class="search__side-nav-item">
-      <a href="#"><img ngSrc="assets/images/shared/search_side_email_icon.svg" alt="Email" height="24" width="24"> Email</a>
+      <a href="#"><img ngSrc="assets/images/shared/search_side_email_icon.svg" alt="Email" height="24" width="24" class="search_side_icon">Email</a>
     </li>
   </ul>
+  <div class="search__nav-bottom_div">
+    <ul class="search__side-nav-items">
+      <li class="search__side-nav-item">
+        <a href="#"><img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="links" height="24" width="24" class="search_side_icon">Links</a>
+      </li>
+      <li class="search__side-nav-item">
+        <a href="#"><img ngSrc="assets/images/shared/document_count.svg" alt="documentation" height="24" width="24" class="search_side_icon">Documentation</a>
+      </li>
+    </ul>
+  </div>
 </nav>
 
-<div class="search__nav-bottom_div">
-  <ul class="search__side-nav-items">
-    <li class="search__side-nav-item">
-      <a href="#"><img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="links" height="24" width="24"> Links</a>
-    </li>
-    <li class="search__side-nav-item">
-      <a href="#"><img ngSrc="assets/images/shared/document_count.svg" alt="documentation" height="24" width="24"> Documentation</a>
-    </li>
-  </ul>
-</div>
+
