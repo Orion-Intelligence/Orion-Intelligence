@@ -1,12 +1,14 @@
 .searchbar__logo-container {
   margin-bottom: 23px
 }
-.searchbar__logo-container p{
+
+.searchbar__logo-container p {
   color: rgba(255, 255, 255, 1);
   font-weight: 600;
   font-size: 20px;
   margin-bottom: 0;
 }
+
 .searchbar__logo-grid {
   display: grid;
 }
@@ -33,10 +35,13 @@
   width: 100%;
   overflow: visible;
   margin-top: -1px;
+  padding: 40px 48px 15px 32px;
+  padding-top: 25px;
+  padding-bottom: 0;
   margin-bottom: 0;
   border-bottom: 1px solid rgba(252, 252, 252, 0.07);
   background: rgba(28, 77, 125, 1);
-  padding: 25px 0 0 32px;
+  padding-right: 0;
 }
 
 .searchbar__searchbox-icon {
@@ -57,7 +62,7 @@
   border-radius: 8px 0 0 7px;
   -moz-border-radius-bottomright: 0;
   height: 44px;
-  width: 80%;
+  width: 50%;
   font-size: 16px;
   color: black;
   padding-left: 20px;
@@ -72,11 +77,16 @@
 }
 
 .searchbar__searchbox .searchbar__search-button-right {
-  border: 0;
-  outline: 0;
+  border-radius: 0 7px 7px 0;
+  background: #30669c;
   width: 50px;
-  border-radius: 0 8px 8px 0;
-  background: #fff;
+  border: none;
+  outline: none;
+}
+
+.search_nav_menu_icon {
+  display: none;
+  margin-right: 20px;
 }
 
 .searchbar__searchbox .searchbar__search-button-right:hover {
@@ -199,10 +209,20 @@ div.searchbar__searchbox .btn.btn-primary.searchbar__search-button-right:focus {
   outline: none;
 }
 
+@media only screen and (max-width: 1050px) {
+  .search_nav_menu_icon {
+    display: block;
+  }
+  .searchbar__profile-button {
+    display: none;
+  }
+}
+
 @media only screen and (max-width: 1000px) {
   #catagory_finance {
     display: none;
   }
+
 
   .searchbar__header .searchbar__searchbox .searchbar__detail-header-search-input-email {
     width: 100%;
@@ -255,9 +275,7 @@ div.searchbar__searchbox .btn.btn-primary.searchbar__search-button-right:focus {
     width: 100%;
   }
 
-  .searchbar__profile-button {
-    display: none;
-  }
+
 
   .searchbar__nav-right {
     display: none;
@@ -432,33 +450,24 @@ div.searchbar__searchbox .btn.btn-primary.searchbar__search-button-right:focus {
   background-color: #0056b3;
 }
 
-.searchbar__searchbox_switch-search-button-left {
-  border-bottom-left-radius: 7px;
-  border-top-left-radius: 7px;
-}
-.searchbar__searchbox_switch-search-button-right {
-  border-bottom-right-radius: 7px;
-  border-top-right-radius: 7px;
-}
-
 .searchbar__searchbox_switch-search-button {
-  padding: 9px 6px 8px 9px;
+  padding: 12px 14px;
   background: none;
   text-decoration: none;
   border: none;
+  border-radius: 8px;
   font-size: 14px;
   background: #fff;
   font-weight: 400;
   color: rgba(23, 64, 105, 1);
   width: 50%;
-  margin-left: 2px;
   cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
 .searchbar__searchbox_switch-search {
-  height: 44px;
-  width: 160px;
+  height: 48px;
+  width: 177px;
   border-radius: 8px;
   background: #fff;
   margin-left: 24px;
@@ -468,46 +477,39 @@ div.searchbar__searchbox .btn.btn-primary.searchbar__search-button-right:focus {
 }
 
 /* Active state styling */
-.searchbar__searchbox_switch-search-button-active-left {
+.searchbar__searchbox_switch-search-button-active {
+  font-weight: 500;
   background: rgba(23, 64, 105, 1);
   color: rgba(227, 227, 227, 1);
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
-  font-weight: bold;
-}
-.searchbar__searchbox_switch-search-button-active-right {
-  background: rgba(23, 64, 105, 1);
-  color: rgba(227, 227, 227, 1);
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  font-weight: bold;
 }
 
-.searchbar__searchbox_switch-search-button-active:active{
+.searchbar__searchbox_switch-search-button-active:active {
   border: none;
   outline: none;
 }
 
-.searchbar__searchbox_switch-search-button-active:focus{
+.searchbar__searchbox_switch-search-button-active:focus {
   border: none;
   outline: none;
 }
-.searchbar__searchbox_switch-search-button-active:hover{
+
+.searchbar__searchbox_switch-search-button-active:hover {
   border: none;
   outline: none;
 }
 
 
-.searchbar__searchbox_switch-search-button:active{
+.searchbar__searchbox_switch-search-button:active {
   border: none;
   outline: none;
 }
 
-.searchbar__searchbox_switch-search-button:focus{
+.searchbar__searchbox_switch-search-button:focus {
   border: none;
   outline: none;
 }
-.searchbar__searchbox_switch-search-button:hover{
+
+.searchbar__searchbox_switch-search-button:hover {
   border: none;
   outline: none;
 }

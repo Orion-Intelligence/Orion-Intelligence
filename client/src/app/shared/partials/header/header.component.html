@@ -3,17 +3,6 @@
     <a href="/" class="gc-clear-selection logo-item" aria-label="Go to Homepage">
       <img ngSrc="/assets/images/shared/brand-header-1.svg" alt="Trustly Logo" width="57" height="12" priority="true">
     </a>
-    <div class="header_form-user--logout dropdown" *ngIf="(authService.authState$ | async)?.isAuthenticated">
-      <a class="dropdown-toggle" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-        <div class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold" id="logout-button">
-          <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logout" width="24" height="24" priority="true">
-        </div>
-      </a>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-        <li><a class="dropdown-item disabled" ><img ngSrc="assets/images/shared/user.svg" alt="Logout" width="20" height="20" priority="true"> &nbsp; {{ username$ | async }}</a></li>
-          <li><hr class="dropdown-divider mx-3"></li>
-        <li><a class="dropdown-item" (click)="logout()"><img ngSrc="assets/images/shared/logout.svg" alt="Logout" width="20" height="20" priority="true"> &nbsp; Logout</a></li>
-      </ul>
-    </div>
+   <app-header-admin-dropdown></app-header-admin-dropdown>
   </div>
 </div>

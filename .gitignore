@@ -33,3 +33,4 @@ client/node_modules/*
 backend/build/*
 client/build/*
 backend/static/.well-known/parser_files.zip
+backend/static/.well-known/parser_files.zip

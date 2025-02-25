@@ -4,12 +4,12 @@
     <!--    <img ngSrc="/assets/images/statistics/seach_nav_menu_icon.svg" alt="background" class="search__nav-menu-icon" priority="true" fill="true">-->
   </label>
   <input type="radio" name="menu-input" class="search__nav-menu-checkbox" id="search__nav-menu-checkbox">
-  <div class="search__side-nav-container">
-    <app-dashboard-sidebar></app-dashboard-sidebar>
+  <div class="search__side-nav-container" [ngClass]="{'show-menu': isMenuOpen}">
+    <app-dashboard-sidebar (menuClosed)="hideSideNav()"></app-dashboard-sidebar>
   </div>
   <div class="search_container">
     <div class="search">
-      <app-dashboard-header></app-dashboard-header>
+      <app-dashboard-header (menuClicked)="toggleSideNav()"></app-dashboard-header>
     </div>
   </div>
 </div>
