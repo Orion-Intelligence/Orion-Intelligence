@@ -5,11 +5,12 @@
   </label>
   <input type="radio" name="menu-input" class="search__nav-menu-checkbox" id="search__nav-menu-checkbox">
   <div class="search__side-nav-container" [ngClass]="{'show-menu': isMenuOpen}">
-    <app-dashboard-sidebar (menuClosed)="hideSideNav()"></app-dashboard-sidebar>
+    <app-dashboard-sidebar (sectionSelected)="selectedSection = $event" (menuClosed)="hideSideNav()"></app-dashboard-sidebar>
   </div>
   <div class="search_container">
     <div class="search">
       <app-dashboard-header (menuClicked)="toggleSideNav()"></app-dashboard-header>
+      <app-dashboard-search-content-items [selectedSection]="selectedSection"></app-dashboard-search-content-items>
     </div>
   </div>
 </div>
