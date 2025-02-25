@@ -13,11 +13,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @auth_router.post("/api/token")
 async def swagger_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    print(":::::::::::::::::::::::::::::::::")
-    print(form_data.username)
-    print(":::::::::::::::::::::::::::::::::")
-    print(form_data.password)
-    print(":::::::::::::::::::::::::::::::::")
     user = await auth_manager.get_instance().authenticate_user(
         form_data.username, form_data.password
     )

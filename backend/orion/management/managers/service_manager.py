@@ -32,9 +32,9 @@ class service_manager:
                 await writer.wait_closed()
 
                 await elastic_controller.get_instance().initialize()
-                await mongo_controller.getInstance().link_connection()
-                await mongo_controller.getInstance().ensure_indexes()
-                await mongo_controller.getInstance().initialize()
+                await mongo_controller.get_instance().link_connection()
+                await mongo_controller.get_instance().ensure_indexes()
+                await mongo_controller.get_instance().initialize()
                 await redis_controller.getInstance().initialize()
                 await asyncio.sleep(5)
 

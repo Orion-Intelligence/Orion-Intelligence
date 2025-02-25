@@ -2,9 +2,7 @@ from odmantic import Model, Field
 from enum import Enum
 
 class AllowedKeys(str, Enum):
-    NAME = "name"
-    TITLE = "title"
-    DESCRIPTION = "description"
+    VERSION = "version"
 
 class InputType(str, Enum):
     TEXT = "text"

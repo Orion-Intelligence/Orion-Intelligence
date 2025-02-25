@@ -3,11 +3,12 @@ import {FormsModule} from '@angular/forms';
 import {NgOptimizedImage} from '@angular/common';
 import {HeaderAdminDropdownComponent} from '../../header-admin-dropdown/header-admin-dropdown.component';
 import { EventEmitter, Output } from '@angular/core';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-header',
-  standalone: true, // Ensure standalone component if applicable
-  imports: [FormsModule, NgOptimizedImage, HeaderAdminDropdownComponent], // Import FormsModule for ngModel support
+  standalone: true,
+  imports: [FormsModule, NgOptimizedImage, HeaderAdminDropdownComponent],
   templateUrl: './dashboard-header.component.html',
   styleUrl: './dashboard-header.component.css'
 })

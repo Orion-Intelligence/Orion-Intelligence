@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../../shared/partials/header/header.component';
 import { FooterComponent } from '../../shared/partials/footer/footer.component';
 import { ErrorStoreService } from '../../shared/services/error-store.service';
-import { Observable } from 'rxjs';
+import { Observable, filter } from 'rxjs';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -30,14 +30,20 @@ import { trigger, transition, style, animate } from '@angular/animations';
   ]
 })
 export class AppComponent {
-  error$: Observable<boolean>;
+  private router = inject(Router);
+  private errorStore = inject(ErrorStoreService);
+  error$: Observable<boolean> = this.errorStore.error$;
   isVisible = true;
 
-  constructor(private errorStore: ErrorStoreService) {
-    this.error$ = this.errorStore.error$;
+  currentRoute = signal(this.router.url);
+
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentRoute.set(event.url);
+    });
   }
 
-  prepareRoute(outlet: RouterOutlet) {
-    return outlet?.activatedRouteData?.['animation'];
-  }
+  showHeaderFooter = computed(() => this.currentRoute() !== '/dashboard');
 }

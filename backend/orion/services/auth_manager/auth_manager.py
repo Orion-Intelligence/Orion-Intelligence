@@ -23,7 +23,7 @@ class auth_manager:
         if auth_manager.__instance is not None:
             raise Exception("This class is a singleton!")
         auth_manager.__instance = self
-        self._engine = mongo_controller.getInstance().get_engine()
+        self._engine = mongo_controller.get_instance().get_engine()
 
     @staticmethod
     def create_access_token(data: dict, expires_delta: timedelta | None = None):

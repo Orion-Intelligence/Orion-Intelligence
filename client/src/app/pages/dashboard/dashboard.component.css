@@ -238,7 +238,7 @@ input[type="radio"] {
 
 .search__side-nav-container {
   width: 300px;
-  background: linear-gradient(to bottom, hsla(210, 69%, 18%, 1) 0%, hsla(211, 70%, 22%, 1) 800px);
+  background: linear-gradient(to bottom, hsla(210, 69%, 18%, 1) 0%, #134070 800px);
   position: sticky;
   padding: 24px 20px;
   height: 100vh;

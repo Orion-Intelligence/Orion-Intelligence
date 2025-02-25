@@ -11,7 +11,7 @@ class directory_model:
 
   # Initializations
   def __init__(self):
-    self._engine = mongo_controller.getInstance().get_engine()
+    self._engine = mongo_controller.get_instance().get_engine()
 
   async def fetch_filtered_urls(self, params: directory_param_model):
 

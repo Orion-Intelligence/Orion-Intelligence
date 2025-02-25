@@ -20,7 +20,7 @@ class crawl_model:
       pass
     else:
       crawl_model.__instance = self
-      self._engine = mongo_controller.getInstance().get_engine()
+      self._engine = mongo_controller.get_instance().get_engine()
 
   async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list, network_type: str, is_leak_update: bool):
     general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == base_url)
@@ -55,9 +55,6 @@ class crawl_model:
     )
 
   async def init_leak(self, leak_index: LeakDataModel):
-    print("2.1 ::::::::::::::::::::::::::::: ")
-    print(leak_index)
-    print("2.1 ::::::::::::::::::::::::::::: ")
     await elastic_controller.get_instance().index_leak(leak_index.model_dump())
     return await self._update_or_create_model(
       base_url=leak_index.base_url,
