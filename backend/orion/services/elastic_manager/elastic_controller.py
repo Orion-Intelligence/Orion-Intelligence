@@ -47,7 +47,7 @@ class elastic_controller:
                 log.g().i(f"Created index: {ELASTIC_INDEX.S_GENERIC_INDEX}")
 
         except Exception as ex:
-            log.g().e(f"ELASTIC 1 : Initialization failed: {str(ex)}")
+            log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
     async def search_query_api_general(self, p_data: search_api_param_model):
         try:
@@ -56,7 +56,7 @@ class elastic_controller:
             print(m_data)
             return True, m_data
         except Exception as ex:
-            log.g().e(f"ELASTIC 3 : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
     async def search_query_api_leak(self, p_data: search_api_param_model):
@@ -66,16 +66,16 @@ class elastic_controller:
             print(m_data)
             return True, m_data
         except Exception as ex:
-            log.g().e(f"ELASTIC 3 : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
     async def search_query(self, p_data:search_param_model):
         try:
-            document, data_filter = self.__m_elastic_request_generator.on_search_leakdata(p_data)
+            document, data_filter = self.__m_elastic_request_generator.on_search_general_data(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)
             return True, m_data
         except Exception as ex:
-            log.g().e(f"ELASTIC 3 : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
     async def purge_old_records(self):

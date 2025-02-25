@@ -97,23 +97,25 @@ class elastic_request_generator:
 
   @staticmethod
   def on_search_general_data(p_query_model):
-      m_user_query, m_search_type, m_safe_search, m_page_number = (
-          p_query_model.m_search_query.lower(),
-          p_query_model.m_search_type,
-          p_query_model.m_safe_search,
-          p_query_model.m_page_number,
-      )
+      m_user_query = p_query_model.q.lower() + "*"
+      m_safe_search = p_query_model.mSearchParamSafeSearch
+      m_search_type = p_query_model.pSearchParamType
+      m_page_number = p_query_model.mSearchParamPage
+      m_network = p_query_model.mNetwork
 
       must_clauses = []
-      if p_query_model.m_search_type != "all":
-          must_clauses.append({"terms": {"m_content_type": [p_query_model.m_search_type]}})
+      if m_search_type != "all":
+          must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
-      if p_query_model.m_network != "" and p_query_model.m_network != "all":
-          must_clauses.append({"terms": {"m_network": [p_query_model.m_network]}})
+      if m_network != "" and m_network != "all":
+          must_clauses.append({"terms": {"m_network": [m_network]}})
 
       must_not_clause = []
       if m_safe_search == "True":
           must_not_clause.append({"term": {"m_content_type": "adult"}})
+
+      if m_network and m_network != "all":
+        must_clauses.append({"term": {"m_network": m_network}})
 
       query_statement = {
           "min_score": 0,
@@ -185,10 +187,7 @@ class elastic_request_generator:
           "track_total_hits": True,
       }
 
-      return {
-          ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
-          ELASTIC_KEYS.S_FILTER: query_statement,
-      }
+      return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
   @staticmethod
   def clear_expire_index():
