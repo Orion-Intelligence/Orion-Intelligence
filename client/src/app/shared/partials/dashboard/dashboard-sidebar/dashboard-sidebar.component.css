@@ -208,7 +208,7 @@ input[type="radio"] {
   position: absolute;
   top: 0;
   right: 0;
-  opacity: 0.05;
+  opacity: 0.04;
   object-fit: contain;
   object-position: top right;
   pointer-events: none;

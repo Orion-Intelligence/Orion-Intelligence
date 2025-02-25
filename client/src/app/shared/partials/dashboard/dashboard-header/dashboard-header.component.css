@@ -13,10 +13,14 @@
   display: grid;
 }
 
-.searchbar__logo:active {
-  opacity: 0.5;
-  transition: opacity 0.3s;
-  width: 100%;
+.searchbar__logo {
+  display: inline-block;
+  transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.fade-out {
+  opacity: 0;
+  transform: translateY(-5px);
 }
 
 .searchbar__profile-button {

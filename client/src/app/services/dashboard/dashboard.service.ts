@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import {filters} from './filters';
-
+import { filters } from './filters';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +9,10 @@ export class DashboardService {
   private searchQuerySubject = new BehaviorSubject<string>('');
   searchQuery$ = this.searchQuerySubject.asObservable();
 
+  private currentPageSubject = new BehaviorSubject<string>('');
+  currentPage$ = this.currentPageSubject.asObservable();
+
   filters: filters = new filters();
-  currentPage: string = '';
 
   constructor() {}
 
@@ -20,10 +21,10 @@ export class DashboardService {
   }
 
   setCurrentPage(page: string) {
-    this.currentPage = page;
+    this.currentPageSubject.next(page);
   }
-
-  setSafeSearch(value: boolean) {
-    this.filters.safeSearch = value;
+  
+  updatePage(page: string) {
+    this.setCurrentPage(page);
   }
 }

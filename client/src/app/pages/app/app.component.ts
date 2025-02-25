@@ -45,5 +45,5 @@ export class AppComponent {
     });
   }
 
-  showHeaderFooter = computed(() => this.currentRoute() !== '/dashboard');
+  showHeaderFooter = computed(() => !this.currentRoute().startsWith('/dashboard'));
 }

@@ -1,12 +1,11 @@
-<form method="GET" action="/search" class="home__search-form">
+<form (submit)="onSearchSubmit($event)" class="home__search-form">
   <div>
     <img ngSrc="assets/images/shared/home-logo.svg" alt="" width="340" height="61">
   </div>
   <div class="home__search-container input-group">
-    <input type="text" class="form-control home__searchbox" placeholder="Search" name="q" maxlength="150" autocomplete="off" autocapitalize="none"/>
+    <input type="text" class="form-control home__searchbox" placeholder="Search" name="q" maxlength="150" autocomplete="off" autocapitalize="none" [(ngModel)]="searchQuery"/>
     <button class="btn btn-primary home__search-container-button" type="submit">
       <img ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" class="home__search-container-button-icon" width="15" height="15">
     </button>
   </div>
 </form>
-

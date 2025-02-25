@@ -1,9 +1,8 @@
 from orion.view_managers.interactive.search_manager.parsers.dynamic_parser import dynamic_parser
 from orion.view_managers.interactive.search_manager.parsers.static_parser import static_parser
-from orion.view_managers.interactive.search_manager.search_data_model import search_dynamic_param_model
+from orion.view_managers.interactive.search_manager.search_data_model import search_dynamic_param_model, search_api_general_param_model
 from orion.view_managers.interactive.search_manager.search_data_model.search_api_callback_model import search_api_callback_model
-from orion.view_managers.interactive.search_manager.search_data_model.search_api_param_model import search_api_param_model
-from orion.view_managers.interactive.search_manager.search_data_model.search_param_model import search_param_model
+from orion.view_managers.interactive.search_manager.search_data_model.search_api_leak_param_model import search_api_leak_param_model
 from orion.view_managers.interactive.search_manager.search_data_model.query_model import query_model
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.constants.constant import CONSTANTS
@@ -66,7 +65,7 @@ class search_model:
       print("Error parsing filtered documents:", e)
       return mRelevanceListData, [], total_pages
 
-  async def __query_results(self, param:search_param_model):
+  async def __query_results(self, param:search_api_leak_param_model):
     m_query_model = query_model()
     m_query_model.m_search_param_model = param
     if m_query_model.m_search_param_model.pSearchParamType != "persona":
@@ -82,7 +81,7 @@ class search_model:
 
         return m_status, m_context
 
-  async def init_page(self, param:search_param_model):
+  async def init_page(self, param:search_api_leak_param_model):
     mStatus, mResult = await self.__query_results(param)
     return mResult
 
@@ -96,7 +95,7 @@ class search_model:
     result = await external_request_controller.getInstance().fetch_runtime_parser_async(param)
     return result
 
-  async def api_seach_general(self, param: search_api_param_model):
+  async def api_seach_general(self, param: search_api_general_param_model):
     m_status, m_documents = await elastic_controller.get_instance().search_query_api_general(param)
     if not m_status:
       return search_api_callback_model(Result=[], Suggestions=[], Page_Count=0)
@@ -110,7 +109,7 @@ class search_model:
       Page_Count=total_pages
     )
 
-  async def api_seach_leak_result(self, param: search_api_param_model):
+  async def api_seach_leak_result(self, param: search_api_leak_param_model):
     m_status, m_documents = await elastic_controller.get_instance().search_query_api_leak(param)
     if not m_status:
       return search_api_callback_model(Result=[], Suggestions=[], Page_Count=0)

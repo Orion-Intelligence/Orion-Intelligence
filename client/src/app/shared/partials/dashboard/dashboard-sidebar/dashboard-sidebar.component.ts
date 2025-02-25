@@ -1,35 +1,41 @@
-import {Component} from '@angular/core';
-import {NgIf, NgOptimizedImage, NgClass} from '@angular/common';
-import {EventEmitter, Output} from '@angular/core';
+import { Component } from '@angular/core';
+import { NgOptimizedImage, NgClass } from '@angular/common';
+import { EventEmitter, Output } from '@angular/core';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {Pages} from '../../../../constants/pages';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
   imports: [
     NgOptimizedImage,
-    NgClass // ✅ Import NgClass to fix the error
+    NgClass
   ],
   templateUrl: './dashboard-sidebar.component.html',
   styleUrls: ['./dashboard-sidebar.component.css']
 })
 export class DashboardSidebarComponent {
-  activeDropdown: string = 'general_intelligence'; // ✅ Set 'general_intelligence' active by default
+  activeDropdown: string = 'general_intelligence';
+
+  constructor(private dashboardService: DashboardService) {}
 
   toggleDropdown(item: string) {
-    setTimeout(() => {
-      this.activeDropdown = this.activeDropdown === item ? '' : item; // ✅ Use an empty string instead of null
-    });
+      this.activeDropdown = this.activeDropdown === item ? '' : item;
   }
 
   @Output() menuClosed = new EventEmitter<void>();
 
   closeMenu() {
-    this.menuClosed.emit(); // Notify parent to remove .show-menu
+    this.menuClosed.emit();
   }
-
-  @Output() sectionSelected = new EventEmitter<string>();
 
   selectSection(section: string) {
-    this.sectionSelected.emit(section);
+    this.updateCurrentPage(section);
   }
+
+  updateCurrentPage(page: string) {
+    this.dashboardService.updatePage(page);
+  }
+
+  protected readonly Pages = Pages;
 }
