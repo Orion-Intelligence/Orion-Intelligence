@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {NgIf, NgOptimizedImage, NgClass} from '@angular/common';
-import { EventEmitter, Output } from '@angular/core';
+import {EventEmitter, Output} from '@angular/core';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -25,5 +25,11 @@ export class DashboardSidebarComponent {
 
   closeMenu() {
     this.menuClosed.emit(); // Notify parent to remove .show-menu
+  }
+
+  @Output() sectionSelected = new EventEmitter<string>();
+
+  selectSection(section: string) {
+    this.sectionSelected.emit(section);
   }
 }
