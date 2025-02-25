@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { NgIf, NgOptimizedImage, NgClass } from '@angular/common';
+import {Component} from '@angular/core';
+import {NgIf, NgOptimizedImage, NgClass} from '@angular/common';
+import { EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -18,5 +19,11 @@ export class DashboardSidebarComponent {
     setTimeout(() => {
       this.activeDropdown = this.activeDropdown === item ? '' : item; // ✅ Use an empty string instead of null
     });
+  }
+
+  @Output() menuClosed = new EventEmitter<void>();
+
+  closeMenu() {
+    this.menuClosed.emit(); // Notify parent to remove .show-menu
   }
 }

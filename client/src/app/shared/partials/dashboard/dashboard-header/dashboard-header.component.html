@@ -1,12 +1,11 @@
 <form class="searchbar" method="GET" action="" enctype="multipart/form-data">
   <div class="searchbar__profile-button">
-    <a routerLink="/admin" aria-label="Go to CMS Home">
-      <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logo" priority="true" height="24" width="24"/>
-    </a>
+    <app-header-admin-dropdown></app-header-admin-dropdown>
   </div>
   <div class="searchbar__logo-grid">
-    <div class="searchbar__logo-container d-flex">
+    <div class="searchbar__logo-container d-flex align-items-center">
       <div class="search__nav-menu-div"></div>
+      <img class="search_nav_menu_icon" ngSrc="assets/images/shared/seach_nav_menu_icon.svg"  alt="Search" priority="true" height="16" width="16" (click)="toggleMenu()">
       <p class="searchbar__logo">General Intelligence</p>
     </div>
 
@@ -25,7 +24,7 @@
           <input type="hidden" name="mSearchParamPage" value="1">
           <input type="hidden" name="mSearchParamSafeSearch" [value]="mSearchCallbackSaveSearch">
           <button class="btn btn-primary searchbar__search-button-right" type="submit">
-            <img class="searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglassblack.svg" alt="Search" priority="true" height="24" width="24">
+            <img class="searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority="true" height="16" width="16">
           </button>
         </div>
       </div>
