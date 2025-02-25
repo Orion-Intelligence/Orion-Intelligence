@@ -1,16 +1,14 @@
 import { Component } from '@angular/core';
 import {AsyncPipe, NgIf, NgOptimizedImage} from '@angular/common';
 import { AuthService } from '../../../services/authetication/auth.service';
-import { HeaderAdminDropdownComponent } from '../header-admin-dropdown/header-admin-dropdown.component';
+import { HeaderProfileDropdownComponent } from '../header-profile-dropdown/header-profile-dropdown.component';
 import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   imports: [
-    HeaderAdminDropdownComponent,
-    NgOptimizedImage,
-    AsyncPipe,
-    NgIf
+    HeaderProfileDropdownComponent,
+    NgOptimizedImage
   ],
   templateUrl: './header.component.html',
 })

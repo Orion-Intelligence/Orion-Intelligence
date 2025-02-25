@@ -87,6 +87,7 @@
 .search_nav_menu_icon {
   display: none;
   margin-right: 20px;
+  cursor: pointer;
 }
 
 .searchbar__searchbox .searchbar__search-button-right:hover {

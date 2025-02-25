@@ -1,11 +1,11 @@
 <form class="searchbar" method="GET" action="" enctype="multipart/form-data">
   <div class="searchbar__profile-button">
-    <app-header-admin-dropdown></app-header-admin-dropdown>
+    <app-header-profile-dropdown></app-header-profile-dropdown>
   </div>
   <div class="searchbar__logo-grid">
     <div class="searchbar__logo-container d-flex align-items-center">
       <div class="search__nav-menu-div"></div>
-      <img class="search_nav_menu_icon" ngSrc="assets/images/shared/seach_nav_menu_icon.svg"  alt="Search" priority="true" height="16" width="16" (click)="toggleMenu()">
+      <img class="search_nav_menu_icon" ngSrc="assets/images/shared/seach_nav_menu_icon.svg"  alt="Search" priority="true" height="20" width="20" (click)="toggleMenu()">
       <p class="searchbar__logo">General Intelligence</p>
     </div>
 
@@ -20,16 +20,15 @@
           </button>
         </div>
       </div>
-      <div class="searchbar__searchbox_switch-search">
-        <button class="searchbar__searchbox_switch-search-button searchbar__searchbox_switch-search-button-left" [class.searchbar__searchbox_switch-search-button-active-left]="activeTab === 'results'" (click)="setActiveTab('results')">
-          Results
-        </button>
+<!--      <div class="searchbar__searchbox_switch-search">-->
+<!--        <button class="searchbar__searchbox_switch-search-button searchbar__searchbox_switch-search-button-left" [class.searchbar__searchbox_switch-search-button-active-left]="activeTab === 'results'" (click)="setActiveTab('results')">-->
+<!--          Results-->
+<!--        </button>-->
 
-        <button class="searchbar__searchbox_switch-search-button searchbar__searchbox_switch-search-button-right" [class.searchbar__searchbox_switch-search-button-active-right]="activeTab === 'analytics'" (click)="setActiveTab('analytics')">
-          Analytics
-        </button>
-      </div>
-
+<!--        <button class="searchbar__searchbox_switch-search-button searchbar__searchbox_switch-search-button-right" [class.searchbar__searchbox_switch-search-button-active-right]="activeTab === 'analytics'" (click)="setActiveTab('analytics')">-->
+<!--          Analytics-->
+<!--        </button>-->
+<!--      </div>-->
     </div>
   </div>
 </form>

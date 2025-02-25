@@ -4,16 +4,16 @@ import {AuthService} from '../../../services/authetication/auth.service';
 import {Observable} from 'rxjs';
 
 @Component({
-  selector: 'app-header-admin-dropdown',
+  selector: 'app-header-profile-dropdown',
   imports: [
     AsyncPipe,
     NgIf,
     NgOptimizedImage
   ],
-  templateUrl: './header-admin-dropdown.component.html',
-  styleUrl: './header-admin-dropdown.component.css'
+  templateUrl: './header-profile-dropdown.component.html',
+  styleUrl: './header-profile-dropdown.component.css'
 })
-export class HeaderAdminDropdownComponent {
+export class HeaderProfileDropdownComponent {
   username$: Observable<string | null>;
   dropdownOpen = false;
 
