@@ -43,6 +43,14 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+* {
+    user-select: none;
+}
+
+p {
+    user-select: text;
+}
+
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto/Roboto-Regular.woff2') format('woff2'),

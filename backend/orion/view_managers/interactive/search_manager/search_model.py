@@ -96,8 +96,22 @@ class search_model:
     result = await external_request_controller.getInstance().fetch_runtime_parser_async(param)
     return result
 
-  async def api_seach_result(self, param: search_api_param_model):
-    m_status, m_documents = await elastic_controller.get_instance().search_query_api(param)
+  async def api_seach_general(self, param: search_api_param_model):
+    m_status, m_documents = await elastic_controller.get_instance().search_query_api_general(param)
+    if not m_status:
+      return search_api_callback_model(Result=[], Suggestions=[], Page_Count=0)
+
+    parsed_result = await self.__parse_filtered_documents(m_documents)
+    m_parsed_documents, m_suggestions_content, total_pages = parsed_result
+
+    return search_api_callback_model(
+      Result=m_parsed_documents,
+      Suggestions=m_suggestions_content,
+      Page_Count=total_pages
+    )
+
+  async def api_seach_leak_result(self, param: search_api_param_model):
+    m_status, m_documents = await elastic_controller.get_instance().search_query_api_leak(param)
     if not m_status:
       return search_api_callback_model(Result=[], Suggestions=[], Page_Count=0)
 

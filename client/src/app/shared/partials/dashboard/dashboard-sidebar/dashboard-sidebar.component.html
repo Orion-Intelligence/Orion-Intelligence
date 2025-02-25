@@ -1,32 +1,43 @@
+
 <nav class="search__side-nav">
+  <img src="/assets/images/shared/Bg.png" alt="background" class="search__side-nav-background">
+
   <div class="search__side-nav-logo">
     <a href="../../..">
       <img ngSrc="assets/images/shared/search_nav_logo.svg" alt="Logo" priority="true" height="50" width="314"/>
     </a>
     <div class="col-6 close_menu_div">
-      <label for="search__nav-close" class="search__nav-close-label">Close</label>
+      <label class="search__nav-close-label">Close</label>
     </div>
   </div>
 
   <ul class="search__side-nav-items">
-    <!-- General Intelligence Dropdown -->
     <li class="search__side-nav-item search__side-nav-dropdown">
       <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence')" [ngClass]="{'active': activeDropdown === 'general_intelligence'}">
-        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="24" width="24">General Intelligence
-        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="24" width="24">
+        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="20" width="20">General Intelligence
+        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="20" width="20">
       </div>
       <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'general_intelligence'}">
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="#">Add Client</a></li>
-        <li><a href="#">Update Client</a></li>
+        <li><a href="#">General</a></li>
+        <li><a href="#">Forums</a></li>
+        <li><a href="#">News</a></li>
+        <li><a href="#">Stolen</a></li>
+        <li><a href="#">Drugs</a></li>
+        <li><a href="#">Hacking</a></li>
+        <li><a href="#">Marketplaces</a></li>
+        <li><a href="#">Cryptocurrency</a></li>
+        <li><a href="#">Leaks</a></li>
       </ul>
     </li>
 
-    <!-- Monitor Dropdown -->
+    <li class="search__side-nav-item">
+      <a href="#"><img ngSrc="assets/images/shared/leak.svg" alt="Live APIs" height="20" width="20" class="search_side_icon">Leaks</a>
+    </li>
+
     <li class="search__side-nav-item search__side-nav-dropdown">
       <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('monitor')" [ngClass]="{'active': activeDropdown === 'monitor'}">
-        <img ngSrc="assets/images/shared/search_side_monitor_icon.svg" alt="Monitor" height="24" width="24" class="search_side_icon">Monitor
-        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="24" width="24">
+        <img ngSrc="assets/images/shared/search_side_monitor_icon.svg" alt="Monitor" height="20" width="20" class="search_side_icon">Monitor
+        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="20" width="20">
       </div>
       <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'monitor'}">
         <li><a href="#">Dashboard</a></li>
@@ -36,11 +47,9 @@
     </li>
 
     <li class="search__side-nav-item">
-      <a href="#"><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="24" width="24" class="search_side_icon">Live APIs</a>
+      <a href="#"><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20" class="search_side_icon">Live APIs</a>
     </li>
-    <li class="search__side-nav-item">
-      <a href="#"><img ngSrc="assets/images/shared/search_side_email_icon.svg" alt="Email" height="24" width="24" class="search_side_icon">Email</a>
-    </li>
+
   </ul>
   <div class="search__nav-bottom_div">
     <ul class="search__side-nav-items">

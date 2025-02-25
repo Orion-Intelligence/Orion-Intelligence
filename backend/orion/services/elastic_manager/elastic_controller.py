@@ -49,7 +49,17 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"ELASTIC 1 : Initialization failed: {str(ex)}")
 
-    async def search_query_api(self, p_data: search_api_param_model):
+    async def search_query_api_general(self, p_data: search_api_param_model):
+        try:
+            document, data_filter = self.__m_elastic_request_generator.on_search_general_data(p_data)
+            m_data = await self.__m_connection.search(index=document, body=data_filter)
+            print(m_data)
+            return True, m_data
+        except Exception as ex:
+            log.g().e(f"ELASTIC 3 : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+            return False, str(ex)
+
+    async def search_query_api_leak(self, p_data: search_api_param_model):
         try:
             document, data_filter = self.__m_elastic_request_generator.on_search_leakdata(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)

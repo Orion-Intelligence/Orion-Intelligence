@@ -1,47 +1,3 @@
-@media only screen and (max-width: 700px) {
-  .search-result__content-webpages-container {
-    max-width: 350px;
-  }
-}
-
-@media only screen and (max-width: 1050px) {
-  .searchbar__logo-container p {
-    margin-left: 40px;
-  }
-
-  .search__side-nav-container {
-    position: absolute;
-    width: 100vw;
-    right: 100vw;
-    z-index: 10;
-    height: 100vh;
-  }
-
-  #search__side-nav-container-main .search__nav-menu-label {
-    display: block;
-    position: absolute;
-    top: 27px;
-    left: 24px;
-  }
-
-  #search__side-nav-container-main .search__nav-menu-checkbox:checked + .search__side-nav-container {
-    right: 0;
-    transition: right 1s ease;
-
-  }
-
-
-  #search__nav-close:checked + .search__nav-mobile-container {
-    left: 100vw;
-    transition: left 0.2s ease;
-
-  }
-
-  .search__side-nav .search__side-nav-logo .close_menu_div {
-    display: block;
-  }
-}
-
 .search__nav-bottom_div {
   bottom: 0;
   position: fixed;
@@ -165,6 +121,7 @@ input[type="radio"] {
   margin-left: 16px;
   opacity: 0;
   max-height: 0;
+  padding-left: 30px;
   overflow: hidden;
   transition: opacity 0.3s ease, max-height 0.3s ease;
 }
@@ -172,7 +129,6 @@ input[type="radio"] {
 .search__side-nav-subitems.show {
   opacity: 1;
   max-height: 500px;
-  padding-left: 22px;
 }
 
 .search__side-nav-subitems li {
@@ -206,3 +162,63 @@ input[type="radio"] {
   font-size: 1.5em;
 }
 
+.search__side-nav-background{
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: 0.05;
+  object-fit: contain;
+  object-position: top right;
+  pointer-events: none;
+}
+
+@media only screen and (max-width: 943px) {
+  .search__side-nav-background{
+    width: 175% !important;
+    height: 175% !important;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  .search-result__content-webpages-container {
+    max-width: 350px;
+  }
+}
+
+@media only screen and (max-width: 1050px) {
+  .searchbar__logo-container p {
+    margin-left: 40px;
+  }
+
+  .search__side-nav-container {
+    position: absolute;
+    width: 100vw;
+    right: 100vw;
+    z-index: 10;
+    height: 100vh;
+  }
+
+  #search__side-nav-container-main .search__nav-menu-label {
+    display: block;
+    position: absolute;
+    top: 27px;
+    left: 24px;
+  }
+
+  #search__side-nav-container-main .search__nav-menu-checkbox:checked + .search__side-nav-container {
+    right: 0;
+    transition: right 1s ease;
+
+  }
+
+
+  #search__nav-close:checked + .search__nav-mobile-container {
+    left: 100vw;
+    transition: left 0.2s ease;
+
+  }
+
+  .search__side-nav .search__side-nav-logo .close_menu_div {
+    display: block;
+  }
+}

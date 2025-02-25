@@ -16,15 +16,12 @@ class elastic_request_generator:
     must_clauses = []
     must_not_clause = []
 
-    # Safe search filtering
     if m_safe_search == "True":
       must_not_clause.append({"term": {"m_content_type": "adult"}})
 
-    # Network filtering
     if m_network and m_network != "all":
       must_clauses.append({"term": {"m_network": m_network}})
 
-    # Query statement construction
     query_statement = {
       "min_score": 0,
       "query": {
@@ -97,6 +94,101 @@ class elastic_request_generator:
     }
 
     return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
+
+  @staticmethod
+  def on_search_general_data(p_query_model):
+      m_user_query, m_search_type, m_safe_search, m_page_number = (
+          p_query_model.m_search_query.lower(),
+          p_query_model.m_search_type,
+          p_query_model.m_safe_search,
+          p_query_model.m_page_number,
+      )
+
+      must_clauses = []
+      if p_query_model.m_search_type != "all":
+          must_clauses.append({"terms": {"m_content_type": [p_query_model.m_search_type]}})
+
+      if p_query_model.m_network != "" and p_query_model.m_network != "all":
+          must_clauses.append({"terms": {"m_network": [p_query_model.m_network]}})
+
+      must_not_clause = []
+      if m_safe_search == "True":
+          must_not_clause.append({"term": {"m_content_type": "adult"}})
+
+      query_statement = {
+          "min_score": 0,
+          "query": {
+              "function_score": {
+                  "query": {
+                      "bool": {
+                          "must": must_clauses,
+                          "should": [
+                              {
+                                  "query_string": {
+                                      "query": m_user_query,
+                                      "fields": [
+                                          "m_title^3",
+                                          "m_meta_description^2",
+                                          "m_content^1.5",
+                                          "m_important_content^1.5",
+                                          "m_content_tokens^2",
+                                          "m_keywords^1.8",
+                                      ],
+                                      "default_operator": "OR",
+                                      "lenient": True,
+                                  }
+                              }
+                          ],
+                          "must_not": must_not_clause,
+                      }
+                  },
+                  "functions": [
+                      {
+                          "gauss": {
+                              "m_update_date": {
+                                  "origin": "now",
+                                  "scale": "30d",
+                                  "offset": "10d",
+                                  "decay": 0.5,
+                              }
+                          },
+                          "weight": 2,
+                      }
+                  ],
+                  "boost_mode": "sum",
+              }
+          },
+          "suggest": {
+              "important_content_suggestion": {
+                  "text": m_user_query,
+                  "term": {
+                      "field": "m_important_content",
+                      "min_word_length": 4,
+                      "max_term_freq": 0.01,
+                      "sort": "score",
+                      "string_distance": "internal",
+                  },
+              },
+              "content_suggestion": {
+                  "text": m_user_query,
+                  "term": {
+                      "field": "m_content",
+                      "min_word_length": 4,
+                      "max_term_freq": 0.01,
+                      "sort": "score",
+                      "string_distance": "internal",
+                  },
+              },
+          },
+          "from": (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC,
+          "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+          "track_total_hits": True,
+      }
+
+      return {
+          ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
+          ELASTIC_KEYS.S_FILTER: query_statement,
+      }
 
   @staticmethod
   def clear_expire_index():

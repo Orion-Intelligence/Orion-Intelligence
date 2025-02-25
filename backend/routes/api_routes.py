@@ -19,9 +19,13 @@ async def parser(request: Request, param: directory_param_model = Depends()):
 async def parser(request: Request, ):
     return await homepage_view_model.getInstance().invoke_analytics_api(request)
 
-@api_routes.get("/api/search", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+@api_routes.get("/api/search/general", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def parser(request: Request, param: search_api_param_model = Depends()):
-    return await search_view_model.getInstance().api_search(param)
+    return await search_view_model.getInstance().api_search_general(param)
+
+@api_routes.get("/api/search/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def parser(request: Request, param: search_api_param_model = Depends()):
+    return await search_view_model.getInstance().api_search_leak(param)
 
 @api_routes.get("/api/dynamic/search", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def parser(request: Request, param: search_dynamic_param_model = Depends()):

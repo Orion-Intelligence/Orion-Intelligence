@@ -22,11 +22,11 @@
         </div>
       </div>
       <div class="searchbar__searchbox_switch-search">
-        <button class="searchbar__searchbox_switch-search-button" [class.searchbar__searchbox_switch-search-button-active]="activeTab === 'results'" (click)="setActiveTab('results')">
+        <button class="searchbar__searchbox_switch-search-button searchbar__searchbox_switch-search-button-left" [class.searchbar__searchbox_switch-search-button-active-left]="activeTab === 'results'" (click)="setActiveTab('results')">
           Results
         </button>
 
-        <button class="searchbar__searchbox_switch-search-button" [class.searchbar__searchbox_switch-search-button-active]="activeTab === 'analytics'" (click)="setActiveTab('analytics')">
+        <button class="searchbar__searchbox_switch-search-button searchbar__searchbox_switch-search-button-right" [class.searchbar__searchbox_switch-search-button-active-right]="activeTab === 'analytics'" (click)="setActiveTab('analytics')">
           Analytics
         </button>
       </div>
