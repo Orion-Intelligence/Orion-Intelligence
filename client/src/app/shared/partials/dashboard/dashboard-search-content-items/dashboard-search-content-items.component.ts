@@ -1,16 +1,22 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardSearchGeneralIntelligenceComponent } from '../dashboard-search-general-intelligence/dashboard-search-general-intelligence.component';
+import { DashboardGeneral } from '../intel-panel/dashboard-search-general-intelligence/dashboard-general.component';
 import { Pages } from '../../../../constants/pages';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { Subscription } from 'rxjs';
+import {DashboardApiComponent} from '../intel-panel/dashboard-api/dashboard-api.component';
+import {DashboardMonitorComponent} from '../intel-panel/dashboard-monitor/dashboard-monitor.component';
+import {DashboardLeakComponent} from '../intel-panel/dashboard-leak/dashboard-leak.component';
 
 @Component({
   selector: 'app-dashboard-search-content-items',
   standalone: true,
   imports: [
     CommonModule,
-    DashboardSearchGeneralIntelligenceComponent
+    DashboardGeneral,
+    DashboardApiComponent,
+    DashboardMonitorComponent,
+    DashboardLeakComponent
   ],
   templateUrl: './dashboard-search-content-items.component.html',
   styleUrl: './dashboard-search-content-items.component.css'

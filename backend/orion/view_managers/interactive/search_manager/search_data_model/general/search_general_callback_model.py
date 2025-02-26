@@ -6,7 +6,7 @@ class suggestion(BaseModel):
     text: str
     offset: int
     length: int
-    options: List[str]
+    options: List[dict]
 
 class result_item(BaseModel):
     m_title: str

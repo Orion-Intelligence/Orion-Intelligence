@@ -17,7 +17,7 @@
   opacity: 0;
   background-color: #0e355650;
   visibility: hidden;
-  height: 0;
+  height: 5px;
   transition: opacity 0.3s ease-in-out, visibility 0.3s;
 }
 

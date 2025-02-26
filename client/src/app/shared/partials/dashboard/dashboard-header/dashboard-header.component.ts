@@ -3,7 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {HeaderProfileDropdownComponent} from '../../header-profile-dropdown/header-profile-dropdown.component';
 import {EventEmitter, Output} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable, take} from 'rxjs';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 
 @Component({
@@ -14,12 +14,14 @@ import {DashboardService} from '../../../../services/dashboard/dashboard.service
   styleUrl: './dashboard-header.component.css'
 })
 export class DashboardHeaderComponent {
-  searchQuery$: Observable<string>;
+  searchQuery: string = '';
   currentPage$: Observable<string>;
 
   constructor(public dashboardService: DashboardService) {
     this.currentPage$ = dashboardService.currentPage$;
-    this.searchQuery$ = dashboardService.searchQuery$;
+    this.dashboardService.searchQuery$.pipe(take(1)).subscribe(query => {
+      this.searchQuery = query;
+    });
   }
 
   @Output() menuClicked = new EventEmitter<void>();
@@ -28,7 +30,11 @@ export class DashboardHeaderComponent {
     this.menuClicked.emit();
   }
 
-  onSearchQueryUpdate(value: string) {
-    this.dashboardService.setSearchQuery(value);
+  onSearchSubmit(event: Event) {
+    event.preventDefault();
+    if (this.searchQuery.trim()) {
+      this.dashboardService.searchGeneralParamModel.q = this.searchQuery.trim()
+      this.dashboardService.fetchGeneralResults().subscribe();
+    }
   }
 }

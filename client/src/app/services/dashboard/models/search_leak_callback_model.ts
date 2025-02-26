@@ -32,11 +32,11 @@ export class ResultItem {
   }
 }
 
-export class SearchGeneralCallbackModel {
+export class SearchLeakCallbackModel {
   Result: ResultItem[] = [];
   Page_Count: number = 0;
 
-  constructor(init?: Partial<SearchGeneralCallbackModel>) {
+  constructor(init?: Partial<SearchLeakCallbackModel>) {
     if (init) {
       this.Result = init.Result?.map(r => new ResultItem(r)) || [];
       this.Page_Count = init.Page_Count ?? 0;

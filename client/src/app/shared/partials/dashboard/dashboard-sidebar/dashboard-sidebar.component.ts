@@ -37,5 +37,14 @@ export class DashboardSidebarComponent {
     this.dashboardService.updatePage(page);
   }
 
+  onTypeSelected(type:string){
+    this.dashboardService.searchGeneralParamModel.pSearchParamType = type
+    this.dashboardService.fetchGeneralResults().subscribe();
+  }
+
   protected readonly Pages = Pages;
+
+  onLeakSelected() {
+    this.dashboardService.fetchLeakResults().subscribe();
+  }
 }

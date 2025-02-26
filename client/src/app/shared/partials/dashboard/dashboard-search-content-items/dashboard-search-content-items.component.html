@@ -1,15 +1,12 @@
 <div *ngIf="currentPage === Pages.GENERAL_INTELLIGENCE">
-  <app-dashboard-search-general-intelligence></app-dashboard-search-general-intelligence>
+  <app-dashboard-general></app-dashboard-general>
 </div>
 <div *ngIf="currentPage === Pages.MONITOR">
-  <h2>Monitor Section</h2>
-  <p>Content for Monitor</p>
+  <app-dashboard-monitor></app-dashboard-monitor>
 </div>
 <div *ngIf="currentPage === Pages.LEAKS">
-  <h2>leaks Section</h2>
-  <p>Content for leaks</p>
+  <app-dashboard-leak></app-dashboard-leak>
 </div>
 <div *ngIf="currentPage === Pages.API">
-  <h2>Live APIs Section</h2>
-  <p>Content for Live APIs</p>
+  <app-dashboard-api></app-dashboard-api>
 </div>

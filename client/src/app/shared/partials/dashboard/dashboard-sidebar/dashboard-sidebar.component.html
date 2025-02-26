@@ -11,27 +11,33 @@
   </div>
 
   <ul class="search__side-nav-items">
-    <li class="search__side-nav-item search__side-nav-dropdown">
-      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence'); selectSection('General Intelligence')" [ngClass]="{'active': activeDropdown === 'general_intelligence'}">
-        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="20" width="20">General
-        Intelligence
-        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="20" width="20">
-      </div>
-      <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'general_intelligence'}">
-        <li><a>General</a></li>
-        <li><a>Forums</a></li>
-        <li><a>News</a></li>
-        <li><a>Stolen</a></li>
-        <li><a>Drugs</a></li>
-        <li><a>Hacking</a></li>
-        <li><a>Marketplaces</a></li>
-        <li><a>Cryptocurrency</a></li>
-        <li><a>Leaks</a></li>
-      </ul>
-    </li>
+    <ul class="search__side-nav-items">
+      <li class="search__side-nav-item search__side-nav-dropdown">
+        <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence'); selectSection('General Intelligence')" [ngClass]="{'active': activeDropdown === 'general_intelligence'}">
+          <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="20" width="20">
+          General Intelligence
+          <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="20" width="20">
+        </div>
 
-    <li class="search__side-nav-item">
-      <a (click)="selectSection(Pages.LEAKS)"><img ngSrc="assets/images/shared/leak.svg" alt="Live APIs" height="20" width="20" class="search_side_icon ml-sm-1">Leaks</a>
+        <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'general_intelligence'}">
+          <li><a (click)="onTypeSelected('general')">General</a></li>
+          <li><a (click)="onTypeSelected('forums')">Forums</a></li>
+          <li><a (click)="onTypeSelected('news')">News</a></li>
+          <li><a (click)="onTypeSelected('stolen')">Stolen</a></li>
+          <li><a (click)="onTypeSelected('drugs')">Drugs</a></li>
+          <li><a (click)="onTypeSelected('hacking')">Hacking</a></li>
+          <li><a (click)="onTypeSelected('marketplaces')">Marketplaces</a></li>
+          <li><a (click)="onTypeSelected('cryptocurrency')">Cryptocurrency</a></li>
+          <li><a (click)="onTypeSelected('leaks')">Leaks</a></li>
+        </ul>
+      </li>
+    </ul>
+
+
+    <li class="search__side-nav-item search__side-nav-dropdown">
+      <div class="search__side-nav-item-dropdown" (click)="onLeakSelected(); toggleDropdown('leaks') ;selectSection(Pages.LEAKS)" [ngClass]="{'active': activeDropdown === 'leaks'}">
+        <img ngSrc="assets/images/shared/leak.svg" alt="leak" height="20" width="20" class="search_side_icon">Leaks
+      </div>
     </li>
 
     <li class="search__side-nav-item search__side-nav-dropdown">
@@ -58,14 +64,10 @@
     </li>
 
     <li class="search__side-nav-item">
-      <a (click)="selectSection('live_api')"><img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20" class="search_side_icon">Live
-        APIs</a>
+      <a href="/directory"><img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="links" height="24" width="24" class="search_side_icon">Links</a>
     </li>
     <li class="search__side-nav-item">
-      <a (click)="selectSection('links')"><img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="links" height="24" width="24" class="search_side_icon">Links</a>
-    </li>
-    <li class="search__side-nav-item">
-      <a (click)="selectSection('documentation')"><img ngSrc="assets/images/shared/document_count.svg" alt="documentation" height="24" width="24" class="search_side_icon">Documentation</a>
+      <a href="https://orion-search.readthedocs.io/en/latest/"><img ngSrc="assets/images/shared/document_count.svg" alt="documentation" height="24" width="24" class="search_side_icon">Documentation</a>
     </li>
   </ul>
 

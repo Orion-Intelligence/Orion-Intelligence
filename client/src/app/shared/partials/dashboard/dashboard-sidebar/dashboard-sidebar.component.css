@@ -137,6 +137,7 @@ input[type="radio"] {
 .search__side-nav-subitems a:hover {
   text-decoration: underline;
   background: none;
+  cursor: pointer;
 }
 
 

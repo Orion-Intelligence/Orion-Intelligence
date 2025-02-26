@@ -7,10 +7,6 @@ export class Suggestion {
   constructor(init?: Partial<Suggestion>) {
     Object.assign(this, init);
   }
-
-  toJSON() {
-    return JSON.stringify(this);
-  }
 }
 
 export class ResultItem {
@@ -46,10 +42,6 @@ export class ResultItem {
   constructor(init?: Partial<ResultItem>) {
     Object.assign(this, init);
   }
-
-  toJSON() {
-    return JSON.stringify(this);
-  }
 }
 
 export class SearchGeneralCallbackModel {
@@ -63,9 +55,5 @@ export class SearchGeneralCallbackModel {
       this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) || [];
       this.Page_Count = init.Page_Count ?? 0;
     }
-  }
-
-  toJSON() {
-    return JSON.stringify(this);
   }
 }
