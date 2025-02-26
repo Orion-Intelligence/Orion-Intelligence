@@ -8,7 +8,7 @@
   padding: 10px 0;
   width: 160px;
   visibility: hidden;
-  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s ease-in-out !important;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s ease-in-out;
   border-radius: 8px;
   right: 0;
   position: absolute;
@@ -21,6 +21,14 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transform: translateY(10px);
 }
+
+.profile-dropdown.show {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
 
 .header_form-user--logout:focus-within .profile-dropdown {
   opacity: 1 !important;
