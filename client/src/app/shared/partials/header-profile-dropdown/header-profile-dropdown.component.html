@@ -5,7 +5,7 @@
     </div>
   </a>
 
-  <ul class="profile-dropdown" aria-labelledby="dropdownMenu2">
+  <ul class="profile-dropdown">
     <div class="profile-dropdown-arrow"></div>
 
     <li><a class="dropdown-item disabled">
@@ -17,6 +17,6 @@
     <li><hr class="dropdown-divider mx-3"></li>
     <li><a class="dropdown-item" href="/login"><img ngSrc="assets/images/shared/settings.svg" alt="Settings" width="15" height="15" priority="true"> &nbsp; Settings</a></li>
     <li><hr class="dropdown-divider mx-3"></li>
-    <li><a class="dropdown-item" href="#" id="logout-button"><img ngSrc="assets/images/shared/logout.svg" alt="Logout" width="15" height="15" priority="true"> &nbsp; Logout</a></li>
+    <li><a class="dropdown-item" href="#" id="logout-button"><img ngSrc="assets/images/shared/logout.svg" (click)="logout()" alt="Logout" width="15" height="15" priority="true"> &nbsp; Logout</a></li>
   </ul>
 </div>
