@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 
 @Component({
@@ -11,10 +11,21 @@ import {DashboardService} from '../../../../../services/dashboard/dashboard.serv
 })
 export class DashboardGeneral {
 
-  constructor(public dashboardService: DashboardService) {
+  activeSection: number | null = null; // No section open by default
+
+  toggleSection(section: number) {
+    this.activeSection = this.activeSection === section ? null : section; // Toggle logic
   }
 
-  items = Array.from({ length: 10 }).map((_, i) => ({
+  constructor(public dashboardService: DashboardService) {
+    if (this.dashboardService.searchGeneralCallbackModel?.Result?.length > 0) {
+      console.log(this.dashboardService.searchGeneralCallbackModel.Result[0].m_content);
+    } else {
+      console.log('searchGeneralCallbackModel is undefined or Result array is empty');
+    }
+  }
+
+  items = Array.from({length: 10}).map((_, i) => ({
     header: `Header ${i + 1}`,
     description: `Description ${i + 1}`,
     url: `https://example.com/page${i + 1}`,
@@ -23,5 +34,6 @@ export class DashboardGeneral {
     updatedOn: `2025-02-${15 + i}`,
     status: i % 2 === 0 ? 'Active' : 'Inactive',
   }));
+
   protected readonly JSON = JSON;
 }
