@@ -1,12 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
-import { HeaderComponent } from '../../shared/partials/header/header.component';
-import { FooterComponent } from '../../shared/partials/footer/footer.component';
-import { ErrorStoreService } from '../../shared/services/error-store.service';
-import { Observable, filter } from 'rxjs';
-import { AsyncPipe, NgIf } from '@angular/common';
-import { LoaderComponent } from '../../shared/partials/loader/loader.component';
-import { trigger, transition, style, animate } from '@angular/animations';
+import {Component, computed, inject, signal} from '@angular/core';
+import {Router, NavigationEnd, RouterOutlet} from '@angular/router';
+import {HeaderComponent} from '../../shared/partials/header/header.component';
+import {FooterComponent} from '../../shared/partials/footer/footer.component';
+import {ErrorStoreService} from '../../shared/services/error-store.service';
+import {Observable, filter} from 'rxjs';
+import {AsyncPipe, NgIf} from '@angular/common';
+import {LoaderComponent} from '../../shared/partials/loader/loader.component';
+import {trigger, transition, style, animate} from '@angular/animations';
 
 @Component({
   selector: 'app-root',
@@ -21,10 +21,10 @@ import { trigger, transition, style, animate } from '@angular/animations';
   ],
   templateUrl: './app.component.html',
   animations: [
-    trigger('fadeIn', [
+    trigger('bottomToTop', [
       transition(':enter', [
-        style({ opacity: 0 }),
-        animate('500ms ease-out', style({ opacity: 1 }))
+        style({opacity: 0, transform: 'translateY(20px)'}), // Start from below
+        animate('500ms ease-out', style({opacity: 1, transform: 'translateY(0)'})) // Move to normal position
       ])
     ])
   ]

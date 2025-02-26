@@ -1,3 +1,17 @@
 .dropdown-toggle::after {
   display: none !important;
 }
+.header .dropdown-menu {
+  opacity: 0;
+  transform: translateY(130px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  position: absolute;
+  bottom: 100%;
+  border-radius: 10px;
+  right: 0;
+}
+
+.header .dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(70px);
+}
