@@ -13,7 +13,7 @@
   right: 0;
   position: absolute;
   pointer-events: none;
-  z-index: 1;
+  z-index: 3;
   list-style: none;
   font-size: 15px;
   margin-top: 15px;

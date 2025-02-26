@@ -1,4 +1,4 @@
-<div class="header_form-user--logout" (click)="toggleDropdown($event)">
+<div class="header_form-user--logout" (click)="toggleDropdown($event)" *ngIf="this.username$|async">
   <a class="profile-dropdown-toggle">
     <div class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold">
       <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logout" width="24" height="24" priority="true">

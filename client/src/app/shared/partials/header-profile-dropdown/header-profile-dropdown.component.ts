@@ -1,5 +1,5 @@
 import { Component, HostListener } from '@angular/core';
-import { AsyncPipe, NgOptimizedImage } from "@angular/common";
+import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Observable } from 'rxjs';
 
@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [
     AsyncPipe,
-    NgOptimizedImage
+    NgOptimizedImage,
+    NgIf
   ],
   templateUrl: './header-profile-dropdown.component.html',
   styleUrl: './header-profile-dropdown.component.css'

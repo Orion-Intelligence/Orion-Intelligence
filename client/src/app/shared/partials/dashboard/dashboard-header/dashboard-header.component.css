@@ -27,6 +27,7 @@
   position: absolute;
   right: 30px;
   top: 30px;
+  padding-right: 20pxy;
 }
 
 .searchbar__header {
