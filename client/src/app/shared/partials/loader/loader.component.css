@@ -17,12 +17,10 @@
   opacity: 0;
   background-color: #0e355650;
   visibility: hidden;
-  height: 5px;
   transition: opacity 0.3s ease-in-out, visibility 0.3s;
 }
 
 .loader-container.show {
-  height: 5px;
   opacity: 1;
   visibility: visible;
 }

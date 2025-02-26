@@ -7,7 +7,6 @@ import {Observable} from 'rxjs';
   selector: 'app-header-profile-dropdown',
   imports: [
     AsyncPipe,
-    NgIf,
     NgOptimizedImage
   ],
   templateUrl: './header-profile-dropdown.component.html',
