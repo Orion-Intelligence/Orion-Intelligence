@@ -21,5 +21,5 @@ class directory_view_model:
       directory_view_model.__instance = self
       self.__m_directory_model = directory_model()
 
-  async def invoke_directory_api(self, param: directory_param_model):
-    return await self.__m_directory_model.api_directory(param)
+  async def invoke_directory(self, param: directory_param_model):
+    return await self.__m_directory_model.directory(param)

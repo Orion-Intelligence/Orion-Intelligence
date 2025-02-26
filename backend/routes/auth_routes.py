@@ -1,11 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import timedelta
-
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from starlette.responses import JSONResponse
 from orion.services.auth_manager.auth_manager import auth_manager
 from orion.services.session_manager.session_manager import session_manager
-from orion.services.session_manager.shared_model.login_token_model import login_token_model
 
 auth_router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

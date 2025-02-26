@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-home-search',
@@ -12,12 +13,17 @@ import {FormsModule} from '@angular/forms';
 export class HomeSearchComponent {
   searchQuery: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,private dashboardService: DashboardService) {}
 
   onSearchSubmit(event: Event) {
     event.preventDefault();
     if (this.searchQuery.trim()) {
-      this.router.navigate(['/dashboard'], { queryParams: { q: this.searchQuery } }).then();
+      this.dashboardService.searchGeneralParamModel.q = this.searchQuery.trim()
+      this.dashboardService.fetchSearchResults().subscribe({
+        next: (response) => {
+          this.router.navigate(['/dashboard'], { queryParams: { q: this.searchQuery } }).then();
+        }
+      });
     }
   }
 }

@@ -22,5 +22,5 @@ class homepage_view_model:
       self.__m_homepage_model = homepage_model()
 
   # External Request Callbacks
-  async def invoke_analytics_api(self, request: Request):
+  async def invoke_analytics(self, request: Request):
     return await self.__m_homepage_model.invoke_analytics()

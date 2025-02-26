@@ -6,8 +6,8 @@ from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATI
 from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
-from orion.view_managers.interactive.search_manager.search_data_model import search_api_general_param_model
-from orion.view_managers.interactive.search_manager.search_data_model.search_api_leak_param_model import search_api_leak_param_model
+from orion.view_managers.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
+from orion.view_managers.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 
 
 class elastic_controller:
@@ -49,27 +49,25 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
-    async def search_query_api_general(self, p_data: search_api_general_param_model):
+    async def search_query_general(self, p_data: search_general_param_model):
         try:
             document, data_filter = self.__m_elastic_request_generator.on_search_general_data(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)
-            print(m_data)
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
-    async def search_query_api_leak(self, p_data: search_api_leak_param_model):
+    async def search_query_leak(self, p_data: search_leak_param_model):
         try:
             document, data_filter = self.__m_elastic_request_generator.on_search_leakdata(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)
-            print(m_data)
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
-    async def search_query(self, p_data:search_api_leak_param_model):
+    async def search_query(self, p_data:search_leak_param_model):
         try:
             document, data_filter = self.__m_elastic_request_generator.on_search_general_data(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)

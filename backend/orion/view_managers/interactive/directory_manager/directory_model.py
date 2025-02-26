@@ -30,7 +30,7 @@ class directory_model:
       data = await self._engine.find(db_url_data_model, query, skip=(params.page - 1) * 10, limit=10)
       return data, total_count
 
-  async def api_directory(self, param: directory_param_model):
+  async def directory(self, param: directory_param_model):
       results, total_count = await self.fetch_filtered_urls(param)
       return directory_callback_model(
           total_count=total_count,

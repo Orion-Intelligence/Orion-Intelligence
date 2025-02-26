@@ -1,12 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../../shared/partials/header/header.component';
 import { FooterComponent } from '../../shared/partials/footer/footer.component';
 import { ErrorStoreService } from '../../shared/services/error-store.service';
-import { Observable, filter } from 'rxjs';
+import { Observable, filter, map } from 'rxjs';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { fadeInAnimation } from './animations/app.animations';
 
 @Component({
   selector: 'app-root',
@@ -20,28 +20,21 @@ import { trigger, transition, style, animate } from '@angular/animations';
     LoaderComponent,
   ],
   templateUrl: './app.component.html',
-  animations: [
-    trigger('fadeIn', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('500ms ease-out', style({ opacity: 1 }))
-      ])
-    ])
-  ]
+  animations: [fadeInAnimation],
 })
 export class AppComponent {
-  private router = inject(Router);
-  private errorStore = inject(ErrorStoreService);
-  error$: Observable<boolean> = this.errorStore.error$;
+  error$: Observable<boolean>;
   isVisible = true;
+  currentRoute = signal('');
 
-  currentRoute = signal(this.router.url);
+  constructor(private router: Router, private errorStore: ErrorStoreService) {
+    this.error$ = this.errorStore.error$;
 
-  constructor() {
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.currentRoute.set(event.url);
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.router.url)
+    ).subscribe((url) => {
+      this.currentRoute.set(url);
     });
   }
 

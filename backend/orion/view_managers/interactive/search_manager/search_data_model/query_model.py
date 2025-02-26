@@ -1,10 +1,10 @@
 from orion.constants.strings import SEARCH_STRINGS
-from orion.view_managers.interactive.search_manager.search_data_model.search_api_leak_param_model import search_api_leak_param_model
+from orion.view_managers.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 
 
 class query_model:
     m_total_documents = 1
-    m_search_param_model:search_api_leak_param_model = None
+    m_search_param_model:search_leak_param_model = None
 
     def set_search_type(self, p_search_type):
         if p_search_type != "all" and p_search_type != "forums" and p_search_type != "marketplaces" and p_search_type != "news":

@@ -22,6 +22,7 @@
 }
 
 .loader-container.show {
+  height: 5px;
   opacity: 1;
   visibility: visible;
 }
