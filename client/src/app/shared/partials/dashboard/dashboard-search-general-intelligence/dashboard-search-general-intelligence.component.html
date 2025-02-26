@@ -1,0 +1,33 @@
+<div class="d-flex search__results-main">
+  <div class="search__results row">
+    <div *ngFor="let item of items" class="search-result__content-webpages-container position-relative">
+      <div class="search-result__content-webpages">
+        <label class="search-content__webpages-header">{{ item.header }}</label>
+        <br>
+        <hr class="search-content__webpages-divider">
+        <label class="search-content__webpages-description">{{ item.description }}</label>
+        <label class="search-content__webpages-url">
+          <a [href]="item.url" target="_blank">{{ item.url }}</a>
+        </label>
+        <div class="row search-content__webpages-data">
+          <div class="col-3">
+            <p>Published on:</p>
+            <h6>{{ item.publishedOn }}</h6>
+          </div>
+          <div class="col-3">
+            <p>Network:</p>
+            <h6>{{ item.network }}</h6>
+          </div>
+          <div class="col-3">
+            <p>Updated on:</p>
+            <h6>{{ item.updatedOn }}</h6>
+          </div>
+          <div class="col-3">
+            <p>Status:</p>
+            <h6>{{ item.status }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

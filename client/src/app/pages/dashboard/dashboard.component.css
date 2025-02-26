@@ -255,6 +255,7 @@ input[type="radio"] {
 .search__side-nav {
   color: white;
   position: relative;
+  overflow-y: scroll;
 }
 
 .search__side-nav-background {

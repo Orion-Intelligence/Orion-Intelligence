@@ -1,12 +1,24 @@
 <div *ngIf="selectedSection === 'general_intelligence'">
-  <app-dashboard-general></app-dashboard-general>
+  <app-dashboard-search-general-intelligence></app-dashboard-search-general-intelligence>
 </div>
+
 <div *ngIf="selectedSection === 'monitor'">
-  <app-dashboard-monitor></app-dashboard-monitor>
+  <h2>Monitor Section</h2>
+  <p>Content for Monitor</p>
 </div>
 <div *ngIf="selectedSection === 'leaks'">
-  <app-dashboard-leak></app-dashboard-leak>
+  <h2>leaks Section</h2>
+  <p>Content for leaks</p>
 </div>
-<div *ngIf="selectedSection === 'api'">
-  <app-dashboard-api></app-dashboard-api>
+<div *ngIf="selectedSection === 'live_api'">
+  <h2>Live APIs Section</h2>
+  <p>Content for Live APIs</p>
+</div>
+<div *ngIf="selectedSection === 'links'">
+  <h2>links Section</h2>
+  <p>Content for links</p>
+</div>
+<div *ngIf="selectedSection === 'documentation'">
+  <h2>documentation Section</h2>
+  <p>Content for documentation</p>
 </div>
