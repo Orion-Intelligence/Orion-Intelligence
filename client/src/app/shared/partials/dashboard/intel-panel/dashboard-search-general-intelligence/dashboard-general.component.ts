@@ -1,48 +1,60 @@
-import {Component} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
-import {FormsModule} from '@angular/forms';
-import {HeaderProfileDropdownComponent} from '../../../header-profile-dropdown/header-profile-dropdown.component';
-import {take} from 'rxjs';
+import { Component } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Router, NavigationEnd } from '@angular/router';
+import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
+import { FormsModule } from '@angular/forms';
+import { FiltersComponent } from '../../../directory/directory-filters/directory-filters.component';
+import { DirectoryService } from '../../../../../services/directory/directory.service';
+import { DashboardSearchNoSuggestionComponent } from '../dashboard-search-no-suggestion/dashboard-search-no-suggestion.component';
+import { Observable, filter } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-general',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgOptimizedImage],
+  imports: [CommonModule, FormsModule, NgOptimizedImage, FiltersComponent, DashboardSearchNoSuggestionComponent],
   templateUrl: './dashboard-general.component.html',
   styleUrls: ['./dashboard-general.component.css']
 })
 export class DashboardGeneral {
 
   searchQuery: string = '';
+  isFilterOpen$: Observable<boolean>;
+  currentSection: string = '';
 
-  constructor(public dashboardService: DashboardService) {
-    if (this.dashboardService.searchGeneralCallbackModel?.Result?.length > 0) {
-      console.log(this.dashboardService.searchGeneralCallbackModel.Result[0].m_content);
-    } else {
-      console.log('searchGeneralCallbackModel is undefined or Result array is empty');
-    }
-    this.dashboardService.searchQuery$.pipe(take(1)).subscribe(query => {
-      this.searchQuery = query;
+  constructor(
+    public dashboardService: DashboardService,
+    private directoryService: DirectoryService,
+    private router: Router
+  ) {
+    this.updateCurrentSection(this.router.url);
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.updateCurrentSection(event.url);
     });
+    this.isFilterOpen$ = this.directoryService.sidebarState$;
   }
 
-  items = Array.from({length: 10}).map((_, i) => ({
-    header: `Header ${i + 1}`,
-    description: `Description ${i + 1}`,
-    url: `https://example.com/page${i + 1}`,
-    publishedOn: `2025-02-${10 + i}`,
-    network: `Network ${i + 1}`,
-    updatedOn: `2025-02-${15 + i}`,
-    status: i % 2 === 0 ? 'Active' : 'Inactive',
-  }));
+  private updateCurrentSection(url: string) {
+
+    if (url.includes('/dashboard')) {
+      this.currentSection = 'dashboard';
+    } else if (url.includes('/directory')) {
+      this.currentSection = 'directory';
+    } else {
+      this.currentSection = 'other';
+    }
+  }
 
   onSearchSubmit(event: Event) {
     event.preventDefault();
     if (this.searchQuery.trim()) {
-      this.dashboardService.searchGeneralParamModel.q = this.searchQuery.trim()
+      this.dashboardService.searchGeneralParamModel.q = this.searchQuery.trim();
       this.dashboardService.fetchGeneralResults().subscribe();
     }
   }
 
+  openSidebar() {
+    this.directoryService.openSidebar();
+  }
 }

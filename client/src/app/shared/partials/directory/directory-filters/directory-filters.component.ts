@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
-import {DirectoryService} from '../../../../services/directory/directory.service';
-import {Observable} from 'rxjs';
+import { DirectoryService } from '../../../../services/directory/directory.service';
+import { Observable } from 'rxjs';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-filters',
@@ -10,10 +11,13 @@ import {Observable} from 'rxjs';
   standalone: true,
   imports: [
     FormsModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    CommonModule
   ],
 })
 export class FiltersComponent {
+  @Input() currentSection: string = ''; // Accepting currentSection from parent
+
   isFilterOpen$: Observable<boolean>;
   filterModel = {
     network: '',
