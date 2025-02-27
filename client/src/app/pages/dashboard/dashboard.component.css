@@ -196,6 +196,7 @@ input[type="radio"] {
   height: 100vh;
   overflow-y: hidden;
   background: rgba(28, 77, 125, 1);
+  overflow-x: hidden;
 }
 
 @media only screen and (max-width: 1050px) {

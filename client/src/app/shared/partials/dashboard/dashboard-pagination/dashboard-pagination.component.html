@@ -1,0 +1,27 @@
+<div class="search__pagination disable-highlight">
+  <div class="search__pagination-container">
+
+    <!-- Previous Button -->
+    <button class="search__pagination-navigation" [disabled]="currentPage === 1" (click)="onPageChange(1)">
+      <img src="/assets/images/trustly/nav-first.svg" alt="nav-first">
+    </button>
+
+    <button class="search__pagination-navigation gc-clear-selection" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+      <img src="/assets/images/trustly/nav-prev.svg" alt="nav-prev">
+    </button>
+
+    <!-- Page Numbers -->
+    <button *ngFor="let page of [].constructor(maxPages); let i = index"
+            class="search__navigation gc-clear-selection"
+            [class.search__navigation--focus]="(i + 1) === currentPage"
+            (click)="onPageChange(i + 1)">
+      {{ i + 1 }}
+    </button>
+
+    <!-- Next Button -->
+    <button class="search__pagination-navigation gc-clear-selection" [disabled]="currentPage >= maxPages" (click)="onPageChange(currentPage + 1)">
+      <img src="/assets/images/trustly/nav-next.svg" alt="nav-next">
+    </button>
+
+  </div>
+</div>
