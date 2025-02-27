@@ -1,3 +1,13 @@
+<form class="dash-searchbar" (submit)="onSearchSubmit($event)" method="GET" action="" enctype="multipart/form-data">
+  <div class="input-group dash-searchbar">
+    <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control dash-searchbar__detail-header-search-input" maxlength="150" name="q" [(ngModel)]="searchQuery">
+    <input type="hidden" value="1">
+    <button class="btn btn-primary dash-searchbar__search-button-right" type="submit">
+      <img class="dash-searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority="true" height="16" width="16">
+    </button>
+  </div>
+</form>
+
 <div class="d-flex search__results-main">
   <div class="search__results row">
     <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result" class="search-result__content-webpages-container position-relative">

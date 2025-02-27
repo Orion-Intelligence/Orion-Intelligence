@@ -12,6 +12,12 @@
   align-items: center;
 }
 
+.header-logout{
+  position: absolute;
+  right: 18px;
+  top: 18px;
+}
+
 .logo-item {
   height: 60px;
   width: 80px;
@@ -74,7 +80,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px 0 10px;
+  padding: 0 0 0 10px;
 }
 
 .header__menu-category svg {

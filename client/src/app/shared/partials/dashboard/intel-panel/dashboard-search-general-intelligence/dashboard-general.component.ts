@@ -1,21 +1,20 @@
 import {Component} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
+import {FormsModule} from '@angular/forms';
+import {HeaderProfileDropdownComponent} from '../../../header-profile-dropdown/header-profile-dropdown.component';
+import {take} from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-general',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, NgOptimizedImage],
   templateUrl: './dashboard-general.component.html',
   styleUrls: ['./dashboard-general.component.css']
 })
 export class DashboardGeneral {
 
-  activeSection: number | null = null; // No section open by default
-
-  toggleSection(section: number) {
-    this.activeSection = this.activeSection === section ? null : section; // Toggle logic
-  }
+  searchQuery: string = '';
 
   constructor(public dashboardService: DashboardService) {
     if (this.dashboardService.searchGeneralCallbackModel?.Result?.length > 0) {
@@ -23,6 +22,9 @@ export class DashboardGeneral {
     } else {
       console.log('searchGeneralCallbackModel is undefined or Result array is empty');
     }
+    this.dashboardService.searchQuery$.pipe(take(1)).subscribe(query => {
+      this.searchQuery = query;
+    });
   }
 
   items = Array.from({length: 10}).map((_, i) => ({
@@ -35,5 +37,12 @@ export class DashboardGeneral {
     status: i % 2 === 0 ? 'Active' : 'Inactive',
   }));
 
-  protected readonly JSON = JSON;
+  onSearchSubmit(event: Event) {
+    event.preventDefault();
+    if (this.searchQuery.trim()) {
+      this.dashboardService.searchGeneralParamModel.q = this.searchQuery.trim()
+      this.dashboardService.fetchGeneralResults().subscribe();
+    }
+  }
+
 }
