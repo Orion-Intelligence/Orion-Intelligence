@@ -135,7 +135,6 @@ input[type="radio"] {
 }
 
 .search__side-nav-subitems a:hover {
-  text-decoration: underline;
   background: none;
   cursor: pointer;
 }
@@ -148,7 +147,7 @@ input[type="radio"] {
 .search__side-nav-item a {
   display: flex;
   align-items: center;
-  padding: 12px 8px;
+  padding: 12px 8px 12px 15px;
   font-family: 'Inter', sans-serif;
   color: rgba(160, 184, 209, 1);
 }
@@ -163,8 +162,21 @@ input[type="radio"] {
   opacity: 0;
   max-height: 0;
   padding-left: 30px;
+  margin-top: 5px;
   overflow: hidden;
   transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+
+.selected {
+  background-color: rgba(42, 87, 132, 0.35) !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+li.selected {
+  list-style-type: disc;
+  list-style-position: inside;
+  color: white;
 }
 
 .search__side-nav-subitems.show {

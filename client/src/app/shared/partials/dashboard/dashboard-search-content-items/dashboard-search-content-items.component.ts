@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardGeneral } from '../intel-panel/dashboard-search-general-intelligence/dashboard-general.component';
+import { DashboardGeneral } from '../intel-panel/dashboard-general/dashboard-general.component';
 import { Pages } from '../../../../constants/pages';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { Subscription } from 'rxjs';

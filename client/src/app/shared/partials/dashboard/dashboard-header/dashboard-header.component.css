@@ -25,8 +25,8 @@
 
 .searchbar__profile-button {
   position: absolute;
-  right: 30px;
-  top: 20px;
+  right: 10px;
+  top: 0;
 }
 
 .searchbar__header {

@@ -3,12 +3,7 @@ import {NgClass, NgIf} from '@angular/common';
 import {Router, ActivatedRoute} from '@angular/router';
 import {DashboardSidebarComponent} from '../../shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component';
 import {DashboardHeaderComponent} from '../../shared/partials/dashboard/dashboard-header/dashboard-header.component';
-import {
-  DashboardPaginationComponent
-} from '../../shared/partials/dashboard/dashboard-pagination/dashboard-pagination.component';
-import {
-  DashboardSearchContentItemsComponent
-} from '../../shared/partials/dashboard/dashboard-search-content-items/dashboard-search-content-items.component';
+import {DashboardSearchContentItemsComponent} from '../../shared/partials/dashboard/dashboard-search-content-items/dashboard-search-content-items.component';
 import {DashboardService} from '../../services/dashboard/dashboard.service';
 import {Pages} from '../../constants/pages';
 
@@ -21,7 +16,6 @@ import {Pages} from '../../constants/pages';
     NgClass,
     DashboardSearchContentItemsComponent,
     NgIf,
-    DashboardPaginationComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -58,7 +52,4 @@ export class DashboardComponent implements OnInit {
     mSearchCallbackCurrentPageNumber: 1,
   };
 
-  handlePageChange(newPage: number) {
-    this.vars.mSearchCallbackCurrentPageNumber = newPage;
-  }
 }

@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
-import {AsyncPipe, NgForOf, NgOptimizedImage} from '@angular/common';
+import {NgForOf} from '@angular/common';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
-import {FiltersComponent} from '../../../directory/directory-filters/directory-filters.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {filter, Observable} from 'rxjs';
 import {DirectoryService} from '../../../../../services/directory/directory.service';
@@ -12,10 +11,7 @@ import {CommonModule} from '@angular/common';
   selector: 'app-dashboard-leak',
   imports: [
     NgForOf,
-    AsyncPipe,
-    FiltersComponent,
     FormsModule,
-    NgOptimizedImage,
     ReactiveFormsModule,
     CommonModule
   ],
@@ -26,7 +22,6 @@ export class DashboardLeakComponent {
   ery: string = '';
   isFilterOpen$: Observable<boolean>;
   currentSection: string = '';
-  searchQuery: string = '';
 
   constructor(
     public dashboardService: DashboardService,
@@ -53,15 +48,4 @@ export class DashboardLeakComponent {
     }
   }
 
-  onSearchSubmit(event: Event) {
-    event.preventDefault();
-    if (this.searchQuery.trim()) {
-      this.dashboardService.searchGeneralParamModel.q = this.searchQuery.trim();
-      this.dashboardService.fetchGeneralResults().subscribe();
-    }
-  }
-
-  openSidebar() {
-    this.directoryService.openSidebar();
-  }
 }

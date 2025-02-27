@@ -1,1 +1,95 @@
-<p>dashboard-api works!</p>
+<form class="dash-searchbar" (submit)="onSearchSubmit($event)" method="GET" action="" enctype="multipart/form-data" xmlns="http://www.w3.org/1999/html">
+  <div class="col-md-6 col-xl-6 col-sm-12 col-xs-12">
+    <div class="input-group dash-searchbar-div">
+      <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control dash-searchbar__detail-header-search-input" maxlength="150" name="q" [(ngModel)]="searchQuery">
+      <input type="hidden" value="1">
+      <button class="btn btn-primary dash-searchbar__search-button-right" type="submit">
+        <img class="dash-searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority="true" height="16" width="16">
+      </button>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-6 col-sm-12 col-xs-12 search-content__filters-div ">
+    <label class="dash-searchbar__toggle-switch">
+      <input type="checkbox">
+      <span class="dash-searchbar__toggle-slider"></span>
+    </label>
+    <p class="dash-searchbar__toggle-switch-label">Analytics</p>
+    <div class="directory__filters-button-div">
+      <label class="directory__filters-button" (click)="openSidebar()">
+        <img ngSrc="assets/images/shared/filter_icon.svg" alt="Trustly Logo" width="24" height="24" priority="true">
+        Filter
+      </label>
+      <div class="directory__filters-container" [class.directory__filters-container-enable]="isFilterOpen$ | async" [class.directory__filters-container-disable]="!(isFilterOpen$ | async)" [ngClass]="{
+       'directory__filters-container-dashboard': currentSection === 'dashboard',
+       'directory__filters-container-directory': currentSection === 'directory'}">
+        <app-filters [currentSection]="currentSection"></app-filters>
+      </div>
+    </div>
+  </div>
+</form>
+<div class="dashboard__search-table">
+  <div class="dashboard__search-table-header">Data Breach List</div>
+  <table>
+    <tr>
+      <td>Title</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>URL</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Base URL</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Content</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Network</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Important Content</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Content Type</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Web Links</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Dump Links</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Extra Tags</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Section</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Name</td>
+      <td>abc</td>
+    </tr>
+    <tr>
+      <td>Email Address</td>
+      <td>abc</td>
+    </tr>
+  </table>
+</div>
+
+
+<div class="d-flex search__results-main">
+  <div class="search__results row">
+    <div *ngFor="let item of dashboardService.searchLeakCallbackModel.Result" class="search-result__content-webpages-container position-relative">
+      {{ item.m_base_url }}
+    </div>
+  </div>
+</div>

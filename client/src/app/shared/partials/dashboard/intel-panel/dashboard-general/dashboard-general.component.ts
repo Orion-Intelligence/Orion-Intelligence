@@ -5,7 +5,7 @@ import { DashboardService } from '../../../../../services/dashboard/dashboard.se
 import { FormsModule } from '@angular/forms';
 import { FiltersComponent } from '../../../directory/directory-filters/directory-filters.component';
 import { DirectoryService } from '../../../../../services/directory/directory.service';
-import { DashboardSearchNoSuggestionComponent } from '../dashboard-search-no-suggestion/dashboard-search-no-suggestion.component';
+import { DashboardSearchNoSuggestionComponent } from '../../dashboard-search-no-suggestion/dashboard-search-no-suggestion.component';
 import { Observable, filter } from 'rxjs';
 
 @Component({

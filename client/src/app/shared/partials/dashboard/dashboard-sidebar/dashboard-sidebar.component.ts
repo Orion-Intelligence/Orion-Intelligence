@@ -16,11 +16,13 @@ import {Pages} from '../../../../constants/pages';
 })
 export class DashboardSidebarComponent {
   activeDropdown: string = 'general_intelligence';
+  selectedType: string = 'all';
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: DashboardService) {
+  }
 
   toggleDropdown(item: string) {
-      this.activeDropdown = this.activeDropdown === item ? '' : item;
+    this.activeDropdown = this.activeDropdown === item ? '' : item;
   }
 
   @Output() menuClosed = new EventEmitter<void>();
@@ -30,15 +32,25 @@ export class DashboardSidebarComponent {
   }
 
   selectSection(section: string) {
+    if(section==this.Pages.GENERAL_INTELLIGENCE){
+      this.selectedType = "all";
+    }
+    else if(section==this.Pages.API){
+      this.selectedType = "email";
+    }else {
+      this.selectedType = "";
+    }
     this.updateCurrentPage(section);
+    this.onTypeSelected(this.selectedType)
   }
 
   updateCurrentPage(page: string) {
     this.dashboardService.updatePage(page);
   }
 
-  onTypeSelected(type:string){
-    this.dashboardService.searchGeneralParamModel.pSearchParamType = type
+  onTypeSelected(type: string) {
+    this.selectedType = type;
+    this.dashboardService.searchGeneralParamModel.pSearchParamType = type;
     this.dashboardService.fetchGeneralResults().subscribe();
   }
 

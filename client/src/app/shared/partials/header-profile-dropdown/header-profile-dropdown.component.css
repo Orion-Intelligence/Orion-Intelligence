@@ -10,13 +10,13 @@
   visibility: hidden;
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s ease-in-out;
   border-radius: 8px;
-  right: 0;
+  right: 10px;
   position: absolute;
   pointer-events: none;
   z-index: 3;
   list-style: none;
   font-size: 15px;
-  margin-top: 15px;
+  margin-top: 0;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transform: translateY(10px);
   margin-right: 0;

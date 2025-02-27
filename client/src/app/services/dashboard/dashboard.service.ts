@@ -69,6 +69,7 @@ export class DashboardService {
       }
     });
 
+    console.log(params)
     return this.apiService.get<SearchGeneralCallbackModel>('search/general', {params}).pipe(
       tap((response) => {
         this.searchGeneralCallbackModel = new SearchGeneralCallbackModel(response);

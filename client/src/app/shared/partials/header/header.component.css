@@ -14,8 +14,8 @@
 
 .header-logout{
   position: absolute;
-  right: 18px;
-  top: 18px;
+  right: 8px;
+  top: 0;
 }
 
 .logo-item {
@@ -90,7 +90,7 @@
 .header__menu-category {
   cursor: pointer;
   font-size: 14px;
-  padding: 0;
+  padding: 20px;
 }
 
 .header__menu-category:focus {
