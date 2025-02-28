@@ -65,7 +65,7 @@ export class DashboardGeneral implements OnInit {
     this.dashboardService.searchQuery$.next(this.searchQuery);
     this.router.navigate([], {
       queryParams: { q: this.searchQuery },
-      queryParamsHandling: 'merge' // Keeps existing query params intact
+      queryParamsHandling: 'merge'
     }).then();
     event.preventDefault();
     this.fetchSearchResults();

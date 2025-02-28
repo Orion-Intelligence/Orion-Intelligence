@@ -1,15 +1,3 @@
-<div class="container mt-4">
-  <div class="grid-container">
-    <div
-      *ngFor="let column of items; let colIndex = index"
-      class="grid-column">
-      <div
-        *ngFor="let item of column; let itemIndex = index"
-        class="grid-item"
-        [class.expanded]="expandedItems[colIndex] === itemIndex"
-        (click)="toggleExpand(colIndex, itemIndex)">
-        {{ item }}
-      </div>
-    </div>
-  </div>
+<div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result">
+  {{ item.m_base_url }}
 </div>

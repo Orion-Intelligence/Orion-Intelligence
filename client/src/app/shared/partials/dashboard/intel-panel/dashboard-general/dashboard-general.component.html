@@ -12,14 +12,7 @@
 </form>
 
 <ng-container *ngIf="isSearchSuccessful && !isResultEmpty">
-  <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result">
-    <app-dashboard-results-grid></app-dashboard-results-grid>
-<!--    <div class="search-result">-->
-<!--      <h3>{{ item.m_title }}</h3>-->
-<!--      <p>{{ item.m_meta_description }}</p>-->
-<!--      <a *ngIf="item.m_url" [href]="item.m_url" target="_blank">{{ item.m_url }}</a>-->
-<!--    </div>-->
-  </div>
+  <app-dashboard-results-grid></app-dashboard-results-grid>
 </ng-container>
 
 <ng-container *ngIf="isSearchSuccessful && isResultEmpty">
