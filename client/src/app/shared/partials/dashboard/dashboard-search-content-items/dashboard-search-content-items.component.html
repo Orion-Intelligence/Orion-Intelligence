@@ -1,9 +1,11 @@
-<div *ngIf="dashboardService.tracker.section === Category.GENERAL_INTELLIGENCE">
-  <app-dashboard-general></app-dashboard-general>
-</div>
-<div *ngIf="dashboardService.tracker.section === Category.LEAKS">
-  <app-dashboard-leak></app-dashboard-leak>
-</div>
-<div *ngIf="dashboardService.tracker.section === Category.API">
-  <app-dashboard-api></app-dashboard-api>
+<div class="dashboard-content-scroll">
+  <div *ngIf="dashboardService.tracker.section === Category.GENERAL_INTELLIGENCE">
+    <app-dashboard-general></app-dashboard-general>
+  </div>
+  <div *ngIf="dashboardService.tracker.section === Category.LEAKS">
+    <app-dashboard-leak></app-dashboard-leak>
+  </div>
+  <div *ngIf="dashboardService.tracker.section === Category.API">
+    <app-dashboard-api></app-dashboard-api>
+  </div>
 </div>

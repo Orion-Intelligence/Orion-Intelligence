@@ -1,21 +1,3 @@
-aaaaa<!--<form class="dash-searchbar d-flex justify-content-between gap-3" (submit)="onSearchSubmit($event)" method="GET" action="" enctype="multipart/form-data">-->
-<!--  <div class="col-md-6 col-xl-6 col-sm-12 col-xs-12">-->
-<!--    <div class="input-group dash-searchbar-div">-->
-<!--      <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control dash-searchbar__detail-header-search-input" maxlength="150" name="q1" [(ngModel)]="email">-->
-<!--      <input type="hidden" value="1">-->
-<!--      <button class="btn btn-primary dash-searchbar__search-button-right" type="submit">-->
-<!--        <img class="dash-searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority="true" height="16" width="16">-->
-<!--      </button>-->
-<!--    </div>-->
-<!--  </div>-->
-
-<!--  <div class="col-md-6 col-xl-6 col-sm-12 col-xs-12">-->
-<!--    <div class="input-group dash-searchbar-div">-->
-<!--      <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control dash-searchbar__detail-header-search-input" maxlength="150" name="q2" [(ngModel)]="username">-->
-<!--      <input type="hidden" value="1">-->
-<!--      <button class="btn btn-primary dash-searchbar__search-button-right" type="submit">-->
-<!--        <img class="dash-searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority="true" height="16" width="16">-->
-<!--      </button>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</form>-->
+<div *ngIf="dashboardService.tracker.getSelectedSection() === category.API && dashboardService.tracker.getSelectedOption() == ApiSubCategory.EMAIL">
+  <app-dashboard-email-api></app-dashboard-email-api>
+</div>

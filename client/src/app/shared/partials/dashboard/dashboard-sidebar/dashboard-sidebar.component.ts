@@ -40,12 +40,15 @@ export class DashboardSidebarComponent {
     }
 
     if (firstSubcategory) {
-      this.onOptionSelected(firstSubcategory);
+      this.onOptionSelected(firstSubcategory, false);
     }
   }
 
-  onOptionSelected(option: string) {
+  onOptionSelected(option: string, close=true) {
     this.dashboardService.tracker.setOption(option);
+    if(close){
+     this.closeMenu()
+    }
   }
 
   closeMenu() {

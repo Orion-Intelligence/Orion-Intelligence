@@ -1,0 +1,31 @@
+.grid-container {
+  display: flex; /* Use Flexbox for the container */
+  gap: 10px; /* Gap between columns */
+}
+
+.grid-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Gap between items in a column */
+  flex: 1; /* Each column takes equal width */
+}
+
+.grid-item {
+  background-color: #f8f9fa;
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  height: 50px; /* Default height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-item.expanded {
+  height: 150px; /* Expanded height */
+  background-color: #d1e7dd;
+}

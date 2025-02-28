@@ -1,7 +1,7 @@
 export enum Category {
   GENERAL_INTELLIGENCE = 'General Intelligence',
   LEAKS = 'Leaks',
-  API = 'Api\'s'
+  API = 'Online API\'s'
 }
 
 export enum GeneralSubCategory {

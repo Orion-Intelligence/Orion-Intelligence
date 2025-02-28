@@ -211,8 +211,7 @@ input[type="radio"] {
     width: 100vw !important;
     height: 100vh;
     z-index: 10;
-    transition: left 0.3s ease-in-out;
-    overflow: hidden;
+     overflow: hidden;
   }
 
   .search__side-nav-container.show-menu {
@@ -227,7 +226,7 @@ input[type="radio"] {
   }
 
   #search__side-nav-container-main .search__nav-menu-checkbox:checked + .search__side-nav-container {
-    right: 0vw;
+    right: 0;
     transition: right 1s ease;
 
   }
@@ -256,7 +255,7 @@ input[type="radio"] {
 .search__side-nav {
   color: white;
   position: relative;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .search__side-nav-background {

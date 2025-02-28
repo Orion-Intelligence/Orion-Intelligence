@@ -1,11 +1,11 @@
-.table td{
+.directory-list__container .table td{
   border: none ;
 }
-.table th{
+.directory-list__container .table th{
   border: none ;
 
 }
-.table thead th{
+.directory-list__container .table thead th{
   border-bottom: none;
 }
 .directory-list__table tr {
@@ -106,17 +106,17 @@
     padding-right: 4%;
   }
 
-  table thead {
+  .directory-list__container table thead {
     display: none;
   }
 
-  table tr {
+  .directory-list__container table tr {
     display: flex;
     flex-direction: column;
     padding: 1px;
   }
 
-  table tr {
+  .directory-list__container table tr {
     height: auto !important;
   }
 
