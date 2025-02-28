@@ -1,13 +1,9 @@
 .dash-searchbar {
   display: flex;
   align-items: center;
-  margin-top: 20px;
-  width: 232px;
-  border-radius: 8px;
-  margin-left: 32px;
+  margin-top: 22px;
+  margin-left: 22px;
   margin-right: 32px;
-  border: 1px solid #ffffff20;
-
 }
 
 @media only screen and (max-width: 550px) {
@@ -17,53 +13,73 @@
 }
 
 .dash-searchbar-div {
-  width: 230px;
+  width: 270px;
 }
 
 .dash-searchbar__input {
   align-self: center;
   border-radius: 8px 0 0 7px;
   height: 44px;
-  background: #174069;
+  background: #174069 !important;
+  color: #fff !important;
   width: 185px;
   font-size: 16px;
+  border: 1px solid #ffffff30 !important;
+  border-right: none !important;
   padding-left: 20px;
   margin-left: 0;
-  padding-right: 45px;
+  padding-right: 35px;
 }
 
 .dash-searchbar__input::placeholder {
-  color: #ffffff90;
+  color: #ffffff80 !important;
 }
-
 .dash-searchbar__input:focus {
   box-shadow: none;
 }
 
 .dash-searchbar__input-button {
-  background: #174069 !important;
+  background: #174069;
   width: 45px;
   border-radius: 0 8px 8px 0;
+  border: 1px solid #ffffff30;
+  border-left: none !important;
   outline: none !important;
   box-shadow: none !important;
-  border: 1px solid #FCFCFC12 !important;
-  border-left: none !important;
+
 }
 
 .dash-searchbar__input-button:hover,
 .dash-searchbar__input-button:focus,
 .dash-searchbar__input-button:active,
 .dash-searchbar__input-button:focus-visible {
-  background: #31669b !important;
-  border: none !important;
+  background: #174069 !important;
   outline: none !important;
   box-shadow: none !important;
+  border: 1px solid #ffffff30 !important;
+  border-left: none !important;
 }
 
 .col-md-6,
 .col-xl-6,
 .col-sm-12,
 .col-xs-12 {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.fade-enter {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+.fade-enter-active {
+  opacity: 1;
+}
+
+.fade-exit {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+.fade-exit-active {
+  opacity: 0;
 }

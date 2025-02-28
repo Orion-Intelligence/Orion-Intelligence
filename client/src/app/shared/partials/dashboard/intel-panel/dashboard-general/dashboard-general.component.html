@@ -1,49 +1,27 @@
-<form class="dash-searchbar" (submit)="onSearchSubmit($event)" method="GET" action="" enctype="multipart/form-data" xmlns="http://www.w3.org/1999/html">
+<form class="dash-searchbar" (submit)="onFormSubmit($event)">
   <div class="col-md-6 col-xl-6 col-sm-12 col-xs-12">
     <div class="input-group dash-searchbar-div">
-      <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control dash-searchbar__detail-header-search-input" maxlength="150" name="q" [(ngModel)]="searchQuery">
+      <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control dash-searchbar__input" maxlength="150" name="q" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)">
+
       <input type="hidden" value="1">
-      <button class="btn btn-primary dash-searchbar__search-button-right" type="submit">
-        <img class="dash-searchbar__search-button-right-icon" ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority="true" height="16" width="16">
+      <button class="btn btn-primary dash-searchbar__input-button" type="submit">
+        <img ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority="true" height="16" width="16">
       </button>
-    </div>
-  </div>
-  <div class="col-md-6 col-xl-6 col-sm-12 col-xs-12 search-content__filters-div ">
-    <label class="dash-searchbar__toggle-switch">
-      <input type="checkbox">
-      <span class="dash-searchbar__toggle-slider"></span>
-    </label>
-    <p class="dash-searchbar__toggle-switch-label">Analytics</p>
-    <div class="directory__filters-button-div">
-      <label class="directory__filters-button" (click)="openSidebar()">
-        <img ngSrc="assets/images/shared/filter_icon.svg" alt="Trustly Logo" width="24" height="24" priority="true">
-        Filter
-      </label>
-      <div class="directory__filters-container"
-           [class.directory__filters-container-enable]="isFilterOpen$ | async"
-           [class.directory__filters-container-disable]="!(isFilterOpen$ | async)"
-           [ngClass]="{
-       'directory__filters-container-dashboard': currentSection === 'dashboard',
-       'directory__filters-container-directory': currentSection === 'directory'
-     }"
-      >
-        <app-filters [currentSection]="currentSection"></app-filters>
-      </div>
     </div>
   </div>
 </form>
 
-<div class="d-flex search__results-main">
-  <div class="search__results row" *ngIf="dashboardService.searchGeneralCallbackModel.Result.length > 0; else noResults">
-    <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result" class="search-result__content-webpages-container position-relative">
-      {{ item.m_archive_url }}
-      {{ item.m_base_url }}
-      {{ item.m_document }}
-    </div>
+<ng-container *ngIf="isSearchSuccessful && !isResultEmpty">
+  <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result">
+    <app-dashboard-results-grid></app-dashboard-results-grid>
+<!--    <div class="search-result">-->
+<!--      <h3>{{ item.m_title }}</h3>-->
+<!--      <p>{{ item.m_meta_description }}</p>-->
+<!--      <a *ngIf="item.m_url" [href]="item.m_url" target="_blank">{{ item.m_url }}</a>-->
+<!--    </div>-->
   </div>
+</ng-container>
 
-  <ng-template #noResults>
-    <app-dashboard-search-no-suggestion></app-dashboard-search-no-suggestion>
-  </ng-template>
-
-</div>
+<ng-container *ngIf="isSearchSuccessful && isResultEmpty">
+  <app-dashboard-search-no-suggestion @fadeAnimation></app-dashboard-search-no-suggestion>
+</ng-container>

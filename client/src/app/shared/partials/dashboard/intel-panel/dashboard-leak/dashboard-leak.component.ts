@@ -10,7 +10,6 @@ import {CommonModule} from '@angular/common';
 @Component({
   selector: 'app-dashboard-leak',
   imports: [
-    NgForOf,
     FormsModule,
     ReactiveFormsModule,
     CommonModule

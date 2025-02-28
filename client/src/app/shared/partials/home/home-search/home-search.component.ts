@@ -13,21 +13,16 @@ import {DashboardService} from '../../../../services/dashboard/dashboard.service
 export class HomeSearchComponent {
   searchQuery: string = '';
 
-  constructor(private router: Router, private dashboardService: DashboardService) {
+  constructor(private router: Router) {
   }
 
   onSearchSubmit(event: Event) {
     event.preventDefault();
     if (this.searchQuery.trim()) {
-      this.dashboardService.searchGeneralParamModel.q = this.searchQuery.trim()
-      this.dashboardService.fetchGeneralResults().subscribe({
-        next: (response) => {
-          this.router.navigate(['/dashboard'], {
-            queryParams: {q: this.searchQuery},
-            queryParamsHandling: 'merge'
-          }).then();
-        }
-      });
+      this.router.navigate(['/dashboard'], {
+        queryParams: {q: this.searchQuery},
+        queryParamsHandling: 'merge'
+      }).then();
     }
   }
 }

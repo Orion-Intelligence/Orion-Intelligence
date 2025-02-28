@@ -1,74 +1,66 @@
 <nav class="search__side-nav">
-  <img src="/assets/images/shared/Bg.png" alt="background" class="search__side-nav-background">
+  <img ngSrc="/assets/images/shared/Bg.png" alt="background" class="search__side-nav-background" height="789" width="1440">
 
   <div class="search__side-nav-logo">
     <a href="../../..">
       <img ngSrc="assets/images/shared/search_nav_logo.svg" alt="Logo" priority="true" height="50" width="314"/>
     </a>
     <div class="close_menu_div">
-      <img class="search__nav-close-button" ngSrc="assets/images/shared/nav-prev.svg" (click)="closeMenu()" alt="Logo" priority="true" height="24" width="24"/>
+      <img class="search__nav-close-button" ngSrc="assets/images/shared/nav-prev.svg" (click)="closeMenu()" alt="Close Menu" priority="true" height="24" width="24"/>
     </div>
   </div>
 
   <ul class="search__side-nav-items">
-    <ul class="search__side-nav-items">
-      <li class="search__side-nav-item search__side-nav-dropdown">
-        <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('general_intelligence'); selectSection('General Intelligence')" [ngClass]="{'active': activeDropdown === 'general_intelligence'}">
-          <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="20" width="20">
-          General Intelligence
-          <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="20" width="20">
-        </div>
+    <li class="search__side-nav-item">
+      <div class="search__side-nav-item-dropdown" [ngClass]="{'active': dashboardService.tracker.getSelectedSection() === category.GENERAL_INTELLIGENCE}" (click)="onSectionSelected(category.GENERAL_INTELLIGENCE)">
+        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="20" width="20">
+        General Intelligence
+        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="Drop Down" height="20" width="20">
+      </div>
+      <ul class="search__side-nav-subitems" [ngClass]="{'show': dashboardService.tracker.getSelectedSection() === category.GENERAL_INTELLIGENCE}">
+        <li *ngFor="let item of generalCategories">
+          <a (click)="onOptionSelected(item)" [ngClass]="{'selected': dashboardService.tracker.getSelectedOption() === item}">
+            {{ item }}
+          </a>
+        </li>
+      </ul>
+    </li>
 
-        <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'general_intelligence'}">
-          <li><a (click)="onTypeSelected('all')" [ngClass]="{'selected': selectedType === 'all'}">All</a></li>
-          <li><a (click)="onTypeSelected('general')" [ngClass]="{'selected': selectedType === 'general'}">General</a></li>
-          <li><a (click)="onTypeSelected('forums')" [ngClass]="{'selected': selectedType === 'forums'}">Forums</a></li>
-          <li><a (click)="onTypeSelected('news')" [ngClass]="{'selected': selectedType === 'news'}">News</a></li>
-          <li><a (click)="onTypeSelected('stolen')" [ngClass]="{'selected': selectedType === 'stolen'}">Stolen</a></li>
-          <li><a (click)="onTypeSelected('drugs')" [ngClass]="{'selected': selectedType === 'drugs'}">Drugs</a></li>
-          <li><a (click)="onTypeSelected('hacking')" [ngClass]="{'selected': selectedType === 'hacking'}">Hacking</a></li>
-          <li><a (click)="onTypeSelected('marketplaces')" [ngClass]="{'selected': selectedType === 'marketplaces'}">Marketplaces</a></li>
-          <li><a (click)="onTypeSelected('cryptocurrency')" [ngClass]="{'selected': selectedType === 'cryptocurrency'}">Cryptocurrency</a></li>
-          <li><a (click)="onTypeSelected('leaks')" [ngClass]="{'selected': selectedType === 'leaks'}">Leaks</a></li>
-        </ul>
-      </li>
-    </ul>
-
-
-    <li class="search__side-nav-item search__side-nav-dropdown">
-      <div class="search__side-nav-item-dropdown" (click)="onLeakSelected(); toggleDropdown('leaks') ;selectSection(Pages.LEAKS)" [ngClass]="{'active': activeDropdown === 'leaks'}">
-        <img ngSrc="assets/images/shared/leak.svg" alt="leak" height="20" width="20" class="search_side_icon">Leaks
+    <li class="search__side-nav-item">
+      <div class="search__side-nav-item-dropdown" [ngClass]="{'active': dashboardService.tracker.getSelectedSection() === category.LEAKS}" (click)="onSectionSelected(category.LEAKS)">
+        <img ngSrc="assets/images/shared/leak.svg" alt="Leaks" height="20" width="20" class="search_side_icon">Leaks
       </div>
     </li>
 
-    <li class="search__side-nav-item search__side-nav-dropdown">
-      <div class="search__side-nav-item-dropdown" (click)="toggleDropdown('api') ;selectSection(Pages.API)" [ngClass]="{'active': activeDropdown === 'api'}">
-        <img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="api" height="20" width="20" class="search_side_icon">Live
+    <li class="search__side-nav-item">
+      <div class="search__side-nav-item-dropdown" [ngClass]="{'active': dashboardService.tracker.getSelectedSection() === category.API}" (click)="onSectionSelected(category.API)">
+        <img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20" class="search_side_icon">Live
         APIs
-        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="drop down" height="20" width="20">
+        <img class="search_side_dropdown_icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="Drop Down" height="20" width="20">
       </div>
-      <ul class="search__side-nav-subitems" [ngClass]="{'show': activeDropdown === 'api'}">
-        <li><a (click)="onTypeSelected('email')" [ngClass]="{'selected': selectedType === 'email'}">Email</a></li>
+      <ul class="search__side-nav-subitems" [ngClass]="{'show': dashboardService.tracker.getSelectedSection() === category.API}">
+        <li *ngFor="let item of apiCategories">
+          <a (click)="onOptionSelected(item)" [ngClass]="{'selected': dashboardService.tracker.getSelectedOption() === item}">
+            {{ item }}
+          </a>
+        </li>
       </ul>
     </li>
 
     <a href="/directory" target="_blank">
-      <li class="search__side-nav-item search__side-nav-dropdown">
+      <li class="search__side-nav-item">
         <div class="search__side-nav-item-dropdown">
-          <img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="leak" height="20" width="20" class="search_side_icon">Links
+          <img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="Links" height="20" width="20" class="search_side_icon">Links
         </div>
       </li>
     </a>
 
     <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
-      <li class="search__side-nav-item search__side-nav-dropdown">
+      <li class="search__side-nav-item">
         <div class="search__side-nav-item-dropdown">
-          <img ngSrc="assets/images/shared/document_count.svg" alt="leak" height="20" width="20" class="search_side_icon">Documentation
+          <img ngSrc="assets/images/shared/document_count.svg" alt="Documentation" height="20" width="20" class="search_side_icon">Documentation
         </div>
       </li>
     </a>
   </ul>
-
 </nav>
-
-

@@ -93,7 +93,8 @@ input[type="radio"] {
 }
 
 .search__side-nav-item {
-  margin: 7.5px 0;
+  margin: 7px 0;
+  border-radius: 8px !important;
 }
 
 .search__side-nav-item .search__side-nav-item-dropdown {
@@ -124,14 +125,6 @@ input[type="radio"] {
   padding: 12px;
   border-radius: 5px;
   transition: background 0.3s;
-}
-
-.search__side-nav-item .search__side-nav-item-dropdown:hover {
-  background: rgba(42, 87, 132, 0.35);
-}
-
-.search__side-nav-item a:hover {
-  background: rgba(42, 87, 132, 0.35);
 }
 
 .search__side-nav-subitems a:hover {
@@ -203,7 +196,7 @@ li.selected {
   transition: transform 0.3s ease;
 }
 
-.search__side-nav-items .search__side-nav-dropdown .search__side-nav-item-dropdown.active {
+.search__side-nav-items .active {
   background: rgba(42, 87, 132, 0.35);
   text-decoration: none;
   color: #fff;

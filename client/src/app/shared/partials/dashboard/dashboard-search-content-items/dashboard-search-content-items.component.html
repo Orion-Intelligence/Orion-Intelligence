@@ -1,12 +1,9 @@
-<div *ngIf="currentPage === Pages.GENERAL_INTELLIGENCE">
+<div *ngIf="dashboardService.tracker.section === Category.GENERAL_INTELLIGENCE">
   <app-dashboard-general></app-dashboard-general>
 </div>
-<div *ngIf="currentPage === Pages.MONITOR">
-  <app-dashboard-monitor></app-dashboard-monitor>
-</div>
-<div *ngIf="currentPage === Pages.LEAKS">
+<div *ngIf="dashboardService.tracker.section === Category.LEAKS">
   <app-dashboard-leak></app-dashboard-leak>
 </div>
-<div *ngIf="currentPage === Pages.API">
+<div *ngIf="dashboardService.tracker.section === Category.API">
   <app-dashboard-api></app-dashboard-api>
 </div>

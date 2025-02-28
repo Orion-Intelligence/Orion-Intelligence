@@ -4,10 +4,10 @@
 
 .search__no-suggestion {
   max-width: 655px;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 20px;
   border: 1px solid #336BA1;
-  margin: 15px 12px 11em 2em;
+  margin: 30px 12px 11em 25px;
   background: #2A578459;
 }
 
