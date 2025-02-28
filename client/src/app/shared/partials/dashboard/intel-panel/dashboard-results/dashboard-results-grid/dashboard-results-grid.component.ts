@@ -13,4 +13,6 @@ import {DashboardService} from '../../../../../../services/dashboard/dashboard.s
 export class DashboardResultsGridComponent {
   constructor(public dashboardService:DashboardService) {
   }
+
+  // protected readonly it = it;
 }

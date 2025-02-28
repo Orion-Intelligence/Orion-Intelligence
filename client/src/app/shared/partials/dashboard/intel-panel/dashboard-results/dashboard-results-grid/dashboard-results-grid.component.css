@@ -29,3 +29,131 @@
   height: 150px; /* Expanded height */
   background-color: #d1e7dd;
 }
+
+.dashboard__search-main-div {
+  background-color: #174069;
+  padding: 20px;
+  border-radius: 10px;
+  width: 95%;
+  margin: 24px 32px;
+}
+.dashboard__search-main-buttons-outer{
+  width: 30%;
+}
+.dashboard__search-tags {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.dashboard__tag {
+  background-color: #1f456e;
+  padding: 6px 8px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #fff;
+
+}
+
+.dashboard__search-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.dashboard__search-description {
+  font-size: 14px;
+  font-weight: 400;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.dashboard__search-highlight {
+  color: #00CCCC;
+  font-weight: bold;
+}
+
+.dashboard__search-link {
+  display: block;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+
+.dashboard__search-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.dashboard__search-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard__info-label {
+  color: #9fb3c8;
+}
+
+.dashboard__info-value {
+  font-weight: bold;
+  color: white;
+}
+
+.dashboard__search-status {
+  align-items: center;
+  gap: 5px;
+}
+
+.dashboard__status-dot {
+  margin-right: 3px;
+  width: 10px;
+  height: 10px;
+  background-color: #3cb371;
+  border-radius: 50%;
+}
+
+.dashboard__status-text {
+  color: #3cb371;
+  font-weight: bold;
+}
+.dashboard__search-main-div-outer {
+  height: 80vh;
+  width: 70%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+/* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+.dashboard__search-main-div-outer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.dashboard__search-main-div-outer {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+}
+
+.dashboard__search-table {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #234D79;
+  border-radius: 7px;
+  border: 1px solid #335A82;
+}
+
+.dashboard__table-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #9fb3c8;
+  /*border-bottom: 1px solid #3b5268;*/
+}
