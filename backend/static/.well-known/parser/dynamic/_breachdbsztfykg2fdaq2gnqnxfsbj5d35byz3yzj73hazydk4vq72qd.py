@@ -35,7 +35,7 @@ class _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd(collector_interf
         return text
 
     async def parse_leak_data(self, query: Dict[str, str], context: BrowserContext) -> collector_data_model:
-        p_data_url = query.get("url", "")
+        p_data_url = self.base_url
         email = query.get("email", "")
         username = query.get("username", "")
 
@@ -77,11 +77,12 @@ class _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd(collector_interf
                                 m_title=f"Records for {query_value[:10]}",
                                 m_important_content=f"Records were found for {search_type} in a data breach.",
                                 m_weblink=[],
+                                m_content="",
                                 m_base_url = self.base_url,
-                                m_network = helper_method.get_network_type(self.base_url).value,
+                                m_network = helper_method.get_network_type(self.base_url),
                                 m_url = p_data_url,
-                                m_content_type = "accounts",
-                                m_public_records=public_records,
+                                m_content_type = ["stolen"],
+                                m_dumplink=public_records,
                                 m_email_addresses=[email] if search_type == "Email" else [],
                                 m_name=username if search_type == "Username" else ""
                             ))

@@ -4,7 +4,7 @@
   <div class="directory__container">
     <div class="directory__main-container">
       <div class="directory__upper-heading">
-        <div class="directory__pagination-heading ">
+        <div class="directory__pagination-heading">
           <p class="directory__header">Live Onion Services</p>
         </div>
 
@@ -14,16 +14,16 @@
 
         <div class="directory__filters-button-div">
           <label class="directory__filters-button" (click)="openSidebar()">
-            <img ngSrc="assets/images/shared/filter_icon.svg" alt="Trustly Logo" width="24" height="24" priority="true">
+            <img ngSrc="assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority="true">
             Filter
           </label>
-          <div class="directory__filters-container"
-               [class.directory__filters-container-enable]="isFilterOpen$ | async"
-               [class.directory__filters-container-disable]="!(isFilterOpen$ | async)">
-            <app-filters></app-filters>
+
+          <div class="directory__filters-container" [class.directory__filters-container-enable]="isFilterOpen$ | async" [class.directory__filters-container-disable]="!(isFilterOpen$ | async)">
+            <app-filters [filterModel]="filterModel" (filterChanged)="applyFilters($event)" (filterReset)="resetFilters()" (filterClose)="closeSidebar()"></app-filters>
           </div>
         </div>
       </div>
+
       <app-directory-list></app-directory-list>
     </div>
   </div>

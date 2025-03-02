@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
-from orion.view_managers.server.crawl_controller.class_model.general_model import GeneralDataModel
+from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.view_managers.server.crawl_controller.class_model.leak_model import LeakDataModel
-from orion.view_managers.server.crawl_controller.crawl_controller import crawl_controller
+from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
+from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from configs.app_dependency import role_required
 
 crawl_routes = APIRouter()

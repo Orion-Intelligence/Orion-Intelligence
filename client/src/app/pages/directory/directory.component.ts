@@ -1,12 +1,16 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
+import {Observable} from 'rxjs';
+import {DirectoryService} from '../../services/directory/directory.service';
 import {ToolbarComponent} from '../../shared/partials/toolbar/toolbar.component';
-import {FiltersComponent} from '../../shared/partials/directory/directory-filters/directory-filters.component';
+import {FiltersComponent} from '../../shared/partials/filters/filters.component';
 import {FooterComponent} from '../../shared/partials/footer/footer.component';
 import {DirectoryListComponent} from '../../shared/partials/directory/directory-list/directory-list.component';
-import {DirectoryPaginationComponent} from '../../shared/partials/directory/directory-pagination/directory-pagination.component';
+import {
+  DirectoryPaginationComponent
+} from '../../shared/partials/directory/directory-pagination/directory-pagination.component';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
-import {DirectoryService} from '../../services/directory/directory.service';
-import {Observable} from 'rxjs';
+import {FilterModel} from '../../shared/model/filter/filter';
+import {directory_filters} from './constants/directory.filter';
 
 @Component({
   selector: 'app-directory',
@@ -19,10 +23,13 @@ import {Observable} from 'rxjs';
     DirectoryPaginationComponent,
     NgOptimizedImage,
     AsyncPipe,
-  ]
+    FiltersComponent,
+  ],
 })
 export class DirectoryComponent {
   isFilterOpen$: Observable<boolean>;
+  filterModel: FilterModel = directory_filters;
+  selectedFilters: { [key: string]: string | null } = {};
 
   constructor(private directoryService: DirectoryService) {
     this.isFilterOpen$ = this.directoryService.sidebarState$;
@@ -32,4 +39,26 @@ export class DirectoryComponent {
     this.directoryService.openSidebar();
   }
 
+  closeSidebar() {
+    this.directoryService.closeSidebar();
+  }
+
+  applyFilters(filters: { [key: string]: string | null }) {
+    this.selectedFilters = filters;
+    console.log("Applying Filters:", this.selectedFilters);
+    this.reloadDirectory();
+  }
+
+  resetFilters() {
+    this.selectedFilters = {};
+    this.reloadDirectory();
+  }
+
+  private reloadDirectory() {
+    const filteredParams = Object.fromEntries(
+      Object.entries(this.selectedFilters).filter(([_, value]) => value !== null && value !== '')
+    );
+
+    this.directoryService.reloadDirectoryData(filteredParams);
+  }
 }

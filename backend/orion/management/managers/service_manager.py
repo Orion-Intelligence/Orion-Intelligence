@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import sleep
 
+from orion.api.server.config_manager.config_controller import config_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -36,6 +37,7 @@ class service_manager:
                 await mongo_controller.get_instance().ensure_indexes()
                 await mongo_controller.get_instance().initialize()
                 await redis_controller.getInstance().initialize()
+                await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)
 
                 self._is_available = True

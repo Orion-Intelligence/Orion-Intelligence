@@ -90,7 +90,7 @@
 .header__menu-category {
   cursor: pointer;
   font-size: 14px;
-  padding: 20px;
+  padding: 18px 20px 20px;
 }
 
 .header__menu-category:focus {

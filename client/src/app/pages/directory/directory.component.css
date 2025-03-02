@@ -100,11 +100,6 @@
 }
 
 
-.directory__main-filter-input:focus {
-  border: none;
-  outline: none;
-}
-
 .directory__filters-container {
   width: 300px;
   position: fixed;

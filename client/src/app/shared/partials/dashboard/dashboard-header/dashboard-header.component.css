@@ -40,10 +40,10 @@
   overflow: visible;
   margin-top: -1px;
   margin-bottom: 0;
-  height: 70px;
+  height: 60px;
   border-bottom: 1px solid rgba(252, 252, 252, 0.07);
-  background: rgba(28, 77, 125, 1);
-  padding: 20px 0 0 32px;
+  background: #2A5784;
+  padding: 15px 0 0 32px;
 }
 
 .searchbar__searchbox-icon {

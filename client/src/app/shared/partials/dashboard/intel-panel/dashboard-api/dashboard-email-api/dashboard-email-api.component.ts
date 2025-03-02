@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {NgForOf, NgOptimizedImage} from '@angular/common';
+import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {DashboardService} from '../../../../../../services/dashboard/dashboard.service';
+import {DashboardSearchNoSuggestionComponent} from '../../../dashboard-search-no-suggestion/dashboard-search-no-suggestion.component';
+import {CardData} from '../../../../../../pages/dashboard/models/dynamic/email/search_dynamic_email_callback_model';
 
 @Component({
   selector: 'app-dashboard-email-api',
@@ -9,7 +11,9 @@ import {DashboardService} from '../../../../../../services/dashboard/dashboard.s
     FormsModule,
     NgForOf,
     NgOptimizedImage,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgIf,
+    DashboardSearchNoSuggestionComponent
   ],
   templateUrl: './dashboard-email-api.component.html',
   styleUrl: './dashboard-email-api.component.css'
@@ -17,11 +21,36 @@ import {DashboardService} from '../../../../../../services/dashboard/dashboard.s
 export class DashboardEmailApiComponent {
   username: string = '';
   email: string = '';
+  loading = false;
+  error = false;
+  breachData: CardData | null = null;
 
   constructor(public dashboardService: DashboardService) {
   }
 
   onSearchSubmit($event: SubmitEvent) {
+    $event.preventDefault();
+    this.loading = true;
+    this.error = false;
+    this.dashboardService.searchDynamicEmailParambackModel.email = this.email;
+    this.dashboardService.searchDynamicEmailParambackModel.username = this.username;
+    this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data = []
+
+
+    this.dashboardService.fetchDynamicEmailSearchResults().subscribe({
+      next: (_) => {
+        if (this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length > 0) {
+          this.breachData = this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data[0];
+        } else {
+          this.breachData = null;
+        }
+        this.loading = false;
+      },
+      error: (_) => {
+        this.error = true;
+        this.loading = false;
+      }
+    });
 
   }
 }

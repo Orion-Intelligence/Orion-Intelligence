@@ -1,4 +1,4 @@
-<form class="dash-searchbar" (submit)="onFormSubmit($event)">
+<form class="dash-searchbar" (submit)="onFormSubmit()">
   <div class="col-md-6 col-xl-6 col-sm-12 col-xs-12">
     <div class="input-group dash-searchbar-div">
       <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..." class="form-control dash-searchbar__input" maxlength="150" name="q" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)">
@@ -12,9 +12,11 @@
 </form>
 
 <ng-container *ngIf="isSearchSuccessful && !isResultEmpty">
+
+  <div class="right-text search__results_count">{{ dashboardService.searchGeneralCallbackModel.Result.length }} Results Found</div>
   <app-dashboard-results-grid></app-dashboard-results-grid>
 </ng-container>
-
 <ng-container *ngIf="isSearchSuccessful && isResultEmpty">
   <app-dashboard-search-no-suggestion @fadeAnimation></app-dashboard-search-no-suggestion>
 </ng-container>
+<app-dashboard-pagination *ngIf="!this.isResultEmpty" (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(dashboardService.searchGeneralCallbackModel.Page_Count)"></app-dashboard-pagination>

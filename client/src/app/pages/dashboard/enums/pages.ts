@@ -1,6 +1,8 @@
 export enum Category {
   GENERAL_INTELLIGENCE = 'General Intelligence',
   LEAKS = 'Leaks',
+  HOMEPAGE = 'Homepage',
+  DIRECTORY = 'Directory',
   API = 'Online API\'s'
 }
 

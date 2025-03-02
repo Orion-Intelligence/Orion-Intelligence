@@ -1,7 +1,7 @@
 .dashboard-content-scroll {
-  height: 90vh;
+  height: 100vh;
   overflow-y: auto;
-  padding: 10px;
+  padding: 10px 10px 150px;
 }
 
 .dashboard-content-scroll::-webkit-scrollbar {

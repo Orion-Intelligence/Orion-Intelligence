@@ -13,8 +13,7 @@ import {DashboardSearchContentItemsComponent} from '../../shared/partials/dashbo
     NgClass,
     DashboardSearchContentItemsComponent,
   ],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent {
   isMenuOpen = false;

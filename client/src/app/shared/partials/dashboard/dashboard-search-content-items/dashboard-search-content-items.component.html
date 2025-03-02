@@ -1,4 +1,4 @@
-<div class="dashboard-content-scroll">
+<div>
   <div *ngIf="dashboardService.tracker.section === Category.GENERAL_INTELLIGENCE">
     <app-dashboard-general></app-dashboard-general>
   </div>
@@ -7,5 +7,11 @@
   </div>
   <div *ngIf="dashboardService.tracker.section === Category.API">
     <app-dashboard-api></app-dashboard-api>
+  </div>
+  <div *ngIf="dashboardService.tracker.section === Category.HOMEPAGE">
+    <app-index></app-index>
+  </div>
+  <div *ngIf="dashboardService.tracker.section === Category.DIRECTORY">
+    <app-directory></app-directory>
   </div>
 </div>

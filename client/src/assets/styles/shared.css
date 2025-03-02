@@ -13,16 +13,15 @@
 }
 
 .dash-searchbar-div {
-  width: 270px;
+  width: 300px !important;
 }
 
 .dash-searchbar__input {
   align-self: center;
   border-radius: 8px 0 0 7px;
   height: 44px;
-  background: #174069 !important;
+  background: #9ebfe030 !important;
   color: #fff !important;
-  width: 185px;
   font-size: 16px;
   border: 1px solid #ffffff30 !important;
   border-right: none !important;
@@ -39,7 +38,7 @@
 }
 
 .dash-searchbar__input-button {
-  background: #174069;
+  background: #9ebfe030;
   width: 45px;
   border-radius: 0 8px 8px 0;
   border: 1px solid #ffffff30;
@@ -82,4 +81,14 @@
 }
 .fade-exit-active {
   opacity: 0;
+}
+
+.search__results_count{
+  color: #fff;
+  margin-left: 35px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-family: Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
 }

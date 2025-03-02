@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
-import { HeaderProfileDropdownComponent } from '../header-profile-dropdown/header-profile-dropdown.component';
+import { ProfileComponent } from '../profile/profile.component';
 
 @Component({
   selector: 'app-header',
   imports: [
-    HeaderProfileDropdownComponent,
+    ProfileComponent,
     NgOptimizedImage
   ],
   templateUrl: './header.component.html',

@@ -7,12 +7,9 @@ import {DashboardService} from '../../../../../../services/dashboard/dashboard.s
   templateUrl: './dashboard-results-grid.component.html',
   imports: [
     NgForOf
-  ],
-  styleUrls: ['./dashboard-results-grid.component.css']
+  ]
 })
 export class DashboardResultsGridComponent {
   constructor(public dashboardService:DashboardService) {
   }
-
-  // protected readonly it = it;
 }

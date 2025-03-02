@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Router} from '@angular/router';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { Category, GeneralSubCategory } from '../../pages/dashboard/enums/pages';
 
@@ -7,7 +7,7 @@ import { Category, GeneralSubCategory } from '../../pages/dashboard/enums/pages'
   providedIn: 'root'
 })
 export class DashboardResolver implements Resolve<boolean> {
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: DashboardService, private router: Router) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     const queryParam = route.queryParams['q'];
@@ -17,6 +17,9 @@ export class DashboardResolver implements Resolve<boolean> {
       this.dashboardService.searchQuery$.next(queryParam);
       this.dashboardService.tracker.setSection(Category.GENERAL_INTELLIGENCE);
       this.dashboardService.tracker.setOption(GeneralSubCategory.ALL);
+    }else {
+      this.router.navigate(['/']).then();
+      return false;
     }
 
     return true;

@@ -4,9 +4,10 @@ import { DashboardService } from '../../../../services/dashboard/dashboard.servi
 import { Subscription } from 'rxjs';
 import {DashboardApiComponent} from '../intel-panel/dashboard-api/dashboard-api.component';
 import {DashboardLeakComponent} from '../intel-panel/dashboard-leak/dashboard-leak.component';
-import {DashboardMonitorComponent} from '../intel-panel/dashboard-monitor/dashboard-monitor.component';
 import {DashboardGeneral} from '../intel-panel/dashboard-general/dashboard-general.component';
 import {Category} from '../../../../pages/dashboard/enums/pages';
+import {HomepageComponent} from '../../../../pages/homepage/homepage.component';
+import {DirectoryComponent} from '../../../../pages/directory/directory.component';
 
 @Component({
   selector: 'app-dashboard-search-content-items',
@@ -15,13 +16,13 @@ import {Category} from '../../../../pages/dashboard/enums/pages';
     CommonModule,
     DashboardApiComponent,
     DashboardLeakComponent,
-    DashboardGeneral
+    DashboardGeneral,
+    HomepageComponent,
+    DirectoryComponent
   ],
   templateUrl: './dashboard-search-content-items.component.html',
-  styleUrl: './dashboard-search-content-items.component.css'
 })
 export class DashboardSearchContentItemsComponent implements OnInit, OnDestroy {
-  currentPage: string = '';
   private subscription!: Subscription;
 
   constructor(public dashboardService: DashboardService) {}

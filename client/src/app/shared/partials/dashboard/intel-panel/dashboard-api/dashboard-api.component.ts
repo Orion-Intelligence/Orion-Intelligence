@@ -13,7 +13,6 @@ import {ApiSubCategory, Category} from '../../../../../pages/dashboard/enums/pag
     NgIf
   ],
   templateUrl: './dashboard-api.component.html',
-  styleUrl: './dashboard-api.component.css'
 })
 export class DashboardApiComponent {
   constructor(public dashboardService: DashboardService) {

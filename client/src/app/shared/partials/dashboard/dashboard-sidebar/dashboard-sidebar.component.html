@@ -1,5 +1,5 @@
 <nav class="search__side-nav">
-  <img ngSrc="/assets/images/shared/Bg.png" alt="background" class="search__side-nav-background" height="789" width="1440">
+  <img ngSrc="/assets/images/shared/Bg.png" alt="background" class="search__side-nav-background" height="789" width="1440" priority="true">
 
   <div class="search__side-nav-logo">
     <a href="../../..">
@@ -11,6 +11,12 @@
   </div>
 
   <ul class="search__side-nav-items">
+    <li class="search__side-nav-item">
+      <div class="search__side-nav-item-dropdown" [ngClass]="{'active': dashboardService.tracker.getSelectedSection() === category.HOMEPAGE}" (click)="onSectionSelected(category.HOMEPAGE)">
+        <img ngSrc="assets/images/shared/home.svg" alt="Leaks" height="20" width="20" class="search_side_icon">Homepage
+      </div>
+    </li>
+
     <li class="search__side-nav-item">
       <div class="search__side-nav-item-dropdown" [ngClass]="{'active': dashboardService.tracker.getSelectedSection() === category.GENERAL_INTELLIGENCE}" (click)="onSectionSelected(category.GENERAL_INTELLIGENCE)">
         <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" class="search_side_icon" height="20" width="20">
@@ -32,7 +38,7 @@
       </div>
     </li>
 
-    <li class="search__side-nav-item">
+    <li class="search__side-nav-item" *ngIf="apiAllowed">
       <div class="search__side-nav-item-dropdown" [ngClass]="{'active': dashboardService.tracker.getSelectedSection() === category.API}" (click)="onSectionSelected(category.API)">
         <img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20" class="search_side_icon">Live
         APIs
@@ -47,13 +53,11 @@
       </ul>
     </li>
 
-    <a href="/directory" target="_blank">
-      <li class="search__side-nav-item">
-        <div class="search__side-nav-item-dropdown">
-          <img ngSrc="assets/images/shared/search_nav_links_icon.svg" alt="Links" height="20" width="20" class="search_side_icon">Links
-        </div>
-      </li>
-    </a>
+    <li class="search__side-nav-item">
+      <div class="search__side-nav-item-dropdown" [ngClass]="{'active': dashboardService.tracker.getSelectedSection() === category.DIRECTORY}" (click)="onSectionSelected(category.DIRECTORY)">
+        <img ngSrc="assets/images/shared/directory.svg" alt="Leaks" height="20" width="20" class="search_side_icon">Links
+      </div>
+    </li>
 
     <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
       <li class="search__side-nav-item">
