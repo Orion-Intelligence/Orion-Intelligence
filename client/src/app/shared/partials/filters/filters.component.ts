@@ -1,16 +1,20 @@
-import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {FilterModel} from '../../model/filter/filter';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { FilterModel } from '../../model/filter/filter';
+import { last } from 'rxjs';
+import { fadeAnimation } from '../../animations/animations';
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
   imports: [FormsModule, CommonModule, NgOptimizedImage],
+  animations: [fadeAnimation]
 })
 export class FiltersComponent implements OnInit {
   @Input() filterModel!: FilterModel;
+  @Input() isFilterOpen!: boolean | null;
   @Output() filterChanged = new EventEmitter<{ [key: string]: string | null }>();
   @Output() filterReset = new EventEmitter<void>();
   @Output() filterClose = new EventEmitter<void>();
@@ -21,42 +25,33 @@ export class FiltersComponent implements OnInit {
     this.initializeFilters();
   }
 
-  /**
-   * Initialize selectedFilters with placeholder text to ensure it appears when closed.
-   */
   private initializeFilters() {
     this.selectedFilters = Object.keys(this.filterModel.filters)
       .reduce((acc, key) => ({
         ...acc,
-        [key]: `Select ${this.filterModel.filters[key].title}`, // Set placeholder as default value
+        [key]: null,
       }), {});
   }
 
-  /**
-   * Update selection but keep placeholder for display purposes.
-   */
   onSelectionChange(key: string, value: string) {
-    this.selectedFilters[key] = value !== `Select ${this.filterModel.filters[key].title}` ? value : null;
+    this.selectedFilters[key] = value;
   }
 
-  /**
-   * Apply the selected filters and emit the event.
-   */
   applyFilters() {
-    this.filterChanged.emit({...this.selectedFilters});
+    this.filterChanged.emit({ ...this.selectedFilters });
+    this.closeFilter()
   }
 
   closeFilter() {
     this.filterClose.emit();
   }
 
-  /**
-   * Reset filters and restore placeholder text.
-   */
   resetFilters() {
+    this.closeFilter()
     this.initializeFilters();
     this.filterReset.emit();
   }
 
   protected readonly Object = Object;
+  protected readonly last = last;
 }

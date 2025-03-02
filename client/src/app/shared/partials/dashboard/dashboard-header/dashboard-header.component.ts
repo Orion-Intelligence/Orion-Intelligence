@@ -1,23 +1,32 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {NgOptimizedImage} from '@angular/common';
 import {ProfileComponent} from '../../profile/profile.component';
-import {EventEmitter, Output} from '@angular/core';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {NavigationEnd, Router} from '@angular/router';
+import {filter} from 'rxjs';
+import {NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, ProfileComponent],
+  imports: [FormsModule, ProfileComponent, NgIf, NgForOf, TitleCasePipe, NgOptimizedImage],
   templateUrl: './dashboard-header.component.html'
 })
-export class DashboardHeaderComponent {
-
-  constructor(public dashboardService: DashboardService) {}
-
+export class DashboardHeaderComponent implements OnInit {
   @Output() menuClicked = new EventEmitter<void>();
+  breadcrumb: string[] = [];
 
-  toggleMenu() {
-    this.menuClicked.emit();
+  constructor(public dashboardService: DashboardService, private router: Router) {}
+
+  ngOnInit() {
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
+      this.updateBreadcrumb();
+    });
+
+    this.updateBreadcrumb();
+  }
+
+  updateBreadcrumb() {
+    this.breadcrumb = this.router.url.split('/').filter(segment => segment);
   }
 }

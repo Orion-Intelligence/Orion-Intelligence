@@ -1,11 +1,8 @@
-<form (submit)="onSearchSubmit($event)" class="home__search-form">
+<form (submit)="onSearchSubmit($event)" class="home__form">
   <div>
     <img ngSrc="assets/images/shared/home-logo.svg" alt="" width="340" height="61">
   </div>
-  <div class="home__search-container input-group">
-    <input type="text" class="form-control home__searchbox" placeholder="Search" name="q" maxlength="150" autocomplete="off" autocapitalize="none" [(ngModel)]="searchQuery"/>
-    <button class="btn btn-primary home__search-container-button" type="submit">
-      <img ngSrc="assets/images/shared/magnifyingglasswhite.svg" alt="Search" class="home__search-container-button-icon" width="15" height="15">
-    </button>
-  </div>
+  <div class="home__version">Version: {{ appService.getConfig()?.settings?.['version'] }}</div>
+  <p class="home__description"><p>Welcome to the <strong>System Analytics Dashboard</strong>. This system is currently running on <strong>version {{ appService.getConfig()?.settings?.['version'] }}</strong>, ensuring optimized performance and security.</p>
+  <p>The dashboard provides <strong>real-time analytics</strong> on key system metrics, tracking insights such as <strong>performance trends, data integrity, and security alerts</strong>. <br>Stay updated with daily and weekly changes to monitor and enhance overall system efficiency.</p>
 </form>

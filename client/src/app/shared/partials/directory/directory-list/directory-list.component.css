@@ -104,6 +104,7 @@
 
   .directory-list__container {
     padding-right: 4%;
+    margin-top: 50px !important;
   }
 
   .directory-list__container table thead {

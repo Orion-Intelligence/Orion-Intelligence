@@ -1,11 +1,10 @@
 .directory {
   margin: 0;
   max-height: 100vh;
-  background: linear-gradient(
-    to bottom,
-    rgba(18, 52, 84, 1) 0%,
-    #2A5784 30%
-  );
+  background: linear-gradient(to bottom,
+  rgba(18, 52, 84, 1),
+  rgba(41, 87, 132, 1) 50vh,
+  rgba(41, 87, 132, 1) 100%);
 }
 
 .directory__container {
@@ -52,6 +51,7 @@
   padding: 0;
   margin: 7px 0 0;
   width: 100%;
+  position: relative;
 }
 
 .directory__filters-button {
@@ -100,23 +100,7 @@
 }
 
 
-.directory__filters-container {
-  width: 300px;
-  position: fixed;
-  top: 1px;
-  background: #2A5784;
-  height: 95vh;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 15px;
-  box-shadow: rgba(0, 0, 0, 0.24) 0 3px 8px;
-  transition: right 0.2s ease;
-}
-
-.directory__filters-container-enable {
-  right: 0;
-}
-
-.directory__filters-container-disable {
+.filter__container-disable {
   right: -300px;
 }
 
@@ -139,15 +123,6 @@
   }
 
   .directory__filters-button-div {
-  }
-
-  .directory__filters-container {
-    width: 100vw;
-    transition: right 0.2s ease;
-  }
-
-  .directory__filters-container-disable {
-    right: -100vw;
-    transition: none;
+    justify-content: start;
   }
 }

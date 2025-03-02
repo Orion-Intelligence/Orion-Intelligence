@@ -1,8 +1,9 @@
-import {Component} from '@angular/core';
-import {NgClass, NgIf} from '@angular/common';
-import {DashboardSidebarComponent} from '../../shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component';
-import {DashboardHeaderComponent} from '../../shared/partials/dashboard/dashboard-header/dashboard-header.component';
-import {DashboardSearchContentItemsComponent} from '../../shared/partials/dashboard/dashboard-search-content-items/dashboard-search-content-items.component';
+import { Component } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { DashboardSidebarComponent } from '../../shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component';
+import { DashboardHeaderComponent } from '../../shared/partials/dashboard/dashboard-header/dashboard-header.component';
+import { RouterOutlet } from '@angular/router';
+import {fadeInDashboard} from '../app/animations/dashboard.animations';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,15 +12,15 @@ import {DashboardSearchContentItemsComponent} from '../../shared/partials/dashbo
     DashboardSidebarComponent,
     DashboardHeaderComponent,
     NgClass,
-    DashboardSearchContentItemsComponent,
+    RouterOutlet,
   ],
-  templateUrl: './dashboard.component.html'
+  templateUrl: './dashboard.component.html',
+  animations: [fadeInDashboard]
 })
 export class DashboardComponent {
   isMenuOpen = false;
 
-  constructor() {
-  }
+  constructor() {}
 
   toggleSideNav() {
     this.isMenuOpen = !this.isMenuOpen;
@@ -28,8 +29,8 @@ export class DashboardComponent {
   hideSideNav() {
     this.isMenuOpen = false;
   }
-  vars = {
-    mSearchCallbackCurrentPageNumber: 1,
-  };
 
+  prepareRoute(outlet: RouterOutlet) {
+    return outlet?.activatedRouteData?.['animation'] || null;
+  }
 }

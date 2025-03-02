@@ -1,39 +1,45 @@
-<label class="directory__main-filter-header d-flex align-items-center" (click)="closeFilter()">
+<div class="filter__overlay" (click)="closeFilter()" *ngIf="isFilterOpen" @fadeAnimation></div>
+
+<label class="filter__header d-flex align-items-center" (click)="closeFilter()">
   <div class="justify-content-start">
-    <h2 class="directory__main-filter-heading">Filters</h2>
+    <h2 class="filter__heading">Filters</h2>
   </div>
-  <div class="col-12 d-flex justify-content-end directory__filters-close-label">
+  <div class="col-12 d-flex justify-content-end filter__close-label">
     <img ngSrc="assets/images/shared/nav-next.svg" alt="close" height="16" width="16">
   </div>
 </label>
 
-<form class="directory__main-filter-form">
-  <div class="directory__main-filter-content">
+<form class="filter__form">
+  <div class="filter__content">
     <div *ngFor="let key of Object.keys(filterModel.filters)">
-      <label class="directory__main-filter-label">
+      <label class="filter__label">
         {{ filterModel.filters[key].title }}
       </label>
       <div class="dropdown">
-        <select class="directory__main-filter-input form-select" name="{{ key }}" [(ngModel)]="selectedFilters[key]" (ngModelChange)="onSelectionChange(key, $event)">
-          <!-- Default placeholder, displayed even when dropdown is closed -->
-          <option value="Select {{ filterModel.filters[key].title }}" disabled>
-            Select {{ filterModel.filters[key].title }}
-          </option>
+        <button class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" type="button" id="dropdown{{ key }}" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selectedFilters[key] ? selectedFilters[key] : 'Select ' + filterModel.filters[key].title }}
+        </button>
 
-          <!-- Other selectable options -->
-          <option *ngFor="let option of filterModel.filters[key].options" [value]="option">
-            {{ option | titlecase }}
-          </option>
-        </select>
+        <!-- Dropdown options -->
+        <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3" [attr.aria-labelledby]="'dropdown' + key">
+          <li *ngFor="let option of filterModel.filters[key].options; let last = last">
+            <a class="dropdown-item py-0 d-flex align-items-center" (click)="onSelectionChange(key, option)">
+              {{ option | titlecase }}
+            </a>
+            <ng-container *ngIf="!last">
+              <li class="dropdown-divider m-0 mx-3"></li>
+            </ng-container>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 
-  <div class="directory__main-filter-submit d-flex flex-column">
-    <button type="button" class="btn btn-secondary mb-4 directory__main-submit-button" (click)="resetFilters()">
+  <div class="filter__submit d-flex flex-column">
+    <button type="button" class="btn btn-secondary mb-4 filter__submit-button" (click)="resetFilters()">
       Reset
     </button>
-    <button type="button" class="btn btn-primary directory__main-submit-button" (click)="applyFilters()">
+    <button type="button" class="btn btn-primary filter__submit-button" (click)="applyFilters()">
       Apply
     </button>
   </div>

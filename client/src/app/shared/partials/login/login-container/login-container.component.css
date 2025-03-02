@@ -1,3 +1,7 @@
+.login-wrapper {
+  position: relative;
+}
+
 .login-background {
   position: absolute;
   top: 0;
@@ -8,7 +12,7 @@
   pointer-events: none;
 }
 
-.auth_form__container {
+.login-container {
   position: relative;
   color: white;
   overflow: hidden;
@@ -21,26 +25,29 @@
   min-width: 300px;
 }
 
-.auth_form__sub__container {
+.login-box {
   background: linear-gradient(90deg, rgba(21, 52, 84, 0.5) 0%, rgba(22, 56, 88, 0.5) 100%);
   padding: 42px 32px;
   border-radius: 16px;
   width: 420px;
 }
 
-.auth_form-form {
-  margin: 36px 0 0 0;
+.login-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-.demo_auth_form {
-  margin-top: 50px;
+.login-error-message {
+  color: #ffcc00;
+  text-align: center;
 }
 
-.auth_form__form-row {
+.login-form-group {
   display: grid;
 }
 
-.auth_form__input {
+.login-input {
   border: none;
   border-radius: 8px;
   background: #fff url('/assets/images/shared/lock.svg') no-repeat calc(100% - 10px) center;
@@ -51,25 +58,26 @@
   font-size: 15px;
 }
 
-.auth_form__input::placeholder {
+.login-input::placeholder {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 15px;
   color: #aaa;
 }
 
-.auth_form__input-user {
+.login-input-username {
   background: #fff url('/assets/images/shared/profile.svg') no-repeat calc(100% - 10px) center;
   background-size: 20px 20px;
   margin-bottom: 24px;
 }
 
-.auth_form__input:focus {
+.login-input:focus {
   border: none;
   outline: none;
 }
 
-.auth_form__form-button, .auth_form__form-button-disabled {
+.login-btn-submit,
+.login-btn-disabled {
   display: table;
   color: #fff;
   text-decoration: none;
@@ -85,15 +93,15 @@
   transition: all 300ms ease;
 }
 
-.auth_form__form-button:hover {
+.login-btn-submit:hover {
   filter: brightness(88%);
 }
 
-.auth_form__form-button-disabled {
+.login-btn-disabled {
   opacity: 0.5;
 }
 
-.auth_form__footer {
+.login-footer {
   position: fixed;
   bottom: 0;
   background: rgba(33, 75, 116, 0.31);
@@ -101,20 +109,12 @@
   width: 100%;
 }
 
-.d-flex {
-  display: flex;
-}
-
-.justify-content-center {
-  justify-content: center;
-}
-
-.d-none {
+.login-hidden-label {
   display: none;
 }
 
 @media only screen and (max-width: 643px) {
-  .auth_form__sub__container {
+  .login-box {
     margin: 0 20px;
     padding: 42px 20px;
     width: 100%;

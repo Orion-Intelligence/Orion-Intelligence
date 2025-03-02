@@ -2,14 +2,13 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { NgOptimizedImage } from '@angular/common';
-import {ToolbarComponent} from '../../shared/partials/toolbar/toolbar.component';
 import {HomeSearchComponent} from '../../shared/partials/home/home-search/home-search.component';
 import {HomeInsightComponent} from '../../shared/partials/home/home-insight/home-insight.component';
 
 @Component({
   selector: 'app-index',
   standalone: true,
-  imports: [ToolbarComponent, HomeSearchComponent, HomeInsightComponent, NgOptimizedImage],
+  imports: [HomeSearchComponent, HomeInsightComponent, NgOptimizedImage],
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {

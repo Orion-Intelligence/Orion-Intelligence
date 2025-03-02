@@ -1,16 +1,18 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {NgOptimizedImage, NgClass, NgForOf, NgIf} from '@angular/common';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ApiSubCategory, Category, GeneralSubCategory, LeakSubCategory } from '../../../../pages/dashboard/enums/pages';
 import { AppService } from '../../../../services/core/app.service';
+import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import {filter} from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, NgForOf, NgIf],
+  imports: [NgOptimizedImage, NgClass, NgForOf, NgIf, RouterLink],
   templateUrl: './dashboard-sidebar.component.html',
 })
-export class DashboardSidebarComponent {
+export class DashboardSidebarComponent implements OnInit {
   @Output() menuClosed = new EventEmitter<void>();
   apiAllowed: boolean = false;
 
@@ -19,10 +21,36 @@ export class DashboardSidebarComponent {
   leakCategories = Object.values(LeakSubCategory);
   category = Category;
 
-  constructor(public dashboardService: DashboardService, private appService: AppService) {
+  constructor(
+    public dashboardService: DashboardService,
+    private appService: AppService,
+    private router: Router
+  ) {
     this.appService.configData$.subscribe(data => {
       this.apiAllowed = !!(data && data.settings['api_allowed'] === '1');
     });
+  }
+
+  ngOnInit() {
+    // Listen for URL changes and update section accordingly
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.updateSelectedSectionFromURL();
+      });
+
+    // Initial check when component loads
+    this.updateSelectedSectionFromURL();
+  }
+
+  updateSelectedSectionFromURL() {
+    const currentURL = this.router.url;
+
+    if (currentURL.includes('/dashboard/directory')) {
+      this.dashboardService.tracker.setSection(Category.DIRECTORY);
+    } else if (currentURL.includes('/dashboard/home')) {
+      this.dashboardService.tracker.setSection(Category.HOMEPAGE);
+    }
   }
 
   onSectionSelected(section: Category) {
@@ -53,7 +81,6 @@ export class DashboardSidebarComponent {
   onOptionSelected(option: string, close = true) {
     this.dashboardService.tracker.setOption(option);
     this.dashboardService.searchGeneralParamModel.pSearchParamType = option.toLowerCase();
-
     this.dashboardService.fetchGeneralSearchResults().subscribe();
 
     if (close) {

@@ -1,66 +1,60 @@
-.profile-dropdown-toggle::after {
-  display: none !important;
+/* ===========================
+   Profile Dropdown Container
+=========================== */
+.header-profile-container {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Push to the right */
+  position: relative;
 }
 
-.profile-dropdown {
+/* Profile Icon */
+.header-profile-icon {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+
+.header-profile-icon:hover {
+  background: #f0f0f0;
+}
+
+/* ===========================
+   Profile Dropdown Styling
+=========================== */
+.header-profile-dropdown {
   opacity: 0;
-  background: #fff;
+  background: #ffffff;
   padding: 10px 0;
-  width: 160px;
+  width: 200px;
   visibility: hidden;
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s ease-in-out;
   border-radius: 8px;
-  right: 10px;
   position: absolute;
-  pointer-events: none;
-  z-index: 3;
+  top: 100%;
+  right: 0;
   list-style: none;
   font-size: 15px;
-  margin-top: 0;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
+  box-shadow: 0 4px 10px #0000001A;
   transform: translateY(10px);
-  margin-right: 0;
+  z-index: 10;
+  pointer-events: none;
 }
 
-.profile-dropdown.show {
+/* Show Dropdown */
+.header-profile-dropdown.show {
   opacity: 1 !important;
   visibility: visible !important;
-  pointer-events: auto;
   transform: translateY(0);
-}
-
-
-.header_form-user--logout:focus-within .profile-dropdown {
-  opacity: 1 !important;
-  visibility: visible !important;
   pointer-events: auto;
-  transform: translateY(0);
 }
 
-.profile-dropdown .dropdown-item {
-  padding-left: 15px;
-  padding-right: 40px;
-}
-
-.profile-dropdown .dropdown-item:hover {
-  background: #cccccc50;
-}
-
-.profile-dropdown .dropdown-item:active {
-  background: #cccccc80;
-  color: #000000;
-}
-
-.dropdown-item-inline {
-  padding-top: 0;
-}
-
-.user-active {
-  width: 10px;
-  height: 10px;
-}
-
-.profile-dropdown-arrow {
+/* Dropdown Arrow */
+.header-profile-dropdown-arrow {
   position: absolute;
   top: -10px;
   right: 15px;
@@ -68,11 +62,80 @@
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 10px solid white;
+  border-bottom: 10px solid #ffffff;
 }
 
-.header_form-user--logout:focus-within .profile-dropdown {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto;
+/* ===========================
+   Dropdown Items
+=========================== */
+.header-profile-item {
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  transition: background 0.3s ease;
+  cursor: pointer;
+}
+
+.header-profile-item img {
+  margin-right: 10px;
+}
+
+.header-profile-item:hover {
+  background: #f0f0f0;
+}
+
+.header-profile-item:active {
+  background: #cccccc;
+  color: #000000;
+}
+
+/* Profile Status */
+.header-profile-status {
+  padding: 5px 15px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+/* Active Status Indicator */
+.header-profile-active {
+  width: 10px;
+  height: 10px;
+  background: #28a745; /* Green */
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Divider */
+.header-profile-divider {
+  border: 0;
+  height: 1px;
+  background: #dddddd;
+  margin: 5px 15px;
+}
+
+/* ===========================
+   General Header Layout
+=========================== */
+.header-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Searchbar Profile Button */
+.searchbar-profile-button {
+  position: absolute;
+  right: 10px;
+  top: 0;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 1050px) {
+  .searchbar-profile-button {
+    display: none;
+  }
 }

@@ -1,12 +1,14 @@
-<div class="searchbar">
-  <div class="searchbar__profile-button">
-     <app-profile></app-profile>
+<div class="header-bar">
+  <div class="header-bar__title-container">
+      <span *ngFor="let crumb of breadcrumb; let last = last">
+        <span *ngIf="!last" class="breadcrumb-item">{{ crumb | titlecase }}
+          <img ngSrc="assets/images/shared/nav-next.svg" class="header-bar__breadcrum" alt="breadcrumb" height="20" width="20">
+        </span>
+
+        <span *ngIf="last" class="breadcrumb-item breadcrumb-active">{{ crumb | titlecase }}</span>
+      </span>
   </div>
-  <div class="searchbar__logo-grid">
-    <div class="searchbar__logo-container d-flex align-items-center">
-      <div class="search__nav-menu-div"></div>
-      <img class="search_nav_menu_icon" ngSrc="assets/images/shared/seach_nav_menu_icon.svg"  alt="Search" priority="true" height="20" width="20" (click)="toggleMenu()">
-      <p class="searchbar__logo">{{dashboardService.tracker.section}}</p>
-    </div>
+  <div class="header-bar__profile">
+    <app-profile></app-profile>
   </div>
 </div>

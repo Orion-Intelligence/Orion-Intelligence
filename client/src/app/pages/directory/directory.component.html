@@ -1,6 +1,6 @@
 <span id="top"></span>
+<img ngSrc="/assets/images/shared/Bg.png" alt="background" class="app-background" priority="true" height="789" width="1440">
 <div class="directory">
-  <app-toolbar></app-toolbar>
   <div class="directory__container">
     <div class="directory__main-container">
       <div class="directory__upper-heading">
@@ -18,8 +18,8 @@
             Filter
           </label>
 
-          <div class="directory__filters-container" [class.directory__filters-container-enable]="isFilterOpen$ | async" [class.directory__filters-container-disable]="!(isFilterOpen$ | async)">
-            <app-filters [filterModel]="filterModel" (filterChanged)="applyFilters($event)" (filterReset)="resetFilters()" (filterClose)="closeSidebar()"></app-filters>
+          <div class="filters-container" [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
+            <app-filters [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async" (filterChanged)="applyFilters($event)" (filterReset)="resetFilters()" (filterClose)="closeSidebar()"></app-filters>
           </div>
         </div>
       </div>
@@ -30,5 +30,3 @@
 </div>
 
 <span id="bottom"></span>
-
-<app-footer></app-footer>

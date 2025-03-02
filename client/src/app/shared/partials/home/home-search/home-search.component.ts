@@ -3,6 +3,7 @@ import {NgOptimizedImage} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {AppService} from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-home-search',
@@ -13,7 +14,7 @@ import {DashboardService} from '../../../../services/dashboard/dashboard.service
 export class HomeSearchComponent {
   searchQuery: string = '';
 
-  constructor(private router: Router) {
+  constructor(private router: Router, public appService:AppService) {
   }
 
   onSearchSubmit(event: Event) {
@@ -25,4 +26,6 @@ export class HomeSearchComponent {
       }).then();
     }
   }
+
+  protected readonly JSON = JSON;
 }

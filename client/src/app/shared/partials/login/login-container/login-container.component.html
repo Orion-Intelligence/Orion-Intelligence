@@ -1,33 +1,37 @@
-<div class="login">
+<ng-container>
+  <app-header></app-header>
+</ng-container>
+
+<div class="login-wrapper">
   <img ngSrc="/assets/images/shared/Bg.png" alt="background" class="login-background" priority="true" fill="true">
 </div>
 
-<div *ngIf="!authenticated" id="content" class="auth_form__container">
-  <div class="auth_form__sub__container">
-    <div class="d-flex justify-content-center mb-5">
+<div *ngIf="!authenticated" id="content" class="login-container">
+  <div class="login-box">
+    <div class="login-header">
       <img ngSrc="/assets/images/shared/home-logo.svg" alt="logo" width="232" height="41" priority="true">
     </div>
 
-    <p *ngIf="errorMessage" [ngClass]="{'text-warning': errorMessage}">
+    <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
       {{ errorMessage }}
     </p>
 
     <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
-      <div class="auth_form__form-row">
-        <label for="id_username" class="d-none">Username</label>
-        <input type="text" id="id_username" name="username" [(ngModel)]="user.username" placeholder="Username" class="auth_form__input auth_form__input--text auth_form__input-user" required>
+      <div class="login-form-group">
+        <label for="id_username" class="login-hidden-label">Username</label>
+        <input type="text" id="id_username" name="username" [(ngModel)]="user.username" placeholder="Username" class="login-input login-input-username" required>
       </div>
 
-      <div class="auth_form__form-row">
-        <label for="id_password" class="d-none">Password</label>
-        <input type="password" id="id_password" name="password" [(ngModel)]="user.password" class="auth_form__input" placeholder="Password" required minlength="6">
+      <div class="login-form-group">
+        <label for="id_password" class="login-hidden-label">Password</label>
+        <input type="password" id="id_password" name="password" [(ngModel)]="user.password" class="login-input" placeholder="Password" required minlength="6">
       </div>
 
-      <div class="submit-row">
-        <input type="submit" [ngClass]="loginForm.valid ? 'auth_form__form-button' : 'auth_form__form-button-disabled'" [disabled]="!loginForm.valid" value="Log in"/>
+      <div class="login-button-container">
+        <input type="submit" [ngClass]="loginForm.valid ? 'login-btn-submit' : 'login-btn-disabled'" [disabled]="!loginForm.valid" value="Log in"/>
       </div>
     </form>
   </div>
 </div>
 
-<footer class="auth_form__footer"></footer>
+<footer class="login-footer"></footer>

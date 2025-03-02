@@ -17,9 +17,6 @@ export class DashboardResolver implements Resolve<boolean> {
       this.dashboardService.searchQuery$.next(queryParam);
       this.dashboardService.tracker.setSection(Category.GENERAL_INTELLIGENCE);
       this.dashboardService.tracker.setOption(GeneralSubCategory.ALL);
-    }else {
-      this.router.navigate(['/']).then();
-      return false;
     }
 
     return true;

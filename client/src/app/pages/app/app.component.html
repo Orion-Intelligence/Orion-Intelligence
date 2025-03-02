@@ -1,15 +1,8 @@
 <div *ngIf="isVisible">
-  <ng-container *ngIf="!(error$ | async) && showHeaderFooter()">
-    <app-header></app-header>
-  </ng-container>
-
   <app-loader></app-loader>
 
-  <div [@fadeIn]="currentRoute()">
+
+  <div [@fadeIn]="shouldAnimate()">
     <router-outlet></router-outlet>
   </div>
-
-  <ng-container *ngIf="!(error$ | async) && showHeaderFooter()">
-    <app-footer></app-footer>
-  </ng-container>
 </div>
