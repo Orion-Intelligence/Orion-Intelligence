@@ -6,10 +6,10 @@ import { SearchLeakParamModel } from '../../pages/dashboard/models/leak/search_l
 import { SearchLeakCallbackModel } from '../../pages/dashboard/models/leak/search_leak_callback_model';
 import { HttpParams } from '@angular/common/http';
 import { catchError, map, tap, takeUntil } from 'rxjs/operators';
-import { SelectionTracker } from '../../pages/dashboard/helper-classes/SelectionTracker';
 import { search_dynamic_email_param_model } from '../../pages/dashboard/models/dynamic/email/search_dynamic_email_param_model';
 import { ApiService } from '../../shared/services/api.service';
 import { SearchDynamicEmailCallbackModel } from '../../pages/dashboard/models/dynamic/email/search_dynamic_email_callback_model';
+import {SelectionStoreService} from './selection.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,11 +25,9 @@ export class DashboardService {
   searchLeakCallbackModel: SearchLeakCallbackModel = new SearchLeakCallbackModel();
 
   searchQuery$ = new BehaviorSubject<string>('');
-  tracker: SelectionTracker = new SelectionTracker();
-
   private activeRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private selectionStore: SelectionStoreService) {}
 
   fetchGeneralSearchResults() {
     this.cancelOngoingRequest();

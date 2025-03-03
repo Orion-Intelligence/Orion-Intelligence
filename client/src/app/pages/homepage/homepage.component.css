@@ -1,0 +1,29 @@
+.home-container {
+  background: linear-gradient(to bottom,
+  rgba(18, 52, 84, 1),
+  rgba(41, 87, 132, 1) 50vh,
+  rgba(41, 87, 132, 1) 100%);
+}
+
+.home {
+  min-height: 100vh;
+  position: relative;
+  color: white;
+  overflow: hidden;
+  padding-bottom: 200px;
+}
+
+.home > * {
+  position: relative;
+  z-index: 2;
+}
+
+@media only screen and (max-width: 943px) {
+  .home {
+    min-height: 100%;
+  }
+  .app-background{
+    width: 175% !important;
+    height: 175% !important;
+  }
+}

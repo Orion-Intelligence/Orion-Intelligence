@@ -6,8 +6,7 @@ import {Category} from '../../../../pages/dashboard/enums/pages';
 @Component({
   selector: 'app-dashboard-search-no-suggestion',
   imports: [
-    AsyncPipe,
-    NgIf
+    AsyncPipe
   ],
   templateUrl: './dashboard-search-no-suggestion.component.html',
 })

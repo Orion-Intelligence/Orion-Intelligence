@@ -7,6 +7,9 @@ import { DirectoryComponent } from './pages/directory/directory.component';
 import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { DirectoryResolver } from './shared/resolvers/directory.resolver';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import {
+  DashboardEmailApiComponent
+} from './shared/partials/dashboard/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { animation: 'RootPage' } },
@@ -19,6 +22,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: HomepageComponent, resolve: { insights: InsightResolver }, data: { animation: 'HomePage' } },
+      { path: 'api/email', component: DashboardEmailApiComponent, data: { animation: 'API/Email' } },
       { path: 'directory', component: DirectoryComponent, resolve: { directory: DirectoryResolver }, data: { animation: 'DirectoryPage' } },
     ],
   },

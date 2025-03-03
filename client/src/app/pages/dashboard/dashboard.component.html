@@ -9,9 +9,9 @@
   <div class="dashboard_container">
     <div class="dashboard dashboard-content-scroll">
       <app-dashboard-header (menuClicked)="toggleSideNav()"></app-dashboard-header>
-      <div [@fadeIn]="prepareRoute(routerOutlet)">
+      <span [@fadeIn]="prepareRoute(routerOutlet)">
         <router-outlet #routerOutlet="outlet"></router-outlet>
-      </div>
+      </span>
     </div>
   </div>
 </div>

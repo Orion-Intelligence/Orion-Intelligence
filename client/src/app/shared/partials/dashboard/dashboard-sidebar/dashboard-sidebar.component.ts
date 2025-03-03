@@ -1,15 +1,16 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {NgOptimizedImage, NgClass, NgForOf, NgIf} from '@angular/common';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { ApiSubCategory, Category, GeneralSubCategory, LeakSubCategory } from '../../../../pages/dashboard/enums/pages';
-import { AppService } from '../../../../services/core/app.service';
+import {NgOptimizedImage, NgClass, NgForOf, NgIf, AsyncPipe} from '@angular/common';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {ApiSubCategory, Category, GeneralSubCategory, LeakSubCategory} from '../../../../pages/dashboard/enums/pages';
+import {AppService} from '../../../../services/core/app.service';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import {filter} from 'rxjs';
+import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, NgForOf, NgIf, RouterLink],
+  imports: [NgOptimizedImage, NgClass, NgForOf, NgIf, RouterLink, AsyncPipe],
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit {
@@ -21,25 +22,19 @@ export class DashboardSidebarComponent implements OnInit {
   leakCategories = Object.values(LeakSubCategory);
   category = Category;
 
-  constructor(
-    public dashboardService: DashboardService,
-    private appService: AppService,
-    private router: Router
-  ) {
+  constructor(protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
     this.appService.configData$.subscribe(data => {
       this.apiAllowed = !!(data && data.settings['api_allowed'] === '1');
     });
   }
 
   ngOnInit() {
-    // Listen for URL changes and update section accordingly
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.updateSelectedSectionFromURL();
       });
 
-    // Initial check when component loads
     this.updateSelectedSectionFromURL();
   }
 
@@ -47,17 +42,17 @@ export class DashboardSidebarComponent implements OnInit {
     const currentURL = this.router.url;
 
     if (currentURL.includes('/dashboard/directory')) {
-      this.dashboardService.tracker.setSection(Category.DIRECTORY);
+      this.selectionStore.setSelectedSection(Category.DIRECTORY);
     } else if (currentURL.includes('/dashboard/home')) {
-      this.dashboardService.tracker.setSection(Category.HOMEPAGE);
+      this.selectionStore.setSelectedSection(Category.HOMEPAGE);
     }
   }
 
   onSectionSelected(section: Category) {
-    if (this.dashboardService.tracker.getSelectedSection() === section) {
+    if (this.selectionStore.getSelectedSection() === section) {
       return;
     } else {
-      this.dashboardService.tracker.setSection(section);
+      this.selectionStore.setSelectedSection(section);
 
       let firstSubcategory: string | undefined;
       switch (section) {
@@ -79,10 +74,7 @@ export class DashboardSidebarComponent implements OnInit {
   }
 
   onOptionSelected(option: string, close = true) {
-    this.dashboardService.tracker.setOption(option);
-    this.dashboardService.searchGeneralParamModel.pSearchParamType = option.toLowerCase();
-    this.dashboardService.fetchGeneralSearchResults().subscribe();
-
+    this.selectionStore.setSelectedOption(option);
     if (close) {
       this.closeMenu();
     }

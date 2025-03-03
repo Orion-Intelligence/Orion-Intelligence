@@ -13,10 +13,8 @@
 @import 'app/shared/partials/directory/directory-pagination/directory-pagination.component.css';
 @import 'app/shared/partials/filters/filters.component.css';
 @import 'app/pages/directory/directory.component.css';
-@import 'app/shared/partials/dashboard/intel-panel/dashboard-api/dashboard-api.component.css';
 @import 'app/shared/partials/profile/profile.component.css';
 @import 'app/shared/partials/dashboard/dashboard-search-no-suggestion/dashboard-search-no-suggestion.component.css';
-@import 'app/shared/partials/dashboard/dashboard-search-content-items/dashboard-search-content-items.component.css';
 @import 'app/shared/partials/dashboard/dashboard-header/dashboard-header.component.css';
 @import 'app/shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component.css';
 @import 'app/shared/partials/dashboard/dashboard-pagination/dashboard-pagination.component.css';
@@ -112,8 +110,9 @@ p {
 .app-background {
   position: absolute;
   right: 0;
+  top:0;
   opacity: 0.07;
   object-fit: contain;
-  object-position: right;
+  object-position:top right;
   pointer-events: none;
 }

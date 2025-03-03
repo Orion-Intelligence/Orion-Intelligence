@@ -22,7 +22,7 @@
 </form>
 
 <div *ngIf="!loading && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length==0 ">
-  <app-dashboard-search-no-suggestion @fadeAnimation></app-dashboard-search-no-suggestion>
+  <app-dashboard-search-no-suggestion></app-dashboard-search-no-suggestion>
 </div>
 
 <div *ngIf="!loading && !error && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length>0" class="dashboard__search-table-container">
