@@ -20,7 +20,7 @@ export enum GeneralSubCategory {
 }
 
 export enum LeakSubCategory {
-  DATABASES = 'databases',
+  DATABASES = 'Databases',
 }
 
 export enum ApiSubCategory {

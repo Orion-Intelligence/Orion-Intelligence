@@ -1,6 +1,5 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {NgOptimizedImage, NgClass, NgForOf, NgIf, AsyncPipe} from '@angular/common';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 import {ApiSubCategory, Category, GeneralSubCategory, LeakSubCategory} from '../../../../pages/dashboard/enums/pages';
 import {AppService} from '../../../../services/core/app.service';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
@@ -50,7 +49,8 @@ export class DashboardSidebarComponent implements OnInit {
 
   onSectionSelected(section: Category) {
     if (this.selectionStore.getSelectedSection() === section) {
-      return;
+      this.selectionStore.setSelectedSection("");
+      this.selectionStore.setSelectedOption("");
     } else {
       this.selectionStore.setSelectedSection(section);
 
