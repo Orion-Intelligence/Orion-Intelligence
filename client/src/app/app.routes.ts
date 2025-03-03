@@ -21,7 +21,7 @@ export const routes: Routes = [
     data: { animation: 'DashboardPage' },
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
-      { path: 'home', component: HomepageComponent, resolve: { insights: InsightResolver }, data: { animation: 'HomePage' } },
+      { path: 'home', component: HomepageComponent,  data: { animation: 'HomePage' } },
       { path: 'api/email', component: DashboardEmailApiComponent, data: { animation: 'API/Email' } },
       { path: 'directory', component: DirectoryComponent, resolve: { directory: DirectoryResolver }, data: { animation: 'DirectoryPage' } },
     ],

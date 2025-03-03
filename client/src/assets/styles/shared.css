@@ -13,25 +13,29 @@
 }
 
 .dash-searchbar-div {
-  width: 300px !important;
+  display: flex;
+  flex-wrap: inherit;
 }
 
 .dash-searchbar__input {
   align-self: center;
   border-radius: 8px 0 0 7px;
   height: 44px;
-  background: #9ebfe030 !important;
-  color: #fff !important;
+  background: #fff !important;
+  color: #000 !important;
   font-size: 16px;
   border: 1px solid #ffffff30 !important;
   border-right: none !important;
   padding-left: 20px;
+  width: 400px !important;
   margin-left: 0;
   padding-right: 35px;
 }
 
 .dash-searchbar__input::placeholder {
-  color: #ffffff80 !important;
+  color: #3C3C43 !important;
+  font-size: 12px;
+  font-weight: 400;
 }
 .dash-searchbar__input:focus {
   box-shadow: none;

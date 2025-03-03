@@ -5,18 +5,21 @@
         <input autocomplete="off" autocapitalize="none" type="text" placeholder="Username" class="form-control dash-searchbar__input" maxlength="150" name="q" [(ngModel)]="username">
         <input type="hidden" value="1">
         <button class="btn btn-primary dash-searchbar__input-button" type="submit">
-          <img ngSrc="assets/images/shared/user1.svg" alt="Search" priority="true" height="16" width="16">
+          <img ngSrc="assets/images/shared/user1.svg" alt="Search" priority="true" height="24" width="24">
         </button>
       </div>
     </div>
-    <div class="col-md-6 col-sm-12 ">
+    <div class="col-md-6 col-sm-12 ms-6">
       <div class="input-group dash-searchbar-div dash-email-div">
         <input autocomplete="off" autocapitalize="none" type="email" placeholder="Email" class="form-control dash-searchbar__input" maxlength="150" name="q" [(ngModel)]="email">
         <input type="hidden" value="1">
         <button class="btn btn-primary dash-searchbar__input-button" type="submit">
-          <img ngSrc="assets/images/shared/email.svg" alt="Search" priority="true" height="16" width="16">
+          <img ngSrc="assets/images/shared/email.svg" alt="Search" priority="true" height="24" width="24">
         </button>
       </div>
+    </div>
+    <div class="dash-search-button-div">
+      <button class="dash-search-button">Search</button>
     </div>
   </div>
 </form>
@@ -25,7 +28,7 @@
   <app-dashboard-search-no-suggestion></app-dashboard-search-no-suggestion>
 </div>
 
-<div *ngIf="!loading && !error && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length>0" class="dashboard__search-table-container">
+<div class="dashboard__search-table-container">
   <div class="dashboard__search-table-header">Data Breach List</div>
 
   <table class="dashboard__search-table" *ngIf="breachData">
@@ -36,7 +39,7 @@
     <tr>
       <td>URL</td>
       <td>
-        <a *ngIf="breachData.m_url" [href]="breachData.m_url" target="_blank">
+        <a [href]="breachData.m_url" target="_blank">
           {{ breachData.m_url }}
         </a>
         <span *ngIf="!breachData.m_url">N/A</span>
