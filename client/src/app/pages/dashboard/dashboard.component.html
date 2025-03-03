@@ -10,8 +10,8 @@
     <div class="dashboard dashboard-content-scroll">
       <app-dashboard-header (menuClicked)="toggleSideNav()"></app-dashboard-header>
       <span [@fadeIn]="prepareRoute(routerOutlet)">
-        <router-outlet #routerOutlet="outlet"></router-outlet>
-      </span>
+          <router-outlet #routerOutlet="outlet"></router-outlet>
+        </span>
     </div>
   </div>
 </div>

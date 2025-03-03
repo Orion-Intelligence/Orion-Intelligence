@@ -1,16 +1,23 @@
 .sidebar__logo {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 24px;
+  margin-bottom: 0;
   display: flex;
   width: 100%;
 }
 
 .sidebar__items {
   list-style: none;
-  padding: 0;
   overflow-y: auto;
+  height: 90vh;
   scrollbar-width: none;
+  padding: 35px 0 20px;
+  mask-image: linear-gradient(to bottom,
+    #00000000 0%,
+    #000000FF 7%,
+    #000000FF 93%,
+    #00000000 100%
+  );
 }
 
 .sidebar__item .sidebar__item-dropdown {
@@ -19,6 +26,7 @@
   font-family: 'Inter', sans-serif;
   display: block;
   padding: 14px 10px;
+  border: 1px solid #ffffff00;
   font-weight: 500;
   font-size: 14px;
   border-radius: 6px;
@@ -67,11 +75,19 @@
     margin-top 0.3s ease-in;
 }
 
+.sidebar__subitems-fast:not(.show) {
+  transition:none;
+}
+
 .sidebar__subitem {
   color: #ffffff70;
   margin-left: -11px;
   z-index: 2;
   font-family: Roboto, sans-serif;
+}
+
+.sidebar__subitems .show .sidebar__subitem {
+  margin-top: 5px;
 }
 
 .sidebar__subitem:hover {
@@ -129,6 +145,7 @@
 .sidebar__items .active {
   background: #2A578459;
   color: #fff;
+  border: 1px solid #ffffff10;
 }
 
 .sidebar__item-dropdown.active .sidebar__icon {
