@@ -8,6 +8,7 @@
     rgba(18, 52, 84, 1) 0%,
     #2A5784 30%
   )!important;
+  z-index: 1;
 }
 
 .dashboard-content-scroll {
@@ -81,5 +82,24 @@
 }
 
 .dashboard__menu-toggle {
+  display: none;
+}
+
+.dashboard__sidebar {
+  width: 300px;
+  position: sticky;
+  padding: 24px 20px;
+  height: 100vh;
+  background: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
+  transition: width 0.3s ease-in-out;
+}
+
+.dashboard__sidebar.collapsed {
+  width: 70px;
+  padding: 24px 10px;
+  overflow: hidden;
+}
+
+.dashboard__sidebar.collapsed .sidebar-text {
   display: none;
 }

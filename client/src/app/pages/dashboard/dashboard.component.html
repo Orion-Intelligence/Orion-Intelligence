@@ -2,16 +2,16 @@
 <div class="row dashboard__sidebar-main" id="dashboard__sidebar-main">
   <input type="radio" name="menu-input" class="dashboard__menu-toggle" id="dashboard__menu-toggle">
 
-  <div class="dashboard__sidebar" [ngClass]="{'show-menu': isMenuOpen}">
-    <app-dashboard-sidebar (menuClosed)="hideSideNav()"></app-dashboard-sidebar>
+  <div class="dashboard__sidebar" [ngClass]="{'show-menu': isMenuOpen, 'collapsed': !isMenuOpen}">
+    <app-dashboard-sidebar (menuToggle)="toggleNavigation()"></app-dashboard-sidebar>
   </div>
 
   <div class="dashboard_container">
     <div class="dashboard dashboard-content-scroll">
-      <app-dashboard-header (menuClicked)="toggleSideNav()"></app-dashboard-header>
+      <app-dashboard-header></app-dashboard-header>
       <span [@fadeIn]="prepareRoute(routerOutlet)">
-          <router-outlet #routerOutlet="outlet"></router-outlet>
-        </span>
+        <router-outlet #routerOutlet="outlet"></router-outlet>
+      </span>
     </div>
   </div>
 </div>

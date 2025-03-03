@@ -13,7 +13,8 @@ import {SelectionStoreService} from '../../../../services/dashboard/selection.se
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit {
-  @Output() menuClosed = new EventEmitter<void>();
+  @Output() menuToggle = new EventEmitter<void>();
+  sidebar_default = true;
   apiAllowed: boolean = false;
 
   apiCategories = Object.values(ApiSubCategory);
@@ -68,19 +69,17 @@ export class DashboardSidebarComponent implements OnInit {
       }
 
       if (firstSubcategory) {
-        this.onOptionSelected(firstSubcategory, false);
+        this.onOptionSelected(firstSubcategory);
       }
     }
   }
 
-  onOptionSelected(option: string, close = true) {
+  onOptionSelected(option: string) {
     this.selectionStore.setSelectedOption(option);
-    if (close) {
-      this.closeMenu();
-    }
   }
 
-  closeMenu() {
-    this.menuClosed.emit();
+  onToggleSidebar(){
+    this.menuToggle.emit()
+    this.sidebar_default = !this.sidebar_default;
   }
 }

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ProfileComponent} from '../../profile/profile.component';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
@@ -13,7 +13,6 @@ import {NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@angular/common';
   templateUrl: './dashboard-header.component.html'
 })
 export class DashboardHeaderComponent implements OnInit {
-  @Output() menuClicked = new EventEmitter<void>();
   breadcrumb: string[] = [];
 
   constructor(public dashboardService: DashboardService, private router: Router) {}
