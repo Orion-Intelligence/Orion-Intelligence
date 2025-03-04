@@ -6,15 +6,20 @@
 }
 
 .home__description{
-  margin-top: 50px;
+  margin-top: 25px;
+  font-size: 15px;
+  padding-right: 120px;
 }
 
 .home__version{
   margin-top: 20px;
-  width: 140px;
+  width: 83px;
+  border: 1px solid #ffffff20;
   padding: 5px 15px;
-  background: #ffffff20;
-  border-radius: 6px;
+  font-size: 15px;
+  margin-left: 25px;
+  background: #2A578459;
+  border-radius: 8px;
 }
 
 @media only screen and (max-width: 943px) {

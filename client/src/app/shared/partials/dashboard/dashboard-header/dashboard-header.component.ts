@@ -1,9 +1,9 @@
-import {Component, OnInit} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {ProfileComponent} from '../../profile/profile.component';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {NavigationEnd, Router} from '@angular/router';
-import {filter} from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ProfileComponent } from '../../profile/profile.component';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import {NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@angular/common';
 
 @Component({
@@ -26,6 +26,7 @@ export class DashboardHeaderComponent implements OnInit {
   }
 
   updateBreadcrumb() {
-    this.breadcrumb = this.router.url.split('/').filter(segment => segment);
+    const segments = this.router.url.split('/').filter(segment => segment);
+    this.breadcrumb = segments.length > 1 ? segments.slice(1) : segments;
   }
 }

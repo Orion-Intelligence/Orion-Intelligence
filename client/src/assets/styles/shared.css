@@ -1,4 +1,4 @@
-.dash-searchbar {
+.default-input-container {
   display: flex;
   align-items: center;
   margin-top: 24px;
@@ -7,41 +7,40 @@
 }
 
 @media only screen and (max-width: 550px) {
-  .dash-searchbar {
+  .default-input-container {
     display: grid;
   }
 }
 
-.dash-searchbar-div {
+.default-input-sub-container {
   display: flex;
   flex-wrap: inherit;
 }
 
-.dash-searchbar__input {
+.default-input {
   align-self: center;
   border-radius: 8px 0 0 7px;
   height: 44px;
   background: #fff !important;
   color: #000 !important;
-  font-size: 16px;
+  font-size: 16px !important;
   border: 1px solid #ffffff30 !important;
   border-right: none !important;
   padding-left: 20px;
-  width: 400px !important;
   margin-left: 0;
   padding-right: 35px;
 }
 
-.dash-searchbar__input::placeholder {
-  color: #3C3C43 !important;
-  font-size: 12px;
+.default-input::placeholder {
+  color: #ccc !important;
+  font-size: 14px;
   font-weight: 400;
 }
-.dash-searchbar__input:focus {
+.default-input:focus {
   box-shadow: none;
 }
 
-.dash-searchbar__input-button {
+.default-input-button {
   background: #9ebfe030;
   width: 45px;
   border-radius: 0 8px 8px 0;
@@ -52,15 +51,19 @@
 
 }
 
-.dash-searchbar__input-button:hover,
-.dash-searchbar__input-button:focus,
-.dash-searchbar__input-button:active,
-.dash-searchbar__input-button:focus-visible {
-  background: #174069 !important;
+.default-input-button:hover,
+.default-input-button:focus,
+.default-input-button:active,
+.default-input-button:focus-visible {
+  background: #fff !important;
   outline: none !important;
   box-shadow: none !important;
   border: 1px solid #ffffff30 !important;
   border-left: none !important;
+}
+
+.default-input-button img{
+  opacity: 0.5;
 }
 
 .col-md-6,
@@ -87,7 +90,7 @@
   opacity: 0;
 }
 
-.search__results_count{
+.label-text{
   color: #fff;
   margin-left: 35px;
   margin-top: 30px;

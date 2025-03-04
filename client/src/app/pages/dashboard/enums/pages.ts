@@ -1,5 +1,5 @@
 export enum Category {
-  GENERAL_INTELLIGENCE = 'General Intelligence',
+  STRATEGIC_INTELLIGENCE = 'Strategic Intelligence',
   LEAKS = 'Leaks',
   HOMEPAGE = 'Homepage',
   DIRECTORY = 'Directory',

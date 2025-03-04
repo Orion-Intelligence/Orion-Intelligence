@@ -1,25 +1,21 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
-import {
-  DashboardSearchNoSuggestionComponent
-} from '../../dashboard-search-no-suggestion/dashboard-search-no-suggestion.component';
-import {Subject} from 'rxjs';
-import {fadeAnimation} from '../../../../animations/animations';
-import {
-  DashboardResultsGridComponent
-} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
-import {Router} from '@angular/router';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
+import { Subject } from 'rxjs';
+import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
+import {DashboardSearchNoSuggestionComponent} from '../../dashboard-search-no-suggestion/dashboard-search-no-suggestion.component';
 import {DashboardPaginationComponent} from '../../dashboard-pagination/dashboard-pagination.component';
+import {FormsModule} from '@angular/forms';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {fadeDashboardItem} from '../../../../../pages/app/animations/dashboard-item.animations';
 
 @Component({
   selector: 'app-dashboard-general',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, FormsModule, DashboardSearchNoSuggestionComponent, DashboardResultsGridComponent, DashboardPaginationComponent, DashboardPaginationComponent],
   templateUrl: './dashboard-general.component.html',
-  animations: [fadeAnimation],
-  styleUrls: ['./dashboard-general.component.css']
+  styleUrls: ['./dashboard-general.component.css'],
+  animations: [fadeDashboardItem],
+  imports: [CommonModule, DashboardResultsGridComponent, DashboardSearchNoSuggestionComponent, DashboardPaginationComponent, FormsModule, NgOptimizedImage] // ✅ Required for ngIf and animations to work in standalone mode
 })
 export class DashboardGeneral implements OnInit {
   searchQuery: string = '';
@@ -28,18 +24,25 @@ export class DashboardGeneral implements OnInit {
   isSearchSuccessful: boolean = false;
   isResultEmpty: boolean = true;
 
-  constructor(public dashboardService: DashboardService, private router: Router) {}
+  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.searchQuery = this.dashboardService.searchQuery$.value;
     this.fetchSearchResults();
+    this.route.paramMap.subscribe(params => {
+      this.isSearchSuccessful = false;
+      this.dashboardService.searchGeneralParamModel.pSearchParamType = params.get('category') || 'all';
+      this.onFormSubmit();
+      this.cdr.detectChanges();
+    });
   }
 
   fetchSearchResults() {
-    this.isResultEmpty = true
+    this.isResultEmpty = true;
     this.dashboardService.fetchGeneralSearchResults().subscribe(response => {
       this.isSearchSuccessful = response.success;
       this.isResultEmpty = response.isEmpty;
+      this.cdr.detectChanges();
     });
   }
 
@@ -50,10 +53,6 @@ export class DashboardGeneral implements OnInit {
   onFormSubmit(): void {
     this.dashboardService.searchGeneralParamModel.q = this.searchQuery;
     this.dashboardService.searchQuery$.next(this.searchQuery);
-    this.router.navigate([], {
-      queryParams: { q: this.searchQuery },
-      queryParamsHandling: 'merge'
-    }).then();
     this.fetchSearchResults();
   }
 

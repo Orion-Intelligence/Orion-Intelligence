@@ -7,9 +7,8 @@ import { DirectoryComponent } from './pages/directory/directory.component';
 import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { DirectoryResolver } from './shared/resolvers/directory.resolver';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import {
-  DashboardEmailApiComponent
-} from './shared/partials/dashboard/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component';
+import { DashboardEmailApiComponent } from './shared/partials/dashboard/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component';
+import {DashboardGeneral} from './shared/partials/dashboard/intel-panel/dashboard-general/dashboard-general.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { animation: 'RootPage' } },
@@ -21,9 +20,24 @@ export const routes: Routes = [
     data: { animation: 'DashboardPage' },
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
-      { path: 'home', component: HomepageComponent,  data: { animation: 'HomePage' } },
-      { path: 'api/email', component: DashboardEmailApiComponent, data: { animation: 'API/Email' } },
+      { path: 'home', component: HomepageComponent, resolve: { insights: InsightResolver }, data: { animation: 'HomePage' } },
       { path: 'directory', component: DirectoryComponent, resolve: { directory: DirectoryResolver }, data: { animation: 'DirectoryPage' } },
+      {
+        path: 'api',
+        data: { animation: 'APIPage' },
+        children: [
+          { path: '', redirectTo: 'email', pathMatch: 'full' },
+          { path: 'email', component: DashboardEmailApiComponent, data: { animation: 'EmailAPI' } }
+        ]
+      },
+      {
+        path: 'strategic',
+        data: { animation: 'StrategicPage' },
+        children: [
+          { path: '', redirectTo: 'all', pathMatch: 'full' },
+          { path: ':category', component: DashboardGeneral, data: { animation: 'CategoryPage' } }
+        ]
+      }
     ],
   },
   { path: '**', component: ErrorHandlerComponent, data: { animation: 'ErrorPage' } }

@@ -1,21 +1,24 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {NgOptimizedImage, NgClass, NgForOf, NgIf, AsyncPipe} from '@angular/common';
-import {ApiSubCategory, Category, GeneralSubCategory, LeakSubCategory} from '../../../../pages/dashboard/enums/pages';
-import {AppService} from '../../../../services/core/app.service';
+import { Component, EventEmitter, OnInit, Output, OnDestroy } from '@angular/core';
+import { NgOptimizedImage, NgClass, NgIf, AsyncPipe } from '@angular/common';
+import { ApiSubCategory, Category, GeneralSubCategory, LeakSubCategory } from '../../../../pages/dashboard/enums/pages';
+import { AppService } from '../../../../services/core/app.service';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
-import {filter} from 'rxjs';
-import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
+import { filter } from 'rxjs';
+import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
+import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
+import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, NgForOf, NgIf, RouterLink, AsyncPipe],
+  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent],
   templateUrl: './dashboard-sidebar.component.html',
 })
-export class DashboardSidebarComponent implements OnInit {
+export class DashboardSidebarComponent implements OnInit, OnDestroy {
   @Output() menuToggle = new EventEmitter<void>();
   sidebar_default = true;
   apiAllowed: boolean = false;
+  min_detected = false;
 
   apiCategories = Object.values(ApiSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
@@ -36,6 +39,23 @@ export class DashboardSidebarComponent implements OnInit {
       });
 
     this.updateSelectedSectionFromURL();
+
+    window.addEventListener('resize', this.checkScreenWidth.bind(this));
+
+    this.checkScreenWidth();
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', this.checkScreenWidth.bind(this));
+  }
+
+  checkScreenWidth() {
+    if(window.innerWidth < 800 && !this.min_detected && this.sidebar_default){
+      this.min_detected = true;
+      this.onToggleSidebar();
+    }else if(window.innerWidth > 800){
+      this.min_detected = false;
+    }
   }
 
   updateSelectedSectionFromURL() {
@@ -57,7 +77,7 @@ export class DashboardSidebarComponent implements OnInit {
 
       let firstSubcategory: string | undefined;
       switch (section) {
-        case Category.GENERAL_INTELLIGENCE:
+        case Category.STRATEGIC_INTELLIGENCE:
           firstSubcategory = this.generalCategories[0];
           break;
         case Category.LEAKS:
@@ -79,7 +99,7 @@ export class DashboardSidebarComponent implements OnInit {
   }
 
   onToggleSidebar(){
-    this.menuToggle.emit()
+    this.menuToggle.emit();
     this.sidebar_default = !this.sidebar_default;
   }
 }

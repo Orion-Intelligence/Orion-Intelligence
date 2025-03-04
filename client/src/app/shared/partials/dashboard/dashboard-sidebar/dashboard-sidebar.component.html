@@ -1,75 +1,35 @@
 <nav class="sidebar" *ngIf="this.sidebar_default">
-  <button class="sidebar__header-menu" (click)="onToggleSidebar()">
-    <img ngSrc="assets/images/shared/seach_nav_menu_icon.svg" alt="Menu" height="20" width="20"/>
-  </button>
   <div class="sidebar__header">
     <a href="">
-      <img ngSrc="assets/images/shared/search_nav_logo.svg" alt="Logo" priority="true" height="50" width="180"/>
+      <img ngSrc="assets/images/sidebar/search_nav_logo.svg" alt="Logo" priority="true" height="50" width="180"/>
     </a>
+    <button class="sidebar__header-menu" (click)="onToggleSidebar()">
+      <img ngSrc="assets/images/sidebar/nav_menu.svg" alt="Menu" height="28" width="24"/>
+    </button>
   </div>
 
 
   <ul class="sidebar__items">
     <li class="sidebar__item">
       <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'">
-        <img ngSrc="assets/images/shared/home.svg" alt="Home" height="20" width="20" class="sidebar__icon">Homepage
+        <img ngSrc="assets/images/sidebar/home.svg" alt="Home" height="20" width="20" class="sidebar__icon">Homepage
       </div>
     </li>
 
-    <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.GENERAL_INTELLIGENCE}" (click)="onSectionSelected(category.GENERAL_INTELLIGENCE)">
-        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" height="20" width="20" class="sidebar__icon">General Intelligence
-        <img class="sidebar__dropdown-icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="Drop Down" height="20" width="20">
-      </div>
-      <ul class="sidebar__subitems" [ngClass]="{'show': (selectionStore.selectedSection$ | async) === category.GENERAL_INTELLIGENCE}">
-        <li *ngFor="let item of generalCategories">
-          <div class="sidebar__subitem" (click)="onOptionSelected(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}">
-            <div class="sidebar__subitem-content" [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">{{ item }}</div>
-          </div>
-        </li>
-      </ul>
-    </li>
-
-    <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.LEAKS}" (click)="onSectionSelected(category.LEAKS)" [routerLink]="'api/email'">
-        <img ngSrc="assets/images/shared/leak.svg" alt="Live APIs" height="20" width="20" class="sidebar__icon">Data
-        Breach
-        <img class="sidebar__dropdown-icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="Drop Down" height="20" width="20">
-      </div>
-      <ul class="sidebar__subitems sidebar__subitems-fast" [ngClass]="{'show': (selectionStore.selectedSection$ | async) === category.LEAKS}">
-        <li *ngFor="let item of leakCategories">
-          <div class="sidebar__subitem" (click)="onOptionSelected(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}">
-            <div class="sidebar__subitem-content" [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">{{ item }}</div>
-          </div>
-        </li>
-      </ul>
-    </li>
-
-    <li class="sidebar__item" *ngIf="apiAllowed">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.API}" (click)="onSectionSelected(category.API)" [routerLink]="'api/email'">
-        <img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20" class="sidebar__icon">Live
-        APIs
-        <img class="sidebar__dropdown-icon" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" alt="Drop Down" height="20" width="20">
-      </div>
-      <ul class="sidebar__subitems sidebar__subitems-fast" [ngClass]="{'show': (selectionStore.selectedSection$ | async) === category.API}">
-        <li *ngFor="let item of apiCategories">
-          <div class="sidebar__subitem" (click)="onOptionSelected(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}">
-            <div class="sidebar__subitem-content" [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">{{ item }}</div>
-          </div>
-        </li>
-      </ul>
-    </li>
+    <app-dashboard-sidebar-items [title]="'Strategic Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [category]="category.STRATEGIC_INTELLIGENCE" [routePrefix]="'strategic'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.LEAKS" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items *ngIf="apiAllowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
 
     <li class="sidebar__item">
       <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
-        <img ngSrc="assets/images/shared/directory.svg" alt="Links" height="20" width="20" class="sidebar__icon"> Links
+        <img ngSrc="assets/images/sidebar/directory.svg" alt="Links" height="20" width="20" class="sidebar__icon"> Links
       </div>
     </li>
 
     <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
       <li class="sidebar__item">
         <div class="sidebar__item-dropdown">
-          <img ngSrc="assets/images/shared/document_count.svg" alt="Documentation" height="20" width="20" class="sidebar__icon">Documentation
+          <img ngSrc="assets/images/sidebar/documentation.svg" alt="Documentation" height="20" width="20" class="sidebar__icon">Documentation
         </div>
       </li>
     </a>
@@ -79,76 +39,29 @@
 
 <nav *ngIf="!this.sidebar_default" class="sidebar sidebar-collapsed">
   <button class="sidebar__header-menu" (click)="onToggleSidebar()">
-    <img ngSrc="assets/images/shared/seach_nav_menu_icon.svg" alt="Menu" height="20" width="20"/>
-  </button>
-  <div class="sidebar__header">
-    <a href="../../..">
-      <img ngSrc="assets/images/shared/logo-min.svg" alt="Logo" priority="true" height="50" width="30"/>
-    </a>
-  </div>
+    <img ngSrc="assets/images/sidebar/menu-mini.svg" alt="Menu" height="20" width="20"/></button>
+  <div class="sidebar__header"><a href="">
+    <img ngSrc="assets/images/shared/logo-min.svg" alt="Logo" priority="true" height="50" width="30"/> </a></div>
 
   <ul class="sidebar__items">
     <li class="sidebar__item">
       <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'">
-        <img ngSrc="assets/images/shared/home.svg" alt="Home" height="20" width="20" class="sidebar__icon">
-      </div>
+        <img ngSrc="assets/images/sidebar/home.svg" alt="Home" height="20" width="20" class="sidebar__icon"></div>
     </li>
 
-    <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.GENERAL_INTELLIGENCE}" (click)="onSectionSelected(category.GENERAL_INTELLIGENCE)">
-        <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" height="20" width="20" class="sidebar__icon">
-      </div>
-      <ul class="sidebar__subitems" [ngClass]="{'show': (selectionStore.selectedSection$ | async) === category.GENERAL_INTELLIGENCE}">
-        <li *ngFor="let item of generalCategories">
-          <div class="sidebar__subitem" (click)="onOptionSelected(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}">
-            <div class="sidebar__subitem-content" [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">
-              <img ngSrc="assets/images/shared/search_side_general_intelligence_icon.svg" alt="General Intelligence" height="20" width="20" class="sidebar__icon">
-            </div>
-          </div>
-        </li>
-      </ul>
-    </li>
-
-    <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.LEAKS}" (click)="onSectionSelected(category.LEAKS)" [routerLink]="'api/email'">
-        <img ngSrc="assets/images/shared/leak.svg" alt="Live APIs" height="20" width="20" class="sidebar__icon">
-      </div>
-      <ul class="sidebar__subitems sidebar__subitems-fast" [ngClass]="{'show': (selectionStore.selectedSection$ | async) === category.LEAKS}">
-        <li *ngFor="let item of leakCategories">
-          <div class="sidebar__subitem" (click)="onOptionSelected(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}">
-            <div class="sidebar__subitem-content" [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">
-              <img ngSrc="assets/images/shared/leak.svg" alt="General Intelligence" height="20" width="20" class="sidebar__icon">
-            </div>
-          </div>
-        </li>
-      </ul>
-    </li>
-
-    <li class="sidebar__item" *ngIf="apiAllowed">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.API}" (click)="onSectionSelected(category.API)" [routerLink]="'api/email'">
-        <img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="Live APIs" height="20" width="20" class="sidebar__icon">
-      </div>
-      <ul class="sidebar__subitems sidebar__subitems-fast" [ngClass]="{'show': (selectionStore.selectedSection$ | async) === category.API}">
-        <li *ngFor="let item of apiCategories">
-          <div class="sidebar__subitem" (click)="onOptionSelected(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}">
-            <div class="sidebar__subitem-content" [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">
-              <img ngSrc="assets/images/shared/search_side_live_api_icon.svg" alt="General Intelligence" height="20" width="20" class="sidebar__icon">
-            </div>
-          </div>
-        </li>
-      </ul>
-    </li>
+    <app-dashboard-sidebar-collapsed [title]="'Strategic Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [category]="category.STRATEGIC_INTELLIGENCE" [routePrefix]="'strategic'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.LEAKS" [routePrefix]="'api/email'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed *ngIf="apiAllowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api/email'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
 
     <li class="sidebar__item">
       <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
-        <img ngSrc="assets/images/shared/directory.svg" alt="Links" height="20" width="20" class="sidebar__icon">
-      </div>
+        <img ngSrc="assets/images/sidebar/directory.svg" alt="Links" height="20" width="20" class="sidebar__icon"></div>
     </li>
 
     <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
       <li class="sidebar__item">
         <div class="sidebar__item-dropdown">
-          <img ngSrc="assets/images/shared/document_count.svg" alt="Documentation" height="20" width="20" class="sidebar__icon">
+          <img ngSrc="assets/images/sidebar/documentation.svg" alt="Documentation" height="20" width="20" class="sidebar__icon">
         </div>
       </li>
     </a>
