@@ -1,10 +1,10 @@
 <form class="default-input-container" (submit)="onSearchSubmit($event)" method="GET" action="" enctype="multipart/form-data">
-  <div class="row dashboard__api-search-input-div">
+  <img ngSrc="/assets/images/shared/Bg.png" alt="background" class="app-background" priority="true" fill="true">
+  <div class="row dashboard__api-search-input-div ">
 
     <div class="col-lg-5 col-12 input-container">
       <div class="input-group default-input-sub-container">
-        <input autocomplete="off" autocapitalize="none" type="text" placeholder="Username"
-               class="form-control default-input" maxlength="150" name="q" [(ngModel)]="username">
+        <input autocomplete="off" autocapitalize="none" type="text" placeholder="Username" class="form-control default-input" maxlength="150" name="q" [(ngModel)]="username">
         <input type="hidden" value="1">
         <button class="btn btn-primary default-input-button" type="submit">
           <img ngSrc="assets/images/shared/user1.svg" alt="Search" priority="true" height="20" width="20">
@@ -14,8 +14,7 @@
 
     <div class="col-lg-5 col-12 mt-lg-0 mt-2 input-container">
       <div class="input-group default-input-sub-container">
-        <input autocomplete="off" autocapitalize="none" type="email" placeholder="Email"
-               class="form-control default-input" maxlength="150" name="q" [(ngModel)]="email">
+        <input autocomplete="off" autocapitalize="none" type="email" placeholder="Email" class="form-control default-input" maxlength="150" name="q" [(ngModel)]="email">
         <input type="hidden" value="1">
         <button class="btn btn-primary default-input-button" type="submit">
           <img ngSrc="assets/images/shared/email.svg" alt="Search" priority="true" height="20" width="20">
@@ -23,88 +22,50 @@
       </div>
     </div>
 
-    <div class="col-12 mt-2">
+    <div class="col-2 mt-lg-0 mt-2">
       <button class="dash-search-button">Search</button>
     </div>
 
   </div>
 </form>
 
+<div *ngIf="!loading && !error && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length > 0" @fadeInDashboardItem class="dashboard__search-table-container">
 
-<div *ngIf="!loading && !error && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length>0" @fadeInDashboardItem class="dashboard__search-table-container">
   <div class="dashboard__search-table-header">Data Breach List</div>
 
-  <table class="dashboard__search-table" *ngIf="breachData">
+  <table class="dashboard__search-table">
+    <thead>
     <tr>
-      <td>Title</td>
-      <td>{{ breachData.m_title || 'N/A' }}</td>
+      <th class="column-id">ID</th>
+      <th class="column-key">Key</th>
+      <th class="column-value">Value</th>
     </tr>
-    <tr>
-      <td>URL</td>
-      <td>
-        <a [href]="breachData.m_url" target="_blank">
-          {{ breachData.m_url }}
-        </a>
-        <span *ngIf="!breachData.m_url">N/A</span>
+    </thead>
+    <tbody>
+    <tr *ngFor="let key of (breachData ? Object.keys(breachData) : []); let i = index">
+      <td class="cell">{{ i + 1 }}</td>
+      <td class="cell">{{ key.replace("m_","").replace("_"," ").toUpperCase() }}</td>
+      <td class="cell">
+        <ng-container *ngIf="$any(breachData)[key] as value">
+          <ng-container *ngIf="Array.isArray(value); else normalValue">
+            <span *ngFor="let item of value" class="badge-red">{{ item }}</span>
+          </ng-container>
+          <ng-template #normalValue>
+            <a *ngIf="typeof value === 'string' && value.startsWith('http')" [href]="value" target="_blank">{{ value }}</a>
+            <span *ngIf="!(typeof value === 'string' && value.startsWith('http'))">{{ value }}</span>
+          </ng-template>
+        </ng-container>
+        <span *ngIf="!$any(breachData)[key]">N/A</span>
       </td>
     </tr>
-    <tr>
-      <td>Base URL</td>
-      <td>
-        <a *ngIf="breachData.m_base_url" [href]="breachData.m_base_url" target="_blank">
-          {{ breachData.m_base_url }}
-        </a>
-        <span *ngIf="!breachData.m_base_url">N/A</span>
-      </td>
-    </tr>
-    <tr>
-      <td>Content</td>
-      <td>{{ breachData.m_content || 'N/A' }}</td>
-    </tr>
-    <tr>
-      <td>Network</td>
-      <td>{{ breachData.m_network || 'N/A' }}</td>
-    </tr>
-    <tr>
-      <td>Important Content</td>
-      <td>{{ breachData.m_important_content || 'N/A' }}</td>
-    </tr>
-    <tr>
-      <td>Content Type</td>
-      <td>{{ breachData.m_content_type.length ? breachData.m_content_type.join(', ') : 'N/A' }}</td>
-    </tr>
-    <tr>
-      <td>Web Links</td>
-      <td>{{ breachData.m_weblink.length ? breachData.m_weblink.join(', ') : 'N/A' }}</td>
-    </tr>
-    <tr>
-      <td>Dump Links</td>
-      <td>{{ breachData.m_dumplink.length ? breachData.m_dumplink.join(', ') : 'N/A' }}</td>
-    </tr>
-    <tr>
-      <td>Name</td>
-      <td>{{ breachData.m_name || 'N/A' }}</td>
-    </tr>
-    <tr>
-      <td>Email Address</td>
-      <td>{{ breachData.m_email_addresses.length ? breachData.m_email_addresses.join(', ') : 'N/A' }}</td>
-    </tr>
+    </tbody>
   </table>
-
 </div>
 
-<div class="d-flex search__results-main">
-  <div class="search__results row">
-    <div *ngFor="let item of dashboardService.searchLeakCallbackModel.Result" class="search-result__content-webpages-container position-relative">
-      {{ item.m_base_url }}
-    </div>
-  </div>
-</div>
-
-<div *ngIf="loading"  @fadeInDashboardItem>
+<div *ngIf="loading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
 
-<div *ngIf="!loading && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length==0 "  @fadeInDashboardItem>
+<div *ngIf="!loading && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length==0 " @fadeInDashboardItem>
   <app-dashboard-search-no-suggestion></app-dashboard-search-no-suggestion>
 </div>

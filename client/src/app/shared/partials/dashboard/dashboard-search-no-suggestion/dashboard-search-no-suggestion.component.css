@@ -7,7 +7,7 @@
   border-radius: 8px;
   padding: 20px;
   border: 1px solid #ffffff30;
-  margin: 30px 12px 11em 30px;
+  margin: 30px 12px 11em 25px;
   background: #ffffff15;
 }
 
@@ -43,5 +43,6 @@
 @media only screen and (max-width: 1000px) {
   .search__no-suggestion {
     margin-left: 20px;
+    margin-right: 15px;
   }
 }

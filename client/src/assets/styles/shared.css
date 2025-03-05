@@ -22,7 +22,7 @@
   border-radius: 8px 0 0 7px;
   height: 44px;
   background: #fff !important;
-  color: #000 !important;
+  color: #3C3C43 !important;
   font-size: 16px !important;
   border: 1px solid #ffffff30 !important;
   border-right: none !important;
@@ -36,6 +36,7 @@
   font-size: 14px;
   font-weight: 400;
 }
+
 .default-input:focus {
   box-shadow: none;
 }
@@ -62,7 +63,7 @@
   border-left: none !important;
 }
 
-.default-input-button img{
+.default-input-button img {
   opacity: 0.5;
 }
 
@@ -78,6 +79,7 @@
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
+
 .fade-enter-active {
   opacity: 1;
 }
@@ -86,11 +88,12 @@
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
 }
+
 .fade-exit-active {
   opacity: 0;
 }
 
-.label-text{
+.label-text {
   color: #fff;
   margin-left: 35px;
   margin-top: 30px;
@@ -98,4 +101,177 @@
   font-family: Roboto, sans-serif;
   font-size: 13px;
   font-weight: bold;
+}
+
+table {
+  background: #12335450;
+  table-layout: fixed;
+  margin-bottom: 0;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
+  padding: 0;
+  line-height: 1 !important;
+  width: 100%;
+}
+
+table td, table th {
+  border: none !important;
+  font-family: 'Inter', sans-serif;
+  padding: 8px;
+  text-align: left;
+}
+
+thead th {
+  border-bottom: none;
+  color: #D0D0D0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+tbody td {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+table tr {
+  border-bottom: 1px solid #FCFCFC12 !important;
+  height: 45px !important;
+  border-top: 1px solid #FCFCFC12 !important;
+  transition: background-color 0.3s ease-in-out;
+}
+
+table tr:nth-child(even) {
+  background-color: #214b75 !important;
+}
+
+table tbody tr:nth-child(odd) {
+  background-color: #1e456c !important;
+}
+
+table tbody tr:hover {
+  background-color: #3A6A9A !important;
+  transition: background-color 0.3s ease-in-out;
+}
+
+table a {
+  color: inherit !important;
+  text-decoration: none;
+}
+
+table a:hover {
+  color: inherit !important;
+  text-decoration: underline;
+}
+
+table a:visited {
+  color: inherit !important;
+}
+
+@media only screen and (max-width: 943px) {
+  table thead {
+    display: none;
+  }
+
+  .filters-button-div{
+    margin: 0 !important;
+  }
+
+  .directory__upper-heading{
+    margin-bottom: 0;
+  }
+
+  table tr {
+    display: flex;
+    flex-direction: column;
+    padding: 1px;
+    height: auto !important;
+  }
+
+  table td[data-label] {
+    display: flex;
+    font-weight: bold;
+    border-bottom: 1px solid #2A5784;
+  }
+
+  table td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 100;
+    width: 50%;
+  }
+
+  table tr:nth-child(even) {
+    background-color: #2A578499;
+  }
+
+  table tr:nth-child(odd) {
+    background-color: #2A578410 !important;
+  }
+
+  table tbody tr:hover {
+    background-color: #3A6A9A !important;
+    cursor: pointer;
+  }
+}
+
+@media only screen and (max-width: 460px) {
+  .filters-button-div {
+    display: none !important;
+  }
+}
+
+.filters-button-div {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  padding: 0;
+  margin: 7px 0 0;
+  position: relative;
+}
+
+.filters-button-div .filters-button {
+  border-radius: 4px;
+  background: #153454;
+  border: none;
+  padding: 7px 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  color: rgba(255, 255, 255, 1);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.filters-button-div .filters-button img {
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+}
+
+.filters-button {
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.filters-button:hover {
+  background: #14335299 !important;
+}
+
+@media only screen and (max-width: 943px) {
+  .filters-button-div {
+    justify-content: start;
+  }
+}
+
+@media only screen and (min-width: 700px) {
+  .dashboard-general-input {
+    min-width: 500px !important;
+  }
+}
+
+.dashboard-general-input {
+  max-width: 700px !important;
+  min-width: 400px !important;
 }

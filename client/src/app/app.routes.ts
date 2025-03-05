@@ -8,7 +8,7 @@ import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { DirectoryResolver } from './shared/resolvers/directory.resolver';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { DashboardEmailApiComponent } from './shared/partials/dashboard/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component';
-import {DashboardGeneral} from './shared/partials/dashboard/intel-panel/dashboard-general/dashboard-general.component';
+import {DashboardExpandedResultComponent} from './shared/partials/dashboard/intel-panel/dashboard-expanded-result/dashboard-expanded-result.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { animation: 'RootPage' } },
@@ -31,11 +31,19 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'breach',
+        data: { animation: 'DataBreach' },
+        children: [
+          { path: '', redirectTo: 'databases', pathMatch: 'full' },
+          { path: 'databases', component: DashboardExpandedResultComponent, data: { type:'Breach', animation: 'DataBreach' } }
+        ]
+      },
+      {
         path: 'strategic',
         data: { animation: 'StrategicPage' },
         children: [
           { path: '', redirectTo: 'all', pathMatch: 'full' },
-          { path: ':category', component: DashboardGeneral, data: { animation: 'CategoryPage' } }
+          { path: ':category', component: DashboardExpandedResultComponent, data: { type:'Strategic Intelligence', animation: 'CategoryPage' } }
         ]
       }
     ],

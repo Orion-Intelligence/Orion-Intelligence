@@ -18,11 +18,11 @@ export class DashboardService {
   searchGeneralParamModel: SearchGeneralParamModel = new SearchGeneralParamModel();
   searchGeneralCallbackModel: SearchGeneralCallbackModel = new SearchGeneralCallbackModel();
 
-  searchDynamicEmailParambackModel: search_dynamic_email_param_model = new search_dynamic_email_param_model();
-  searchDynamicEmailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
-
   searchLeakParamModel: SearchLeakParamModel = new SearchLeakParamModel();
   searchLeakCallbackModel: SearchLeakCallbackModel = new SearchLeakCallbackModel();
+
+  searchDynamicEmailParambackModel: search_dynamic_email_param_model = new search_dynamic_email_param_model();
+  searchDynamicEmailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
 
   searchQuery$ = new BehaviorSubject<string>('');
   private activeRequest$ = new Subject<void>();

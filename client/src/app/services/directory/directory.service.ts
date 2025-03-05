@@ -8,9 +8,6 @@ export class DirectoryService {
   private directoryDataSubject = new BehaviorSubject<DirectoryCallbackModel | null>(null);
   directoryData$ = this.directoryDataSubject.asObservable();
 
-  private sidebarStateSubject = new BehaviorSubject<boolean>(false);
-  sidebarState$ = this.sidebarStateSubject.asObservable();
-
   constructor(private apiService: ApiService) {}
 
   setDirectoryData(data: DirectoryCallbackModel): void {
@@ -21,13 +18,5 @@ export class DirectoryService {
     this.apiService.get<DirectoryCallbackModel>('directory', { params }).subscribe((data) => {
       this.directoryDataSubject.next(data);
     });
-  }
-
-  openSidebar(): void {
-    this.sidebarStateSubject.next(true);
-  }
-
-  closeSidebar(): void {
-    this.sidebarStateSubject.next(false);
   }
 }

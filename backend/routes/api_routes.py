@@ -33,6 +33,6 @@ async def parser(param: search_leak_param_model = Depends()):
 async def parser(param: search_dynamic_param_model = Depends()):
     return await search_view_model.getInstance().dynamic_search_email(param)
 
-@api_routes.get("/api/public", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+@api_routes.get("/api/public")
 async def parser():
     return await config_controller.getInstance().get_all()

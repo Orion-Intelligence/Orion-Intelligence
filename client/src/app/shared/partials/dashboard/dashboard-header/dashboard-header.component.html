@@ -1,7 +1,7 @@
 <div class="header-bar">
   <div class="header-bar__title-container">
       <span *ngFor="let crumb of breadcrumb; let last = last">
-        <span *ngIf="!last" class="breadcrumb-item">{{ crumb | titlecase }}
+        <span *ngIf="!last" class="breadcrumb-item ">{{ crumb | titlecase }}
           <img ngSrc="assets/images/shared/nav-next.svg" class="header-bar__breadcrum" alt="breadcrumb" height="20" width="20">
         </span>
 

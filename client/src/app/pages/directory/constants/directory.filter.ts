@@ -31,3 +31,18 @@ export const directory_filters: FilterModel = {
     },
   },
 };
+
+export const general_filters: FilterModel = {
+  filters: {
+    mNetwork: {
+      title: "Network Type",
+      options: ["all", "onion", "i2p", "freenet"],
+      type: "dropdown",
+    },
+    mSearchParamSafeSearch: {
+      title: "Safe Search",
+      options: ["yes", "no"],
+      type: "dropdown",
+    },
+  },
+};

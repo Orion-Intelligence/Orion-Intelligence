@@ -224,8 +224,16 @@
 }
 
 .sidebar-collapsed .sidebar__subitem-content {
-  margin-left: 5px;
-  padding-left: 0;
+  width: 30px;
+  height: 30px;
+  margin-left: -7px;
+  padding: 20px;
+}
+
+.sidebar-collapsed .sidebar__icon-min{
+  margin-top: -58px !important;
+  margin-left: -10px !important;
+
 }
 
 .sidebar-collapsed .sidebar__icon {

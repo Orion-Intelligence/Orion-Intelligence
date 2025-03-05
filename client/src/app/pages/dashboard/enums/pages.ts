@@ -1,6 +1,6 @@
 export enum Category {
   STRATEGIC_INTELLIGENCE = 'Strategic Intelligence',
-  LEAKS = 'Leaks',
+  BREACH = 'Breach',
   HOMEPAGE = 'Homepage',
   DIRECTORY = 'Directory',
   API = 'Online API\'s'
@@ -19,7 +19,7 @@ export enum GeneralSubCategory {
   LEAKS = 'Leaks'
 }
 
-export enum LeakSubCategory {
+export enum BreachSubCategory {
   DATABASES = 'Databases',
 }
 

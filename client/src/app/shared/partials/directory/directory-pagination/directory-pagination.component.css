@@ -1,8 +1,7 @@
 .directory-pagination {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 50%;
+  justify-content: start;
+  align-items: start;
   float: right;
   margin-top: 15px
 }

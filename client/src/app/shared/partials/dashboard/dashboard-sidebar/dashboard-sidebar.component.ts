@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output, OnDestroy } from '@angular/core';
 import { NgOptimizedImage, NgClass, NgIf, AsyncPipe } from '@angular/common';
-import { ApiSubCategory, Category, GeneralSubCategory, LeakSubCategory } from '../../../../pages/dashboard/enums/pages';
+import { ApiSubCategory, Category, GeneralSubCategory, BreachSubCategory } from '../../../../pages/dashboard/enums/pages';
 import { AppService } from '../../../../services/core/app.service';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { filter } from 'rxjs';
@@ -22,7 +22,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   apiCategories = Object.values(ApiSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
-  leakCategories = Object.values(LeakSubCategory);
+  leakCategories = Object.values(BreachSubCategory);
   category = Category;
 
   constructor(protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
@@ -80,7 +80,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.STRATEGIC_INTELLIGENCE:
           firstSubcategory = this.generalCategories[0];
           break;
-        case Category.LEAKS:
+        case Category.BREACH:
           firstSubcategory = this.leakCategories[0];
           break;
         case Category.API:

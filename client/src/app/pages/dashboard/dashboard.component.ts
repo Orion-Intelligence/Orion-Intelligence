@@ -4,7 +4,7 @@ import { DashboardSidebarComponent } from '../../shared/partials/dashboard/dashb
 import { DashboardHeaderComponent } from '../../shared/partials/dashboard/dashboard-header/dashboard-header.component';
 import { DashboardInsightsComponent } from '../../shared/partials/dashboard/dashboard-insights/dashboard-insights.component';
 import { RouterOutlet } from '@angular/router';
-import { fadeInDashboardItem } from '../app/animations/dashboard.animations';
+import {fadeGlobalDashboardItem} from '../app/animations/dashboard.animations';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +17,7 @@ import { fadeInDashboardItem } from '../app/animations/dashboard.animations';
     DashboardInsightsComponent
   ],
   templateUrl: './dashboard.component.html',
-  animations: [fadeInDashboardItem]
+  animations: [fadeGlobalDashboardItem]
 })
 export class DashboardComponent implements AfterViewInit {
   isMenuOpen = true;
