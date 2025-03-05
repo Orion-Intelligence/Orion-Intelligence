@@ -28,7 +28,6 @@ export class DashboardEmailApiComponent {
   loading = false;
   error = false;
   breachData: CardData | null = null;
-
   constructor(public dashboardService: DashboardService) {
   }
 
@@ -57,4 +56,7 @@ export class DashboardEmailApiComponent {
     });
 
   }
+
+  protected readonly Object = Object;
+  protected readonly Array = Array;
 }

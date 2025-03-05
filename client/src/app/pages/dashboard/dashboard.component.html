@@ -9,7 +9,7 @@
   <div class="dashboard_container">
     <div class="dashboard dashboard-content-scroll">
       <app-dashboard-header></app-dashboard-header>
-      <span [@fadeIn]="prepareRoute(routerOutlet)">
+      <span class="dashboard-body" [@fadeIn]="prepareRoute(routerOutlet)">
         <router-outlet #routerOutlet="outlet"></router-outlet>
       </span>
     </div>

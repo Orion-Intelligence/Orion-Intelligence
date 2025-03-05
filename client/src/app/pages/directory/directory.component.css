@@ -1,10 +1,6 @@
 .directory {
   margin: 0;
   max-height: 100vh;
-  background: linear-gradient(to bottom,
-  rgba(18, 52, 84, 1),
-  rgba(41, 87, 132, 1) 50vh,
-  rgba(41, 87, 132, 1) 100%);
 }
 
 .directory__container {
@@ -44,45 +40,6 @@
 
 }
 
-.directory__filters-button-div {
-  display: flex;
-  justify-content: end;
-  align-items: center;
-  padding: 0;
-  margin: 7px 0 0;
-  width: 100%;
-  position: relative;
-}
-
-.directory__filters-button {
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.directory__filters-button:hover {
-  background: #14335299 !important;
-}
-
-.directory__filters-button-div .directory__filters-button {
-  border-radius: 4px;
-  background: #153454;
-  border: none;
-  padding: 7px 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Inter', sans-serif;
-  color: rgba(255, 255, 255, 1);
-  font-weight: 500;
-  font-size: 15px;
-}
-
-.directory__filters-button-div .directory__filters-button img {
-  width: 16px;
-  height: 16px;
-  margin-right: 10px;
-}
-
 .directory__main-filter-label {
   font-family: 'Inter', sans-serif;
   font-size: 12px;
@@ -120,9 +77,5 @@
     align-items: start;
     gap: 16px;
     height: 120px;
-  }
-
-  .directory__filters-button-div {
-    justify-content: start;
   }
 }

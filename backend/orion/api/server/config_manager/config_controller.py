@@ -35,4 +35,10 @@ class config_controller:
         await self.load_config()
 
     async def get_all(self) -> config_data:
-        return config_data(settings=self._config)
+        try:
+            records = await self._engine.find(db_system_model)
+            fresh_config = {record.key.value: record.value for record in records}
+            return config_data(settings=fresh_config)
+        except Exception as e:
+            print(f"Error fetching config: {e}")
+            return config_data(settings={})

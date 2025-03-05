@@ -13,7 +13,7 @@
 }
 
 .dash-search-button {
-  padding: 13px 97px;
+  padding: 13px 57px 10px;
   background: linear-gradient(92.32deg, #4EA2F1 2.58%, #2C7AC5 66.77%, #1E6CB7 130.97%);
   border-radius: 8px;
   border: none;
@@ -30,68 +30,77 @@
   background: linear-gradient(92.32deg, #2173C0 2.58%, #1D5A9A 66.77%, #174E8A 130.97%);
 }
 
+.dashboard__search-table-header {
+  padding-top: 15px;
+  padding-bottom: 0;
+  padding-left: 15px;
+
+  font-weight: 500;
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 0;
+  width: 200px;
+}
+
+.column-id {
+  width: 10%;
+  padding-left: 12px;
+}
+
+.column-key {
+  width: 25%;
+  padding-left: 12px;
+}
+
+.column-value {
+  width: 65%;
+  padding-left: 12px;
+}
+
+.cell {
+  padding-left: 12px;
+}
+
+.badge-red {
+  display: inline-block;
+  background-color: #ffffff20;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 7px;
+  margin: 2px;
+  font-size: 12px;
+}
+
+
 .dashboard__search-table-container {
-  margin: 24px 32px;
+  margin: 24px 22px;
   overflow: hidden;
   color: white;
   font-family: Arial, sans-serif;
   border-radius: 10px;
-  background: rgba(41, 87, 132, 255);
   border: 1px solid #ffffff15;
 }
 
-.dashboard__search-table {
-  width: 100%;
-}
-
-.dashboard__search-table-header {
-  background: #174069;
-  padding: 13px 24px;
-  font-size: 12px;
-  color: #D0D0D0;
-  font-weight: 500;
-}
-
-.dashboard__search-table table {
-  border-collapse: collapse;
-}
-
-.dashboard__search-table td {
-  padding: 12px 24px;
-  color: #FFFFFF;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.dashboard__search-table tr:last-child td {
-  border-bottom: none;
-}
-
-.dashboard__search-table tr:nth-child(odd) td {
-  background: #2A5784;
-}
-
-.dashboard__search-table tr:nth-child(even) td {
-  background: #1f406150;
+.dashboard__api-search-input-div {
+  background: #00000035;
+  border-radius: 13px;
+  margin-right: 0;
+  padding: 15px 50px 15px 0;
 }
 
 .input-container {
   padding-right: 0;
 }
 
-@media only screen and (max-width: 768px) {
-  .dashboard__api-search-input-div {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .col-md-6, .col-sm-12 {
-    max-width: 100%;
-  }
+.default-input-container {
+  margin-left: 35px;
 }
-@media only screen and (max-width: 550px) {
-  .search-content__filters-div {
-    justify-content: start !important;
-    margin-top: 10px;
+
+@media (max-width: 1000px) {
+  .dashboard__api-search-input-div {
+    padding: 15px 15px 15px 0;
+  }
+  .default-input-container {
+    margin-right: 15px;
   }
 }
