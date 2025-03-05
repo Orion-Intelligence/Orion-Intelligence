@@ -1,3 +1,13 @@
+export class Suggestion {
+  text: string = "";
+  offset: number = 0;
+  length: number = 0;
+  options: string[] = [];
+
+  constructor(init?: Partial<Suggestion>) {
+    Object.assign(this, init);
+  }
+}
 export class ResultItem {
   m_title: string = "";
   m_url?: string;
@@ -35,10 +45,12 @@ export class ResultItem {
 export class SearchLeakCallbackModel {
   Result: ResultItem[] = [];
   Page_Count: number = 0;
+  Suggestions: Suggestion[] = [];
 
   constructor(init?: Partial<SearchLeakCallbackModel>) {
     if (init) {
       this.Result = init.Result?.map(r => new ResultItem(r)) || [];
+      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) || [];
       this.Page_Count = init.Page_Count ?? 0;
     }
   }

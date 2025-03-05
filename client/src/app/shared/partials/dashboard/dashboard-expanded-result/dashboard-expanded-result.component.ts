@@ -49,6 +49,7 @@ export class DashboardExpandedResultComponent implements OnInit {
 
   resetFilters() {
     this.selectedFilters = {};
+    this.reloadFilters.emit(["", ""]);
     this.reloadData.emit()
   }
 
