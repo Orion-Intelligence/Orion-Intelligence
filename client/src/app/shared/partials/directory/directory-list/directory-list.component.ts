@@ -13,7 +13,7 @@ import {DirectoryService} from '../../../../services/directory/directory.service
 export class DirectoryListComponent {
   directoryData$: Observable<DirectoryCallbackModel | null>;
 
-  constructor(private directoryService: DirectoryService) {
+  constructor(public directoryService: DirectoryService) {
     this.directoryData$ = this.directoryService.directoryData$;
   }
 

@@ -2,32 +2,36 @@ import {Component} from '@angular/core';
 import {Observable} from 'rxjs';
 import {FiltersComponent} from '../../shared/partials/filters/filters.component';
 import {DirectoryListComponent} from '../../shared/partials/directory/directory-list/directory-list.component';
-import {DirectoryPaginationComponent} from '../../shared/partials/directory/directory-pagination/directory-pagination.component';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {FilterModel} from '../../shared/model/filter/filter';
 import {directory_filters} from './constants/directory.filter';
 import {SidebarService} from '../../services/shared/sidebar.service';
 import {DirectoryService} from '../../services/directory/directory.service';
+import {DashboardPaginationComponent} from "../../shared/partials/dashboard/dashboard-pagination/dashboard-pagination.component";
+import {DirectoryCallbackModel} from '../../shared/model/callback/directory';
 
 @Component({
   selector: 'app-directory',
   templateUrl: './directory.component.html',
-  imports: [
-    FiltersComponent,
-    DirectoryListComponent,
-    DirectoryPaginationComponent,
-    NgOptimizedImage,
-    AsyncPipe,
-    FiltersComponent,
-  ],
+  imports: [FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, DashboardPaginationComponent,],
 })
 export class DirectoryComponent {
+  directoryData$: Observable<DirectoryCallbackModel | null>;
   isFilterOpen$: Observable<boolean>;
   filterModel: FilterModel = directory_filters;
   selectedFilters: { [key: string]: string | null } = {};
+  totalPages: number = 0;
 
-  constructor(private sidebarService: SidebarService, private directoryService:DirectoryService) {
+  constructor(private sidebarService: SidebarService, private directoryService: DirectoryService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+    this.directoryData$ = this.directoryService.directoryData$;
+
+    this.directoryData$.subscribe(data => {
+      if (data) {
+        this.totalPages = Math.ceil(data.total_count / 10);
+      }
+    });
+
   }
 
   openSidebar() {
@@ -49,10 +53,13 @@ export class DirectoryComponent {
     this.reloadDirectory();
   }
 
+  onPageChange(currentPage: number) {
+    this.directoryService.setCurrentPage(currentPage);
+    this.directoryService.reloadDirectoryData({page: currentPage});
+  }
+
   private reloadDirectory() {
-    const filteredParams = Object.fromEntries(
-      Object.entries(this.selectedFilters).filter(([_, value]) => value !== null && value !== '')
-    );
+    const filteredParams = Object.fromEntries(Object.entries(this.selectedFilters).filter(([_, value]) => value !== null && value !== ''));
 
     this.directoryService.reloadDirectoryData(filteredParams);
   }

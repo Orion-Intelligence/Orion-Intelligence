@@ -66,10 +66,20 @@
   border: 1px solid #FCFCFC12;
 }
 
+.directory-pagination {
+  margin-top: -10px;
+}
+
 @media only screen and (max-width: 943px) {
   .directory__container {
     min-height: 100vh;
     padding: 40px 10px 100px;
+  }
+
+  .directory-pagination {
+    margin-top: -20px;
+    margin-left: -30px;
+    margin-bottom: -5px;
   }
 
   .directory__upper-heading {

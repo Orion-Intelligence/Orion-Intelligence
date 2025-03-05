@@ -9,7 +9,7 @@
         </div>
 
         <div class="directory-pagination col-7">
-          <app-directory-pagination></app-directory-pagination>
+          <app-dashboard-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-dashboard-pagination>
         </div>
 
         <div class="filters-button-div">

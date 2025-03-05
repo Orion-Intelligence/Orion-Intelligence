@@ -1,0 +1,5 @@
+<app-dashboard-expanded-result (updatePageNumber)="onPageChange($event)" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="dashboardService.searchLeakCallbackModel.Result.length"></app-dashboard-expanded-result>
+<app-dashboard-leak-result-grid *ngIf="!isLoading" @fadeInDashboardItem></app-dashboard-leak-result-grid>
+<div *ngIf="!isLoading && !(dashboardService.searchLeakCallbackModel.Result.length==0)" @fadeInDashboardItem>
+  <app-dashboard-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(dashboardService.searchLeakCallbackModel.Page_Count)"></app-dashboard-pagination>
+</div>

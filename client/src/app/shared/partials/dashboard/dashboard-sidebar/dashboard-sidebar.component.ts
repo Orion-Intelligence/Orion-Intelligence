@@ -7,6 +7,9 @@ import { filter } from 'rxjs';
 import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {SearchGeneralCallbackModel} from '../../../../pages/dashboard/models/general/search_general_callback_model';
+import {SearchLeakCallbackModel} from '../../../../pages/dashboard/models/leak/search_leak_callback_model';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -25,7 +28,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   leakCategories = Object.values(BreachSubCategory);
   category = Category;
 
-  constructor(protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
+  constructor(private dashboardService:DashboardService, protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
     this.appService.configData$.subscribe(data => {
       this.apiAllowed = !!(data && data.settings['api_allowed'] === '1');
     });
@@ -69,6 +72,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onSectionSelected(section: Category) {
+    this.dashboardService.searchGeneralCallbackModel = new SearchGeneralCallbackModel();
+    this.dashboardService.searchLeakCallbackModel = new SearchLeakCallbackModel();
+
     if (this.selectionStore.getSelectedSection() === section) {
       this.selectionStore.setSelectedSection("");
       this.selectionStore.setSelectedOption("");

@@ -6,8 +6,8 @@
   margin-top: 15px
 }
 
-.directory-pagination li {
-  margin: 0 5px;
+.directory-pagination {
+  margin: 0 !important;
 }
 
 .directory-pagination-navbtn{
