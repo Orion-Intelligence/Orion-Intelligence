@@ -1,0 +1,34 @@
+<div class="search__insight-data-div">
+<div *ngIf="analytics?.unique_urls?.length > 0" class="search-insights__data-accordion search-insights__container-background">
+  <input type="checkbox" id="unique_url-toggle" checked>
+  <label class=" search-insights__data-header" for="unique_url-toggle">
+    Unique URLs
+    <img ngSrc="assets/images/shared/dropdown_left.svg" alt="" width="16" height="16" alt="Dropdown Arrow">
+  </label>
+  <div class="search-insights__unique-url-content">
+    <ul class="search-insights__unique-url-ul">
+      <li *ngFor="let url of analytics.unique_urls">
+        <p class="search-insights__unique-url-text">
+          <span class="search-insights__unique-url-span"></span>{{ url.m_title }}
+        </p>
+        <h6 class="search-insight__unique_url__url">{{ url.m_url }}</h6>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ng-container *ngFor="let category of categories">
+  <div *ngIf="analytics[category.key]?.length > 0" class="search-insights__accordion search-insights__data-accordion search-insights__container-background">
+    <input type="checkbox" [id]="'unique__' + category.key + '-toggle'" checked>
+    <label class="search-insights__data-header" [for]="'unique__' + category.key + '-toggle'">
+      {{ category.label }}
+      <img ngSrc="assets/images/shared/dropdown_left.svg" alt="" width="16" height="16" alt="Dropdown Arrow">
+    </label>
+    <div class="search-insights__content">
+      <div *ngFor="let item of analytics[category.key]" class="search-insights__row">
+        <div class="search-insights__column">{{ item }}</div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+</div>

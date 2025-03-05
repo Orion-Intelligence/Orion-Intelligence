@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/dashboard/dashboard-header/dashboard-header.component';
+import { DashboardInsightsComponent } from '../../shared/partials/dashboard/dashboard-insights/dashboard-insights.component';
 import { RouterOutlet } from '@angular/router';
 import { fadeInDashboardItem } from '../app/animations/dashboard.animations';
 
@@ -13,6 +14,7 @@ import { fadeInDashboardItem } from '../app/animations/dashboard.animations';
     DashboardHeaderComponent,
     NgClass,
     RouterOutlet,
+    DashboardInsightsComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [fadeInDashboardItem]
