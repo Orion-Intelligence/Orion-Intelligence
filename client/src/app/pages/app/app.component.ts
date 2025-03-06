@@ -5,7 +5,7 @@ import { Observable, filter, map } from 'rxjs';
 import { NgIf } from '@angular/common';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
 import { AppService } from '../../services/core/app.service';
-import {fadeInAnimation} from './animations/app.animations';
+import {appAnimation} from '../../shared/animations/app.animations';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +16,7 @@ import {fadeInAnimation} from './animations/app.animations';
     LoaderComponent,
   ],
   templateUrl: './app.component.html',
-  animations: [fadeInAnimation],
+  animations: [appAnimation],
 })
 export class AppComponent {
   error$: Observable<boolean>;

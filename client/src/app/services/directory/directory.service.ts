@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { DirectoryCallbackModel } from '../../shared/model/callback/directory';
+import { DirectoryCallbackModel } from '../../shared/model/directory/directory';
 import { ApiService } from '../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })

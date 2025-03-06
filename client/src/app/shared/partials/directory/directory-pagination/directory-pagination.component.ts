@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Observable } from 'rxjs';
-import { DirectoryCallbackModel } from '../../../model/callback/directory';
+import { DirectoryCallbackModel } from '../../../model/directory/directory';
 import { DirectoryService } from '../../../../services/directory/directory.service';
 
 @Component({

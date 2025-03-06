@@ -3,7 +3,7 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/r
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
-import { DirectoryCallbackModel } from '../model/callback/directory';
+import { DirectoryCallbackModel } from '../model/directory/directory';
 import { DirectoryService } from '../../services/directory/directory.service';
 
 @Injectable({ providedIn: 'root' })

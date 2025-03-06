@@ -17,7 +17,7 @@ class elastic_request_generator:
     must_not_clause = []
 
     if m_safe_search == "True":
-      must_not_clause.append({"term": {"m_content_type": "adult"}})
+      must_clauses.append({"term": {"m_content_type": "adult"}})
 
     if m_network and m_network != "all":
       must_clauses.append({"term": {"m_network": m_network}})
@@ -104,15 +104,15 @@ class elastic_request_generator:
       m_network = p_query_model.mNetwork
 
       must_clauses = []
-      if m_search_type != "all":
-          must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-
       if m_network != "" and m_network != "all":
           must_clauses.append({"terms": {"m_network": [m_network]}})
 
       must_not_clause = []
       if m_safe_search == "True":
           must_not_clause.append({"term": {"m_content_type": "adult"}})
+
+      if m_search_type != "all":
+          must_clauses.insert({"terms": {"m_content_type": [m_search_type]}})
 
       if m_network and m_network != "all":
         must_clauses.append({"term": {"m_network": m_network}})
@@ -186,7 +186,6 @@ class elastic_request_generator:
           "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
           "track_total_hits": True,
       }
-
       return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
   @staticmethod

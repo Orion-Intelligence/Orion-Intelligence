@@ -1,6 +1,6 @@
 <div *ngIf="isVisible">
   <app-loader></app-loader>
-  <div [@fadeIn]="shouldAnimate()">
+  <div [@appAnimation]="shouldAnimate()">
     <router-outlet></router-outlet>
   </div>
 </div>

@@ -13,11 +13,11 @@
 @import 'app/shared/partials/filters/filters.component.css';
 @import 'app/pages/directory/directory.component.css';
 @import 'app/shared/partials/profile/profile.component.css';
-@import 'app/shared/partials/dashboard/dashboard-search-no-suggestion/dashboard-search-no-suggestion.component.css';
-@import 'app/shared/partials/dashboard/dashboard-header/dashboard-header.component.css';
-@import 'app/shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component.css';
-@import 'app/shared/partials/dashboard/dashboard-pagination/dashboard-pagination.component.css';
-@import 'app/shared/partials/dashboard/intel-panel/dashboard-results/shared/dashboard-general-results-grid.component.css';
+@import 'app/shared/partials/intel-results/dashboard-search-no-suggestion/dashboard-search-no-suggestion.component.css';
+@import 'app/shared/partials/intel-results/dashboard-header/dashboard-header.component.css';
+@import 'app/shared/partials/intel-results/dashboard-sidebar/dashboard-sidebar.component.css';
+@import 'app/shared/partials/intel-results/dashboard-pagination/dashboard-pagination.component.css';
+@import 'app/shared/partials/intel-results/intel-panel/dashboard-results/shared/dashboard-results-grid.component.css';
 @import 'app/pages/dashboard/dashboard.component.css';
 
 html {

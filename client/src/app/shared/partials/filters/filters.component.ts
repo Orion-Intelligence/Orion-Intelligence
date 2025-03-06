@@ -3,14 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter';
 import { last } from 'rxjs';
-import { fadeAnimation } from '../../animations/animations';
+import { filterAnimation } from '../../animations/filter.animation';
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
   imports: [FormsModule, CommonModule, NgOptimizedImage],
-  animations: [fadeAnimation]
+  animations: [filterAnimation]
 })
 export class FiltersComponent implements OnInit {
   @Input() filterModel!: FilterModel;

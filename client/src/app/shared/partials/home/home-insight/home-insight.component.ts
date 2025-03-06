@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {NgClass, NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
-import { InsightCallbackModel, GenericModel, LeakModel } from '../../../model/callback/insight';
+import { InsightCallbackModel, GenericModel, LeakModel } from '../../../model/homepage/insight';
 
 @Component({
   selector: 'app-home-insight',

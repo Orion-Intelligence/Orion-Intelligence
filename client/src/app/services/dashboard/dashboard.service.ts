@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { SearchGeneralParamModel } from '../../pages/dashboard/models/general/search_general_param_model';
-import { SearchGeneralCallbackModel } from '../../pages/dashboard/models/general/search_general_callback_model';
-import { SearchLeakParamModel } from '../../pages/dashboard/models/leak/search_leak_param_model';
-import { SearchLeakCallbackModel } from '../../pages/dashboard/models/leak/search_leak_callback_model';
+import { SearchGeneralParamModel } from '../../shared/model/intel-results/general/search_general_param_model';
+import { SearchGeneralCallbackModel } from '../../shared/model/intel-results/general/search_general_callback_model';
+import { SearchLeakParamModel } from '../../shared/model/intel-results/leak/search_leak_param_model';
+import { SearchLeakCallbackModel } from '../../shared/model/intel-results/leak/search_leak_callback_model';
 import { HttpParams } from '@angular/common/http';
 import { catchError, map, tap, takeUntil } from 'rxjs/operators';
-import { search_dynamic_email_param_model } from '../../pages/dashboard/models/dynamic/email/search_dynamic_email_param_model';
 import { ApiService } from '../../shared/services/api.service';
-import { SearchDynamicEmailCallbackModel } from '../../pages/dashboard/models/dynamic/email/search_dynamic_email_callback_model';
-import {SelectionStoreService} from './selection.service';
+import {search_dynamic_email_param_model} from '../../shared/model/dynamic/email/search_dynamic_email_param_model';
+import {SearchDynamicEmailCallbackModel} from '../../shared/model/dynamic/email/search_dynamic_email_callback_model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +26,7 @@ export class DashboardService {
   searchQuery$ = new BehaviorSubject<string>('');
   private activeRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService, private selectionStore: SelectionStoreService) {}
+  constructor(private apiService: ApiService) {}
 
   fetchGeneralSearchResults() {
     this.cancelOngoingRequest();

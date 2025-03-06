@@ -13,13 +13,13 @@ export class SelectionStoreService {
 
   setSelectedSection(section: string) {
     this.selectedSectionSubject.next(section);
-    this.selectedOptionSubject.next(null); // Reset selected option when section changes
-    localStorage.setItem('selectedSection', section); // Save to local storage
+    this.selectedOptionSubject.next(null);
+    localStorage.setItem('selectedSection', section);
   }
 
   setSelectedOption(option: string) {
     this.selectedOptionSubject.next(option);
-    localStorage.setItem('selectedOption', option); // Save to local storage
+    localStorage.setItem('selectedOption', option);
   }
 
   getSelectedSection(): string | null {

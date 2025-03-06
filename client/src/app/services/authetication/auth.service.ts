@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
-import { AuthCallbackModel } from '../../shared/model/callback/authCallbackModel';
+import { AuthCallbackModel } from '../../shared/model/core/auth.callback.model';
 import { TokenRefreshService } from './token-refresh.service';
 import {HttpHeaders} from '@angular/common/http';
 

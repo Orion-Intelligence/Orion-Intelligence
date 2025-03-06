@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Router} from '@angular/router';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
-import { Category, GeneralSubCategory } from '../../pages/dashboard/enums/pages';
+import { Category, GeneralSubCategory } from '../enums/pages';
 
 @Injectable({
   providedIn: 'root'

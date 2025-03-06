@@ -1,9 +1,9 @@
 import { Component, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { DashboardSidebarComponent } from '../../shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component';
-import { DashboardHeaderComponent } from '../../shared/partials/dashboard/dashboard-header/dashboard-header.component';
 import { RouterOutlet } from '@angular/router';
-import {fadeGlobalDashboardItem} from '../app/animations/dashboard.animations';
+import {dashboardGlobalAnimation} from '../../shared/animations/dashboard.global.animations';
+import {DashboardSidebarComponent} from '../../shared/partials/intel-results/dashboard-sidebar/dashboard-sidebar.component';
+import {DashboardHeaderComponent} from '../../shared/partials/intel-results/dashboard-header/dashboard-header.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,7 +15,7 @@ import {fadeGlobalDashboardItem} from '../app/animations/dashboard.animations';
     RouterOutlet,
   ],
   templateUrl: './dashboard.component.html',
-  animations: [fadeGlobalDashboardItem]
+  animations: [dashboardGlobalAnimation]
 })
 export class DashboardComponent implements AfterViewInit {
   isMenuOpen = true;

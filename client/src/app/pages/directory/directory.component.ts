@@ -4,11 +4,13 @@ import {FiltersComponent} from '../../shared/partials/filters/filters.component'
 import {DirectoryListComponent} from '../../shared/partials/directory/directory-list/directory-list.component';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {FilterModel} from '../../shared/model/filter/filter';
-import {directory_filters} from './constants/directory.filter';
+import {directory_filters} from '../../shared/constants/filters';
 import {SidebarService} from '../../services/shared/sidebar.service';
 import {DirectoryService} from '../../services/directory/directory.service';
-import {DashboardPaginationComponent} from "../../shared/partials/dashboard/dashboard-pagination/dashboard-pagination.component";
-import {DirectoryCallbackModel} from '../../shared/model/callback/directory';
+import {DirectoryCallbackModel} from '../../shared/model/directory/directory';
+import {
+  DashboardPaginationComponent
+} from '../../shared/partials/intel-results/dashboard-pagination/dashboard-pagination.component';
 
 @Component({
   selector: 'app-directory',
@@ -44,7 +46,6 @@ export class DirectoryComponent {
 
   applyFilters(filters: { [key: string]: string | null }) {
     this.selectedFilters = filters;
-    console.log("Applying Filters:", this.selectedFilters);
     this.reloadDirectory();
   }
 

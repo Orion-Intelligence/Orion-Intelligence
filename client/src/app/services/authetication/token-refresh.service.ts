@@ -17,9 +17,6 @@ export class TokenRefreshService {
           switchMap(() => refreshAction()),
           tap({
             next: (newToken) => {
-              if (newToken) {
-                console.log('Token refreshed:', newToken);
-              }
             },
             error: () => {
               this.stopTokenRefresh();

@@ -7,9 +7,13 @@ import { DirectoryComponent } from './pages/directory/directory.component';
 import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { DirectoryResolver } from './shared/resolvers/directory.resolver';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { DashboardEmailApiComponent } from './shared/partials/dashboard/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component';
-import {DashboardGeneralComponent} from './shared/partials/dashboard/intel-panel/dashboard-general/dashboard-general.component';
-import {DashboardBreachComponent} from './shared/partials/dashboard/intel-panel/dashboard-breach/dashboard-breach.component';
+import {
+  DashboardEmailApiComponent
+} from './shared/partials/intel-results/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component';
+import {DashboardBreachComponent} from './shared/partials/intel-results/intel-panel/dashboard-breach/dashboard-breach.component';
+import {
+  DashboardGeneralComponent
+} from './shared/partials/intel-results/intel-panel/dashboard-general/dashboard-general.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { animation: 'RootPage' } },
