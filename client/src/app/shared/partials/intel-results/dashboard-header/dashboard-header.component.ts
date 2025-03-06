@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProfileComponent } from '../../profile/profile.component';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs';
-import {NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@angular/common';
+import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-header',
@@ -26,7 +26,8 @@ export class DashboardHeaderComponent implements OnInit {
   }
 
   updateBreadcrumb() {
-    const segments = this.router.url.split('/').filter(segment => segment);
+    const urlTree: UrlTree = this.router.parseUrl(this.router.url);
+    const segments = urlTree.root.children['primary']?.segments.map(segment => segment.path) || [];
     this.breadcrumb = segments.length > 1 ? segments.slice(1) : segments;
   }
 }

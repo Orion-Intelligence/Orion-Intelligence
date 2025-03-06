@@ -1,14 +1,15 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, of, Subject } from 'rxjs';
-import { SearchGeneralParamModel } from '../../shared/model/intel-results/general/search_general_param_model';
-import { SearchGeneralCallbackModel } from '../../shared/model/intel-results/general/search_general_callback_model';
-import { SearchLeakParamModel } from '../../shared/model/intel-results/leak/search_leak_param_model';
-import { SearchLeakCallbackModel } from '../../shared/model/intel-results/leak/search_leak_callback_model';
-import { HttpParams } from '@angular/common/http';
-import { catchError, map, tap, takeUntil } from 'rxjs/operators';
-import { ApiService } from '../../shared/services/api.service';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, of, Subject} from 'rxjs';
+import {SearchGeneralParamModel} from '../../shared/model/intel-results/general/search_general_param_model';
+import {SearchGeneralCallbackModel} from '../../shared/model/intel-results/general/search_general_callback_model';
+import {SearchLeakParamModel} from '../../shared/model/intel-results/leak/search_leak_param_model';
+import {SearchLeakCallbackModel} from '../../shared/model/intel-results/leak/search_leak_callback_model';
+import {HttpParams} from '@angular/common/http';
+import {catchError, map, tap, takeUntil} from 'rxjs/operators';
+import {ApiService} from '../../shared/services/api.service';
 import {search_dynamic_email_param_model} from '../../shared/model/dynamic/email/search_dynamic_email_param_model';
 import {SearchDynamicEmailCallbackModel} from '../../shared/model/dynamic/email/search_dynamic_email_callback_model';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -26,60 +27,59 @@ export class DashboardService {
   searchQuery$ = new BehaviorSubject<string>('');
   private activeRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) {}
-
-  fetchGeneralSearchResults() {
-    this.cancelOngoingRequest();
-    const params = new HttpParams({ fromObject: this.searchGeneralParamModel as any });
-
-    return this.apiService.get<SearchGeneralCallbackModel>('search/general', { params }).pipe(
-      takeUntil(this.activeRequest$),
-      tap((response: SearchGeneralCallbackModel) => {
-        this.searchGeneralCallbackModel = new SearchGeneralCallbackModel(response);
-      }),
-      map((response: SearchGeneralCallbackModel) => ({
-        success: true,
-        isEmpty: response.Result?.length === 0
-      })),
-      catchError(() => of({ success: false, isEmpty: false }))
-    );
+  constructor(private apiService: ApiService, private router: Router) {
   }
 
   fetchDynamicEmailSearchResults() {
     this.cancelOngoingRequest();
-    const params = new HttpParams({ fromObject: this.searchDynamicEmailParambackModel as any });
+    const params = new HttpParams({fromObject: this.searchDynamicEmailParambackModel as any});
 
-    return this.apiService.get<SearchDynamicEmailCallbackModel>('dynamic/email', { params }).pipe(
-      takeUntil(this.activeRequest$),
-      tap((response: SearchDynamicEmailCallbackModel) => {
-        this.searchDynamicEmailCallbackbackModel = new SearchDynamicEmailCallbackModel(response);
-      }),
-      map((response: SearchDynamicEmailCallbackModel) => ({
-        success: true,
-        isEmpty: response.cards_data?.length === 0
-      })),
-      catchError(() => of({ success: false, isEmpty: false }))
-    );
+    return this.apiService.get<SearchDynamicEmailCallbackModel>('dynamic/email', {params}).pipe(takeUntil(this.activeRequest$), tap((response: SearchDynamicEmailCallbackModel) => {
+      this.searchDynamicEmailCallbackbackModel = new SearchDynamicEmailCallbackModel(response);
+    }), map((response: SearchDynamicEmailCallbackModel) => ({
+      success: true, isEmpty: response.cards_data?.length === 0
+    })), catchError(() => of({success: false, isEmpty: false})));
+  }
+
+  fetchGeneralSearchResults() {
+    this.cancelOngoingRequest();
+    const params = new HttpParams({fromObject: this.searchGeneralParamModel as any});
+
+    return this.apiService.get<SearchGeneralCallbackModel>('search/general', {params}).pipe(takeUntil(this.activeRequest$), tap((response: SearchGeneralCallbackModel) => {
+      this.searchGeneralCallbackModel = new SearchGeneralCallbackModel(response);
+      this.updateUrlWithParams(this.searchGeneralParamModel);
+    }), map((response: SearchGeneralCallbackModel) => ({
+      success: true, isEmpty: response.Result?.length === 0
+    })), catchError(() => of({success: false, isEmpty: false})));
   }
 
   fetchLeakSearchResults() {
     this.cancelOngoingRequest();
-    const params = new HttpParams({ fromObject: this.searchLeakParamModel as any });
+    const params = new HttpParams({fromObject: this.searchLeakParamModel as any});
 
-    return this.apiService.get<SearchLeakCallbackModel>('search/leak', { params }).pipe(
-      takeUntil(this.activeRequest$),
-      tap(response => {
-        this.searchLeakCallbackModel = new SearchLeakCallbackModel(response);
-      }),
-      map((response: SearchLeakCallbackModel) => ({
-        success: true,
-        isEmpty: response.Result?.length === 0
-      })),
-      catchError(() => of({ success: false, isEmpty: false }))
-    );
+    return this.apiService.get<SearchLeakCallbackModel>('search/leak', {params}).pipe(takeUntil(this.activeRequest$), tap(response => {
+      this.searchLeakCallbackModel = new SearchLeakCallbackModel(response);
+      this.updateUrlWithParams(this.searchLeakParamModel);
+    }), map((response: SearchLeakCallbackModel) => ({
+      success: true, isEmpty: response.Result?.length === 0
+    })), catchError(() => of({success: false, isEmpty: false})));
+  }
+
+  updateUrlWithParams(params: any) {
+    const {pSearchParamType, ...filteredParams} = params;
+    this.router.navigate([], {
+      queryParams: filteredParams, queryParamsHandling: 'merge', replaceUrl: true
+    }).then();
   }
 
   private cancelOngoingRequest() {
     this.activeRequest$.next();
+  }
+
+  public parseParamValue(value: any): any {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    if (!isNaN(value) && value !== '') return +value;
+    return value;
   }
 }

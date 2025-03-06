@@ -5,64 +5,70 @@ import {NgIf} from "@angular/common";
 import {DashboardService} from "../../../../../services/dashboard/dashboard.service";
 import {ActivatedRoute} from "@angular/router";
 import {switchMap, timer} from "rxjs";
-import {DashboardLeakResultGridComponent} from "../dashboard-results/dashboard-leak-result-grid/dashboard-leak-result-grid.component";
+import {
+  DashboardLeakResultGridComponent
+} from "../dashboard-results/dashboard-leak-result-grid/dashboard-leak-result-grid.component";
 import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
 
 @Component({
-	selector: 'app-dashboard-breach',
-	imports: [DashboardExpandedResultComponent, DashboardLeakResultGridComponent, DashboardPaginationComponent, NgIf],
-	templateUrl: './dashboard-breach.component.html',
-    animations: [fadeInDashboardItem],
+  selector: 'app-dashboard-breach',
+  imports: [DashboardExpandedResultComponent, DashboardLeakResultGridComponent, DashboardPaginationComponent, NgIf],
+  templateUrl: './dashboard-breach.component.html',
+  animations: [fadeInDashboardItem],
 })
 export class DashboardBreachComponent implements OnInit {
-	isLoading = false;
+  isLoading = false;
 
-	constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
-	}
+  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  }
 
-	ngOnInit(): void {
-		this.route.paramMap.subscribe((params) => {
-			this.dashboardService.searchLeakParamModel.pSearchParamType = params.get('category') || 'all';
-			this.fetchSearchResults();
-			this.cdr.detectChanges();
-		});
-	}
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      this.dashboardService.searchLeakParamModel.q = params['q'] || '';
+      this.dashboardService.searchLeakParamModel.pSearchParamType = params['category'] || 'all';
+      this.dashboardService.searchLeakParamModel.mSearchParamPage = params['page'] ? +params['page'] : 1;
+      this.dashboardService.searchLeakParamModel.mSearchParamSafeSearch = params['safeSearch'] === 'true';
+      this.dashboardService.searchLeakParamModel.mNetwork = params['network'] || 'all';
 
-	fetchSearchResults() {
-		if (this.isLoading) return;
+      this.fetchSearchResults();
+      this.cdr.detectChanges();
+    });
+  }
 
-		if (this.dashboardService.searchLeakParamModel.q == "") {
-			this.isLoading = false;
-			this.dashboardService.searchLeakCallbackModel.Result = []
-		} else {
-			this.isLoading = true;
-			this.dashboardService.fetchLeakSearchResults()
-				.pipe(switchMap(() => timer(1000)))
-				.subscribe(() => {
-					this.isLoading = false;
-				});
-		}
-	}
+  fetchSearchResults() {
+    if (this.isLoading) return;
 
+    if (this.dashboardService.searchLeakParamModel.q == "") {
+      this.isLoading = false;
+      this.dashboardService.searchLeakCallbackModel.Result = []
+    } else {
+      this.isLoading = true;
+      this.dashboardService.fetchLeakSearchResults()
+        .pipe(switchMap(() => timer(1000)))
+        .subscribe(() => {
+          this.isLoading = false;
+        });
+    }
+  }
 
-	onPageChange(step: number) {
-		this.dashboardService.searchLeakParamModel.mSearchParamPage = step;
-		this.fetchSearchResults();
-	}
+  onPageChange(step: number) {
+    this.dashboardService.searchLeakParamModel.mSearchParamPage = step;
+    this.fetchSearchResults();
+  }
 
-	reloadFilters(event: [string | null, string | null]) {
-		const [mNetwork, mSearchParamSafeSearch] = event;
-		if (mNetwork != null) {
-			this.dashboardService.searchLeakParamModel.mNetwork = mNetwork;
-		}
-		this.dashboardService.searchLeakParamModel.mSearchParamSafeSearch = mSearchParamSafeSearch != 'yes';
-		this.fetchSearchResults();
-	}
+  reloadFilters(event: [string | null, string | null]) {
+    const [mNetwork, mSearchParamSafeSearch] = event;
+    if (mNetwork != null) {
+      this.dashboardService.searchLeakParamModel.mNetwork = mNetwork;
+    }
+    this.dashboardService.searchLeakParamModel.mSearchParamSafeSearch = mSearchParamSafeSearch != 'yes';
+    this.fetchSearchResults();
+  }
 
-	onUpdateQuery(query: string) {
-		this.dashboardService.searchLeakParamModel.q = query
-	}
+  onUpdateQuery(query: string) {
+    this.dashboardService.searchLeakParamModel.q = query
+  }
 
-	protected readonly Math = Math;
+  protected readonly Math = Math;
 
 }

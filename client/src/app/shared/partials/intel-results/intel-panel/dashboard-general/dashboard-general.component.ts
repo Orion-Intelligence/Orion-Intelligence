@@ -7,7 +7,7 @@ import {
 } from '../dashboard-results/dashboard-results-grid/dashboard-general-results-grid.component';
 import {NgIf} from '@angular/common';
 import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
-import {switchMap, timer} from 'rxjs';
+import {combineLatest, distinctUntilChanged, switchMap, timer} from 'rxjs';
 import {DashboardPaginationComponent} from '../../dashboard-pagination/dashboard-pagination.component';
 
 @Component({
@@ -18,16 +18,26 @@ import {DashboardPaginationComponent} from '../../dashboard-pagination/dashboard
 })
 export class DashboardGeneralComponent implements OnInit {
   isLoading = false;
+  query = ""
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      this.dashboardService.searchGeneralParamModel.pSearchParamType = params.get('category') || 'all';
-      this.fetchSearchResults();
-      this.cdr.detectChanges();
-    });
+    combineLatest([this.route.queryParams, this.route.url])
+      .pipe(distinctUntilChanged())
+      .subscribe(([params, urlSegments]) => {
+        this.query = params['q'];
+        this.dashboardService.searchGeneralParamModel.q = params['q'] || '';
+        this.dashboardService.searchGeneralParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
+        this.dashboardService.searchGeneralParamModel.mSearchParamSafeSearch = params['mSearchParamSafeSearch'] === 'true';
+        this.dashboardService.searchGeneralParamModel.mNetwork = params['network'] || 'all';
+
+        this.dashboardService.searchGeneralParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+
+        this.fetchSearchResults();
+        this.cdr.detectChanges();
+      });
   }
 
   fetchSearchResults() {

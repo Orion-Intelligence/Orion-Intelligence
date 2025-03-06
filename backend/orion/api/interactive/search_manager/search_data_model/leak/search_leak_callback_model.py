@@ -9,34 +9,34 @@ class suggestion(BaseModel):
     options: List[dict]
 
 class result_item(BaseModel):
-    m_title: str
+    m_title: Optional[str] = None
     m_url: Optional[HttpUrl] = None
     m_base_url: Optional[HttpUrl] = None
-    m_content: str
-    m_important_content: str
+    m_content: Optional[str] = None
+    m_important_content: Optional[str] = None
     m_network: Optional[str] = None
-    m_content_type: Union[str, List[str]]
-    m_weblink: List[HttpUrl] = []
-    m_dumplink: List[HttpUrl] = []
+    m_content_type: Optional[Union[str, List[str]]] = None
+    m_weblink: Optional[List[HttpUrl]] = None
+    m_dumplink: Optional[List[HttpUrl]] = None
     m_name: Optional[str] = None
-    m_email_addresses: List[str] = []
+    m_email_addresses: Optional[List[str]] = None
     m_industry: Optional[str] = None
-    m_phone_numbers: List[str] = []
-    m_addresses: List[str] = []
-    m_social_media_profiles: List[str] = []
-    m_websites: List[str] = []
+    m_phone_numbers: Optional[List[str]] = None
+    m_addresses: Optional[List[str]] = None
+    m_social_media_profiles: Optional[List[str]] = None
+    m_websites: Optional[List[str]] = None
     m_company_name: Optional[str] = None
-    m_logo_or_images: List[str] = []
+    m_logo_or_images: Optional[List[str]] = None
     m_leak_date: Optional[datetime] = None
     m_data_size: Optional[str] = None
     m_country_name: Optional[str] = None
     m_revenue: Optional[str] = None
-    m_hash: str
-    m_update_date: datetime
+    m_hash: Optional[str] = None
+    m_update_date: Optional[datetime] = None
     m_contact_link: Optional[HttpUrl] = None
-    m_creation_date: datetime
+    m_creation_date: Optional[datetime] = None
 
 class search_leak_callback_model(BaseModel):
-    Result: List[result_item]
-    Suggestions: List[suggestion]
-    Page_Count: float
+    Result: Optional[List[result_item]] = None
+    Suggestions: Optional[List[suggestion]] = None
+    Page_Count: Optional[float] = None

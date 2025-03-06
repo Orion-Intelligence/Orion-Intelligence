@@ -263,15 +263,23 @@ table a:visited {
   .filters-button-div {
     justify-content: start;
   }
+  .dashboard-general-input {
+    margin-left: 0;
+    min-width: 500px;
+  }
+  .default-input-container {
+    margin-left: 20px;
+    margin-right: 15px;
+  }
 }
 
-@media only screen and (min-width: 700px) {
+@media only screen and (max-width: 700px) {
   .dashboard-general-input {
-    min-width: 500px !important;
+    min-width: 100px;
   }
 }
 
 .dashboard-general-input {
-  max-width: 700px !important;
-  min-width: 400px !important;
+  max-width: 700px;
+  min-width: 500px;
 }

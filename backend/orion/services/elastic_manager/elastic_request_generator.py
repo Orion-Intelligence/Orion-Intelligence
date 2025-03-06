@@ -112,7 +112,7 @@ class elastic_request_generator:
           must_not_clause.append({"term": {"m_content_type": "adult"}})
 
       if m_search_type != "all":
-          must_clauses.insert({"terms": {"m_content_type": [m_search_type]}})
+          must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
       if m_network and m_network != "all":
         must_clauses.append({"term": {"m_network": m_network}})

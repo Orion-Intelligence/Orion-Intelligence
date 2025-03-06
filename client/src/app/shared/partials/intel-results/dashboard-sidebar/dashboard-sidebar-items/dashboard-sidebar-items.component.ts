@@ -1,17 +1,11 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { AsyncPipe, NgClass, NgForOf, NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {AsyncPipe, NgClass, NgForOf, NgOptimizedImage} from '@angular/common';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-sidebar-items',
   standalone: true,
-  imports: [
-    NgClass,
-    NgOptimizedImage,
-    AsyncPipe,
-    RouterLink,
-    NgForOf
-  ],
+  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf],
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {

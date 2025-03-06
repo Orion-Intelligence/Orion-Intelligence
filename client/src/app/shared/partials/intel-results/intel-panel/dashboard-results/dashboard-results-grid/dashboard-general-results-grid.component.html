@@ -2,9 +2,7 @@
   <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result" class="dashboard__search-card">
     <div class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
-        <span class="dashboard__tag">General</span>
-        <span class="dashboard__tag">Leaks</span>
-        <span class="dashboard__tag">Marketplace</span>
+        <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
       </div>
 
       <h2 class="dashboard__search-title">{{ item.m_title }}</h2>

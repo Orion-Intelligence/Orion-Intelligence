@@ -25,6 +25,7 @@ export class DashboardExpandedResultComponent implements OnInit {
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
   @Input() suggestion!: Suggestion | undefined;
+  @Input() searchQuery: string = '';
 
   @Output() updatePageNumber = new EventEmitter<number>();
   @Output() reloadFilters = new EventEmitter<[string | null, string | null]>();
@@ -33,7 +34,6 @@ export class DashboardExpandedResultComponent implements OnInit {
 
   filterModel: FilterModel = general_filters;
   selectedFilters: { [key: string]: string | null } = {};
-  searchQuery: string = '';
   isFilterOpen$: Observable<boolean>;
 
   constructor(public dashboardService: DashboardService, public sidebarService: SidebarService) {
@@ -41,7 +41,6 @@ export class DashboardExpandedResultComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.searchQuery = this.dashboardService.searchQuery$.value;
   }
 
 

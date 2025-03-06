@@ -2,6 +2,7 @@ from orion.api.interactive.search_manager.parsers.dynamic_parser import dynamic_
 from orion.api.interactive.search_manager.parsers.static_parser import static_parser
 from orion.api.interactive.search_manager.search_data_model.dynamic import search_dynamic_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_callback_model import breach_data
+from orion.api.interactive.search_manager.search_data_model.enums import leak_listing, general_listing
 from orion.api.interactive.search_manager.search_data_model.general import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import search_general_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import search_leak_callback_model
@@ -106,8 +107,13 @@ class search_model:
     parsed_result = await self.__parse_filtered_documents(m_documents)
     m_parsed_documents, m_suggestions_content, total_pages = parsed_result
 
+    filtered_results = [
+      {k: v for k, v in doc.items() if k not in general_listing}
+      for doc in m_parsed_documents
+    ]
+
     return search_general_callback_model(
-      Result=m_parsed_documents,
+      Result=filtered_results,
       Suggestions=m_suggestions_content,
       Page_Count=total_pages
     )
@@ -120,8 +126,13 @@ class search_model:
     parsed_result = await self.__parse_filtered_documents(m_documents)
     m_parsed_documents, m_suggestions_content, total_pages = parsed_result
 
+    filtered_results = [
+      {k: v for k, v in doc.items() if k not in leak_listing}
+      for doc in m_parsed_documents
+    ]
+
     return search_leak_callback_model(
-      Result=m_parsed_documents,
+      Result=filtered_results,
       Suggestions=m_suggestions_content,
       Page_Count=total_pages
     )
