@@ -7,10 +7,11 @@
     </label>
     <div class="search-insights__content">
       <div class="row">
-        <div *ngFor="let item of section.items" class="col-3">
-          <p class="search-insights__coverage-numbers">{{ item.value }}</p>
+        <div *ngFor="let item of section.items" class="general__insights-inner-div">
           <p class="search-insights__text">
             <span *ngIf="item.spanClass" [class]="item.spanClass"></span>{{ item.label }} </p>
+          <p class="search-insights__coverage-numbers">{{ item.value }}</p>
+
         </div>
       </div>
     </div>
