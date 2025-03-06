@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
-import {DashboardDataInsightComponent} from  '../intel-panel/dashboard-data-insight/dashboard-data-insight.component';
-import {DashboardGeneralInsightsComponent} from  '../intel-panel/dashboard-general-insights/dashboard-general-insights.component';
+import {DashboardDataInsightComponent} from './dashboard-data-insight/dashboard-data-insight.component';
+import {DashboardGeneralInsightsComponent} from './dashboard-general-insights/dashboard-general-insights.component';
 @Component({
   selector: 'app-dashboard-insights',
   imports: [

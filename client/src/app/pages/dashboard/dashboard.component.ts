@@ -1,8 +1,6 @@
 import { Component, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { DashboardSidebarComponent } from '../../shared/partials/dashboard/dashboard-sidebar/dashboard-sidebar.component';
-import { DashboardHeaderComponent } from '../../shared/partials/dashboard/dashboard-header/dashboard-header.component';
-import { DashboardInsightsComponent } from '../../shared/partials/dashboard/dashboard-insights/dashboard-insights.component';
+import { DashboardInsightsComponent } from '../../shared/partials/intel-results/dashboard-insights/dashboard-insights.component';
 import { RouterOutlet } from '@angular/router';
 import {dashboardGlobalAnimation} from '../../shared/animations/dashboard.global.animations';
 import {DashboardSidebarComponent} from '../../shared/partials/intel-results/dashboard-sidebar/dashboard-sidebar.component';

@@ -3,7 +3,7 @@
   <input type="checkbox" id="unique_url-toggle" checked>
   <label class=" search-insights__data-header" for="unique_url-toggle">
     Unique URLs
-    <img ngSrc="assets/images/shared/dropdown_left.svg" alt="" width="16" height="16" alt="Dropdown Arrow">
+    <img ngSrc="../../../../../../assets/images/shared/dropdown_left.svg" alt="" width="16" height="16" alt="Dropdown Arrow">
   </label>
   <div class="search-insights__unique-url-content">
     <ul class="search-insights__unique-url-ul">
@@ -22,7 +22,7 @@
     <input type="checkbox" [id]="'unique__' + category.key + '-toggle'" checked>
     <label class="search-insights__data-header" [for]="'unique__' + category.key + '-toggle'">
       {{ category.label }}
-      <img ngSrc="assets/images/shared/dropdown_left.svg" alt="" width="16" height="16" alt="Dropdown Arrow">
+      <img ngSrc="../../../../../../assets/images/shared/dropdown_left.svg" alt="" width="16" height="16" alt="Dropdown Arrow">
     </label>
     <div class="search-insights__content">
       <div *ngFor="let item of analytics[category.key]" class="search-insights__row">
