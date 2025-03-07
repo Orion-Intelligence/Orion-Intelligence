@@ -1,0 +1,9 @@
+<div class="search__result-detail-section-content">
+  <div class="row" *ngFor="let row of getRows(listItems, 3); let rowIndex = index">
+    <ul class="grid-list">
+      <li *ngFor="let item of row; let i = index">
+        <span class="item-number">{{ rowIndex * 3 + i + 1 }}.</span> {{ item }}
+      </li>
+    </ul>
+  </div>
+</div>
