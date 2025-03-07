@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ResultItem } from '../../../../model/intel-results/general/search_general_callback_model';
 import {ResultSectionComponent} from './result-section/result-section.component';
 import {ResultListComponent} from './result-list/result-list.component';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-result-main',
@@ -11,7 +11,8 @@ import {CommonModule} from '@angular/common';
   imports: [
     ResultListComponent,
     CommonModule,
-    ResultSectionComponent
+    ResultSectionComponent,
+    NgOptimizedImage
   ]
 })
 export class DashboardResultMainComponent {
