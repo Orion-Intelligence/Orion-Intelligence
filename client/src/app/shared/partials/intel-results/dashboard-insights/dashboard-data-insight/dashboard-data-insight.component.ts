@@ -1,12 +1,11 @@
 import {Component,Input} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {DataAccordianComponent} from './data-accordian/data-accordian.component'
 
 @Component({
   selector: 'app-dashboard-data-insight',
   imports: [
     CommonModule,
-    NgOptimizedImage,
     DataAccordianComponent,
   ],
   templateUrl: './dashboard-data-insight.component.html',

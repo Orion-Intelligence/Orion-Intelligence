@@ -12,6 +12,7 @@ import {general_filters} from '../../../constants/filters';
 import {FilterModel} from '../../../model/filter/filter';
 import {Suggestion} from '../../../model/intel-results/general/search_general_callback_model';
 import {SuggestionComponent} from '../../suggestion/suggestion.component';
+import {DashboardNoResultComponent} from '../dashboard-no-result/dashboard-no-result.component';
 
 @Component({
   selector: 'app-dashboard-expanded-result',
@@ -19,7 +20,7 @@ import {SuggestionComponent} from '../../suggestion/suggestion.component';
   templateUrl: './dashboard-expanded-result.html',
   styleUrls: ['./dashboard-expanded-result.css'],
   animations: [fadeInDashboardItem],
-  imports: [CommonModule, DashboardSearchNoSuggestionComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent,],
+  imports: [CommonModule, DashboardSearchNoSuggestionComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, DashboardNoResultComponent,],
 })
 export class DashboardExpandedResultComponent implements OnInit {
   @Input() result_count!: number;
@@ -31,10 +32,12 @@ export class DashboardExpandedResultComponent implements OnInit {
   @Output() reloadFilters = new EventEmitter<[string | null, string | null]>();
   @Output() reloadData = new EventEmitter<void>();
   @Output() updateQuery = new EventEmitter<string>();
+  @Output() onToggleSwitch = new EventEmitter<void>();
 
   filterModel: FilterModel = general_filters;
   selectedFilters: { [key: string]: string | null } = {};
   isFilterOpen$: Observable<boolean>;
+  result_triggered = false
 
   constructor(public dashboardService: DashboardService, public sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -53,10 +56,12 @@ export class DashboardExpandedResultComponent implements OnInit {
     this.selectedFilters = {};
     this.reloadFilters.emit(["", ""]);
     this.reloadData.emit()
+    this.result_triggered = true
   }
 
   onFormSubmit() {
     this.reloadData.emit()
+    this.result_triggered = true
   }
 
   onGetSuggestion(){
@@ -73,9 +78,14 @@ export class DashboardExpandedResultComponent implements OnInit {
       this.updateQuery.emit(suggestion)
     }
     this.reloadData.emit()
+    this.result_triggered = true
   }
 
   onSearchChange($event: any) {
     this.updateQuery.emit($event)
+  }
+
+  onToggleAnalytics() {
+    this.onToggleSwitch.emit()
   }
 }

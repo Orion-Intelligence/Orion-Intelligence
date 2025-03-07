@@ -9,15 +9,19 @@ import {
   DashboardLeakResultGridComponent
 } from "../dashboard-results/dashboard-leak-result-grid/dashboard-leak-result-grid.component";
 import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
+import {Analytics} from '../../dashboard-insights/analytics.model';
+import {DashboardInsightsComponent} from '../../dashboard-insights/dashboard-insights.component';
 
 @Component({
   selector: 'app-dashboard-breach',
-  imports: [DashboardExpandedResultComponent, DashboardLeakResultGridComponent, DashboardPaginationComponent, NgIf],
+  imports: [DashboardExpandedResultComponent, DashboardLeakResultGridComponent, DashboardPaginationComponent, NgIf, DashboardInsightsComponent],
   templateUrl: './dashboard-breach.component.html',
   animations: [fadeInDashboardItem],
 })
 export class DashboardBreachComponent implements OnInit {
   isLoading = false;
+  analyticsData = {} as Analytics;
+  onToggleAnalytics = false;
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
@@ -35,6 +39,38 @@ export class DashboardBreachComponent implements OnInit {
     });
   }
 
+  initAnalytics() {
+    console.log("FUUCK1:")
+    console.log("FUUCK1:")
+    const searchModel = this.dashboardService.searchLeakCallbackModel;
+    if (!searchModel || !searchModel.Result) {
+      console.warn("No data available in searchGeneralCallbackModel.Result");
+      return;
+    }
+
+    this.analyticsData = {
+      unique_urls: searchModel.Result.map(item => ({
+        m_title: item.m_title, m_url: item.m_url || ""
+      })),
+      total_p_document_list_length: searchModel.Result.length.toString(),
+      m_documents_length: searchModel.Result.length.toString(),
+      m_clearnet_links_count: searchModel.Result.reduce((sum, item) => sum + (item.m_weblink?.length || 0), 0).toString(),
+      active_links: searchModel.Result.reduce((sum, item) => sum + (item.m_weblink?.length || 0), 0).toString(),
+      inactive_links: searchModel.Result.reduce((sum, item) => sum + (item.m_dumplink?.length || 0), 0).toString(),
+      seldom_active_links: searchModel.Result.reduce((sum, item) => sum + (item.m_contact_link ? 1 : 0), 0).toString(),
+      m_urls: searchModel.Result.map(item => item.m_url || ""),
+      m_emails: searchModel.Result.flatMap(item => item.m_email_addresses || []),
+      mPhoneNumber: searchModel.Result.flatMap(item => item.m_phone_numbers || []),
+      mArchiveUrl: searchModel.Result.flatMap(item => item.m_dumplink || []),
+      mName: searchModel.Result.flatMap(item => item.m_company_name || []),
+      m_pages: searchModel.Page_Count,
+      m_document: searchModel.Result.flatMap(item => item.m_weblink || [])
+    };
+    console.log("FUUCK2:")
+    console.log(this.dashboardService.searchLeakCallbackModel.Result)
+    console.log("FUUCK2:")
+  }
+
   fetchSearchResults() {
     if (this.isLoading) return;
 
@@ -47,6 +83,7 @@ export class DashboardBreachComponent implements OnInit {
         .pipe(switchMap(() => timer(1000)))
         .subscribe(() => {
           this.isLoading = false;
+          this.initAnalytics()
         });
     }
   }
@@ -68,7 +105,9 @@ export class DashboardBreachComponent implements OnInit {
   onUpdateQuery(query: string) {
     this.dashboardService.searchLeakParamModel.q = query
   }
-
+  onToggleAnalyticsTrigger() {
+    this.onToggleAnalytics = !this.onToggleAnalytics
+  }
   protected readonly Math = Math;
 
 }

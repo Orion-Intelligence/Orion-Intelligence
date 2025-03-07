@@ -1,4 +1,4 @@
-<nav class="sidebar">
+<nav *ngIf="this.sidebar_default" class="sidebar">
   <div class="sidebar__header">
     <a href="">
       <img ngSrc="assets/images/sidebar/search_nav_logo.svg" alt="Logo" priority="true" height="50" width="180"/>
@@ -50,8 +50,8 @@
     </li>
 
     <app-dashboard-sidebar-collapsed [title]="'Strategic Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [category]="category.STRATEGIC_INTELLIGENCE" [routePrefix]="'strategic'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'api/email'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="apiAllowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api/email'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed *ngIf="apiAllowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
 
     <li class="sidebar__item">
       <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">

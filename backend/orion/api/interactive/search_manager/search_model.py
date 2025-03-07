@@ -1,3 +1,7 @@
+from typing import Optional
+
+from pydantic import ValidationError
+
 from orion.api.interactive.search_manager.parsers.dynamic_parser import dynamic_parser
 from orion.api.interactive.search_manager.parsers.static_parser import static_parser
 from orion.api.interactive.search_manager.search_data_model.dynamic import search_dynamic_param_model
@@ -6,7 +10,7 @@ from orion.api.interactive.search_manager.search_data_model.enums import leak_li
 from orion.api.interactive.search_manager.search_data_model.general import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import search_general_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import search_leak_callback_model
-from orion.api.interactive.search_manager.search_data_model.search_callback_model import search_callback_model
+from orion.api.interactive.search_manager.search_data_model.search_callback_model import search_callback_model, result_item
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.search_manager.search_data_model.query_model import query_model
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -117,6 +121,26 @@ class search_model:
       Suggestions=m_suggestions_content,
       Page_Count=total_pages
     )
+
+  @staticmethod
+  async def get_leak_doc(doc_id) -> Optional[result_item]:
+    try:
+      results = await elastic_controller.get_instance().get_leak_doc(doc_id)
+      if results:
+        return result_item(**results[0])
+      return None
+    except ValidationError:
+      return None
+
+  @staticmethod
+  async def get_general_doc(doc_id) -> Optional[result_item]:
+    try:
+      results = await elastic_controller.get_instance().get_general_doc(doc_id)
+      if results:
+        return result_item(**results[0])
+      return None
+    except ValidationError:
+      return None
 
   async def seach_leak_result(self, param: search_leak_param_model):
     m_status, m_documents = await elastic_controller.get_instance().search_query_leak(param)

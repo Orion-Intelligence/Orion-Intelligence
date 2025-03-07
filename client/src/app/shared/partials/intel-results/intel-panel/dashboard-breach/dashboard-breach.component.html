@@ -1,5 +1,12 @@
-<app-dashboard-expanded-result (updatePageNumber)="onPageChange($event)" [searchQuery]="dashboardService.searchLeakParamModel.q" [suggestion]="dashboardService.searchLeakCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="dashboardService.searchLeakCallbackModel.Result.length"></app-dashboard-expanded-result>
-<app-dashboard-leak-result-grid *ngIf="!isLoading" @fadeInDashboardItem></app-dashboard-leak-result-grid>
+<app-dashboard-expanded-result (onToggleSwitch)="onToggleAnalyticsTrigger()" (updatePageNumber)="onPageChange($event)" [searchQuery]="dashboardService.searchLeakParamModel.q" [suggestion]="dashboardService.searchLeakCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="dashboardService.searchLeakCallbackModel.Result.length"></app-dashboard-expanded-result>
+
+<div *ngIf="this.onToggleAnalytics && !isLoading" @fadeInDashboardItem>
+  <app-dashboard-insights [analytics]="analyticsData"></app-dashboard-insights>
+</div>
+<div *ngIf="!this.onToggleAnalytics" @fadeInDashboardItem>
+  <app-dashboard-leak-result-grid *ngIf="!isLoading" @fadeInDashboardItem></app-dashboard-leak-result-grid>
+</div>
+
 <div *ngIf="!isLoading && !(dashboardService.searchLeakCallbackModel.Result.length==0)" @fadeInDashboardItem>
   <app-dashboard-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(dashboardService.searchLeakCallbackModel.Page_Count)"></app-dashboard-pagination>
 </div>

@@ -29,7 +29,7 @@ export class DashboardGeneralInsightsComponent implements OnChanges {
           { label: 'Total Found', value: this.analytics.total_p_document_list_length },
           { label: 'Documents', value: this.analytics.m_documents_length },
           { label: 'Links', value: this.analytics.m_clearnet_links_count },
-          { label: 'Pages', value: 3432 }
+          { label: 'Pages', value: this.analytics.m_pages }
         ]
       },
       {

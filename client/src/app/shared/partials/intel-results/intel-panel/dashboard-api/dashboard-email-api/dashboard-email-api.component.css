@@ -85,6 +85,7 @@
   background: #00000035;
   border-radius: 13px;
   margin-right: 0;
+  margin-left: -5px;
   padding: 15px 50px 15px 0;
 }
 
@@ -99,6 +100,7 @@
 @media (max-width: 1000px) {
   .dashboard__api-search-input-div {
     padding: 15px 15px 15px 0;
+    margin-right: 20px;
   }
   .default-input-container {
     margin-right: 15px;

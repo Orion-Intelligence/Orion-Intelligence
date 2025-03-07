@@ -29,6 +29,14 @@ async def parser(param: search_general_param_model = Depends()):
 async def parser(param: search_leak_param_model = Depends()):
     return await search_view_model.getInstance().search_leak(param)
 
+@api_routes.get("/api/search/leak/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def parser(doc_id: str):
+    return await search_view_model.getInstance().get_leak_doc(doc_id)
+
+@api_routes.get("/api/search/general/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def parser(doc_id: str):
+    return await search_view_model.getInstance().get_general_doc(doc_id)
+
 @api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def parser(param: search_dynamic_param_model = Depends()):
     return await search_view_model.getInstance().dynamic_search_email(param)

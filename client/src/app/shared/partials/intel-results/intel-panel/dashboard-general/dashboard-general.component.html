@@ -1,6 +1,13 @@
-<app-dashboard-expanded-result (updatePageNumber)="onPageChange($event)" [searchQuery]="query" [suggestion]="dashboardService.searchGeneralCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="dashboardService.searchGeneralCallbackModel.Result.length"></app-dashboard-expanded-result>
-<app-dashboard-general-results-grid [query]="dashboardService.searchGeneralParamModel.q" *ngIf="!isLoading" @fadeInDashboardItem></app-dashboard-general-results-grid>
+<app-dashboard-expanded-result (onToggleSwitch)="onToggleAnalyticsTrigger()"  (updatePageNumber)="onPageChange($event)" [searchQuery]="query" [suggestion]="dashboardService.searchGeneralCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="dashboardService.searchGeneralCallbackModel.Result.length"></app-dashboard-expanded-result>
 
-<div *ngIf="!isLoading && !(dashboardService.searchGeneralCallbackModel.Result.length==0)" @fadeInDashboardItem>
+
+<div *ngIf="this.onToggleAnalytics && !isLoading" @fadeInDashboardItem>
+  <app-dashboard-insights [analytics]="analyticsData"></app-dashboard-insights>
+</div>
+<div *ngIf="!this.onToggleAnalytics" @fadeInDashboardItem>
+  <app-dashboard-general-results-grid [query]="dashboardService.searchGeneralParamModel.q" *ngIf="!isLoading" @fadeInDashboardItem></app-dashboard-general-results-grid>
+</div>
+
+<div *ngIf="!this.onToggleAnalytics && !isLoading && !(dashboardService.searchGeneralCallbackModel.Result.length==0)" @fadeInDashboardItem>
   <app-dashboard-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(dashboardService.searchGeneralCallbackModel.Page_Count)"></app-dashboard-pagination>
 </div>

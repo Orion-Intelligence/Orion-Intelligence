@@ -212,7 +212,8 @@ class elastic_request_generator:
       p_index_data["m_hash_url"] = hashlib.sha256(
         (p_index_data["m_url"] + p_index_data["m_title"]).encode()
       ).hexdigest()
-      p_index_data["m_hash"] = p_index_data["m_url"]
+      data_hash = helper_controller.generate_data_hash(p_index_data["m_url"])
+      p_index_data["m_hash"] = data_hash
 
       index_entries.append(
         {

@@ -66,6 +66,9 @@
   <app-loading-form></app-loading-form>
 </div>
 
-<div *ngIf="!loading && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length==0 " @fadeInDashboardItem>
+<div *ngIf="query_triggered && !loading && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length==0 " @fadeInDashboardItem>
   <app-dashboard-search-no-suggestion></app-dashboard-search-no-suggestion>
+</div>
+<div *ngIf="!query_triggered && !loading && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length==0 " @fadeInDashboardItem>
+  <app-dashboard-no-result></app-dashboard-no-result>
 </div>

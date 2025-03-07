@@ -9,12 +9,19 @@
         </button>
       </div>
     </div>
-    <div class="filters-button-div flex-column align-items-center text-center mt-2">
-      <label class="filters-button" (click)="sidebarService.openSidebar()">
+
+    <div class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3">
+      <div class="analytics d-flex align-items-center gap-2">
+        <input type="checkbox" id="switch" (click)="onToggleAnalytics()"/>
+        <label for="switch" class="mb-0"></label><span>&nbsp; Analytics</span>
+      </div>
+
+      <label class="filters-button d-flex align-items-center" (click)="sidebarService.openSidebar()">
         <img ngSrc="../../../../../assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority="true">
-        <span class="mt-1">Filter</span>
+        <span class="ms-2">Filter</span>
       </label>
     </div>
+
   </div>
 </form>
 
@@ -30,8 +37,12 @@
   <app-loading-form></app-loading-form>
 </div>
 
-<div *ngIf="!isLoading && (result_count==0)" @fadeInDashboardItem>
-  <app-dashboard-search-no-suggestion></app-dashboard-search-no-suggestion>
+<div *ngIf="!this.result_triggered && !isLoading && !result_count" @fadeInDashboardItem>
+  <app-dashboard-no-result></app-dashboard-no-result>
+</div>
+
+<div *ngIf="this.result_triggered && !isLoading && (result_count==0)" @fadeInDashboardItem>
+    <app-dashboard-search-no-suggestion></app-dashboard-search-no-suggestion>
 </div>
 
 <div *ngIf="!isLoading && !(result_count==0)" @fadeInDashboardItem>

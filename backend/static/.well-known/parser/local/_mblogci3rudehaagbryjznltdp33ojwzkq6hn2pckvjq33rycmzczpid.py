@@ -46,7 +46,7 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
-        return "https://www.iana.org/help/example-domains"
+        return "http://mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid.onion"
 
     def parse_leak_data(self, page: Page):
         self._card_data = []

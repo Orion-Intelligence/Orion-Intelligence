@@ -1,15 +1,15 @@
-<div class="search-insights__accordion-main-div">
+<div class="data-accordion__main-div">
   <ng-container *ngFor="let category of categories">
-    <div *ngIf="analytics[category.key]?.length > 0" class="search-insights__accordion search-insights__data-accordion search-insights__container-background">
+    <div *ngIf="analytics[category.key]?.length > 0" class="data-accordion__container data-accordion__container-background">
       <input type="checkbox" [id]="category.key + '-toggle'" checked>
-      <label class="search-insights__data-header" [for]="category.key + '-toggle'">
+      <label class="data-accordion__header" [for]="category.key + '-toggle'">
         {{ category.label }}
-        <img ngSrc="assets/images/shared/dropdown_left.svg" alt="Dropdown Arrow" width="16" height="16">
+        <img ngSrc="assets/images/shared/dropdown_left.svg" alt="Dropdown Arrow" width="20" height="20">
       </label>
 
-      <div class="search-insights__content">
-        <div *ngFor="let item of analytics[category.key]" class="search-insights__row">
-          <div class="search-insights__column">{{ item }}</div>
+      <div class="data-accordion__content">
+        <div *ngFor="let item of analytics[category.key]; let i = index" class="data-accordion__row">
+          <div class="data-accordion__column">{{ i + 1 }}. {{ item }}</div>
         </div>
       </div>
     </div>

@@ -48,7 +48,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
-        return "http://ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid.onion/chat.php"
+        return "https://mirror-h.org/contact"
 
     def safe_find(self, page, selector, attr=None):
         try:
@@ -61,22 +61,30 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
             full_url = self.seed_url
-            page.goto(full_url)
+            print("full url ")
+            page.goto(full_url,timeout=30000)
             page.wait_for_load_state('load')
-            page.wait_for_selector("div.advert_col")
+            print("full url load")
+            page.wait_for_selector("div.advert_col",timeout=30000)
+            print("full url cols added")
 
+            today_date = datetime.today().strftime('%Y-%m-%d')
 
             advert_blocks = page.query_selector_all("div.advert_col")
             for block in advert_blocks:
                 soup = BeautifulSoup(block.inner_html(), 'html.parser')
 
+                # Extract title
                 title = soup.select_one('div.advert_info_title').text.strip()
 
+                # Extract content
                 content = soup.select_one('div.advert_info_p').get_text(separator="\n", strip=True)
 
+                # Extract website link
                 web_url_element = soup.select_one('div.advert_info_p a')
                 web_url = web_url_element['href'] if web_url_element else None
 
+                # Extract size, files, folders
                 size = ""
                 files = ""
                 folders = ""
@@ -89,31 +97,33 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     elif "Folders:" in info_text:
                         folders = info_text.replace("Folders:", "").strip()
 
-                data_size = f"Size: {size}, Files: {files}, Folders: {folders}"
-
+                # Extract image URLs
                 image_urls = []
                 for img in soup.select('div.advert_imgs_block img'):
                     img_src = img.get('src')
                     full_img_url = urljoin(self.base_url, img_src)
                     image_urls.append(full_img_url)
 
-                actual_data_link_element = soup.select_one('div.advert_action a')
-                actual_data_link = actual_data_link_element['href'] if actual_data_link_element else None
+                # Extract action link
+                action_link_element = soup.select_one('div.advert_action a')
+                action_link = action_link_element['href'] if action_link_element else None
 
+                # Create card data object
                 card_data = card_extraction_model(
-                    m_title=f"Leak of {title}",
-                m_weblink=[web_url] if web_url else [],
+                    m_name=title,
+                    m_title=title,
+                    m_weblink=[web_url] if web_url else [],
                     m_url=full_url,
+                    m_addresses=[],
                     m_base_url=self.base_url,
-                    m_dumplink=actual_data_link,
                     m_content=content,
+                    m_websites=[],
                     m_important_content=content,
-                    m_logo_or_images=image_urls,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_content_type=["leaks"],
-                    m_data_size=data_size,
-                    m_email_addresses=helper_method.extract_emails(content),
-                    m_phone_numbers=helper_method.extract_phone_numbers(content),
+                    m_email_addresses=[],
+                    m_phone_numbers=[],
+                    m_leak_date=today_date
                 )
 
                 self._card_data.append(card_data)

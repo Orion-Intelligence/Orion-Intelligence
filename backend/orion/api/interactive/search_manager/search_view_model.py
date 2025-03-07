@@ -27,5 +27,11 @@ class search_view_model:
   async def search_leak(self, param):
     return await self.__m_search_model.seach_leak_result(param)
 
+  async def get_leak_doc(self, doc_id):
+    return await self.__m_search_model.get_leak_doc(doc_id)
+
+  async def get_general_doc(self, doc_id):
+    return await self.__m_search_model.get_general_doc(doc_id)
+
   async def dynamic_search_email(self, param: search_dynamic_param_model):
     return await self.__m_search_model.dynamic_search_email(param)

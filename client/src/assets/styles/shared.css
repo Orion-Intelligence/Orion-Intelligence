@@ -174,7 +174,7 @@ table a:visited {
     display: none;
   }
 
-  .filters-button-div{
+  .side-menu-container{
     margin: 0 !important;
   }
 
@@ -216,12 +216,12 @@ table a:visited {
 }
 
 @media only screen and (max-width: 460px) {
-  .filters-button-div {
+  .side-menu-container {
     display: none !important;
   }
 }
 
-.filters-button-div {
+.side-menu-container {
   display: flex;
   justify-content: end;
   align-items: center;
@@ -230,7 +230,7 @@ table a:visited {
   position: relative;
 }
 
-.filters-button-div .filters-button {
+.side-menu-container .filters-button {
   border-radius: 4px;
   background: #153454;
   border: none;
@@ -244,7 +244,7 @@ table a:visited {
   font-size: 15px;
 }
 
-.filters-button-div .filters-button img {
+.side-menu-container .filters-button img {
   width: 16px;
   height: 16px;
   margin-right: 10px;
@@ -260,7 +260,7 @@ table a:visited {
 }
 
 @media only screen and (max-width: 943px) {
-  .filters-button-div {
+  .side-menu-container {
     justify-content: start;
   }
   .dashboard-general-input {

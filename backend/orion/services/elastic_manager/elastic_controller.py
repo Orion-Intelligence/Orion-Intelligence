@@ -49,6 +49,20 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
+    async def get_leak_doc(self, doc_id: str):
+        try:
+            result = await self.__m_connection.get(index=ELASTIC_INDEX.S_LEAK_INDEX, id=doc_id, ignore=[404])
+            return [result["_source"]] if result and "_source" in result else []
+        except:
+            return []
+
+    async def get_general_doc(self, doc_id: str):
+        try:
+            result = await self.__m_connection.get(index=ELASTIC_INDEX.S_GENERIC_INDEX, id=doc_id, ignore=[404])
+            return [result["_source"]] if result and "_source" in result else []
+        except:
+            return []
+
     async def search_query_general(self, p_data: search_general_param_model):
         try:
             document, data_filter = self.__m_elastic_request_generator.on_search_general_data(p_data)

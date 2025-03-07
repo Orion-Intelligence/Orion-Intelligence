@@ -9,6 +9,7 @@ export interface Analytics {
   m_urls: string[];
   m_emails: string[];
   mPhoneNumber: string[];
+  m_pages: number;
   mArchiveUrl: string[];
   mName: string[];
   m_document: string[];

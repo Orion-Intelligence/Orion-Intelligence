@@ -1,17 +1,16 @@
-<div *ngIf="analytics" class="search__insight-general-div">
-  <div *ngFor="let section of sections" class="search-insights__container search-insights__container-background">
+<div *ngIf="analytics" class="insight-general__div">
+  <div *ngFor="let section of sections" class="insight-general__container insight-general__container-background">
     <input type="checkbox" [id]="section.title + '-toggle'" checked>
-    <label class="search-insights__header" [for]="section.title + '-toggle'">
+    <label class="insight-general__header" [for]="section.title + '-toggle'">
       {{ section.title }}
-      <img ngSrc="../../../../../../assets/images/shared/dropdown_left.svg" alt="" width="16" height="16" alt="Dropdown Arrow">
+      <img ngSrc="../../../../../../assets/images/shared/dropdown_left.svg" alt="" width="20" height="20">
     </label>
-    <div class="search-insights__content">
+    <div class="insight-general__content">
       <div class="row">
-        <div *ngFor="let item of section.items" class="general__insights-inner-div">
-          <p class="search-insights__text">
+        <div *ngFor="let item of section.items" class="insight-general__inner-div">
+          <p class="insight-general__text">
             <span *ngIf="item.spanClass" [class]="item.spanClass"></span>{{ item.label }} </p>
-          <p class="search-insights__coverage-numbers">{{ item.value }}</p>
-
+          <p class="insight-general__coverage-numbers">{{ item.value }}</p>
         </div>
       </div>
     </div>
