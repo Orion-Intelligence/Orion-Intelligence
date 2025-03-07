@@ -11,6 +11,7 @@ import {FiltersComponent} from '../../filters/filters.component';
 import {general_filters} from '../../../constants/filters';
 import {FilterModel} from '../../../model/filter/filter';
 import {Suggestion} from '../../../model/intel-results/general/search_general_callback_model';
+import {DashboardResultMainComponent} from '../intel-panel/dashboard-result-main/dashboard-result-main.component';
 import {SuggestionComponent} from '../../suggestion/suggestion.component';
 
 @Component({
@@ -19,7 +20,7 @@ import {SuggestionComponent} from '../../suggestion/suggestion.component';
   templateUrl: './dashboard-expanded-result.html',
   styleUrls: ['./dashboard-expanded-result.css'],
   animations: [fadeInDashboardItem],
-  imports: [CommonModule, DashboardSearchNoSuggestionComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent,],
+  imports: [CommonModule, DashboardSearchNoSuggestionComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent,DashboardResultMainComponent],
 })
 export class DashboardExpandedResultComponent implements OnInit {
   @Input() result_count!: number;

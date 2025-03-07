@@ -1,0 +1,67 @@
+<div class="search__result-detail">
+  <h2 class="search__result-detail-heading">{{ resultItem.m_title }}</h2>
+
+  <span class="search__result-detail-description-span">Description</span>
+  <p class="search__result-detail-description">
+    {{ resultItem.m_content }}
+  </p>
+
+  <span class="search__result-detail-url-span">URL</span>
+  <p class="search__result-detail-url-p">
+    <a [href]="resultItem.m_url" class="search__result-detail-url" target="_blank">
+      {{ resultItem.m_url }}
+    </a>
+  </p>
+
+  <div class="search__result-detail-meta">
+    <div class="search__result-detail-meta-divs">
+      <p>Published on:</p>
+      <span>{{ resultItem.m_creation_date }}</span>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p>Network:</p>
+      <span>{{ resultItem.m_network }}</span>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p>Updated on:</p>
+      <span>{{ resultItem.m_update_date }}</span>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p class="tags">Tags:</p>
+      <div class="tags">
+        <span *ngFor="let tag of resultItem.m_section">{{ tag }}</span>
+      </div>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p class="status">Status:</p>
+      <span [ngClass]="resultItem.m_hash">{{ resultItem.m_hash | titlecase }}</span>
+    </div>
+  </div>
+
+  <div class="search__result-detail-tabs-div">
+    <div class="tabs">
+      <button
+        *ngFor="let tab of resultItem.m_content_type"
+        [class.active]="activeTab === tab"
+        (click)="setActiveTab(tab)"
+      >
+        {{ tab }}
+      </button>
+
+      <div class="download__buttons">
+        <button class="download">⤓</button>
+        <button class="share">↻</button>
+      </div>
+    </div>
+    <app-result-section
+      *ngIf="activeTab === 'Sections'"
+      [sections]="sections"
+    ></app-result-section>
+    <app-result-list
+      *ngIf="activeTab !== 'Sections'"
+      [listItems]="listItems"
+    ></app-result-list>
+  </div>
+
+
+</div>

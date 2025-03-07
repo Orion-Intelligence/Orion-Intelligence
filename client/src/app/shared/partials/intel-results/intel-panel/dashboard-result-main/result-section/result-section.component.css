@@ -1,0 +1,15 @@
+
+.search__result-detail-section-content p {
+  font-size: 14px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.search__result-detail-section-content h3 {
+  font-size: 12px;
+  color: #D0D0D0;
+  font-weight: 400;
+
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
