@@ -11,10 +11,11 @@
 
   <ul class="sidebar__items">
     <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'">
+      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'" [queryParamsHandling]="'merge'">
         <img ngSrc="assets/images/sidebar/home.svg" alt="Home" height="20" width="20" class="sidebar__icon">Homepage
       </div>
     </li>
+
 
     <app-dashboard-sidebar-items [title]="'Strategic Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [category]="category.STRATEGIC_INTELLIGENCE" [routePrefix]="'strategic'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>

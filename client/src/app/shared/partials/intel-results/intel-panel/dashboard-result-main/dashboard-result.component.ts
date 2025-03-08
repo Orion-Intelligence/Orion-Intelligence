@@ -5,9 +5,9 @@ import {ResultListComponent} from './result-list/result-list.component';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 
 @Component({
-  selector: 'app-dashboard-result-main',
-  templateUrl: './dashboard-result-main.component.html',
-  styleUrls: ['./dashboard-result-main.component.css'],
+  selector: 'app-result-panel',
+  templateUrl: './dashboard-result.component.html',
+  styleUrls: ['./dashboard-result.component.css'],
   imports: [
     ResultListComponent,
     CommonModule,
@@ -15,7 +15,7 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
     NgOptimizedImage
   ]
 })
-export class DashboardResultMainComponent {
+export class DashboardResultComponent {
   resultItem: ResultItem = new ResultItem({
     m_title: "Portugal Umaor Database leaked data collection",
     m_url: "https://www.xyzurl.com/Trusted-Internet?node-id=60-271",

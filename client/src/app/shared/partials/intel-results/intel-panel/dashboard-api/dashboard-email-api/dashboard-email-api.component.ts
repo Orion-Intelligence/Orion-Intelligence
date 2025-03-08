@@ -30,6 +30,10 @@ export class DashboardEmailApiComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if(this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length>0){
+      this.query_triggered = true
+      this.breachData = this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data[0];
+    }
     this.route.queryParams.subscribe(params => {
       if (params['username']) {
         this.username = params['username'];

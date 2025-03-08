@@ -4,8 +4,8 @@
 <div *ngIf="this.onToggleAnalytics && !isLoading" @fadeInDashboardItem>
   <app-dashboard-insights [analytics]="analyticsData"></app-dashboard-insights>
 </div>
-<div *ngIf="!this.onToggleAnalytics" @fadeInDashboardItem>
-  <app-dashboard-general-results-grid [query]="dashboardService.searchGeneralParamModel.q" *ngIf="!isLoading" @fadeInDashboardItem></app-dashboard-general-results-grid>
+<div *ngIf="!isLoading && !this.onToggleAnalytics" @fadeInDashboardItem>
+  <app-dashboard-general-results-grid [query]="dashboardService.searchGeneralParamModel.q" @fadeInDashboardItem></app-dashboard-general-results-grid>
 </div>
 
 <div *ngIf="!this.onToggleAnalytics && !isLoading && !(dashboardService.searchGeneralCallbackModel.Result.length==0)" @fadeInDashboardItem>

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +12,16 @@ export class SelectionStoreService {
 
   selectedSection$ = this.selectedSectionSubject.asObservable();
   selectedOption$ = this.selectedOptionSubject.asObservable();
+
+  constructor(private router: Router) {
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        if (!event.url.startsWith('/dashboard')) {
+          this.resetSelection();
+        }
+      });
+  }
 
   setSelectedSection(section: string) {
     this.selectedSectionSubject.next(section);
@@ -36,5 +48,12 @@ export class SelectionStoreService {
 
   private getStoredOption(): string | null {
     return localStorage.getItem('selectedOption');
+  }
+
+  private resetSelection() {
+    this.selectedSectionSubject.next(null);
+    this.selectedOptionSubject.next(null);
+    localStorage.removeItem('selectedSection');
+    localStorage.removeItem('selectedOption');
   }
 }

@@ -2,11 +2,11 @@ import {Component, Input} from '@angular/core';
 import {NgForOf} from '@angular/common';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {DashboardService} from '../../../../../../services/dashboard/dashboard.service';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-general-results-grid',
-  templateUrl: './dashboard-general-results-grid.component.html',
-  imports: [NgForOf]
+  templateUrl: './dashboard-general-results-grid.component.html', imports: [NgForOf, RouterLink]
 })
 export class DashboardGeneralResultsGridComponent {
   @Input() query!: string;

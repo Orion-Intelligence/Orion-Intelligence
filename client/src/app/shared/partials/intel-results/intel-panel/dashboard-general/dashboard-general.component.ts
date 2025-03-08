@@ -28,6 +28,10 @@ export class DashboardGeneralComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if(this.dashboardService.searchGeneralCallbackModel.Result.length>0){
+      this.isLoading = false;
+      this.query = this.dashboardService.searchGeneralParamModel.q
+    }
     this.initAnalytics()
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
@@ -40,7 +44,9 @@ export class DashboardGeneralComponent implements OnInit {
 
         this.dashboardService.searchGeneralParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
 
-        this.fetchSearchResults();
+        if(this.dashboardService.searchGeneralCallbackModel.Result.length==0){
+          this.fetchSearchResults();
+        }
         this.cdr.detectChanges();
       });
   }

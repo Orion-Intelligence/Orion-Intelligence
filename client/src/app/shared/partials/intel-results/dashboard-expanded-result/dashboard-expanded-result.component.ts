@@ -11,7 +11,6 @@ import {FiltersComponent} from '../../filters/filters.component';
 import {general_filters} from '../../../constants/filters';
 import {FilterModel} from '../../../model/filter/filter';
 import {Suggestion} from '../../../model/intel-results/general/search_general_callback_model';
-import {DashboardResultMainComponent} from '../intel-panel/dashboard-result-main/dashboard-result-main.component';
 import {SuggestionComponent} from '../../suggestion/suggestion.component';
 import {DashboardNoResultComponent} from '../dashboard-no-result/dashboard-no-result.component';
 

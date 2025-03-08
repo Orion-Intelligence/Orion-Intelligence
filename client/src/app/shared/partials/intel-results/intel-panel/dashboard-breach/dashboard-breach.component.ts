@@ -34,7 +34,9 @@ export class DashboardBreachComponent implements OnInit {
       this.dashboardService.searchLeakParamModel.mSearchParamSafeSearch = params['safeSearch'] === 'true';
       this.dashboardService.searchLeakParamModel.mNetwork = params['network'] || 'all';
 
-      this.fetchSearchResults();
+      if(this.dashboardService.searchLeakCallbackModel.Result.length==0){
+        this.fetchSearchResults();
+      }
       this.cdr.detectChanges();
     });
   }
@@ -66,9 +68,6 @@ export class DashboardBreachComponent implements OnInit {
       m_pages: searchModel.Page_Count,
       m_document: searchModel.Result.flatMap(item => item.m_weblink || [])
     };
-    console.log("FUUCK2:")
-    console.log(this.dashboardService.searchLeakCallbackModel.Result)
-    console.log("FUUCK2:")
   }
 
   fetchSearchResults() {

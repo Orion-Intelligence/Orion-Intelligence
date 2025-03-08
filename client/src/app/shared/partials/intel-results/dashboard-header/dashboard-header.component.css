@@ -26,6 +26,11 @@
   color: #ffffff50;
   font-size: 16px;
   font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.breadcrumb-item:hover{
+  color: #fcfcfc;
 }
 
 .breadcrumb-active{
@@ -51,4 +56,21 @@
 .header-bar__title-text {
   display: inline-block;
   transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+}
+.header-bar__left-arrow {
+  margin-top: -1px;
+  margin-right: 10px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.header-bar__left-arrow.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.breadcrumb-item.disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
 }

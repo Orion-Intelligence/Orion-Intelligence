@@ -29,7 +29,8 @@
   </div>
 </form>
 
-<div *ngIf="!loading && !error && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length > 0" @fadeInDashboardItem class="dashboard__search-table-container">
+<div *ngIf="!loading && !error && this.dashboardService.searchDynamicEmailCallbackbackModel.cards_data.length > 0 && breachData && Object.keys(breachData).length > 0" @fadeInDashboardItem class="dashboard__search-table-container">
+
 
   <div class="dashboard__search-table-header">Data Breach List</div>
 
