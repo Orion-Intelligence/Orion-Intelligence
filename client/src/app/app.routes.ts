@@ -10,7 +10,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { DashboardEmailApiComponent } from './shared/partials/intel-results/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component';
 import { DashboardBreachComponent } from './shared/partials/intel-results/intel-panel/dashboard-breach/dashboard-breach.component';
 import { DashboardGeneralComponent } from './shared/partials/intel-results/intel-panel/dashboard-general/dashboard-general.component';
-import { DashboardResultComponent } from './shared/partials/intel-results/intel-panel/dashboard-result-main/dashboard-result.component';
+import {DashboardGeneralResultGridItemComponent} from './shared/partials/intel-results/intel-panel/dashboard-results/dashboard-general-results-grid/dashboard-general-result-grid-item/dashboard-general-result-grid-item.component';
+import {DashboardLeakResultGridItemComponent} from './shared/partials/intel-results/intel-panel/dashboard-results/dashboard-leak-result-grid/dashboard-leak-result-grid-item/dashboard-leak-result-grid-item.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { animation: 'RootPage' } },
@@ -39,7 +40,7 @@ export const routes: Routes = [
         children: [
           { path: '', redirectTo: 'databases', pathMatch: 'full' },
           { path: ':category', component: DashboardBreachComponent, data: { type: 'Breach', animation: 'DataBreach' } }, // Dynamic category path
-          { path: ':category/:m_hash', component: DashboardResultComponent, data: { type: 'Breach', animation: 'HashPage' } } // Dynamically handle m_hash within any category
+          { path: ':category/:m_hash', component: DashboardLeakResultGridItemComponent, data: { type: 'Breach', animation: 'HashPage' } } // Dynamically handle m_hash within any category
         ]
       },
       {
@@ -48,7 +49,7 @@ export const routes: Routes = [
         children: [
           { path: '', redirectTo: 'all', pathMatch: 'full' },
           { path: ':category', component: DashboardGeneralComponent, data: { type: 'Strategic Intelligence', animation: 'CategoryPage' } },
-          { path: ':category/:m_hash', component: DashboardResultComponent, data: { type: 'Strategic Intelligence', animation: 'HashPage' } }
+          { path: ':category/:m_hash', component: DashboardGeneralResultGridItemComponent, data: { type: 'Strategic Intelligence', animation: 'HashPage' } }
         ]
       }
     ],

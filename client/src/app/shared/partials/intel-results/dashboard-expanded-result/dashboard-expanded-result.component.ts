@@ -18,7 +18,6 @@ import {DashboardNoResultComponent} from '../dashboard-no-result/dashboard-no-re
   selector: 'app-dashboard-expanded-result',
   standalone: true,
   templateUrl: './dashboard-expanded-result.html',
-  styleUrls: ['./dashboard-expanded-result.css'],
   animations: [fadeInDashboardItem],
   imports: [CommonModule, DashboardSearchNoSuggestionComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, DashboardNoResultComponent,],
 })

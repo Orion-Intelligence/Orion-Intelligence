@@ -4,9 +4,8 @@ import {CommonModule} from '@angular/common';
 @Component({
   selector: 'app-result-section',
   imports: [CommonModule],
-  templateUrl: './result-section.component.html',
-  styleUrl: './result-section.component.css'
+  templateUrl: './result-section.component.html'
 })
 export class ResultSectionComponent {
-  @Input() sections: { title: string, content: string }[] = [];
+  @Input() listItems: string[] = [];
 }

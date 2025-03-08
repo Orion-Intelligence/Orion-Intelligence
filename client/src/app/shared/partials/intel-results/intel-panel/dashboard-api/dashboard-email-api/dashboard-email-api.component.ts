@@ -15,8 +15,7 @@ import {DashboardNoResultComponent} from "../../../dashboard-no-result/dashboard
   selector: 'app-dashboard-email-api',
   imports: [FormsModule, NgForOf, NgOptimizedImage, ReactiveFormsModule, NgIf, DashboardSearchNoSuggestionComponent, LoadingFormComponent, DashboardNoResultComponent],
   animations: [fadeInDashboardItem],
-  templateUrl: './dashboard-email-api.component.html',
-  styleUrl: './dashboard-email-api.component.css'
+  templateUrl: './dashboard-email-api.component.html'
 })
 export class DashboardEmailApiComponent implements OnInit {
   username: string = '';

@@ -3,8 +3,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 @Component({
   selector: 'app-suggestion',
   imports: [],
-  templateUrl: './suggestion.component.html',
-  styleUrl: './suggestion.component.css'
+  templateUrl: './suggestion.component.html'
 })
 export class SuggestionComponent {
   @Input() suggestion!:string

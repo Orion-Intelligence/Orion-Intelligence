@@ -4,11 +4,11 @@
   align-items: center;
 }
 
-.default-input-button {
-  background: #fff;
+.default-input-button-light {
+  background: #fff !important;
 }
 
-.default-input-button:hover {
+.default-input-button-light:hover {
   background: #fff !important;
 }
 

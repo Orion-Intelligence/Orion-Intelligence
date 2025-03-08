@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {NgForOf} from '@angular/common';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {DashboardService} from '../../../../../../services/dashboard/dashboard.service';
-import {RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-general-results-grid',
@@ -10,8 +10,16 @@ import {RouterLink} from '@angular/router';
 })
 export class DashboardGeneralResultsGridComponent {
   @Input() query!: string;
+  currentUrl: string = '';
+  queryParams: any = {};
 
-  constructor(public dashboardService: DashboardService, private sanitizer: DomSanitizer) {
+  constructor(public dashboardService: DashboardService, private sanitizer: DomSanitizer, private router: Router, private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    this.currentUrl = this.router.url.split('?')[0];
+    this.route.queryParams.subscribe(params => {
+      this.queryParams = params;
+    });
   }
 
   highlightWords(text: string, maxLength: number = 250): SafeHtml {

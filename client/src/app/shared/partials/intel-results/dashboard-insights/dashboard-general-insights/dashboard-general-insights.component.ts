@@ -4,7 +4,6 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 @Component({
   selector: 'app-dashboard-general-insights',
   templateUrl: './dashboard-general-insights.component.html',
-  styleUrls: ['./dashboard-general-insights.component.css'],
   imports: [
     CommonModule,
     NgOptimizedImage

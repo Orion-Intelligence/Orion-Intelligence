@@ -9,7 +9,7 @@ import {DashboardPaginationComponent} from '../../dashboard-pagination/dashboard
 import {DashboardInsightsComponent} from '../../dashboard-insights/dashboard-insights.component';
 import {
   DashboardGeneralResultsGridComponent
-} from '../dashboard-results/dashboard-results-grid/dashboard-general-results-grid.component';
+} from '../dashboard-results/dashboard-general-results-grid/dashboard-general-results-grid.component';
 import {Analytics} from '../../dashboard-insights/analytics.model';
 
 @Component({

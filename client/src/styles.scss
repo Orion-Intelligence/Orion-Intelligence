@@ -17,8 +17,19 @@
 @import 'app/shared/partials/intel-results/dashboard-header/dashboard-header.component.css';
 @import 'app/shared/partials/intel-results/dashboard-sidebar/dashboard-sidebar.component.css';
 @import 'app/shared/partials/intel-results/dashboard-pagination/dashboard-pagination.component.css';
-@import 'app/shared/partials/intel-results/intel-panel/dashboard-results/shared/dashboard-results-grid.component.css';
+@import 'app/shared/partials/intel-results/intel-panel/dashboard-results/shared/dashboard-result-grid.component.css';
 @import 'app/pages/dashboard/dashboard.component.css';
+@import 'app/shared/partials/suggestion/suggestion.component.css';
+@import 'app/shared/partials/loading-form/loading-form.component.css';
+@import 'app/shared/partials/intel-results/intel-panel/dashboard-results/shared/dashboard-result.component.css';
+@import 'app/shared/partials/intel-results/intel-panel/dashboard-results/shared/result-section/result-section.component.css';
+@import 'app/shared/partials/intel-results/intel-panel/dashboard-results/shared/result-list/result-list.component.css';
+@import 'app/shared/partials/intel-results/dashboard-no-result/dashboard-no-result.component.css';
+@import 'app/shared/partials/intel-results/dashboard-insights/dashboard-data-insight/dashboard-data-insight.component.css';
+@import 'app/shared/partials/intel-results/dashboard-insights/dashboard-insights.component.css';
+@import 'app/shared/partials/intel-results/dashboard-insights/dashboard-general-insights/dashboard-general-insights.component.css';
+@import 'app/shared/partials/intel-results/dashboard-expanded-result/dashboard-expanded-result.css';
+@import 'app/shared/partials/intel-results/intel-panel/dashboard-api/dashboard-email-api/dashboard-email-api.component.css';
 
 html {
   background: rgba(41, 87, 132, 255) !important;
@@ -47,14 +58,6 @@ html, body, * {
 body::-webkit-scrollbar,
 html::-webkit-scrollbar {
   display: none;
-}
-
-* {
-    user-select: none;
-}
-
-p {
-    user-select: text;
 }
 
 @font-face {

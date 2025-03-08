@@ -1,0 +1,61 @@
+<div class="search__result-detail">
+  <h2 class="search__result-detail-heading">{{ resultItem?.m_title }}</h2>
+
+  <span class="search__result-detail-description-span">Description</span>
+  <p class="search__result-detail-description">
+    {{ resultItem?.m_important_content }} </p>
+  <p class="search__result-detail-url-p text-truncate">
+    <a [href]="resultItem?.m_url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate" style="max-width: 100%;" target="_blank">
+      {{ resultItem?.m_url }}
+    </a>
+  </p>
+  <div class="search__result-detail-meta">
+    <div class="search__result-detail-meta-divs">
+      <p>Published on:</p>
+      <span>{{ resultItem?.m_creation_date }}</span>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p>Network:</p>
+      <span>{{ resultItem?.m_network }}</span>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p>Updated on:</p>
+      <span>{{ resultItem?.m_update_date }}</span>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p class="tags">Tags:</p>
+      <div>
+        <span *ngFor="let tag of resultItem?.m_content_type">
+          <span class="tag-item">
+            {{ tag }}
+          </span>
+        </span>
+      </div>
+    </div>
+    <div class="search__result-detail-meta-divs">
+      <p class="status">Status:</p>
+      <div class="search__result-detail-meta-divs d-flex align-items-center">
+      <span class="rounded-circle d-inline-block me-2 search__result-detail-status-circle" [ngClass]="{
+        'bg-success': isWithinDays(resultItem!.m_creation_date, 5),
+        'bg-warning': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5),
+        'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}">
+      </span>
+        <p class="status mb-0">{{ getStatusText(resultItem?.m_creation_date) }} </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="search__result-detail-tabs-div">
+    <div class="tabs d-flex align-items-center search__result-detail-container">
+      <ng-container *ngFor="let key of arrayKeys; let last = last">
+        <button class="search__result-tabs" [class.active]="activeTab === key" (click)="setActiveTab(key)">
+          {{ key.replace('m_', '').replace('_', ' ') | titlecase }}
+        </button>
+        <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
+      </ng-container>
+    </div>
+    <app-result-section *ngIf="activeTab === 'm_content'" [listItems]="[content]" @fadeInDashboardItem></app-result-section>
+    <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems" @fadeInDashboardItem></app-result-section>
+    <app-result-list *ngIf="activeTab !== 'm_section'" [listItems]="listItems" @fadeInDashboardItem></app-result-list>
+  </div>
+</div>

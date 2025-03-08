@@ -7,8 +7,7 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
     CommonModule,
     NgOptimizedImage
   ],
-  templateUrl: './data-accordian.component.html',
-  styleUrl: './data-accordian.component.css'
+  templateUrl: './data-accordian.component.html'
 })
 export class DataAccordianComponent {
   @Input() analytics: any;

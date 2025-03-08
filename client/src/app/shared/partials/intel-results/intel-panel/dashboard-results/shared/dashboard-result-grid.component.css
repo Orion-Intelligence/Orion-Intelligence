@@ -173,11 +173,10 @@
 }
 
 .default-input-button {
-  background: #1e6cb7;
+  background: #1e6cb7 !important;
 }
 
-.default-input-button:hover,
-.default-input-button:focus{
+.grid-container .default-input-button:hover, .default-input-button:focus{
   background: #2c7ac5 !important;
 }
 

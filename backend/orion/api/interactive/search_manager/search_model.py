@@ -126,8 +126,8 @@ class search_model:
   async def get_leak_doc(doc_id) -> Optional[result_item]:
     try:
       results = await elastic_controller.get_instance().get_leak_doc(doc_id)
-      if results:
-        return result_item(**results[0])
+      if results and isinstance(results, list) and len(results) > 0:
+        return results[0]
       return None
     except ValidationError:
       return None
@@ -136,8 +136,8 @@ class search_model:
   async def get_general_doc(doc_id) -> Optional[result_item]:
     try:
       results = await elastic_controller.get_instance().get_general_doc(doc_id)
-      if results:
-        return result_item(**results[0])
+      if results and isinstance(results, list) and len(results) > 0:
+        return results[0]
       return None
     except ValidationError:
       return None

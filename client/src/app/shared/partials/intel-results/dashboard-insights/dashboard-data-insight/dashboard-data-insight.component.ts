@@ -8,8 +8,7 @@ import {DataAccordianComponent} from './data-accordian/data-accordian.component'
     CommonModule,
     DataAccordianComponent,
   ],
-  templateUrl: './dashboard-data-insight.component.html',
-  styleUrl: './dashboard-data-insight.component.css'
+  templateUrl: './dashboard-data-insight.component.html'
 })
 export class DashboardDataInsightComponent {
   @Input() analytics: any;

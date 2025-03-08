@@ -3,8 +3,7 @@ import {NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-no-result', imports: [NgOptimizedImage],
-  templateUrl: './dashboard-no-result.component.html',
-  styleUrl: './dashboard-no-result.component.css'
+  templateUrl: './dashboard-no-result.component.html'
 })
 export class DashboardNoResultComponent {
 

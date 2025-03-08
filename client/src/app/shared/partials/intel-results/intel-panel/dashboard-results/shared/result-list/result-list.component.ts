@@ -4,8 +4,7 @@ import {CommonModule} from '@angular/common';
 @Component({
   selector: 'app-result-list',
   imports: [CommonModule],
-  templateUrl: './result-list.component.html',
-  styleUrl: './result-list.component.css'
+  templateUrl: './result-list.component.html'
 })
 export class ResultListComponent {
   @Input() listItems: string[] = [];

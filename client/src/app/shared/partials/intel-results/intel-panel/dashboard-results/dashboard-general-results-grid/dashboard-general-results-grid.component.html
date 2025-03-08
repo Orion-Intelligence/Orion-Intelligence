@@ -1,6 +1,6 @@
 <div class="dashboard__search-container">
   <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result" class="dashboard__search-card">
-    <div class="dashboard__search-main-div">
+    <div class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
       <div class="dashboard__search-tags">
         <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
       </div>

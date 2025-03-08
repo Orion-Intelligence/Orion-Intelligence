@@ -10,8 +10,7 @@ import { Analytics } from './analytics.model';
     DashboardDataInsightComponent,
     DashboardGeneralInsightsComponent
   ],
-  templateUrl: './dashboard-insights.component.html',
-  styleUrl: './dashboard-insights.component.css'
+  templateUrl: './dashboard-insights.component.html'
 })
 export class DashboardInsightsComponent {
 
