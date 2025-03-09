@@ -1,14 +1,14 @@
 <div class="profile-header header_form-user--logout" (click)="toggleDropdown($event)" *ngIf="this.username$|async">
   <a class="profile-dropdown-toggle">
     <div class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold">
-      <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logout" width="24" height="24" priority="true">
+      <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logout" width="24" height="24" priority >
     </div>
   </a>
 
   <ul class="profile-dropdown" [class.show]="dropdownOpen">
     <div class="profile-dropdown-arrow"></div>
     <li><a class="dropdown-item disabled">
-      <img ngSrc="assets/images/shared/profile.svg" alt="Settings" width="15" height="15" priority="true"/>
+      <img ngSrc="assets/images/shared/profile.svg" alt="Settings" width="15" height="15" priority />
       {{ username$ | async }}</a></li>
     <li class="dropdown-item dropdown-item-inline d-flex align-items-center disabled">
       <span class="bg-success rounded-circle d-inline-block me-2 user-active"></span>
@@ -16,9 +16,9 @@
     </li>
     <li><hr class="dropdown-divider mx-3"></li>
     <li><a class="dropdown-item" href="admin/" target="_blank">
-      <img ngSrc="assets/images/shared/settings.svg" alt="Settings" width="15" height="15" priority="true"> &nbsp; Settings</a></li>
+      <img ngSrc="assets/images/shared/settings.svg" alt="Settings" width="15" height="15" priority > &nbsp; Settings</a></li>
     <li><hr class="dropdown-divider mx-3"></li>
     <li><a class="dropdown-item" id="logout-button" (click)="logout()">
-      <img ngSrc="assets/images/shared/logout.svg" alt="Logout" width="15" height="15" priority="true"> &nbsp; Logout</a></li>
+      <img ngSrc="assets/images/shared/logout.svg" alt="Logout" width="15" height="15" priority > &nbsp; Logout</a></li>
   </ul>
 </div>

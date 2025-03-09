@@ -4,13 +4,13 @@
       <ul class="directory-pagination">
         <li [class.disabled]="currentPage === 1">
           <button class="directory-pagination-navbtn" type="button" (click)="changePage(1)" [disabled]="currentPage === 1">
-            <img ngSrc="assets/images/shared/nav-first.svg" alt="First Page" width="24" height="24" priority="true">
+            <img ngSrc="assets/images/shared/nav-first.svg" alt="First Page" width="24" height="24" priority >
           </button>
         </li>
 
         <li [class.disabled]="currentPage === 1">
           <button class="directory-pagination-navbtn" type="button" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
-            <img ngSrc="assets/images/shared/nav-prev.svg" alt="Previous Page" width="24" height="24" priority="true">
+            <img ngSrc="assets/images/shared/nav-prev.svg" alt="Previous Page" width="24" height="24" priority >
           </button>
         </li>
 
@@ -22,13 +22,13 @@
 
         <li [class.disabled]="currentPage === totalPages">
           <button class="directory-pagination-navbtn" type="button" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
-            <img ngSrc="assets/images/shared/nav-next.svg" alt="Next Page" width="24" height="24" priority="true">
+            <img ngSrc="assets/images/shared/nav-next.svg" alt="Next Page" width="24" height="24" priority >
           </button>
         </li>
 
         <li [class.disabled]="currentPage === totalPages">
           <button class="directory-pagination-navbtn" type="button" (click)="changePage(totalPages)" [disabled]="currentPage === totalPages">
-            <img ngSrc="assets/images/shared/nav-last.svg" alt="Last Page" width="24" height="24" priority="true">
+            <img ngSrc="assets/images/shared/nav-last.svg" alt="Last Page" width="24" height="24" priority >
           </button>
         </li>
       </ul>
