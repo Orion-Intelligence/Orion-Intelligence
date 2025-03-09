@@ -1,10 +1,7 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-
 from configs import config
 
-
-import logging
 
 class security_headers_middleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
@@ -14,7 +11,7 @@ class security_headers_middleware(BaseHTTPMiddleware):
             hsts_value = f"max-age={config.SECURE_HSTS_SECONDS}; includeSubDomains; preload"
             response.headers["Strict-Transport-Security"] = hsts_value
         else:
-            response.headers["Strict-Transport-Security"] = "0"
+            response.headers["Strict-Transport-Security"] = "max-age=0"
 
         response.headers["X-Content-Type-Options"] = "nosniff" if config.SECURE_CONTENT_TYPE_NOSNIFF else "off"
         response.headers["X-Frame-Options"] = config.X_FRAME_OPTIONS
