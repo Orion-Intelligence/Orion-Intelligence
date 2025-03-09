@@ -132,7 +132,7 @@ services:
 
   nginx:
     container_name: trusted-web-nginx
-    image: "webdevops/nginx:latest"
+    image: "wokalek/nginx-brotli"
     ports:
       - "80:80"
       - "443:443"
