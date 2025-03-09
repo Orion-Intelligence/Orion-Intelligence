@@ -4,10 +4,10 @@
   border: 1px solid #ffffff20;
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 32px; /* Keeps margin but allows growth */
-  min-height: auto; /* Ensures it grows dynamically */
-  height: auto !important; /* Overrides any fixed height */
-  display: block; /* Ensures it behaves like a block element */
+  margin: 32px;
+  min-height: auto;
+  height: auto !important;
+  display: block;
 }
 
 .search__result-detail-status-circle{
@@ -42,8 +42,8 @@
 .search__result-detail-url,
 .search__result-detail-meta-divs span {
   font-size: 14px;
-  font-weight: 400;
   color: #fff;
+  overflow: hidden;
 }
 
 .search__result-detail-url {
@@ -61,18 +61,17 @@
   justify-content: space-between;
   margin-bottom: 32px;
   margin-right: 20px;
-  flex-wrap: wrap; /* Added to allow wrapping */
+  flex-wrap: wrap;
 }
 
-/* Added media query for smaller screens */
-@media (max-width: 991px) { /* Using 991px to match Bootstrap's lg breakpoint */
+@media (max-width: 991px) {
   .search__result-detail-meta {
     flex-direction: column;
-    margin-right: 0; /* Remove right margin on small screens for better spacing */
+    margin-right: 0;
   }
 
   .search__result-detail-meta-divs {
-    margin-bottom: 16px; /* Add spacing between stacked items */
+    margin-bottom: 16px;
   }
 }
 
@@ -161,3 +160,9 @@
   position: absolute;
   right: 0;
 }
+@media only screen and (max-width: 943px) {
+  .search__result-detail {
+    margin: 15px;
+  }
+}
+

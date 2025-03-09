@@ -100,7 +100,7 @@
 @media (max-width: 1000px) {
   .dashboard__api-search-input-div {
     padding: 15px 15px 15px 0;
-    margin-right: 20px;
+    margin: 0;
   }
   .default-input-container {
     margin-right: 15px;

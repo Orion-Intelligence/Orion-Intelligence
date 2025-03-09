@@ -77,3 +77,8 @@
   cursor: default;
   pointer-events: none;
 }
+@media only screen and (max-width: 943px) {
+  .header-bar__title-container {
+    margin-left: 0;
+  }
+}

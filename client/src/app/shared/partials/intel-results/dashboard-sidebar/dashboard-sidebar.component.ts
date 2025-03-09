@@ -83,6 +83,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   onOptionSelected(option: string) {
     this.selectionStore.setSelectedOption(option);
+    if(this.min_detected && this.sidebar_default){
+      this.onToggleSidebar();
+    }
   }
 
   onToggleSidebar() {

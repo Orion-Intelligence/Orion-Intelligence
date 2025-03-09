@@ -23,6 +23,7 @@ export class DashboardGeneralComponent implements OnInit {
   onToggleAnalytics = false;
   query = ""
   analyticsData = {} as Analytics;
+  firstTrigger = false
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
@@ -43,11 +44,10 @@ export class DashboardGeneralComponent implements OnInit {
         this.dashboardService.searchGeneralParamModel.mNetwork = params['network'] || 'all';
 
         this.dashboardService.searchGeneralParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
-
-        if(this.dashboardService.searchGeneralCallbackModel.Result.length==0){
+        if(this.firstTrigger)
           this.fetchSearchResults();
-        }
         this.cdr.detectChanges();
+        this.firstTrigger = true
       });
   }
 

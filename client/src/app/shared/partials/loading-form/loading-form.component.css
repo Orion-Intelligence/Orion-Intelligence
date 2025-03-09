@@ -1,5 +1,6 @@
 .skeleton-loader {
-  width: 650px;
+  max-width: 650px;
+  width: 100%;
   padding: 15px;
   background: #f6f7f830;
   margin-top: 30px;
@@ -34,4 +35,10 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+@media only screen and (max-width: 943px) {
+  .skeleton-loader{
+    width: calc(100% - 30px);
+    margin-left: 15px;
+  }
 }

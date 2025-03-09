@@ -28,3 +28,11 @@
   font-size: 14px;
   color: #A0B8D1;
 }
+
+@media only screen and (max-width: 943px) {
+  .no-result-container{
+    padding: 15px;
+    margin: 15px;
+    width: calc(100% - 30px);
+  }
+}
