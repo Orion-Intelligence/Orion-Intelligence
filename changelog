@@ -1,0 +1,94 @@
+Changelog [1.0.2] – 2025-03-09
+
+OVERVIEW
+ • The system’s backend was migrated from Django to FastAPI, and the frontend from Django templates to Angular.
+ • Introduced a new sidebar navigation, replacing the old top bar menu for better clarity and usability.
+ • Added 34 new crawler API integrations, significantly expanding our data collection capabilities.
+ • Implemented token-based session management for enhanced security.
+ • Added admin panel support for straightforward platform configuration changes.
+ • Expanded API documentation with a /doc endpoint.
+
+ADDED
+ 1. **Sidebar Navigation**
+    - Provides a cleaner layout and improved accessibility.
+    - Organized into six main sections:
+      (1) Homepage
+      (2) Strategic Intelligence (General, Forum, News, Stolen, Drugs, Hacking, Marketplace, Cryptocurrency)
+      (3) Data Breach
+      (4) Live API (Email tracking)
+      (5) Links (Live Onion URLs)
+      (6) Documentation
+
+ 2. **Generic Index Search**
+    - Completely revamped mechanism for data filtering and retrieval.
+
+ 3. **Leaked Index Enhancements**
+    - Offers refined categorization, enabling more systematic leak exploration.
+
+ 4. **Administrator Settings**
+    - New “Settings” option in the User Profile (top-right corner) for configuring platform settings.
+
+ 5. **Strategic Intelligence Analytics**
+    - Replaced the “Enable” button with an “Analytics” button for advanced search functionalities.
+
+ 6. **New Crawler API Integrations** (34 sources):
+    - The system now supports data extraction from a variety of new Onion and clearnet sources, including:
+      1) https://mirror-h.org/archive (web url, attacker name, server ip, etc.)
+      2) http://ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid.onion/
+      3) https://handala-hack.to/
+      4) http://xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd.onion/
+      5) https://www.ransomlook.io/leaks
+      6) https://leak-lookup.com/breaches#phonemondo-com
+      7) http://basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd.onion/
+      8) http://dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid.onion/
+      9) http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/posts.php?pid=zMkDVPh6OjeKpzVFi7sSB2QP
+      10) http://vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd.onion/...
+      11) http://ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.onion/
+      12) http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion/
+      13) https://darkfeed.io/threat-intelligence/
+      14) https://ddosecrets.com/all_articles/a-z
+      15) https://zone-xsec.com/archive/page=1
+      16) _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad.py
+      17) http://orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id.onion
+      18) http://leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.onion
+      19) https://www.csidb.net/csidb/actors/...
+      20) http://b1nd.net/
+      21) https://tor.link/site/royal-market/info
+      22) http://black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd.onion
+      23) http://cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd.onion
+      24) http://embargobe3n5okxyzqphpmk3moinoap2snz5k6765mvtkk7hhi544jid.onion/#/
+      25) http://funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id.onion
+      26) http://nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd.onion
+      27) http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion
+      28) https://inthewild.io/feed
+      29) http://darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd.onion
+      30) http://bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad.onion
+      31) http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion
+      32) http://mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid.onion
+      33) https://ransom.wiki
+      34) http://nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad.onion
+      35) https://darkfeed.io
+
+CHANGED
+ 1. **Backend Migration to FastAPI**
+    - Provides faster performance and a more modular code structure.
+ 2. **Frontend Migration to Angular**
+    - Replaces the original Django HTML templates with a modern, dynamic SPA approach.
+ 3. **Homepage Layout**
+    - Restructured for improved accessibility and better visual clarity.
+ 4. **Session Management**
+    - Moved to a token-based system for improved security and flexibility.
+ 5. **Strategic Intelligence Filter UI**
+    - Updated filter buttons for enhanced usability and discoverability.
+
+FIXED
+ • **UI Inconsistencies**
+   - Resolved various styling discrepancies across multiple sections.
+ • **Database Performance**
+   - Optimized queries to reduce load times and improve responsiveness.
+
+ADDITIONAL
+ • **Admin Panel**
+   - Expanded configuration options, allowing administrators to modify settings with minimal effort.
+ • **Comprehensive /doc Endpoint**
+   - Offers detailed API documentation for easy reference by developers and integrators.

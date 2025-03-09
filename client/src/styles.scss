@@ -41,10 +41,10 @@ html {
 body {
   margin: 0;
   background: linear-gradient(
-    to bottom,
-    rgba(18, 52, 84, 255),
-    rgba(41, 87, 132, 255),
-    rgba(41, 87, 132, 255)
+      to bottom,
+      rgba(18, 52, 84, 255),
+      rgba(41, 87, 132, 255),
+      rgba(41, 87, 132, 255)
   ) !important;
   height: 100vh;
   min-height: 100vh;
@@ -64,7 +64,7 @@ html::-webkit-scrollbar {
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto/Roboto-Regular.woff2') format('woff2'),
-       url('/assets/fonts/Roboto/Roboto-Regular.woff') format('woff');
+  url('/assets/fonts/Roboto/Roboto-Regular.woff') format('woff');
   font-weight: 400;
   font-style: normal;
   font-display: swap; /* ✅ Fix: Ensures text is visible while loading */
@@ -73,7 +73,7 @@ html::-webkit-scrollbar {
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto/Roboto-Bold.woff2') format('woff2'),
-       url('/assets/fonts/Roboto/Roboto-Bold.woff') format('woff');
+  url('/assets/fonts/Roboto/Roboto-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -82,7 +82,7 @@ html::-webkit-scrollbar {
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto/Roboto-Italic.woff2') format('woff2'),
-       url('/assets/fonts/Roboto/Roboto-Italic.woff') format('woff');
+  url('/assets/fonts/Roboto/Roboto-Italic.woff') format('woff');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -91,7 +91,7 @@ html::-webkit-scrollbar {
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto/Roboto-BoldItalic.woff2') format('woff2'),
-       url('/assets/fonts/Roboto/Roboto-BoldItalic.woff') format('woff');
+  url('/assets/fonts/Roboto/Roboto-BoldItalic.woff') format('woff');
   font-weight: 700;
   font-style: italic;
   font-display: swap;
@@ -117,9 +117,14 @@ html::-webkit-scrollbar {
 .app-background {
   position: absolute;
   right: 0;
-  top:0;
+  top: 0;
   opacity: 0.07;
   object-fit: contain;
   object-position: top right;
   pointer-events: none;
+}
+
+img::before {
+  color: white;
+  font-size: 12px;
 }
