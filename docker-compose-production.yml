@@ -132,7 +132,7 @@ services:
 
   nginx:
     container_name: trusted-web-nginx
-    image: "public.ecr.aws/nginx/nginx-with-brotli:latest"
+    image: "fholzer/nginx-brotli"
     ports:
       - "80:80"
       - "443:443"
