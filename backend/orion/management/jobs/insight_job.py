@@ -119,9 +119,7 @@ class insight_job:
     day_counter = 0
     insight_old_daily = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None])
     print("xx9")
-    if insight_old_daily is None:
-      print("xx10")
-      await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
+    await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
 
     print("xx11")
     while True:
