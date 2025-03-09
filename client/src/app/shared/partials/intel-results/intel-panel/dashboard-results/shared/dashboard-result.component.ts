@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, Input, OnChanges} from '@angular/core';
 import {ResultSectionComponent} from './result-section/result-section.component';
 import {ResultListComponent} from './result-list/result-list.component';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {ResultItemModel} from '../../../../../model/intel-results/result-item/result.item.model';
 import {last} from 'rxjs';
 import {fadeInDashboardItem} from '../../../../../animations/dashboard.item.animation';
@@ -9,7 +9,7 @@ import {fadeInDashboardItem} from '../../../../../animations/dashboard.item.anim
 @Component({
   selector: 'app-result-panel',
   templateUrl: './dashboard-result.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent],
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultComponent implements OnChanges {

@@ -3,7 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ApiService} from '../../../../../../services/api.service';
 import {catchError, tap} from 'rxjs/operators';
 import {of} from 'rxjs';
-import {NgClass, NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {DashboardResultComponent} from '../../shared/dashboard-result.component';
 import {ResultItemModel} from '../../../../../../model/intel-results/result-item/result.item.model';
 import {fadeInDashboardItem} from '../../../../../../animations/dashboard.item.animation';
@@ -11,7 +11,7 @@ import {fadeInDashboardItem} from '../../../../../../animations/dashboard.item.a
 @Component({
   selector: 'app-dashboard-leak-result-grid-item',
   templateUrl: './dashboard-leak-result-grid-item.component.html',
-  imports: [NgForOf, NgOptimizedImage, TitleCasePipe, NgClass, DashboardResultComponent, NgIf],
+  imports: [DashboardResultComponent, NgIf],
   animations: [fadeInDashboardItem],
 })
 export class DashboardLeakResultGridItemComponent implements OnInit {
