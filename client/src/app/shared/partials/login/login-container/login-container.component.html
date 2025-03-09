@@ -3,14 +3,15 @@
 </ng-container>
 
 <div class="login-wrapper">
-  <img ngSrc="/assets/images/shared/Bg.png" alt="background" class="login-background" priority="true" fill="true">
+  <img ngSrc="/assets/images/shared/Bg.webp" alt="background" class="login-background" priority="true" fill="true">
 </div>
 
 <div *ngIf="!authenticated" id="content" class="login-container">
   <div class="login-box">
     <div class="login-header">
-      <img ngSrc="/assets/images/shared/home-logo.svg" alt="logo" width="232" height="41" priority="true">
+      <img ngSrc="/assets/images/shared/home-logo.svg" alt="logo" width="232" height="41" priority="true" loading="eager" fetchpriority="high">
     </div>
+
 
     <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
       {{ errorMessage }}

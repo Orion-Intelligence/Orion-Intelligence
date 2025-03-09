@@ -4,12 +4,15 @@ from starlette.responses import Response
 from configs import config
 
 
+import logging
+
 class security_headers_middleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response: Response = await call_next(request)
 
         if not config.DEBUG:
-            response.headers["Strict-Transport-Security"] = f"max-age={config.SECURE_HSTS_SECONDS}; includeSubDomains; preload"
+            hsts_value = f"max-age={config.SECURE_HSTS_SECONDS}; includeSubDomains; preload"
+            response.headers["Strict-Transport-Security"] = hsts_value
         else:
             response.headers["Strict-Transport-Security"] = "0"
 

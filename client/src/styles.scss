@@ -4,7 +4,6 @@
 @import 'app/pages/homepage/homepage.component.css';
 @import 'app/shared/partials/footer/footer.component.css';
 @import 'app/shared/partials/header/header.component.css';
-@import 'app/shared/partials/header/header.component.css';
 @import 'app/shared/partials/home/home-insight/home-insight.component.css';
 @import 'app/shared/partials/home/home-search/home-search.component.css';
 @import 'app/shared/partials/loader/loader.component.css';
@@ -60,12 +59,14 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+/* Ensure fonts do not block rendering */
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto/Roboto-Regular.woff2') format('woff2'),
        url('/assets/fonts/Roboto/Roboto-Regular.woff') format('woff');
   font-weight: 400;
   font-style: normal;
+  font-display: swap; /* ✅ Fix: Ensures text is visible while loading */
 }
 
 @font-face {
@@ -74,6 +75,7 @@ html::-webkit-scrollbar {
        url('/assets/fonts/Roboto/Roboto-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -82,6 +84,7 @@ html::-webkit-scrollbar {
        url('/assets/fonts/Roboto/Roboto-Italic.woff') format('woff');
   font-weight: 400;
   font-style: italic;
+  font-display: swap;
 }
 
 @font-face {
@@ -90,6 +93,7 @@ html::-webkit-scrollbar {
        url('/assets/fonts/Roboto/Roboto-BoldItalic.woff') format('woff');
   font-weight: 700;
   font-style: italic;
+  font-display: swap;
 }
 
 .gc-clear-selection {
@@ -115,6 +119,6 @@ html::-webkit-scrollbar {
   top:0;
   opacity: 0.07;
   object-fit: contain;
-  object-position:top right;
+  object-position: top right;
   pointer-events: none;
 }
