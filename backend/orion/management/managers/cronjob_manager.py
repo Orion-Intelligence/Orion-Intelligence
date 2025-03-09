@@ -23,10 +23,8 @@ class cronjob_manager:
 
   @staticmethod
   async def __init_handles():
-    print("xx8")
     asyncio.create_task(insight_job.get_instance().update_insights())
 
   async def init(self):
-    print("xx7")
     await self.__init_handles()
     # RepeatedTimer(CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT, elastic_controller.get_instance().purge_old_records, False)

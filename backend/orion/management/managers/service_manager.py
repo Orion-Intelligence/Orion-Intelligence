@@ -48,10 +48,8 @@ class service_manager:
         return False
 
     async def init_cronjobs(self):
-        print("xx4")
         while not self._is_available:
             await sleep(5)
-        print("xx5")
         await cronjob_manager.get_instance().init()
 
     def check_status(self):
