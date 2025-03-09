@@ -118,9 +118,12 @@ class insight_job:
   async def update_insights(self):
     day_counter = 0
     insight_old_daily = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None])
+    print("xx9")
     if insight_old_daily is None:
+      print("xx10")
       await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
 
+    print("xx11")
     while True:
       day_counter += 1
       await asyncio.sleep(CONSTANTS.S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT)
