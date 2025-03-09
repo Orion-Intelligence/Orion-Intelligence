@@ -41,7 +41,7 @@ class migration_manager:
 
         try:
           migration_module = importlib.import_module(migration_script_name)
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as ex:
           return
 
         if hasattr(migration_module, migration_script_name):

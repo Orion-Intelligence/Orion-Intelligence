@@ -11,15 +11,18 @@ create_parser_zip() {
     PARSER_DIR="backend/static/.well-known/parser"
     OUTPUT_DIR="backend/static/.well-known"
     ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
+    if ! command -v zip &> /dev/null; then
+        echo "Error: 'zip' command not found. Please install 'zip' and try again."
+        exit 1
+    fi
     if [ -d "$PARSER_DIR" ]; then
-        echo "Creating $ZIP_FILE..."
         [ -f "$ZIP_FILE" ] && rm -f "$ZIP_FILE"
-        (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .)
-        echo "$ZIP_FILE created successfully in $OUTPUT_DIR."
-    else
-        echo "Directory $PARSER_DIR does not exist."
+        (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .) || {
+            exit 1
+        }
     fi
 }
+
 
 client_build() {
     cd client || exit
@@ -64,6 +67,7 @@ else
                 use_compose_file "default"
                 ;;
             -p)
+                client_build
                 use_compose_file "production"
                 cp nginx/nginx-prod.conf nginx/nginx.conf
                 ;;
