@@ -44,7 +44,7 @@ export class DashboardGeneralComponent implements OnInit {
         this.dashboardService.searchGeneralParamModel.mNetwork = params['network'] || 'all';
 
         this.dashboardService.searchGeneralParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
-        if(this.firstTrigger)
+        if(this.firstTrigger || this.dashboardService.searchGeneralCallbackModel.Result.length==0)
           this.fetchSearchResults();
         this.cdr.detectChanges();
         this.firstTrigger = true
