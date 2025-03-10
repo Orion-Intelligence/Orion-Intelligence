@@ -97,7 +97,7 @@ class session_manager:
       if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
-      new_token_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60
+      new_token_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
       new_token_payload = {"sub": username, "exp": new_token_expiry}
       new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
