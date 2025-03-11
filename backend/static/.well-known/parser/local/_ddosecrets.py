@@ -79,6 +79,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
 
                 meta_element = content_div.find("p", class_="meta")
                 published_date = meta_element.get_text(strip=True) if meta_element else ""
+                published_date = helper_method.extract_and_convert_date(published_date)
 
                 metadata_div = content_div.find("div", class_="metadata")
                 source = ""

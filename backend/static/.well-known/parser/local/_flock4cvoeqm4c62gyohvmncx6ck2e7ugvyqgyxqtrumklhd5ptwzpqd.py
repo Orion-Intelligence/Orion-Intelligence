@@ -113,7 +113,7 @@ class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_i
                                     m_email_addresses=helper_method.extract_emails(content_text),
                                     m_phone_numbers=helper_method.extract_phone_numbers(content_text),
                                     m_content_type=["leaks"],
-                                    m_leak_date=date_text,
+                                    m_leak_date=helper_method.extract_and_convert_date(date_text),
                                 )
                             )
 

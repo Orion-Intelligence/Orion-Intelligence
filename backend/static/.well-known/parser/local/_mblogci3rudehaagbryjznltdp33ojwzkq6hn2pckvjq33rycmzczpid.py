@@ -113,7 +113,7 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
                                     m_email_addresses=helper_method.extract_emails(content_text),
                                     m_phone_numbers=helper_method.extract_phone_numbers(content_text),
                                     m_content_type=["leaks"],
-                                    m_leak_date=datetime_text,
+                                    m_leak_date=helper_method.extract_and_convert_date(datetime_text),
                                 )
                             )
 

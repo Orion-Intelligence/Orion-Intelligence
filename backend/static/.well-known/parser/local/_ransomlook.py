@@ -100,7 +100,7 @@ class _ransomlook(leak_extractor_interface, ABC):
                         m_important_content=m_content,
                         m_content_type=["leaks"],
                         m_data_size=m_data_size,
-                        m_leak_date=m_date,
+                        m_leak_date=helper_method.extract_and_convert_date(m_date),
 
                     )
 

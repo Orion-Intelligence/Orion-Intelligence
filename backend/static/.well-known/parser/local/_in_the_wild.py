@@ -133,7 +133,7 @@ class _in_the_wild(leak_extractor_interface, ABC):
                                     m_content=description_text,
                                     m_important_content=description_text,
                                     m_network=helper_method.get_network_type(self.base_url),
-                                    m_leak_date=last_update_date,
+                                    m_leak_date=helper_method.extract_and_convert_date(last_update_date),
                                     m_websites=[website] if website else [],
                                     m_social_media_profiles=[social_media_profile] if social_media_profile else [],
                                     m_content_type=["leaks"],

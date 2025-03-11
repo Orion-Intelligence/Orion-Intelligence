@@ -120,7 +120,7 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                     m_logo_or_images=image_urls,
                     m_phone_numbers=[phone_number] if phone_number != "N/A" else [],
                     m_revenue = revenue,
-                    m_leak_date=date_time,
+                    m_leak_date=helper_method.extract_and_convert_date(date_time),
                     m_url=page.url,
                     m_base_url=self.base_url,
                     m_company_name=title,

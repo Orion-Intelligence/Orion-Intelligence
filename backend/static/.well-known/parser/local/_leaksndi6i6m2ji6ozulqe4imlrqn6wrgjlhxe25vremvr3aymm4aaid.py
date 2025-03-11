@@ -97,7 +97,7 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                                 m_email_addresses=helper_method.extract_emails(description),
                                 m_phone_numbers=helper_method.extract_phone_numbers(description),
                                 m_content_type=["leaks"],
-                                m_leak_date=year,
+                                m_leak_date=helper_method.extract_and_convert_date(year),
                             )
                         )
 

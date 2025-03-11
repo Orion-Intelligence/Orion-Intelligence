@@ -120,7 +120,7 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                             m_email_addresses=helper_method.extract_emails(description_text),
                             m_phone_numbers=helper_method.extract_phone_numbers(description_text),
                             m_content_type=["leaks"],
-                            m_leak_date=date_text,
+                            m_leak_date=helper_method.extract_and_convert_date(date_text),
                             m_data_size= file_size_text,
                             m_logo_or_images=[profile_img] if profile_img != "Unknown" else []
                         )

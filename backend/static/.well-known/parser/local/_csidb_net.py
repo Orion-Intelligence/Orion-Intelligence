@@ -73,6 +73,7 @@ class _csidb_net(leak_extractor_interface, ABC):
 
                 date_cell = row.select_one("td:nth-child(1) a")
                 incident_date = date_cell.get_text(strip=True) if date_cell else None
+                incident_date = helper_method.extract_and_convert_date(incident_date)
 
 
                 victim_cell = row.select_one("td:nth-child(2) a")

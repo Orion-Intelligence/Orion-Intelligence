@@ -107,7 +107,7 @@ class _xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd(leak_extractor_i
                         m_content_type=["leaks"],
                         m_revenue=m_revenue,
                         m_data_size=m_data_size,
-                        m_leak_date=m_date
+                        m_leak_date = helper_method.extract_and_convert_date(m_date)
                     )
 
                     self._card_data.append(card_data)

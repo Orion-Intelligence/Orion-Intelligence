@@ -117,7 +117,7 @@ class _handala_hack(leak_extractor_interface, ABC):
                         m_content_type=["leaks"],
                         m_email_addresses=helper_method.extract_emails(content),
                         m_phone_numbers=helper_method.extract_phone_numbers(content),
-                        m_leak_date=date_time
+                        m_leak_date=helper_method.extract_and_convert_date(date_time)
                     )
 
                     self._card_data.append(card_data)
