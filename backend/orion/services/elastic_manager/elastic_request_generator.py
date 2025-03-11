@@ -103,6 +103,28 @@ class elastic_request_generator:
           "boost_mode": "multiply",
         }
       },
+      "suggest": {
+        "important_content_suggestion": {
+          "text": m_user_query,
+          "term": {
+            "field": "m_important_content",
+            "min_word_length": 3,
+            "max_term_freq": 0.05,
+            "sort": "score",
+            "string_distance": "levenshtein",
+          },
+        },
+        "content_suggestion": {
+          "text": m_user_query,
+          "term": {
+            "field": "m_content",
+            "min_word_length": 3,
+            "max_term_freq": 0.05,
+            "sort": "score",
+            "string_distance": "levenshtein",
+          },
+        },
+      },
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
