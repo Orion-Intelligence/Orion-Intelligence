@@ -40,6 +40,8 @@ class elastic_request_generator:
                       "m_important_content^1.5",
                       "m_content_tokens^2",
                       "m_keywords^1.8",
+                      "m_url^1.2",
+                      "m_base_url^1.0"
                     ],
                     "default_operator": "OR",
                     "lenient": True,
@@ -135,6 +137,8 @@ class elastic_request_generator:
                                           "m_important_content^1.5",
                                           "m_content_tokens^2",
                                           "m_keywords^1.8",
+                                          "m_url^1.2",
+                                          "m_base_url^1.0"
                                       ],
                                       "default_operator": "OR",
                                       "lenient": True,
