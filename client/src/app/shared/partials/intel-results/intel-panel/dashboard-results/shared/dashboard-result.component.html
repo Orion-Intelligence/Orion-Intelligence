@@ -56,6 +56,11 @@
     </div>
     <app-result-section *ngIf="activeTab === 'm_content'" [listItems]="[content]" @fadeInDashboardItem></app-result-section>
     <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems" @fadeInDashboardItem></app-result-section>
-    <app-result-list *ngIf="activeTab !== 'm_section'" [listItems]="listItems" @fadeInDashboardItem></app-result-list>
+    <app-result-list *ngIf="activeTab !== 'm_section'"
+                     [listItems]="listItems"
+                     [activeTab]="activeTab"
+                     @fadeInDashboardItem
+                    >
+    </app-result-list>
   </div>
 </div>

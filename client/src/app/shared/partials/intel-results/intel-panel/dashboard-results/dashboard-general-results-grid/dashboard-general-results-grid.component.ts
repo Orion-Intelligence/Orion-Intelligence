@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, AfterViewInit} from '@angular/core';
 import {NgForOf} from '@angular/common';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {DashboardService} from '../../../../../../services/dashboard/dashboard.service';
@@ -6,14 +6,21 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-general-results-grid',
-  templateUrl: './dashboard-general-results-grid.component.html', imports: [NgForOf, RouterLink]
+  templateUrl: './dashboard-general-results-grid.component.html',
+  imports: [NgForOf, RouterLink]
 })
-export class DashboardGeneralResultsGridComponent {
+export class DashboardGeneralResultsGridComponent implements AfterViewInit {
   @Input() query!: string;
   currentUrl: string = '';
   queryParams: any = {};
 
-  constructor(public dashboardService: DashboardService, private sanitizer: DomSanitizer, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    public dashboardService: DashboardService,
+    private sanitizer: DomSanitizer,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+  }
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
@@ -21,6 +28,35 @@ export class DashboardGeneralResultsGridComponent {
       this.queryParams = params;
     });
   }
+
+  ngAfterViewInit() {
+  setTimeout(() => this.scrollToSavedItem(), 100); // Small delay
+}
+
+  saveSession(itemId: string) {
+    if (itemId) {
+      sessionStorage.setItem('selectedItem', itemId);
+    }
+  }
+
+  scrollToSavedItem() {
+    const savedItemId = sessionStorage.getItem('selectedItem');
+    console.log("Retrieved ID from sessionStorage:", savedItemId); // Debugging log
+    if (savedItemId) {
+      setTimeout(() => {
+        const element = document.getElementById('item-' + savedItemId);
+        console.log("Scrolling to:", element); // Debugging log
+        if (element) {
+          element.scrollIntoView({behavior: 'smooth', block: 'start'});
+        } else {
+          console.warn("Element not found for ID:", 'item-' + savedItemId);
+        }
+      }, 500);
+    } else {
+      console.warn("No saved ID in sessionStorage.");
+    }
+  }
+
 
   highlightWords(text: string, maxLength: number = 250): SafeHtml {
     if (!this.query || text.length <= maxLength) {
