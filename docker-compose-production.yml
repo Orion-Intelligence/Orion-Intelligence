@@ -140,7 +140,7 @@ services:
       - web
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./app/static:/app/static:cached
+      - ./backend/static:/app/static:cached
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
