@@ -127,7 +127,7 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                     m_title=card_title,
                     m_url=self.base_url,
                     m_weblink=[company_url] if company_url else [],
-                    m_dumplink=download_url,
+                    m_dumplink=[download_url],
                     m_network=helper_method.get_network_type(self.base_url),
                     m_base_url=self.base_url,
                     m_content=description,
