@@ -128,7 +128,6 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
-      "_source": ["m_title", "m_url", "m_base_url", "m_content", "m_important_content", "m_company_name", "m_leak_date", "m_update_date"],
     }
 
     return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
@@ -249,7 +248,6 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
-      "_source": ["m_title", "m_url", "m_base_url", "m_content", "m_meta_description", "m_important_content", "m_update_date", "m_validity_score"],  # Mapping-aligned fields
     }
     return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
