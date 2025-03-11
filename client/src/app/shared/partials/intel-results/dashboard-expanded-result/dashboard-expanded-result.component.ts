@@ -65,7 +65,7 @@ export class DashboardExpandedResultComponent implements OnInit {
   }
 
   onGetSuggestion(){
-    if (this.suggestion && this.suggestion.options.length) {
+    if (this.suggestion && this.suggestion.options.length>0 && this.suggestion.options.length<15 ) {
       return  this.local_query.replace(this.suggestion?.text, this.suggestion?.options[0].text)
     }else {
       return ""
