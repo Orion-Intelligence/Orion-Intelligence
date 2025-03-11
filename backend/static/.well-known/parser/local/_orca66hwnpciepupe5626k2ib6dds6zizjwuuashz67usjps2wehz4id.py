@@ -132,7 +132,6 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                     m_base_url=self.base_url,
                     m_content=description,
                     m_important_content = description,
-                    m_logo_or_images=image_urls,
                     m_content_type=["leaks"],
                     m_data_size=number_of_files,
                     m_email_addresses=helper_method.extract_emails(description) if description else [],

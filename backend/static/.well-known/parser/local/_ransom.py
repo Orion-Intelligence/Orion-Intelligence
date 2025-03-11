@@ -114,7 +114,7 @@ class _ransom(leak_extractor_interface, ABC):
                 continue
             self._card_data.append(card_extraction_model(
                 m_title=victim,
-                m_url="https://ransom.wiki/"+post_url,
+                m_url=post_url,
                 m_base_url=self.base_url,
                 m_content=description,
                 m_company_name=group,
