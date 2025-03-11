@@ -119,6 +119,8 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                             elif title_text == "Date of publication":
                                 date_of_publication = value_text
 
+                if date_of_publication is None:
+                    date_of_publication = ""
 
                 card_data = card_extraction_model(
                     m_company_name=card_title,

@@ -65,6 +65,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
 
         page_url = f"{self.base_url}?page={page_num}"
 
+        sleep(5)
         page.goto(page_url)
         page.wait_for_load_state('load')
 
