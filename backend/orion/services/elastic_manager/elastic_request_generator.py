@@ -7,6 +7,7 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_I
 
 
 class elastic_request_generator:
+
   @staticmethod
   def on_search_leakdata(p_query_model):
     raw_query = p_query_model.q.strip()
@@ -14,10 +15,15 @@ class elastic_request_generator:
       return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
 
     m_user_query = raw_query.lower().rstrip("/") + "*"
-    m_url_query = raw_query.rstrip("/")
+    m_url_query = raw_query
     m_safe_search = p_query_model.mSearchParamSafeSearch
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
+
+    from urllib.parse import urlparse
+    parsed_url = urlparse(raw_query)
+    domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
+    path = parsed_url.path.lstrip("/") or ("/".join(raw_query.split("/")[1:]) if "/" in raw_query else "")
 
     must_clauses = []
     must_not_clause = []
@@ -28,6 +34,50 @@ class elastic_request_generator:
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network.keyword": m_network.lower()}})
 
+    # Enhanced URL matching with broader wildcards
+    url_priority_query = {
+      "bool": {
+        "should": [
+          {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},  # Exact match
+          {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},  # Any substring
+          {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},  # Domain + path
+          {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},  # Path anywhere
+          {"match": {"m_url": {"query": raw_query, "boost": 40}}}  # Fuzzy match
+        ],
+        "minimum_should_match": 1,
+        "boost": 10
+      }
+    }
+
+    # Base URL matching focused on domain
+    base_url_query = {
+      "bool": {
+        "should": [
+          {"term": {"m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},  # Exact domain (HTTPS)
+          {"term": {"m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},  # Exact domain (HTTP)
+          {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}  # Domain substring
+        ],
+        "minimum_should_match": 1,
+        "boost": 5
+      }
+    }
+
+    content_query = {
+      "query_string": {
+        "query": m_user_query,
+        "fields": [
+          "m_title^4",
+          "m_content^1.5",
+          "m_important_content^1.5",
+          "m_company_name^2.5"
+        ],
+        "default_operator": "OR",
+        "lenient": True,
+        "analyze_wildcard": True,
+        "boost": 2
+      }
+    }
+
     query_statement = {
       "min_score": 0,
       "query": {
@@ -36,46 +86,12 @@ class elastic_request_generator:
             "bool": {
               "filter": must_clauses,
               "should": [
-                {
-                  "query_string": {
-                    "query": m_user_query,
-                    "fields": [
-                      "m_title^4",
-                      "m_content^1.5",
-                      "m_important_content^1.5",
-                      "m_company_name^2.5",
-                      "m_url^1.5",
-                      "m_base_url^1.0"
-                    ],
-                    "default_operator": "OR",
-                    "lenient": True,
-                    "analyze_wildcard": True,
-                    "boost": 2,
-                  }
-                },
-                {
-                  "bool": {
-                    "should": [
-                      {"term": {"m_url.keyword": {"value": m_url_query, "boost": 6}}},
-                      {"wildcard": {"m_url.keyword": {"value": m_url_query + "/*", "boost": 5}}},
-                      {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query, "boost": 4}}},
-                      {"match": {"m_url": {"query": raw_query, "boost": 3}}}
-                    ],
-                    "minimum_should_match": 1
-                  }
-                },
-                {
-                  "bool": {
-                    "should": [
-                      {"term": {"m_base_url.keyword": {"value": m_url_query, "boost": 4}}},
-                      {"wildcard": {"m_base_url.keyword": {"value": "*" + m_url_query + "*", "boost": 2}}}
-                    ],
-                    "minimum_should_match": 1
-                  }
-                }
+                url_priority_query,
+                base_url_query,
+                content_query
               ],
               "minimum_should_match": 1,
-              "must_not": must_not_clause,
+              "must_not": must_not_clause
             }
           },
           "functions": [
@@ -85,10 +101,10 @@ class elastic_request_generator:
                   "origin": "now",
                   "scale": "30d",
                   "offset": "10d",
-                  "decay": 0.5,
+                  "decay": 0.5
                 }
               },
-              "weight": 2,
+              "weight": 2
             },
             {
               "field_value_factor": {
@@ -100,7 +116,7 @@ class elastic_request_generator:
             }
           ],
           "score_mode": "sum",
-          "boost_mode": "multiply",
+          "boost_mode": "multiply"
         }
       },
       "suggest": {
@@ -111,8 +127,8 @@ class elastic_request_generator:
             "min_word_length": 3,
             "max_term_freq": 0.05,
             "sort": "score",
-            "string_distance": "levenshtein",
-          },
+            "string_distance": "levenshtein"
+          }
         },
         "content_suggestion": {
           "text": m_user_query,
@@ -121,17 +137,17 @@ class elastic_request_generator:
             "min_word_length": 3,
             "max_term_freq": 0.05,
             "sort": "score",
-            "string_distance": "levenshtein",
-          },
-        },
+            "string_distance": "levenshtein"
+          }
+        }
       },
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
+      "explain": True  # Added for debugging
     }
 
     return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
-
   @staticmethod
   def on_search_general_data(p_query_model):
     raw_query = p_query_model.q.strip()
@@ -139,11 +155,17 @@ class elastic_request_generator:
       return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
     m_user_query = raw_query.lower().rstrip("/") + "*"
-    m_url_query = raw_query.rstrip("/")
+    m_url_query = raw_query  # Preserve exact input
     m_safe_search = p_query_model.mSearchParamSafeSearch
     m_search_type = p_query_model.pSearchParamType
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
+
+    # Extract domain and path for flexible matching
+    from urllib.parse import urlparse
+    parsed_url = urlparse(raw_query)
+    domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
+    path = parsed_url.path.lstrip("/") or ("/".join(raw_query.split("/")[1:]) if "/" in raw_query else "")
 
     must_clauses = []
     must_not_clause = []
@@ -157,6 +179,51 @@ class elastic_request_generator:
     if m_search_type and m_search_type.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_content_type.keyword": m_search_type.lower()}})
 
+    # Enhanced URL matching with broader wildcards
+    url_priority_query = {
+      "bool": {
+        "should": [
+          {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},  # Exact match
+          {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},  # Any substring
+          {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},  # Domain + path
+          {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},  # Path anywhere
+          {"match": {"m_url": {"query": raw_query, "boost": 40}}}  # Fuzzy match
+        ],
+        "minimum_should_match": 1,
+        "boost": 10
+      }
+    }
+
+    # Base URL matching focused on domain
+    base_url_query = {
+      "bool": {
+        "should": [
+          {"term": {"m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},  # Exact domain
+          {"term": {"m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},  # HTTP variation
+          {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}  # Domain substring
+        ],
+        "minimum_should_match": 1,
+        "boost": 5
+      }
+    }
+
+    content_query = {
+      "query_string": {
+        "query": m_user_query,
+        "fields": [
+          "m_title^3",
+          "m_meta_description^2",
+          "m_content^1.5",
+          "m_important_content^1.5",
+          "m_meta_keywords^1.8"
+        ],
+        "default_operator": "OR",
+        "lenient": True,
+        "analyze_wildcard": True,
+        "boost": 2
+      }
+    }
+
     query_statement = {
       "min_score": 0,
       "query": {
@@ -165,43 +232,9 @@ class elastic_request_generator:
             "bool": {
               "filter": must_clauses,
               "should": [
-                {
-                  "query_string": {
-                    "query": m_user_query,
-                    "fields": [
-                      "m_title^3",
-                      "m_meta_description^2",
-                      "m_content^1.5",
-                      "m_important_content^1.5",
-                      "m_meta_keywords^1.8",
-                      "m_url^1.2",
-                      "m_base_url^1.0"
-                    ],
-                    "default_operator": "OR",
-                    "lenient": True,
-                    "analyze_wildcard": True,
-                  }
-                },
-                {
-                  "bool": {
-                    "should": [
-                      {"term": {"m_url.keyword": {"value": m_url_query, "boost": 5}}},
-                      {"wildcard": {"m_url.keyword": {"value": m_url_query + "/*", "boost": 4}}},
-                      {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query, "boost": 3}}},
-                      {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 2}}}
-                    ],
-                    "minimum_should_match": 1
-                  }
-                },
-                {
-                  "bool": {
-                    "should": [
-                      {"term": {"m_base_url.keyword": {"value": m_url_query, "boost": 3}}},
-                      {"wildcard": {"m_base_url.keyword": {"value": "*" + m_url_query + "*", "boost": 1}}}
-                    ],
-                    "minimum_should_match": 1
-                  }
-                }
+                url_priority_query,
+                base_url_query,
+                content_query
               ],
               "minimum_should_match": 1,
               "must_not": must_not_clause,
@@ -248,6 +281,7 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
+      "explain": True  # For debugging
     }
     return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
