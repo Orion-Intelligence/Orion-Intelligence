@@ -176,8 +176,8 @@ class elastic_request_generator:
     if m_safe_search == "True":
       must_not_clause.append({"term": {"m_content_type.keyword": "adult"}})
 
-    if m_search_type and m_search_type.lower() not in ("", "all"):
-      must_clauses.append({"term": {"m_content_type.keyword": m_search_type.lower()}})
+    if m_search_type != "all":
+      must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
     # Enhanced URL matching with broader wildcards
     url_priority_query = {
