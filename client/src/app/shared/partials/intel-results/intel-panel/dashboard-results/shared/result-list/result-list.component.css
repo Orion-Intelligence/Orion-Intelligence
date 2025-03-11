@@ -1,7 +1,8 @@
-.search__result-detail-section-content{
+.search__result-detail-section-content {
   padding: 10px 15px 5px;
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
 }
 
 .search__result-detail-section-content .row {
@@ -18,7 +19,7 @@
   margin: 0;
 }
 
-.search__result-detail-section-content .border-bottom-background{
+.search__result-detail-section-content .border-bottom-background {
   border-color: #ffffff15 !important;
   padding-left: 30px;
   padding-right: 30px;
@@ -37,4 +38,11 @@
   font-weight: bold;
   margin-right: 5px;
   color: #fff;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .search__result-detail-section-content .grid-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }

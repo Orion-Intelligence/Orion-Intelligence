@@ -2,7 +2,7 @@
   margin: 0;
   flex: 1;
   height: auto;
-  overflow: scroll;
+  overflow: hidden;
   background: linear-gradient(to bottom,
   rgba(18, 52, 84, 1),
   rgba(41, 87, 132, 1) 50vh,

@@ -1,4 +1,4 @@
-<div class="search__result-detail-section-content" *ngIf="listItems.length > 0">
+<div class="search__result-detail-section-content" *ngIf="listItems.length > 0" [@fadeInUp]="activeTab">
   <ng-container *ngFor="let row of getRows(listItems, 3); let rowIndex = index; let last = last">
     <div class="row p-1">
       <ul class="grid-list">
