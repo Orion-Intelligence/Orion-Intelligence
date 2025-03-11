@@ -47,7 +47,6 @@ export class DashboardExpandedResultComponent implements OnInit {
     this.local_query = this.searchQuery
   }
 
-
   applyFilters(filters: { [key: string]: string | null }) {
     this.selectedFilters = filters;
     this.reloadFilters.emit([this.selectedFilters['mNetwork'], this.selectedFilters['mSearchParamSafeSearch']]);
