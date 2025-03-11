@@ -49,72 +49,67 @@ class _leak_lookup(leak_extractor_interface, ABC):
         return "https://twitter.com/LeakLookup"
 
     def parse_leak_data(self, page: Page):
-        while True:
-            rows = page.query_selector_all("table tr")
+        rows = page.query_selector_all("table tr")
 
-            for row in rows:
-                link_element = row.query_selector("td a")
-                if not link_element:
-                    continue
+        for row in rows:
+            link_element = row.query_selector("td a")
+            if not link_element:
+                continue
 
-                site_name = link_element.inner_text().strip()
-                site_url = link_element.get_attribute("href")
+            site_name = link_element.inner_text().strip()
+            site_url = link_element.get_attribute("href")
 
-                if site_url.startswith("#"):
-                    site_url = f"{self.base_url}/breaches{site_url}"
-                elif not site_url.startswith("http"):
-                    site_url = f"{self.base_url}/{site_url.lstrip('/')}"
+            if site_url.startswith("#"):
+                site_url = f"{self.base_url}/breaches{site_url}"
+            elif not site_url.startswith("http"):
+                site_url = f"{self.base_url}/{site_url.lstrip('/')}"
 
-                breach_size_element = row.query_selector("td.d-xl-table-cell:nth-of-type(2)")
-                breach_size = breach_size_element.inner_text().strip() if breach_size_element else "Unknown"
+            breach_size_element = row.query_selector("td.d-xl-table-cell:nth-of-type(2)")
+            breach_size = breach_size_element.inner_text().strip() if breach_size_element else "Unknown"
 
-                date_indexed_element = row.query_selector("td.d-xl-table-cell:nth-of-type(3)")
-                date_indexed = date_indexed_element.inner_text().strip() if date_indexed_element else "Unknown"
+            date_indexed_element = row.query_selector("td.d-xl-table-cell:nth-of-type(3)")
+            date_indexed = date_indexed_element.inner_text().strip() if date_indexed_element else "Unknown"
 
-                dropdown_button = row.query_selector("td .dropdown a")
-                if dropdown_button:
-                    dropdown_button.click()
-                    page.wait_for_timeout(1000)
+            dropdown_button = row.query_selector("td .dropdown a")
+            if dropdown_button:
+                dropdown_button.click()
 
-                    info_link = row.query_selector("td .dropdown-menu a[data-bs-toggle='modal']")
-                    if info_link:
-                        info_link.click()
+                info_link = row.query_selector("td .dropdown-menu a[data-bs-toggle='modal']")
+                if info_link:
+                    info_link.click()
 
-                        page.wait_for_selector("#breachModal .modal-body", timeout=5000)
-                        page.wait_for_timeout(2000)
+                    page.wait_for_selector("#breachModal .modal-body")
 
-                        modal_content_element = page.query_selector("#breachModal .modal-body")
-                        modal_content = modal_content_element.inner_text() if modal_content_element else "No data available"
+                    modal_content_element = page.query_selector("#breachModal .modal-body")
+                    modal_content = modal_content_element.inner_text() if modal_content_element else "No data available"
 
-                        modal_content_cleaned = []
-                        for line in modal_content.split("\n"):
-                            stripped_line = line.strip()
-                            if stripped_line:
-                                modal_content_cleaned.append(stripped_line)
+                    modal_content_cleaned = []
+                    for line in modal_content.split("\n"):
+                        stripped_line = line.strip()
+                        if stripped_line:
+                            modal_content_cleaned.append(stripped_line)
 
-                        modal_content_cleaned = "\n".join(modal_content_cleaned)
+                    modal_content_cleaned = "\n".join(modal_content_cleaned)
 
-                        self._card_data.append(card_extraction_model(
-                            m_title=site_name,
-                            m_url=site_url,
-                            m_base_url=self.base_url,
-                            m_content=modal_content_cleaned,
-                            m_network=helper_method.get_network_type(self.base_url),
-                            m_important_content=modal_content_cleaned,
-                            m_data_size=breach_size,
-                            m_leak_date=helper_method.extract_and_convert_date(date_indexed),
-                            m_content_type=["leaks"],
-                        ))
+                    self._card_data.append(card_extraction_model(
+                        m_title=site_name,
+                        m_url=site_url,
+                        m_base_url=self.base_url,
+                        m_content=modal_content_cleaned,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=modal_content_cleaned,
+                        m_data_size=breach_size,
+                        m_leak_date=helper_method.extract_and_convert_date(date_indexed),
+                        m_content_type=["leaks"],
+                    ))
 
-                        close_button = page.query_selector("#breachModal .btn-close")
-                        if close_button:
-                            close_button.click()
-                            page.wait_for_timeout(1000)
+                    close_button = page.query_selector("#breachModal .btn-close")
+                    if close_button:
+                        close_button.click()
 
-            next_button = page.query_selector("#datatables-indexed-breaches_next a.page-link")
-            if next_button and "disabled" not in next_button.get_attribute("class"):
-                next_button.click()
-                page.wait_for_selector("table tr", timeout=5000)
-                page.wait_for_timeout(3000)
-            else:
-                break
+        next_button = page.query_selector("#datatables-indexed-breaches_next a.page-link")
+        if next_button and "disabled" not in next_button.get_attribute("class"):
+            next_button.click()
+            page.wait_for_selector("table tr")
+            self.parse_leak_data(page)
+

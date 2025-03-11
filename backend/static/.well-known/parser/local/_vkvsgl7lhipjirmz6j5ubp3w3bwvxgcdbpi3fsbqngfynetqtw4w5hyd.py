@@ -57,7 +57,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
         return "https://www.iana.org/help/example-domains"
 
     def parse_leak_data(self, page: Page):
-        page.wait_for_selector('card-body')
+        # page.wait_for_selector('card-body')
         title_elements = page.query_selector_all('div.card-body.p-3.pt-2 a.h5')
 
         title_urls_list = [element.get_attribute('href') for element in title_elements]
@@ -75,7 +75,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
             link_elements = page.query_selector_all('a[href]')
             web_links = [a.get_attribute('href') for a in link_elements]
 
-            self._card_data = card_extraction_model(
+            self._card_data.append(card_extraction_model(
                 m_title=page.title(),
                 m_url=page.url,
                 m_base_url=self.base_url,
@@ -87,5 +87,5 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
                 m_email_addresses=helper_method.extract_emails(m_content),
                 m_phone_numbers=helper_method.extract_phone_numbers(m_content),
                 m_content_type=["leaks"],
-            )
+            ))
 

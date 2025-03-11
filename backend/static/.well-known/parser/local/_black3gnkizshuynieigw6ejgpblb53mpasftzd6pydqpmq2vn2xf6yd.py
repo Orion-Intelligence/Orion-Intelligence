@@ -82,7 +82,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
 
             print(f"Found {len(all_leak_urls)} leak URLs to process")
 
-
+            
             for leak_url in all_leak_urls:
                 try:
                     print(f"Processing: {leak_url}")
@@ -137,7 +137,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_company_name=title,
                         m_title=title,
                         m_url=leak_url,
-                        m_dumplink=dump_link,
+                        m_dumplink=[dump_link],
                         m_network=helper_method.get_network_type(self.base_url),
                         m_base_url=self.base_url,
                         m_content=description,
@@ -146,7 +146,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_data_size=data_size,
                         m_email_addresses=helper_method.extract_emails(description) if description else [],
                         m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
-                        m_leak_date=leak_date
+                        m_leak_date=helper_method.extract_and_convert_date(leak_date)
                     )
 
                     self._card_data.append(card_data)

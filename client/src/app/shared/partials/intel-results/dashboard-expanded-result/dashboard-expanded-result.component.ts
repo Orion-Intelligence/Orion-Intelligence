@@ -37,12 +37,14 @@ export class DashboardExpandedResultComponent implements OnInit {
   selectedFilters: { [key: string]: string | null } = {};
   isFilterOpen$: Observable<boolean>;
   result_triggered = false
+  local_query = ""
 
   constructor(public dashboardService: DashboardService, public sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
   ngOnInit(): void {
+    this.local_query = this.searchQuery
   }
 
 
@@ -65,7 +67,7 @@ export class DashboardExpandedResultComponent implements OnInit {
 
   onGetSuggestion(){
     if (this.suggestion && this.suggestion.options.length) {
-      return  this.searchQuery.replace(this.suggestion?.text, this.suggestion?.options[0].text)
+      return  this.local_query.replace(this.suggestion?.text, this.suggestion?.options[0].text)
     }else {
       return ""
     }

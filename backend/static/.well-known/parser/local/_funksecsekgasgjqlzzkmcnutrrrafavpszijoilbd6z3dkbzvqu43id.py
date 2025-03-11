@@ -75,7 +75,10 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
 
 
             for product_url in product_links:
-                page.goto(product_url)
+                if product_url is not None:
+                    page.goto(product_url)
+                else:
+                    continue
                 page.wait_for_load_state('load')
 
                 product_html = page.content()
@@ -117,7 +120,7 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                     m_email_addresses=helper_method.extract_emails(content) if content else [],
                     m_phone_numbers=helper_method.extract_phone_numbers(content) if content else [],
                     m_logo_or_images=logos,
-                    m_dumplink=dumplink
+                    m_dumplink=[dumplink]
                 )
 
                 self._card_data.append(card_data)

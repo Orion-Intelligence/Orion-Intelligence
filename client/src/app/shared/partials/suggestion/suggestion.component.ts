@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {NgIf} from '@angular/common';
 
 @Component({
-  selector: 'app-suggestion',
-  imports: [],
+  selector: 'app-suggestion', imports: [NgIf],
   templateUrl: './suggestion.component.html'
 })
 export class SuggestionComponent {

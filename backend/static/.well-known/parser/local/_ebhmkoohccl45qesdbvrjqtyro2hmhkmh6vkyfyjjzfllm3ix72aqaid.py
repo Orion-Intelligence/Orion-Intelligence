@@ -123,7 +123,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     m_content_type=["leaks"],
                     m_email_addresses=[],
                     m_phone_numbers=[],
-                    m_leak_date=today_date
+                    m_leak_date=helper_method.extract_and_convert_date(today_date)
                 )
 
                 self._card_data.append(card_data)

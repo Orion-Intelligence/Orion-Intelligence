@@ -12,7 +12,7 @@ from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, C
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _ransomwiki(leak_extractor_interface, ABC):
+class _ransom(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self):
@@ -23,7 +23,7 @@ class _ransomwiki(leak_extractor_interface, ABC):
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(_ransomwiki, cls).__new__(cls)
+            cls._instance = super(_ransom, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 

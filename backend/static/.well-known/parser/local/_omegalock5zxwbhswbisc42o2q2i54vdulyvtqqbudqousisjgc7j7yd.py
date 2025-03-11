@@ -85,7 +85,7 @@ class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_i
                     m_url=page_url,
                     m_base_url=self.base_url,
                     m_content=content,
-                    m_network=helper_method.get_network_type(self.base_url).value,
+                    m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=important_content,
                     m_weblink=[page_url],
                     m_dumplink=dump_links,
