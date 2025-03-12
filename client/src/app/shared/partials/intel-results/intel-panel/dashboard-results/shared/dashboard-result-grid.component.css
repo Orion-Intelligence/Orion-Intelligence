@@ -55,6 +55,12 @@
   font-weight: 600;
   margin-bottom: 16px;
   color: #fff;
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+
 }
 
 .dashboard__search-description {
