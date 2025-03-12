@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from playwright.sync_api import Page, TimeoutError
 from urllib.parse import urljoin
 
-from crawler.crawler_instance.local_interface_model.defacement.defacement_collector_interface import defacement_collector_interface
+from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
@@ -13,7 +13,7 @@ from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, C
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _zone_xsec(defacement_collector_interface, ABC):
+class _zone_xsec(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self):

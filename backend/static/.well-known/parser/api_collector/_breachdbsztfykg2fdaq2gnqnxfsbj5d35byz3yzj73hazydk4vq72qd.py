@@ -5,7 +5,7 @@ from playwright.async_api import BrowserContext
 from crawler.crawler_instance.local_interface_model.api.api_collector_interface import api_collector_interface
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_interface_model.api.api_data_model import api_data_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -27,7 +27,7 @@ class _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd(api_collector_in
 
   @property
   def rule_config(self) -> RuleModel:
-    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM)
+    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM, threat_type=ThreatType.API)
 
   @staticmethod
   def clean_text(text: str) -> str:
