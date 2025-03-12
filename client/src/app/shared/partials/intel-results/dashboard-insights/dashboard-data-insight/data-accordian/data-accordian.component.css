@@ -29,7 +29,9 @@
   color: #D0D0D0;
   font-family: Roboto, sans-serif;
 }
-
+.category__icons{
+  margin-right: 8px;
+}
 .data-accordion__header img {
   transition: max-height 0.3s ease, padding 0.3s ease;
   cursor: pointer;
@@ -88,7 +90,7 @@ input[type="checkbox"] {
   .data-accordion__container {
     float: left;
     max-width: 100vw;
-    width: 78%;
+    width: 100%;
     margin: 0;
   }
 }

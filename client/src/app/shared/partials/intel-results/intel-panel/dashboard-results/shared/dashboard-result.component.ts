@@ -5,6 +5,7 @@ import {CommonModule} from '@angular/common';
 import {ResultItemModel} from '../../../../../model/intel-results/result-item/result.item.model';
 import {last} from 'rxjs';
 import {fadeInDashboardItem} from '../../../../../animations/dashboard.item.animation';
+import {ResultHelperService} from '../../../../../services/helper.service';
 
 @Component({
   selector: 'app-result-panel',
@@ -14,7 +15,22 @@ import {fadeInDashboardItem} from '../../../../../animations/dashboard.item.anim
 })
 export class DashboardResultComponent implements OnChanges {
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private resultHelperService: ResultHelperService
+  ) {
+  }
+
+  downloadCSV() {
+    this.resultHelperService.downloadAsCSV(this.resultItem);
+  }
+
+  printPage() {
+    this.resultHelperService.printPage();
+  }
+
+  shareResult() {
+    this.resultHelperService.shareResult(this.resultItem?.m_url || '');
   }
 
   @Input() resultItem: ResultItemModel | null = null;
@@ -23,6 +39,7 @@ export class DashboardResultComponent implements OnChanges {
   listItems = []
   activeTab: string = "";
   content = ""
+
 
   ngOnChanges(): void {
     if (this.resultItem) {

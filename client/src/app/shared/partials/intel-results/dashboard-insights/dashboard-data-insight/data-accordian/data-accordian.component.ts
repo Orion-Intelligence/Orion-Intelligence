@@ -11,5 +11,5 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 })
 export class DataAccordianComponent {
   @Input() analytics: any;
-  @Input() categories: { key: string; label: string }[] = [];
+  @Input() categories: { key: string; label: string; icon?: string }[] = [];
 }

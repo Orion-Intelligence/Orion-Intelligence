@@ -36,8 +36,7 @@
 <div *ngIf="isLoading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
-
-<div *ngIf="!this.result_triggered && !isLoading && !result_count" @fadeInDashboardItem>
+<div *ngIf="!this.result_triggered && !isLoading && !result_count && !analyticsToggle" @fadeInDashboardItem>
   <app-dashboard-no-result></app-dashboard-no-result>
 </div>
 
