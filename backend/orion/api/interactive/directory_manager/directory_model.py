@@ -27,7 +27,7 @@ class directory_model:
           query["network_type"] = params.network
 
       total_count = await self._engine.count(db_url_data_model, query)
-      data = await self._engine.find(db_url_data_model, query, skip=(params.page - 1) * 10, limit=10)
+      data = await self._engine.find(db_url_data_model, query, skip=(params.page - 1) * 1000, limit=1000)
       return data, total_count
 
   async def directory(self, param: directory_param_model):

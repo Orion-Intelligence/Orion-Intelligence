@@ -1,13 +1,13 @@
 <div class="dashboard__search-container">
   <div *ngFor="let item of dashboardService.searchLeakCallbackModel.Result" class="dashboard__search-card">
-    <div class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
+    <div class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="saveSession(item.m_hash)">
       <div class="dashboard__search-tags">
         <span class="dashboard__tag">General</span>
         <span class="dashboard__tag">Leaks</span>
         <span class="dashboard__tag">Marketplace</span>
       </div>
 
-      <h2 class="dashboard__search-title">{{ item.m_title }}</h2>
+      <h2 class="dashboard__search-title">{{ item.m_title.substring(0, 50) }}</h2>
 
       <p class="dashboard__search-description">
         {{ item.m_important_content.substring(0, 250) }} ...

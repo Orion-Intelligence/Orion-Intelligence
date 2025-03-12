@@ -1,13 +1,7 @@
 <div class="dashboard__search-container">
-  <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result"
-       class="dashboard__search-card"
-       [id]="'item-' + item.m_hash"
+  <div *ngFor="let item of dashboardService.searchGeneralCallbackModel.Result" class="dashboard__search-card" [id]="'item-' + item.m_hash">
 
->
-
-    <div class="dashboard__search-main-div"
-         [routerLink]="[currentUrl, item.m_hash]"
-         [queryParams]="queryParams" (click)="saveSession(item.m_hash)">
+    <div class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="saveSession(item.m_hash)">
 
       <div class="dashboard__search-tags">
         <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
@@ -15,7 +9,7 @@
 
       <h2 class="dashboard__search-title">{{ item.m_title }}</h2>
 
-      <p class="dashboard__search-description highlight" [innerHTML]="highlightWords(item.m_important_content) + '...'"></p>
+      <p class="dashboard__search-description highlight" [innerHTML]="highlightWords(item.m_important_content)">&nbsp;...</p>
 
       <a class="dashboard__search-link">{{ item.m_url }}</a>
 

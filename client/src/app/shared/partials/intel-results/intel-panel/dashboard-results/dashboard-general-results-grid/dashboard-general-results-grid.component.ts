@@ -14,12 +14,7 @@ export class DashboardGeneralResultsGridComponent implements AfterViewInit {
   currentUrl: string = '';
   queryParams: any = {};
 
-  constructor(
-    public dashboardService: DashboardService,
-    private sanitizer: DomSanitizer,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
+  constructor(public dashboardService: DashboardService, private sanitizer: DomSanitizer, private router: Router, private route: ActivatedRoute) {
   }
 
   ngOnInit() {
@@ -30,8 +25,8 @@ export class DashboardGeneralResultsGridComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-  setTimeout(() => this.scrollToSavedItem(), 100); // Small delay
-}
+    this.scrollToSavedItem();
+  }
 
   saveSession(itemId: string) {
     if (itemId) {
@@ -41,47 +36,79 @@ export class DashboardGeneralResultsGridComponent implements AfterViewInit {
 
   scrollToSavedItem() {
     const savedItemId = sessionStorage.getItem('selectedItem');
-    console.log("Retrieved ID from sessionStorage:", savedItemId); // Debugging log
     if (savedItemId) {
-      setTimeout(() => {
-        const element = document.getElementById('item-' + savedItemId);
-        console.log("Scrolling to:", element); // Debugging log
-        if (element) {
-          element.scrollIntoView({behavior: 'smooth', block: 'start'});
-        } else {
-          console.warn("Element not found for ID:", 'item-' + savedItemId);
-        }
-      }, 500);
-    } else {
-      console.warn("No saved ID in sessionStorage.");
+      const element = document.getElementById('item-' + savedItemId);
+      if (element) {
+        element.scrollIntoView();
+      }
     }
   }
 
 
   highlightWords(text: string, maxLength: number = 250): SafeHtml {
     if (!this.query || text.length <= maxLength) {
-      return this.sanitizer.bypassSecurityTrustHtml(text.substring(0, maxLength));
+      let truncatedText = text.substring(0, maxLength);
+      if (text.length > maxLength) {
+        const lastSpaceIndex = truncatedText.lastIndexOf(' ');
+        if (lastSpaceIndex > 0) {
+          truncatedText = truncatedText.substring(0, lastSpaceIndex);
+        }
+        truncatedText += '...';
+      }
+      return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(truncatedText));
     }
 
-    let queryWords = this.query.split(/\s+/).map(word => word.toLowerCase());
-    let bestSubstring = "";
-    let maxKeywordCount = 0;
+    const queryWords = this.query
+      .split(/\s+/)
+      .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').toLowerCase());
+    const effectiveMaxLength = maxLength - 3;
 
-    for (let i = 0; i <= text.length - maxLength; i++) {
-      let windowText = text.substring(i, i + maxLength);
-      let wordCount = queryWords.reduce((count, word) =>
-        count + (windowText.toLowerCase().split(word).length - 1), 0);
+    let bestSubstring = '';
+    let maxKeywordCount = 0;
+    let bestStartIndex = 0;
+
+    for (let i = 0; i <= text.length - effectiveMaxLength; i++) {
+      const windowText = text.slice(i, i + effectiveMaxLength);
+      const wordCount = queryWords.reduce((count, word) => count + (windowText.toLowerCase().split(word).length - 1), 0);
 
       if (wordCount > maxKeywordCount) {
         maxKeywordCount = wordCount;
         bestSubstring = windowText;
+        bestStartIndex = i;
       }
     }
 
-    let snippet = bestSubstring || text.substring(0, maxLength);
-    let regex = new RegExp(`\\b(${queryWords.join('|')})\\b`, 'gi');
-    let highlightedText = snippet.replace(regex, match => `<span class="dashboard__search-highlight">${match}</span>`);
+    if (!bestSubstring) {
+      bestSubstring = text.substring(0, effectiveMaxLength);
+      bestStartIndex = 0;
+    }
 
+    if (bestStartIndex > 0) {
+      let adjustedStart = text.lastIndexOf('. ', bestStartIndex - 1);
+      if (adjustedStart === -1 || adjustedStart < bestStartIndex - effectiveMaxLength) {
+        adjustedStart = text.lastIndexOf(' ', bestStartIndex - 1);
+      }
+      if (adjustedStart !== -1 && adjustedStart >= 0) {
+        bestSubstring = text.slice(adjustedStart + 1, adjustedStart + 1 + effectiveMaxLength);
+      }
+    }
+
+    const lastSpaceIndex = bestSubstring.lastIndexOf(' ');
+    if (lastSpaceIndex > 0 && bestSubstring.length === effectiveMaxLength) {
+      bestSubstring = bestSubstring.substring(0, lastSpaceIndex);
+    }
+
+    const regex = new RegExp(`\\b(${queryWords.join('|')})\\b`, 'gi');
+    let escapedSnippet = this.escapeHtml(bestSubstring);
+    let highlightedText = escapedSnippet.replace(regex, match => `<span class="dashboard__search-highlight">${match}</span>`);
+
+    highlightedText += '...';
     return this.sanitizer.bypassSecurityTrustHtml(highlightedText);
+  }
+
+  escapeHtml(text: string): string {
+    let tempDiv = document.createElement("div");
+    tempDiv.textContent = text;
+    return tempDiv.innerHTML;
   }
 }
