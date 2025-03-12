@@ -73,11 +73,11 @@ services:
     command:
       - "--entrypoints.web.address=:9090"
       - "--entrypoints.websecure.address=:9443"
-      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--providers.file.filename=/etc/traefik/api_collector.yml"
       - "--providers.docker=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./dockerFiles/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./dockerFiles/traefik/api_collector.yml:/etc/traefik/api_collector.yml:ro
       - /etc/letsencrypt/live/orion.genesistechnologies.org/cert.pem:/certs/cert.pem:ro
       - /etc/letsencrypt/live/orion.genesistechnologies.org/privkey.pem:/certs/privkey.pem:ro
 
