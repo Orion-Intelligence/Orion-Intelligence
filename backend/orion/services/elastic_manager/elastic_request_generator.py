@@ -1,12 +1,33 @@
 import hashlib
 from datetime import datetime, timedelta, timezone
 
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 
 
 class elastic_request_generator:
+
+  @staticmethod
+  def on_search_defacementdata(p_query_model: search_defacement_param_model):
+    raw_query = p_query_model.q.lower()  # Convert input to lowercase
+
+    query_statement = {
+      "query": {
+        "bool": {
+          "should": [
+            {"match": {"m_location": raw_query}},  # Tokenized search
+            {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True}}}
+          ],
+          "minimum_should_match": 1
+        }
+      },
+      "size": 1000,
+      "track_total_hits": True
+    }
+
+    return "defacement_model", query_statement
 
   @staticmethod
   def on_search_leakdata(p_query_model):
@@ -148,6 +169,7 @@ class elastic_request_generator:
     }
 
     return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
+
   @staticmethod
   def on_search_general_data(p_query_model):
     raw_query = p_query_model.q.strip()
@@ -319,6 +341,24 @@ class elastic_request_generator:
         }
       )
 
+    return index_entries
+
+  @staticmethod
+  def index_query_defacement(p_index_data):
+    index_entries = []
+    utc_now = datetime.now(timezone.utc)
+    current_timestamp = utc_now.isoformat()
+
+    for record in p_index_data.get("cards_data", []):
+      data_hash = helper_controller.generate_data_hash(record)
+      record["m_hash"] = data_hash
+      record["m_update_date"] = current_timestamp
+      index_entries.append(
+        {
+          ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+          ELASTIC_KEYS.S_VALUE: record,
+        }
+      )
     return index_entries
 
   @staticmethod

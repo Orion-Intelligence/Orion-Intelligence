@@ -1,6 +1,8 @@
 import os
 from datetime import datetime, timezone
 from starlette.responses import JSONResponse
+
+from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -60,6 +62,16 @@ class crawl_model:
       base_url=leak_index.base_url,
       new_content_type=['leaks'],
       new_index_type=['leak'],
+      network_type=leak_index.m_network,
+      is_leak_update=True
+    )
+
+  async def init_defacement(self, leak_index: DefacementDataModel):
+    await elastic_controller.get_instance().index_defacement(leak_index.model_dump())
+    return await self._update_or_create_model(
+      base_url=leak_index.base_url,
+      new_content_type=['defacement'],
+      new_index_type=['defacement'],
       network_type=leak_index.m_network,
       is_leak_update=True
     )

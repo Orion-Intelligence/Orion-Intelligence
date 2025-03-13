@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 from string import capwords
 
 from elasticsearch import AsyncElasticsearch
+
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING
 from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
@@ -37,14 +39,16 @@ class elastic_controller:
         try:
             mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
             mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
+            mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
-                log.g().i(f"Created index: {ELASTIC_INDEX.S_LEAK_INDEX}")
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_GENERIC_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=mapping_generic_model)
-                log.g().i(f"Created index: {ELASTIC_INDEX.S_GENERIC_INDEX}")
+
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model)
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
@@ -75,6 +79,15 @@ class elastic_controller:
     async def search_query_leak(self, p_data: search_leak_param_model):
         try:
             document, data_filter = self.__m_elastic_request_generator.on_search_leakdata(p_data)
+            m_data = await self.__m_connection.search(index=document, body=data_filter)
+            return True, m_data
+        except Exception as ex:
+            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+            return False, str(ex)
+
+    async def search_query_defacement(self, p_data: search_defacement_param_model):
+        try:
+            document, data_filter = self.__m_elastic_request_generator.on_search_defacementdata(p_data)
             m_data = await self.__m_connection.search(index=document, body=data_filter)
             return True, m_data
         except Exception as ex:
@@ -142,6 +155,10 @@ class elastic_controller:
 
     async def index_leak(self, p_data):
         m_data = self.__m_elastic_request_generator.index_query_leak(p_data)
+        return await self.__index(m_data)
+
+    async def index_defacement(self, p_data):
+        m_data = self.__m_elastic_request_generator.index_query_defacement(p_data)
         return await self.__index(m_data)
 
     async def __index(self, p_data):

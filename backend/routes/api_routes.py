@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from orion.api.interactive.hompage_manager.homepage_view_model import homepage_view_model
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
@@ -28,6 +29,10 @@ async def parser(param: search_general_param_model = Depends()):
 @api_routes.get("/api/search/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def parser(param: search_leak_param_model = Depends()):
     return await search_view_model.getInstance().search_leak(param)
+
+@api_routes.get("/api/search/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def parser(param: search_defacement_param_model = Depends()):
+    return await search_view_model.getInstance().search_defacement(param)
 
 @api_routes.get("/api/search/leak/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def parser(doc_id: str):

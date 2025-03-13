@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
+from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
@@ -21,6 +22,11 @@ async def parser(request: Request):
 async def get_leak_data(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_leak_index(LeakDataModel(**body))
+
+@crawl_routes.post("/api/index/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def get_leak_data(request: Request):
+  body = await request.json()
+  return await crawl_controller.getInstance().invoke_defacement_index(DefacementDataModel(**body))
 
 @crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser(request: Request):

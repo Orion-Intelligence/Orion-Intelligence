@@ -4,6 +4,7 @@ from orion.helper_manager.env_handler import env_handler
 class ELASTIC_INDEX:
   S_GENERIC_INDEX = "generic_model"
   S_LEAK_INDEX = "leak_model"
+  S_DEFACEMENT_INDEX = "defacement_model"
 
 
 class ELASTIC_CONNECTIONS:
@@ -31,6 +32,7 @@ class MANAGE_ELASTIC_MESSAGES:
   S_READ_FAILURE = "[5] Something unexpected happened while reading"
   S_READ_SUCCESS = "[6] Data Read Successfully"
   S_COUNT_FAILURE = "[1] Something unexpected happened while counting"
+
 
 class ELASTIC_ENUMS:
   mapping_leakdatamodel = {
@@ -109,6 +111,39 @@ class ELASTIC_ENUMS:
         "m_update_date": {"type": "date"},
         "m_creation_date": {"type": "date"},
         "m_content_type": {"type": "keyword"}
+      }
+    }
+  }
+
+  mapping_defacement_model = {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "max_result_window": 1000000
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "strings_as_keywords": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "m_location": {"type": "keyword"},
+        "m_attacker": {"type": "keyword"},
+        "m_team": {"type": "keyword"},
+        "m_network": {"type": "keyword"},
+        "m_web_server": {"type": "keyword"},
+        "m_base_url": {"type": "keyword"},
+        "m_ip": {"type": "keyword"},
+        "m_date_of_leak": {"type": "date", "format": "yyyy-MM-dd"},
+        "m_web_url": {"type": "keyword"},
+        "m_screenshot": {"type": "keyword"},
+        "m_mirror_links": {"type": "keyword"}
       }
     }
   }

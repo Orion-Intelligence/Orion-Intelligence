@@ -36,13 +36,13 @@
         <td data-label="General Model Status" class="onion__table-leak-status">
           <span class="directory-list__status-default-pointer" [class.directory-list__status-inactive-pointer]="!isRecent(item.geneic_model_last_update)">
           </span>
-          {{ isRecent(item.geneic_model_last_update) ? 'Active' : 'Dead' }}
+          {{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
         </td>
 
         <td data-label="Leak Model Status" class="onion__table-leak-status">
           <span class="directory-list__status-default-pointer" [class.directory-list__status-inactive-pointer]="!isRecent(item.leak_model_last_update)">
           </span>
-          {{ isRecent(item.leak_model_last_update) ? 'Active' : 'Dead' }}
+          {{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
         </td>
 
         <td data-label="Network Type">

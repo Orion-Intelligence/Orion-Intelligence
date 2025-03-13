@@ -9,7 +9,7 @@ export const directory_filters: FilterModel = {
     },
     index: {
       title: "Index Type",
-      options: ["all", "general", "leak"],
+      options: ["all", "general", "leak", "defacement"],
       type: "dropdown",
     },
     content_type: {

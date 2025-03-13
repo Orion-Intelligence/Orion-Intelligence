@@ -37,7 +37,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.SELENIUM, threat_type=ThreatType.DEFACEMENT)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.SELENIUM, m_threat_type=ThreatType.DEFACEMENT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -126,13 +126,13 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
                         card_data = defacement_model(
                             m_web_server=[web_url] if web_url else [],
-                            m_web_url=link,
+                            m_web_url=[link],
                             m_ip=[location, ip] if location and ip else [],
                             m_base_url=self.base_url,
                             m_date_of_leak = helper_method.extract_and_convert_date(date),
                             m_team="",
-                            m_location=location,
-                            m_attacker=""
+                            m_location=[location],
+                            m_attacker=[""]
                         )
 
                         self._card_data.append(card_data)

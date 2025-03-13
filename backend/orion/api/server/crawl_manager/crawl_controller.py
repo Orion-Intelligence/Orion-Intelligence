@@ -1,3 +1,4 @@
+from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -21,6 +22,9 @@ class crawl_controller:
     else:
       crawl_controller.__instance = self
       self.__crawl_model = crawl_model()
+
+  async def invoke_defacement_index(self, leak_index: DefacementDataModel):
+    return await self.__crawl_model.init_defacement(leak_index)
 
   async def invoke_leak_index(self, leak_index: LeakDataModel):
     return await self.__crawl_model.init_leak(leak_index)
