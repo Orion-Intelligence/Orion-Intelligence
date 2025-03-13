@@ -1,1 +1,32 @@
-<p>dashboard-defacement works!</p>
+<span id="top"></span>
+<img ngSrc="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" priority  fill="true">
+<div class="directory">
+  <div class="directory__container">
+    <div class="directory__main-container">
+      <div class="directory__upper-heading">
+        <div class="directory__pagination-heading">
+          <p class="directory__header">Defacement Services</p>
+        </div>
+
+        <div class="directory-pagination col-7">
+          <app-dashboard-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-dashboard-pagination>
+        </div>
+
+        <div class="side-menu-container">
+          <label class="filters-button" (click)="openSidebar()">
+            <img ngSrc="assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority >
+            Filter
+          </label>
+
+          <div class="filters-container" [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
+            <app-filters [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async" (filterChanged)="applyFilters($event)" (filterReset)="resetFilters()" (filterClose)="closeSidebar()"></app-filters>
+          </div>
+        </div>
+      </div>
+
+      <app-dashboard-defacement-result-grid></app-dashboard-defacement-result-grid>
+    </div>
+  </div>
+</div>
+
+<span id="bottom"></span>
