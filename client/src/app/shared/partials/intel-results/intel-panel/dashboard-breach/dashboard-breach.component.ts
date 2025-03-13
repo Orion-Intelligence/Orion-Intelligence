@@ -1,20 +1,18 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {DashboardExpandedResultComponent} from "../../dashboard-expanded-result/dashboard-expanded-result.component";
-import {DashboardPaginationComponent} from "../../dashboard-pagination/dashboard-pagination.component";
+import {ResultComponent} from "../../../result/result.component";
+import {PaginationComponent} from "../../../pagination/pagination.component";
 import {NgIf} from "@angular/common";
 import {DashboardService} from "../../../../../services/dashboard/dashboard.service";
 import {ActivatedRoute} from "@angular/router";
 import {switchMap, timer} from "rxjs";
-import {
-  DashboardLeakResultGridComponent
-} from "../dashboard-results/dashboard-leak-result-grid/dashboard-leak-result-grid.component";
 import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
-import {Analytics} from '../../dashboard-insights/analytics.model';
-import {DashboardInsightsComponent} from '../../dashboard-insights/dashboard-insights.component';
+import {Analytics} from '../../../../model/analytics/analytics.model';
+import {InsightsComponent} from '../../../insights/insights.component';
+import {DashboardResultsGridComponent} from "../dashboard-results/dashboard-results-grid/dashboard-results-grid.component";
 
 @Component({
   selector: 'app-dashboard-breach',
-  imports: [DashboardExpandedResultComponent, DashboardLeakResultGridComponent, DashboardPaginationComponent, NgIf, DashboardInsightsComponent],
+	imports: [ResultComponent, PaginationComponent, NgIf, InsightsComponent, DashboardResultsGridComponent],
   templateUrl: './dashboard-breach.component.html',
   animations: [fadeInDashboardItem],
 })

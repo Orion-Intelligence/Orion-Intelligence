@@ -1,20 +1,20 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {DashboardExpandedResultComponent} from '../../dashboard-expanded-result/dashboard-expanded-result.component';
+import {ResultComponent} from '../../../result/result.component';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute} from '@angular/router';
 import {NgIf} from '@angular/common';
 import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
 import {combineLatest, distinctUntilChanged, switchMap, timer} from 'rxjs';
-import {DashboardPaginationComponent} from '../../dashboard-pagination/dashboard-pagination.component';
-import {DashboardInsightsComponent} from '../../dashboard-insights/dashboard-insights.component';
+import {PaginationComponent} from '../../../pagination/pagination.component';
+import {InsightsComponent} from '../../../insights/insights.component';
 import {
-  DashboardGeneralResultsGridComponent
-} from '../dashboard-results/dashboard-general-results-grid/dashboard-general-results-grid.component';
-import {Analytics} from '../../dashboard-insights/analytics.model';
+  DashboardResultsGridComponent
+} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
+import {Analytics} from '../../../../model/analytics/analytics.model';
 
 @Component({
   selector: 'app-dashboard-general',
-  imports: [DashboardExpandedResultComponent, NgIf, DashboardPaginationComponent, DashboardInsightsComponent, DashboardGeneralResultsGridComponent],
+  imports: [ResultComponent, NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent],
   templateUrl: './dashboard-general.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -29,7 +29,7 @@ export class DashboardGeneralComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if(this.dashboardService.searchGeneralCallbackModel.Result.length>0){
+    if (this.dashboardService.searchGeneralCallbackModel.Result.length > 0) {
       this.isLoading = false;
       this.query = this.dashboardService.searchGeneralParamModel.q
     }
@@ -44,8 +44,7 @@ export class DashboardGeneralComponent implements OnInit {
         this.dashboardService.searchGeneralParamModel.mNetwork = params['network'] || 'all';
 
         this.dashboardService.searchGeneralParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
-        if(this.firstTrigger || this.dashboardService.searchGeneralCallbackModel.Result.length==0)
-          this.fetchSearchResults();
+        if (this.firstTrigger || this.dashboardService.searchGeneralCallbackModel.Result.length == 0) this.fetchSearchResults();
         this.cdr.detectChanges();
         this.firstTrigger = true
       });

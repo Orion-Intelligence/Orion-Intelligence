@@ -1,21 +1,21 @@
 import {Component} from '@angular/core';
 import {Observable} from 'rxjs';
 import {FiltersComponent} from '../../shared/partials/filters/filters.component';
-import {DirectoryListComponent} from '../../shared/partials/directory/directory-list/directory-list.component';
+import {DirectoryListComponent} from './directory-list/directory-list.component';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
-import {FilterModel} from '../../shared/model/filter/filter';
+import {FilterModel} from '../../shared/model/filter/filter.model';
 import {directory_filters} from '../../shared/constants/filters';
 import {SidebarService} from '../../services/shared/sidebar.service';
 import {DirectoryService} from '../../services/directory/directory.service';
-import {DirectoryCallbackModel} from '../../shared/model/directory/directory';
+import {DirectoryCallbackModel} from '../../shared/model/directory/directory.model';
 import {
-  DashboardPaginationComponent
-} from '../../shared/partials/intel-results/dashboard-pagination/dashboard-pagination.component';
+  PaginationComponent
+} from '../../shared/partials/pagination/pagination.component';
 
 @Component({
   selector: 'app-directory',
   templateUrl: './directory.component.html',
-  imports: [FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, DashboardPaginationComponent,],
+  imports: [FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent,],
 })
 export class DirectoryComponent {
   directoryData$: Observable<DirectoryCallbackModel | null>;

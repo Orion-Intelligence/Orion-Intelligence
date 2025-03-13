@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
-import { AuthCallbackModel } from '../../shared/model/core/auth.callback.model';
+import { AuthModel } from '../../shared/model/auth/auth.model';
 import { TokenRefreshService } from './token-refresh.service';
 import {HttpHeaders} from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private authState = new BehaviorSubject<AuthCallbackModel>(this.loadAuthState());
+  private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
   constructor(
     private apiService: ApiService,
@@ -20,7 +20,7 @@ export class AuthService {
     }
   }
 
-  get authState$(): Observable<AuthCallbackModel> {
+  get authState$(): Observable<AuthModel> {
     return this.authState.asObservable();
   }
 
@@ -74,7 +74,7 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  private loadAuthState(): AuthCallbackModel {
+  private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
     return {
       token,

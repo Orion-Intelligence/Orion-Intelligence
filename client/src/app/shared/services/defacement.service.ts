@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import {Defacement_callback_model} from '../model/intel-results/defacement/defacement_callback_model';
+import {DefacementCallbackModel} from '../model/intel-results/defacement/defacement.callback.model';
 
 @Injectable({ providedIn: 'root' })
 export class DefacementService {
-  private dummyData: Defacement_callback_model[] = [
+  private dummyData: DefacementCallbackModel[] = [
     {
       m_location: ['USA', 'Germany'],
       m_attacker: ['Hacker Group A'],
@@ -19,7 +19,7 @@ export class DefacementService {
     }
   ];
 
-  getResults(): Observable<Defacement_callback_model[]> {
+  getResults(): Observable<DefacementCallbackModel[]> {
     return of(this.dummyData);
   }
 }

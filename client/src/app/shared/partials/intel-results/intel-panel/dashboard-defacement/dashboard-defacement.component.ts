@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
-import {DashboardPaginationComponent} from '../../dashboard-pagination/dashboard-pagination.component';
+import {PaginationComponent} from '../../../pagination/pagination.component';
 import {FiltersComponent} from '../../../filters/filters.component';
 import {Observable} from 'rxjs';
-import {DirectoryCallbackModel} from '../../../../model/directory/directory';
-import {FilterModel} from '../../../../model/filter/filter';
+import {DirectoryCallbackModel} from '../../../../model/directory/directory.model';
+import {FilterModel} from '../../../../model/filter/filter.model';
 import {directory_filters} from '../../../../constants/filters';
 import {SidebarService} from '../../../../../services/shared/sidebar.service';
 import {DirectoryService} from '../../../../../services/directory/directory.service';
@@ -14,9 +14,8 @@ import {
 
 @Component({
   selector: 'app-dashboard-defacement',
-  imports: [AsyncPipe, DashboardPaginationComponent, DashboardDefacementResultGridComponent, FiltersComponent, NgOptimizedImage],
-  templateUrl: './dashboard-defacement.component.html',
-  styleUrl: './dashboard-defacement.component.css'
+  imports: [AsyncPipe, PaginationComponent, DashboardDefacementResultGridComponent, FiltersComponent, NgOptimizedImage],
+  templateUrl: './dashboard-defacement.component.html'
 })
 export class DashboardDefacementComponent {
   directoryData$: Observable<DirectoryCallbackModel | null>;

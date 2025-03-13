@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, of, Subject} from 'rxjs';
-import {SearchGeneralParamModel} from '../../shared/model/intel-results/general/search_general_param_model';
-import {SearchGeneralCallbackModel} from '../../shared/model/intel-results/general/search_general_callback_model';
-import {SearchLeakParamModel} from '../../shared/model/intel-results/leak/search_leak_param_model';
-import {SearchLeakCallbackModel} from '../../shared/model/intel-results/leak/search_leak_callback_model';
+import {GeneralParamModel} from '../../shared/model/intel-results/general/general.param.model';
+import {GeneralCallbackModel} from '../../shared/model/intel-results/general/general.callback.model';
+import {SearchLeakParamModel} from '../../shared/model/intel-results/leak/leak.param.model';
+import {LeakCallbackModel} from '../../shared/model/intel-results/leak/leak.callback.model';
 import {HttpParams} from '@angular/common/http';
 import {catchError, map, tap, takeUntil} from 'rxjs/operators';
 import {ApiService} from '../../shared/services/api.service';
@@ -15,11 +15,11 @@ import {Router} from '@angular/router';
   providedIn: 'root'
 })
 export class DashboardService {
-  searchGeneralParamModel: SearchGeneralParamModel = new SearchGeneralParamModel();
-  searchGeneralCallbackModel: SearchGeneralCallbackModel = new SearchGeneralCallbackModel();
+  searchGeneralParamModel: GeneralParamModel = new GeneralParamModel();
+  searchGeneralCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
 
   searchLeakParamModel: SearchLeakParamModel = new SearchLeakParamModel();
-  searchLeakCallbackModel: SearchLeakCallbackModel = new SearchLeakCallbackModel();
+  searchLeakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
 
   searchDynamicEmailParambackModel: search_dynamic_email_param_model = new search_dynamic_email_param_model();
   searchDynamicEmailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
@@ -45,10 +45,10 @@ export class DashboardService {
     this.cancelOngoingRequest();
     const params = new HttpParams({fromObject: this.searchGeneralParamModel as any});
 
-    return this.apiService.get<SearchGeneralCallbackModel>('search/general', {params}).pipe(takeUntil(this.activeRequest$), tap((response: SearchGeneralCallbackModel) => {
-      this.searchGeneralCallbackModel = new SearchGeneralCallbackModel(response);
+    return this.apiService.get<GeneralCallbackModel>('search/general', {params}).pipe(takeUntil(this.activeRequest$), tap((response: GeneralCallbackModel) => {
+      this.searchGeneralCallbackModel = new GeneralCallbackModel(response);
       this.updateUrlWithParams(this.searchGeneralParamModel);
-    }), map((response: SearchGeneralCallbackModel) => ({
+    }), map((response: GeneralCallbackModel) => ({
       success: true, isEmpty: response.Result?.length === 0
     })), catchError(() => of({success: false, isEmpty: false})));
   }
@@ -57,10 +57,10 @@ export class DashboardService {
     this.cancelOngoingRequest();
     const params = new HttpParams({fromObject: this.searchLeakParamModel as any});
 
-    return this.apiService.get<SearchLeakCallbackModel>('search/leak', {params}).pipe(takeUntil(this.activeRequest$), tap(response => {
-      this.searchLeakCallbackModel = new SearchLeakCallbackModel(response);
+    return this.apiService.get<LeakCallbackModel>('search/leak', {params}).pipe(takeUntil(this.activeRequest$), tap(response => {
+      this.searchLeakCallbackModel = new LeakCallbackModel(response);
       this.updateUrlWithParams(this.searchLeakParamModel);
-    }), map((response: SearchLeakCallbackModel) => ({
+    }), map((response: LeakCallbackModel) => ({
       success: true, isEmpty: response.Result?.length === 0
     })), catchError(() => of({success: false, isEmpty: false})));
   }

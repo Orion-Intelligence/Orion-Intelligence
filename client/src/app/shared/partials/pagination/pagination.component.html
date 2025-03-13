@@ -1,0 +1,30 @@
+<div class="search__pagination disable-highlight">
+  <div class="search__pagination-container">
+
+    <button class="search__pagination-navigation"
+            [class.disabled]="currentPage === 1"
+            (click)="currentPage !== 1 && onPageChange(1)">
+      <img ngSrc="/client/src/assets/images/shared/nav-first.svg" alt="nav-first" height="16" width="16">
+    </button>
+
+    <button class="search__pagination-navigation gc-clear-selection"
+            [class.disabled]="currentPage === 1"
+            (click)="currentPage !== 1 && onPageChange(currentPage - 1)">
+      <img ngSrc="/client/src/assets/images/shared/nav-prev.svg" alt="nav-prev" height="16" width="16">
+    </button>
+
+    <button *ngFor="let page of getPageRange(); let i = index"
+            class="search__navigation gc-clear-selection"
+            [class.search__navigation--focus]="page === currentPage"
+            (click)="onPageChange(page)">
+      {{ page }}
+    </button>
+
+    <button class="search__pagination-navigation gc-clear-selection"
+            [class.disabled]="currentPage >= maxPages"
+            (click)="currentPage < maxPages && onPageChange(currentPage + 1)">
+      <img ngSrc="/client/src/assets/images/shared/nav-next.svg" alt="nav-next" height="16" width="16">
+    </button>
+
+  </div>
+</div>

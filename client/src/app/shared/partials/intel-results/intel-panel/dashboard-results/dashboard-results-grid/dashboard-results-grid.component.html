@@ -1,0 +1,40 @@
+<div class="dashboard__search-container">
+  <div *ngFor="let item of searchResults" class="dashboard__search-card" [id]="'item-' + item.m_hash">
+
+    <div class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="saveSession(item.m_hash)">
+
+      <div class="dashboard__search-tags">
+        <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+      </div>
+
+      <h2 class="dashboard__search-title">{{ item.m_title }} dsasd sdasda asd sadc ad asd asd as dsasd sdasda asd sadc ad asd asd as dsasd sdasda asd sadc ad asd asd as</h2>
+
+      <p class="dashboard__search-description highlight" [innerHTML]="highlightWords(item.m_important_content)">&nbsp;...</p>
+
+      <div class="dashboard__search-link">{{ item.m_url }}</div>
+
+      <div class="dashboard__search-info">
+        <div class="dashboard__search-info-item">
+          <span class="dashboard__info-label">Published on:</span>
+          <span class="dashboard__info-value">{{ item.m_creation_date }}</span>
+        </div>
+        <div class="dashboard__search-info-item">
+          <span class="dashboard__info-label">Network:</span>
+          <span class="dashboard__info-value">{{ item.m_network }}</span>
+        </div>
+        <div class="dashboard__search-info-item">
+          <span class="dashboard__info-label">Updated on:</span>
+          <span class="dashboard__info-value">{{ item.m_update_date }}</span>
+        </div>
+        <div class="dashboard__search-status">
+          <span class="dashboard__info-label">Status</span>
+          <div class="d-flex align-items-center">
+            <span class="dashboard__status-dot"></span>
+            <span class="dashboard__status-text">&nbsp;active</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

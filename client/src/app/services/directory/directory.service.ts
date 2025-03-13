@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { DirectoryCallbackModel } from '../../shared/model/directory/directory';
+import { DirectoryCallbackModel } from '../../shared/model/directory/directory.model';
 import { ApiService } from '../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })
 export class DirectoryService {
   private directoryDataSubject = new BehaviorSubject<DirectoryCallbackModel | null>(null);
-  directoryData$ = this.directoryDataSubject.asObservable();
-
   private currentPageSubject = new BehaviorSubject<number>(1); // Default page is 1
+
+  directoryData$ = this.directoryDataSubject.asObservable();
   currentPage$ = this.currentPageSubject.asObservable();
 
   constructor(private apiService: ApiService) {}
@@ -27,9 +27,5 @@ export class DirectoryService {
     if (page > 0) {
       this.currentPageSubject.next(page);
     }
-  }
-
-  getCurrentPage(): number {
-    return this.currentPageSubject.getValue();
   }
 }

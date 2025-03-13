@@ -1,4 +1,4 @@
-import { FilterModel } from '../model/filter/filter';
+import { FilterModel } from '../model/filter/filter.model';
 
 export const directory_filters: FilterModel = {
   filters: {

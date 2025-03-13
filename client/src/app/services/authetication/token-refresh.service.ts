@@ -16,7 +16,7 @@ export class TokenRefreshService {
         .pipe(
           switchMap(() => refreshAction()),
           tap({
-            next: (newToken) => {
+            next: (_) => {
             },
             error: () => {
               this.stopTokenRefresh();

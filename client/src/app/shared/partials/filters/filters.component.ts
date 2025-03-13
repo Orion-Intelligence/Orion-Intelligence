@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { FilterModel } from '../../model/filter/filter';
+import { FilterModel } from '../../model/filter/filter.model';
 import { last } from 'rxjs';
 import { filterAnimation } from '../../animations/filter.animation';
 

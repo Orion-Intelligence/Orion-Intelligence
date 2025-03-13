@@ -1,0 +1,127 @@
+.login-wrapper {
+  position: relative;
+}
+
+.login-background {
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: 0.07;
+  object-fit: contain;
+  object-position: top right;
+  pointer-events: none;
+}
+
+.login-container {
+  position: relative;
+  color: white;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+  min-height: 400px;
+  width: 100%;
+  min-width: 300px;
+}
+
+.login-box {
+  background: linear-gradient(90deg, rgba(21, 52, 84, 0.5) 0%, rgba(22, 56, 88, 0.5) 100%);
+  padding: 42px 32px;
+  border-radius: 16px;
+  width: 420px;
+}
+
+.login-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.login-error-message {
+  color: #ffcc00;
+  text-align: center;
+}
+
+.login-form-group {
+  display: grid;
+}
+
+.login-input {
+  border: none;
+  border-radius: 8px;
+  background: #fff url('/client/src/assets/images/shared/lock.svg') no-repeat calc(100% - 10px) center;
+  background-size: 20px 20px;
+  padding: 12px 40px 12px 20px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.login-input::placeholder {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: #aaa;
+}
+
+.login-input-username {
+  background: #fff url('/client/src/assets/images/shared/profile.svg') no-repeat calc(100% - 10px) center;
+  background-size: 20px 20px;
+  margin-bottom: 24px;
+}
+
+.login-input:focus {
+  border: none;
+  outline: none;
+}
+
+.login-btn-submit,
+.login-btn-disabled {
+  display: table;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(92.32deg, #4EA2F1 2.58%, #2C7AC5 66.77%, #1E6CB7 130.97%);
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 36px;
+  width: 100%;
+  filter: brightness(100%);
+  transition: all 300ms ease;
+}
+
+.login-btn-submit:hover {
+  filter: brightness(88%);
+}
+
+.login-btn-disabled {
+  opacity: 0.5;
+}
+
+.login-footer {
+  position: fixed;
+  bottom: 0;
+  background: rgba(33, 75, 116, 0.31);
+  height: 48px;
+  width: 100%;
+}
+
+.login-hidden-label {
+  display: none;
+}
+
+@media only screen and (max-width: 643px) {
+  .login-box {
+    margin: 0 20px;
+    padding: 42px 20px;
+    width: 100%;
+  }
+
+  .login-background {
+    width: 175% !important;
+    height: 175% !important;
+  }
+}

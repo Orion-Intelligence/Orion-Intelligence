@@ -1,0 +1,18 @@
+<div *ngIf="analytics" class="insight-general__div">
+  <div *ngFor="let section of sections" class="insight-general__container insight-general__container-background">
+    <input type="checkbox" [id]="section.title + '-toggle'" checked>
+    <label class="insight-general__header" [for]="section.title + '-toggle'">
+      {{ section.title }}
+      <img ngSrc="../../../../../assets/images/shared/dropdown_left.svg" alt="" width="20" height="20">
+    </label>
+    <div class="insight-general__content">
+      <div class="row">
+        <div *ngFor="let item of section.items" class="insight-general__inner-div">
+          <p class="insight-general__text">
+            <span *ngIf="item.spanClass" [class]="item.spanClass"></span>{{ item.label }} </p>
+          <p class="insight-general__coverage-numbers">{{ item.value }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
