@@ -1,188 +1,129 @@
 from datetime import datetime, timezone
 from string import capwords
-
 from elasticsearch import AsyncElasticsearch
-
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING
 from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
-from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 
 
 class elastic_controller:
-    __instance = None
-    __m_connection = None
-    __m_elastic_request_generator = None
+  __instance = None
+  __m_connection = None
+  __m_elastic_request_generator = None
 
-    @staticmethod
-    def get_instance():
-        if elastic_controller.__instance is None:
-            elastic_controller()
-        return elastic_controller.__instance
+  @staticmethod
+  def get_instance():
+    if elastic_controller.__instance is None:
+      elastic_controller()
+    return elastic_controller.__instance
 
-    def __init__(self):
-        elastic_controller.__instance = self
-        self.__m_elastic_request_generator = elastic_request_generator()
+  def __init__(self):
+    elastic_controller.__instance = self
+    self.__m_elastic_request_generator = elastic_request_generator()
 
-    async def initialize(self):
-        await self.__link_connection()
+  async def initialize(self):
+    await self.__link_connection()
 
-    async def __link_connection(self):
-        self.__m_connection = AsyncElasticsearch(f"{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
-                                                 http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
-        await self.__initialize_mappings()
+  async def __link_connection(self):
+    self.__m_connection = AsyncElasticsearch(f"{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
+                                             http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
+    await self.__initialize_mappings()
 
-    async def __initialize_mappings(self):
-        try:
-            mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
-            mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
-            mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
+  async def __initialize_mappings(self):
+    try:
+      mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
+      mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
+      mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
+      if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
+        await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_GENERIC_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=mapping_generic_model)
+      if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_GENERIC_INDEX):
+        await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=mapping_generic_model)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model)
+      if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX):
+        await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model)
 
-        except Exception as ex:
-            log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
+    except Exception as ex:
+      log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
-    async def get_defacement_doc(self, doc_id: str):
-        try:
-            result = await self.__m_connection.get(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, id=doc_id, ignore=[404])
-            return [result["_source"]] if result and "_source" in result else []
-        except:
-            return []
+  async def purge_old_records(self):
+    print("Purging expired records")
+    m_request = await self.__m_elastic_request_generator.clear_expire_index()
+    try:
+      await self.__m_connection.delete_by_query(index=ELASTIC_INDEX.S_LEAK_INDEX, body=m_request, ignore=[404])
+      await self.__m_connection.delete_by_query(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=m_request, ignore=[404])
+    except Exception as ex:
+      log.g().e(f"Failed to delete old records: {str(ex)}")
 
-    async def get_leak_doc(self, doc_id: str):
-        try:
-            result = await self.__m_connection.get(index=ELASTIC_INDEX.S_LEAK_INDEX, id=doc_id, ignore=[404])
-            return [result["_source"]] if result and "_source" in result else []
-        except:
-            return []
+  async def get_doc(self, index, doc_id: str):
+    try:
+      result = await self.__m_connection.get(index=index, id=doc_id, ignore=[404])
+      return [result["_source"]] if result and "_source" in result else []
+    except:
+      return []
 
-    async def get_general_doc(self, doc_id: str):
-        try:
-            result = await self.__m_connection.get(index=ELASTIC_INDEX.S_GENERIC_INDEX, id=doc_id, ignore=[404])
-            return [result["_source"]] if result and "_source" in result else []
-        except:
-            return []
+  async def search_query(self, document, data_filter):
+    try:
+      m_data = await self.__m_connection.search(index=document, body=data_filter)
+      return True, m_data
+    except Exception as ex:
+      log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+      return False, str(ex)
 
-    async def search_query_general(self, p_data: search_general_param_model):
-        try:
-            document, data_filter = self.__m_elastic_request_generator.on_search_general_data(p_data)
-            m_data = await self.__m_connection.search(index=document, body=data_filter)
-            return True, m_data
-        except Exception as ex:
-            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, str(ex)
+  async def get_insight(self):
+    try:
+      queries = self.__m_elastic_request_generator.generate_insight_queries()
+      insight_data = InsightData()
 
-    async def search_query_leak(self, p_data: search_leak_param_model):
-        try:
-            document, data_filter = self.__m_elastic_request_generator.on_search_leakdata(p_data)
-            m_data = await self.__m_connection.search(index=document, body=data_filter)
-            return True, m_data
-        except Exception as ex:
-            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, str(ex)
+      for query in queries:
+        result = await self.__m_connection.search(index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER])
 
-    async def search_query_defacement(self, p_data: search_defacement_param_model):
-        try:
-            document, data_filter = self.__m_elastic_request_generator.on_search_defacementdata(p_data)
-            m_data = await self.__m_connection.search(index=document, body=data_filter)
-            return True, m_data
-        except Exception as ex:
-            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, str(ex)
+        aggs = result.get("aggregations", {})
+        value = "-"
+        if aggs:
+          first_key = next(iter(aggs))
+          value = aggs[first_key].get("value", None)
+        key = query["m_filter"]["aggs"]
+        m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
+        key = list(key.keys())[0]
 
-    async def search_query(self, p_data:search_leak_param_model):
-        try:
-            document, data_filter = self.__m_elastic_request_generator.on_search_general_data(p_data)
-            m_data = await self.__m_connection.search(index=document, body=data_filter)
-            return True, m_data
-        except Exception as ex:
-            log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, str(ex)
+        if key in ["Most Recent", "Oldest Update"] and value:
+          value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
+        if isinstance(value, float):
+          value = round(value, 2)
 
-    async def purge_old_records(self):
-        print("Purging expired records")
-        m_request = await self.__m_elastic_request_generator.clear_expire_index()
-        try:
-            await self.__m_connection.delete_by_query(index=ELASTIC_INDEX.S_LEAK_INDEX, body=m_request, ignore=[404])
-            await self.__m_connection.delete_by_query(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=m_request, ignore=[404])
-        except Exception as ex:
-            log.g().e(f"Failed to delete old records: {str(ex)}")
+        if key in GENERIC_AGGREGATION_MAPPING and GENERIC_AGGREGATION_MAPPING[key] == "common_types":
+          buckets = result.get("aggregations", {}).get("Common Type", {}).get("buckets", [])
+          value = capwords(buckets[0]["key"]) if buckets else "-"
 
-    async def get_insight(self):
-        try:
-            queries = self.__m_elastic_request_generator.generate_insight_queries()
-            insight_data = InsightData()
+        if value is not None:
+          if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX:
+            setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)
+          else:
+            setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
 
-            for query in queries:
-                result = await self.__m_connection.search(index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER])
+      return True, insight_data
 
-                aggs = result.get("aggregations", {})
-                value = "-"
-                if aggs:
-                    first_key = next(iter(aggs))
-                    value = aggs[first_key].get("value", None)
-                key = query["m_filter"]["aggs"]
-                m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
-                key = list(key.keys())[0]
+    except Exception as _:
+      return False, None
 
-                if key in ["Most Recent", "Oldest Update"] and value:
-                    value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
-                if isinstance(value, float):
-                    value = round(value, 2)
+  async def index_data(self, p_data):
+    try:
+      def ensure_creation_date(p_entry):
+        if "m_creation_date" not in p_entry[ELASTIC_KEYS.S_VALUE]:
+          p_entry[ELASTIC_KEYS.S_VALUE]["m_creation_date"] = datetime.now(timezone.utc).isoformat()
+        return p_entry
 
-                if key in GENERIC_AGGREGATION_MAPPING and GENERIC_AGGREGATION_MAPPING[key] == "common_types":
-                    buckets = result.get("aggregations", {}).get("Common Type", {}).get("buckets", [])
-                    value = capwords(buckets[0]["key"]) if buckets else "-"
-
-                if value is not None:
-                    if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX:
-                        setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)
-                    else:
-                        setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
-
-            return True, insight_data
-
-        except Exception as _:
-            return False, None
-
-    async def index_general(self, p_data):
-        m_data = self.__m_elastic_request_generator.index_query_general(p_data)
-        return await self.__index(m_data)
-
-    async def index_leak(self, p_data):
-        m_data = self.__m_elastic_request_generator.index_query_leak(p_data)
-        return await self.__index(m_data)
-
-    async def index_defacement(self, p_data):
-        m_data = self.__m_elastic_request_generator.index_query_defacement(p_data)
-        return await self.__index(m_data)
-
-    async def __index(self, p_data):
-        try:
-            def ensure_creation_date(p_entry):
-                if "m_creation_date" not in p_entry[ELASTIC_KEYS.S_VALUE]:
-                    p_entry[ELASTIC_KEYS.S_VALUE]["m_creation_date"] = datetime.now(timezone.utc).isoformat()
-                return p_entry
-
-            if isinstance(p_data, list):
-                for entry in p_data:
-                    entry = ensure_creation_date(entry)
-                    await self.__m_connection.index(index=entry[ELASTIC_KEYS.S_DOCUMENT], id=entry[ELASTIC_KEYS.S_VALUE]["m_hash"], body=entry[ELASTIC_KEYS.S_VALUE])
-            else:
-                p_data = ensure_creation_date(p_data)
-                await self.__m_connection.index(index=p_data[ELASTIC_KEYS.S_DOCUMENT], id=p_data[ELASTIC_KEYS.S_VALUE]["m_hash"], body=p_data[ELASTIC_KEYS.S_VALUE])
-            return True, None
-        except Exception as ex:
-            log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
-            return False, str(ex)
+      if isinstance(p_data, list):
+        for entry in p_data:
+          entry = ensure_creation_date(entry)
+          await self.__m_connection.index(index=entry[ELASTIC_KEYS.S_DOCUMENT], id=entry[ELASTIC_KEYS.S_VALUE]["m_hash"], body=entry[ELASTIC_KEYS.S_VALUE])
+      else:
+        p_data = ensure_creation_date(p_data)
+        await self.__m_connection.index(index=p_data[ELASTIC_KEYS.S_DOCUMENT], id=p_data[ELASTIC_KEYS.S_VALUE]["m_hash"], body=p_data[ELASTIC_KEYS.S_VALUE])
+      return True, None
+    except Exception as ex:
+      log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
+      return False, str(ex)

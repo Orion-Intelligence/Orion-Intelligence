@@ -9,7 +9,12 @@ class directory_model:
   # Private Variables
   __instance = None
 
-  # Initializations
+  @staticmethod
+  def getInstance():
+    if directory_model.__instance is None:
+      directory_model.__instance = directory_model()
+    return directory_model.__instance
+
   def __init__(self):
     self._engine = mongo_controller.get_instance().get_engine()
 
@@ -30,7 +35,7 @@ class directory_model:
       data = await self._engine.find(db_url_data_model, query, skip=(params.page - 1) * 1000, limit=1000)
       return data, total_count
 
-  async def directory(self, param: directory_param_model):
+  async def invoke_directory(self, param: directory_param_model):
       results, total_count = await self.fetch_filtered_urls(param)
       return directory_callback_model(
           total_count=total_count,

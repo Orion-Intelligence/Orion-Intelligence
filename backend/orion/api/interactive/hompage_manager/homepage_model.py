@@ -10,8 +10,11 @@ class homepage_model:
   __instance = None
 
   # Initializations
-  def __init__(self):
-    pass
+  @staticmethod
+  def getInstance():
+    if homepage_model.__instance is None:
+      homepage_model.__instance = homepage_model()
+    return homepage_model.__instance
 
   @staticmethod
   async def invoke_analytics():

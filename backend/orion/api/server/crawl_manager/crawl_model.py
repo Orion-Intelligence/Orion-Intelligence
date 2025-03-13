@@ -6,6 +6,7 @@ from orion.api.server.crawl_manager.class_model.defacement_model import Defaceme
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from fastapi.responses import FileResponse
@@ -47,7 +48,8 @@ class crawl_model:
     return JSONResponse(content={"message": CRAWL_CALLBACK_RESPONSES.M_WEBSITE_INDEXED}, status_code=200)
 
   async def init_general(self, general_index: GeneralDataModel):
-    await elastic_controller.get_instance().index_general(general_index.model_dump())
+    m_data = elastic_request_generator().index_query_general(general_index)
+    await elastic_controller.get_instance().index_data(m_data.model_dump())
     return await self._update_or_create_model(
       base_url=general_index.m_base_url,
       new_content_type=general_index.m_content_type,
@@ -57,7 +59,8 @@ class crawl_model:
     )
 
   async def init_leak(self, leak_index: LeakDataModel):
-    await elastic_controller.get_instance().index_leak(leak_index.model_dump())
+    m_data = elastic_request_generator().index_query_leak(leak_index)
+    await elastic_controller.get_instance().index_data(m_data.model_dump())
     return await self._update_or_create_model(
       base_url=leak_index.base_url,
       new_content_type=['leaks'],
@@ -66,13 +69,14 @@ class crawl_model:
       is_leak_update=True
     )
 
-  async def init_defacement(self, leak_index: DefacementDataModel):
-    await elastic_controller.get_instance().index_defacement(leak_index.model_dump())
+  async def init_defacement(self, defacement_index: DefacementDataModel):
+    m_data = elastic_request_generator().index_query_defacement(defacement_index)
+    await elastic_controller.get_instance().index_data(m_data.model_dump())
     return await self._update_or_create_model(
-      base_url=leak_index.base_url,
+      base_url=defacement_index.base_url,
       new_content_type=['defacement'],
       new_index_type=['defacement'],
-      network_type=leak_index.m_network,
+      network_type=defacement_index.m_network,
       is_leak_update=True
     )
 
