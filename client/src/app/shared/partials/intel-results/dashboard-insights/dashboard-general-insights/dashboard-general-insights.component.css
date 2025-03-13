@@ -132,6 +132,9 @@
     width: 100%;
     margin-bottom: 24px;
   }
+  .insight-general__div .insight-general__container:nth-child(1){
+    margin-bottom: 24px;
+  }
 }
 
 @media only screen and (max-width: 943px) {

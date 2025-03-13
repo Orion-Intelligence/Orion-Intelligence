@@ -1,4 +1,4 @@
-<app-dashboard-expanded-result (onToggleSwitch)="onToggleAnalyticsTrigger()"  (updatePageNumber)="onPageChange($event)" [searchQuery]="query" [suggestion]="dashboardService.searchGeneralCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="dashboardService.searchGeneralCallbackModel.Result.length"></app-dashboard-expanded-result>
+<app-dashboard-expanded-result (onToggleSwitch)="onToggleAnalyticsTrigger()" [analyticsToggle]="onToggleAnalytics"  (updatePageNumber)="onPageChange($event)" [searchQuery]="query" [suggestion]="dashboardService.searchGeneralCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="dashboardService.searchGeneralCallbackModel.Result.length"></app-dashboard-expanded-result>
 
 
 <div *ngIf="this.onToggleAnalytics && !isLoading" @fadeInDashboardItem>

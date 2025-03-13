@@ -23,7 +23,7 @@
 .sidebar__items {
   list-style: none;
   overflow-y: auto;
-  height: 80vh;
+  height: 88vh;
   scrollbar-width: none;
   margin-left: -5px;
   padding: 20px;

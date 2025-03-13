@@ -1,3 +1,19 @@
+<div class="d-flex justify-content-start">
+  <div class="btn-group report-menu-option-container">
+    <button class="p-0 report-menu-option" (click)="downloadCSV()">
+      <img ngSrc="/assets/images/shared/download.svg" alt="background" height="25" width="25">
+    </button>
+    <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="printPage()">
+      <img ngSrc="/assets/images/shared/print.svg" alt="background" height="25" width="25">
+    </button>
+    <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="shareResult()">
+      <img ngSrc="/assets/images/shared/share.svg" alt="background" height="25" width="25">
+    </button>
+  </div>
+</div>
+
 <div class="search__result-detail">
   <h2 class="search__result-detail-heading">{{ resultItem?.m_title }}</h2>
 
@@ -60,7 +76,7 @@
                      [listItems]="listItems"
                      [activeTab]="activeTab"
                      @fadeInDashboardItem
-                    >
+    >
     </app-result-list>
   </div>
 </div>

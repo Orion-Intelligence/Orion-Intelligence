@@ -26,6 +26,7 @@ export class DashboardExpandedResultComponent implements OnInit {
   @Input() isLoading!: boolean;
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery: string = '';
+  @Input() analyticsToggle: boolean = false;
 
   @Output() updatePageNumber = new EventEmitter<number>();
   @Output() reloadFilters = new EventEmitter<[string | null, string | null]>();
