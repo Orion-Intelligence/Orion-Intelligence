@@ -8,8 +8,7 @@ import { DefacementService } from '../../../../../services/defacement.service';
   selector: 'app-dashboard-defacement-result-grid',
   standalone: true,
   imports: [NgIf, NgForOf, AsyncPipe],
-  templateUrl: './dashboard-defacement-result-grid.component.html',
-  styleUrls: ['./dashboard-defacement-result-grid.component.css']
+  templateUrl: './dashboard-defacement-result-grid.component.html'
 })
 export class DashboardDefacementResultGridComponent implements OnInit {
   resultData$!: Observable<Defacement_callback_model[]>;
