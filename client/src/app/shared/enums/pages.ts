@@ -3,6 +3,7 @@ export enum Category {
   BREACH = 'Breach',
   HOMEPAGE = 'Homepage',
   DIRECTORY = 'Directory',
+  DEFACEMENT = 'Defacement',
   API = 'Online API\'s'
 }
 
@@ -21,6 +22,10 @@ export enum GeneralSubCategory {
 
 export enum BreachSubCategory {
   DATABASES = 'Databases',
+}
+
+export enum DefacementSubCategory {
+  DATABASES = 'Archive',
 }
 
 export enum ApiSubCategory {

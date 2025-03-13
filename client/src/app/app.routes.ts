@@ -12,6 +12,9 @@ import { DashboardBreachComponent } from './shared/partials/intel-results/intel-
 import { DashboardGeneralComponent } from './shared/partials/intel-results/intel-panel/dashboard-general/dashboard-general.component';
 import {DashboardGeneralResultGridItemComponent} from './shared/partials/intel-results/intel-panel/dashboard-results/dashboard-general-results-grid/dashboard-general-result-grid-item/dashboard-general-result-grid-item.component';
 import {DashboardLeakResultGridItemComponent} from './shared/partials/intel-results/intel-panel/dashboard-results/dashboard-leak-result-grid/dashboard-leak-result-grid-item/dashboard-leak-result-grid-item.component';
+import {
+  DashboardDefacementComponent
+} from './shared/partials/intel-results/intel-panel/dashboard-defacement/dashboard-defacement.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { animation: 'RootPage' } },
@@ -50,6 +53,14 @@ export const routes: Routes = [
           { path: '', redirectTo: 'all', pathMatch: 'full' },
           { path: ':category', component: DashboardGeneralComponent, data: { type: 'Strategic Intelligence', animation: 'CategoryPage' } },
           { path: ':category/:m_hash', component: DashboardGeneralResultGridItemComponent, data: { type: 'Strategic Intelligence', animation: 'HashPage' } }
+        ]
+      },
+      {
+        path: 'defacement',
+        data: { animation: 'DefacementPage' },
+        children: [
+          { path: '', redirectTo: 'all', pathMatch: 'full' },
+          { path: ':category', component: DashboardDefacementComponent, data: { type: 'Defacement', animation: 'CategoryPage' } },
         ]
       }
     ],
