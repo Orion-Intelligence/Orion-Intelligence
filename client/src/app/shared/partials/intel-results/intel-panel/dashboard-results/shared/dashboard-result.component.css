@@ -16,6 +16,7 @@
   padding: 5px;
   background: #143352;
   border: none !important;
+  transition: background-color 0.3s ease-in-out;
 }
 
 .report-menu-option:hover{

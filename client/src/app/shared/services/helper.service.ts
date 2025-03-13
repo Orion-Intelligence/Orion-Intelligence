@@ -32,10 +32,10 @@ export class ResultHelperService {
   shareResult(url: string) {
     if (navigator.share) {
       navigator.share({
-        title: 'Check out this result',
-        text: 'Here is a search result you might find interesting.',
+        title: 'Orion Intelligence',
+        text: 'Sharing a relevant CTI resource for review.',
         url: url
-      }).catch(error => console.log('Error sharing:', error));
+      }).catch(error => console.error('Error sharing:', error));
     } else {
       alert('Sharing is not supported on this browser.');
     }
