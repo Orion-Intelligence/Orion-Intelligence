@@ -19,6 +19,7 @@ export class DashboardResultsGridComponent implements AfterViewInit {
   constructor(private helperService:HelperService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute) {
   }
 
+  
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
     this.route.queryParams.subscribe(params => {
