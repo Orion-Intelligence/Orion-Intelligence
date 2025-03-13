@@ -1,7 +1,17 @@
-<div class="search__result-actions d-flex justify-content-start mb-3">
-  <button class="btn btn-primary me-2" (click)="downloadCSV()">Download as CSV</button>
-  <button class="btn btn-secondary me-2" (click)="printPage()">Print</button>
-  <button class="btn btn-info" (click)="shareResult()">Share</button>
+<div class="d-flex justify-content-start">
+  <div class="btn-group report-menu-option-container">
+    <button class="p-0 report-menu-option" (click)="downloadCSV()">
+      <img ngSrc="/assets/images/shared/download.svg" alt="background" height="25" width="25">
+    </button>
+    <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="printPage()">
+      <img ngSrc="/assets/images/shared/print.svg" alt="background" height="25" width="25">
+    </button>
+    <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="shareResult()">
+      <img ngSrc="/assets/images/shared/share.svg" alt="background" height="25" width="25">
+    </button>
+  </div>
 </div>
 
 <div class="search__result-detail">

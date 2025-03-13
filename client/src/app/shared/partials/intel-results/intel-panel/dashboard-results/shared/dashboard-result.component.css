@@ -10,9 +10,32 @@
   display: block;
 }
 
-.search__result-actions {
-  padding-left: 35px;
-  padding-top: 20px;
+.report-menu-option{
+  width: 45px;
+  height: 45px;
+  padding: 5px;
+  background: #143352;
+  border: none !important;
+}
+
+.report-menu-option:hover{
+  background: #0f263e;
+}
+
+.report-menu-divider{
+  width: 1px;
+  background: #ffffff10;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.report-menu-option-container{
+  border-radius: 12px;
+  margin-left: 30px;
+  background: #143352;
+  margin-top: 20px;
+  border: 1px solid #ffffff10;
+  overflow: hidden;
 }
 
 .search__result-actions button {
