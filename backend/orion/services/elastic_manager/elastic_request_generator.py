@@ -11,23 +11,111 @@ class elastic_request_generator:
 
   @staticmethod
   def on_search_defacementdata(p_query_model: search_defacement_param_model):
-    raw_query = p_query_model.q.lower()  # Convert input to lowercase
+    raw_query = p_query_model.q.strip().lower()
+    if not raw_query:
+      return ELASTIC_INDEX.S_DEFACEMENT_INDEX, {"query": {"match_none": {}}, "size": 0}
+
+    m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
+    m_network = getattr(p_query_model, 'mNetwork', None)
+
+    must_clauses = []
+    must_not_clause = []
+
+    if m_network and m_network.lower() not in ("", "all"):
+      must_clauses.append({"term": {"m_network.keyword": m_network.lower()}})
+
+    main_query = {
+      "bool": {
+        "should": [
+          {
+            "multi_match": {
+              "query": raw_query,
+              "fields": [
+                "m_location^2",
+                "m_ip^1.5",
+                "m_web_url^3",
+                "m_base_url^2.5",
+                "m_web_server^1.5",
+                "m_attacker^2",
+                "m_team^2",
+                "m_network^1"
+              ],
+              "type": "best_fields",
+              "boost": 10
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_ip": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1.5}}},
+                {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 3}}},
+                {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2.5}}},
+                {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1.5}}},
+                {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}}
+              ],
+              "minimum_should_match": 1
+            }
+          }
+        ],
+        "minimum_should_match": 1,
+        "filter": must_clauses,
+        "must_not": must_not_clause
+      }
+    }
 
     query_statement = {
+      "min_score": 0,
       "query": {
-        "bool": {
-          "should": [
-            {"match": {"m_location": raw_query}},  # Tokenized search
-            {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True}}}
+        "function_score": {
+          "query": main_query,
+          "functions": [
+            {
+              "gauss": {
+                "m_update_date": {
+                  "origin": "now",
+                  "scale": "30d",
+                  "offset": "10d",
+                  "decay": 0.5
+                }
+              },
+              "weight": 1.5
+            }
           ],
-          "minimum_should_match": 1
+          "score_mode": "sum",
+          "boost_mode": "multiply"
         }
       },
-      "size": 1000,
+      "suggest": {
+        "attacker_suggestion": {
+          "text": raw_query,
+          "term": {
+            "field": "m_attacker",
+            "min_word_length": 3,
+            "max_term_freq": 0.05,
+            "sort": "score",
+            "string_distance": "levenshtein"
+          }
+        },
+        "web_url_suggestion": {
+          "text": raw_query,
+          "term": {
+            "field": "m_web_url",
+            "min_word_length": 3,
+            "max_term_freq": 0.05,
+            "sort": "score",
+            "string_distance": "levenshtein"
+          }
+        }
+      },
+      "from": max(0, (m_page_number - 1) * 100),
+      "size": 100,
       "track_total_hits": True
     }
 
-    return "defacement_model", query_statement
+    return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
   @staticmethod
   def on_search_leakdata(p_query_model):

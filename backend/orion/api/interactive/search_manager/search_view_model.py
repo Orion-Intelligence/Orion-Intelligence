@@ -30,6 +30,9 @@ class search_view_model:
   async def search_defacement(self, param):
     return await self.__m_search_model.seach_defacement_result(param)
 
+  async def get_defacement_doc(self, doc_id):
+    return await self.__m_search_model.get_defacement_doc(doc_id)
+
   async def get_leak_doc(self, doc_id):
     return await self.__m_search_model.get_leak_doc(doc_id)
 

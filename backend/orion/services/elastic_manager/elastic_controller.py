@@ -53,6 +53,13 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
+    async def get_defacement_doc(self, doc_id: str):
+        try:
+            result = await self.__m_connection.get(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, id=doc_id, ignore=[404])
+            return [result["_source"]] if result and "_source" in result else []
+        except:
+            return []
+
     async def get_leak_doc(self, doc_id: str):
         try:
             result = await self.__m_connection.get(index=ELASTIC_INDEX.S_LEAK_INDEX, id=doc_id, ignore=[404])
