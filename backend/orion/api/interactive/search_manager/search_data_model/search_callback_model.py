@@ -41,3 +41,4 @@ class search_callback_model(BaseModel):
     Result: List[result_item]
     Suggestions: List[suggestion]
     Page_Count: float
+    
