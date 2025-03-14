@@ -1,4 +1,4 @@
-import {Component, Input, AfterViewInit} from '@angular/core';
+import {AfterViewInit, Component, Input} from '@angular/core';
 import {NgForOf} from '@angular/common';
 import {SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -9,7 +9,8 @@ import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model
 @Component({
   selector: 'app-dashboard-results-grid',
   templateUrl: './dashboard-results-grid.component.html',
-  imports: [NgForOf, RouterLink]
+  imports: [NgForOf, RouterLink],
+  standalone: true
 })
 export class DashboardResultsGridComponent implements AfterViewInit {
   @Input() query!: string;
@@ -17,9 +18,8 @@ export class DashboardResultsGridComponent implements AfterViewInit {
   currentUrl: string = '';
   queryParams: any = {};
 
-  constructor(private helperService:HelperService, private router: Router, private route: ActivatedRoute) {
+  constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute) {
   }
-
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
@@ -29,21 +29,40 @@ export class DashboardResultsGridComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.scrollToSavedItem();
+    this.scrollToSavedPosition();
   }
 
   saveSession(itemId: string) {
     if (itemId) {
       sessionStorage.setItem('selectedItem', itemId);
+      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + itemId);
+      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
+        scrollableContainer = scrollableContainer.parentElement;
+      }
+      const scrollPosition = scrollableContainer ? scrollableContainer.scrollTop : window.scrollY;
+      sessionStorage.setItem('scrollPosition', scrollPosition.toString());
     }
   }
 
-  scrollToSavedItem() {
+  private isScrollable(element: HTMLElement): boolean {
+    const style = window.getComputedStyle(element);
+    const overflowY = style.overflowY;
+    return (overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight;
+  }
+
+  scrollToSavedPosition() { // Renamed from scrollToSavedItem
+    const savedPosition = sessionStorage.getItem('scrollPosition');
     const savedItemId = sessionStorage.getItem('selectedItem');
-    if (savedItemId) {
-      const element = document.getElementById('item-' + savedItemId);
-      if (element) {
-        element.scrollIntoView();
+    if (savedPosition !== null && savedItemId) {
+      const position = parseInt(savedPosition, 10);
+      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + savedItemId);
+      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
+        scrollableContainer = scrollableContainer.parentElement;
+      }
+      if (scrollableContainer) {
+        scrollableContainer.scrollTop = position;
+      } else {
+        window.scrollTo({top: position, behavior: 'auto'});
       }
     }
   }

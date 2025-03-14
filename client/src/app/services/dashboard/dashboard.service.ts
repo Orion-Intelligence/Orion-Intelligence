@@ -1,13 +1,20 @@
 import {Injectable} from '@angular/core';
-import {Observable, of, Subject} from 'rxjs';
+import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
 import {HttpParams} from '@angular/common/http';
 import {catchError, map, takeUntil} from 'rxjs/operators';
 import {ApiService} from '../../shared/services/api.service';
+import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
+import {GeneralCallbackModel} from '../../shared/model/results/general/general.callback.model';
+import {GeneralParamModel} from '../../shared/model/results/shared/generalParamModel';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
+  generalParamModel: GeneralParamModel = new GeneralParamModel();
+  generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
+  leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
+
   private cancelRequest$ = new Subject<void>();
 
   constructor(private apiService: ApiService) {

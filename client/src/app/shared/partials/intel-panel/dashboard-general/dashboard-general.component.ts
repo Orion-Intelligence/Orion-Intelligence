@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {NgIf} from '@angular/common';
 import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
 import {PaginationComponent} from '../../pagination/pagination.component';
@@ -23,9 +23,9 @@ import {general_filters} from '../../../constants/filters';
 })
 export class DashboardGeneralComponent implements OnInit {
 
-  generalParamModel: GeneralParamModel = new GeneralParamModel()
-  generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
-  leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
+  public generalParamModel: GeneralParamModel = new GeneralParamModel();
+  public generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
+  public leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
 
   query = ""
   analyticsData = {} as Analytics;
@@ -33,13 +33,16 @@ export class DashboardGeneralComponent implements OnInit {
 
   onToggleAnalytics = false;
   isLoading = false;
-  firstTrigger = false
+  firstTrigger = true
 
-  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
     this.type = this.route.snapshot.data['type'];
+    this.generalParamModel = {...this.dashboardService.generalParamModel} as GeneralParamModel;
+    this.generalCallbackModel = {...this.dashboardService.generalCallbackModel} as GeneralCallbackModel;
+    this.leakCallbackModel = {...this.dashboardService.leakCallbackModel} as LeakCallbackModel;
 
     this.initAnalytics()
     combineLatest([this.route.queryParams, this.route.url])
@@ -52,12 +55,13 @@ export class DashboardGeneralComponent implements OnInit {
         this.generalParamModel.mNetwork = params['network'] || 'all';
 
         this.generalParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
-        if (this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC || this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH) {
+        if (this.firstTrigger && this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC || this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH) {
           this.isLoading = false;
           this.query = this.generalParamModel.q
         } else if (this.firstTrigger) {
           this.cdr.detectChanges();
           this.firstTrigger = true
+          this.fetchSearchResults()
         }
       });
   }
@@ -75,33 +79,42 @@ export class DashboardGeneralComponent implements OnInit {
 
     if (!this.generalParamModel.q) {
       this.isLoading = false;
-      this.generalCallbackModel = new GeneralCallbackModel();
-      this.leakCallbackModel = new LeakCallbackModel();
+
+      this.router.navigate([], {
+        queryParams: {}, queryParamsHandling: 'merge'
+      }).then();
+
       return;
     }
 
     this.isLoading = true;
 
     const apiEndpoint = this.type === Category.STRATEGIC ? 'search/general' : 'search/leak';
+
+    const queryParams = Object.fromEntries(Object.entries(this.generalParamModel).filter(([_, v]) => v != null && v !== ""));
+
+    this.router.navigate([], {
+      queryParams: queryParams, queryParamsHandling: 'merge'
+    }).then();
+
     this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.generalParamModel)
-      .pipe(switchMap(response => timer(1000).pipe(map(() => response)))) // Delay UI update
+      .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
           if (this.type === Category.STRATEGIC) {
             this.generalCallbackModel = response.data as GeneralCallbackModel;
+            this.dashboardService.generalCallbackModel = response.data as GeneralCallbackModel;
           } else {
             this.leakCallbackModel = response.data as LeakCallbackModel;
+            this.dashboardService.leakCallbackModel = response.data as LeakCallbackModel;
           }
-        } else {
-          this.generalCallbackModel = new GeneralCallbackModel();
-          this.leakCallbackModel = new LeakCallbackModel();
         }
 
         this.isLoading = false;
         this.initAnalytics();
       });
-
   }
+
 
   onPageChange(step: number) {
     this.generalParamModel.mSearchParamPage = step;

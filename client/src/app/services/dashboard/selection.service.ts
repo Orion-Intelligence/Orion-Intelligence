@@ -11,6 +11,7 @@ export class SelectionStoreService {
   private selectedOptionSubject = new BehaviorSubject<string | null>(this.getStoredOption());
 
   selectedSection$ = this.selectedSectionSubject.asObservable();
+  selectedOption$ = this.selectedOptionSubject.asObservable();
 
   constructor(private router: Router) {
     this.router.events
@@ -35,6 +36,10 @@ export class SelectionStoreService {
 
   getSelectedSection(): string | null {
     return this.selectedSectionSubject.value;
+  }
+
+  getSelectedOption(): string | null {
+    return this.selectedOptionSubject.value;
   }
 
   private getStoredSection(): string | null {
