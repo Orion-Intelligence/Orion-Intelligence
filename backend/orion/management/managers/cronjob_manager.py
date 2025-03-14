@@ -1,7 +1,6 @@
 import asyncio
 
 from orion.management.jobs.insight_job import insight_job
-from orion.services.redis_manager.redis_enums import REDIS_KEYS
 
 
 class cronjob_manager:

@@ -1,6 +1,5 @@
 from typing import List, Optional, Union
-from pydantic import BaseModel, HttpUrl
-from datetime import datetime
+from pydantic import BaseModel
 
 class suggestion(BaseModel):
     text: str

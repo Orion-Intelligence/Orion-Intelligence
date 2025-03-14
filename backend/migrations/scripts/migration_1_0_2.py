@@ -4,7 +4,7 @@ from orion.services.mongo_manager.shared_model.db_system_settings import db_syst
 class migration_1_0_2:
 
     @staticmethod
-    async def migrate(migration_version, version):
+    async def migrate(version):
         engine = mongo_controller.get_instance().get_engine()
 
         if engine is None:
