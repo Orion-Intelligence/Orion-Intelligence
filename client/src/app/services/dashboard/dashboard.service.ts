@@ -3,7 +3,6 @@ import {Observable, of, Subject} from 'rxjs';
 import {HttpParams} from '@angular/common/http';
 import {catchError, map, takeUntil} from 'rxjs/operators';
 import {ApiService} from '../../shared/services/api.service';
-import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +10,7 @@ import {Router} from '@angular/router';
 export class DashboardService {
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService, private router: Router) {
+  constructor(private apiService: ApiService) {
   }
 
   fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{

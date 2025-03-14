@@ -1,16 +1,12 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {AsyncPipe, NgIf} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {DefacementParamModel} from '../../../model/results/defacement/defacement.callback.model';
 import {DefacementCallbackModel} from '../../../model/results/defacement/defacement.param.model';
 import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import {ResultComponent} from '../../result/result.component';
-import {GeneralCallbackModel} from '../../../model/results/general/general.callback.model';
-import {LeakCallbackModel} from '../../../model/results/leak/leak.callback.model';
-import {Category} from '../../../enums/pages';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 import {PaginationComponent} from '../../pagination/pagination.component';
-import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
 import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
 
 @Component({

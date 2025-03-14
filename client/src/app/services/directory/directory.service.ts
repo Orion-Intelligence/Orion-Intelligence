@@ -6,7 +6,7 @@ import { ApiService } from '../../shared/services/api.service';
 @Injectable({ providedIn: 'root' })
 export class DirectoryService {
   private directoryDataSubject = new BehaviorSubject<DirectoryCallbackModel | null>(null);
-  private currentPageSubject = new BehaviorSubject<number>(1); // Default page is 1
+  private currentPageSubject = new BehaviorSubject<number>(1);
 
   directoryData$ = this.directoryDataSubject.asObservable();
   currentPage$ = this.currentPageSubject.asObservable();

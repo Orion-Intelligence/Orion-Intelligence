@@ -6,7 +6,6 @@ import {filter, map} from 'rxjs/operators';
 @Injectable({providedIn: 'root'})
 export class RouteTrackerService {
   private currentPageSubject = new BehaviorSubject<string>('');
-  currentPage$ = this.currentPageSubject.asObservable();
 
   constructor(private router: Router) {
     this.router.events

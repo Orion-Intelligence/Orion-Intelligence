@@ -7,7 +7,6 @@ import {filter} from 'rxjs';
 import {SelectionStoreService} from '../../../services/dashboard/selection.service';
 import {DashboardSidebarItemsComponent} from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import {SidebarSectionComponent} from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -27,7 +26,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   defacementCategories = Object.values(DefacementSubCategory);
   category = Category;
 
-  constructor(private dashboardService: DashboardService, protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
+  constructor(protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
     this.appService.configData$.subscribe(data => {
       this.apiAllowed = !!(data && data.settings['api_allowed'] === '1');
     });

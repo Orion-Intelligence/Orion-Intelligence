@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { trigger, style, transition, animate } from '@angular/animations';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 @Component({
   selector: 'app-result-list',
@@ -13,7 +12,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
 })
 export class ResultListComponent {
   @Input() listItems: string[] = [];
-  @Input() activeTab: string = ''; // Ensure activeTab is passed from the parent component
+  @Input() activeTab: string = '';
 
   getRows(items: string[], itemsPerRow: number): string[][] {
     const rows = [];
