@@ -1,0 +1,8 @@
+engines:
+  eslint:
+    enabled: true
+    config:
+      exclude_rules:
+        - no-eval
+        - no-implied-eval
+        - no-new-func
