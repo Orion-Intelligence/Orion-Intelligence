@@ -61,7 +61,7 @@ class elastic_controller:
     try:
       result = await self.__m_connection.get(index=index, id=doc_id, ignore=[404])
       return [result["_source"]] if result and "_source" in result else []
-    except:
+    except Exception:
       return []
 
   async def search_query(self, document, data_filter):

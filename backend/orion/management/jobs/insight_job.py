@@ -28,7 +28,7 @@ class insight_job:
 
   @staticmethod
   async def __fetch_elastic_insight():
-    m_status, m_documents = await elastic_controller.get_instance().get_insight()
+    _, m_documents = await elastic_controller.get_instance().get_insight()
     return m_documents
 
   @staticmethod

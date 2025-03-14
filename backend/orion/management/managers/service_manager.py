@@ -28,7 +28,7 @@ class service_manager:
     async def init_services(self):
         while not self._is_available:
             try:
-                reader, writer = await asyncio.open_connection("elasticsearch", 9400)
+                _, writer = await asyncio.open_connection("elasticsearch", 9400)
                 writer.close()
                 await writer.wait_closed()
 

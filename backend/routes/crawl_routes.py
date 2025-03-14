@@ -19,12 +19,12 @@ async def parser():
     return await crawl_controller.getInstance().invoke_fetch_feeder()
 
 @crawl_routes.post("/api/index/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
-async def get_leak_data(request: Request):
+async def index_leak_data(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_leak_index(LeakDataModel(**body))
 
 @crawl_routes.post("/api/index/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
-async def get_leak_data(request: Request):
+async def index_defacement_data(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_defacement_index(DefacementDataModel(**body))
 
