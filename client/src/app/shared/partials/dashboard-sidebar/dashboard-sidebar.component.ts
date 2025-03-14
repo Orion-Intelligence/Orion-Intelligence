@@ -7,6 +7,9 @@ import {filter} from 'rxjs';
 import {SelectionStoreService} from '../../../services/dashboard/selection.service';
 import {DashboardSidebarItemsComponent} from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import {SidebarSectionComponent} from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {GeneralCallbackModel} from '../../model/results/general/general.callback.model';
+import {LeakCallbackModel} from '../../model/results/leak/leak.callback.model';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -26,7 +29,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   defacementCategories = Object.values(DefacementSubCategory);
   category = Category;
 
-  constructor(protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
+  constructor(protected dashboardService:DashboardService, protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
     this.appService.configData$.subscribe(data => {
       this.apiAllowed = !!(data && data.settings['api_allowed'] === '1');
     });
@@ -79,12 +82,21 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       }
 
       if (firstSubcategory) {
-        this.onOptionSelected(firstSubcategory);
+        this.selectionStore.setSelectedOption(firstSubcategory);
+        if(this.min_detected && this.sidebar_default){
+          this.onToggleSidebar();
+        }
       }
     }
   }
 
+  onResetCallback(){
+    this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
+    this.dashboardService.leakCallbackModel = new LeakCallbackModel()
+  }
+
   onOptionSelected(option: string) {
+    this.onResetCallback()
     this.selectionStore.setSelectedOption(option);
     if(this.min_detected && this.sidebar_default){
       this.onToggleSidebar();

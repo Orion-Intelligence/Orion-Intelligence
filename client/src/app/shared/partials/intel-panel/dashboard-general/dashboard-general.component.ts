@@ -58,11 +58,11 @@ export class DashboardGeneralComponent implements OnInit {
         if (this.firstTrigger && this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC || this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH) {
           this.isLoading = false;
           this.query = this.generalParamModel.q
-        } else if (this.firstTrigger) {
+        } else {
           this.cdr.detectChanges();
-          this.firstTrigger = true
           this.fetchSearchResults()
         }
+        this.firstTrigger = false
       });
   }
 

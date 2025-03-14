@@ -1,26 +1,20 @@
-.list-container{
+.list-container {
   margin-left: 30px;
   margin-right: 30px;
 }
 
-.list-container .table{
+.list-container .table {
+  border: 1px solid #FCFCFC12;
   border-radius: 12px;
-}
-
-.list-container table tr:last-child {
-  border-bottom: none !important;
-}
-
-.list-container thead tr:first-child {
-  border-top: none !important;
-}
-
-.list-container tbody tr:first-child {
-  border-top: 1px solid #FCFCFC12 !important;
+  width: 100%;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .list-container .table td,
 .list-container .table th {
+  border: 1px solid #FCFCFC12;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -28,3 +22,14 @@
   cursor: pointer;
 }
 
+.list-container table tr:last-child td {
+  border-bottom: none !important;
+}
+
+.list-container thead tr:first-child th {
+  border-top: none !important;
+}
+
+.list-container tbody tr:first-child td {
+  border-top: 1px solid #FCFCFC12 !important;
+}

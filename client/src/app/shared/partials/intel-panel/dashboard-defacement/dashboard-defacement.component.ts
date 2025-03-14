@@ -8,11 +8,15 @@ import {ResultComponent} from '../../result/result.component';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 import {PaginationComponent} from '../../pagination/pagination.component';
 import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-dashboard-defacement',
   imports: [ResultComponent, NgIf, PaginationComponent, DashboardResultListComponent],
-  templateUrl: './dashboard-defacement.component.html'
+  templateUrl: './dashboard-defacement.component.html',
+  animations: [
+    fadeInDashboardItem
+  ]
 })
 export class DashboardDefacementComponent implements OnInit {
   defacementParamModel: DefacementParamModel = new DefacementParamModel()
@@ -21,7 +25,7 @@ export class DashboardDefacementComponent implements OnInit {
 
   query = ""
   isLoading = false;
-  firstTrigger = false
+  firstTrigger = true
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService) {
   }
@@ -33,13 +37,16 @@ export class DashboardDefacementComponent implements OnInit {
         this.query = params['q'];
         this.defacementParamModel.q = params['q'] || '';
 
-        if (this.defacementCallbackModel.Result.length > 0) {
+        if (this.firstTrigger && this.defacementCallbackModel.Result.length > 0) {
           this.isLoading = false;
           this.query = this.defacementParamModel.q
         } else if (this.firstTrigger) {
+          this.defacementParamModel.q = "*"
+          this.query = ""
+          this.fetchSearchResults()
           this.cdr.detectChanges();
-          this.firstTrigger = true
         }
+        this.firstTrigger = false
       });
   }
 
