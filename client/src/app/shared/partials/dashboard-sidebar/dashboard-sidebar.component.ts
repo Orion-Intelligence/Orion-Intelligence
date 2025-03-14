@@ -65,7 +65,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
       let firstSubcategory: string | undefined;
       switch (section) {
-        case Category.STRATEGIC_INTELLIGENCE:
+        case Category.STRATEGIC:
           firstSubcategory = this.generalCategories[0];
           break;
         case Category.BREACH:

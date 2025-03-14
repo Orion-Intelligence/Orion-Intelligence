@@ -144,6 +144,26 @@ table tbody tr:nth-child(odd) {
   background-color: #1e456c !important;
 }
 
+table tr:first-child {
+  border-top: none !important;
+}
+
+table tr:last-child {
+  border-bottom: none !important;
+}
+
+table tr:first-child {
+  border-top: 1px solid #FCFCFC12 !important;
+}
+
+table tr:last-child {
+  border-bottom: 1px solid #FCFCFC12 !important;
+}
+
+table tr:not(:first-child):not(:last-child) {
+  border: none !important;
+}
+
 table tbody tr:hover {
   background-color: #3A6A9A !important;
   transition: background-color 0.3s ease-in-out;

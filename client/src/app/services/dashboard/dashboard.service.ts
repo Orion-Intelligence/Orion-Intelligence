@@ -1,85 +1,72 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, of, Subject} from 'rxjs';
-import {GeneralParamModel} from '../../shared/model/intel-results/general/general.param.model';
-import {GeneralCallbackModel} from '../../shared/model/intel-results/general/general.callback.model';
-import {SearchLeakParamModel} from '../../shared/model/intel-results/leak/leak.param.model';
-import {LeakCallbackModel} from '../../shared/model/intel-results/leak/leak.callback.model';
+import {Observable, of, Subject} from 'rxjs';
 import {HttpParams} from '@angular/common/http';
-import {catchError, map, tap, takeUntil} from 'rxjs/operators';
+import {catchError, map, takeUntil} from 'rxjs/operators';
 import {ApiService} from '../../shared/services/api.service';
-import {search_dynamic_email_param_model} from '../../shared/model/dynamic/email/search_dynamic_email_param_model';
-import {SearchDynamicEmailCallbackModel} from '../../shared/model/dynamic/email/search_dynamic_email_callback_model';
 import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
-  searchGeneralParamModel: GeneralParamModel = new GeneralParamModel();
-  searchGeneralCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
-
-  searchLeakParamModel: SearchLeakParamModel = new SearchLeakParamModel();
-  searchLeakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
-
-  searchDynamicEmailParambackModel: search_dynamic_email_param_model = new search_dynamic_email_param_model();
-  searchDynamicEmailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
-
-  searchQuery$ = new BehaviorSubject<string>('');
-  private activeRequest$ = new Subject<void>();
+  private cancelRequest$ = new Subject<void>();
 
   constructor(private apiService: ApiService, private router: Router) {
   }
 
-  fetchDynamicEmailSearchResults() {
+  fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{
+    success: boolean;
+    isEmpty: boolean;
+    data: T | null
+  }> {
     this.cancelOngoingRequest();
-    const params = new HttpParams({fromObject: this.searchDynamicEmailParambackModel as any});
 
-    return this.apiService.get<SearchDynamicEmailCallbackModel>('dynamic/email', {params}).pipe(takeUntil(this.activeRequest$), tap((response: SearchDynamicEmailCallbackModel) => {
-      this.searchDynamicEmailCallbackbackModel = new SearchDynamicEmailCallbackModel(response);
-    }), map((response: SearchDynamicEmailCallbackModel) => ({
-      success: true, isEmpty: response.cards_data?.length === 0
-    })), catchError(() => of({success: false, isEmpty: false})));
-  }
+    const params = new HttpParams({fromObject: paramModel as any});
 
-  fetchGeneralSearchResults() {
-    this.cancelOngoingRequest();
-    const params = new HttpParams({fromObject: this.searchGeneralParamModel as any});
-
-    return this.apiService.get<GeneralCallbackModel>('search/general', {params}).pipe(takeUntil(this.activeRequest$), tap((response: GeneralCallbackModel) => {
-      this.searchGeneralCallbackModel = new GeneralCallbackModel(response);
-      this.updateUrlWithParams(this.searchGeneralParamModel);
-    }), map((response: GeneralCallbackModel) => ({
-      success: true, isEmpty: response.Result?.length === 0
-    })), catchError(() => of({success: false, isEmpty: false})));
-  }
-
-  fetchLeakSearchResults() {
-    this.cancelOngoingRequest();
-    const params = new HttpParams({fromObject: this.searchLeakParamModel as any});
-
-    return this.apiService.get<LeakCallbackModel>('search/leak', {params}).pipe(takeUntil(this.activeRequest$), tap(response => {
-      this.searchLeakCallbackModel = new LeakCallbackModel(response);
-      this.updateUrlWithParams(this.searchLeakParamModel);
-    }), map((response: LeakCallbackModel) => ({
-      success: true, isEmpty: response.Result?.length === 0
-    })), catchError(() => of({success: false, isEmpty: false})));
-  }
-
-  updateUrlWithParams(params: any) {
-    const {pSearchParamType, ...filteredParams} = params;
-    this.router.navigate([], {
-      queryParams: filteredParams, queryParamsHandling: 'merge', replaceUrl: true
-    }).then();
+    return this.apiService.get<T>(apiEndpoint, {params}).pipe(takeUntil(this.cancelRequest$), map((response: T) => ({
+      success: true, isEmpty: (response.Result?.length === 0 || response.cards_data?.length === 0), data: response
+    })), catchError(() => of({success: false, isEmpty: false, data: null})));
   }
 
   private cancelOngoingRequest() {
-    this.activeRequest$.next();
+    this.cancelRequest$.next();
   }
 
-  public parseParamValue(value: any): any {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    if (!isNaN(value) && value !== '') return +value;
-    return value;
+  generateAnalytics<T extends { m_update_date: string }>(resultItems: T[]): any {
+    if (!resultItems) {
+      console.warn("No data available in Result");
+      return null;
+    }
+
+    return {
+      unique_urls: resultItems.length,
+      total_p_document_list_length: resultItems.length,
+      m_documents_length: resultItems.length,
+      m_clearnet_links_count: resultItems.reduce((sum, item) => sum + ((item as any).m_clearnet_links?.length || 0), 0),
+
+      active_links: resultItems.filter(item => {
+        const daysOld = (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24);
+        return daysOld <= 5;
+      }).length,
+
+      seldom_active_links: resultItems.filter(item => {
+        const daysOld = (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24);
+        return daysOld > 5 && daysOld <= 10;
+      }).length,
+
+      inactive_links: resultItems.filter(item => {
+        const daysOld = (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24);
+        return daysOld > 10;
+      }).length,
+
+      consolidated_lists: {
+        m_urls: resultItems.map(item => (item as any).m_url || ""),
+        m_emails: resultItems.flatMap(item => (item as any).m_emails || (item as any).m_email_addresses || []),
+        mPhoneNumber: resultItems.flatMap(item => (item as any).m_phone_numbers || []),
+        mArchiveUrl: resultItems.flatMap(item => (item as any).m_archive_url || []),
+        mName: resultItems.flatMap(item => (item as any).m_names || []),
+        m_document: resultItems.flatMap(item => (item as any).m_document || [])
+      }
+    };
   }
 }

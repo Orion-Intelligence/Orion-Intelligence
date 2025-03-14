@@ -4,7 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Subscription } from 'rxjs';
-import {HeaderComponent} from '../../../shared/partials/header/header.component';
+import {HeaderComponent} from '../../../shared/partials/header/login-header/header.component';
 
 @Component({
   selector: 'app-login-container',

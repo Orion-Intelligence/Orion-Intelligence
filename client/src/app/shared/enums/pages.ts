@@ -1,10 +1,10 @@
 export enum Category {
-  STRATEGIC_INTELLIGENCE = 'Strategic Intelligence',
+  STRATEGIC = 'Strategic',
   BREACH = 'Breach',
   HOMEPAGE = 'Homepage',
   DIRECTORY = 'Directory',
   DEFACEMENT = 'Defacement',
-  API = 'Online API\'s'
+  API = 'API'
 }
 
 export enum GeneralSubCategory {

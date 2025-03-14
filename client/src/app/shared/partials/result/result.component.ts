@@ -1,25 +1,24 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {Observable} from 'rxjs';
-import {NoSuggestionComponent} from '../no-suggestion/no-suggestion.component';
+import {EmptyResultComponent} from '../empty-result/empty-result.component';
 import {FormsModule} from '@angular/forms';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {LoadingFormComponent} from '../loading-form/loading-form.component';
 import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
 import {SidebarService} from '../../../services/shared/sidebar.service';
 import {FiltersComponent} from '../filters/filters.component';
-import {general_filters} from '../../constants/filters';
 import {FilterModel} from '../../model/filter/filter.model';
-import {Suggestion} from '../../model/intel-results/general/general.callback.model';
 import {SuggestionComponent} from '../suggestion/suggestion.component';
-import {NoResultComponent} from '../no-result/no-result.component';
+import {EmptyQueryComponent} from '../empty-query/empty-query.component';
+import {Suggestion} from '../../model/results/shared/common-result';
+import {query} from '@angular/animations';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CommonModule, NoSuggestionComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, NoResultComponent,],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent,],
 })
 export class ResultComponent implements OnInit {
   @Input() result_count!: number;
@@ -28,19 +27,18 @@ export class ResultComponent implements OnInit {
   @Input() searchQuery: string = '';
   @Input() analyticsToggle: boolean = false;
 
-  @Output() updatePageNumber = new EventEmitter<number>();
   @Output() reloadFilters = new EventEmitter<[string | null, string | null]>();
   @Output() reloadData = new EventEmitter<void>();
   @Output() updateQuery = new EventEmitter<string>();
   @Output() onToggleSwitch = new EventEmitter<void>();
+  @Input() filterModel!: FilterModel
 
-  filterModel: FilterModel = general_filters;
   selectedFilters: { [key: string]: string | null } = {};
   isFilterOpen$: Observable<boolean>;
   result_triggered = false
   local_query = ""
 
-  constructor(public dashboardService: DashboardService, public sidebarService: SidebarService) {
+  constructor(public sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -61,6 +59,7 @@ export class ResultComponent implements OnInit {
   }
 
   onFormSubmit() {
+    this.local_query = this.searchQuery
     this.reloadData.emit()
     this.result_triggered = true
   }
@@ -89,4 +88,6 @@ export class ResultComponent implements OnInit {
   onToggleAnalytics() {
     this.onToggleSwitch.emit()
   }
+
+  protected readonly query = query;
 }

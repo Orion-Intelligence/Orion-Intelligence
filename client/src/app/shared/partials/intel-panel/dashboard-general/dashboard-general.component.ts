@@ -1,0 +1,151 @@
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {NgIf} from '@angular/common';
+import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
+import {PaginationComponent} from '../../pagination/pagination.component';
+import {InsightsComponent} from '../../insights/insights.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {Analytics} from '../../../model/analytics/analytics.model';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {GeneralCallbackModel, GeneralResultItem} from '../../../model/results/general/general.callback.model';
+import {LeakCallbackModel, LeakResultItem} from '../../../model/results/leak/leak.callback.model';
+import {GeneralParamModel} from '../../../model/results/shared/generalParamModel';
+import {Category} from '../../../enums/pages';
+import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
+import {ResultComponent} from '../../result/result.component';
+import {general_filters} from '../../../constants/filters';
+
+@Component({
+  selector: 'app-dashboard-general',
+  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent],
+  templateUrl: './dashboard-general.component.html',
+  animations: [fadeInDashboardItem],
+})
+export class DashboardGeneralComponent implements OnInit {
+
+  generalParamModel: GeneralParamModel = new GeneralParamModel()
+  generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
+  leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
+
+  query = ""
+  analyticsData = {} as Analytics;
+  type = Category.STRATEGIC
+
+  onToggleAnalytics = false;
+  isLoading = false;
+  firstTrigger = false
+
+  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  }
+
+  ngOnInit(): void {
+    this.type = this.route.snapshot.data['type'];
+
+    this.initAnalytics()
+    combineLatest([this.route.queryParams, this.route.url])
+      .pipe(distinctUntilChanged())
+      .subscribe(([params, urlSegments]) => {
+        this.query = params['q'];
+        this.generalParamModel.q = params['q'] || '';
+        this.generalParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
+        this.generalParamModel.mSearchParamSafeSearch = params['mSearchParamSafeSearch'] === 'true';
+        this.generalParamModel.mNetwork = params['network'] || 'all';
+
+        this.generalParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        if (this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC || this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH) {
+          this.isLoading = false;
+          this.query = this.generalParamModel.q
+        } else if (this.firstTrigger) {
+          this.cdr.detectChanges();
+          this.firstTrigger = true
+        }
+      });
+  }
+
+  initAnalytics() {
+    if (this.type === Category.STRATEGIC) {
+      this.analyticsData = this.dashboardService.generateAnalytics(this.generalCallbackModel?.Result || []);
+    } else if (this.type === Category.BREACH) {
+      this.analyticsData = this.dashboardService.generateAnalytics(this.leakCallbackModel?.Result || []);
+    }
+  }
+
+  fetchSearchResults() {
+    if (this.isLoading) return;
+
+    if (!this.generalParamModel.q) {
+      this.isLoading = false;
+      this.generalCallbackModel = new GeneralCallbackModel();
+      this.leakCallbackModel = new LeakCallbackModel();
+      return;
+    }
+
+    this.isLoading = true;
+
+    const apiEndpoint = this.type === Category.STRATEGIC ? 'search/general' : 'search/leak';
+    this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.generalParamModel)
+      .pipe(switchMap(response => timer(1000).pipe(map(() => response)))) // Delay UI update
+      .subscribe(response => {
+        if (response.success && response.data) {
+          if (this.type === Category.STRATEGIC) {
+            this.generalCallbackModel = response.data as GeneralCallbackModel;
+          } else {
+            this.leakCallbackModel = response.data as LeakCallbackModel;
+          }
+        } else {
+          this.generalCallbackModel = new GeneralCallbackModel();
+          this.leakCallbackModel = new LeakCallbackModel();
+        }
+
+        this.isLoading = false;
+        this.initAnalytics();
+      });
+
+  }
+
+  onPageChange(step: number) {
+    this.generalParamModel.mSearchParamPage = step;
+    this.fetchSearchResults();
+  }
+
+  reloadFilters(event: [string | null, string | null]) {
+    const [mNetwork, mSearchParamSafeSearch] = event;
+    if (mNetwork != null) {
+      this.generalParamModel.mNetwork = mNetwork;
+    }
+    this.generalParamModel.mSearchParamSafeSearch = mSearchParamSafeSearch != 'yes';
+    this.fetchSearchResults();
+  }
+
+  onUpdateQuery(query: string) {
+    this.generalParamModel.q = query
+  }
+
+  onToggleAnalyticsTrigger() {
+    this.onToggleAnalytics = !this.onToggleAnalytics
+  }
+
+  get currentCallbackModel(): GeneralCallbackModel | LeakCallbackModel {
+    return this.type === Category.STRATEGIC ? this.generalCallbackModel : this.leakCallbackModel;
+  }
+
+  get currentParamModel(): GeneralParamModel {
+    return this.type === Category.STRATEGIC ? this.generalParamModel : this.generalParamModel;
+  }
+
+  get currentResultCount(): number {
+    return this.currentCallbackModel?.Result?.length ?? 0;
+  }
+
+  get currentSearchResults(): (GeneralResultItem | LeakResultItem)[] {
+    return this.currentCallbackModel?.Result ?? [];
+  }
+
+  get currentQuery(): string {
+    return this.currentParamModel?.q ?? '';
+  }
+
+
+  protected readonly Math = Math;
+  protected readonly general_filters = general_filters;
+}

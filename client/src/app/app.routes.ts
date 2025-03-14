@@ -7,11 +7,12 @@ import { DirectoryComponent } from './pages/directory/directory.component';
 import { InsightResolver } from './shared/resolvers/insight.resolver';
 import { DirectoryResolver } from './shared/resolvers/directory.resolver';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { DashboardEmailApiComponent } from './shared/partials/intel-results/intel-panel/dashboard-email-api/dashboard-email-api.component';
-import { DashboardBreachComponent } from './shared/partials/intel-results/intel-panel/dashboard-breach/dashboard-breach.component';
-import { DashboardGeneralComponent } from './shared/partials/intel-results/intel-panel/dashboard-general/dashboard-general.component';
-import {ReportComponent} from './shared/partials/dashboard-report/report.component';
 import {ReportResolver} from './shared/resolvers/report.resolver';
+import {DashboardGeneralComponent} from './shared/partials/intel-panel/dashboard-general/dashboard-general.component';
+import {ReportComponent} from './shared/partials/report/report_general/report.component';
+import {DashboardEmailApiComponent} from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
+import {DashboardDefacementComponent} from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
+import {ReportDefacementComponent} from './shared/partials/report/report-defacement/report-defacement.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full', data: { animation: 'RootPage' } },
@@ -39,7 +40,7 @@ export const routes: Routes = [
         data: { animation: 'DataBreach' },
         children: [
           { path: '', redirectTo: 'databases', pathMatch: 'full' },
-          { path: ':category', component: DashboardBreachComponent, data: { type: 'Breach', animation: 'DataBreach' } },
+          { path: ':category', component: DashboardGeneralComponent, data: { type: 'Breach', animation: 'DataBreach' } },
           { path: ':category/:m_hash', component: ReportComponent, resolve: { reportdata: ReportResolver }, data: { type: 'Breach', animation: 'HashPage' } }
         ]
       },
@@ -48,8 +49,8 @@ export const routes: Routes = [
         data: { animation: 'StrategicPage' },
         children: [
           { path: '', redirectTo: 'all', pathMatch: 'full' },
-          { path: ':category', component: DashboardGeneralComponent, data: { type: 'Strategic Intelligence', animation: 'CategoryPage' } },
-          { path: ':category/:m_hash', component: ReportComponent, resolve: { reportdata: ReportResolver }, data: { type: 'Strategic Intelligence', animation: 'HashPage' } }
+          { path: ':category', component: DashboardGeneralComponent, data: { type: 'Strategic', animation: 'CategoryPage' } },
+          { path: ':category/:m_hash', component: ReportComponent, resolve: { reportdata: ReportResolver }, data: { type: 'Strategic', animation: 'HashPage' } }
         ]
       },
       {
@@ -57,7 +58,8 @@ export const routes: Routes = [
         data: { animation: 'DefacementPage' },
         children: [
           { path: '', redirectTo: 'all', pathMatch: 'full' },
-          { path: ':category', component: ReportComponent, resolve: { reportdata: ReportResolver }, data: { type: 'Defacement', animation: 'CategoryPage' } },
+          { path: ':category', component: DashboardDefacementComponent, data: { type: 'Defacement', animation: 'CategoryPage' } },
+          { path: ':category/:m_hash', component: ReportDefacementComponent, resolve: { reportdata: ReportResolver }, data: { type: 'Defacement', animation: 'HashPage' } }
         ]
       }
     ],

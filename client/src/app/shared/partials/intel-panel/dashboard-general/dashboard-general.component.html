@@ -1,0 +1,13 @@
+<app-result (onToggleSwitch)="onToggleAnalyticsTrigger()" [filterModel]="general_filters" [analyticsToggle]="onToggleAnalytics" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(currentCallbackModel.Result.length)"></app-result>
+
+<div *ngIf="onToggleAnalytics && !isLoading" @fadeInDashboardItem>
+  <app-insights [analytics]="analyticsData"></app-insights>
+</div>
+
+<div *ngIf="!isLoading && !onToggleAnalytics" @fadeInDashboardItem>
+  <app-dashboard-results-grid [searchResults]="currentSearchResults" [query]="currentQuery" @fadeInDashboardItem></app-dashboard-results-grid>
+</div>
+
+<div *ngIf="!onToggleAnalytics && !isLoading && currentResultCount > 0" @fadeInDashboardItem>
+  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(currentCallbackModel.Page_Count)"></app-pagination>
+</div>

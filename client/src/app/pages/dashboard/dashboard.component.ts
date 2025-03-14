@@ -3,7 +3,7 @@ import { NgClass } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import {dashboardGlobalAnimation} from '../../shared/animations/dashboard.global.animations';
 import {DashboardSidebarComponent} from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
-import {DashboardHeaderComponent} from '../../shared/partials/dashboard-header/dashboard-header.component';
+import {DashboardHeaderComponent} from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 
 @Component({
   selector: 'app-dashboard',

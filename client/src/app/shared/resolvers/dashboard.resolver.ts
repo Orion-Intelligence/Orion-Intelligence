@@ -13,10 +13,8 @@ export class DashboardResolver implements Resolve<boolean> {
     const queryParam = route.queryParams['q'];
 
     if (queryParam) {
-      this.dashboardService.searchGeneralParamModel.q = queryParam;
-      this.dashboardService.searchQuery$.next(queryParam);
-      this.dashboardService.tracker.setSection(Category.STRATEGIC_INTELLIGENCE);
-      this.dashboardService.tracker.setOption(GeneralSubCategory.ALL);
+      // this.dashboardService.searchGeneralParamModel.q = queryParam;
+      // this.dashboardService.searchQuery$.next(queryParam);
     }
 
     return true;

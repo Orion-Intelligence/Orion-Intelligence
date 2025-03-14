@@ -1,0 +1,20 @@
+<div class="header-bar">
+  <div class="header-bar__title-container">
+    <img ngSrc="../../../../../assets/images/shared/arrow.svg" class="header-bar__left-arrow" [class.disabled]="breadcrumb.length <= 2" alt="Back" height="30" width="30" (click)="breadcrumb.length > 2 ? goBack() : null"/>
+
+    <span *ngFor="let crumb of breadcrumb; let i = index; let last = last">
+      <span *ngIf="!last" class="breadcrumb-item" [class.disabled]="breadcrumb.length <= 2" (click)="breadcrumb.length > 2 ? navigateToCrumb(i) : null" [style.cursor]="breadcrumb.length > 2 ? 'pointer' : 'default'">
+        {{ crumb.label | titlecase }}
+        <img ngSrc="../../../../../assets/images/shared/nav-next.svg" class="header-bar__breadcrum" alt="breadcrumb" height="20" width="20"/>
+      </span>
+
+      <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
+        {{ crumb.label | titlecase }}
+      </span>
+    </span>
+  </div>
+
+  <div class="header-bar__profile">
+    <app-profile></app-profile>
+  </div>
+</div>

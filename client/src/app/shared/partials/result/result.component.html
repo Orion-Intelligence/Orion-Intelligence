@@ -29,7 +29,7 @@
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
 
-<div class="filters-container" [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
+<div *ngIf="filterModel" class="filters-container" [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
   <app-filters [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async" (filterChanged)="applyFilters($event)" (filterReset)="resetFilters()" (filterClose)="sidebarService.closeSidebar()"></app-filters>
 </div>
 
@@ -37,11 +37,11 @@
   <app-loading-form></app-loading-form>
 </div>
 <div *ngIf="!this.result_triggered && !isLoading && !result_count && !analyticsToggle" @fadeInDashboardItem>
-  <app-no-result></app-no-result>
+    <app-empty-query></app-empty-query>
 </div>
 
 <div *ngIf="this.result_triggered && !isLoading && (result_count==0)" @fadeInDashboardItem>
-    <app-no-suggestion></app-no-suggestion>
+  <app-empty-result [searchQuery]="local_query"></app-empty-result>
 </div>
 
 <div *ngIf="!isLoading && !(result_count==0)" @fadeInDashboardItem>
