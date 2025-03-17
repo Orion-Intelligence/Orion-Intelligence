@@ -76,6 +76,11 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         page.wait_for_load_state("load")
                         page.wait_for_selector(".panel.panel-danger")
 
+                        h1_element = page.query_selector("h1.panel-title.mirror-details")
+                        full_title = h1_element.inner_text().strip() if h1_element else ""
+                        url_span = page.query_selector("span#url")
+                        extracted_url = url_span.inner_text().strip() if url_span else link
+
                         ip = self.safe_find(page, "p:has(strong):has-text('IP') strong")
                         defacer = self.safe_find(page, "p:has(strong):has-text('Defacer') strong")
                         location = self.safe_find(page, "p:has(strong):has-text('Location') strong")
@@ -99,7 +104,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
                         card_data = defacement_model(
                             m_web_server=[web_server],
-                            m_web_url=[link],
+                            m_web_url=[extracted_url],
                             m_ip=[ip],
                             m_content="",
                             m_base_url=self.base_url,

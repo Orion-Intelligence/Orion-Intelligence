@@ -21,7 +21,7 @@ export class ReportDefacementComponent implements OnInit {
       if (data['reportdata']) {
         this.defacementData = data['reportdata'];
         if(this.defacementData){
-          this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.defacementData.m_web_server[0]);
+          this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.defacementData.m_mirror_links[0]);
         }
       }
     });

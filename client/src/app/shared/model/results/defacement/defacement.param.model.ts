@@ -8,7 +8,7 @@ export class DefacementResultItem {
   m_base_url: string = "";
   m_ip: string[] = [];
   m_location = ""
-  m_leak_date?: string;
+  m_date_of_leak?: string;
   m_web_url: string[] = [];
   m_hash: string = "";
   m_screenshot?: string;
