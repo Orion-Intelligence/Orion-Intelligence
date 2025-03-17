@@ -50,81 +50,73 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
     return "https://support.mozilla.org"
 
   def parse_leak_data(self, page: Page):
-      page.wait_for_load_state("domcontentloaded")
-      breach_cards = page.locator('a[class^="BreachIndexView_breachCard"]')
-      breach_cards.first.wait_for(state="visible")
-      card_count = breach_cards.count()
+    page.wait_for_load_state("domcontentloaded")
+    breach_cards = page.locator('a[class^="BreachIndexView_breachCard"]')
+    breach_cards.first.wait_for(state="visible")
+    card_count = breach_cards.count()
 
-      self._card_data = []
-      error_count = 0
-      max_errors = 20
-      original_url = page.url
-      error = False
+    self._card_data = []
+    error_count = 0
+    max_errors = 20
+    original_url = page.url
 
-      for i in range(card_count):
-          if error_count >= max_errors:
-              break
-          if error:
-            page.goto(original_url)
-            error = False
+    # Step 1: Collect all card data first
+    card_list = []
+    for i in range(card_count):
+      try:
+        card = page.locator('a[class^="BreachIndexView_breachCard"]').nth(i)
+        card.wait_for(state="visible")
 
-          try:
-              card = page.locator('a[class^="BreachIndexView_breachCard"]').nth(i)
-              card.wait_for(state="visible")
+        card_content = helper_method.clean_text(card.inner_text())
+        card_href = card.get_attribute('href')
+        card_title = helper_method.clean_text(card.locator('h2').inner_text())
+        base = "https://monitor.mozilla.org" +"/"+card_href
 
-              card_content = helper_method.clean_text(card.inner_text())
-              card_href = card.get_attribute('href')
-              card_title = helper_method.clean_text(card.locator('h2').inner_text())
+        card_list.append({
+          'content': card_content,
+          'href': card_href,
+          'title': card_title,
+          'dumplink': base
+        })
 
-              with page.expect_navigation():
-                  card.click()
+      except Exception as ex:
+        error_count += 1
+        print(f"Error collecting card {i}: {ex}")
+        if error_count >= max_errors:
+          break
+        continue
 
-              page.wait_for_load_state("domcontentloaded")
+    # Step 2: Visit each URL one by one
+    for card_data in card_list:
+      if error_count >= max_errors:
+        break
 
-              soup = BeautifulSoup(page.content(), "html.parser")
-              extracted_text = helper_method.clean_text(soup.get_text(separator=" ", strip=True))
+      try:
+        page.goto(card_data['dumplink'])
+        page.wait_for_load_state("domcontentloaded")
 
-              current_url = page.url
-              print("::::::::::::::::::::::::::::::::::::")
-              print(current_url)
-              print("::::::::::::::::::::::::::::::::::::")
+        soup = BeautifulSoup(page.content(), "html.parser")
+        extracted_text = helper_method.clean_text(soup.get_text(separator=" ", strip=True))
+        current_url = page.url
 
-              leak_data = leak_model(
-                  m_title=card_title,
-                  m_url=current_url,
-                  m_base_url=self.base_url,
-                  m_content=extracted_text,
-                  m_network=helper_method.get_network_type(self.base_url),
-                  m_important_content=card_content,
-                  m_weblink=[current_url],
-                  m_dumplink=[f"{self.base_url}{card_href}"],
-                  m_email_addresses=helper_method.extract_emails(extracted_text),
-                  m_phone_numbers=helper_method.extract_phone_numbers(extracted_text),
-                  m_content_type=["leaks"],
-              )
+        leak_data = leak_model(
+          m_title=card_data['title'],
+          m_url=current_url,
+          m_base_url=self.base_url,
+          m_content=extracted_text,
+          m_network=helper_method.get_network_type(self.base_url),
+          m_important_content=card_data['content'],
+          m_weblink=[current_url],
+          m_dumplink=[card_data['dumplink']],
+          m_email_addresses=helper_method.extract_emails(extracted_text),
+          m_phone_numbers=helper_method.extract_phone_numbers(extracted_text),
+          m_content_type=["leaks"],
+        )
 
-              self._card_data.append(leak_data)
-              error_count = 0
+        self._card_data.append(leak_data)
+        error_count = 0
 
-              page.go_back()
-              page.wait_for_load_state("domcontentloaded")
-              page.locator('a[class^="BreachIndexView_breachCard"]').first.wait_for(state="visible")
-
-          except Exception as ex:
-              error_count += 1
-              try:
-                  page.go_back()
-                  page.wait_for_load_state("domcontentloaded")
-                  page.locator('a[class^="BreachIndexView_breachCard"]').first.wait_for(state="visible")
-              except:
-                  pass
-              error = True
-              print("::::::::::::::::::::::::::::::::::::")
-              print(ex)
-              print("::::::::::::::::::::::::::::::::::::")
-              continue
-
-      print(":::::::::::::::::::::cc:::::::::::::: cccccccccccccccccccc:")
-      print(":::::::::::::::::::::cc:::::::::::::: cccccccccccccccccccc:")
-      print(":::::::::::::::::::::cc:::::::::::::: cccccccccccccccccccc:")
-      return self._card_data
+      except Exception as ex:
+        error_count += 1
+        continue
+    return self._card_data
