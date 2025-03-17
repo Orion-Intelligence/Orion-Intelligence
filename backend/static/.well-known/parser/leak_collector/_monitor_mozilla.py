@@ -80,7 +80,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
               current_url = page.url
 
               leak_data = leak_model(
-                  m_title=card_title,
+                  m_title=card_title[1:],
                   m_url=current_url,
                   m_base_url=self.base_url,
                   m_content=extracted_text,
