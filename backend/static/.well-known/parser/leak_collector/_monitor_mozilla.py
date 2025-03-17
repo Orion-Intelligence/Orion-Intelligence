@@ -2,6 +2,8 @@ from abc import ABC
 from typing import List
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
+from trio import fail_after
+
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
@@ -56,10 +58,15 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
       self._card_data = []
       error_count = 0
       max_errors = 20
+      original_url = page.url
+      error = False
 
       for i in range(card_count):
           if error_count >= max_errors:
               break
+          if error:
+            page.goto(original_url)
+            error = False
 
           try:
               card = page.locator('a[class^="BreachIndexView_breachCard"]').nth(i)
@@ -80,7 +87,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
               current_url = page.url
 
               leak_data = leak_model(
-                  m_title=card_title[1:],
+                  m_title=card_title,
                   m_url=current_url,
                   m_base_url=self.base_url,
                   m_content=extracted_text,
@@ -108,6 +115,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
                   page.locator('a[class^="BreachIndexView_breachCard"]').first.wait_for(state="visible")
               except:
                   pass
+              error = True
               continue
 
       return self._card_data
