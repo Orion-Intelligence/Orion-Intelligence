@@ -3,6 +3,8 @@ PROJECT_NAME="trusted-search"
 stop_docker() {
     docker compose -p "$PROJECT_NAME" down --remove-orphans
     rm -rf staticfiles
+    docker stop trusted-web-nginx
+    docker rm trusted-web-nginx
 }
 
 create_parser_zip() {

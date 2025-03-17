@@ -61,67 +61,77 @@ class _mirror_h(leak_extractor_interface, ABC):
     def parse_leak_data(self, page: Page):
         try:
             is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-            if is_crawled:
-                max_pages = 100
-            else:
-                max_pages = 1000
+            max_pages = 100 if is_crawled else 1000
 
             current_page = 1
+            failure_count = 0
+            max_failures = 20
 
             while current_page <= max_pages:
-                full_url = f"{self.seed_url}/page/{current_page}"
-                page.goto(full_url)
-                page.wait_for_load_state('load')
-                page.wait_for_selector("td[style='word-break: break-word;white-space: normal;min-width: 300px;'] a")
-
-                links = page.query_selector_all("td[style='word-break: break-word;white-space: normal;min-width: 300px;'] a")
-                collected_links = []
-                for link in links:
-                    href = link.get_attribute("href")
-                    if 'zone' in href:
-                        collected_links.append(urljoin(self.base_url, href))
-
-                for link in collected_links:
-                    page.goto(link)
+                try:
+                    full_url = f"{self.seed_url}/page/{current_page}"
+                    page.goto(full_url)
                     page.wait_for_load_state('load')
-                    page.wait_for_selector("table[width='100%']")
+                    page.wait_for_selector("td[style='word-break: break-word;white-space: normal;min-width: 300px;'] a")
 
-                    web_url = self.safe_find(page, "//td[i[contains(@class, 'mdi-web')]]/following-sibling::td/strong/a", "href")
-                    location = self.safe_find(page, "//td[i[contains(@class, 'mdi-map-marker')]]/following-sibling::td/strong")
-                    server_ip = self.safe_find(page, "//td[i[contains(@class, 'mdi-mapbox')]]/following-sibling::td/strong/a")
-                    web_server = self.safe_find(page, "//td[i[contains(@class, 'mdi-server')]]/following-sibling::td/strong/a")
-                    attacker = self.safe_find(page, "//td[i[contains(@class, 'mdi-account')]]/following-sibling::td/strong/a")
-                    total = self.safe_find(page, "//td[i[contains(@class, 'mdi-clipboard-plus')]]/following-sibling::td/strong")
-                    date = self.safe_find(page, "//td[i[contains(@class, 'mdi-calendar')]]/following-sibling::td/strong")
+                    links = page.query_selector_all("td[style='word-break: break-word;white-space: normal;min-width: 300px;'] a")
+                    collected_links = [urljoin(self.base_url, link.get_attribute("href")) for link in links if 'zone' in link.get_attribute("href")]
 
-                    iframe = page.query_selector("iframe")
-                    if iframe:
-                        iframe_content = iframe.content_frame().content()
-                        soup = BeautifulSoup(iframe_content, 'html.parser')
-                        content = soup.get_text(strip=True)
-                    else:
-                        content = ""
+                    success = False
+                    for link in collected_links:
+                        try:
+                            page.goto(link)
+                            page.wait_for_load_state('load')
+                            page.wait_for_selector("table[width='100%']")
 
-                    card_data = defacement_model(
-                        m_location=[location] if location else [],
-                        m_attacker=[attacker] if attacker else [],
-                        m_ip=[server_ip] if server_ip else [],
-                        m_date_of_leak=helper_method.extract_and_convert_date(date),
-                        m_web_server=[web_server] if web_server else [],
-                        m_web_url=[web_url] if web_url else [],
-                        m_base_url=self.base_url,
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_team=total,
-                        m_content=content,
+                            web_url = self.safe_find(page, "//td[i[contains(@class, 'mdi-web')]]/following-sibling::td/strong/a", "href")
+                            location = self.safe_find(page, "//td[i[contains(@class, 'mdi-map-marker')]]/following-sibling::td/strong")
+                            server_ip = self.safe_find(page, "//td[i[contains(@class, 'mdi-mapbox')]]/following-sibling::td/strong/a")
+                            web_server = self.safe_find(page, "//td[i[contains(@class, 'mdi-server')]]/following-sibling::td/strong/a")
+                            attacker = self.safe_find(page, "//td[i[contains(@class, 'mdi-account')]]/following-sibling::td/strong/a")
+                            total = self.safe_find(page, "//td[i[contains(@class, 'mdi-clipboard-plus')]]/following-sibling::td/strong")
+                            date = self.safe_find(page, "//td[i[contains(@class, 'mdi-calendar')]]/following-sibling::td/strong")
 
-                    )
+                            iframe = page.query_selector("iframe")
+                            content = ""
+                            if iframe:
+                                iframe_content = iframe.content_frame().content()
+                                soup = BeautifulSoup(iframe_content, 'html.parser')
+                                content = soup.get_text(strip=True)
 
-                    self._card_data.append(card_data)
+                            card_data = defacement_model(
+                                m_location=[location] if location else [],
+                                m_attacker=[attacker] if attacker else [],
+                                m_ip=[server_ip] if server_ip else [],
+                                m_date_of_leak=helper_method.extract_and_convert_date(date),
+                                m_web_server=[web_server] if web_server else [],
+                                m_web_url=[web_url] if web_url else [],
+                                m_base_url=self.base_url,
+                                m_network=helper_method.get_network_type(self.base_url),
+                                m_team=total,
+                                m_content=content,
+                            )
 
-                current_page += 1
+                            self._card_data.append(card_data)
+                            success = True
+                        except Exception as ex:
+                            print(f"Error processing link {link}: {ex}")
+                            failure_count += 1
+                            if failure_count >= max_failures:
+                                print("Max failure count reached. Stopping execution.")
+                                return
 
-        except Exception as ex:
-            print(f"An error occurred: {ex}")
+                    if success:
+                        failure_count = 0
+
+                    current_page += 1
+
+                except Exception as ex:
+                    print(f"Error processing page {current_page}: {ex}")
+                    failure_count += 1
+                    if failure_count >= max_failures:
+                        print("Max failure count reached. Stopping execution.")
+                        return
 
         finally:
             self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)
