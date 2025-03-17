@@ -123,7 +123,11 @@ class elastic_request_generator:
     if not raw_query:
       return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
 
-    m_user_query = raw_query.lower().rstrip("/") + "*"
+    # Parse query for exact phrases (in quotes) and loose terms
+    import re
+    exact_phrases = re.findall(r'"([^"]+)"', raw_query)  # Extract phrases in quotes
+    loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()  # Remove quoted parts, split remaining terms
+
     m_url_query = raw_query
     m_safe_search = p_query_model.mSearchParamSafeSearch
     m_page_number = p_query_model.mSearchParamPage
@@ -143,49 +147,86 @@ class elastic_request_generator:
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network.keyword": m_network.lower()}})
 
-    # Enhanced URL matching with broader wildcards
     url_priority_query = {
       "bool": {
         "should": [
-          {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},  # Exact match
-          {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},  # Any substring
-          {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},  # Domain + path
-          {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},  # Path anywhere
-          {"match": {"m_url": {"query": raw_query, "boost": 40}}}  # Fuzzy match
+          {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},
+          {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},
+          {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},
+          {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},
+          {"match": {"m_url": {"query": raw_query, "boost": 40}}}
         ],
         "minimum_should_match": 1,
         "boost": 10
       }
     }
 
-    # Base URL matching focused on domain
     base_url_query = {
       "bool": {
         "should": [
-          {"term": {"m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},  # Exact domain (HTTPS)
-          {"term": {"m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},  # Exact domain (HTTP)
-          {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}  # Domain substring
+          {"term": {"m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},
+          {"term": {"m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},
+          {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}
         ],
         "minimum_should_match": 1,
         "boost": 5
       }
     }
 
-    content_query = {
-      "query_string": {
-        "query": m_user_query,
-        "fields": [
-          "m_title^4",
-          "m_content^1.5",
-          "m_important_content^1.5",
-          "m_company_name^2.5"
-        ],
-        "default_operator": "OR",
-        "lenient": True,
-        "analyze_wildcard": True,
-        "boost": 2
+    # Build content query with exact phrases and loose terms
+    content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+
+    # Add exact phrase queries
+    for phrase in exact_phrases:
+      phrase_query = {
+        "bool": {
+          "should": [
+            {"match_phrase": {"m_title": {"query": phrase, "boost": 4}}},
+            {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+            {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
+            {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}}
+          ],
+          "minimum_should_match": 1
+        }
       }
-    }
+      content_query["bool"]["should"].append(phrase_query)
+
+    # Add loose term queries with wildcards
+    for term in loose_terms:
+      term_query = {
+        "query_string": {
+          "query": term.lower() + "*",
+          "fields": [
+            "m_title^4",
+            "m_content^1.5",
+            "m_important_content^1.5",
+            "m_company_name^2.5"
+          ],
+          "default_operator": "OR",
+          "lenient": True,
+          "analyze_wildcard": True,
+          "boost": 2
+        }
+      }
+      content_query["bool"]["should"].append(term_query)
+
+    # If no exact phrases or loose terms, use a default query
+    if not exact_phrases and not loose_terms:
+      content_query = {
+        "query_string": {
+          "query": raw_query.lower().rstrip("/") + "*",
+          "fields": [
+            "m_title^4",
+            "m_content^1.5",
+            "m_important_content^1.5",
+            "m_company_name^2.5"
+          ],
+          "default_operator": "OR",
+          "lenient": True,
+          "analyze_wildcard": True,
+          "boost": 2
+        }
+      }
 
     query_statement = {
       "min_score": 0,
@@ -230,7 +271,7 @@ class elastic_request_generator:
       },
       "suggest": {
         "important_content_suggestion": {
-          "text": m_user_query,
+          "text": raw_query,
           "term": {
             "field": "m_important_content",
             "min_word_length": 3,
@@ -240,7 +281,7 @@ class elastic_request_generator:
           }
         },
         "content_suggestion": {
-          "text": m_user_query,
+          "text": raw_query,
           "term": {
             "field": "m_content",
             "min_word_length": 3,
@@ -253,7 +294,7 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
-      "explain": True  # Added for debugging
+      "explain": True
     }
 
     return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
