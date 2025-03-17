@@ -62,6 +62,9 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
     card_list = []
     for i in range(card_count):
       try:
+        print(":::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(i)
+        print(":::::::::::::::::::::::::::::::::::::::", flush=True)
         card = page.locator('a[class^="BreachIndexView_breachCard"]').nth(i)
         card.wait_for(state="visible")
 
@@ -85,11 +88,17 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
         continue
 
     for card_data in card_list:
+      print("Z:::::::::::::::::::::::::::::::::::::::", flush=True)
+      print(card_data['dumplink'])
+      print("Z:::::::::::::::::::::::::::::::::::::::", flush=True)
       if error_count >= max_errors:
         break
 
       try:
         page.goto(card_data['dumplink'])
+        print("C:::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(card_data['dumplink'])
+        print("C:::::::::::::::::::::::::::::::::::::::", flush=True)
         page.wait_for_load_state("domcontentloaded")
 
         soup = BeautifulSoup(page.content(), "html.parser")
