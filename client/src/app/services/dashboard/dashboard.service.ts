@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
+import {Observable, of, Subject} from 'rxjs';
 import {HttpParams} from '@angular/common/http';
 import {catchError, map, takeUntil} from 'rxjs/operators';
 import {ApiService} from '../../shared/services/api.service';
@@ -21,9 +21,7 @@ export class DashboardService {
   }
 
   fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{
-    success: boolean;
-    isEmpty: boolean;
-    data: T | null
+    success: boolean; isEmpty: boolean; data: T | null
   }> {
     this.cancelOngoingRequest();
 
@@ -49,30 +47,29 @@ export class DashboardService {
       total_p_document_list_length: resultItems.length,
       m_documents_length: resultItems.length,
       m_clearnet_links_count: resultItems.reduce((sum, item) => sum + ((item as any).m_clearnet_links?.length || 0), 0),
-
-      active_links: resultItems.filter(item => {
-        const daysOld = (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24);
-        return daysOld <= 5;
-      }).length,
-
+      active_links: resultItems.filter(item => (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24) <= 5).length,
       seldom_active_links: resultItems.filter(item => {
         const daysOld = (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24);
         return daysOld > 5 && daysOld <= 10;
       }).length,
-
-      inactive_links: resultItems.filter(item => {
-        const daysOld = (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24);
-        return daysOld > 10;
-      }).length,
-
-      consolidated_lists: {
-        m_urls: resultItems.map(item => (item as any).m_url || ""),
-        m_emails: resultItems.flatMap(item => (item as any).m_emails || (item as any).m_email_addresses || []),
-        mPhoneNumber: resultItems.flatMap(item => (item as any).m_phone_numbers || []),
-        mArchiveUrl: resultItems.flatMap(item => (item as any).m_archive_url || []),
-        mName: resultItems.flatMap(item => (item as any).m_names || []),
-        m_document: resultItems.flatMap(item => (item as any).m_document || [])
-      }
+      inactive_links: resultItems.filter(item => (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24) > 10).length,
+      consolidated_lists: (() => {
+        const consolidated: { [key: string]: string[] } = {};
+        resultItems.forEach(item => {
+          const typedItem = item as any;
+          Object.entries(typedItem).forEach(([key, value]) => {
+            if (Array.isArray(value) && value.every(v => typeof v === 'string') && value.length > 0) {
+              const filteredValue = value.filter(v => v !== "");
+              if (filteredValue.length > 0) {
+                consolidated[key] = Array.from(new Set([...(consolidated[key] || []), ...filteredValue]));
+              }
+            } else if (typeof value === 'string' && key !== 'm_update_date' && value !== "") {
+              consolidated[key] = Array.from(new Set([...(consolidated[key] || []), value]));
+            }
+          });
+        });
+        return consolidated;
+      })()
     };
   }
 }

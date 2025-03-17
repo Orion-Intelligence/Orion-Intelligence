@@ -75,7 +75,7 @@ export const routes: Routes = [{
   }, {
     path: 'defacement',
     data: {animation: 'DefacementPage'},
-    children: [{path: '', redirectTo: 'all', pathMatch: 'full'}, {
+    children: [{path: '', redirectTo: 'archives', pathMatch: 'full'}, {
       path: ':category',
       component: DashboardDefacementComponent,
       data: {type: 'Defacement', animation: 'CategoryPage'}

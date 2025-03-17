@@ -1,9 +1,9 @@
-<app-result [searchQuery]="query" [isLoading]="isLoading" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(result_count)"></app-result>
+<app-result [searchQuery]="query" [shrinkmenu] = true [isLoading]="isLoading" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(result_count)"></app-result>
 
 <div *ngIf="!isLoading && this.defacementCallbackModel.Result.length" @fadeInDashboardItem>
   <app-dashboard-result-list [searchResults]="defacementCallbackModel.Result"></app-dashboard-result-list>
 </div>
 
-<div *ngIf="!isLoading && this.defacementCallbackModel.Result.length > 0" @fadeInDashboardItem>
-  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(this.defacementCallbackModel.Page_Count)"></app-pagination>
+<div *ngIf="!isLoading && this.defacementCallbackModel.Result.length > 0" @fadeInDashboardItem class="pagination-margin">
+  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="this.defacementParamModel.mSearchParamPage" [maxPages]="Math.ceil(this.defacementParamModel.mSearchParamPage * this.defacementCallbackModel.Page_Count)"></app-pagination>
 </div>

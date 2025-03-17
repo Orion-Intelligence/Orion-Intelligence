@@ -48,8 +48,8 @@ class crawl_model:
     return JSONResponse(content={"message": CRAWL_CALLBACK_RESPONSES.M_WEBSITE_INDEXED}, status_code=200)
 
   async def init_general(self, general_index: GeneralDataModel):
-    m_data = elastic_request_generator().index_query_general(general_index)
-    await elastic_controller.get_instance().index_data(m_data.model_dump())
+    m_data = elastic_request_generator().index_query_general(general_index.model_dump())
+    await elastic_controller.get_instance().index_data(m_data)
     return await self._update_or_create_model(
       base_url=general_index.m_base_url,
       new_content_type=general_index.m_content_type,
@@ -59,8 +59,8 @@ class crawl_model:
     )
 
   async def init_leak(self, leak_index: LeakDataModel):
-    m_data = elastic_request_generator().index_query_leak(leak_index)
-    await elastic_controller.get_instance().index_data(m_data.model_dump())
+    m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
+    await elastic_controller.get_instance().index_data(m_data)
     return await self._update_or_create_model(
       base_url=leak_index.base_url,
       new_content_type=['leaks'],
@@ -70,8 +70,8 @@ class crawl_model:
     )
 
   async def init_defacement(self, defacement_index: DefacementDataModel):
-    m_data = elastic_request_generator().index_query_defacement(defacement_index)
-    await elastic_controller.get_instance().index_data(m_data.model_dump())
+    m_data = elastic_request_generator().index_query_defacement(defacement_index.model_dump())
+    await elastic_controller.get_instance().index_data(m_data)
     return await self._update_or_create_model(
       base_url=defacement_index.base_url,
       new_content_type=['defacement'],

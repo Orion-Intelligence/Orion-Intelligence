@@ -8,6 +8,6 @@
   <app-dashboard-results-grid [searchResults]="currentSearchResults" [query]="currentQuery" @fadeInDashboardItem></app-dashboard-results-grid>
 </div>
 
-<div *ngIf="!onToggleAnalytics && !isLoading && currentResultCount > 0" @fadeInDashboardItem>
+<div *ngIf="!onToggleAnalytics && !isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
   <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(currentCallbackModel.Page_Count)"></app-pagination>
 </div>

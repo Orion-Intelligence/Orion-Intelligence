@@ -77,6 +77,7 @@ class search_model:
   async def search_defacement_result(self, param: search_defacement_param_model):
     document, data_filter = elastic_request_generator().on_search_defacementdata(param)
     m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
     return await self.__search_callback.search_handler(
       m_status, m_documents,
       search_defacement_callback_model,

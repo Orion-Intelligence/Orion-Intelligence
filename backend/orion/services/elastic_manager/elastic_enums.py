@@ -42,7 +42,6 @@ class ELASTIC_ENUMS:
       "max_result_window": 1000000
     },
     "mappings": {
-      "api_collector": "true",
       "dynamic_templates": [
         {
           "strings_as_keywords": {
@@ -90,7 +89,6 @@ class ELASTIC_ENUMS:
       "max_result_window": 1000000
     },
     "mappings": {
-      "api_collector": "true",
       "dynamic_templates": [
         {
           "strings_as_keywords": {

@@ -5,7 +5,7 @@
     <span *ngFor="let crumb of breadcrumb; let i = index; let last = last">
       <span *ngIf="!last" class="breadcrumb-item" [class.disabled]="breadcrumb.length <= 2" (click)="breadcrumb.length > 2 ? navigateToCrumb(i) : null" [style.cursor]="breadcrumb.length > 2 ? 'pointer' : 'default'">
         {{ crumb.label | titlecase }}
-        <img ngSrc="../../../../../assets/images/shared/nav-next.svg" class="header-bar__breadcrum" alt="breadcrumb" height="20" width="20"/>
+        <img ngSrc="assets/images/shared/nav-next.svg" class="header-bar__breadcrum" alt="breadcrumb" height="20" width="20" priority/>
       </span>
 
       <span *ngIf="last" class="breadcrumb-item breadcrumb-active">

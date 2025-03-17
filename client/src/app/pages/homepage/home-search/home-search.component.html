@@ -1,6 +1,6 @@
 <form (submit)="onSearchSubmit($event)" class="home__form">
   <div>
-    <img ngSrc="../../../../assets/images/shared/home-logo.svg" alt="" width="280" height="61" loading="eager" fetchpriority="high">
+    <img src="assets/images/shared/home-logo.svg" alt="" width="280" height="61" loading="eager" priority>
     <span class="home__version">V: {{ appService.getConfig()?.settings?.['version'] }}</span>
   </div>
   <p class="home__description">Welcome to the <strong>System Analytics Dashboard</strong>. This system is currently running on <strong>version {{ appService.getConfig()?.settings?.['version'] }}</strong>, ensuring optimized performance and security. The dashboard provides <strong>real-time analytics</strong> on key system metrics, tracking insights such as <strong>performance trends, data integrity, and security alerts</strong>. Stay updated with daily and weekly changes to monitor and enhance overall system efficiency.</p>

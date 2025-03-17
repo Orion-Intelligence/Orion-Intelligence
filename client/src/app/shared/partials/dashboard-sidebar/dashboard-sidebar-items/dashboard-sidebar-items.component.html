@@ -1,6 +1,6 @@
 <li class="sidebar__item">
   <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}" (click)="selectSection()" [routerLink]="[routePrefix]" queryParamsHandling="merge">
-    <img [ngSrc]="icon" [alt]="title" height="20" width="20" class="sidebar__icon">
+    <img src="{{icon}}" [alt]="title" height="20" width="20" class="sidebar__icon">
     {{ title }}
     <img class="sidebar__dropdown-icon" ngSrc="../../../../../assets/images/shared/search_side_dropdown_icon.svg" alt="Drop Down" height="20" width="20">
   </div>

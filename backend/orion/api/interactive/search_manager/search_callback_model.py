@@ -30,13 +30,17 @@ class search_callback:
         m_service['m_host'] = m_service.get('m_host', '')
 
         m_content_preview = m_service.get("m_content", "")[:500]
-        if type(m_content_preview) is not list and m_content_preview in mDescription:
+        m_hash = m_service.get("m_hash", "")
+
+        dedup_key = m_content_preview if m_content_preview else m_hash
+
+        if type(dedup_key) is not list and dedup_key in mDescription:
           continue
         else:
-          if type(m_content_preview) is not list:
-            mDescription.add(m_content_preview)
+          if type(dedup_key) is not list:
+            mDescription.add(dedup_key)
           else:
-            for item in m_content_preview:
+            for item in dedup_key:
               mDescription.add(item)
 
         mRelevanceListData.append(m_service)

@@ -1,6 +1,6 @@
-import {Component,Input} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {DataAccordianComponent} from './data-accordian/data-accordian.component'
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DataAccordianComponent } from './data-accordian/data-accordian.component';
 
 @Component({
   selector: 'app-data-insight',
@@ -13,12 +13,15 @@ import {DataAccordianComponent} from './data-accordian/data-accordian.component'
 export class DataInsightComponent {
   @Input() analytics: any;
 
-  categories = [
-    { key: 'm_urls', label: 'Unique Urls', icon: 'assets/images/report/uniqueUrl.svg' },
-    { key: 'm_emails', label: 'Unique Emails', icon: 'assets/images/report/search_side_email_icon.svg' },
-    { key: 'mPhoneNumber', label: 'Unique Cellular', icon: 'assets/images/report/document_count.svg' },
-    { key: 'mArchiveUrl', label: 'Unique Archives', icon: 'assets/images/report/document_count.svg' },
-    { key: 'mName', label: 'Unique Names', icon: 'assets/images/report/document_count.svg' },
-    { key: 'm_document', label: 'Unique Documents', icon: 'assets/images/report/document_count.svg' }
-  ];
+  get categories() {
+    return this.analytics.consolidated_lists
+  }
+
+  private formatLabel(key: string): string {
+    return key
+      .replace('m_', '')
+      .split(/(?=[A-Z])|_|-/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
 }

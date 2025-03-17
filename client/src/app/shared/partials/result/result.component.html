@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <div class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3">
+    <div class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3" *ngIf="!shrinkmenu">
       <div class="analytics d-flex align-items-center gap-2">
         <input type="checkbox" id="switch" (click)="onToggleAnalytics()"/>
         <label for="switch" class="mb-0"></label><span>&nbsp; Analytics</span>
@@ -29,7 +29,7 @@
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
 
-<div *ngIf="filterModel" class="filters-container" [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
+<div *ngIf="filterModel && !shrinkmenu" class="filters-container" [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
   <app-filters [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async" (filterChanged)="applyFilters($event)" (filterReset)="resetFilters()" (filterClose)="sidebarService.closeSidebar()"></app-filters>
 </div>
 

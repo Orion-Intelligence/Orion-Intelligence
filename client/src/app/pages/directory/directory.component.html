@@ -1,5 +1,5 @@
 <span id="top"></span>
-<img ngSrc="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" priority  fill="true">
+<img ngSrc="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" priority fill="true">
 <div class="directory">
   <div class="directory__container">
     <div class="directory__main-container">
@@ -8,13 +8,11 @@
           <p class="directory__header">Live Onion Services</p>
         </div>
 
-        <div class="directory-pagination col-7">
-          <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
-        </div>
+        <div class="directory-pagination col-7"></div>
 
         <div class="side-menu-container">
           <label class="filters-button" (click)="openSidebar()">
-            <img ngSrc="assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority >
+            <img ngSrc="assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority>
             Filter
           </label>
 
@@ -26,6 +24,7 @@
 
       <app-directory-list></app-directory-list>
     </div>
+    <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
   </div>
 </div>
 

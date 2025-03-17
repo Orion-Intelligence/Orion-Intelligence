@@ -7,7 +7,7 @@ import {AppService} from '../../../services/core/app.service';
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [NgOptimizedImage, FormsModule],
+  imports: [FormsModule],
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent {

@@ -26,6 +26,7 @@ export class ResultComponent implements OnInit {
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery: string = '';
   @Input() analyticsToggle: boolean = false;
+  @Input() shrinkmenu: boolean = false;
 
   @Output() reloadFilters = new EventEmitter<[string | null, string | null]>();
   @Output() reloadData = new EventEmitter<void>();
