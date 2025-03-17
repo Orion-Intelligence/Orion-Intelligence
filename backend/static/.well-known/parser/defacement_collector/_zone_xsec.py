@@ -55,12 +55,12 @@ class _zone_xsec(leak_extractor_interface, ABC):
             return ""
 
     def parse_leak_data(self, page: Page):
-        try:
-            is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-            max_pages = 20 if is_crawled else 500
+        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
+        max_pages = 20 if is_crawled else 500
 
-            current_page = 1
-            while current_page <= max_pages:
+        current_page = 1
+        while current_page <= max_pages:
+            try:
                 full_url = f"{self.seed_url}/page={current_page}"
                 page.goto(full_url)
                 page.wait_for_load_state("load")
@@ -75,12 +75,14 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         page.goto(link)
                         page.wait_for_load_state("load")
                         page.wait_for_selector(".panel.panel-danger")
+
                         ip = self.safe_find(page, "p:has(strong):has-text('IP') strong")
                         defacer = self.safe_find(page, "p:has(strong):has-text('Defacer') strong")
                         location = self.safe_find(page, "p:has(strong):has-text('Location') strong")
                         web_server = self.safe_find(page, "p:has(strong):has-text('Web Server') strong")
                         date = self.safe_find(page, "p:has(strong):has-text('Saved on') strong")
                         team = self.safe_find(page, "p:has(strong):has-text('Team') strong")
+
                         iframe = page.query_selector("iframe")
                         if not iframe:
                             try:
@@ -116,8 +118,9 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         continue
 
                 current_page += 1
+            except Exception as ex:
+                print(f"An error occurred on page {current_page}: {ex}")
+                current_page += 1
+                continue
 
-        except Exception as ex:
-            print(f"An error occurred: {ex}")
-        finally:
-            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)
+        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)

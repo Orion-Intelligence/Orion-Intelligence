@@ -143,6 +143,7 @@ services:
       - ./backend/static:/app/static:cached
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
+
     networks:
       backend:
         ipv4_address: 172.20.1.13

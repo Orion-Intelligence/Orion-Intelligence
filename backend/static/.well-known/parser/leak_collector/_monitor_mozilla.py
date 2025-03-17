@@ -37,7 +37,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.SELENIUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -58,7 +58,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
         self._card_data = []
         original_url = page.url
 
-        for i in range(min(5, card_count)):
+        for i in range(card_count):
             try:
                 card = page.locator('a[class^="BreachIndexView_breachCard"]').nth(i)
                 card.wait_for(state="visible")
