@@ -39,11 +39,11 @@ use_compose_file() {
 }
 
 stop_docker
-create_parser_zip
 
 if [ "$1" == "stop" ]; then
     echo "Crawler service stopped"
 else
+    create_parser_zip
     COMMAND=$1
     FLAG=$2
 
