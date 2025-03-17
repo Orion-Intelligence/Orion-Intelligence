@@ -58,9 +58,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
     self._card_data = []
     error_count = 0
     max_errors = 20
-    original_url = page.url
 
-    # Step 1: Collect all card data first
     card_list = []
     for i in range(card_count):
       try:
@@ -86,7 +84,6 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
           break
         continue
 
-    # Step 2: Visit each URL one by one
     for card_data in card_list:
       if error_count >= max_errors:
         break
