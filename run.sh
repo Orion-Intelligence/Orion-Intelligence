@@ -1,5 +1,3 @@
-[200~#!/bin/bash
-
 PROJECT_NAME="trusted-search"
 
 stop_docker() {
@@ -85,5 +83,5 @@ else
 
     docker network create --driver bridge shared_bridge || true
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
-    echo "Server started"
+    echo "Server started"c
 fi
