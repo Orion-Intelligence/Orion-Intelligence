@@ -85,6 +85,9 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
               extracted_text = helper_method.clean_text(soup.get_text(separator=" ", strip=True))
 
               current_url = page.url
+              print("::::::::::::::::::::::::::::::::::::")
+              print(current_url)
+              print("::::::::::::::::::::::::::::::::::::")
 
               leak_data = leak_model(
                   m_title=card_title,
@@ -107,7 +110,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
               page.wait_for_load_state("domcontentloaded")
               page.locator('a[class^="BreachIndexView_breachCard"]').first.wait_for(state="visible")
 
-          except Exception:
+          except Exception as ex:
               error_count += 1
               try:
                   page.go_back()
@@ -116,6 +119,12 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
               except:
                   pass
               error = True
+              print("::::::::::::::::::::::::::::::::::::")
+              print(ex)
+              print("::::::::::::::::::::::::::::::::::::")
               continue
 
+      print(":::::::::::::::::::::cc:::::::::::::: cccccccccccccccccccc:")
+      print(":::::::::::::::::::::cc:::::::::::::: cccccccccccccccccccc:")
+      print(":::::::::::::::::::::cc:::::::::::::: cccccccccccccccccccc:")
       return self._card_data
