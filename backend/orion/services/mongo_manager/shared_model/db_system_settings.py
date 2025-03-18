@@ -5,6 +5,7 @@ from pydantic import field_validator
 class AllowedKeys(str, Enum):
     VERSION = "version"
     API_ALLOWED = "api_allowed"
+    LANGUAGE_ALLOWED = "language_allowed"
 
 class db_system_model(Model):
     key: AllowedKeys = Field(unique=True)
