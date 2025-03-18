@@ -58,7 +58,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
     max_errors = 20
 
     card_urls = []
-    for i in range(5):
+    for i in range(card_count):
       try:
         card = breach_cards.nth(i)
         card_href = card.get_attribute('href')
