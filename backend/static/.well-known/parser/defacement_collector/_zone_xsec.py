@@ -59,6 +59,8 @@ class _zone_xsec(leak_extractor_interface, ABC):
         max_pages = 20 if is_crawled else 500
 
         current_page = 1
+        consecutive_errors = 0
+
         while current_page <= max_pages:
             try:
                 full_url = f"{self.seed_url}/page={current_page}"
@@ -76,8 +78,6 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         page.wait_for_load_state("load")
                         page.wait_for_selector(".panel.panel-danger")
 
-                        h1_element = page.query_selector("h1.panel-title.mirror-details")
-                        full_title = h1_element.inner_text().strip() if h1_element else ""
                         url_span = page.query_selector("span#url")
                         extracted_url = url_span.inner_text().strip() if url_span else link
 
@@ -93,7 +93,6 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             try:
                                 iframe = page.wait_for_selector("iframe")
                             except TimeoutError:
-
                                 continue
 
                         m_mirror = ""
@@ -122,8 +121,14 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         continue
 
                 current_page += 1
+                consecutive_errors = 0
+
             except Exception as ex:
                 print(f"An error occurred on page {current_page}: {ex}")
+                consecutive_errors += 1
+                if consecutive_errors >= 5:
+                    print(f"Stopping due to {consecutive_errors} consecutive errors")
+                    break
                 current_page += 1
                 continue
 
