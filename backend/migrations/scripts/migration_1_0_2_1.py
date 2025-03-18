@@ -17,5 +17,5 @@ class migration_1_0_2_1:
         existing_version_entry = await engine.find_one(db_system_model, db_system_model.key == AllowedKeys.VERSION)
         existing_version_entry.value = str(version)
         await engine.save(existing_version_entry)
-        new_entry = db_system_model(key=AllowedKeys.LANGUAGE_ALLOWED, value=1)
+        new_entry = db_system_model(key=AllowedKeys.LANGUAGE_ALLOWED, value=str(1))
         await engine.save(new_entry)
