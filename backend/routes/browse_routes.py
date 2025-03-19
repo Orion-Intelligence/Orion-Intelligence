@@ -9,7 +9,7 @@ PRIVOXY_URL = "http://host.docker.internal:8118"  # Tinyproxy URL
 PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL)  # Force all traffic through proxy
 
 async def fetch_and_rewrite(url: str, request: Request):
-    async with AsyncClient(transport=PRIVOXY_TRANSPORT, timeout=30, follow_redirects=True) as client:
+    async with AsyncClient(timeout=30, follow_redirects=True) as client:
         response = await client.request(
             method=request.method,
             url=url,
