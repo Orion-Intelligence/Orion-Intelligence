@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response, HTMLResponse
 from httpx import AsyncClient, AsyncHTTPTransport, HTTPStatusError, RequestError
 import re
-from urllib.parse import urljoin ในสาขา, quote
+from urllib.parse import urljoin, quote  # Fixed import, removed erroneous "ในสาขา"
 import logging
 
 # Configure logging with detailed output
