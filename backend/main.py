@@ -38,7 +38,6 @@ configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(api_routes)
-app.include_router(browse_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
