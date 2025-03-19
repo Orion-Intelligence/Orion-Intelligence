@@ -18,6 +18,8 @@ services:
       - ./client/build:/client_build:delegated
     expose:
       - "8070"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - backend
       - shared_bridge
