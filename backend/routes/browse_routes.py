@@ -5,11 +5,11 @@ import re
 
 browse_routes = APIRouter(prefix="/api")
 
-PRIVOXY_URL = "http://host.docker.internal:8118"
-PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL)
+PROXY_URL = "http://host.docker.internal:8118"
+PROXY_TRANSPORT = AsyncHTTPTransport(proxy=PROXY_URL)
 
 async def fetch_and_rewrite(url: str, request: Request, use_proxy: bool = False):
-    transport = PRIVOXY_TRANSPORT if use_proxy else None
+    transport = PROXY_TRANSPORT if use_proxy else None
     async with AsyncClient(transport=transport, timeout=30, follow_redirects=True) as client:
         response = await client.request(
             method=request.method,
@@ -17,6 +17,7 @@ async def fetch_and_rewrite(url: str, request: Request, use_proxy: bool = False)
             headers={k: v for k, v in request.headers.items() if k.lower() != "host"},
             content=await request.body() if request.method != "GET" else None
         )
+
         content_type = response.headers.get("content-type", "")
         return HTMLResponse(content=rewrite_html_urls(response.text, url)) if "text/html" in content_type else Response(response.content)
 
