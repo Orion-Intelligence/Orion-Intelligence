@@ -9,30 +9,32 @@ PRIVOXY_URL = "http://host.docker.internal:8118"  # Tinyproxy URL
 PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL)  # Force all traffic through proxy
 
 async def fetch_and_rewrite(url: str, request: Request):
-    async with AsyncClient(timeout=30, follow_redirects=True) as client:
-        response = await client.request(
-            method=request.method,
-            url=url,
-            headers={k: v for k, v in request.headers.items() if k.lower() != "host"},
-            content=await request.body() if request.method != "GET" else None
-        )
-        content_type = response.headers.get("content-type", "")
-        return HTMLResponse(content=rewrite_html_urls(response.text, url)) if "text/html" in content_type else Response(response.content)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": url,
+    }
+
+    async with AsyncClient(headers=headers, timeout=30, follow_redirects=True) as client:
+        response = await client.get(url)
+        print(f"✅ Status: {response.status_code}, URL: {url}")  # Debugging output
+        return HTMLResponse(content=response.text) if "text/html" in response.headers.get("content-type", "") else Response(response.content)
 
 def rewrite_html_urls(html: str, base_url: str) -> str:
     def fix_url(match):
         old_url = match.group(1) or match.group(2)
 
-        # ✅ If the URL is already absolute (http, https, etc.), do NOT modify it
+        # Skip rewriting if it's an absolute URL
         if old_url.startswith(("http://", "https://", "data:", "javascript:", "#")):
             return match.group(0)
 
-        # ✅ Make sure we are rewriting relative paths only within the same domain
-        if old_url.startswith("/"):
-            new_url = f'{base_url.rstrip("/")}{old_url}'
-        else:
-            new_url = f'{base_url.rstrip("/")}/{old_url}'
+        # Avoid breaking external static assets
+        if "static-ss.xnxx-cdn.com" in old_url or old_url.endswith((".css", ".js", ".png", ".jpg", ".gif", ".svg")):
+            print(f"🚫 Skipping rewrite for static asset: {old_url}")  # Debugging output
+            return match.group(0)
 
+        new_url = f'/api/browse?url={base_url.rstrip("/")}/{old_url.lstrip("/")}'
         print(f"🔍 Rewriting: {old_url} → {new_url}")  # Debugging output
         return match.group(0).replace(old_url, new_url)
 
