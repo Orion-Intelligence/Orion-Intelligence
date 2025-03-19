@@ -12,8 +12,9 @@ logger = logging.getLogger(__name__)
 browse_routes = APIRouter(prefix="/api")
 
 PRIVOXY_URL = "http://host.docker.internal:8118"
-PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL, retries=5)
+PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL, retries=5)  # Increased retries
 
+# Limit concurrent requests
 CONCURRENCY_LIMIT = 5
 semaphore = asyncio.Semaphore(CONCURRENCY_LIMIT)
 
@@ -25,11 +26,11 @@ async def fetch_and_rewrite(url: str, request: Request):
         "Referer": url,
     }
 
-    async with semaphore:
+    async with semaphore:  # Throttle concurrent requests
         try:
             async with AsyncClient(
                 headers=headers,
-                timeout=90,
+                timeout=90,  # Increased timeout further
                 follow_redirects=True,
                 transport=PRIVOXY_TRANSPORT
             ) as client:
@@ -50,12 +51,12 @@ async def fetch_and_rewrite(url: str, request: Request):
 
         except Exception as e:
             logger.error(f"Error fetching URL {url}: {str(e)}")
-            # Fallback based on URL, not content_type
-            if ".jpg" in url or ".png" in url:
-                return Response(content=b"", media_type="image/jpeg", status_code=200)
-            elif ".css" in url:
+            # Fallbacks for failed assets
+            if "image" in content_type or ".jpg" in url or ".png" in url:
+                return Response(content=b"", media_type="image/jpeg", status_code=200)  # Empty image
+            elif "css" in url:
                 return Response(content="/* Failed to load CSS */", media_type="text/css", status_code=200)
-            elif ".js" in url:
+            elif "js" in url:
                 return Response(content="console.log('Failed to load JS');", media_type="application/javascript", status_code=200)
             return Response(content=f"Error: {str(e)}", status_code=502)
 
