@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response, HTMLResponse
-from httpx import AsyncClient, AsyncHTTPTransport, HTTPStatusError, RequestError, Limits
+from httpx import AsyncClient, AsyncHTTPTransport, HTTPStatusError, RequestError
 import re
 from urllib.parse import urljoin, quote
 import logging
@@ -14,12 +14,7 @@ logger = logging.getLogger(__name__)
 browse_routes = APIRouter(prefix="/api")
 
 PRIVOXY_URL = "http://host.docker.internal:8118"
-PRIVOXY_TRANSPORT = AsyncHTTPTransport(
-    proxy=PRIVOXY_URL,
-    retries=3,
-    http2=True,
-    limits=Limits(max_connections=100, max_keepalive_connections=20)
-)
+PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL, retries=3, http2=True, limits={"max_connections": 100, "max_keepalive_connections": 20})
 
 async def fetch_and_rewrite(url: str, request: Request):
     headers = {
@@ -63,11 +58,11 @@ async def fetch_and_rewrite(url: str, request: Request):
                 )
 
     except HTTPStatusError as e:
-        return Response(content=f"❌Error fetching URL: {e}", status_code=e.response.status_code)
+        return Response(content=f"Error fetching URL: {e}", status_code=e.response.status_code)
     except RequestError as e:
-        return Response(content=f"❌Network error: {str(e)}", status_code=502)
+        return Response(content=f"Network error: {str(e)}", status_code=502)
     except Exception as e:
-        return Response(content=f"❌Internal server error: {str(e)}", status_code=500)
+        return Response(content=f"Internal server error: {str(e)}", status_code=500)
 
 def rewrite_html_urls(html: str, base_url: str) -> str:
     def fix_url(match):
