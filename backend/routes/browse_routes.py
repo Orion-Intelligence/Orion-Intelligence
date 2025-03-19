@@ -22,9 +22,10 @@ async def fetch_and_rewrite(url: str, request: Request):
     """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept": "*/*",
         "Accept-Language": "en-US,en;q=0.9",
         "Referer": url,
+        "Connection": "keep-alive",
     }
 
     try:
@@ -32,38 +33,27 @@ async def fetch_and_rewrite(url: str, request: Request):
             headers=headers,
             timeout=30,
             follow_redirects=True,
-            transport=PRIVOXY_TRANSPORT  # Ensure proxy is used for all requests
+            transport=PRIVOXY_TRANSPORT  # Ensure proxy is used
         ) as client:
             response = await client.get(url)
-            response.raise_for_status()  # Raise exception for bad status codes
-            logger.info(f"✅ Status: {response.status_code}, URL: {url}")
+            response.raise_for_status()  # Raise error for 4xx/5xx responses
+            logger.info(f"✅ Success: {response.status_code} - {url}")
 
             content_type = response.headers.get("content-type", "").lower()
             if "text/html" in content_type:
-                # Rewrite HTML content
-                rewritten_content = rewrite_html_urls(response.text, url)
-                return HTMLResponse(content=rewritten_content, status_code=response.status_code)
+                return HTMLResponse(content=rewrite_html_urls(response.text, url), status_code=response.status_code)
             elif "css" in content_type:
-                # Rewrite URLs in CSS content
-                rewritten_content = rewrite_css_urls(response.text, url)
-                return Response(
-                    content=rewritten_content,
-                    media_type=content_type,
-                    status_code=response.status_code
-                )
+                return Response(content=rewrite_css_urls(response.text, url), media_type=content_type, status_code=response.status_code)
             else:
-                # Return non-HTML/CSS assets (e.g., images, JS) as-is
-                return Response(
-                    content=response.content,
-                    media_type=content_type,
-                    status_code=response.status_code
-                )
+                return Response(content=response.content, media_type=content_type, status_code=response.status_code)
 
     except HTTPStatusError as e:
-        logger.error(f"❌ HTTP error: {e.response.status_code} for URL: {url}")
-        return Response(content=f"Error fetching URL: {e}", status_code=e.response.status_code)
+        logger.error(f"❌ HTTP error: {e.response.status_code} for {url}\nResponse: {e.response.text}")
+        return Response(content=f"HTTP error: {e.response.status_code}", status_code=e.response.status_code)
+
     except Exception as e:
-        logger.error(f"❌ General error fetching URL {url}: {str(e)}")
+        import traceback
+        logger.error(f"❌ General error fetching URL {url}: {str(e)}\n{traceback.format_exc()}")
         return Response(content=f"Internal server error: {str(e)}", status_code=500)
 
 def rewrite_html_urls(html: str, base_url: str) -> str:
