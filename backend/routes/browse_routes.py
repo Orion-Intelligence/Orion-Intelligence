@@ -19,20 +19,26 @@ async def fetch_and_rewrite(url: str, request: Request):
         content_type = response.headers.get("content-type", "")
         return HTMLResponse(content=rewrite_html_urls(response.text, url)) if "text/html" in content_type else Response(response.content)
 
-
 def rewrite_html_urls(html: str, base_url: str) -> str:
     def fix_url(match):
         old_url = match.group(1) or match.group(2)
 
-        # Don't modify absolute URLs (fixing potential loop issue)
+        # ✅ If the URL is already absolute (http, https, etc.), do NOT modify it
         if old_url.startswith(("http://", "https://", "data:", "javascript:", "#")):
             return match.group(0)
 
-        new_url = f'/api/browse?url={base_url.rstrip("/")}/{old_url.lstrip("/")}'
-        print(f"🔍 Rewriting relative URL: {old_url} → {new_url}")  # Debugging output
+        # ✅ Make sure we are rewriting relative paths only within the same domain
+        if old_url.startswith("/"):
+            new_url = f'{base_url.rstrip("/")}{old_url}'
+        else:
+            new_url = f'{base_url.rstrip("/")}/{old_url}'
+
+        print(f"🔍 Rewriting: {old_url} → {new_url}")  # Debugging output
         return match.group(0).replace(old_url, new_url)
 
     return re.sub(r'href="([^"]+)"|src="([^"]+)"', fix_url, html)
+
+
 @browse_routes.get("/browse")
 async def browse(request: Request, url: str = Query(...)):
     return await fetch_and_rewrite(url, request)
