@@ -22,7 +22,13 @@ async def fetch_and_rewrite(url: str, request: Request):
 def rewrite_html_urls(html: str, base_url: str) -> str:
     def fix_url(match):
         old_url = match.group(1) or match.group(2)
-        return match.group(0) if not old_url or old_url.startswith(("http", "data:", "javascript:", "#")) else match.group(0).replace(old_url, f'/api/browse?url={base_url.rstrip("/")}/{old_url.lstrip("/")}')
+        if not old_url or old_url.startswith(("http", "data:", "javascript:", "#")):
+            return match.group(0)
+
+        new_url = f'/api/browse?url={base_url.rstrip("/")}/{old_url.lstrip("/")}'
+        print(f"🔍 Rewriting: {old_url} → {new_url}")  # Debugging output
+        return match.group(0).replace(old_url, new_url)
+
     return re.sub(r'href="([^"]+)"|src="([^"]+)"', fix_url, html)
 
 @browse_routes.get("/browse")
