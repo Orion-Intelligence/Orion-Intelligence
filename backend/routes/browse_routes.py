@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response, HTMLResponse
-from httpx import AsyncClient, AsyncHTTPTransport, HTTPStatusError, RequestError
+from httpx import AsyncClient, AsyncHTTPTransport, HTTPStatusError, RequestError, Limits
 import re
-from urllib.parse import urljoin, quote  # Fixed import, removed erroneous "ในสาขา"
+from urllib.parse import urljoin, quote
 import logging
 
-# Configure logging with detailed output
+# Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
@@ -14,14 +14,16 @@ logger = logging.getLogger(__name__)
 
 browse_routes = APIRouter(prefix="/api")
 
-# Proxy configuration
+# Proxy configuration with increased limits
 PRIVOXY_URL = "http://host.docker.internal:8118"
-PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL, retries=3)
+PRIVOXY_TRANSPORT = AsyncHTTPTransport(
+    proxy=PRIVOXY_URL,
+    retries=5,  # Retry up to 5 times
+    limits=Limits(max_connections=100, max_keepalive_connections=20)  # Increase connection pool
+)
 
 async def fetch_and_rewrite(url: str, request: Request):
-    """
-    Fetch and rewrite content, handling all asset types robustly.
-    """
+    """Fetch and rewrite content with robust error handling."""
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -32,9 +34,10 @@ async def fetch_and_rewrite(url: str, request: Request):
     try:
         async with AsyncClient(
             headers=headers,
-            timeout=60,  # Increased timeout for slower CDNs
+            timeout=60,
             follow_redirects=True,
-            transport=PRIVOXY_TRANSPORT
+            transport=PRIVOXY_TRANSPORT,
+            max_redirects=10
         ) as client:
             response = await client.get(url)
             response.raise_for_status()
@@ -46,23 +49,12 @@ async def fetch_and_rewrite(url: str, request: Request):
                 return HTMLResponse(content=rewritten_content, status_code=response.status_code)
             elif "css" in content_type:
                 rewritten_content = rewrite_css_urls(response.text, url)
-                return Response(
-                    content=rewritten_content,
-                    media_type=content_type,
-                    status_code=response.status_code
-                )
-            elif content_type:  # Handle other known types (images, JS, etc.)
-                return Response(
-                    content=response.content,
-                    media_type=content_type,
-                    status_code=response.status_code
-                )
+                return Response(content=rewritten_content, media_type=content_type, status_code=response.status_code)
+            elif content_type:
+                return Response(content=response.content, media_type=content_type, status_code=response.status_code)
             else:
                 logger.warning(f"Unknown content-type for URL: {url}")
-                return Response(
-                    content=response.content,
-                    status_code=response.status_code
-                )
+                return Response(content=response.content, status_code=response.status_code)
 
     except HTTPStatusError as e:
         logger.error(f"❌ HTTP error: {e.response.status_code} for URL: {url} - {e}")
