@@ -4,6 +4,7 @@ from httpx import AsyncClient, AsyncHTTPTransport
 import re
 from urllib.parse import urljoin, quote
 import logging
+import asyncio
 
 logging.basicConfig(level=logging.ERROR, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -11,7 +12,11 @@ logger = logging.getLogger(__name__)
 browse_routes = APIRouter(prefix="/api")
 
 PRIVOXY_URL = "http://host.docker.internal:8118"
-PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL, retries=3)
+PRIVOXY_TRANSPORT = AsyncHTTPTransport(proxy=PRIVOXY_URL, retries=5)  # Increased retries
+
+# Limit concurrent requests
+CONCURRENCY_LIMIT = 5
+semaphore = asyncio.Semaphore(CONCURRENCY_LIMIT)
 
 async def fetch_and_rewrite(url: str, request: Request):
     headers = {
@@ -21,31 +26,39 @@ async def fetch_and_rewrite(url: str, request: Request):
         "Referer": url,
     }
 
-    try:
-        async with AsyncClient(
-            headers=headers,
-            timeout=60,
-            follow_redirects=True,
-            transport=PRIVOXY_TRANSPORT
-        ) as client:
-            response = await client.get(url)
-            response.raise_for_status()
+    async with semaphore:  # Throttle concurrent requests
+        try:
+            async with AsyncClient(
+                headers=headers,
+                timeout=90,  # Increased timeout further
+                follow_redirects=True,
+                transport=PRIVOXY_TRANSPORT
+            ) as client:
+                response = await client.get(url)
+                response.raise_for_status()
 
-            content_type = response.headers.get("content-type", "").lower()
-            if "text/html" in content_type:
-                rewritten_content = rewrite_html_urls(response.text, url)
-                return HTMLResponse(content=rewritten_content, status_code=response.status_code)
-            elif "css" in content_type:
-                rewritten_content = rewrite_css_urls(response.text, url)
-                return Response(content=rewritten_content, media_type=content_type, status_code=response.status_code)
-            elif content_type:
-                return Response(content=response.content, media_type=content_type, status_code=response.status_code)
-            else:
-                return Response(content=response.content, status_code=response.status_code)
+                content_type = response.headers.get("content-type", "").lower()
+                if "text/html" in content_type:
+                    rewritten_content = rewrite_html_urls(response.text, url)
+                    return HTMLResponse(content=rewritten_content, status_code=response.status_code)
+                elif "css" in content_type:
+                    rewritten_content = rewrite_css_urls(response.text, url)
+                    return Response(content=rewritten_content, media_type=content_type, status_code=response.status_code)
+                elif content_type:
+                    return Response(content=response.content, media_type=content_type, status_code=response.status_code)
+                else:
+                    return Response(content=response.content, status_code=response.status_code)
 
-    except Exception as e:
-        logger.error(f"Error fetching URL {url}: {str(e)}")
-        return Response(content=f"Error: {str(e)}", status_code=502)
+        except Exception as e:
+            logger.error(f"Error fetching URL {url}: {str(e)}")
+            # Fallbacks for failed assets
+            if "image" in content_type or ".jpg" in url or ".png" in url:
+                return Response(content=b"", media_type="image/jpeg", status_code=200)  # Empty image
+            elif "css" in url:
+                return Response(content="/* Failed to load CSS */", media_type="text/css", status_code=200)
+            elif "js" in url:
+                return Response(content="console.log('Failed to load JS');", media_type="application/javascript", status_code=200)
+            return Response(content=f"Error: {str(e)}", status_code=502)
 
 def rewrite_html_urls(html: str, base_url: str) -> str:
     def fix_url(match):
