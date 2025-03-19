@@ -25,15 +25,11 @@ def rewrite_html_urls(html: str, base_url: str) -> str:
     def fix_url(match):
         old_url = match.group(1) or match.group(2)
 
-        # Skip rewriting if it's an absolute URL
-        if old_url.startswith(("http://", "https://", "data:", "javascript:", "#")):
+        # If the URL is absolute (starts with http/https), don't rewrite it
+        if old_url.startswith(("http://", "https://")):
             return match.group(0)
 
-        # Avoid breaking external static assets
-        if "static-ss.xnxx-cdn.com" in old_url or old_url.endswith((".css", ".js", ".png", ".jpg", ".gif", ".svg")):
-            print(f"🚫 Skipping rewrite for static asset: {old_url}")  # Debugging output
-            return match.group(0)
-
+        # Rewrite only relative URLs
         new_url = f'/api/browse?url={base_url.rstrip("/")}/{old_url.lstrip("/")}'
         print(f"🔍 Rewriting: {old_url} → {new_url}")  # Debugging output
         return match.group(0).replace(old_url, new_url)
