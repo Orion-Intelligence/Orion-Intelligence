@@ -1,6 +1,4 @@
 import threading
-import jwt
-from datetime import datetime, timedelta, timezone
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
@@ -24,13 +22,6 @@ class auth_manager:
             raise Exception("This class is a singleton!")
         auth_manager.__instance = self
         self._engine = mongo_controller.get_instance().get_engine()
-
-    @staticmethod
-    def create_access_token(data: dict, expires_delta: timedelta | None = None):
-        to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + expires_delta
-        to_encode.update({"exp": expire.timestamp()})
-        return jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
     async def authenticate_user(self, username: str, password: str):
       user = await self._engine.find_one(db_user_account, db_user_account.username == username)

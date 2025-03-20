@@ -9,7 +9,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @auth_router.post("/api/token")
-async def swagger_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await auth_manager.get_instance().authenticate_user(
         form_data.username, form_data.password
     )
@@ -18,7 +18,7 @@ async def swagger_token(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     access_token_expires = timedelta(minutes=30)
-    access_token = auth_manager.get_instance().create_access_token(
+    access_token = session_manager.get_instance().create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
 
