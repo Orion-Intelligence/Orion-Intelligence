@@ -157,7 +157,7 @@ services:
 
   mongo:
     image: mongo:latest
-    container_name: orion-web-mongodb
+    container_name: trusted-web-mongodb
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
