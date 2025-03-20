@@ -1,7 +1,6 @@
-<form class="default-input-container" (submit)="onSearchSubmit($event)" method="GET" action="" enctype="multipart/form-data">
+<form class="default-input-container" (submit)="onSearchSubmit($event)" method="GET" action="" enctype="multipart/form-data" #searchForm="ngForm">
   <img ngSrc="assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" priority fill="true">
-  <div class="row dashboard__api-search-input-div ">
-
+  <div class="row dashboard__api-search-input-div">
     <div class="col-lg-5 col-12 input-container">
       <div class="input-group default-input-sub-container">
         <input autocomplete="off" autocapitalize="none" type="text" placeholder="Username" class="form-control default-input" maxlength="150" name="username" [(ngModel)]="username">
@@ -14,7 +13,7 @@
 
     <div class="col-lg-5 col-12 mt-lg-0 mt-2 input-container">
       <div class="input-group default-input-sub-container">
-        <input autocomplete="off" autocapitalize="none" type="email" placeholder="Email" class="form-control default-input" maxlength="150" name="password" [(ngModel)]="email">
+        <input autocomplete="off" autocapitalize="none" type="email" placeholder="Email" class="form-control default-input" maxlength="150" name="email" [(ngModel)]="email" #emailInput="ngModel" email>
         <input type="hidden" value="1">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img ngSrc="assets/images/shared/email.svg" alt="Search" priority height="20" width="20">
@@ -23,9 +22,8 @@
     </div>
 
     <div class="col-2 mt-lg-0 mt-2">
-      <button class="dash-search-button">Search</button>
+      <button class="dash-search-button" [disabled]="!searchForm.valid">Search</button>
     </div>
-
   </div>
 </form>
 

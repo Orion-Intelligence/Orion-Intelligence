@@ -13,6 +13,7 @@ export class ReportResolver implements Resolve<any> {
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
     const category = route.parent?.url[0]?.path || '';
     const hash = route.paramMap.get('m_hash');
+    const lang = route.queryParamMap.get('lang');
 
     let apiUrl = '';
 
@@ -28,6 +29,10 @@ export class ReportResolver implements Resolve<any> {
         break;
       default:
         return of(null);
+    }
+
+    if (lang) {
+      apiUrl += `?lang=${lang}`;
     }
 
     return this.apiService.get<any>(apiUrl).pipe(

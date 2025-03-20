@@ -1,11 +1,11 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { last } from 'rxjs';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { HelperService } from '../../../services/helper.service';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {last} from 'rxjs';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {HelperService} from '../../../services/helper.service';
 import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
 import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
 
@@ -22,14 +22,11 @@ export class ReportComponent implements OnInit {
   activeTab: string = '';
   content: string = '';
 
-  constructor(
-    private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute,
-    private resultHelperService: HelperService
-  ) {}
+  constructor(private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService) {
+  }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata }) => {
+    this.route.data.subscribe(({reportdata}) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });
@@ -79,8 +76,20 @@ export class ReportComponent implements OnInit {
     this.resultHelperService.printPage();
   }
 
+  langUpdate() {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('lang', "en");
+    window.location.href = currentUrl.toString();
+  }
+
   shareResult() {
     this.resultHelperService.shareResult(this.resultItem?.m_url || '');
+  }
+
+  redirectToUrl() {
+    if (this.resultItem && this.resultItem.m_url) {
+      window.open(this.resultItem.m_url, '_blank');
+    }
   }
 
   getStatusText(dateString?: string): string {

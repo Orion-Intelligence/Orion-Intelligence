@@ -1,3 +1,4 @@
+<img ngSrc="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" priority fill="true">
 <app-result (onToggleSwitch)="onToggleAnalyticsTrigger()" [filterModel]="general_filters" [analyticsToggle]="onToggleAnalytics" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(currentCallbackModel.Result.length)"></app-result>
 
 <div *ngIf="onToggleAnalytics && !isLoading" @fadeInDashboardItem>

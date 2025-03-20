@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
@@ -42,8 +44,8 @@ async def get_leak_document(doc_id: str):
     return await search_model.getInstance().request_leak_doc(doc_id)
 
 @api_routes.get("/api/search/general/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
-async def get_general_document(doc_id: str):
-    return await search_model.getInstance().request_general_doc(doc_id)
+async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
+    return await search_model.getInstance().request_general_doc(doc_id, lang)
 
 @api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_dynamic_email(param: search_dynamic_param_model = Depends()):

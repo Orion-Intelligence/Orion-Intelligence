@@ -19,4 +19,4 @@ pymongo~=4.11
 passlib~=1.7.4
 PyJWT~=2.10.1
 toml~=0.10.2
-mitmproxy
+deep-translator==1.11.4

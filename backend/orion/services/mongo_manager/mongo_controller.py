@@ -41,6 +41,7 @@ class mongo_controller:
 
   async def ensure_indexes(self):
     await self.__engine.get_collection(db_user_account).create_index([("username", 1)], unique=True)
+    await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
 
   def get_engine(self)-> AIOEngine:
     return self.__engine

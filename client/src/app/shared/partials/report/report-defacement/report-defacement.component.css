@@ -1,9 +1,7 @@
 .dashboard__defacement-detail-container {
-  padding: 1.5rem;
+  padding: 0rem;
   margin: 35px;
   color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard__defacement-detail-header-row {

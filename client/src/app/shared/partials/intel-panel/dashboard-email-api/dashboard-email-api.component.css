@@ -23,13 +23,18 @@
   color: #fff;
   font-family: 'Roboto', sans-serif !important;
   cursor: pointer;
-  transition: opacity 0.2s ease-in-out;
-}
+  transition: opacity 0.2s ease-in-out, background 0.2s ease-in-out;
+  opacity: 0.9;
 
+}
 .dash-search-button:hover {
-  background: linear-gradient(92.32deg, #2173C0 2.58%, #1D5A9A 66.77%, #174E8A 130.97%);
+  opacity: 1;
 }
 
+.dash-search-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 .dashboard__search-table-header {
   padding-top: 15px;
   padding-bottom: 0;

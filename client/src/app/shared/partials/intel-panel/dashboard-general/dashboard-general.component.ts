@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgIf} from '@angular/common';
+import {NgIf, NgOptimizedImage} from '@angular/common';
 import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
 import {PaginationComponent} from '../../pagination/pagination.component';
 import {InsightsComponent} from '../../insights/insights.component';
@@ -17,7 +17,7 @@ import {general_filters} from '../../../constants/filters';
 
 @Component({
   selector: 'app-dashboard-general',
-  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent],
+  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent, NgOptimizedImage],
   templateUrl: './dashboard-general.component.html',
   animations: [fadeInDashboardItem],
 })

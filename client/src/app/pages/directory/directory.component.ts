@@ -5,7 +5,7 @@ import {DirectoryListComponent} from './directory-list/directory-list.component'
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {FilterModel} from '../../shared/model/filter/filter.model';
 import {directory_filters} from '../../shared/constants/filters';
-import {SidebarService} from '../../services/shared/sidebar.service';
+import {SidebarService} from '../../shared/services/sidebar.service';
 import {DirectoryService} from '../../services/directory/directory.service';
 import {DirectoryCallbackModel} from '../../shared/model/directory/directory.model';
 import {

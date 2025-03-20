@@ -5,7 +5,7 @@ import {FormsModule} from '@angular/forms';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {LoadingFormComponent} from '../loading-form/loading-form.component';
 import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {SidebarService} from '../../../services/shared/sidebar.service';
+import {SidebarService} from '../../services/sidebar.service';
 import {FiltersComponent} from '../filters/filters.component';
 import {FilterModel} from '../../model/filter/filter.model';
 import {SuggestionComponent} from '../suggestion/suggestion.component';

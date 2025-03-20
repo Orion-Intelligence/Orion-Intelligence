@@ -12,6 +12,7 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_cal
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.server.external_request_manager.external_request_controller import external_request_controller
+from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -46,15 +47,22 @@ class search_model:
 
   async def request_defacement_doc(self, doc_id) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)
-
     return await self.__search_callback.get_doc(result)
 
   async def request_leak_doc(self, doc_id) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id)
+    result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"])
+    result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"])
     return await self.__search_callback.get_doc(result)
 
-  async def request_general_doc(self, doc_id) -> Optional[result_item]:
+  async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id)
+    print("::::::::::::::")
+    print(lang)
+    print("::::::::::::::")
+    if lang:
+      result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+      result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)
     return await self.__search_callback.get_doc(result)
 
   async def search_general_result(self, param: search_general_param_model):
