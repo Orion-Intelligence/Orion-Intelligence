@@ -85,5 +85,5 @@ else
 
     docker network create --driver bridge shared_bridge || true
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
-    echo "Server started"c
+    echo "Server started"
 fi
