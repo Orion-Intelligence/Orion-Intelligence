@@ -112,19 +112,19 @@ class insight_job:
         await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.INSIGHT_OLD_WEEK, insight_new.model_dump_json(), None])
 
     except Exception as ex:
-      print(ex)
+      print("::::::::::::::::::::::::::::::::")
+      print("::::::::::::::::::::::::::::::::")
       return
 
   async def update_insights(self):
-    day_counter = 0
     await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None])
     await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
 
-    while True:
-      day_counter += 1
-      await asyncio.sleep(CONSTANTS.S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT)
-      if day_counter >= 7:
-        await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_WEEK)
-        day_counter = 0
-      else:
-        await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
+    # while True:
+    #   day_counter += 1
+    #   await asyncio.sleep(CONSTANTS.S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT)
+    #   if day_counter >= 7:
+    #     await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_WEEK)
+    #     day_counter = 0
+    #   else:
+    #     await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)

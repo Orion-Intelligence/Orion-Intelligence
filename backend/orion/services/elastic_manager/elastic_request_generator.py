@@ -518,8 +518,14 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"Document Count": {"value_count": {"field": "m_hash"}}},
-        },
+          "aggs": {
+            "Document Count": {
+              "value_count": {
+                "field": "m_hash"
+              }
+            }
+          }
+        }
       },
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
@@ -620,15 +626,21 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"Document Count": {"value_count": {"field": "m_hash"}}},
-        },
+          "aggs": {
+            "Document Count": {
+              "value_count": {
+                "field": "m_hash.keyword"
+              }
+            }
+          }
+        }
       },
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Unique Base URLs": {"value_count": {"field": "m_base_url"}}
+            "Unique Base URLs": {"value_count": {"field": "m_base_url.keyword"}}
           },
         },
       },
@@ -636,7 +648,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink"}}},
+          "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink.keyword"}}},
         },
       },
       {
@@ -644,7 +656,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Dumps/Document": {"value_count": {"field": "m_dumplink"}}
+            "Dumps/Document": {"value_count": {"field": "m_dumplink.keyword"}}
           },
         },
       },
@@ -654,7 +666,7 @@ class elastic_request_generator:
           "size": 0,
           "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}},
           "aggs": {
-            "Updated 5 Days ago": {"value_count": {"field": "m_hash"}}
+            "Updated 5 Days ago": {"value_count": {"field": "m_hash.keyword"}}
           },
         },
       },
@@ -664,7 +676,7 @@ class elastic_request_generator:
           "size": 0,
           "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}},
           "aggs": {
-            "Updated 9 Days ago": {"value_count": {"field": "m_hash"}}
+            "Updated 9 Days ago": {"value_count": {"field": "m_hash.keyword"}}
           },
         },
       },

@@ -19,9 +19,6 @@ class homepage_model:
   @staticmethod
   async def invoke_analytics():
     results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, InsightComparisonModel().model_dump_json(), None])
-
-    print(f"Raw Results: {results}")
-
     if not results:
       print("Error: No data retrieved from Redis")
       return None

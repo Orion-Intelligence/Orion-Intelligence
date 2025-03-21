@@ -19,26 +19,8 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     if user.role == user_role.CRAWLER:
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
-        print(":::::::::::::::::::::::::::::::::::::::::::")
         access_token_expires = timedelta(minutes=92)
     else:
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
-        print("pp :::::::::::::::::::::::::::::::::::::::::::")
         access_token_expires = timedelta(minutes=30)
     access_token = await session_manager.get_instance().create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
