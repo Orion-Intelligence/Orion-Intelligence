@@ -606,7 +606,7 @@ class elastic_request_generator:
           "size": 0,
           "aggs": {
             "Clearnet/Document": {
-              "value_count": {"field": "m_clearnet_links"}
+              "value_count": {"field": "m_clearnet_links.keyword"}
             }
           },
         },
@@ -640,7 +640,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Unique Base URLs": {"value_count": {"field": "m_base_url"}}
+            "Unique Base URLs": {"value_count": {"field": "m_base_url.keyword"}}
           },
         },
       },
@@ -648,7 +648,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink"}}},
+          "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink.keyword"}}},
         },
       },
       {
@@ -656,7 +656,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Dumps/Document": {"value_count": {"field": "m_dumplink"}}
+            "Dumps/Document": {"value_count": {"field": "m_dumplink.keyword"}}
           },
         },
       },
