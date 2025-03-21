@@ -521,7 +521,7 @@ class elastic_request_generator:
           "aggs": {
             "Document Count": {
               "value_count": {
-                "field": "m_hash.keyword"
+                "field": "m_hash"
               }
             }
           }
