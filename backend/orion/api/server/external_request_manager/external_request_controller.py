@@ -1,15 +1,11 @@
 import json
 import aiohttp
-import asyncio
 import hashlib
-
-from orion.constants.constant import CONSTANTS
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 class external_request_controller:
     __instance = None
-    _semaphore = asyncio.Semaphore(CONSTANTS.S_SETTINGS_SEARCH_MAX_DYNAMIC_RESOURCE_LIMIT)
 
     @staticmethod
     def getInstance():
@@ -37,21 +33,18 @@ class external_request_controller:
         cached_response = await self.redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [cache_key, None, None])
         if cached_response:
             data = json.loads(cached_response)
-            if len(data)>0:
-                return json.loads(cached_response)
+            if len(data) > 0:
+                return data
 
-        if self._semaphore.locked():
-            return {"server busy": "Server is currently processing maximum requests allowed. Please try again later."}
-
-        async with self._semaphore:
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.post(url, json=param) as response:
-                        result = await response.json()
-                        if result:
-                            await self.redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [cache_key, result, None])
-                        return json.loads(result)
-            except aiohttp.ClientError as e:
-                return {"error": f"Request failed: {str(e)}"}
-            except Exception as e:
-                return {"error": f"Unexpected error: {str(e)}"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=param) as response:
+                    result = await response.json()
+                    if result:
+                        await self.redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [cache_key, result, None])
+                    cached_response = await self.redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [cache_key, None, None])
+                    return json.loads(cached_response)
+        except aiohttp.ClientError as e:
+            return {"error": f"Request failed: {str(e)}"}
+        except Exception as e:
+            return {"error": f"Unexpected error: {str(e)}"}
