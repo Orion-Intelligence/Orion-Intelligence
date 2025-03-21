@@ -88,13 +88,15 @@ class insight_job:
 
   async def update_trending_insights(self, args):
     try:
+      print("1::::::::::::::::::::::::::::::::", flush=True)
+      print("1::::::::::::::::::::::::::::::::", flush=True)
       insight_new = await self.__fetch_elastic_insight()
       insight_old_daily = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None])
       insight_old_weekly = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_WEEK, None, None])
 
-      print("::::::::::::::::::::::::::::::::")
+      print("2::::::::::::::::::::::::::::::::", flush=True)
       print(insight_new)
-      print("::::::::::::::::::::::::::::::::")
+      print("3::::::::::::::::::::::::::::::::", flush=True)
 
       if insight_old_daily is None:
         insight_old_daily = InsightData()
@@ -123,12 +125,12 @@ class insight_job:
   async def update_insights(self):
     await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None])
     await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
-
-    # while True:
-    #   day_counter += 1
-    #   await asyncio.sleep(CONSTANTS.S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT)
-    #   if day_counter >= 7:
-    #     await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_WEEK)
-    #     day_counter = 0
-    #   else:
-    #     await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
+    day_counter = 0
+    while True:
+      day_counter += 1
+      await asyncio.sleep(CONSTANTS.S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT)
+      if day_counter >= 7:
+        await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_WEEK)
+        day_counter = 0
+      else:
+        await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
