@@ -572,7 +572,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"URL/Document": {"value_count": {"field": "m_sub_url"}}},
+          "aggs": {"URL/Document": {"value_count": {"field": "m_sub_url.keyword"}}},
         },
       },
       {
@@ -580,7 +580,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Archive/Document": {"value_count": {"field": "m_archive_url"}}
+            "Archive/Document": {"value_count": {"field": "m_archive_url.keyword"}}
           },
         },
       },
@@ -588,7 +588,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"Email/Document": {"value_count": {"field": "m_emails"}}},
+          "aggs": {"Email/Document": {"value_count": {"field": "m_emails.keyword"}}},
         },
       },
       {
@@ -596,7 +596,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Phone/Document": {"value_count": {"field": "m_phone_numbers"}}
+            "Phone/Document": {"value_count": {"field": "m_phone_numbers.keyword"}}
           },
         },
       },
