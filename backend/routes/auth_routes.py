@@ -19,7 +19,7 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     if user.role == user_role.CRAWLER:
-        access_token_expires = timedelta(minutes=92)
+        access_token_expires = timedelta(weeks=92)
     else:
         access_token_expires = timedelta(minutes=30)
     access_token = await session_manager.get_instance().create_access_token(
