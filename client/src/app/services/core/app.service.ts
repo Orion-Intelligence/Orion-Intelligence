@@ -1,24 +1,25 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import {config_data} from './model/config_data';
-import {ApiService} from '../../shared/services/api.service';
+import { ApiService } from '../../shared/services/api.service';
+import {ConfigData, ConfigSettings} from '../../shared/model/app/config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
-  private configDataSubject = new BehaviorSubject<config_data | null>(null);
-  configData$ = this.configDataSubject.asObservable();
+  private configData: ConfigData = new ConfigData();
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) {
+  }
 
   loadConfig(): void {
-    this.apiService.get<config_data>('public').subscribe(config => {
-      this.configDataSubject.next(config);
+    this.apiService.get<ConfigData>('public').subscribe(response => {
+      if (response && response.settings) {
+        this.configData = new ConfigData(response);
+      }
     });
   }
 
-  getConfig(): config_data | null {
-    return this.configDataSubject.getValue();
+  getConfig(): ConfigSettings {
+    return this.configData.settings;
   }
 }

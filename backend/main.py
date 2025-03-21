@@ -9,6 +9,7 @@ from orion.management.managers.service_manager import service_manager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from routes.api_routes import api_routes
+from routes.app_routes import admin_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 from interface import interface
@@ -36,6 +37,7 @@ setup_middlewares(app)
 configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
+app.include_router(admin_routes, include_in_schema=False)
 app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)

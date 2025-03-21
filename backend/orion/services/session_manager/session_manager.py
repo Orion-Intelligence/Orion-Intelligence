@@ -28,19 +28,6 @@ class session_manager:
     session_manager.__instance = self
     self._engine = mongo_controller.get_instance().get_engine()
 
-  @staticmethod
-  def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + expires_delta
-    to_encode.update({"exp": expire.timestamp()})
-    token = jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
-
-    username = data.get("sub")
-    if username:
-      session_manager.__cache[username] = (token, expire.timestamp())  # Store expiry at creation
-
-    return token
-
   async def get_current_user(self, token: str):
     if not token:
       raise HTTPException(status_code=401, detail="Missing or invalid token")
@@ -50,6 +37,12 @@ class session_manager:
       token = token[len("Bearer "):].strip()
 
     current_time = time.time()
+    if token in session_manager.__cache:
+      cached_user, expiry = session_manager.__cache[token]
+      if expiry > current_time:
+        return cached_user
+      else:
+        del session_manager.__cache[token]
 
     try:
       payload = jwt.decode(
@@ -65,16 +58,9 @@ class session_manager:
 
       user = await self._engine.find_one(db_user_account, db_user_account.username == username)
       if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
 
-      if username in session_manager.__cache:
-        latest_token, expiry = session_manager.__cache[username]
-        if latest_token != token:
-          raise HTTPException(status_code=401, detail="Token is no longer valid (logged out or refreshed)")
-        if expiry < current_time:
-          del session_manager.__cache[username]
-          raise HTTPException(status_code=401, detail="Token has expired")
-
+      session_manager.__cache[token] = (user, current_time + 60)
       return user
 
     except jwt.ExpiredSignatureError:
@@ -94,6 +80,13 @@ class session_manager:
       raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
     return role
 
+  @staticmethod
+  async def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + expires_delta
+    to_encode.update({"exp": expire.timestamp()})
+    return jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
+
   async def refresh_token(self, token: str):
     try:
       payload = jwt.decode(
@@ -111,16 +104,11 @@ class session_manager:
       if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
-      if username in session_manager.__cache:
-        latest_token, _ = session_manager.__cache[username]
-        if latest_token != token:
-          raise HTTPException(status_code=401, detail="Token is no longer valid")
-
-      new_token_expiry = datetime.now(timezone.utc) + timedelta(minutes=CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES)
-      new_token_payload = {"sub": username, "exp": new_token_expiry.timestamp()}
+      new_token_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
+      new_token_payload = {"sub": username, "exp": new_token_expiry}
       new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
-      session_manager.__cache[username] = (new_token, new_token_expiry.timestamp())
+      session_manager.__cache[new_token] = (user, new_token_expiry)
 
       return {"access_token": new_token, "token_type": "bearer"}
 

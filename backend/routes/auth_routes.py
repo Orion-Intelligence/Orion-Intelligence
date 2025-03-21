@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from orion.services.auth_manager.auth_manager import auth_manager
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.services.session_manager.session_manager import session_manager
 
 auth_router = APIRouter()
@@ -17,8 +18,29 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends()):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    access_token_expires = timedelta(minutes=30)
-    access_token = session_manager.get_instance().create_access_token(
+    if user.role == user_role.CRAWLER:
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        print(":::::::::::::::::::::::::::::::::::::::::::")
+        access_token_expires = timedelta(minutes=92)
+    else:
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        print("pp :::::::::::::::::::::::::::::::::::::::::::")
+        access_token_expires = timedelta(minutes=30)
+    access_token = await session_manager.get_instance().create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
 

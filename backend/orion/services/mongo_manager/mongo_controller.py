@@ -43,7 +43,7 @@ class mongo_controller:
     await self.__engine.get_collection(db_user_account).create_index([("username", 1)], unique=True)
     await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
 
-  def get_engine(self)-> AIOEngine:
+  def get_engine(self) -> AIOEngine:
     return self.__engine
 
   async def initialize(self):
@@ -71,7 +71,5 @@ class mongo_controller:
     admin.add_view(ModelView(db_user_account, icon="fa fa-user-circle"))
     admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
     admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
-    #admin.add_view(SystemSettingsView(db_system_model, icon="fa fa-building"))
-
 
     return admin

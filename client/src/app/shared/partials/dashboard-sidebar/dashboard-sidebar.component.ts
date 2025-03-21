@@ -30,9 +30,8 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   category = Category;
 
   constructor(protected dashboardService:DashboardService, protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
-    this.appService.configData$.subscribe(data => {
-      this.apiAllowed = !!(data && data.settings['api_allowed'] === '1');
-    });
+    this.apiAllowed = appService.getConfig().api_allowed == "1"
+    console.log(this.apiAllowed)
   }
 
   ngOnInit() {

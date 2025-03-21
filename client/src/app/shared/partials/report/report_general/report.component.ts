@@ -8,6 +8,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
 import {HelperService} from '../../../services/helper.service';
 import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
 import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
+import {AppService} from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-result-panel',
@@ -21,8 +22,10 @@ export class ReportComponent implements OnInit {
   listItems: any[] = [];
   activeTab: string = '';
   content: string = '';
+  lang = "en"
 
-  constructor(private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService) {
+  constructor(private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
+    this.lang = appService.getConfig().language_allowed
   }
 
   ngOnInit(): void {
@@ -78,7 +81,7 @@ export class ReportComponent implements OnInit {
 
   langUpdate() {
     const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('lang', "en");
+    currentUrl.searchParams.set('lang', this.lang);
     window.location.href = currentUrl.toString();
   }
 
