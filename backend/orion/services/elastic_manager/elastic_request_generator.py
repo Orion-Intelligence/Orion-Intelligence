@@ -629,7 +629,7 @@ class elastic_request_generator:
           "aggs": {
             "Document Count": {
               "value_count": {
-                "field": "m_hash.keyword"
+                "field": "_id"
               }
             }
           }
@@ -666,7 +666,7 @@ class elastic_request_generator:
           "size": 0,
           "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}},
           "aggs": {
-            "Updated 5 Days ago": {"value_count": {"field": "m_hash.keyword"}}
+            "Updated 5 Days ago": {"value_count": {"field": "_id"}}
           },
         },
       },
@@ -676,7 +676,7 @@ class elastic_request_generator:
           "size": 0,
           "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}},
           "aggs": {
-            "Updated 9 Days ago": {"value_count": {"field": "m_hash.keyword"}}
+            "Updated 9 Days ago": {"value_count": {"field": "_id"}}
           },
         },
       },
