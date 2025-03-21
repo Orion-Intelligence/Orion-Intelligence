@@ -33,7 +33,10 @@ class crawl_controller:
     return await self.__crawl_model.init_general(leak_index)
 
   async def invoke_fetch_parser(self):
-    return await self.__crawl_model.fetch_feeder()
-
-  async def invoke_fetch_feeder(self):
     return await self.__crawl_model.fetch_parser()
+
+  async def invoke_fetch_feeder_generic(self):
+    return await self.__crawl_model.fetch_feeder_generic()
+
+  async def invoke_fetch_feeder_leak(self):
+    return await self.__crawl_model.fetch_feeder_leak()

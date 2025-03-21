@@ -88,8 +88,15 @@ class crawl_model:
       return JSONResponse(content={"detail": "File not found"}, status_code=404)
 
   @staticmethod
-  async def fetch_feeder():
+  async def fetch_feeder_generic():
     if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
-        return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH, media_type="text/plain", filename="crawl_data_unique.txt")
+        return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH, media_type="text/plain", filename="crawl_data_generic.txt")
+    else:
+      return JSONResponse(content={"detail": "File not found"}, status_code=404)
+
+  @staticmethod
+  async def fetch_feeder_leak():
+    if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
+        return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH, media_type="text/plain", filename="crawl_data_leak.txt")
     else:
       return JSONResponse(content={"detail": "File not found"}, status_code=404)

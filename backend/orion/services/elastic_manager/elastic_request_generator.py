@@ -27,34 +27,44 @@ class elastic_request_generator:
     main_query = {
       "bool": {
         "should": [
+          # Exact match with very high boost for key fields
+          {"match": {"m_location": {"query": raw_query, "boost": 50}}},
+          {"match": {"m_ip": {"query": raw_query, "boost": 50}}},
+          {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
+          {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
+          {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
+          # Multi-match for broader search with reduced boost
           {
             "multi_match": {
               "query": raw_query,
               "fields": [
-                "m_location^2",
-                "m_ip^1.5",
-                "m_web_url^3",
-                "m_base_url^2.5",
-                "m_web_server^1.5",
-                "m_attacker^2",
-                "m_team^2",
-                "m_network^1"
+                "m_location^5",
+                "m_ip^5",
+                "m_web_url^5",
+                "m_base_url^5",
+                "m_web_server^3",
+                "m_attacker^5",
+                "m_team^5",
+                "m_network^3",
+                "m_mirror_links^5"
               ],
               "type": "best_fields",
-              "boost": 10
+              "boost": 5  # Lowered from 10
             }
           },
+          # Wildcard as a fallback with lower boost
           {
             "bool": {
               "should": [
                 {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_ip": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1.5}}},
-                {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 3}}},
-                {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2.5}}},
-                {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1.5}}},
+                {"wildcard": {"m_ip": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
                 {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
                 {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}}
+                {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
+                {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
               ],
               "minimum_should_match": 1
             }
@@ -81,7 +91,7 @@ class elastic_request_generator:
                   "decay": 0.5
                 }
               },
-              "weight": 1.5
+              "weight": 0.5  # Reduced from 1.5 to lessen date bias
             }
           ],
           "score_mode": "sum",
@@ -116,7 +126,6 @@ class elastic_request_generator:
     }
 
     return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
-
   @staticmethod
   def on_search_leakdata(p_query_model):
     raw_query = p_query_model.q.strip()

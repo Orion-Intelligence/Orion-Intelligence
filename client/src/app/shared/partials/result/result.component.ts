@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {Observable} from 'rxjs';
 import {EmptyResultComponent} from '../empty-result/empty-result.component';
 import {FormsModule} from '@angular/forms';
@@ -20,7 +20,7 @@ import {query} from '@angular/animations';
   animations: [fadeInDashboardItem],
   imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent,],
 })
-export class ResultComponent implements OnInit {
+export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
   @Input() suggestion!: Suggestion | undefined;
@@ -43,8 +43,11 @@ export class ResultComponent implements OnInit {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
-  ngOnInit(): void {
+  ngOnChanges(_: SimpleChanges): void {
     this.local_query = this.searchQuery
+  }
+
+  ngOnInit(): void {
   }
 
   applyFilters(filters: { [key: string]: string | null }) {
@@ -60,14 +63,15 @@ export class ResultComponent implements OnInit {
   }
 
   onFormSubmit() {
-    this.local_query = this.searchQuery
+    this.updateQuery.emit(this.local_query)
+    this.searchQuery = this.local_query
     this.reloadData.emit()
     this.result_triggered = true
   }
 
   onGetSuggestion(){
     if (this.suggestion && this.suggestion.options.length>0 && this.suggestion.options.length<15 ) {
-      return  this.local_query.replace(this.suggestion?.text, this.suggestion?.options[0].text)
+      return  this.searchQuery.replace(this.suggestion?.text, this.suggestion?.options[0].text)
     }else {
       return ""
     }
@@ -80,10 +84,6 @@ export class ResultComponent implements OnInit {
     }
     this.reloadData.emit()
     this.result_triggered = true
-  }
-
-  onSearchChange($event: any) {
-    this.updateQuery.emit($event)
   }
 
   onToggleAnalytics() {

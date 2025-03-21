@@ -57,23 +57,21 @@ export class DashboardDefacementComponent implements OnInit {
 
   onUpdateQuery(query: string) {
     this.defacementParamModel.q = query;
-    this.defacementParamModel.mSearchParamPage = 1; // Reset to page 1 on new query
+    this.defacementParamModel.mSearchParamPage = 1;
     this.fetchSearchResults();
   }
 
   fetchSearchResults() {
     this.isLoading = true;
-
-    // Update browser URL with all relevant defacementParamModel properties
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
         q: this.defacementParamModel.q,
         mSearchParamPage: this.defacementParamModel.mSearchParamPage,
       },
-      queryParamsHandling: 'merge', // Merge with any existing params
-      replaceUrl: true, // Update URL without adding to history
-    });
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    }).then();
 
     this.dashboardService
       .fetchSearchResults<DefacementCallbackModel>('search/defacement', this.defacementParamModel)

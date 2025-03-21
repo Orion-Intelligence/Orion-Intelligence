@@ -10,13 +10,17 @@ from configs.app_dependency import role_required
 
 crawl_routes = APIRouter()
 
-@crawl_routes.get("/api/feeder/unique", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+@crawl_routes.get("/api/feeder/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def feeder_unqiue():
-  return await crawl_controller.getInstance().invoke_fetch_parser()
+  return await crawl_controller.getInstance().invoke_fetch_feeder_generic()
+
+@crawl_routes.get("/api/feeder/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def feeder_unqiue():
+  return await crawl_controller.getInstance().invoke_fetch_feeder_leak()
 
 @crawl_routes.get("/api/parser", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser():
-    return await crawl_controller.getInstance().invoke_fetch_feeder()
+    return await crawl_controller.getInstance().invoke_fetch_parser()
 
 @crawl_routes.post("/api/index/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_leak_data(request: Request):
