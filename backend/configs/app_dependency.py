@@ -15,6 +15,7 @@ async def get_current_role(token: str = Depends(oauth2_scheme)):
   role = await session_manager.get_instance().get_current_role(token)
   if role is None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
+
   return role
 
 

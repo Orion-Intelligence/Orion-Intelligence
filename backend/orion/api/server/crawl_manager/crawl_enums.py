@@ -3,5 +3,5 @@ class CRAWL_CALLBACK_RESPONSES:
 
 class CRAWL_PATHS:
   M_PARSER_FILE_PATH = "static/.well-known/parser_files.zip"
-  M_FEEDER_FILE_PATH = "static/.well-known/feeder/crawl_data_unique.txt"
+  M_FEEDER_FILE_PATH = "static/.well-known/feeder/"
 

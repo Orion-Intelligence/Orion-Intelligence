@@ -35,8 +35,5 @@ class crawl_controller:
   async def invoke_fetch_parser(self):
     return await self.__crawl_model.fetch_parser()
 
-  async def invoke_fetch_feeder_generic(self):
-    return await self.__crawl_model.fetch_feeder_generic()
-
-  async def invoke_fetch_feeder_leak(self):
-    return await self.__crawl_model.fetch_feeder_leak()
+  async def invoke_fetch_feeder(self, index_type):
+    return await self.__crawl_model.fetch_feeder(index_type)
