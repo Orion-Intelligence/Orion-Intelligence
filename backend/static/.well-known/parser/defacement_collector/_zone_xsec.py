@@ -1,7 +1,8 @@
 from abc import ABC
 from typing import List
-from playwright.sync_api import Page, TimeoutError
+from playwright.sync_api import Page
 from urllib.parse import urljoin
+import requests
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -56,7 +57,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     def parse_leak_data(self, page: Page):
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-        max_pages = 20 if is_crawled else 500
+        max_pages = 50 if is_crawled else 500
 
         current_page = 1
         consecutive_errors = 0
@@ -68,15 +69,19 @@ class _zone_xsec(leak_extractor_interface, ABC):
                 page.wait_for_load_state("load")
                 page.wait_for_selector("a[title='Show Mirror']")
 
-                links = [urljoin(self.base_url, link.get_attribute("href"))
-                         for link in page.query_selector_all("a[title='Show Mirror']")
-                         if link.get_attribute("href")]
+                links = [
+                    urljoin(self.base_url, link.get_attribute("href"))
+                    for link in page.query_selector_all("a[title='Show Mirror']")
+                    if link.get_attribute("href")
+                ]
 
                 for link in links:
                     try:
-                        page.goto(link)
-                        page.wait_for_load_state("load")
-                        page.wait_for_selector(".panel.panel-danger")
+                        response = requests.get(link, timeout=10)
+                        response.raise_for_status()
+
+                        page.set_content(response.text.replace("iframe","safeframe"))
+                        page.wait_for_selector(".panel.panel-danger", timeout=5000)
 
                         url_span = page.query_selector("span#url")
                         extracted_url = url_span.inner_text().strip() if url_span else link
@@ -88,14 +93,8 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         date = self.safe_find(page, "p:has(strong):has-text('Saved on') strong")
                         team = self.safe_find(page, "p:has(strong):has-text('Team') strong")
 
-                        iframe = page.query_selector("iframe")
-                        if not iframe:
-                            try:
-                                iframe = page.wait_for_selector("iframe")
-                            except TimeoutError:
-                                continue
-
                         m_mirror = ""
+                        iframe = page.query_selector("iframe")
                         if iframe:
                             iframe_src = iframe.get_attribute("src")
                             if iframe_src:
@@ -116,6 +115,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         )
 
                         self._card_data.append(card_data)
+
                     except Exception as ex:
                         print(f"Error processing link {link}: {ex}")
                         continue
