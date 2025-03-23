@@ -57,7 +57,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     def parse_leak_data(self, page: Page):
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-        max_pages = 50 if is_crawled else 500
+        max_pages = 250 if is_crawled else 500
 
         current_page = 1
         consecutive_errors = 0
