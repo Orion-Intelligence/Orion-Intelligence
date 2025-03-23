@@ -94,7 +94,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         team = self.safe_find(page, "p:has(strong):has-text('Team') strong")
 
                         m_mirror = ""
-                        iframe = page.query_selector("iframe")
+                        iframe = page.query_selector("safeframe")
                         if iframe:
                             iframe_src = iframe.get_attribute("src")
                             if iframe_src:

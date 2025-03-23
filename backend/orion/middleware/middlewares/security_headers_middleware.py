@@ -16,7 +16,6 @@ class security_headers_middleware(BaseHTTPMiddleware):
             response.headers["Strict-Transport-Security"] = "max-age=31536000"
 
         response.headers["X-Content-Type-Options"] = "nosniff" if config.SECURE_CONTENT_TYPE_NOSNIFF else "off"
-        response.headers["X-Frame-Options"] = config.X_FRAME_OPTIONS
         response.headers["X-XSS-Protection"] = "1; mode=block" if config.SECURE_BROWSER_XSS_FILTER else "0"
 
         return response
