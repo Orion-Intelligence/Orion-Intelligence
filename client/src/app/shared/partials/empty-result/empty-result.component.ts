@@ -10,7 +10,6 @@ export class EmptyResultComponent {
 
   ngOnInit(_: SimpleChanges): void {
     this.query = this.searchQuery
-    alert(this.query)
   }
 
   constructor() {
