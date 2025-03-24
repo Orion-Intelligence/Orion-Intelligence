@@ -92,6 +92,12 @@ class insight_job:
       insight_old_daily = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None])
       insight_old_weekly = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_WEEK, None, None])
 
+      print("::::::::::::::::::::::::::::::::::::::")
+      print("::::::::::::::::::::::::::::::::::::::")
+      print(insight_new)
+      print("::::::::::::::::::::::::::::::::::::::")
+      print("::::::::::::::::::::::::::::::::::::::")
+
       if insight_old_daily is None:
         insight_old_daily = InsightData()
       else:

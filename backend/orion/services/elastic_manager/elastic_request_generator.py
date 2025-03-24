@@ -27,13 +27,11 @@ class elastic_request_generator:
     main_query = {
       "bool": {
         "should": [
-          # Exact match with very high boost for key fields
           {"match": {"m_location": {"query": raw_query, "boost": 50}}},
           {"match": {"m_ip": {"query": raw_query, "boost": 50}}},
           {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
           {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
           {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
-          # Multi-match for broader search with reduced boost
           {
             "multi_match": {
               "query": raw_query,
@@ -597,7 +595,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"Email/Document": {"value_count": {"field": "m_emails.keyword"}}},
+          "aggs": {"Email/Document": {"value_count": {"field": "m_emails"}}},
         },
       },
       {
@@ -605,7 +603,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Phone/Document": {"value_count": {"field": "m_phone_numbers.keyword"}}
+            "Phone/Document": {"value_count": {"field": "m_phone_numbers"}}
           },
         },
       },
