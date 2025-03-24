@@ -47,10 +47,9 @@ class elastic_request_generator:
                 "m_mirror_links^5"
               ],
               "type": "best_fields",
-              "boost": 5  # Lowered from 10
+              "boost": 5
             }
           },
-          # Wildcard as a fallback with lower boost
           {
             "bool": {
               "should": [
@@ -89,7 +88,7 @@ class elastic_request_generator:
                   "decay": 0.5
                 }
               },
-              "weight": 0.5  # Reduced from 1.5 to lessen date bias
+              "weight": 0.5
             }
           ],
           "score_mode": "sum",
@@ -130,10 +129,9 @@ class elastic_request_generator:
     if not raw_query:
       return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
 
-    # Parse query for exact phrases (in quotes) and loose terms
     import re
-    exact_phrases = re.findall(r'"([^"]+)"', raw_query)  # Extract phrases in quotes
-    loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()  # Remove quoted parts, split remaining terms
+    exact_phrases = re.findall(r'"([^"]+)"', raw_query)
+    loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
 
     m_url_query = raw_query
     m_safe_search = p_query_model.mSearchParamSafeSearch
@@ -180,10 +178,8 @@ class elastic_request_generator:
       }
     }
 
-    # Build content query with exact phrases and loose terms
     content_query = {"bool": {"should": [], "minimum_should_match": 1}}
 
-    # Add exact phrase queries
     for phrase in exact_phrases:
       phrase_query = {
         "bool": {
@@ -198,7 +194,6 @@ class elastic_request_generator:
       }
       content_query["bool"]["should"].append(phrase_query)
 
-    # Add loose term queries with wildcards
     for term in loose_terms:
       term_query = {
         "query_string": {
@@ -217,7 +212,6 @@ class elastic_request_generator:
       }
       content_query["bool"]["should"].append(term_query)
 
-    # If no exact phrases or loose terms, use a default query
     if not exact_phrases and not loose_terms:
       content_query = {
         "query_string": {
@@ -313,13 +307,12 @@ class elastic_request_generator:
       return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
     m_user_query = raw_query.lower().rstrip("/") + "*"
-    m_url_query = raw_query  # Preserve exact input
+    m_url_query = raw_query
     m_safe_search = p_query_model.mSearchParamSafeSearch
     m_search_type = p_query_model.pSearchParamType
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
 
-    # Extract domain and path for flexible matching
     from urllib.parse import urlparse
     parsed_url = urlparse(raw_query)
     domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
@@ -337,28 +330,26 @@ class elastic_request_generator:
     if m_search_type != "all":
       must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
-    # Enhanced URL matching with broader wildcards
     url_priority_query = {
       "bool": {
         "should": [
-          {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},  # Exact match
-          {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},  # Any substring
-          {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},  # Domain + path
-          {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},  # Path anywhere
-          {"match": {"m_url": {"query": raw_query, "boost": 40}}}  # Fuzzy match
+          {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},
+          {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},
+          {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},
+          {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},
+          {"match": {"m_url": {"query": raw_query, "boost": 40}}}
         ],
         "minimum_should_match": 1,
         "boost": 10
       }
     }
 
-    # Base URL matching focused on domain
     base_url_query = {
       "bool": {
         "should": [
-          {"term": {"m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},  # Exact domain
-          {"term": {"m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},  # HTTP variation
-          {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}  # Domain substring
+          {"term": {"m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},
+          {"term": {"m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},
+          {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}
         ],
         "minimum_should_match": 1,
         "boost": 5
@@ -439,7 +430,7 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
-      "explain": True  # For debugging
+      "explain": True
     }
     return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
@@ -579,7 +570,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"URL/Document": {"value_count": {"field": "m_sub_url.keyword"}}},
+          "aggs": {"URL/Document": {"value_count": {"field": "m_sub_url"}}},
         },
       },
       {
@@ -587,7 +578,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Archive/Document": {"value_count": {"field": "m_archive_url.keyword"}}
+            "Archive/Document": {"value_count": {"field": "m_archive_url"}}
           },
         },
       },
@@ -613,7 +604,7 @@ class elastic_request_generator:
           "size": 0,
           "aggs": {
             "Clearnet/Document": {
-              "value_count": {"field": "m_clearnet_links.keyword"}
+              "value_count": {"field": "m_clearnet_links"}
             }
           },
         },
@@ -624,7 +615,7 @@ class elastic_request_generator:
           "size": 0,
           "aggs": {
             "Common Type": {
-              "terms": {"field": "m_content_type.keyword", "size": 1}
+              "terms": {"field": "m_content_type", "size": 1}
             }
           },
         },
@@ -647,7 +638,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Unique Base URLs": {"value_count": {"field": "m_base_url.keyword"}}
+            "Unique Base URLs": {"value_count": {"field": "m_base_url"}}
           },
         },
       },
@@ -655,7 +646,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink.keyword"}}},
+          "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink"}}},
         },
       },
       {
@@ -663,7 +654,7 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Dumps/Document": {"value_count": {"field": "m_dumplink.keyword"}}
+            "Dumps/Document": {"value_count": {"field": "m_dumplink"}}
           },
         },
       },
