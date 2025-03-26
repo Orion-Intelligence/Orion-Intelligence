@@ -49,3 +49,4 @@ class DefacementModelComparison(BaseModel):
 class InsightComparisonModel(BaseModel):
   general: GenericModelComparison = Field(default_factory=GenericModelComparison)
   leak: LeakModelComparison = Field(default_factory=LeakModelComparison)
+  defacement: DefacementModelComparison = Field(default_factory=LeakModelComparison)
