@@ -34,7 +34,6 @@ class DefacementModel(BaseModel):
     top_team: Optional[str] = "-"
     common_server: Optional[str] = "-"
     unique_base_urls: int = 0
-    mirror_links: int = 0
     web_url_count: int = 0
 
 class InsightData(BaseModel):
@@ -77,6 +76,5 @@ DEFACEMENT_AGGREGATION_MAPPING = {
     "Top Team": "top_team",
     "Common Server": "common_server",
     "Unique Base URLs": "unique_base_urls",
-    "Mirror Links": "mirror_links",
     "Web URLs": "web_url_count",
 }
