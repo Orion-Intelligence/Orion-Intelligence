@@ -694,17 +694,41 @@ class elastic_request_generator:
       },
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-        ELASTIC_KEYS.S_FILTER: {
+        "filter": {
           "size": 0,
           "aggs": {
-            "Document Count": {
-              "value_count": {
-                "field": "_id"
-              }
-            }
+            "Document Count": {"value_count": {"field": "_id"}}
           }
         }
-      }
+      },
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        "filter": {
+          "size": 0,
+          "aggs": {
+            "Most Recent": {"max": {"field": "m_date_of_leak"}}
+          }
+        }
+      },
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        "filter": {
+          "size": 0,
+          "aggs": {
+            "Oldest Update": {"min": {"field": "m_date_of_leak"}}
+          }
+        }
+      },
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        "filter": {
+          "size": 0,
+          "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
+          "aggs": {
+            "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+          }
+        }
+      },
     ]
 
     return queries
