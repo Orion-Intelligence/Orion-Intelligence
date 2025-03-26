@@ -762,19 +762,7 @@ class elastic_request_generator:
             "Common Server": {"terms": {"field": "m_web_server.keyword", "size": 1}}
           }
         }
-      },
-      # 8. Counts for unique base URLs, mirror links, and web URLs
-      {
-        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-        ELASTIC_KEYS.S_FILTER: {
-          "size": 0,
-          "aggs": {
-            "Unique Base URLs": {"value_count": {"field": "m_base_url.keyword"}},
-            "Mirror Links": {"value_count": {"field": "m_mirror_links.keyword"}},
-            "Web URLs": {"value_count": {"field": "m_web_url.keyword"}}
-          }
-        }
-      },
+      }
     ]
 
     return queries
