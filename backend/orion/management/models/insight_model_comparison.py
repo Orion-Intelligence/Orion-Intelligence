@@ -26,13 +26,13 @@ class GenericModelComparison(BaseModel):
 
 class LeakModelComparison(BaseModel):
   document_count: MetricComparison = Field(default_factory=MetricComparison)
-  unique_base_urls: MetricComparison = Field(default_factory=MetricComparison)
   url_document_count: MetricComparison = Field(default_factory=MetricComparison)
   dumps_document_count: MetricComparison = Field(default_factory=MetricComparison)
   updated_5_days_ago: MetricComparison = Field(default_factory=MetricComparison)
   updated_9_days_ago: MetricComparison = Field(default_factory=MetricComparison)
   most_recent: MetricComparison = Field(default_factory=MetricComparison)
   oldest_update: MetricComparison = Field(default_factory=MetricComparison)
+  mirror_links: MetricComparison = Field(default_factory=MetricComparison)  # Query 8 (part of combined agg)
 
 
 class DefacementModelComparison(BaseModel):
