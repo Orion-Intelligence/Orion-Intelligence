@@ -27,7 +27,6 @@ class LeakModel(BaseModel):
 
 class DefacementModel(BaseModel):
     document_count: int = 0
-    most_recent: Optional[str] = "-"
     updated_5_days_ago: int = 0
     top_team: Optional[str] = "-"
     common_server: Optional[str] = "-"
