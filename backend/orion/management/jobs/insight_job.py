@@ -137,7 +137,6 @@ class insight_job:
                 )
 
         except Exception as ex:
-            print("3:::::::::::::::::::::::::::", flush=True)
             print(ex)
             return
 

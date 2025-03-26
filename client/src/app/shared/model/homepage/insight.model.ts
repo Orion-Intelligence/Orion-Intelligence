@@ -43,7 +43,7 @@ export interface DefacementModel {
   updated_9_days_ago: InsightMetric;
   top_team: InsightMetric;
   common_server: InsightMetric;
-  mirror_links: InsightMetric;
+  unique_base_urls: InsightMetric;
 
   [key: string]: InsightMetric;
 }
