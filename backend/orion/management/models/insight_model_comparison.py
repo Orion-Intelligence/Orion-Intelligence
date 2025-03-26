@@ -36,9 +36,9 @@ class LeakModelComparison(BaseModel):
 
 
 class DefacementModelComparison(BaseModel):
-  document_count: MetricComparison = Field(default_factory=MetricComparison)  # Query 1
-  most_recent: MetricComparison = Field(default_factory=MetricComparison)  # Query 2
-  oldest_update: MetricComparison = Field(default_factory=MetricComparison)  # Query 3
+  document_count: MetricComparison = Field(default_factory=MetricComparison)
+  most_recent: MetricComparison = Field(default_factory=MetricComparison)
+  oldest_update: MetricComparison = Field(default_factory=MetricComparison)
   updated_5_days_ago: MetricComparison = Field(default_factory=MetricComparison)
   updated_9_days_ago: MetricComparison = Field(default_factory=MetricComparison)
   top_team: MetricComparison = Field(default_factory=MetricComparison)
