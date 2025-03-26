@@ -34,11 +34,16 @@ class LeakModelComparison(BaseModel):
   most_recent: MetricComparison = Field(default_factory=MetricComparison)
   oldest_update: MetricComparison = Field(default_factory=MetricComparison)
 
+
 class DefacementModelComparison(BaseModel):
-  document_count: MetricComparison = Field(default_factory=MetricComparison)
-  most_recent: MetricComparison = Field(default_factory=MetricComparison)
-  oldest_update: MetricComparison = Field(default_factory=MetricComparison)
-  updated_5_days_ago: MetricComparison = Field(default_factory=MetricComparison)
+  document_count: MetricComparison = Field(default_factory=MetricComparison)  # Query 1
+  most_recent: MetricComparison = Field(default_factory=MetricComparison)  # Query 2
+  oldest_update: MetricComparison = Field(default_factory=MetricComparison)  # Query 3
+  updated_5_days_ago: MetricComparison = Field(default_factory=MetricComparison)  # Query 4
+  updated_9_days_ago: MetricComparison = Field(default_factory=MetricComparison)  # Query 5
+  top_team: MetricComparison = Field(default_factory=MetricComparison)  # Query 6
+  common_server: MetricComparison = Field(default_factory=MetricComparison)  # Query 7
+  unique_base_urls: MetricComparison = Field(default_factory=MetricComparison)  # Query 8 (part of combined agg)
 
 class InsightComparisonModel(BaseModel):
   general: GenericModelComparison = Field(default_factory=GenericModelComparison)

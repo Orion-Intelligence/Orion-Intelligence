@@ -701,7 +701,48 @@ class elastic_request_generator:
           }
         }
       },
-
+      # 2. Most recent leak date
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        ELASTIC_KEYS.S_FILTER: {
+          "size": 0,
+          "aggs": {
+            "Most Recent": {"max": {"field": "m_date_of_leak"}}
+          }
+        }
+      },
+      # 3. Oldest leak date
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        ELASTIC_KEYS.S_FILTER: {
+          "size": 0,
+          "aggs": {
+            "Oldest Update": {"min": {"field": "m_date_of_leak"}}
+          }
+        }
+      },
+      # 4. Defacements updated 5 days ago (using m_date_of_leak)
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        ELASTIC_KEYS.S_FILTER: {
+          "size": 0,
+          "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
+          "aggs": {
+            "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+          }
+        }
+      },
+      # 5. Defacements updated 9 days ago (using m_date_of_leak)
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        ELASTIC_KEYS.S_FILTER: {
+          "size": 0,
+          "query": {"range": {"m_date_of_leak": {"gte": "now-9d/d"}}},
+          "aggs": {
+            "Updated 9 Days ago": {"value_count": {"field": "_id"}}
+          }
+        }
+      },
       # 6. Top attacking team
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
