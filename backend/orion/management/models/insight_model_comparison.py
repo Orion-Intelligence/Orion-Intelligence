@@ -43,7 +43,7 @@ class DefacementModelComparison(BaseModel):
   updated_9_days_ago: MetricComparison = Field(default_factory=MetricComparison)
   top_team: MetricComparison = Field(default_factory=MetricComparison)
   common_server: MetricComparison = Field(default_factory=MetricComparison)
-  unique_base_urls: MetricComparison = Field(default_factory=MetricComparison)
+  mirror_links: MetricComparison = Field(default_factory=MetricComparison)
 
 class InsightComparisonModel(BaseModel):
   general: GenericModelComparison = Field(default_factory=GenericModelComparison)
