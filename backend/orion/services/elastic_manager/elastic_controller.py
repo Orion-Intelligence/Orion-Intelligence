@@ -82,11 +82,6 @@ class elastic_controller:
                 index=query[ELASTIC_KEYS.S_DOCUMENT],
                 body=query[ELASTIC_KEYS.S_FILTER]
             )
-            print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-            print(result, flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
 
             aggs = result.get("aggregations", {})
             m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
@@ -116,6 +111,11 @@ class elastic_controller:
                     elif m_filter == ELASTIC_INDEX.S_DEFACEMENT_INDEX and key in DEFACEMENT_AGGREGATION_MAPPING:
                         setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
 
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(insight_data, flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
         return True, insight_data
 
     except Exception as ex:
