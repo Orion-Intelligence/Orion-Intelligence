@@ -701,7 +701,6 @@ class elastic_request_generator:
           }
         }
       },
-      # 2. Most recent leak date
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
@@ -711,7 +710,16 @@ class elastic_request_generator:
           }
         }
       },
-      # 3. Oldest leak date
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        "filter": {
+          "size": 0,
+          "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
+          "aggs": {
+            "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+          }
+        }
+      },
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
@@ -721,7 +729,6 @@ class elastic_request_generator:
           }
         }
       },
-      # 4. Defacements updated 5 days ago (using m_date_of_leak)
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
@@ -732,7 +739,6 @@ class elastic_request_generator:
           }
         }
       },
-      # 5. Defacements updated 9 days ago (using m_date_of_leak)
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
@@ -743,23 +749,21 @@ class elastic_request_generator:
           }
         }
       },
-      # 6. Top attacking team
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Top Team": {"terms": {"field": "m_team.keyword", "size": 1}}
+            "Top Team": {"terms": {"field": "m_team", "size": 1}}
           }
         }
       },
-      # 7. Most common web server
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Common Server": {"terms": {"field": "m_web_server.keyword", "size": 1}}
+            "Common Server": {"terms": {"field": "m_web_server", "size": 1}}
           }
         }
       }
