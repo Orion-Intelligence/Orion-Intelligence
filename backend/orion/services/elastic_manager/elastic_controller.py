@@ -79,6 +79,11 @@ class elastic_controller:
 
       for query in queries:
         result = await self.__m_connection.search(index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER])
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(result, flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
 
         aggs = result.get("aggregations", {})
         value = "-"
@@ -104,11 +109,6 @@ class elastic_controller:
           else:
             setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
 
-      print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-      print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-      print(insight_data, flush=True)
-      print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-      print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
       return True, insight_data
 
     except Exception as ex:
