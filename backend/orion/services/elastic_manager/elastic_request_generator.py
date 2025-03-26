@@ -705,49 +705,11 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "aggs": {
-            "Most Recent": {"max": {"field": "m_date_of_leak"}}
-          }
-        }
-      },
-      {
-        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-        ELASTIC_KEYS.S_FILTER: {
-          "size": 0,
-          "aggs": {
-            "Oldest Update": {"min": {"field": "m_date_of_leak"}}
-          }
-        }
-      },
-      {
-        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-        ELASTIC_KEYS.S_FILTER: {
-          "size": 0,
           "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
           "aggs": {
             "Updated 5 Days ago": {"value_count": {"field": "_id"}}
           },
         },
-      },
-      {
-        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-        ELASTIC_KEYS.S_FILTER: {
-          "size": 0,
-          "query": {"range": {"m_date_of_leak": {"gte": "now-10d/d"}}},
-          "aggs": {
-            "Updated 9 Days ago": {"value_count": {"field": "_id"}}
-          },
-        },
-      },
-      {
-        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-        ELASTIC_KEYS.S_FILTER: {
-          "size": 0,
-          "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
-          "aggs": {
-            "Updated 5 Days ago": {"value_count": {"field": "_id"}}
-          }
-        }
       },
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
@@ -764,15 +726,6 @@ class elastic_request_generator:
           "size": 0,
           "aggs": {
             "Common Server": {"terms": {"field": "m_web_server", "size": 1}}
-          }
-        }
-      },
-      {
-        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-        ELASTIC_KEYS.S_FILTER: {
-          "size": 0,
-          "aggs": {
-            "Mirror Links": {"value_count": {"field": "m_mirror_links.keyword"}}
           }
         }
       }
