@@ -110,6 +110,9 @@ class elastic_controller:
                         if key in DEFACEMENT_AGGREGATION_MAPPING:
                             setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
 
+        print(":::::::::::::::::::::::::::",flush=True)
+        print(insight_data,flush=True)
+        print(":::::::::::::::::::::::::::",flush=True)
         return True, insight_data
 
     except Exception as ex:

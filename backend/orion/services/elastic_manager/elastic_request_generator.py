@@ -744,7 +744,7 @@ class elastic_request_generator:
         "filter": {
           "size": 0,
           "aggs": {
-            "Top Team": {"terms": {"field": "m_team.keyword", "size": 1}}
+            "Top Team": {"terms": {"field": "m_team", "size": 1}}
           }
         }
       },
@@ -753,7 +753,7 @@ class elastic_request_generator:
         "filter": {
           "size": 0,
           "aggs": {
-            "Common Server": {"terms": {"field": "m_web_server.keyword", "size": 1}}
+            "Common Server": {"terms": {"field": "m_web_server", "size": 1}}
           }
         }
       },
@@ -762,9 +762,9 @@ class elastic_request_generator:
         "filter": {
           "size": 0,
           "aggs": {
-            "Unique Base URLs": {"value_count": {"field": "m_base_url.keyword"}},
-            "Mirror Links": {"value_count": {"field": "m_mirror_links.keyword"}},
-            "Web URLs": {"value_count": {"field": "m_web_url.keyword"}}
+            "Unique Base URLs": {"value_count": {"field": "m_base_url"}},
+            "Mirror Links": {"value_count": {"field": "m_mirror_links"}},
+            "Web URLs": {"value_count": {"field": "m_web_url"}}
           }
         }
       }
