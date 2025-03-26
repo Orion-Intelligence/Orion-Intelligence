@@ -100,6 +100,8 @@ class insight_job:
 
     async def update_trending_insights(self, args):
         try:
+            print("1:::::::::::::::::::::::::::", flush=True)
+            print("2:::::::::::::::::::::::::::", flush=True)
             insight_new = await self.__fetch_elastic_insight()
             insight_old_daily = await redis_controller.getInstance().invoke_trigger(
                 REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None]
@@ -137,6 +139,7 @@ class insight_job:
                 )
 
         except Exception as ex:
+            print("3:::::::::::::::::::::::::::", flush=True)
             print(ex)
             return
 
