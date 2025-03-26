@@ -772,10 +772,10 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Mirror Links": {"value_count": {"field": "m_mirror_links"}}
+            "Mirror Links": {"value_count": {"field": "m_mirror_links.keyword"}}
           }
         }
-      },
+      }
     ]
 
     return queries
