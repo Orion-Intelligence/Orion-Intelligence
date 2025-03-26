@@ -726,19 +726,30 @@ class elastic_request_generator:
           "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
           "aggs": {
             "Updated 5 Days ago": {"value_count": {"field": "_id"}}
-          }
-        }
+          },
+        },
       },
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
-          "query": {"range": {"m_date_of_leak": {"gte": "now-9d/d"}}},
+          "query": {"range": {"m_date_of_leak": {"gte": "now-10d/d"}}},
           "aggs": {
             "Updated 9 Days ago": {"value_count": {"field": "_id"}}
+          },
+        },
+      },
+      {
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+        ELASTIC_KEYS.S_FILTER: {
+          "size": 0,
+          "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
+          "aggs": {
+            "Updated 5 Days ago": {"value_count": {"field": "_id"}}
           }
         }
       },
+
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
