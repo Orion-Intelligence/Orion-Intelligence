@@ -45,6 +45,7 @@ class DefacementModelComparison(BaseModel):
   common_server: MetricComparison = Field(default_factory=MetricComparison)  # Query 7
   mirror_links: MetricComparison = Field(default_factory=MetricComparison)  # Query 8 (part of combined agg)
   unique_base_urls: MetricComparison = Field(default_factory=MetricComparison)  # Query 8 (part of combined agg)
+  web_url_count: MetricComparison = Field(default_factory=MetricComparison)  # Query 8 (part of combined agg)
 
 class InsightComparisonModel(BaseModel):
   general: GenericModelComparison = Field(default_factory=GenericModelComparison)
