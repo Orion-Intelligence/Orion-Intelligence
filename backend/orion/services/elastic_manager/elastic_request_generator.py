@@ -749,7 +749,6 @@ class elastic_request_generator:
           }
         }
       },
-
       {
         ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
         ELASTIC_KEYS.S_FILTER: {
@@ -773,11 +772,10 @@ class elastic_request_generator:
         ELASTIC_KEYS.S_FILTER: {
           "size": 0,
           "aggs": {
-            "Unique Base URLs": {"value_count": {"field": "m_base_url.keyword"}},
-            "Mirror Links": {"value_count": {"field": "m_mirror_links.keyword"}},
+            "Mirror Links": {"value_count": {"field": "m_mirror_links"}}
           }
         }
-      }
+      },
     ]
 
     return queries
