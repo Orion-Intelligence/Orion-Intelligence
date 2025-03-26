@@ -116,7 +116,9 @@ class elastic_controller:
         return True, insight_data
 
     except Exception as ex:
+        print(":::::::::::::::::::::::::::",flush=True)
         log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+        print(":::::::::::::::::::::::::::",flush=True)
         return False, None
 
   async def index_data(self, p_data):
