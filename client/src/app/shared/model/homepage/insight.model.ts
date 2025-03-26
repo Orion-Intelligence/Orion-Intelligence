@@ -37,13 +37,9 @@ export interface LeakModel {
 
 export interface DefacementModel {
   document_count: InsightMetric;
-  most_recent: InsightMetric;
-  oldest_update: InsightMetric;
   updated_5_days_ago: InsightMetric;
-  updated_9_days_ago: InsightMetric;
   top_team: InsightMetric;
   common_server: InsightMetric;
-  unique_base_urls: InsightMetric;
 
   [key: string]: InsightMetric;
 }
