@@ -86,6 +86,7 @@ class elastic_controller:
             aggs = result.get("aggregations", {})
             m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
 
+            print("x1:::::::::::::::::::::::::::", flush=True)
             for key in aggs:
                 value = "-"
                 if "value" in aggs[key]:
@@ -99,6 +100,7 @@ class elastic_controller:
                 if isinstance(value, float):
                     value = round(value, 2)
 
+                print("x2:::::::::::::::::::::::::::", flush=True)
                 if value is not None:
                     if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX:
                         if key in GENERIC_AGGREGATION_MAPPING:
@@ -110,7 +112,7 @@ class elastic_controller:
                         if key in DEFACEMENT_AGGREGATION_MAPPING:
                             setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
 
-        print(":::::::::::::::::::::::::::",flush=True)
+        print("x3:::::::::::::::::::::::::::",flush=True)
         print(insight_data,flush=True)
         print(":::::::::::::::::::::::::::",flush=True)
         return True, insight_data
