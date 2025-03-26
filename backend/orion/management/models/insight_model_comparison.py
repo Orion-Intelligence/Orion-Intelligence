@@ -32,7 +32,7 @@ class LeakModelComparison(BaseModel):
   updated_9_days_ago: MetricComparison = Field(default_factory=MetricComparison)
   most_recent: MetricComparison = Field(default_factory=MetricComparison)
   oldest_update: MetricComparison = Field(default_factory=MetricComparison)
-  mirror_links: MetricComparison = Field(default_factory=MetricComparison)  # Query 8 (part of combined agg)
+  unique_base_urls: MetricComparison = Field(default_factory=MetricComparison)
 
 
 class DefacementModelComparison(BaseModel):
