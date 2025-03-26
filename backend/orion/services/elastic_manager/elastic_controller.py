@@ -108,9 +108,9 @@ class elastic_controller:
                     elif m_filter == ELASTIC_INDEX.S_LEAK_INDEX:
                         if key in LEAK_AGGREGATION_MAPPING:
                             setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
-                    elif m_filter == ELASTIC_INDEX.S_DEFACEMENT_INDEX:
-                        if key in DEFACEMENT_AGGREGATION_MAPPING:
-                            setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
+                    # elif m_filter == ELASTIC_INDEX.S_DEFACEMENT_INDEX:
+                    #     if key in DEFACEMENT_AGGREGATION_MAPPING:
+                    #         setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
 
         print("x3:::::::::::::::::::::::::::",flush=True)
         print(insight_data,flush=True)
