@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import  Optional
+from typing import Optional
 
 class GenericModel(BaseModel):
     document_count: int = 0
@@ -25,9 +25,22 @@ class LeakModel(BaseModel):
     most_recent: Optional[str] = "-"
     oldest_update: Optional[str] = "-"
 
+class DefacementModel(BaseModel):
+    document_count: int = 0
+    most_recent: Optional[str] = "-"
+    oldest_update: Optional[str] = "-"
+    updated_5_days_ago: int = 0
+    updated_9_days_ago: int = 0
+    top_team: Optional[str] = "-"
+    common_server: Optional[str] = "-"
+    unique_base_urls: int = 0
+    mirror_links: int = 0
+    web_url_count: int = 0
+
 class InsightData(BaseModel):
     general: GenericModel = Field(default_factory=GenericModel)
     leak: LeakModel = Field(default_factory=LeakModel)
+    defacement: DefacementModel = Field(default_factory=DefacementModel)
 
 GENERIC_AGGREGATION_MAPPING = {
     "Document Count": "document_count",
@@ -53,4 +66,17 @@ LEAK_AGGREGATION_MAPPING = {
     "Unique Base URLs": "unique_base_urls",
     "URL/Documents": "url_document_count",
     "Dumps/Document": "dumps_document_count",
+}
+
+DEFACEMENT_AGGREGATION_MAPPING = {
+    "Document Count": "document_count",
+    "Most Recent": "most_recent",
+    "Oldest Update": "oldest_update",
+    "Updated 5 Days ago": "updated_5_days_ago",
+    "Updated 9 Days ago": "updated_9_days_ago",
+    "Top Team": "top_team",
+    "Common Server": "common_server",
+    "Unique Base URLs": "unique_base_urls",
+    "Mirror Links": "mirror_links",
+    "Web URLs": "web_url_count",
 }

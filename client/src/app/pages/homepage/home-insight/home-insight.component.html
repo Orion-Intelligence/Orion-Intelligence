@@ -1,12 +1,10 @@
 <div id="analytics">
-
   <div *ngFor="let model of models">
     <div class="home_insight__container">
       <div class="home_insight__card" *ngFor="let key of getKeys(insights[model]); let first = first">
         <div class="home_insight__content">
-
           <div *ngIf="first" class="home_insight__header">
-            {{ model === 'general' ? 'Generic Index' : 'Leaked Index' }}
+            {{ model === 'general' ? 'Generic Index' : model === 'leak' ? 'Leaked Index' : 'Defacement Index' }}
           </div>
 
           <div class="home_insight__icon">
@@ -38,7 +36,6 @@
               {{ insights[model][key].change_weekly || '-' }}
             </div>
           </div>
-
         </div>
       </div>
     </div><br><br>

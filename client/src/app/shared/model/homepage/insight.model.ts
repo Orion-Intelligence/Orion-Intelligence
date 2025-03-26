@@ -35,7 +35,23 @@ export interface LeakModel {
   [key: string]: InsightMetric;
 }
 
+export interface DefacementModel {
+  document_count: InsightMetric;
+  most_recent: InsightMetric;
+  oldest_update: InsightMetric;
+  updated_5_days_ago: InsightMetric;
+  updated_9_days_ago: InsightMetric;
+  top_team: InsightMetric;
+  common_server: InsightMetric;
+  unique_base_urls: InsightMetric;
+  mirror_links: InsightMetric;
+  web_url_count: InsightMetric;
+
+  [key: string]: InsightMetric;
+}
+
 export interface InsightCallbackModel {
   general: GenericModel;
   leak: LeakModel;
+  defacement: DefacementModel;
 }

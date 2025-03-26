@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from string import capwords
 from elasticsearch import AsyncElasticsearch
-from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING
+from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -74,41 +74,47 @@ class elastic_controller:
 
   async def get_insight(self):
     try:
-      queries = self.__m_elastic_request_generator.generate_insight_queries()
-      insight_data = InsightData()
+        queries = self.__m_elastic_request_generator.generate_insight_queries()
+        insight_data = InsightData()
 
-      for query in queries:
-        result = await self.__m_connection.search(index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER])
+        for query in queries:
+            result = await self.__m_connection.search(
+                index=query[ELASTIC_KEYS.S_DOCUMENT],
+                body=query[ELASTIC_KEYS.S_FILTER]
+            )
 
-        aggs = result.get("aggregations", {})
-        value = "-"
-        if aggs:
-          first_key = next(iter(aggs))
-          value = aggs[first_key].get("value", None)
-        key = query["m_filter"]["aggs"]
-        m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
-        key = list(key.keys())[0]
+            aggs = result.get("aggregations", {})
+            m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
 
-        if key in ["Most Recent", "Oldest Update"] and value:
-          value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
-        if isinstance(value, float):
-          value = round(value, 2)
+            for key in aggs:
+                value = "-"
+                if "value" in aggs[key]:
+                    value = aggs[key]["value"]
+                elif "buckets" in aggs[key]:
+                    buckets = aggs[key].get("buckets", [])
+                    value = capwords(buckets[0]["key"]) if buckets else "-"
 
-        if key in GENERIC_AGGREGATION_MAPPING and GENERIC_AGGREGATION_MAPPING[key] == "common_types":
-          buckets = result.get("aggregations", {}).get("Common Type", {}).get("buckets", [])
-          value = capwords(buckets[0]["key"]) if buckets else "-"
+                if key in ["Most Recent", "Oldest Update"] and value and isinstance(value, (int, float)):
+                    value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
+                if isinstance(value, float):
+                    value = round(value, 2)
 
-        if value is not None:
-          if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX:
-            setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)
-          else:
-            setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
+                if value is not None:
+                    if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX:
+                        if key in GENERIC_AGGREGATION_MAPPING:
+                            setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)
+                    elif m_filter == ELASTIC_INDEX.S_LEAK_INDEX:
+                        if key in LEAK_AGGREGATION_MAPPING:
+                            setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
+                    elif m_filter == ELASTIC_INDEX.S_DEFACEMENT_INDEX:
+                        if key in DEFACEMENT_AGGREGATION_MAPPING:
+                            setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
 
-      return True, insight_data
+        return True, insight_data
 
     except Exception as ex:
-      log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-      return False, None
+        log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+        return False, None
 
   async def index_data(self, p_data):
     try:
