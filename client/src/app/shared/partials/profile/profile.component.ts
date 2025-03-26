@@ -1,5 +1,5 @@
 import { Component, HostListener } from '@angular/core';
-import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
+import { AsyncPipe, NgIf, NgOptimizedImage } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Observable } from 'rxjs';
 
@@ -15,10 +15,17 @@ import { Observable } from 'rxjs';
 })
 export class ProfileComponent {
   username$: Observable<string | null>;
+  role$: Observable<string | null>;
   dropdownOpen = false;
 
   constructor(protected authService: AuthService) {
     this.username$ = this.authService.getUsername$();
+    this.role$ = this.authService.getRole$();
+  }
+
+  isAdmin(): boolean {
+    const currentRole = this.authService.getRole();
+    return currentRole === 'admin';
   }
 
   toggleDropdown(event: Event) {

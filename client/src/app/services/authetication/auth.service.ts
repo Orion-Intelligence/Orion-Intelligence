@@ -1,20 +1,16 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap, map } from 'rxjs';
-import { ApiService } from '../../shared/services/api.service';
-import { Router } from '@angular/router';
-import { AuthModel } from '../../shared/model/auth/auth.model';
-import { TokenRefreshService } from './token-refresh.service';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, Observable, tap, map} from 'rxjs';
+import {ApiService} from '../../shared/services/api.service';
+import {Router} from '@angular/router';
+import {AuthModel} from '../../shared/model/auth/auth.model';
+import {TokenRefreshService} from './token-refresh.service';
 import {HttpHeaders} from '@angular/common/http';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class AuthService {
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
-  constructor(
-    private apiService: ApiService,
-    private router: Router,
-    private tokenRefreshService: TokenRefreshService
-  ) {
+  constructor(private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
     if (this.isAuthenticated()) {
       this.startTokenRefresh();
     }
@@ -28,31 +24,40 @@ export class AuthService {
     return this.authState$.pipe(map((state) => state.username));
   }
 
+  getRole$(): Observable<string | null> {
+    return this.authState$.pipe(map((state) => state.role));
+  }
+
   login(username: string, password: string): Observable<any> {
     const body = new URLSearchParams();
     body.set('username', username);
     body.set('password', password);
 
-    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
 
-    return this.apiService.post<{ access_token: string }>('token', body.toString(), { headers }).pipe(
-      tap({
-        next: (response) => {
-          this.setToken(response.access_token, username);
-          this.startTokenRefresh();
-        },
-        error: () => {
-          this.authState.next({ token: null, username: null, isAuthenticated: false, error: 'Invalid credentials' });
-        },
-      })
-    );
+    return this.apiService.post<{ access_token: string; role: string }>('token', body.toString(), {headers}).pipe(tap({
+      next: (response) => {
+        this.setToken(response.access_token, username, response.role);
+        this.startTokenRefresh();
+      }, error: () => {
+        this.authState.next({
+          token: null, username: null, role: null, isAuthenticated: false, error: 'Invalid credentials'
+        });
+      },
+    }));
   }
 
   logout(): void {
+    this.apiService.post('logout', {}).subscribe();
     localStorage.removeItem('token');
     localStorage.removeItem('username');
-    this.authState.next({ token: null, username: null, isAuthenticated: false, error: null });
+    localStorage.removeItem('role');
+
+    this.authState.next({
+      token: null, username: null, role: null, isAuthenticated: false, error: null
+    });
     this.tokenRefreshService.stopTokenRefresh();
+
     this.router.navigate(['/login']).then();
   }
 
@@ -60,14 +65,21 @@ export class AuthService {
     return this.getStoredToken();
   }
 
+  getRole(): string | null {
+    return localStorage.getItem('role');
+  }
+
   isAuthenticated(): boolean {
     return !!this.getStoredToken();
   }
 
-  private setToken(token: string, username: string): void {
-    this.authState.next({ token, username, isAuthenticated: true, error: null });
+  private setToken(token: string, username: string, role: string): void {
+    this.authState.next({
+      token, username, role, isAuthenticated: true, error: null
+    });
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
+    localStorage.setItem('role', role);
   }
 
   private getStoredToken(): string | null {
@@ -77,10 +89,7 @@ export class AuthService {
   private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
     return {
-      token,
-      username: localStorage.getItem('username'),
-      isAuthenticated: !!token,
-      error: null
+      token, username: localStorage.getItem('username'), role: localStorage.getItem('role'), isAuthenticated: !!token, error: null
     };
   }
 
@@ -91,12 +100,18 @@ export class AuthService {
   }
 
   private refreshToken(): Observable<string | null> {
-    return this.tokenRefreshService.refreshToken().pipe(
-      tap((newToken) => {
-        if (newToken) {
-          this.setToken(newToken, localStorage.getItem('username') || '');
-        }
-      })
-    );
+    const currentToken = this.getStoredToken();
+    if (!currentToken) {
+      return new Observable(observer => {
+        observer.next(null);
+        observer.complete();
+      });
+    }
+
+    return this.apiService.post<{access_token: string; role: string}>('refresh-token', {token: currentToken}, {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}).pipe(tap((response) => {
+      if (response) {
+        this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
+      }
+    }), map((response) => response?.access_token || null));
   }
 }

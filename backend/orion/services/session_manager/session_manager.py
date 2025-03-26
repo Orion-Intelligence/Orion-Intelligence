@@ -80,12 +80,13 @@ class session_manager:
       raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
     return role
 
-  @staticmethod
-  async def create_access_token(data: dict, expires_delta: timedelta | None = None):
+  async def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire.timestamp()})
-    return jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
+    token = jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
+    role = await self.get_current_role(token)
+    return token, role
 
   async def refresh_token(self, token: str):
     try:
@@ -116,3 +117,12 @@ class session_manager:
       raise HTTPException(status_code=401, detail="Token has expired, please log in again")
     except jwt.InvalidTokenError:
       raise HTTPException(status_code=401, detail="Invalid token")
+
+  @staticmethod
+  def logout_user(ptoken: str):
+    if not ptoken:
+      return
+    token = ptoken.strip()
+    if token.startswith("Bearer "):
+      token = token[len("Bearer "):].strip()
+    session_manager.__cache.pop(token, None)
