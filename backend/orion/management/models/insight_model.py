@@ -33,7 +33,7 @@ class DefacementModel(BaseModel):
     updated_9_days_ago: int = 0
     top_team: Optional[str] = "-"
     common_server: Optional[str] = "-"
-    unique_base_urls: int = 0
+    mirror_links: int = 0
 
 class InsightData(BaseModel):
     general: GenericModel = Field(default_factory=GenericModel)
