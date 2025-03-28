@@ -255,6 +255,10 @@ table a:visited {
   overflow: hidden;
 }
 
+.warninng-font{
+  font-size: 15px;
+}
+
 @media only screen and (max-width: 550px) {
   .default-input-container {
     display: grid;
