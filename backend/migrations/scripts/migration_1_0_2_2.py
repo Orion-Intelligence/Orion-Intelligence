@@ -1,3 +1,5 @@
+from time import sleep
+
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
@@ -22,10 +24,11 @@ class migration_1_0_2_2:
 
   @staticmethod
   async def update_leak_index():
+    sleep(5)
+    migration_count = 0
     leak = ELASTIC_INDEX.S_LEAK_INDEX
     elastic = elastic_controller.get_instance()
     es_connection = elastic.get_connection()
-    migration_counter = 0
     if not es_connection:
       raise Exception("Elasticsearch connection not initialized")
     query = {"query": {"match_all": {}}}
@@ -48,18 +51,18 @@ class migration_1_0_2_2:
         ELASTIC_KEYS.S_VALUE: new_data
       }
       success, error = await elastic.index_data(entry)
-      migration_counter += 1
-      print("migrating" + str(migration_counter))
+      migration_count = migration_count+1
+      print(migration_count)
       if not success:
         return False, f"Re-indexing failed: {error}"
     return True, None
 
   @staticmethod
   async def update_defacement_index():
+    migration_count = 0
     leak = ELASTIC_INDEX.S_DEFACEMENT_INDEX
     elastic = elastic_controller.get_instance()
     es_connection = elastic.get_connection()
-    migration_counter = 0
     if not es_connection:
       raise Exception("Elasticsearch connection not initialized")
     query = {"query": {"match_all": {}}}
@@ -91,6 +94,8 @@ class migration_1_0_2_2:
           ELASTIC_KEYS.S_DOCUMENT: leak,
           ELASTIC_KEYS.S_VALUE: new_data
         }
+        migration_count = migration_count + 1
+        print(migration_count)
         success, error = await elastic.index_data(entry)
         if not success:
           return False, f"Re-indexing failed: {error}"
@@ -100,7 +105,5 @@ class migration_1_0_2_2:
       )
       hits = search_result.get("hits", {}).get("hits", [])
       scroll_id = search_result.get("_scroll_id")
-      migration_counter += 1
-      print("migrating" + str(migration_counter))
     await es_connection.clear_scroll(scroll_id=scroll_id)
     return True, None
