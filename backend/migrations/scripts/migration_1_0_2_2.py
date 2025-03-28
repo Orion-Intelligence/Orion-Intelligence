@@ -84,35 +84,45 @@ class migration_1_0_2_2:
     search_result = await es_connection.search(
       index=leak,
       body=query,
-      size=10000
+      size=1000,
+      scroll="2m"
     )
     hits = search_result.get("hits", {}).get("hits", [])
+    scroll_id = search_result.get("_scroll_id")
     if not hits:
       return True, "No documents to process"
-    for hit in hits:
-      doc_id = hit["_id"]
-      original_data = hit["_source"]
-      await es_connection.delete(index=leak, id=doc_id, ignore=[404])
-      new_data = original_data.copy()
-      if "m_mirror_links" in new_data and new_data["m_mirror_links"] and len(new_data["m_mirror_links"]) > 0:
-        new_data["m_url"] = new_data["m_mirror_links"][0].replace(
-          "https://zone-xsec.com/view/defaced/~",
-          "https://zone-xsec.com/mirror/id"
-        )
-      else:
-        new_data["m_url"] = "https://zone-xsec.com/mirror/id/default"
-      new_data["m_hash"] = helper_controller.generate_data_hash(new_data["m_url"])
-      entry = {
-        ELASTIC_KEYS.S_DOCUMENT: leak,
-        ELASTIC_KEYS.S_VALUE: new_data
-      }
-      success, error = await elastic.index_data(entry)
-      print("a:::::::::::::::::::::::::::::::::::::::::::::")
-      print("a:::::::::::::::::::::::::::::::::::::::::::::")
-      print("a:::::::::::::::::::::::::::::::::::::::::::::")
-      print("a:::::::::::::::::::::::::::::::::::::::::::::")
-      print("a:::::::::::::::::::::::::::::::::::::::::::::")
-      print("a:::::::::::::::::::::::::::::::::::::::::::::")
-      if not success:
-        return False, f"Re-indexing failed: {error}"
+    while hits:
+      for hit in hits:
+        doc_id = hit["_id"]
+        original_data = hit["_source"]
+        await es_connection.delete(index=leak, id=doc_id, ignore=[404])
+        new_data = original_data.copy()
+        if "m_mirror_links" in new_data and new_data["m_mirror_links"] and len(new_data["m_mirror_links"]) > 0:
+          new_data["m_url"] = new_data["m_mirror_links"][0].replace(
+            "https://zone-xsec.com/view/defaced/~",
+            "https://zone-xsec.com/mirror/id"
+          )
+        else:
+          new_data["m_url"] = "https://zone-xsec.com/mirror/id/default"
+        new_data["m_hash"] = helper_controller.generate_data_hash(new_data["m_url"])
+        entry = {
+          ELASTIC_KEYS.S_DOCUMENT: leak,
+          ELASTIC_KEYS.S_VALUE: new_data
+        }
+        print("a:::::::::::::::::::::::::::::::::::::::::::::")
+        print("a:::::::::::::::::::::::::::::::::::::::::::::")
+        print("a:::::::::::::::::::::::::::::::::::::::::::::")
+        print("a:::::::::::::::::::::::::::::::::::::::::::::")
+        print("a:::::::::::::::::::::::::::::::::::::::::::::")
+        print("a:::::::::::::::::::::::::::::::::::::::::::::")
+        success, error = await elastic.index_data(entry)
+        if not success:
+          return False, f"Re-indexing failed: {error}"
+      search_result = await es_connection.scroll(
+        scroll_id=scroll_id,
+        scroll="2m"
+      )
+      hits = search_result.get("hits", {}).get("hits", [])
+      scroll_id = search_result.get("_scroll_id")
+    await es_connection.clear_scroll(scroll_id=scroll_id)
     return True, None
