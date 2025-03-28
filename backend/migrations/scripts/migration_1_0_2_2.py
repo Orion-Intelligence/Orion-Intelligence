@@ -56,6 +56,12 @@ class migration_1_0_2_2:
         ELASTIC_KEYS.S_VALUE: new_data
       }
       success, error = await elastic.index_data(entry)
+      print("c:::::::::::::::::::::::::::::::::::::::::::::")
+      print("c:::::::::::::::::::::::::::::::::::::::::::::")
+      print("c:::::::::::::::::::::::::::::::::::::::::::::")
+      print("c:::::::::::::::::::::::::::::::::::::::::::::")
+      print("c:::::::::::::::::::::::::::::::::::::::::::::")
+      print("c:::::::::::::::::::::::::::::::::::::::::::::")
       if not success:
         return False, f"Re-indexing failed: {error}"
     return True, None
@@ -101,6 +107,12 @@ class migration_1_0_2_2:
         ELASTIC_KEYS.S_VALUE: new_data
       }
       success, error = await elastic.index_data(entry)
+      print("a:::::::::::::::::::::::::::::::::::::::::::::")
+      print("a:::::::::::::::::::::::::::::::::::::::::::::")
+      print("a:::::::::::::::::::::::::::::::::::::::::::::")
+      print("a:::::::::::::::::::::::::::::::::::::::::::::")
+      print("a:::::::::::::::::::::::::::::::::::::::::::::")
+      print("a:::::::::::::::::::::::::::::::::::::::::::::")
       if not success:
         return False, f"Re-indexing failed: {error}"
     return True, None
