@@ -88,7 +88,13 @@ class migration_1_0_2_2:
       original_data = hit["_source"]
       await es_connection.delete(index=leak, id=doc_id, ignore=[404])
       new_data = original_data.copy()
-      new_data["m_url"] = new_data["m_mirror_links"][0].replace("https://zone-xsec.com/view/defaced/~", "https://zone-xsec.com/mirror/id")
+      if "m_mirror_links" in new_data and new_data["m_mirror_links"] and len(new_data["m_mirror_links"]) > 0:
+        new_data["m_url"] = new_data["m_mirror_links"][0].replace(
+          "https://zone-xsec.com/view/defaced/~",
+          "https://zone-xsec.com/mirror/id"
+        )
+      else:
+        new_data["m_url"] = "https://zone-xsec.com/mirror/id/default"
       new_data["m_hash"] = helper_controller.generate_data_hash(new_data["m_url"])
       entry = {
         ELASTIC_KEYS.S_DOCUMENT: leak,
