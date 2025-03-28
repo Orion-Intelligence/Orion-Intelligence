@@ -166,4 +166,5 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
+  protected readonly Category = Category;
 }
