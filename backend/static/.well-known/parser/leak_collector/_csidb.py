@@ -97,7 +97,7 @@ class _csidb(leak_extractor_interface, ABC):
                     important_content = ""
 
                 card_data = leak_model(
-                    m_screenshot=helper_method.get_screenshot_base64(page),
+                    m_screenshot=helper_method.get_screenshot_base64(page, victim_name),
                     m_company_name=victim_name,
                     m_title=victim_name,
                     m_url=self.seed_url,

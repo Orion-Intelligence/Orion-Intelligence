@@ -109,7 +109,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                 action_link = action_link_element['href'] if action_link_element else None
 
                 card_data = leak_model(
-                    m_screenshot=helper_method.get_screenshot_base64(page),
+                    m_screenshot=helper_method.get_screenshot_base64(page, title),
                     m_name=title,
                     m_title=title,
                     m_weblink=[web_url] if web_url else [],

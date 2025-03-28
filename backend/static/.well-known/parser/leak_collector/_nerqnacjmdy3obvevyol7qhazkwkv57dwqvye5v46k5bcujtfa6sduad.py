@@ -113,7 +113,7 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                 dumplinks = [a['href'].strip() for a in detail_soup.find_all('a', href=True) if ".onion" in a['href']]
 
                 self._card_data.append(leak_model(
-                    m_screenshot=helper_method.get_screenshot_base64(page),
+                    m_screenshot=helper_method.get_screenshot_base64(page, title),
                     m_title=title,
                     m_content=content,
                     m_weblink=[website],

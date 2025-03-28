@@ -99,7 +99,7 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
                     weblinks = [a['href'] for a in soup.find_all('a', href=True)]
 
                     card_data = leak_model(
-                        m_screenshot=helper_method.get_screenshot_base64(page),
+                        m_screenshot=helper_method.get_screenshot_base64(page, title),
                         m_title=title,
                         m_url=link,
                         m_weblink=weblinks,

@@ -103,7 +103,7 @@ class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_i
 
                             self._card_data.append(
                                 leak_model(
-                                    m_screenshot=helper_method.get_screenshot_base64(page),
+                                    m_screenshot=helper_method.get_screenshot_base64(page, title_text),
                                     m_title=title_text,
                                     m_url=page.url,
                                     m_base_url=self.base_url,

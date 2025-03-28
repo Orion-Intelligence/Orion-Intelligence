@@ -87,7 +87,7 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
                         ]
 
                         card_data = leak_model(
-                            m_screenshot=helper_method.get_screenshot_base64(page),
+                            m_screenshot=helper_method.get_screenshot_base64(page, title),
                             m_title=title,
                             m_url=page.url,
                             m_base_url=self.base_url,

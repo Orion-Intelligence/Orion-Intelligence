@@ -75,7 +75,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
             web_links = [a.get_attribute('href') for a in link_elements]
 
             self._card_data.append(leak_model(
-                m_screenshot=helper_method.get_screenshot_base64(page),
+                m_screenshot=helper_method.get_screenshot_base64(page, page.title()),
                 m_title=page.title(),
                 m_url=page.url,
                 m_base_url=self.base_url,

@@ -72,7 +72,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
                 dump_links = [link["href"] for link in links_element.find_all("a", href=True)] if links_element else []
 
                 card_data = leak_model(
-                    m_screenshot=helper_method.get_screenshot_base64(page),
+                    m_screenshot=helper_method.get_screenshot_base64(page, title_text),
                     m_title=title_text,
                     m_url=self.seed_url,
                     m_base_url=self.base_url,

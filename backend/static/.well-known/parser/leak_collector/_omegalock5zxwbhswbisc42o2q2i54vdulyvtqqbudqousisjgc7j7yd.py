@@ -81,7 +81,7 @@ class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_i
                     ]
 
                 card_data = leak_model(
-                    m_screenshot=helper_method.get_screenshot_base64(page),
+                    m_screenshot=helper_method.get_screenshot_base64(page, title_text),
                     m_title=title_text,
                     m_url=page_url,
                     m_base_url=self.base_url,

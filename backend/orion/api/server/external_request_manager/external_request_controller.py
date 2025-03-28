@@ -30,6 +30,7 @@ class external_request_controller:
         param = {"query": p_data.model_dump()}
         cache_key = self.generate_cache_key(url, param)
 
+        print("::::::::::::::::::::::::::::::::: 1")
         cached_response = await self.redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [cache_key, None, None])
         if cached_response:
             data = json.loads(cached_response)

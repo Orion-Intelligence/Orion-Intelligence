@@ -126,7 +126,7 @@ class _inthewild(leak_extractor_interface, ABC):
 
                             self._card_data.append(
                                 leak_model(
-                                    m_screenshot=helper_method.get_screenshot_base64(page),
+                                    m_screenshot=helper_method.get_screenshot_base64(page, vuln_id),
                                     m_title=vuln_id,
                                     m_url=page.url,
                                     m_base_url=self.base_url,

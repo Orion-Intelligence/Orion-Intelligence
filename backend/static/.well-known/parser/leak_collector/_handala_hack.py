@@ -105,7 +105,7 @@ class _handala_hack(leak_extractor_interface, ABC):
                             dump_links.append(a['href'])
 
                     card_data = leak_model(
-                        m_screenshot=helper_method.get_screenshot_base64(page),
+                        m_screenshot=helper_method.get_screenshot_base64(page, title),
                         m_title=title,
                         m_weblink=external_links,
                         m_dumplink=dump_links,

@@ -107,7 +107,7 @@ class _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd(leak_extractor_i
                         web_link.append(full_href)
 
             card_data = leak_model(
-                m_screenshot=helper_method.get_screenshot_base64(page),
+                m_screenshot=helper_method.get_screenshot_base64(page, title),
                 m_title=title,
                 m_url=page.url,
                 m_base_url=self.base_url,

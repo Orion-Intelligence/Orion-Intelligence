@@ -78,7 +78,7 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
 
                     self._card_data.append(
                         leak_model(
-                            m_screenshot=helper_method.get_screenshot_base64(page),
+                            m_screenshot=helper_method.get_screenshot_base64(page, company_name),
                             m_title=company_name,
                             m_url=page.url,
                             m_websites=[website],

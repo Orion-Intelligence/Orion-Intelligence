@@ -119,7 +119,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
                     )
 
                 card = leak_model(
-                    m_screenshot=helper_method.get_screenshot_base64(page),
+                    m_screenshot=helper_method.get_screenshot_base64(page, title),
                     m_title=title,
                     m_url=article_url,
                     m_base_url=self.base_url,

@@ -120,7 +120,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
               logo_image = logo_img.get_attribute("src")
 
           card_data = leak_model(
-            m_screenshot=helper_method.get_screenshot_base64(page),
+            m_screenshot=helper_method.get_screenshot_base64(page, company_name),
             m_company_name=company_name,
             m_title=company_name,
             m_url=url,

@@ -108,7 +108,7 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                 dumplink = dump_link_element["href"] if dump_link_element else "not found"
 
                 card_data = leak_model(
-                    m_screenshot=helper_method.get_screenshot_base64(page),
+                    m_screenshot=helper_method.get_screenshot_base64(page, title),
                     m_company_name=title,
                     m_title=title,
                     m_url=product_url,
