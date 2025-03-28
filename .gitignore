@@ -31,6 +31,7 @@ swagconfig/swagger-initializer.js
 *.swp
 client/node_modules/*
 backend/build/*
+backend/static/resource/*
 client/build/*
 backend/static/.well-known/parser_files.zip
 backend/static/.well-known/parser_files.zip
