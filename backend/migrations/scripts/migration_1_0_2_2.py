@@ -1,5 +1,3 @@
-from time import sleep
-
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
@@ -27,6 +25,7 @@ class migration_1_0_2_2:
     leak = ELASTIC_INDEX.S_LEAK_INDEX
     elastic = elastic_controller.get_instance()
     es_connection = elastic.get_connection()
+    migration_counter = 0
     if not es_connection:
       raise Exception("Elasticsearch connection not initialized")
     query = {"query": {"match_all": {}}}
@@ -49,12 +48,8 @@ class migration_1_0_2_2:
         ELASTIC_KEYS.S_VALUE: new_data
       }
       success, error = await elastic.index_data(entry)
-      print("c:::::::::::::::::::::::::::::::::::::::::::::")
-      print("c:::::::::::::::::::::::::::::::::::::::::::::")
-      print("c:::::::::::::::::::::::::::::::::::::::::::::")
-      print("c:::::::::::::::::::::::::::::::::::::::::::::")
-      print("c:::::::::::::::::::::::::::::::::::::::::::::")
-      print("c:::::::::::::::::::::::::::::::::::::::::::::")
+      migration_counter += 1
+      print("migrating" + str(migration_counter))
       if not success:
         return False, f"Re-indexing failed: {error}"
     return True, None
