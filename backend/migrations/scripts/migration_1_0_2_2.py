@@ -64,6 +64,7 @@ class migration_1_0_2_2:
     leak = ELASTIC_INDEX.S_DEFACEMENT_INDEX
     elastic = elastic_controller.get_instance()
     es_connection = elastic.get_connection()
+    migration_counter = 0
     if not es_connection:
       raise Exception("Elasticsearch connection not initialized")
     query = {"query": {"match_all": {}}}
@@ -95,12 +96,6 @@ class migration_1_0_2_2:
           ELASTIC_KEYS.S_DOCUMENT: leak,
           ELASTIC_KEYS.S_VALUE: new_data
         }
-        print("a:::::::::::::::::::::::::::::::::::::::::::::")
-        print("a:::::::::::::::::::::::::::::::::::::::::::::")
-        print("a:::::::::::::::::::::::::::::::::::::::::::::")
-        print("a:::::::::::::::::::::::::::::::::::::::::::::")
-        print("a:::::::::::::::::::::::::::::::::::::::::::::")
-        print("a:::::::::::::::::::::::::::::::::::::::::::::")
         success, error = await elastic.index_data(entry)
         if not success:
           return False, f"Re-indexing failed: {error}"
@@ -110,5 +105,7 @@ class migration_1_0_2_2:
       )
       hits = search_result.get("hits", {}).get("hits", [])
       scroll_id = search_result.get("_scroll_id")
+      migration_counter += 1
+      print("migrating" + str(migration_counter))
     await es_connection.clear_scroll(scroll_id=scroll_id)
     return True, None

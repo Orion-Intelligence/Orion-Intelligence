@@ -55,13 +55,13 @@ class migration_manager:
                             log.g().w(f"No 'migrate' method in {migration_script_name}")
                     else:
                         log.g().w(f"No class {migration_script_name} in module")
-            # existing_version_entry = await engine.find_one(db_system_model, db_system_model.key == AllowedKeys.VERSION)
-            # if existing_version_entry:
-            #     existing_version_entry.value = version
-            #     await engine.save(existing_version_entry)
-            # else:
-            #     new_entry = db_system_model(key=AllowedKeys.VERSION, value=version)
-            #     await engine.save(new_entry)
+            existing_version_entry = await engine.find_one(db_system_model, db_system_model.key == AllowedKeys.VERSION)
+            if existing_version_entry:
+                existing_version_entry.value = version
+                await engine.save(existing_version_entry)
+            else:
+                new_entry = db_system_model(key=AllowedKeys.VERSION, value=version)
+                await engine.save(new_entry)
         except Exception as ex:
             log.g().e(f"Migration failed: {str(ex)}")
             raise Exception(f"Migration failed: {str(ex)}")
