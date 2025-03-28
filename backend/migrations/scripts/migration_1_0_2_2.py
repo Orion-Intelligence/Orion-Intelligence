@@ -26,13 +26,6 @@ class migration_1_0_2_2:
   async def update_leak_index():
     leak = ELASTIC_INDEX.S_LEAK_INDEX
     elastic = elastic_controller.get_instance()
-    while True:
-      try:
-        sleep(10)
-        await elastic.initialize()
-        break
-      except Exception as e:
-        pass
     es_connection = elastic.get_connection()
     if not es_connection:
       raise Exception("Elasticsearch connection not initialized")
@@ -70,13 +63,6 @@ class migration_1_0_2_2:
   async def update_defacement_index():
     leak = ELASTIC_INDEX.S_DEFACEMENT_INDEX
     elastic = elastic_controller.get_instance()
-    while True:
-      try:
-        sleep(10)
-        await elastic.initialize()
-        break
-      except Exception as e:
-        pass
     es_connection = elastic.get_connection()
     if not es_connection:
       raise Exception("Elasticsearch connection not initialized")

@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 
 from configs.SimpleAuthProvider import setup_admin
 from configs.swagger_config import configure_swagger
-from migrations.migration import migration_manager
 from orion.middleware.middleware_setup import setup_middlewares
 from orion.management.managers.service_manager import service_manager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -19,7 +18,6 @@ from fastapi.exceptions import RequestValidationError
 
 @asynccontextmanager
 async def lifespan(p_app: FastAPI):
-    await migration_manager.get_instance().init_migration()
     service_manager_instance = service_manager.get_instance()
     await service_manager_instance.init_services()
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
