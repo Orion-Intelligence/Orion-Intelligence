@@ -129,8 +129,8 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
                             if tag_text.startswith('#'):
                                 tags.append(tag_text[1:])
 
-
                         card_data = leak_model(
+                            m_screenshot=helper_method.get_screenshot_base64(page),
                             m_company_name=title,
                             m_title=title,
                             m_url=item_url,

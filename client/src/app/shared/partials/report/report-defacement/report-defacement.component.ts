@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {DomSanitizer} from '@angular/platform-browser';
 import {DefacementResultItem} from '../../../model/results/defacement/defacement.param.model';
 import {NgOptimizedImage} from '@angular/common';
 import {HelperService} from '../../../services/helper.service';
@@ -14,11 +14,9 @@ import {AppService} from '../../../../services/core/app.service';
 })
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
-  safeUrl: SafeResourceUrl;
   lang: string = "en";
 
   constructor(private sanitizer: DomSanitizer, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
-    this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl('');
     this.lang = appService.getConfig().language_allowed
   }
 
@@ -37,12 +35,12 @@ export class ReportDefacementComponent implements OnInit {
   }
 
   shareResult() {
-    this.resultHelperService.shareResult(this.defacementData?.m_mirror_links[0] || '');
+    this.resultHelperService.shareResult(this.defacementData?.m_url || '');
   }
 
   redirectToUrl() {
     if (this.defacementData && this.defacementData.m_web_url) {
-      window.open(this.defacementData.m_mirror_links[0], '_blank');
+      window.open(this.defacementData.m_url, '_blank');
     }
   }
 
@@ -50,9 +48,6 @@ export class ReportDefacementComponent implements OnInit {
     this.route.data.subscribe(data => {
       if (data['reportdata']) {
         this.defacementData = data['reportdata'];
-        if (this.defacementData) {
-          this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.defacementData.m_mirror_links[0]);
-        }
       }
     });
   }

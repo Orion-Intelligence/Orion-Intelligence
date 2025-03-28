@@ -68,6 +68,7 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
                 dumplinks = [urljoin(self.base_url, link.a['href']) for link in link_elements if link and link.a]
 
                 card_data = leak_model(
+                    m_screenshot=helper_method.get_screenshot_base64(page),
                     m_title=title_text,
                     m_url=page_url,
                     m_base_url=self.base_url,

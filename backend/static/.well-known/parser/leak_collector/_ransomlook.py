@@ -34,7 +34,7 @@ class _ransomlook(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM)
+        return RuleModel(m_resoource_block = False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -92,6 +92,7 @@ class _ransomlook(leak_extractor_interface, ABC):
                     m_content = m_columns.replace("[", "").replace("]", "")
 
                     card_data = leak_model(
+                        m_screenshot=helper_method.get_screenshot_base64(page),
                         m_title=m_title,
                         m_url=page.url,
                         m_base_url=self.base_url,

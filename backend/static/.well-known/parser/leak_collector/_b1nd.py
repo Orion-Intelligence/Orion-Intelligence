@@ -102,6 +102,7 @@ class _b1nd(leak_extractor_interface, ABC):
               m_leak_date = helper_method.extract_and_convert_date(m_leak_date)
 
               card_data = leak_model(
+                m_screenshot=helper_method.get_screenshot_base64(page),
                 m_title=title,
                 m_weblink=[inner_link],
                 m_url=inner_link,

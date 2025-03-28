@@ -30,6 +30,9 @@ class elastic_controller:
                                              http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
     await self.__initialize_mappings()
 
+  def get_connection(self):
+    return self.__m_connection
+
   async def __initialize_mappings(self):
     try:
       mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
@@ -74,48 +77,48 @@ class elastic_controller:
 
   async def get_insight(self):
     try:
-        queries = self.__m_elastic_request_generator.generate_insight_queries()
-        insight_data = InsightData()
+      queries = self.__m_elastic_request_generator.generate_insight_queries()
+      insight_data = InsightData()
 
-        for query in queries:
-            result = await self.__m_connection.search(
-                index=query[ELASTIC_KEYS.S_DOCUMENT],
-                body=query[ELASTIC_KEYS.S_FILTER]
-            )
+      for query in queries:
+        result = await self.__m_connection.search(
+          index=query[ELASTIC_KEYS.S_DOCUMENT],
+          body=query[ELASTIC_KEYS.S_FILTER]
+        )
 
-            aggs = result.get("aggregations", {})
-            m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
+        aggs = result.get("aggregations", {})
+        m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
 
-            # Process all aggregations in the result
-            for key in aggs:
-                value = "-"
-                if "value" in aggs[key]:
-                    value = aggs[key]["value"]
-                elif "buckets" in aggs[key]:
-                    buckets = aggs[key].get("buckets", [])
-                    value = capwords(buckets[0]["key"]) if buckets else "-"
+        # Process all aggregations in the result
+        for key in aggs:
+          value = "-"
+          if "value" in aggs[key]:
+            value = aggs[key]["value"]
+          elif "buckets" in aggs[key]:
+            buckets = aggs[key].get("buckets", [])
+            value = capwords(buckets[0]["key"]) if buckets else "-"
 
-                # Format dates for time-based aggregations
-                if key in ["Most Recent", "Oldest Update"] and value and isinstance(value, (int, float)):
-                    value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
-                # Round floats
-                if isinstance(value, float):
-                    value = round(value, 2)
+          # Format dates for time-based aggregations
+          if key in ["Most Recent", "Oldest Update"] and value and isinstance(value, (int, float)):
+            value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
+          # Round floats
+          if isinstance(value, float):
+            value = round(value, 2)
 
-                # Assign value based on index and mapping
-                if value is not None:
-                    if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX and key in GENERIC_AGGREGATION_MAPPING:
-                        setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)
-                    elif m_filter == ELASTIC_INDEX.S_LEAK_INDEX and key in LEAK_AGGREGATION_MAPPING:
-                        setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
-                    elif m_filter == ELASTIC_INDEX.S_DEFACEMENT_INDEX and key in DEFACEMENT_AGGREGATION_MAPPING:
-                        setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
+          # Assign value based on index and mapping
+          if value is not None:
+            if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX and key in GENERIC_AGGREGATION_MAPPING:
+              setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)
+            elif m_filter == ELASTIC_INDEX.S_LEAK_INDEX and key in LEAK_AGGREGATION_MAPPING:
+              setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
+            elif m_filter == ELASTIC_INDEX.S_DEFACEMENT_INDEX and key in DEFACEMENT_AGGREGATION_MAPPING:
+              setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
 
-        return True, insight_data
+      return True, insight_data
 
     except Exception as ex:
-        log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-        return False, None
+      log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+      return False, None
 
   async def index_data(self, p_data):
     try:

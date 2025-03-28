@@ -1,5 +1,5 @@
 .dashboard__defacement-detail-container {
-  padding: 0rem;
+  padding: 0;
   margin: 35px;
   color: white;
 }
@@ -36,29 +36,6 @@
   color: #D0D0D0;
 }
 
-.dashboard__defacement-detail-preview {
-  border: 1px solid #FCFCFC12;
-  border-radius: 8px;
-  padding: 24px;
-  background: #17406959;
-  margin-top: 24px;
-}
-.dashboard__defacement-detail-preview-heading{
-  font-weight: 500;
-  font-size: 20px;
-  color: #fff;
-}
-
-.dashboard__defacement-preview{
-  border: none;
-  border-radius: 25px;
-}
-.dashboard__defacement-detail-preview iframe{
-  width: 100%;
-  height: 400px;
-  border-top-right-radius: 16px;
-  border-top-left-radius: 16px;
-}
 @media only screen and (max-width: 1000px) {
   .dashboard__defacement-detail-header-row{
     display: grid;

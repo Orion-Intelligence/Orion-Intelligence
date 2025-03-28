@@ -1,18 +1,22 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {AppService} from '../../../services/core/app.service';
 
 @Component({
-  selector: 'app-pagination',
-  templateUrl: './pagination.component.html',
-  imports: [CommonModule, NgOptimizedImage]
+  selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgOptimizedImage]
 })
-export class PaginationComponent {
+export class PaginationComponent implements OnInit {
   @Input() maxPages: number = 1;
   @Input() currentPage: number = 1;
 
   @Output() pageChange = new EventEmitter<number>();
 
+  constructor(private appService: AppService) {
+  }
 
+  ngOnInit(): void {
+    this.currentPage = this.appService.page();
+  }
 
   getPageRange(): number[] {
     const leftBound = Math.max(1, this.currentPage - 2);

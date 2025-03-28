@@ -134,6 +134,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
 
 
                     card_data = leak_model(
+                        m_screenshot=helper_method.get_screenshot_base64(page),
                         m_company_name=title,
                         m_title=title,
                         m_url=leak_url,

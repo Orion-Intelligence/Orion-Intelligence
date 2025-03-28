@@ -94,6 +94,7 @@ class _xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd(leak_extractor_i
                         m_data_size = ""
 
                     card_data = leak_model(
+                        m_screenshot=helper_method.get_screenshot_base64(page),
                         m_title=m_title,
                         m_url=page.url,
                         m_base_url=self.base_url,

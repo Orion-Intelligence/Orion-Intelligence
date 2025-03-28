@@ -93,6 +93,7 @@ class _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd(leak_extractor_i
                         imp_content = ""
 
                     card_data = leak_model(
+                        m_screenshot=helper_method.get_screenshot_base64(page),
                         m_company_name=title,
                         m_title=title,
                         m_url=url,

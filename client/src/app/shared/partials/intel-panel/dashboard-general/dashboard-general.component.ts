@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgIf, NgOptimizedImage} from '@angular/common';
 import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
@@ -14,6 +14,7 @@ import {Category} from '../../../enums/pages';
 import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
 import {ResultComponent} from '../../result/result.component';
 import {general_filters} from '../../../constants/filters';
+import {AppService} from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-dashboard-general',
@@ -21,7 +22,7 @@ import {general_filters} from '../../../constants/filters';
   templateUrl: './dashboard-general.component.html',
   animations: [fadeInDashboardItem],
 })
-export class DashboardGeneralComponent implements OnInit {
+export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   public generalParamModel: GeneralParamModel = new GeneralParamModel();
   public generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
@@ -35,7 +36,11 @@ export class DashboardGeneralComponent implements OnInit {
   isLoading = false;
   firstTrigger = true
 
-  constructor(public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  }
+
+  ngAfterViewInit(): void {
+    this.appService.updatePage(1)
   }
 
   ngOnInit(): void {

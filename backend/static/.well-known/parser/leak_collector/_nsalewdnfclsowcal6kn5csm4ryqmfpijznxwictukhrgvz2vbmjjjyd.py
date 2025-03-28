@@ -125,6 +125,7 @@ class _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd(leak_extractor_i
 
                     self._card_data.append(
                         leak_model(
+                            m_screenshot=helper_method.get_screenshot_base64(page),
                             m_title=company_name,
                             m_url=page.url,
                             m_websites=websites,

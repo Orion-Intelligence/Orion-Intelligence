@@ -1,8 +1,9 @@
+from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
+from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
+from orion.api.server.crawl_manager.crawl_model import crawl_model
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
-
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
-from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
@@ -27,6 +28,10 @@ async def index_leak_data(request: Request):
 async def index_defacement_data(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_defacement_index(DefacementDataModel(**body))
+
+@crawl_routes.post("/api/screenshot", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))):
+  return await crawl_model.getInstance().invoke_file_upload(payload)
 
 @crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_generic(request: Request):

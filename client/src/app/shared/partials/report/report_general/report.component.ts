@@ -9,6 +9,7 @@ import {HelperService} from '../../../services/helper.service';
 import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
 import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
 import {AppService} from '../../../../services/core/app.service';
+import {Category} from '../../../enums/pages';
 
 @Component({
   selector: 'app-result-panel',
@@ -23,14 +24,18 @@ export class ReportComponent implements OnInit {
   activeTab: string = '';
   content: string = '';
   lang = "en"
+  type = ""
+  isImageLoaded: boolean = false;
+  isImageError: boolean = false;
 
-  constructor(private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
+  constructor(public helperService: HelperService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({reportdata}) => {
+    this.route.data.subscribe(({reportdata, type}) => {
       this.resultItem = reportdata;
+      this.type = type;
       this.processResultItem();
     });
   }
@@ -118,5 +123,14 @@ export class ReportComponent implements OnInit {
     return diffInDays <= days;
   }
 
+  onImageLoad() {
+    this.isImageLoaded = true;
+  }
+
+  onImageError() {
+    this.isImageError = true;
+  }
+
   protected readonly last = last;
+  protected readonly Category = Category;
 }

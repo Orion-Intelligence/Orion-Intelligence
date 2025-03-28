@@ -1,8 +1,7 @@
-import os
 from datetime import datetime, timezone
 from starlette.responses import JSONResponse
-
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
+from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -10,13 +9,20 @@ from orion.services.elastic_manager.elastic_request_generator import elastic_req
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from fastapi.responses import FileResponse
-
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
-
+import os
+import base64
+from PIL import Image
+from io import BytesIO
 
 class crawl_model:
-  # Private Variables
   __instance = None
+
+  @staticmethod
+  def getInstance():
+    if crawl_model.__instance is None:
+      crawl_model()
+    return crawl_model.__instance
 
   def __init__(self):
     if crawl_model.__instance is not None:
@@ -93,3 +99,28 @@ class crawl_model:
         return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH+f"crawl_data_{index_type}.txt", media_type="text/plain", filename="crawl_data_leak.txt")
     else:
       return JSONResponse(content={"detail": "File not found"}, status_code=404)
+
+  @staticmethod
+  async def get_screenshot_file(filename: str):
+    try:
+      file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, filename)
+      if not os.path.exists(file_path):
+        return {"error": "File not found"}
+      return FileResponse(path=file_path, filename=filename, media_type="image/webp")
+    except Exception as e:
+      return {"error": f"Failed to retrieve screenshot: {str(e)}"}
+
+  @staticmethod
+  async def invoke_file_upload(payload: ScreenshotPayload):
+    try:
+      os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
+      file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, payload.filename)
+      image = Image.open(BytesIO(base64.b64decode(payload.data)))
+      if image.width > 1100:
+        aspect_ratio = image.height / image.width
+        new_height = int(1100 * aspect_ratio)
+        image = image.resize((1100, new_height), Image.Resampling.LANCZOS)
+      image.save(file_path, "WEBP", quality=30)
+      return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}
+    except Exception as e:
+      return {"error": f"Failed to save screenshot: {str(e)}"}

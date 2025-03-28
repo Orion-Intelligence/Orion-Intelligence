@@ -1,14 +1,15 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ResultComponent } from '../../result/result.component';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { PaginationComponent } from '../../pagination/pagination.component';
-import { DashboardResultListComponent } from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {NgIf} from '@angular/common';
+import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ResultComponent} from '../../result/result.component';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {PaginationComponent} from '../../pagination/pagination.component';
+import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 import {DefacementParamModel} from '../../../model/results/defacement/defacement.callback.model';
 import {DefacementCallbackModel} from '../../../model/results/defacement/defacement.param.model';
+import {AppService} from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-dashboard-defacement',
@@ -17,7 +18,7 @@ import {DefacementCallbackModel} from '../../../model/results/defacement/defacem
   templateUrl: './dashboard-defacement.component.html',
   animations: [fadeInDashboardItem],
 })
-export class DashboardDefacementComponent implements OnInit {
+export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   defacementParamModel: DefacementParamModel = new DefacementParamModel();
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
   result_count = 0;
@@ -26,12 +27,12 @@ export class DashboardDefacementComponent implements OnInit {
   isLoading = false;
   firstTrigger = true;
 
-  constructor(
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
-    public dashboardService: DashboardService,
-    private router: Router
-  ) {}
+  constructor(public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
+  }
+
+  ngAfterViewInit(): void {
+    this.appService.updatePage(1)
+  }
 
   ngOnInit(): void {
     combineLatest([this.route.queryParams, this.route.url])
@@ -39,7 +40,7 @@ export class DashboardDefacementComponent implements OnInit {
       .subscribe(([params, _]) => {
         this.query = params['q'] || '';
         this.defacementParamModel.q = params['q'] || '';
-        this.defacementParamModel.mSearchParamPage = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1; // Default to 1 if not present
+        this.defacementParamModel.mSearchParamPage = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1;
 
         if (this.firstTrigger && this.defacementCallbackModel.Result.length > 0) {
           this.isLoading = false;
@@ -47,7 +48,6 @@ export class DashboardDefacementComponent implements OnInit {
         } else if (this.firstTrigger) {
           this.defacementParamModel.q = '*';
           this.query = '';
-          this.defacementParamModel.mSearchParamPage = 1; // Explicitly set initial page
           this.fetchSearchResults();
           this.cdr.detectChanges();
         }
@@ -64,13 +64,9 @@ export class DashboardDefacementComponent implements OnInit {
   fetchSearchResults() {
     this.isLoading = true;
     this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        q: this.defacementParamModel.q,
-        mSearchParamPage: this.defacementParamModel.mSearchParamPage,
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
+      relativeTo: this.route, queryParams: {
+        q: this.defacementParamModel.q, mSearchParamPage: this.defacementParamModel.mSearchParamPage,
+      }, queryParamsHandling: 'merge', replaceUrl: true,
     }).then();
 
     this.dashboardService

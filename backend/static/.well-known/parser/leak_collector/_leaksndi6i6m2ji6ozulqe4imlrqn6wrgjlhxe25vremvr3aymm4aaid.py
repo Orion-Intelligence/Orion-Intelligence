@@ -84,9 +84,9 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                         buy_page.close()
                         page.bring_to_front()
 
-
                         self._card_data.append(
                             leak_model(
+                                m_screenshot=helper_method.get_screenshot_base64(page),
                                 m_title=database,
                                 m_url=page.url,
                                 m_base_url=self.base_url,

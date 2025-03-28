@@ -101,9 +101,8 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
                         if not download_url.startswith('http'):
                             download_url = f"http://{download_url}"
 
-
-
             self._card_data.append(leak_model(
+                m_screenshot=helper_method.get_screenshot_base64(page),
                 m_title=title,
                 m_url=url,
                 m_base_url=self.base_url,

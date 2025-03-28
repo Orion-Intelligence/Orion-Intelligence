@@ -7,6 +7,7 @@ class CardExtractionModel(BaseModel):
     m_team: str
     m_web_server: List[str]
     m_base_url: str
+    m_url: str
     m_ip: List[str]
     m_date_of_leak: Optional[str] = None
     m_web_url: List[str]

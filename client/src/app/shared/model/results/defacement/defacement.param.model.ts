@@ -13,6 +13,7 @@ export class DefacementResultItem {
   m_hash: string = "";
   m_screenshot?: string;
   m_mirror_links: string[] = [];
+  m_url: string = "";
 
   constructor(init?: Partial<DefacementResultItem>) {
     Object.assign(this, init);

@@ -14,6 +14,7 @@ import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model
 })
 export class DashboardResultsGridComponent implements AfterViewInit {
   @Input() query!: string;
+  @Input() type!: string;
   @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
   currentUrl: string = '';
   queryParams: any = {};

@@ -64,6 +64,7 @@ class _darkfeed(leak_extractor_interface, ABC):
             content_message = f"{title}, To visit or explore more visit the website: {url}"
 
             card_data = leak_model(
+              m_screenshot=helper_method.get_screenshot_base64(page),
               m_title=title,
               m_url=url,
               m_base_url=self.base_url,

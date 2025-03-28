@@ -35,7 +35,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.SELENIUM, m_threat_type=ThreatType.DEFACEMENT)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.SELENIUM, m_threat_type=ThreatType.DEFACEMENT, m_resoource_block = False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -57,7 +57,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     def parse_leak_data(self, page: Page):
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-        max_pages = 250 if is_crawled else 500
+        max_pages = 50 if is_crawled else 500
 
         current_page = 1
         consecutive_errors = 0
@@ -106,6 +106,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             m_ip=[ip],
                             m_content="",
                             m_base_url=self.base_url,
+                            m_url=link,
                             m_date_of_leak=helper_method.extract_and_convert_date(date),
                             m_team=team,
                             m_location=[location],

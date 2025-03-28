@@ -477,7 +477,7 @@ class elastic_request_generator:
     current_timestamp = utc_now.isoformat()
 
     for record in p_index_data.get("cards_data", []):
-      data_hash = helper_controller.generate_data_hash(record)
+      data_hash = helper_controller.generate_data_hash(record["m_url"])
       record["m_hash"] = data_hash
       record["m_update_date"] = current_timestamp
       index_entries.append(
@@ -496,7 +496,7 @@ class elastic_request_generator:
     current_timestamp = utc_now.isoformat()
 
     for card in p_index_data.get("cards_data", []):
-      data_hash = helper_controller.generate_data_hash(card)
+      data_hash = helper_controller.generate_data_hash(card["m_url"]+"_"+card["m_important_content"])
       card["m_hash"] = data_hash
       card["m_update_date"] = current_timestamp
       card["m_contact_link"] = contact_link

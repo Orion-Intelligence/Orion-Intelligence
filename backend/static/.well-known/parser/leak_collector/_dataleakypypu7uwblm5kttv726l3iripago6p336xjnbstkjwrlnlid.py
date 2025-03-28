@@ -81,6 +81,7 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
             title = title_element.inner_text() if title_element else "No Title"
 
             self._card_data.append(leak_model(
+                m_screenshot=helper_method.get_screenshot_base64(page),
                 m_title=title,
                 m_url=page.url,
                 m_base_url=self.base_url,

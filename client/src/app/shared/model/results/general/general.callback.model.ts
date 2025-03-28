@@ -5,6 +5,7 @@ export class GeneralResultItem {
   m_url?: string;
   m_base_url?: string;
   m_content: string = "";
+  m_screenshot = ""
   m_important_content: string = "";
   m_network?: string;
   m_meta_description?: string;

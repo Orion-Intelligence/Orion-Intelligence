@@ -27,7 +27,11 @@
 
   <span class="search__result-detail-description-span">Description</span>
   <p class="search__result-detail-description">
-    {{ resultItem?.m_important_content }} </p>
+    {{
+      ((resultItem?.m_important_content ?? '').length > 650)
+        ? (resultItem?.m_important_content | slice:0:650) + ' ...'
+        : resultItem?.m_important_content
+    }}
   <p class="search__result-detail-url-p text-truncate">
     <a [href]="resultItem?.m_url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate" style="max-width: 100%;" target="_blank">
       {{ resultItem?.m_url }}
@@ -81,5 +85,16 @@
     <app-result-section *ngIf="activeTab === 'm_content'" [listItems]="[content]" @fadeInDashboardItem></app-result-section>
     <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems" @fadeInDashboardItem></app-result-section>
     <app-result-list *ngIf="activeTab !== 'm_section'" [listItems]="listItems" [activeTab]="activeTab" @fadeInDashboardItem></app-result-list>
+  </div>
+  <div class="search__result-detail-preview" *ngIf="type == Category.BREACH">
+    <h3 class="search__result-detail-preview-heading">Leak Screenshot</h3>
+    <br>
+    <div *ngIf="!isImageLoaded && !isImageError" class="text-left text-muted">
+      <b>Loading, please wait...</b>
+    </div>
+    <div *ngIf="isImageError" class="text-left text-muted">
+      <b>Screenshot not found</b>
+    </div>
+    <img [src]="'/api/search/leak/screenshot/' + (resultItem?.m_screenshot ?? '')" alt="Screenshot Preview" class="search__result-preview" (load)="onImageLoad()" (error)="onImageError()" *ngIf="!isImageError"/>
   </div>
 </div>

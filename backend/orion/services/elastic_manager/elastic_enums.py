@@ -137,6 +137,7 @@ class ELASTIC_ENUMS:
         "m_network": {"type": "keyword"},
         "m_web_server": {"type": "keyword"},
         "m_base_url": {"type": "keyword"},
+        "m_url": {"type": "keyword"},
         "m_ip": {"type": "keyword"},
         "m_date_of_leak": {"type": "date", "format": "yyyy-MM-dd"},
         "m_web_url": {"type": "keyword"},

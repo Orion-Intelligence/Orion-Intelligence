@@ -7,6 +7,7 @@ from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
+from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
@@ -61,6 +62,9 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, al
 async def search_dynamic_email(param: search_dynamic_param_model = Depends()):
   return await search_model.getInstance().dynamic_search_email(param)
 
+@api_routes.get("/api/search/leak/screenshot/{filename}")
+async def get_screenshot(filename: str):
+    return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
 @api_routes.get("/api/public")
 async def get_public_config():

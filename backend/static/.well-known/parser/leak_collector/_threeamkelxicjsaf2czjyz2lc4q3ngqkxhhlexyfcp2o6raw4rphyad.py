@@ -110,6 +110,7 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
 
                     self._card_data.append(
                         leak_model(
+                            m_screenshot=helper_method.get_screenshot_base64(page),
                             m_title=title_text if title_text != "Unknown" else "Extracted Post",
                             m_url=post_link,
                             m_base_url=self.base_url,

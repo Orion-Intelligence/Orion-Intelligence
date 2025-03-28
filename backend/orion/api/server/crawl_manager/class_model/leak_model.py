@@ -4,6 +4,7 @@ from typing import List, Optional
 class CardExtractionModel(BaseModel):
     m_title: str = ""
     m_url: str
+    m_screenshot: str
     m_base_url: str = ""
     m_content: str = ""
     m_important_content: str = ""

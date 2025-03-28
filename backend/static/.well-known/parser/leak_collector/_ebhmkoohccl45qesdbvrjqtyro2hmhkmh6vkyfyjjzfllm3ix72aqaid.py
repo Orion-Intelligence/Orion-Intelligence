@@ -108,8 +108,8 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                 action_link_element = soup.select_one('div.advert_action a')
                 action_link = action_link_element['href'] if action_link_element else None
 
-                # Create card data object
                 card_data = leak_model(
+                    m_screenshot=helper_method.get_screenshot_base64(page),
                     m_name=title,
                     m_title=title,
                     m_weblink=[web_url] if web_url else [],

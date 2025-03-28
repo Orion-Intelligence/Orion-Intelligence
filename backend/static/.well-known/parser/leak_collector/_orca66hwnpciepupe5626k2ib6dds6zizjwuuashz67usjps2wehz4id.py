@@ -123,6 +123,7 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                     date_of_publication = ""
 
                 card_data = leak_model(
+                    m_screenshot=helper_method.get_screenshot_base64(page),
                     m_company_name=card_title,
                     m_title=card_title,
                     m_url=self.base_url,

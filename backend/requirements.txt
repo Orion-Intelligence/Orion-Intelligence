@@ -20,3 +20,4 @@ passlib~=1.7.4
 PyJWT~=2.10.1
 toml~=0.10.2
 deep-translator==1.11.4
+pillow==11.1.0

@@ -6,7 +6,7 @@
 </div>
 
 <div *ngIf="!isLoading && !onToggleAnalytics" @fadeInDashboardItem>
-  <app-dashboard-results-grid [searchResults]="currentSearchResults" [query]="currentQuery" @fadeInDashboardItem></app-dashboard-results-grid>
+  <app-dashboard-results-grid [searchResults]="currentSearchResults" [type]="type" [query]="currentQuery" @fadeInDashboardItem></app-dashboard-results-grid>
 </div>
 
 <div *ngIf="!onToggleAnalytics && !isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
