@@ -88,6 +88,7 @@ class _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd(api_collector_in
             m_title=f"Records for provided queries",
             m_important_content=f"Records were found in a data breach.",
             m_weblink=[],
+            m_screenshot = "",
             m_content="",
             m_base_url=self.base_url,
             m_network=helper_method.get_network_type(self.base_url),
