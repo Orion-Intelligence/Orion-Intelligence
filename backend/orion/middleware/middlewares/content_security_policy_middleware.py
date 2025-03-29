@@ -24,7 +24,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         if request.url.path.startswith("/admin"):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self' data: blob:; "
-                "script-src 'self'"
+                "script-src 'self'; "
                 "style-src 'self' 'unsafe-inline' *; "
                 "img-src 'self' data: *; "
                 "font-src 'self' *; "
@@ -36,7 +36,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "form-action *; "
                 "base-uri 'self'; "
                 "upgrade-insecure-requests; "
-                "report-uri /csp-report-endpoint/;"
+                "report-to csp-endpoint;"
             )
         else:
             response.headers["Content-Security-Policy"] = (
@@ -52,15 +52,18 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "form-action 'self'; "
                 "base-uri 'self'; "
                 "upgrade-insecure-requests; "
-                "report-uri /csp-report-endpoint/;"
+                "report-to csp-endpoint;"
             )
+
+        response.headers["Report-To"] = (
+            '{"group":"csp-endpoint",'
+            '"max_age":10886400,'
+            '"endpoints":[{"url":"https://yourdomain.com/csp-report-endpoint/"}]}'
+        )
 
         if not self.DEBUG:
             response.headers["Strict-Transport-Security"] = (
                 "max-age=31536000; includeSubDomains; preload"
-            )
-            response.headers["Expect-CT"] = (
-                "max-age=86400, enforce, report-uri=\"/ct-report-endpoint/\""
             )
 
         response.headers["Permissions-Policy"] = (
@@ -76,13 +79,8 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
             "xr-spatial-tracking=()"
         )
 
-        if self.DEBUG:
-            response.headers["X-Frame-Options"] = "ALLOW-FROM http://localhost:4200"
-        else:
-            response.headers["X-Frame-Options"] = "SAMEORIGIN"
-
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
         response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
         return response
