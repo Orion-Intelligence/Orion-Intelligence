@@ -37,13 +37,19 @@ export class AuthService {
 
     return this.apiService.post<{ access_token: string; role: string }>('token', body.toString(), {headers}).pipe(tap({
       next: (response) => {
+        if (response.role === 'crawler') {
+          this.authState.next({
+            token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Not enough credentials'
+          });
+          return
+        }
         this.setToken(response.access_token, username, response.role);
         this.startTokenRefresh();
-      }, error: () => {
+      }, error: (err) => {
         this.authState.next({
-          token: null, username: null, role: null, isAuthenticated: false, error: 'Invalid credentials'
+            token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Invalid credentials'
         });
-      },
+      }
     }));
   }
 
@@ -108,7 +114,10 @@ export class AuthService {
       });
     }
 
-    return this.apiService.post<{access_token: string; role: string}>('refresh-token', {token: currentToken}, {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}).pipe(tap((response) => {
+    return this.apiService.post<{
+      access_token: string;
+      role: string
+    }>('refresh-token', {token: currentToken}, {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}).pipe(tap((response) => {
       if (response) {
         this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
       }

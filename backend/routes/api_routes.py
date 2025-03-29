@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import Depends, Query
-from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi import APIRouter
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
@@ -62,10 +62,10 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, al
 async def search_dynamic_email(param: search_dynamic_param_model = Depends()):
   return await search_model.getInstance().dynamic_search_email(param)
 
-@api_routes.get("/api/search/leak/screenshot/{filename}")
+@api_routes.get("/api/search/leak/screenshot/{filename}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def get_screenshot(filename: str):
-    return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
+    return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 
-@api_routes.get("/api/public")
+@api_routes.get("/api/public", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def get_public_config():
   return await config_controller.getInstance().get_all()
