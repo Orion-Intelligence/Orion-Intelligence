@@ -24,7 +24,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         if request.url.path.startswith("/admin"):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: *; "
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' *; "
+                "script-src 'self'"
                 "style-src 'self' 'unsafe-inline' *; "
                 "img-src 'self' data: *; "
                 "font-src 'self' *; "
@@ -43,7 +43,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "default-src 'self'; "
                 "script-src 'self'; "
                 "style-src 'self'; "
-                "img-src 'self' data: http://orion.genesistechnologies.org; "
+                "img-src 'self' data: https://orion.genesistechnologies.org; "
                 "font-src 'self'; "
                 "connect-src 'self'; "
                 "media-src 'self'; "
