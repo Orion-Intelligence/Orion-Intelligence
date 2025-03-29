@@ -23,7 +23,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
 
         if request.url.path.startswith("/admin"):
             response.headers["Content-Security-Policy"] = (
-                "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: *; "
+                "default-src 'self' data: blob:; "
                 "script-src 'self'"
                 "style-src 'self' 'unsafe-inline' *; "
                 "img-src 'self' data: *; "
