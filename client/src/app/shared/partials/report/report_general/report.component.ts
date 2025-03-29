@@ -10,6 +10,7 @@ import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
 import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
 import {AppService} from '../../../../services/core/app.service';
 import {Category} from '../../../enums/pages';
+import {ApiService} from '../../../services/api.service';
 
 @Component({
   selector: 'app-result-panel',
@@ -27,8 +28,9 @@ export class ReportComponent implements OnInit {
   type = ""
   isImageLoaded: boolean = false;
   isImageError: boolean = false;
+  imageSrc: string | null = null;
 
-  constructor(public helperService: HelperService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
   }
 
@@ -37,6 +39,10 @@ export class ReportComponent implements OnInit {
       this.resultItem = reportdata;
       this.type = type;
       this.processResultItem();
+
+      if (this.resultItem?.m_screenshot) {
+        this.loadImage(this.resultItem.m_screenshot);
+      }
     });
   }
 
@@ -129,6 +135,29 @@ export class ReportComponent implements OnInit {
 
   onImageError() {
     this.isImageError = true;
+  }
+
+  loadImage(fileName: string) {
+    const endpoint = `search/leak/screenshot/${fileName}`;
+
+    this.api.get<Blob>(endpoint, {
+      responseType: 'blob'
+    } as any).subscribe({
+      next: (blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.imageSrc = reader.result as string;
+          this.isImageError = false;
+          this.isImageLoaded = true;
+          this.cdr.detectChanges();
+        };
+        reader.readAsDataURL(blob);
+      }, error: () => {
+        this.isImageError = true;
+        this.imageSrc = null;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   protected readonly last = last;
