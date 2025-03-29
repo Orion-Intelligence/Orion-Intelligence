@@ -64,8 +64,8 @@ async def search_dynamic_email(param: search_dynamic_param_model = Depends()):
 
 @api_routes.get("/api/search/leak/screenshot/{filename}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def get_screenshot(filename: str):
-    return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+    return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
-@api_routes.get("/api/public", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+@api_routes.get("/api/public")
 async def get_public_config():
   return await config_controller.getInstance().get_all()
