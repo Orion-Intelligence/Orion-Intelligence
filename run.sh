@@ -23,10 +23,13 @@ create_parser_zip() {
     fi
 }
 
-
 client_build() {
     cd client || exit
-    npm run build
+    if [ "$1" == "-p" ]; then
+      npm run production
+    else
+      npm run build
+    fi
     cd ..
 }
 
@@ -53,21 +56,22 @@ else
 
         case "$FLAG" in
             -c)
-                client_build
+                client_build "$FLAG"
                 cp nginx/nginx-dev.conf nginx/nginx.conf
                 use_compose_file "default"
                 ;;
             -b)
+                client_build "$FLAG"
                 cp nginx/nginx-dev.conf nginx/nginx.conf
                 use_compose_file "default"
                 ;;
             -d)
-                client_build
+                client_build "$FLAG"
                 cp nginx/nginx-dev.conf nginx/nginx.conf
                 use_compose_file "default"
                 ;;
             -p)
-                client_build
+                client_build "$FLAG"
                 use_compose_file "production"
                 cp nginx/nginx-prod.conf nginx/nginx.conf
                 ;;
