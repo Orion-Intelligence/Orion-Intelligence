@@ -259,6 +259,14 @@ table a:visited {
   font-size: 15px;
 }
 
+.blocked-media{
+  background: #fff;
+  color: #000;
+  padding: 1em;
+  font-size: 16px;
+  text-align: center;
+}
+
 @media only screen and (max-width: 550px) {
   .default-input-container {
     display: grid;
