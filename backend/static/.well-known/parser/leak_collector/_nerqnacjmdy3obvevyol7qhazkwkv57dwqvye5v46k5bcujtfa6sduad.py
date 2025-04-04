@@ -15,7 +15,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -48,6 +49,11 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
 
     def contact_page(self) -> str:
         return "kairossup@onionmail.com"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         visited_pages = set()
@@ -111,13 +117,13 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                 date_time = detail_soup.select_one('.date').text.strip() if detail_soup.select_one('.date') else "N/A"
 
                 dumplinks = [a['href'].strip() for a in detail_soup.find_all('a', href=True) if ".onion" in a['href']]
-
-                self._card_data.append(leak_model(
+                title = title.split("\\")[0]
+                self.append_leak_data(leak_model(
                     m_screenshot=helper_method.get_screenshot_base64(page, title),
                     m_title=title,
                     m_content=content,
                     m_weblink=[website],
-                    m_addresses=[address] if address != "N/A" else [],
+                    m_location_info=[address] if address != "N/A" else [],
                     m_logo_or_images=image_urls,
                     m_phone_numbers=[phone_number] if phone_number != "N/A" else [],
                     m_revenue = revenue,

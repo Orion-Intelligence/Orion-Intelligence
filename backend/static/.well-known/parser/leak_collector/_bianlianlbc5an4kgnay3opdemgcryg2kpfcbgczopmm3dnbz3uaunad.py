@@ -13,7 +13,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self._redis_instance = redis_controller()
 
@@ -43,6 +44,11 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
 
     def contact_page(self) -> str:
         return "swikipedia@onionmail.org"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         try:
@@ -104,7 +110,7 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
                             m_data_size=data_size
                         )
 
-                        self._card_data.append(card_data)
+                        self.append_leak_data(card_data)
 
                         page.go_back()
                         page.wait_for_load_state("networkidle")

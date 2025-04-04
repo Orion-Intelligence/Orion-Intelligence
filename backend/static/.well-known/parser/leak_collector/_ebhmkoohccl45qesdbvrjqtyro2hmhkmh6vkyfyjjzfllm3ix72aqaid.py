@@ -16,7 +16,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -49,6 +50,11 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
 
     def contact_page(self) -> str:
         return "https://mirror-h.org/contact"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def safe_find(self, page, selector, attr=None):
         try:
@@ -114,7 +120,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     m_title=title,
                     m_weblink=[web_url] if web_url else [],
                     m_url=full_url,
-                    m_addresses=[],
+                    m_location_info=[],
                     m_base_url=self.base_url,
                     m_content=content,
                     m_websites=[],
@@ -126,7 +132,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     m_leak_date=helper_method.extract_and_convert_date(today_date)
                 )
 
-                self._card_data.append(card_data)
+                self.append_leak_data(card_data)
 
         except Exception as ex:
             print(f"An error occurred: {ex}")

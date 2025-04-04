@@ -13,7 +13,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -46,6 +47,11 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
 
     def contact_page(self) -> str:
         return "http://weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd.onion/?contact"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page:Page ):
 
@@ -81,4 +87,4 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
                     m_phone_numbers= helper_method.extract_phone_numbers(content),
                     m_content_type=["leaks"]
                 )
-                self._card_data.append(card_data)
+                self.append_leak_data(card_data)

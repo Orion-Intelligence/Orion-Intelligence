@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -47,6 +48,11 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
 
     def contact_page(self) -> str:
         return "http://mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid.onion"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         self._card_data = []
@@ -101,7 +107,7 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
                             page.wait_for_load_state("domcontentloaded")
                             page.wait_for_selector(".leak-card", timeout=10000)
 
-                            self._card_data.append(
+                            self.append_leak_data(
                                 leak_model(
                                     m_screenshot=helper_method.get_screenshot_base64(page, title_text),
                                     m_title=title_text,

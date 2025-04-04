@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
 
         self._card_data = []
         self.soup = None
@@ -53,8 +54,12 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
-
         return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/index.php#contact"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         links = page.query_selector_all('a[post]')
@@ -101,7 +106,7 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
                         if not download_url.startswith('http'):
                             download_url = f"http://{download_url}"
 
-            self._card_data.append(leak_model(
+            self.append_leak_data(leak_model(
                 m_screenshot=helper_method.get_screenshot_base64(page, title),
                 m_title=title,
                 m_url=url,

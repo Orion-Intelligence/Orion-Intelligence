@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -48,6 +49,11 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
     def contact_page(self) -> str:
         return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
 
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
+
     def parse_leak_data(self, page: Page):
         self._card_data = []
 
@@ -76,7 +82,7 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
                     if links:
                         dumplinks = [link.get_attribute("href").strip() for link in links if link.get_attribute("href")]
 
-                    self._card_data.append(
+                    self.append_leak_data(
                         leak_model(
                             m_screenshot=helper_method.get_screenshot_base64(page, company_name),
                             m_title=company_name,

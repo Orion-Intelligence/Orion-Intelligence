@@ -110,7 +110,8 @@ table {
 }
 
 table td, table th {
-  border: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid #FCFCFC12 !important;
   font-family: 'Inter', sans-serif;
   padding: 8px;
   text-align: left;
@@ -130,10 +131,12 @@ tbody td {
 }
 
 table tr {
-  border-bottom: 1px solid #FCFCFC12 !important;
   height: 45px !important;
-  border-top: 1px solid #FCFCFC12 !important;
   transition: background-color 0.3s ease-in-out;
+}
+
+table tr:not(:first-child) {
+  border-top: 1px solid #FCFCFC12 !important;
 }
 
 table tr:nth-child(even) {
@@ -150,10 +153,6 @@ table tr:first-child {
 
 table tr:last-child {
   border-bottom: none !important;
-}
-
-table tr:first-child {
-  border-top: 1px solid #FCFCFC12 !important;
 }
 
 table tr:last-child {
@@ -300,13 +299,13 @@ table a:visited {
   table td[data-label] {
     display: flex;
     font-weight: bold;
-    border-bottom: 1px solid #2A5784;
+    border-bottom: 1px solid #2A5784 !important;
   }
 
   table td[data-label]::before {
     content: attr(data-label);
     font-weight: 100;
-    width: 50%;
+    width: 100%;
   }
 
   table tr:nth-child(even) {

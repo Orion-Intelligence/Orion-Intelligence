@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _leak_lookup(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -47,6 +48,11 @@ class _leak_lookup(leak_extractor_interface, ABC):
 
     def contact_page(self) -> str:
         return "https://twitter.com/LeakLookup"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         rows = page.query_selector_all("table tr")
@@ -91,7 +97,7 @@ class _leak_lookup(leak_extractor_interface, ABC):
 
                     modal_content_cleaned = "\n".join(modal_content_cleaned)
 
-                    self._card_data.append(leak_model(
+                    self.append_leak_data(leak_model(
                         m_screenshot=helper_method.get_screenshot_base64(page, site_name),
                         m_title=site_name,
                         m_url=site_url,

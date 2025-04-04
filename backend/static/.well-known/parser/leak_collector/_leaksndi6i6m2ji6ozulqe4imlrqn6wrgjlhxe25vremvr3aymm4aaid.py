@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -48,6 +49,11 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
     def contact_page(self) -> str:
         return "hackteam@dnmx.su"
 
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
+
     def parse_leak_data(self, page: Page):
         self._card_data = []
 
@@ -80,11 +86,7 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                         description_element = buy_page.query_selector(".order-details tr:nth-child(4) td")
                         description = description_element.inner_text().strip() if description_element else "No description"
 
-
-                        buy_page.close()
-                        page.bring_to_front()
-
-                        self._card_data.append(
+                        self.append_leak_data(
                             leak_model(
                                 m_screenshot=helper_method.get_screenshot_base64(page, database),
                                 m_title=database,
@@ -100,6 +102,8 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                                 m_leak_date=helper_method.extract_and_convert_date(year),
                             )
                         )
+                        buy_page.close()
+                        page.bring_to_front()
 
                     except Exception as e:
                         print(f"Error processing row: {e}")

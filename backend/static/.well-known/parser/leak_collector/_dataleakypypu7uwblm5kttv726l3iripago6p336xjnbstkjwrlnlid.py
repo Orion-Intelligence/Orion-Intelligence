@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
 
         self._card_data = []
         self.soup = None
@@ -53,8 +54,12 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
-
         return "https://t.me/BlackLockChanel"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         project_sections = page.query_selector_all(".project")
@@ -80,7 +85,7 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
             title_element = content_element.query_selector("h2")
             title = title_element.inner_text() if title_element else "No Title"
 
-            self._card_data.append(leak_model(
+            self.append_leak_data(leak_model(
                 m_screenshot=helper_method.get_screenshot_base64(page, title),
                 m_title=title,
                 m_url=page.url,

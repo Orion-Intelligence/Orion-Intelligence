@@ -15,7 +15,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -49,7 +50,13 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
     def contact_page(self) -> str:
         return "http://ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.onion"
 
-    def safe_find(self, page, selector, attr=None):
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
+
+    @staticmethod
+    def safe_find(page, selector, attr=None):
         try:
             element = page.query_selector(selector)
             if element:
@@ -114,7 +121,7 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
 
                     )
 
-                    self._card_data.append(card_data)
+                    self.append_leak_data(card_data)
 
                 current_page += 1
 

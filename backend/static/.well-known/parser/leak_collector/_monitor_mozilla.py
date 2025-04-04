@@ -13,7 +13,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _monitor_mozilla(leak_extractor_interface, ABC):
   _instance = None
 
-  def __init__(self):
+  def __init__(self, callback=None):
+    self.callback = callback
     self._card_data = []
     self.soup = None
     self._initialized = None
@@ -46,6 +47,11 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
 
   def contact_page(self) -> str:
     return "https://support.mozilla.org"
+
+  def append_leak_data(self, leak: leak_model) -> None:
+      self._card_data.append(leak)
+      if self.callback:
+          self.callback()
 
   def parse_leak_data(self, page: Page):
     page.wait_for_load_state("domcontentloaded")
@@ -98,7 +104,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
           m_content_type=["leaks"],
         )
 
-        self._card_data.append(leak_data)
+        self.append_leak_data(leak_data)
         error_count = 0
 
       except Exception as ex:

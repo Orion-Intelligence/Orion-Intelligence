@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self._redis_instance = redis_controller()
 
@@ -44,6 +45,11 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
 
     def contact_page(self) -> str:
         return "http://black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd.onion/contacts"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def safe_find(self, page, selector, attr=None):
 
@@ -150,7 +156,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_leak_date=helper_method.extract_and_convert_date(leak_date)
                     )
 
-                    self._card_data.append(card_data)
+                    self.append_leak_data(card_data)
                     print(f"Successfully processed: {title}")
 
                 except Exception as item_ex:

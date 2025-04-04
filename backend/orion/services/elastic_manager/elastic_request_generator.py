@@ -17,6 +17,8 @@ class elastic_request_generator:
 
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_network = getattr(p_query_model, 'mNetwork', None)
+    if raw_query.__eq__(""):
+      raw_query = "*"
 
     must_clauses = []
     must_not_clause = []

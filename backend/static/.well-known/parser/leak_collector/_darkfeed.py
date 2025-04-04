@@ -13,7 +13,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _darkfeed(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -47,6 +48,11 @@ class _darkfeed(leak_extractor_interface, ABC):
     def contact_page(self) -> str:
         return "https://darkfeed.io/aboutus/"
 
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
+
     def parse_leak_data(self, page: Page):
       try:
         self.soup = BeautifulSoup(page.content(), 'html.parser')
@@ -77,6 +83,6 @@ class _darkfeed(leak_extractor_interface, ABC):
               m_leak_date=today_date
             )
 
-            self._card_data.append(card_data)
+            self.append_leak_data(card_data)
       except Exception as ex:
         print(ex)

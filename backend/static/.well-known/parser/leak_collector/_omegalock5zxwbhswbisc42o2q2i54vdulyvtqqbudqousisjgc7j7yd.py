@@ -13,7 +13,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -46,6 +47,11 @@ class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_i
 
     def contact_page(self) -> str:
         return "http://omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd.onion"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         datatable = self.soup.find("table", class_="datatable")
@@ -95,7 +101,7 @@ class _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd(leak_extractor_i
                     m_content_type=["leaks"],
                 )
 
-                self._card_data.append(card_data)
+                self.append_leak_data(card_data)
 
             except Exception as e:
                 print(f"Error processing {page_url}: {e}")

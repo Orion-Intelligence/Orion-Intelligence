@@ -15,7 +15,8 @@ import re
 class _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -48,6 +49,11 @@ class _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd(leak_extractor_i
 
     def contact_page(self) -> str:
         return "https://t.me/fresh_leaks_today"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         self._card_data = []
@@ -117,13 +123,13 @@ class _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd(leak_extractor_i
                             slick_images.append(img_src.strip())
 
                     download_element = page.query_selector('li.download__list-item a.counter_link')
-                    dumplinks = download_element.get_attribute("href") if download_element else None
+                    dumplinks = download_element.get_attribute("href") if download_element else ""
 
                     with page.expect_navigation(wait_until="domcontentloaded"):
                         page.go_back()
                     page.wait_for_selector("div.elem_ibody", timeout=10000)
 
-                    self._card_data.append(
+                    self.append_leak_data(
                         leak_model(
                             m_screenshot=helper_method.get_screenshot_base64(page, company_name),
                             m_title=company_name,

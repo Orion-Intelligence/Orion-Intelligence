@@ -15,7 +15,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _ransom(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -48,6 +49,11 @@ class _ransom(leak_extractor_interface, ABC):
 
     def contact_page(self) -> str:
         return "https://www.linkedin.com/in/soufianetahiri/"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
 
@@ -113,7 +119,7 @@ class _ransom(leak_extractor_interface, ABC):
             if victim is None:
                 continue
 
-            self._card_data.append(leak_model(
+            self.append_leak_data(leak_model(
                 m_screenshot=helper_method.get_screenshot_base64(page, victim),
                 m_title=victim,
                 m_url=post_url,
@@ -124,7 +130,7 @@ class _ransom(leak_extractor_interface, ABC):
                 m_important_content=description,
                 m_weblink=[website],
                 m_leak_date=helper_method.extract_and_convert_date(published),
-                m_addresses=[country],
+                m_location_info=[country],
                 m_dumplink=[],
                 m_email_addresses=helper_method.extract_emails(soup.text),
                 m_phone_numbers=helper_method.extract_phone_numbers(soup.text),

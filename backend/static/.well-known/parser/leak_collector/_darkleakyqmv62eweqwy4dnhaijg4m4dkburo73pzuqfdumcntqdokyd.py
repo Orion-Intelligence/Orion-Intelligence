@@ -8,6 +8,7 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from urllib.parse import urljoin
+from playwright.sync_api import Page
 
 from crawler.crawler_services.shared.helper_method import helper_method
 
@@ -15,7 +16,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -49,7 +51,10 @@ class _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd(leak_extractor_i
     def contact_page(self) -> str:
         return "http://darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd.onion"
 
-    from playwright.sync_api import Page
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         try:
@@ -108,7 +113,7 @@ class _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd(leak_extractor_i
 
                     )
 
-                    self._card_data.append(card_data)
+                    self.append_leak_data(card_data)
 
                 except Exception as link_ex:
                     print(f"Error processing link {url}: {link_ex}")

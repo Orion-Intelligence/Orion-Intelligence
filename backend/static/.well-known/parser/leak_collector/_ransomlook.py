@@ -12,7 +12,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _ransomlook(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -34,7 +35,7 @@ class _ransomlook(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_resoource_block = False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.SELENIUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -45,6 +46,11 @@ class _ransomlook(leak_extractor_interface, ABC):
 
     def contact_page(self) -> str:
         return "https://www.ransomlook.io/telegrams"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         try:
@@ -105,7 +111,7 @@ class _ransomlook(leak_extractor_interface, ABC):
 
                     )
 
-                    self._card_data.append(card_data)
+                    self.append_leak_data(card_data)
 
                 break
 

@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _inthewild(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = None
@@ -47,6 +48,11 @@ class _inthewild(leak_extractor_interface, ABC):
 
     def contact_page(self) -> str:
         return "https://www.linkedin.com/company/in-the-wild-io"
+
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
 
     def parse_leak_data(self, page: Page):
         self._card_data = []
@@ -124,7 +130,7 @@ class _inthewild(leak_extractor_interface, ABC):
 
                             page.wait_for_timeout(200)
 
-                            self._card_data.append(
+                            self.append_leak_data(
                                 leak_model(
                                     m_screenshot=helper_method.get_screenshot_base64(page, vuln_id),
                                     m_title=vuln_id,

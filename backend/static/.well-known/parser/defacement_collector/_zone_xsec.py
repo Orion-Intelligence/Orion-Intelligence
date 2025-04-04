@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _zone_xsec(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self._card_data = []
         self.soup = None
         self._initialized = False
@@ -47,7 +48,13 @@ class _zone_xsec(leak_extractor_interface, ABC):
     def contact_page(self) -> str:
         return "https://zone-xsec.com/contact"
 
-    def safe_find(self, page: Page, selector: str, attr: str = None) -> str:
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
+
+    @staticmethod
+    def safe_find(page: Page, selector: str, attr: str = None) -> str:
         try:
             element = page.query_selector(selector)
             if element:
@@ -115,7 +122,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             m_network=helper_method.get_network_type(self.base_url),
                         )
 
-                        self._card_data.append(card_data)
+                        self.append_leak_data(card_data)
 
                     except Exception as ex:
                         print(f"Error processing link {link}: {ex}")

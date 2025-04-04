@@ -14,7 +14,8 @@ from crawler.crawler_services.shared.helper_method import helper_method
 class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_interface, ABC):
     _instance = None
 
-    def __init__(self):
+    def __init__(self, callback=None):
+        self.callback = callback
         self.soup = None
         self._card_data = []
         self._redis_instance = redis_controller()
@@ -46,7 +47,13 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
     def contact_page(self) -> str:
         return self.seed_url
 
-    def safe_find(self, page, selector, attr=None):
+    def append_leak_data(self, leak: leak_model) -> None:
+        self._card_data.append(leak)
+        if self.callback:
+            self.callback()
+
+    @staticmethod
+    def safe_find(page, selector, attr=None):
 
         try:
             element = page.locator(selector).first
@@ -123,7 +130,7 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                     m_dumplink=[dumplink]
                 )
 
-                self._card_data.append(card_data)
+                self.append_leak_data(card_data)
 
         except Exception as ex:
             print(f"An error occurred: {ex}")
