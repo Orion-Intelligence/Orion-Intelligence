@@ -139,6 +139,7 @@ class elastic_request_generator:
     m_safe_search = p_query_model.mSearchParamSafeSearch
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
+    m_search_type = p_query_model.pSearchParamType
 
     from urllib.parse import urlparse
     parsed_url = urlparse(raw_query)
@@ -147,6 +148,9 @@ class elastic_request_generator:
 
     must_clauses = []
     must_not_clause = []
+
+    if m_search_type == "tracking":
+      must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
     if m_safe_search == "True":
       must_not_clause.append({"term": {"m_content_type.keyword": "adult"}})

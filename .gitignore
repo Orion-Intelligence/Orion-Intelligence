@@ -5,6 +5,7 @@ TrustlySearchServices/raw/classifier_output/training_data.csv
 **/__pycache__/
 .idea/*
 env/*
+backend/env/*
 logs/*
 staticfiles/*
 mongo-data/*

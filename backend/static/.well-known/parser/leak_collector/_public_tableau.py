@@ -1,6 +1,7 @@
 import re
 from abc import ABC
 from datetime import datetime
+from time import sleep
 from typing import List, Optional, Callable
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
@@ -52,6 +53,7 @@ class _public_tableau(leak_extractor_interface, ABC):
         return "https://privacyrights.org/contact"
 
     def append_leak_data(self, leak: leak_model) -> None:
+
         self._card_data.append(leak)
         if self.callback:
             self.callback()
@@ -59,6 +61,7 @@ class _public_tableau(leak_extractor_interface, ABC):
     def parse_leak_data(self, page: Page):
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
         max_pages = 100 if is_crawled else 50000
+        sleep(25)
 
         page.evaluate("""
             const cursor = document.createElement('div');
@@ -171,7 +174,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                 if hover_count % 15 == 0:
                     page.mouse.wheel(0, 280)
                     y_position = default_y_position
-        except Exception as ex:
+        except Exception:
             pass
         finally:
             self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)

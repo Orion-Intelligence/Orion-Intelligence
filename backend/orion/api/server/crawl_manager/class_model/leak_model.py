@@ -13,6 +13,7 @@ class CardExtractionModel(BaseModel):
     m_weblink: List[str] = Field(default_factory=list)
     m_dumplink: List[str] = Field(default_factory=list)
     m_name: str = ""
+    m_section: Optional[List[str]] = Field(default_factory=list)
     m_email_addresses: List[str] = Field(default_factory=list)
     m_industry: Optional[str] = None
     m_phone_numbers: List[str] = Field(default_factory=list)
