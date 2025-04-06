@@ -6,6 +6,7 @@ from typing import List
 from playwright.sync_api import Page
 from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
@@ -19,7 +20,13 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
   def __init__(self, callback=None):
     self.callback = callback
     self._card_data = []
+    self._entity_data = []
+    self.soup = None
+    self._initialized = None
     self._redis_instance = redis_controller()
+
+  def init_callback(self, callback=None):
+    self.callback = callback
 
   def __new__(cls):
     if cls._instance is None:
@@ -42,16 +49,21 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
   def card_data(self) -> List[leak_model]:
     return self._card_data
 
-  def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+  @property
+  def entity_data(self) -> List[entity_model]:
+    return self._entity_data
+
+  def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
     return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
   def contact_page(self) -> str:
     return self.seed_url
 
-  def append_leak_data(self, leak: leak_model) -> None:
-      self._card_data.append(leak)
-      if self.callback:
-          self.callback()
+  def append_leak_data(self, leak: leak_model, entity: entity_model):
+    self._card_data.append(leak)
+    self._entity_data.append(entity)
+    if self.callback:
+      self.callback()
 
   @staticmethod
   def safe_find(page, selector, attr=None):
@@ -109,9 +121,6 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
           size_element = page.query_selector("div.rounded-md.inline-block.mb-1 span.text-white.text-sm")
           data_size = size_element.inner_text().strip() if size_element else None
 
-          status_element = page.query_selector("span.text-white.text-sm.ml-1.timer")
-          status = status_element.inner_text().strip() if status_element else "No status found"
-
           created_element = page.query_selector("div.rounded-md.inline-block.mb-1 span.text-white.text-sm")
           created_date = created_element.inner_text().strip() if created_element else "No date found"
 
@@ -128,7 +137,6 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
 
           card_data = leak_model(
             m_screenshot=helper_method.get_screenshot_base64(page, company_name),
-            m_company_name=company_name,
             m_title=company_name,
             m_url=url,
             m_weblink=[url, website],
@@ -139,12 +147,16 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
             m_logo_or_images=[logo_image] if logo_image else [],
             m_content_type=["leaks"],
             m_data_size=data_size,
-            m_email_addresses=helper_method.extract_emails(description) if description else [],
-            m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
             m_leak_date=helper_method.extract_and_convert_date(created_date)
           )
 
-          self.append_leak_data(card_data)
+          entity_data = entity_model(
+            m_company_name=company_name,
+            m_email_addresses=helper_method.extract_emails(description) if description else [],
+            m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
+          )
+
+          self.append_leak_data(card_data, entity_data)
 
         except Exception as _:
           continue

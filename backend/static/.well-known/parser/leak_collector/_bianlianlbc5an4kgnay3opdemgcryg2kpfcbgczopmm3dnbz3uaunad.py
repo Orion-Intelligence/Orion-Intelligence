@@ -3,6 +3,7 @@ from typing import List
 from playwright.sync_api import Page
 
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
@@ -16,7 +17,13 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
     def __init__(self, callback=None):
         self.callback = callback
         self._card_data = []
+        self._entity_data = []
+        self.soup = None
+        self._initialized = None
         self._redis_instance = redis_controller()
+
+    def init_callback(self, callback=None):
+        self.callback = callback
 
     def __new__(cls):
         if cls._instance is None:
@@ -39,14 +46,19 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
     def card_data(self) -> List[leak_model]:
         return self._card_data
 
-    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
+
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "swikipedia@onionmail.org"
 
-    def append_leak_data(self, leak: leak_model) -> None:
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
+        self._entity_data.append(entity)
         if self.callback:
             self.callback()
 
@@ -103,14 +115,17 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
                             m_weblink=weblink,
                             m_logo_or_images=images,
                             m_dumplink=dump_links,
-                            m_email_addresses=helper_method.extract_emails(description),
-                            m_phone_numbers=helper_method.extract_phone_numbers(description),
                             m_content_type=["leaks"],
                             m_revenue=revenue,
                             m_data_size=data_size
                         )
 
-                        self.append_leak_data(card_data)
+                        entity_data = entity_model(
+                            m_email_addresses=helper_method.extract_emails(description),
+                            m_phone_numbers=helper_method.extract_phone_numbers(description),
+                        )
+
+                        self.append_leak_data(card_data, entity_data)
 
                         page.go_back()
                         page.wait_for_load_state("networkidle")

@@ -4,6 +4,7 @@ from typing import List
 from playwright.sync_api import Page
 
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
@@ -16,11 +17,14 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
 
     def __init__(self, callback=None):
         self.callback = callback
-
         self._card_data = []
+        self._entity_data = []
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+
+    def init_callback(self, callback=None):
+        self.callback = callback
 
     def __new__(cls):
 
@@ -49,15 +53,20 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
 
         return self._card_data
 
-    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
+
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
 
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "https://t.me/BlackLockChanel"
 
-    def append_leak_data(self, leak: leak_model) -> None:
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
+        self._entity_data.append(entity)
         if self.callback:
             self.callback()
 
@@ -85,7 +94,7 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
             title_element = content_element.query_selector("h2")
             title = title_element.inner_text() if title_element else "No Title"
 
-            self.append_leak_data(leak_model(
+            card_data = leak_model(
                 m_screenshot=helper_method.get_screenshot_base64(page, title),
                 m_title=title,
                 m_url=page.url,
@@ -94,10 +103,15 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
                 m_network=helper_method.get_network_type(self.base_url),
                 m_important_content=content,
                 m_dumplink=[full_data_link],
+                m_content_type=["leaks"],
+            )
+
+            entity_data = entity_model(
                 m_email_addresses=helper_method.extract_emails(content),
                 m_phone_numbers=helper_method.extract_phone_numbers(content),
-                m_content_type=["leaks"],
-            ))
+            )
+
+            self.append_leak_data(card_data, entity_data)
 
             close_button = page.query_selector(".close div")
             if close_button:

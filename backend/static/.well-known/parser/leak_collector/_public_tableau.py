@@ -6,6 +6,7 @@ from typing import List, Optional, Callable
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
@@ -19,10 +20,13 @@ class _public_tableau(leak_extractor_interface, ABC):
     def __init__(self, callback=None):
         self.callback = callback
         self._card_data = []
+        self._entity_data = []
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
-        self.callback = callback  # Optional, no-param callback
+
+    def init_callback(self, callback=None):
+        self.callback = callback
 
     def __new__(cls, callback: Optional[Callable[[], None]] = None):
         if cls._instance is None:
@@ -46,15 +50,19 @@ class _public_tableau(leak_extractor_interface, ABC):
     def card_data(self) -> List[leak_model]:
         return self._card_data
 
-    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
+
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "https://privacyrights.org/contact"
 
-    def append_leak_data(self, leak: leak_model) -> None:
-
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
+        self._entity_data.append(entity)
         if self.callback:
             self.callback()
 
@@ -139,7 +147,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                     ]
                     m_content = "\n".join(content_parts).strip()
 
-                    leak = leak_model(
+                    card_data = leak_model(
                         m_title=company_name,
                         m_section=content_parts,
                         m_url=page.url,
@@ -150,24 +158,27 @@ class _public_tableau(leak_extractor_interface, ABC):
                         m_important_content=m_important,
                         m_weblink=weblinks,
                         m_dumplink=[],
-                        m_email_addresses=helper_method.extract_emails(tooltip_content),
-                        m_phone_numbers=helper_method.extract_phone_numbers(tooltip_content),
                         m_content_type=["tracking"],
-                        m_company_name=company_name,
                         m_leak_date=(
                             datetime.strptime(data_dict["Breach date"], "%Y-%m-%d").date()
                             if "Breach date" in data_dict and data_dict["Breach date"] != "UNKN"
                             else None
                         ),
-                        m_industry="Healthcare" if data_dict.get("Organization Type") == "MED" else None,
                         m_data_size=f"{data_dict['Total Affected']} individuals"
                         if "Total Affected" in data_dict and data_dict["Total Affected"] != "UNKN"
                         else None,
-                        m_country_name="United States",
-                        m_states=[data_dict["Breach Location State"]]
-                        if "Breach Location State" in data_dict else [],
                     )
-                    self.append_leak_data(leak)
+
+                    entity_data = entity_model(
+                        m_country_name="United States",
+                        m_industry="Healthcare" if data_dict.get("Organization Type") == "MED" else None,
+                        m_email_addresses=helper_method.extract_emails(tooltip_content),
+                        m_phone_numbers=helper_method.extract_phone_numbers(tooltip_content),
+                        m_company_name=company_name,
+                        m_states=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else [],
+                    )
+
+                    self.append_leak_data(card_data, entity_data)
 
                 y_position += 20
                 hover_count += 1

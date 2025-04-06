@@ -12,8 +12,8 @@ from fastapi.responses import FileResponse
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 import os
 import base64
-from PIL import Image
 from io import BytesIO
+
 
 class crawl_model:
   __instance = None
@@ -89,14 +89,14 @@ class crawl_model:
   @staticmethod
   async def fetch_parser():
     if os.path.exists(CRAWL_PATHS.M_PARSER_FILE_PATH):
-        return FileResponse(CRAWL_PATHS.M_PARSER_FILE_PATH, media_type="application/zip", filename="parser_files.zip")
+      return FileResponse(CRAWL_PATHS.M_PARSER_FILE_PATH, media_type="application/zip", filename="parser_files.zip")
     else:
       return JSONResponse(content={"detail": "File not found"}, status_code=404)
 
   @staticmethod
   async def fetch_feeder(index_type):
     if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
-        return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH+f"crawl_data_{index_type}.txt", media_type="text/plain", filename="crawl_data_leak.txt")
+      return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH + f"crawl_data_{index_type}.txt", media_type="text/plain", filename="crawl_data_leak.txt")
     else:
       return JSONResponse(content={"detail": "File not found"}, status_code=404)
 
@@ -115,12 +115,13 @@ class crawl_model:
     try:
       os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
       file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, payload.filename)
-      image = Image.open(BytesIO(base64.b64decode(payload.data)))
-      if image.width > 1100:
-        aspect_ratio = image.height / image.width
-        new_height = int(1100 * aspect_ratio)
-        image = image.resize((1100, new_height), Image.Resampling.LANCZOS)
-      image.save(file_path, "WEBP", quality=30)
-      return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}
+      with open(file_path, "wb") as f:
+        f.write(base64.b64decode(payload.data))
+      return {
+        "message": f"Screenshot saved successfully at {file_path}",
+        "filename": payload.filename
+      }
     except Exception as e:
-      return {"error": f"Failed to save screenshot: {str(e)}"}
+      return {
+        "error": f"Failed to save screenshot: {str(e)}"
+      }

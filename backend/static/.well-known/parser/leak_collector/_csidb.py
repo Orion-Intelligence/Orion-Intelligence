@@ -5,6 +5,7 @@ from typing import List
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
@@ -18,7 +19,13 @@ class _csidb(leak_extractor_interface, ABC):
     def __init__(self, callback=None):
         self.callback = callback
         self._card_data = []
+        self._entity_data = []
+        self.soup = None
+        self._initialized = None
         self._redis_instance = redis_controller()
+
+    def init_callback(self, callback=None):
+        self.callback = callback
 
     def __new__(cls):
         if cls._instance is None:
@@ -41,14 +48,19 @@ class _csidb(leak_extractor_interface, ABC):
     def card_data(self) -> List[leak_model]:
         return self._card_data
 
-    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
+
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return self.base_url
 
-    def append_leak_data(self, leak: leak_model) -> None:
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
+        self._entity_data.append(entity)
         if self.callback:
             self.callback()
 
@@ -68,10 +80,10 @@ class _csidb(leak_extractor_interface, ABC):
             page.wait_for_load_state('load')
 
             page_html = page.content()
-            self.soup = BeautifulSoup(page_html, 'html.parser')
+            soup = BeautifulSoup(page_html, 'html.parser')
 
 
-            incident_rows = self.soup.select("tbody tr.text-nowrap")
+            incident_rows = soup.select("tbody tr.text-nowrap")
             if not incident_rows:
                 print("No incident data found on the page.")
                 return
@@ -105,7 +117,6 @@ class _csidb(leak_extractor_interface, ABC):
 
                 card_data = leak_model(
                     m_screenshot=helper_method.get_screenshot_base64(page, victim_name),
-                    m_company_name=victim_name,
                     m_title=victim_name,
                     m_url=self.seed_url,
                     m_network=helper_method.get_network_type(self.base_url),
@@ -113,13 +124,18 @@ class _csidb(leak_extractor_interface, ABC):
                     m_content=summary,
                     m_important_content=important_content,
                     m_content_type=["hacking"],
+                    m_leak_date=incident_date,
+                )
+
+                entity_data = entity_model(
                     m_email_addresses=helper_method.extract_emails(summary),
                     m_phone_numbers=helper_method.extract_phone_numbers(summary),
-                    m_leak_date=incident_date,
+                    m_company_name=victim_name,
                     m_country_name=location
                 )
 
-                self.append_leak_data(card_data)
+                self.append_leak_data(card_data, entity_data)
+
 
         except Exception as ex:
             print(f"An error occurred: {ex}")

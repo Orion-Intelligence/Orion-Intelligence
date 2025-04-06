@@ -2,8 +2,8 @@ from abc import ABC
 from typing import List
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
-
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
@@ -17,8 +17,13 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
     def __init__(self, callback=None):
         self.callback = callback
         self._card_data = []
+        self._entity_data = []
         self.soup = None
+        self._initialized = None
         self._redis_instance = redis_controller()
+
+    def init_callback(self, callback=None):
+        self.callback = callback
 
     def __new__(cls):
         if cls._instance is None:
@@ -41,14 +46,19 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
     def card_data(self) -> List[leak_model]:
         return self._card_data
 
-    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
+
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion"
 
-    def append_leak_data(self, leak: leak_model) -> None:
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
+        self._entity_data.append(entity)
         if self.callback:
             self.callback()
 
@@ -87,13 +97,17 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
                     m_important_content=body_text,
                     m_weblink=[self.seed_url],
                     m_dumplink=dump_links,
-                    m_email_addresses=helper_method.extract_emails(body_text),
-                    m_phone_numbers=helper_method.extract_phone_numbers(body_text),
                     m_content_type=["leaks"],
                 )
 
-                self.append_leak_data(card_data)
+                entity_data = entity_model(
+                    m_email_addresses=helper_method.extract_emails(body_text),
+                    m_phone_numbers=helper_method.extract_phone_numbers(body_text),
+                )
+
+                self.append_leak_data(card_data, entity_data)
                 page.locator(".modal .btn-close").click()
 
             except Exception as e:
                 print(f"Error processing button {index}: {e}")
+

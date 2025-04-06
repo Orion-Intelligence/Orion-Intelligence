@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
@@ -17,7 +18,13 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
     def __init__(self, callback=None):
         self.callback = callback
         self._card_data = []
+        self._entity_data = []
+        self.soup = None
+        self._initialized = None
         self._redis_instance = redis_controller()
+
+    def init_callback(self, callback=None):
+        self.callback = callback
 
     def __new__(cls):
         if cls._instance is None:
@@ -40,18 +47,24 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
     def card_data(self) -> List[leak_model]:
         return self._card_data
 
-    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value) -> None:
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
+
+    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd.onion/contacts"
 
-    def append_leak_data(self, leak: leak_model) -> None:
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
+        self._entity_data.append(entity)
         if self.callback:
             self.callback()
 
-    def safe_find(self, page, selector, attr=None):
+    @staticmethod
+    def safe_find(page, selector, attr=None):
 
         try:
             element = page.locator(selector).first
@@ -59,8 +72,6 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                 return element.get_attribute(attr) if attr else element.inner_text().strip()
         except Exception:
             return None
-
-
 
     def parse_leak_data(self, page: Page):
         try:
@@ -138,10 +149,8 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                                 dump_link = urljoin(self.base_url, dump_link)
                             dump_links.append(dump_link)
 
-
                     card_data = leak_model(
                         m_screenshot=helper_method.get_screenshot_base64(page, title),
-                        m_company_name=title,
                         m_title=title,
                         m_url=leak_url,
                         m_dumplink=[dump_link],
@@ -151,12 +160,17 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_important_content=description,
                         m_content_type=["leaks"],
                         m_data_size=data_size,
-                        m_email_addresses=helper_method.extract_emails(description) if description else [],
-                        m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
                         m_leak_date=helper_method.extract_and_convert_date(leak_date)
                     )
 
-                    self.append_leak_data(card_data)
+                    entity_data = entity_model(
+                        m_email_addresses=helper_method.extract_emails(description) if description else [],
+                        m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
+                        m_company_name=title,
+                    )
+
+                    self.append_leak_data(card_data, entity_data)
+
                     print(f"Successfully processed: {title}")
 
                 except Exception as item_ex:
