@@ -20,9 +20,6 @@ module.exports = {
       stringArray: true,
       stringArrayEncoding: ['base64'],
       stringArrayThreshold: 0.75,
-      debugProtection: true,
-      debugProtectionInterval: 4000,
-      disableConsoleOutput: true
     }, ['vendor.js'])
   ]
 };

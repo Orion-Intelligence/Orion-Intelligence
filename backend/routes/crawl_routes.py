@@ -8,6 +8,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from configs.app_dependency import role_required
+from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
 
 crawl_routes = APIRouter()
 

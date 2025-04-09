@@ -7,10 +7,14 @@ import {ActivatedRoute, Router} from '@angular/router';
   providedIn: 'root'
 })
 export class AppService {
-  private configData: ConfigData = new ConfigData();
+  public configData = signal<ConfigData>(new ConfigData());
   public page = signal<number>(1);
 
-  constructor(private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router) {
+  constructor(
+    private apiService: ApiService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router
+  ) {
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = params['mSearchParamPage'];
       if (pageParam && !isNaN(+pageParam)) {
@@ -22,13 +26,13 @@ export class AppService {
   loadConfig(): void {
     this.apiService.get<ConfigData>('public').subscribe(response => {
       if (response && response.settings) {
-        this.configData = new ConfigData(response);
+        this.configData.set(new ConfigData(response));
       }
     });
   }
 
   getConfig(): ConfigSettings {
-    return this.configData.settings;
+    return this.configData().settings;
   }
 
   updatePage(newPage: number): void {
@@ -36,7 +40,9 @@ export class AppService {
     const currentParams = {...this.activatedRoute.snapshot.queryParams};
     currentParams['mSearchParamPage'] = newPage;
     this.router.navigate([], {
-      relativeTo: this.activatedRoute, queryParams: currentParams, replaceUrl: true
+      relativeTo: this.activatedRoute,
+      queryParams: currentParams,
+      replaceUrl: true
     }).then();
   }
 }

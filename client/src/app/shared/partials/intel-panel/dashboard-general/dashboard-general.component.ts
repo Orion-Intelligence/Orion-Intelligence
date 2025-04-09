@@ -1,6 +1,6 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgIf, NgOptimizedImage} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
 import {PaginationComponent} from '../../pagination/pagination.component';
 import {InsightsComponent} from '../../insights/insights.component';
@@ -18,7 +18,7 @@ import {AppService} from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-dashboard-general',
-  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent, NgOptimizedImage],
+  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent],
   templateUrl: './dashboard-general.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -167,5 +167,4 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
-  protected readonly Category = Category;
 }

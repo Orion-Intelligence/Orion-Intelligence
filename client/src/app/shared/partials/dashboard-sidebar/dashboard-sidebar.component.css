@@ -130,10 +130,14 @@
   background: #2A578459;
 }
 
-.sidebar__subitem-content::before{
-  content: "●";
+.sidebar__selected .sidebar__subitem-content::before{
   color: #fff;
-  font-size: 12px;
+}
+
+.sidebar__subitem-content::before{
+  color: #ffffff70;
+  content: "●";
+  font-size: 8px;
   margin-right: 10px;
   margin-left: 18px;
   display: inline-block;

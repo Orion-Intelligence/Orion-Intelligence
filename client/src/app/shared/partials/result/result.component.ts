@@ -12,6 +12,7 @@ import {SuggestionComponent} from '../suggestion/suggestion.component';
 import {EmptyQueryComponent} from '../empty-query/empty-query.component';
 import {Suggestion} from '../../model/results/shared/common-result';
 import {query} from '@angular/animations';
+import {Category} from "../../enums/pages";
 
 @Component({
   selector: 'app-result',
@@ -27,6 +28,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() searchQuery: string = '';
   @Input() analyticsToggle: boolean = false;
   @Input() shrinkmenu: boolean = false;
+  @Input() type!: Category;
 
   @Output() reloadFilters = new EventEmitter<[string | null, string | null]>();
   @Output() reloadData = new EventEmitter<void>();
@@ -91,4 +93,6 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   protected readonly query = query;
+  protected readonly Category = Category;
+
 }

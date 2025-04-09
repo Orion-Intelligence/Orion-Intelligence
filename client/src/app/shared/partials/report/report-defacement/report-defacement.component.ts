@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {DomSanitizer} from '@angular/platform-browser';
 import {DefacementResultItem} from '../../../model/results/defacement/defacement.param.model';
 import {NgOptimizedImage} from '@angular/common';
 import {HelperService} from '../../../services/helper.service';
@@ -16,7 +15,7 @@ export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
   lang: string = "en";
 
-  constructor(private sanitizer: DomSanitizer, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
+  constructor(private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
   }
 

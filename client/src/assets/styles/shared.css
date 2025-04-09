@@ -14,8 +14,8 @@
 .default-input {
   align-self: center;
   border-radius: 8px 0 0 7px;
-  height: 44px;
-  background: #fff !important;
+  height: 42px;
+  background: #EFFDFF !important;
   color: #3C3C43 !important;
   font-size: 16px !important;
   border: 1px solid #ffffff30 !important;
@@ -50,7 +50,7 @@
 .default-input-button:focus,
 .default-input-button:active,
 .default-input-button:focus-visible {
-  background: #2076c5 !important;
+  background: #EFFDFF !important;
   outline: none !important;
   box-shadow: none !important;
   border: 1px solid #ffffff30 !important;
@@ -220,8 +220,27 @@ table a:visited {
   background: #14335299 !important;
 }
 
+.default-notification-banner-icon{
+  vertical-align: middle;
+  margin-right: 10px;
+  margin-top: -4px;
+}
+
+.default-notification-banner{
+  display: flex;
+  flex-wrap: inherit;
+  background: #FFC1071A;
+  max-width: 795px;
+  padding: 10px;
+  font-size: 13px;
+  border-radius: 10px;
+  margin-top: 20px;
+  color: #fff;
+
+}
+
 .dashboard-general-input {
-  max-width: 700px;
+  max-width: 750px;
   min-width: 500px;
 }
 

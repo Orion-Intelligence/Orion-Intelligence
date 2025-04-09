@@ -12,6 +12,9 @@
   font-size: 32px;
   font-weight: 700;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home_insight__text-secondary {
@@ -82,10 +85,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  margin: 0 auto;
-  padding: 16px 48px;
-  justify-content: center;
+  justify-content: flex-start;
+  margin-left: 30px;
+  flex: 1;
+  max-width: 100%;
+  margin-right: 20px;
+  margin-top: 30px;
 }
+
 
 @media only screen and (max-width: 943px) {
   .home_insight__header {
@@ -100,5 +107,6 @@
 
   .home_insight__container {
     padding: 20px;
+    margin-left: 0;
   }
 }

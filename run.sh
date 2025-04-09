@@ -27,9 +27,9 @@ client_build() {
     cd client || exit
     npm install
     if [ "$1" = "-p" ]; then
-        npm run production
+        ng build --configuration production
     else
-        npm run build
+        ng build --configuration production
     fi
     cd ..
 }

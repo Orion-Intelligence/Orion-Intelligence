@@ -26,8 +26,8 @@ class external_request_controller:
         return hashlib.sha256(hash_input.encode()).hexdigest()
 
     async def fetch_email_leak(self, p_data):
-        url = "http://trusted-crawler-api:8000/runtime/parse"
-        param = {"query": p_data.model_dump()}
+        url = "http://trusted-micros-api:8010/runtime/parse"
+        param = {"text": p_data.model_dump()}
         cache_key = self.generate_cache_key(url, param)
 
         cached_response = await self.redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [cache_key, None, None])

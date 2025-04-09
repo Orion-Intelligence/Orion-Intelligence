@@ -1,11 +1,5 @@
-<div *ngIf="type == Category.STRATEGIC">
-    <div class="alert alert-warning w-100 m-0 rounded-0 d-flex justify-content-between align-items-center" role="alert">
-        <span class="warninng-font">Current results are general and may lack accuracy. For more precise insights, open the <b>Data Breaches</b> section from the sidebar</span>
-    </div>
-</div>
-
-<img ngSrc="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" priority fill="true">
-<app-result (onToggleSwitch)="onToggleAnalyticsTrigger()" [filterModel]="general_filters" [analyticsToggle]="onToggleAnalytics" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(currentCallbackModel.Result.length)"></app-result>
+<img src="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" >
+<app-result (onToggleSwitch)="onToggleAnalyticsTrigger()" [type]="type" [filterModel]="general_filters" [analyticsToggle]="onToggleAnalytics" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(currentCallbackModel.Result.length)"></app-result>
 
 <div *ngIf="onToggleAnalytics && !isLoading" @fadeInDashboardItem>
   <app-insights [analytics]="analyticsData"></app-insights>

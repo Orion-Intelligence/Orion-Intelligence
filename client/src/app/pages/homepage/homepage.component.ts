@@ -1,14 +1,13 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { NgOptimizedImage } from '@angular/common';
 import {HomeSearchComponent} from './home-search/home-search.component';
 import {HomeInsightComponent} from './home-insight/home-insight.component';
 
 @Component({
   selector: 'app-index',
   standalone: true,
-  imports: [HomeSearchComponent, HomeInsightComponent, NgOptimizedImage],
+  imports: [HomeSearchComponent, HomeInsightComponent],
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {

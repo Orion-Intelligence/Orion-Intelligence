@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {AppService} from '../../../services/core/app.service';

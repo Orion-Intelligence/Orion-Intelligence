@@ -25,6 +25,7 @@ export class ProfileComponent {
 
   isAdmin(): boolean {
     const currentRole = this.authService.getRole();
+    console.log(currentRole)
     return currentRole === 'admin';
   }
 

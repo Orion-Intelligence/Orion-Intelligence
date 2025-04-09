@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import List
 
+from pydantic.v1 import Extra
+
+
 class GeneralDataModel(BaseModel):
     m_base_url: str
     m_url: str
@@ -18,7 +21,7 @@ class GeneralDataModel(BaseModel):
     m_meta_keywords: str
     m_content_type: List[str]
     m_section: List[str]
-    m_names: List[str]
-    m_emails: List[str]
-    m_phone_numbers: List[str]
     m_clearnet_links: List[str]
+
+    class Config:
+        extra = Extra.allow

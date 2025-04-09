@@ -117,7 +117,7 @@ export class AuthService {
     return this.apiService.post<{
       access_token: string;
       role: string
-    }>('refresh-token', {token: currentToken}, {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}).pipe(tap((response) => {
+    }>('token/refresh', {token: currentToken}, {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}).pipe(tap((response) => {
       if (response) {
         this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
       }

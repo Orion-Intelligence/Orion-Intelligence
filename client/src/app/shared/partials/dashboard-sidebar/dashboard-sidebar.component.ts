@@ -20,7 +20,6 @@ import {LeakCallbackModel} from '../../model/results/leak/leak.callback.model';
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
   @Output() menuToggle = new EventEmitter<void>();
   sidebar_default = true;
-  apiAllowed: boolean = false;
   min_detected = false;
 
   apiCategories = Object.values(ApiSubCategory);
@@ -29,9 +28,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   defacementCategories = Object.values(DefacementSubCategory);
   category = Category;
 
-  constructor(protected dashboardService:DashboardService, protected selectionStore: SelectionStoreService, private appService: AppService, private router: Router) {
-    this.apiAllowed = appService.getConfig().api_allowed == "1"
-    console.log(this.apiAllowed)
+  constructor(protected dashboardService:DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
   }
 
   ngOnInit() {

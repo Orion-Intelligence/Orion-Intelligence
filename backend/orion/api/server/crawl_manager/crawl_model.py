@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+
+import requests
 from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
@@ -13,6 +15,8 @@ from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_d
 import os
 import base64
 from io import BytesIO
+
+from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
 
 
 class crawl_model:
@@ -125,3 +129,15 @@ class crawl_model:
       return {
         "error": f"Failed to save screenshot: {str(e)}"
       }
+
+  @staticmethod
+  async def fetch_cti_label(payload: CTITextRequest):
+    url = "http://trusted-micros-api:8010/cti_classifier/classify"
+    payload = {
+      "data": payload.data
+    }
+
+    response = requests.post(url, json=payload)
+    response.raise_for_status()
+
+    return response.json()["result"]

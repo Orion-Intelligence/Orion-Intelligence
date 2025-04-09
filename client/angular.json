@@ -17,7 +17,7 @@
               "path": "./webpack.config.js",
               "replaceDuplicatePlugins": true
             },
-            "outputPath": "dist",
+            "outputPath": "build",
             "baseHref": "/",
             "deployUrl": "/",
             "index": "src/index.html",
@@ -41,6 +41,7 @@
           },
           "configurations": {
             "production": {
+              "aot": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -78,6 +79,7 @@
               "scripts": ["src/assets/libs/bootstrap.min.js"]
             },
             "development": {
+              "aot": true,
               "optimization": false,
               "sourceMap": false,
               "extractLicenses": false,
