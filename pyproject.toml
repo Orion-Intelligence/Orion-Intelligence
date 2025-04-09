@@ -32,16 +32,3 @@ email-validator = "2.2.0"
 pymongo = "~4.11"
 passlib = "~1.7.4"
 PyJWT = "~2.10.1"
-
-[tool.poetry.dev-dependencies]
-pytest = "^7.1.2"
-black = "^22.3.0"
-flake8 = "^4.0.1"
-mypy = "^1.2.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-start = "uvicorn main:app --reload --host 0.0.0.0 --port 8000"
