@@ -36,8 +36,7 @@ export class ReportResolver implements Resolve<any> {
     }
 
     return this.apiService.get<any>(apiUrl).pipe(
-      catchError((error) => {
-        console.error(`Error fetching data for category ${category} with hash ${hash}:`, error);
+      catchError((_) => {
         return of(null);
       })
     );
