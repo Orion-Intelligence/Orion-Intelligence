@@ -30,7 +30,6 @@ export class DashboardHeaderComponent implements OnInit {
     const urlTree: UrlTree = this.router.parseUrl(url);
     const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) || [];
 
-    console.log(segments)
     this.breadcrumb = segments.length > 1
       ? segments.slice(1).map((segment) => ({ path: segment, label: segment }))
       : segments.map((segment) => ({ path: segment, label: segment }));

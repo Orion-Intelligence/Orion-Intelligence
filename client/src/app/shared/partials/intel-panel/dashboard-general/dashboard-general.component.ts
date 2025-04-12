@@ -17,10 +17,7 @@ import {general_filters} from '../../../constants/filters';
 import {AppService} from '../../../../services/core/app.service';
 
 @Component({
-  selector: 'app-dashboard-general',
-  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent],
-  templateUrl: './dashboard-general.component.html',
-  animations: [fadeInDashboardItem],
+  selector: 'app-dashboard-general', imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent], templateUrl: './dashboard-general.component.html', animations: [fadeInDashboardItem],
 })
 export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
@@ -41,7 +38,6 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(1)
-    // this.fetchSearchResults()
   }
 
   ngOnInit(): void {
@@ -58,7 +54,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         this.generalParamModel.q = params['q'] || '';
         this.generalParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
         this.generalParamModel.mSearchParamSafeSearch = params['mSearchParamSafeSearch'] === 'true';
-        this.generalParamModel.mNetwork = params['network'] || 'all';
+        this.generalParamModel.mNetwork = params['mNetwork'] || 'all';
 
         this.generalParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH))) {

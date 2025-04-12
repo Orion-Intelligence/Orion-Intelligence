@@ -29,7 +29,7 @@ export class DirectoryComponent {
 
     this.directoryData$.subscribe(data => {
       if (data) {
-        this.totalPages = Math.ceil(data.total_count / 1000);
+        this.totalPages = Math.ceil(data.total_count / 500);
       }
     });
 
