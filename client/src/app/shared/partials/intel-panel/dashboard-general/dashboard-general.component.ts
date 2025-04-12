@@ -41,7 +41,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(1)
-    this.fetchSearchResults()
+    // this.fetchSearchResults()
   }
 
   ngOnInit(): void {
@@ -61,7 +61,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         this.generalParamModel.mNetwork = params['network'] || 'all';
 
         this.generalParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
-        if (this.firstTrigger && this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC || this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH) {
+        if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH))) {
           this.isLoading = false;
           this.query = this.generalParamModel.q
         } else {

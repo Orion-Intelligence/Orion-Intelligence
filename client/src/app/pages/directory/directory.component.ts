@@ -11,11 +11,10 @@ import {DirectoryCallbackModel} from '../../shared/model/directory/directory.mod
 import {
   PaginationComponent
 } from '../../shared/partials/pagination/pagination.component';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
-  selector: 'app-directory',
-  templateUrl: './directory.component.html',
-  imports: [FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent,],
+  selector: 'app-directory', templateUrl: './directory.component.html', imports: [FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent,],
 })
 export class DirectoryComponent {
   directoryData$: Observable<DirectoryCallbackModel | null>;
@@ -24,13 +23,13 @@ export class DirectoryComponent {
   selectedFilters: { [key: string]: string | null } = {};
   totalPages: number = 0;
 
-  constructor(private sidebarService: SidebarService, private directoryService: DirectoryService) {
+  constructor(private router: Router, private route: ActivatedRoute, private sidebarService: SidebarService, private directoryService: DirectoryService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
     this.directoryData$ = this.directoryService.directoryData$;
 
     this.directoryData$.subscribe(data => {
       if (data) {
-        this.totalPages = Math.ceil(data.total_count / 10);
+        this.totalPages = Math.ceil(data.total_count / 1000);
       }
     });
 
@@ -59,8 +58,12 @@ export class DirectoryComponent {
     this.directoryService.reloadDirectoryData({page: currentPage});
   }
 
-  private reloadDirectory() {
+  private reloadDirectory(): void {
     const filteredParams = Object.fromEntries(Object.entries(this.selectedFilters).filter(([_, value]) => value !== null && value !== ''));
+
+    this.router.navigate([], {
+      relativeTo: this.route, queryParams: filteredParams, queryParamsHandling: 'merge',
+    }).then();
 
     this.directoryService.reloadDirectoryData(filteredParams);
   }

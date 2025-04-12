@@ -1,7 +1,16 @@
-<form (submit)="onSearchSubmit($event)" class="home__form">
-  <div>
-    <img src="assets/images/shared/home-logo.svg" alt="" width="280" height="61" loading="eager" priority>
-    <span class="home__version">V: {{ appService.getConfig().version }}</span>
+<form class="home__form default-input-container w-90" (submit)="onSearchSubmit()" @fadeInDashboardItem>
+  <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
+    <div class="col-md-10 col-sm-12 col-xs-12">
+      <div class="input-group default-input-sub-container">
+        <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search Data Breach ..."
+               class="form-control default-input dashboard-general-input" maxlength="150" name="q"
+               [(ngModel)]="searchQuery">
+        <input type="hidden" value="1">
+        <button class="btn btn-primary default-input-button" type="submit">
+          <img ngSrc="../../../../assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority height="16"
+               width="16">
+        </button>
+      </div>
+    </div>
   </div>
-  <p class="home__description">Welcome to the <strong>System Analytics Dashboard</strong>. This system is currently running on <strong>version {{ appService.getConfig().version }}</strong>, ensuring optimized performance and security. The dashboard provides <strong>real-time analytics</strong> on key system metrics, tracking insights such as <strong>performance trends, data integrity, and security alerts</strong>. Stay updated with daily and weekly changes to monitor and enhance overall system efficiency.</p>
 </form>

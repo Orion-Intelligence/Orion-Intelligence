@@ -92,7 +92,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
                     m_title=title_text,
                     m_url=self.seed_url,
                     m_base_url=self.base_url,
-                    m_content=body_text,
+                    m_content=body_text + " " + self.seed_url + " " + self.base_url,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=body_text,
                     m_weblink=[self.seed_url],

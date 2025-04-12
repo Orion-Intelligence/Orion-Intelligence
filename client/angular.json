@@ -30,9 +30,7 @@
               "src/favicon.ico",
               "src/assets",
               "src/assets/images",
-              "src/assets/fonts",
-              "src/assets/fonts/FontAwesome",
-              "src/assets/fonts/Roboto"
+              "src/assets/fonts"
             ],
             "styles": [
               "src/styles.scss"
@@ -69,9 +67,7 @@
                 "src/favicon.ico",
                 "src/assets",
                 "src/assets/images",
-                "src/assets/fonts",
-                "src/assets/fonts/FontAwesome",
-                "src/assets/fonts/Roboto"
+                "src/assets/fonts"
               ],
               "styles": [
                 "src/styles.scss"
@@ -122,9 +118,7 @@
               "src/favicon.ico",
               "src/assets/images",
               "src/assets",
-              "src/assets/fonts",
-              "src/assets/fonts/FontAwesome",
-              "src/assets/fonts/Roboto"
+              "src/assets/fonts"
             ],
             "styles": [
               "src/styles.scss"

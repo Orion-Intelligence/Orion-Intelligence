@@ -101,7 +101,7 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                             m_title=database,
                             m_url=page.url,
                             m_base_url=self.base_url,
-                            m_content=description if description else f"{year} | {database} | {site} | {records} | {price}",
+                            m_content=description if description else f"{year} | {database} | {site} | {records} | {price}" + " " + self.base_url + " " + page.url,
                             m_network=helper_method.get_network_type(self.base_url),
                             m_important_content=description if description else f"{year} | {database} | {site} | {records} | {price}",
                             m_weblink=[site],

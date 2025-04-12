@@ -135,7 +135,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
                     m_title=title,
                     m_url=article_url,
                     m_base_url=self.base_url,
-                    m_content=content_text,
+                    m_content=content_text + " " + self.base_url + " " + article_url,
                     m_content_type=["leaks"],
                     m_important_content=content_text,
                     m_weblink=weblinks,

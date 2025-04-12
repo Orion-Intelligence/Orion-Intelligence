@@ -128,7 +128,7 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                         m_title=title_text if title_text != "Unknown" else "Extracted Post",
                         m_url=post_link,
                         m_base_url=self.base_url,
-                        m_content=f"Description: {description_text}\nFile Size: {file_size_text}",
+                        m_content=f"Description: {description_text}\nFile Size: {file_size_text}" + " " + self.base_url + " " + post_link,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=description_text,
                         m_dumplink=[download_link] if download_link else [],

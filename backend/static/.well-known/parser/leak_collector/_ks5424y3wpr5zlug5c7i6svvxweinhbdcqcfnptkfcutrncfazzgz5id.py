@@ -120,7 +120,7 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
                 m_title=title,
                 m_url=url,
                 m_base_url=self.base_url,
-                m_content=content,
+                m_content=content + " " + self.base_url + " " + url,
                 m_network=helper_method.get_network_type(self.base_url),
                 m_important_content=important_content,
                 m_dumplink=[download_url],

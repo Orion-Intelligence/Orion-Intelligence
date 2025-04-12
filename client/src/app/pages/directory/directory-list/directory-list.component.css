@@ -12,7 +12,7 @@
 }
 
 .directory-list__content-category {
-  font-weight: bold;
+  font-weight: 500;
   color: #D4D4D4;
   border-radius: 100px;
   background: #FCFCFC0D;
@@ -22,11 +22,11 @@
 }
 
 .directory-list__column-service-url {
-  width: 40%;
+  width: 45%;
 }
 
 .directory-list__column-category {
-  width: 25%;
+  width: 20%;
 }
 
 .directory-list__column-url-status {
@@ -38,7 +38,6 @@
 }
 
 .directory-list__table-url {
-  overflow-wrap: break-word;
 }
 
 @media only screen and (max-width: 943px) {

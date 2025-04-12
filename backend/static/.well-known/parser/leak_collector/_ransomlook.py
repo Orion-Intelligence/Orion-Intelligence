@@ -112,7 +112,7 @@ class _ransomlook(leak_extractor_interface, ABC):
                         m_title=m_title,
                         m_url=page.url,
                         m_base_url=self.base_url,
-                        m_content=m_content,
+                        m_content=m_content + " " + self.base_url + " " + page.url,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=m_content,
                         m_content_type=["leaks"],

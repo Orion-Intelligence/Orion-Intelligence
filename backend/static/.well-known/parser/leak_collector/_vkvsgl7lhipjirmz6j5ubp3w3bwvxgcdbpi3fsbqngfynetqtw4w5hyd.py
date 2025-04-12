@@ -91,7 +91,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
                 m_title=first_paragraph,
                 m_url=page.url,
                 m_base_url=self.base_url,
-                m_content=m_content,
+                m_content=m_content + " " + self.base_url + " " + page.url,
                 m_important_content=m_content,
                 m_network=helper_method.get_network_type(self.base_url),
                 m_weblink=web_links,

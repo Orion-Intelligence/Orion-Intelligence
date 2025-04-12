@@ -1,29 +1,29 @@
 import {Component} from '@angular/core';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {AppService} from '../../../services/core/app.service';
+import {NgOptimizedImage} from "@angular/common";
 
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgOptimizedImage],
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent {
   searchQuery: string = '';
 
-  constructor(private router: Router, public appService:AppService) {
+  constructor(private route: ActivatedRoute, private router: Router) {
   }
 
-  onSearchSubmit(event: Event) {
-    event.preventDefault();
-    if (this.searchQuery.trim()) {
-      this.router.navigate(['/dashboard'], {
-        queryParams: {q: this.searchQuery},
-        queryParamsHandling: 'merge'
-      }).then();
-    }
-  }
+  onSearchSubmit(): void {
+    const queryParams = {
+      ...this.route.snapshot.queryParams,
+      q: this.searchQuery || null
+    };
 
-  protected readonly JSON = JSON;
+    this.router.navigate(['/dashboard/breach/databases'], {
+      queryParams,
+      queryParamsHandling: 'merge'
+    }).then();
+  }
 }

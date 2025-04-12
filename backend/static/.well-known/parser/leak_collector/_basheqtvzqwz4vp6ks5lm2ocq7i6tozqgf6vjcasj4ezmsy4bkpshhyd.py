@@ -125,7 +125,7 @@ class _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd(leak_extractor_i
                 m_title=title,
                 m_url=page.url,
                 m_base_url=self.base_url,
-                m_content=description,
+                m_content=description + " " + self.base_url + " " + page.url,
                 m_network=helper_method.get_network_type(self.base_url),
                 m_important_content=description,
                 m_dumplink=dumps,

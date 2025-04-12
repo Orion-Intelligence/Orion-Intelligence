@@ -4,7 +4,7 @@
   border: 1px solid #ffffff20;
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 32px;
+  margin: 15px 32px 32px;
   min-height: auto;
   height: auto !important;
   display: block;
@@ -259,7 +259,7 @@
 
 .dashboard__search-title {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 16px;
   color: #fff;
   max-width: 600px !important;
@@ -281,7 +281,7 @@
 
 .dashboard__search-highlight {
   color: #00CCCC;
-  font-weight: bold;
+  font-weight: 500;
 }
 
 .dashboard__search-link {
@@ -333,7 +333,7 @@
 }
 
 .dashboard__info-value {
-  font-weight: bold;
+  font-weight: 500;
   color: white;
 }
 
@@ -352,7 +352,7 @@
 
 .dashboard__status-text {
   color: #fff;
-  font-weight: bold;
+  font-weight: 500;
 }
 
 
@@ -416,7 +416,7 @@
 }
 
 .dashboard__search-highlight {
-  font-weight: bold;
+  font-weight: 500;
   color: #00CCCC;
 }
 

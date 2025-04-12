@@ -1,7 +1,7 @@
 .result-suggestion-header {
   color: #ffc107;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .result-suggestion {
   display: flex;
@@ -19,19 +19,19 @@
 .result-suggestion-header {
   color: #ffc107;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .result-suggestion-info {
   color: #fff;
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 500;
   font-style: italic;
   cursor: pointer;
 }
 .result-suggestion-info {
   color: #fff;
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 500;
   font-style: italic;
   cursor: pointer;
 }

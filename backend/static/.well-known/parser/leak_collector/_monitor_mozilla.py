@@ -104,7 +104,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
           m_title=card_title,
           m_url=current_url,
           m_base_url=self.base_url,
-          m_content=extracted_text,
+          m_content=extracted_text + " " + self.base_url + " " + current_url,
           m_network=helper_method.get_network_type(self.base_url),
           m_important_content=card_content,
           m_weblink=[current_url],

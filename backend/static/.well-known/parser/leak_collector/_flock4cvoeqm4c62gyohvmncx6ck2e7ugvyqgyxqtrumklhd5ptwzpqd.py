@@ -122,7 +122,7 @@ class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_i
                                 m_title=title_text,
                                 m_url=page.url,
                                 m_base_url=self.base_url,
-                                m_content=content_text.strip(),
+                                m_content=content_text.strip() + " " + self.base_url + " " + page.url,
                                 m_network=helper_method.get_network_type(self.base_url),
                                 m_important_content=content_text.strip(),
                                 m_dumplink=links,

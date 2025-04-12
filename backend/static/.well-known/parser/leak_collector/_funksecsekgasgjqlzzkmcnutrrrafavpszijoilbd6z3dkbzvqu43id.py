@@ -131,7 +131,7 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                     m_url=product_url,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_base_url=self.base_url,
-                    m_content=content,
+                    m_content=content + " " + self.base_url + " " + product_url,
                     m_important_content=important_content,
                     m_content_type=["leaks"],
                     m_logo_or_images=logos,

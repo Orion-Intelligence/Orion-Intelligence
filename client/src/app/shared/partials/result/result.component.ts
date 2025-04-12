@@ -13,13 +13,15 @@ import {EmptyQueryComponent} from '../empty-query/empty-query.component';
 import {Suggestion} from '../../model/results/shared/common-result';
 import {query} from '@angular/animations';
 import {Category} from "../../enums/pages";
+import {RouterLink} from '@angular/router';
+import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent,],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent,],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;

@@ -82,7 +82,7 @@ class _darkfeed(leak_extractor_interface, ABC):
               m_title=title,
               m_url=url,
               m_base_url=self.base_url,
-              m_content=content_message,
+              m_content=content_message + " " + self.base_url + " " + url,
               m_network=helper_method.get_network_type(self.base_url),
               m_important_content=content_message,
               m_content_type=["leaks"],

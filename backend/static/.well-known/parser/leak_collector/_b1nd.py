@@ -125,7 +125,7 @@ class _b1nd(leak_extractor_interface, ABC):
                 m_weblink=[inner_link],
                 m_url=inner_link,
                 m_base_url=self.base_url,
-                m_content=m_content if m_content else "",
+                m_content=m_content if m_content else "" + " " + self.base_url + " " + inner_link,
                 m_network=helper_method.get_network_type(self.base_url),
                 m_important_content=m_important_content,
                 m_content_type=["leaks"],

@@ -20,7 +20,7 @@ export class DashboardHeaderComponent implements OnInit {
     this.updateBreadcrumb(this.router.url);
 
     this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
+      .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.updateBreadcrumb(event.urlAfterRedirects);
       });
@@ -30,7 +30,7 @@ export class DashboardHeaderComponent implements OnInit {
     const urlTree: UrlTree = this.router.parseUrl(url);
     const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) || [];
 
-    // Update breadcrumb
+    console.log(segments)
     this.breadcrumb = segments.length > 1
       ? segments.slice(1).map((segment) => ({ path: segment, label: segment }))
       : segments.map((segment) => ({ path: segment, label: segment }));

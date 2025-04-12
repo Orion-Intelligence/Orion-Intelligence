@@ -112,7 +112,7 @@ class _leak_lookup(leak_extractor_interface, ABC):
                         m_title=site_name,
                         m_url=site_url,
                         m_base_url=self.base_url,
-                        m_content=modal_content_cleaned,
+                        m_content=modal_content_cleaned + " " + self.base_url + " " + site_url,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=modal_content_cleaned,
                         m_data_size=breach_size,

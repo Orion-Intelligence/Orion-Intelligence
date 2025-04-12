@@ -121,7 +121,7 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
                         m_url=link,
                         m_weblink=weblinks,
                         m_base_url=self.base_url,
-                        m_content=content,
+                        m_content=content + " " + self.base_url + " " + link,
                         m_logo_or_images=image_urls,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=important_content,

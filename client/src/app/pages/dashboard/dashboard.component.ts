@@ -8,12 +8,12 @@ import {DashboardHeaderComponent} from '../../shared/partials/header/dashboard-h
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    DashboardSidebarComponent,
-    DashboardHeaderComponent,
-    NgClass,
-    RouterOutlet
-  ],
+    imports: [
+        DashboardSidebarComponent,
+        DashboardHeaderComponent,
+        NgClass,
+        RouterOutlet
+    ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })

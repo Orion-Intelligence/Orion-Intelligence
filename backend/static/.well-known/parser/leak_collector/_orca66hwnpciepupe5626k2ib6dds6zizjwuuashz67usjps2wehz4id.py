@@ -139,7 +139,7 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                     m_dumplink=[download_url],
                     m_network=helper_method.get_network_type(self.base_url),
                     m_base_url=self.base_url,
-                    m_content=description,
+                    m_content=description + " " + self.base_url,
                     m_important_content = description,
                     m_content_type=["leaks"],
                     m_data_size=number_of_files,

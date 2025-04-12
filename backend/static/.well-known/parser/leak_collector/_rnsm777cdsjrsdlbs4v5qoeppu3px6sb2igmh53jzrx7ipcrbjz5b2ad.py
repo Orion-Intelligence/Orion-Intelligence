@@ -153,7 +153,7 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
                             m_weblink=[],
                             m_network=helper_method.get_network_type(self.base_url),
                             m_base_url=self.base_url,
-                            m_content=description,
+                            m_content=description + " " + self.base_url + " " + item_url,
                             m_important_content=description,
                             m_logo_or_images=[],
                             m_content_type=["leaks"],

@@ -13,8 +13,7 @@ import {AppService} from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-dashboard-defacement',
-  standalone: true,
-  imports: [ResultComponent, NgIf, PaginationComponent, DashboardResultListComponent],
+  standalone: true, imports: [ResultComponent, NgIf, PaginationComponent, DashboardResultListComponent],
   templateUrl: './dashboard-defacement.component.html',
   animations: [fadeInDashboardItem],
 })

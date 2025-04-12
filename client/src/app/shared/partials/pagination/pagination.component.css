@@ -16,7 +16,7 @@
   height: 35px;
   margin-top: -2px;
   color: #fff;
-  font-weight: bold;
+  font-weight: 500;
   outline: none;
   display: flex;
   justify-content: center;
@@ -63,7 +63,7 @@
   color: #ffffff;
   background: #15345475;
   border: 0;
-  font-weight: bold;
+  font-weight: 500;
   outline: none;
   transition: background 0.2s ease-in-out;
 }

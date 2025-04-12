@@ -142,7 +142,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
             m_weblink=[url, website],
             m_network=helper_method.get_network_type(url),
             m_base_url=self.base_url,
-            m_content=description,
+            m_content=description + " " + self.base_url + " " + url,
             m_important_content=description,
             m_logo_or_images=[logo_image] if logo_image else [],
             m_content_type=["leaks"],

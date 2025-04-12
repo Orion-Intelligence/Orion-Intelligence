@@ -132,7 +132,7 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                 card_data = leak_model(
                     m_screenshot=helper_method.get_screenshot_base64(page, title),
                     m_title=title,
-                    m_content=content,
+                    m_content=content + " " + self.base_url + " " + page.url,
                     m_weblink=[website],
                     m_logo_or_images=image_urls,
                     m_revenue = revenue,

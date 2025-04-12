@@ -114,7 +114,7 @@ class _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd(leak_extractor_i
                         m_weblink=[url],
                         m_network=helper_method.get_network_type(url),
                         m_base_url=self.base_url,
-                        m_content=content,
+                        m_content=content + " " + self.base_url + " " + url,
                         m_important_content=imp_content,
                         m_content_type=["leaks"],
                     )

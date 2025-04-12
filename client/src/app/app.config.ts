@@ -9,7 +9,7 @@ import { httpInterceptor } from './services/core/http.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     AuthGuard,
-    provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'ignore' })),
+    provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     provideHttpClient(withInterceptors([httpInterceptor])),
     provideAnimations()
   ],

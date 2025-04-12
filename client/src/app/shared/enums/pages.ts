@@ -1,10 +1,10 @@
 export enum Category {
   STRATEGIC = 'Strategic',
   BREACH = 'Breach',
-  HOMEPAGE = 'Homepage',
+  HOMEPAGE = 'Home',
   DIRECTORY = 'Directory',
   DEFACEMENT = 'Defacement',
-  API = 'API'
+  API = 'Api'
 }
 
 export enum GeneralSubCategory {
@@ -21,8 +21,8 @@ export enum GeneralSubCategory {
 }
 
 export enum BreachSubCategory {
-  TRACKING = 'Tracking',
   DATABASES = 'Databases',
+  TRACKING = 'Tracking',
 }
 
 export enum DefacementSubCategory {

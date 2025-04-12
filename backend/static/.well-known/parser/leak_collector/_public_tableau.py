@@ -69,7 +69,6 @@ class _public_tableau(leak_extractor_interface, ABC):
     def parse_leak_data(self, page: Page):
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
         max_pages = 100 if is_crawled else 50000
-        sleep(25)
 
         page.evaluate("""
             const cursor = document.createElement('div');
@@ -92,7 +91,9 @@ class _public_tableau(leak_extractor_interface, ABC):
             };
         """)
 
-        viewport = page.viewport_size or {"width": 1920, "height": 1080}
+        page.wait_for_selector("#tabZoneId8", state="visible", timeout=60000)
+        sleep(10)
+        viewport = page.viewport_size
         x_position = int(viewport["width"] * 0.8)
         default_y_position = 98
         y_position = default_y_position
@@ -102,7 +103,10 @@ class _public_tableau(leak_extractor_interface, ABC):
 
         try:
             for _ in range(max_pages):
+
                 page.mouse.move(x_position, y_position)
+
+
                 page.evaluate(f'moveFakeCursor({x_position}, {y_position});')
 
                 page.wait_for_selector(".tab-tooltipContainer", timeout=5000)
@@ -153,7 +157,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                         m_url=page.url,
                         m_base_url=base_url,
                         m_screenshot="",
-                        m_content=m_content,
+                        m_content=m_content + " " + self.base_url + " " + page.url,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=m_important,
                         m_weblink=weblinks,
@@ -185,7 +189,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                 if hover_count % 15 == 0:
                     page.mouse.wheel(0, 280)
                     y_position = default_y_position
-        except Exception:
-            pass
+        except Exception as ex:
+            print(ex)
         finally:
             self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)

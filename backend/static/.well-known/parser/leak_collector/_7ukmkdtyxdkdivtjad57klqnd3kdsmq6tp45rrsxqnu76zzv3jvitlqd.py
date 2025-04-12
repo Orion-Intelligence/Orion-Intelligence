@@ -98,7 +98,7 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
                         m_url=page.url,
                         m_websites=[website],
                         m_base_url=self.base_url,
-                        m_content=content_text,
+                        m_content=content_text + " " + self.base_url + " " + page.url,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=imp_content,
                         m_content_type=["leaks"],

@@ -134,7 +134,7 @@ class _ransom(leak_extractor_interface, ABC):
                 m_title=victim,
                 m_url=post_url,
                 m_base_url=self.base_url,
-                m_content=description,
+                m_content=description + " " + post_url + " " + page.url,
                 m_network=helper_method.get_network_type(self.base_url),
                 m_important_content=description,
                 m_weblink=[website],

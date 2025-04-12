@@ -20,12 +20,17 @@
 }
 
 .no-result-container-header{
+  padding-top: 10px;
+  font-family: 'Inter', sans-serif;
   font-size: 20px;
+  font-weight: 500;
   color: #fff;
 }
 
 .no-result-container-description{
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
+  font-weight: 400;
   color: #A0B8D1;
 }
 

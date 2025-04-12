@@ -15,7 +15,6 @@ const renameWithRetry = (src, dest, attempts = 5) => {
         fs.renameSync(src, dest);
     } catch (err) {
         if (err.code === 'EPERM' && attempts > 0) {
-            console.log(`Retrying rename... attempts left: ${attempts}`);
             setTimeout(() => renameWithRetry(src, dest, attempts - 1), 500);
         } else {
             console.error(`Error renaming ${src} to ${dest}:`, err);

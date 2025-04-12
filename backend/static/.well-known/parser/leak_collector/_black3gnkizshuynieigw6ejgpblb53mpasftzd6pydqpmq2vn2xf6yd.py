@@ -156,7 +156,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_dumplink=[dump_link],
                         m_network=helper_method.get_network_type(self.base_url),
                         m_base_url=self.base_url,
-                        m_content=description,
+                        m_content=description + " " + self.base_url + " " + leak_url,
                         m_important_content=description,
                         m_content_type=["leaks"],
                         m_data_size=data_size,

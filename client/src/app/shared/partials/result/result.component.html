@@ -1,5 +1,5 @@
 <form class="default-input-container w-90" (submit)="onFormSubmit()" @fadeInDashboardItem>
-  <div class="d-flex align-items-center justify-content-between w-100 flex-wrap">
+  <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
     <div class="col-md-10 col-sm-12 col-xs-12">
       <div class="input-group default-input-sub-container">
         <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..."
@@ -14,8 +14,18 @@
       <ng-container *ngIf="type == Category.STRATEGIC">
         <div class="default-notification-banner">
           <span>
-            <img src="../../../../assets/images/shared/hint.svg" class="default-notification-banner-icon" alt="Info Icon">
-            Current results are general and may lack accuracy. For precise insights, open the <u><b>Data Breaches</b></u> section in sidebar
+            <img src="../../../../assets/images/shared/hint.svg" class="default-notification-banner-icon"
+                 alt="Info Icon">
+              <span>
+                Current results are general and may lack accuracy. For precise insights, open the &nbsp;
+                <u><b>
+                  <a
+                    class="cursor-pointer text-reset text-decoration-none"
+                    routerLink="/dashboard/breach/databases"
+                    queryParamsHandling="preserve">
+                    Data Breaches</a>
+                </b></u> &nbsp; section in sidebar.
+              </span>
           </span>
         </div>
       </ng-container>
@@ -64,3 +74,8 @@
       Results Found</span>
   </div>
 </div>
+
+<div *ngIf="!isLoading && result_count>0" @fadeInDashboardItem>
+  <app-scroll-top></app-scroll-top>
+</div>
+

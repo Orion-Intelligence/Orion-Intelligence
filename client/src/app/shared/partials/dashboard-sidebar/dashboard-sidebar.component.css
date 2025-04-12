@@ -4,13 +4,14 @@
 
 .sidebar__header {
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 500;
   margin-bottom: 0;
   display: flex;
   align-items: start;
   justify-content: space-between;
   width: 100%;
   padding: 10px 15px;
+  margin-top: 10px;
 }
 
 .sidebar__header-menu {
@@ -18,12 +19,13 @@
   border: none;
   cursor: pointer;
   margin-left: 1px;
+  margin-top: -5px;
 }
 
 .sidebar__items {
   list-style: none;
   overflow-y: auto;
-  height: 88vh;
+  height: calc(100vh - 250px);
   scrollbar-width: none;
   margin-left: -5px;
   padding: 20px;
@@ -35,6 +37,30 @@
   );
 }
 
+.sidebar-hotlinks{
+  border-top: 1px solid #ffffff10;
+  padding-top: 10px;
+  position: absolute;
+  bottom: 31px;
+  left: 13px;
+  width: 265px;
+}
+
+.sidebar-hotlinks-collapsed{
+  padding-top: 10px;
+  border-top: 1px solid #ffffff10;
+  position: absolute;
+  bottom: 31px !important;
+}
+
+.sidebar-hotlinks-collapsed .sidebar__icon{
+  margin: 0;
+}
+
+.sidebar-hotlinks-collapsed .sidebar__item .sidebar__item-dropdown{
+  padding: 13px 16px;
+}
+
 .sidebar__item .sidebar__item-dropdown {
   text-decoration: none;
   color: #A0B8D1;
@@ -44,13 +70,13 @@
   border: 1px solid #ffffff00;
   font-weight: 500;
   font-size: 14px;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: background 0.3s, max-height 0.3s ease-out;
   cursor: pointer;
 }
 
 .sidebar__item {
-  margin: 7px 0;
+  margin: 6px 0 0;
   border-radius: 8px;
 }
 
@@ -117,9 +143,10 @@
 .sidebar__subitem-content{
   padding: 12px 12px 12px 0;
   font-size: 13px;
+  font-weight: 500;
   margin-left: 20px;
   border-radius: 6px;
-  font-family: Roboto, sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 .sidebar__subitem-content:hover{
@@ -146,7 +173,7 @@
 .sidebar__selected {
   border-left: 1px solid #fff;
   color: white;
-  font-weight: bold;
+  font-weight: 500;
   height: 43px;
 }
 
@@ -156,6 +183,7 @@
 }
 
 .sidebar__dropdown-icon {
+  transform: rotate(270deg);
   transition: transform 0.3s ease;
   float: right;
 }
@@ -166,7 +194,7 @@
 }
 
 .sidebar__item-dropdown.active .sidebar__dropdown-icon {
-  transform: rotate(180deg);
+  transform: rotate(360deg);
 }
 
 .sidebar__items .active {
@@ -236,13 +264,13 @@
 .sidebar-collapsed .sidebar__subitem-content {
   width: 30px;
   height: 30px;
-  margin-left: -7px;
+  margin-left: -5px;
   padding: 20px;
 }
 
 .sidebar-collapsed .sidebar__icon-min{
-  margin-top: -58px !important;
-  margin-left: -10px !important;
+  margin-top: -61px !important;
+  margin-left: -7px !important;
 
 }
 
@@ -263,6 +291,8 @@
 .sidebar-collapsed .sidebar__icon-min{
   margin: 0 0 0 3px;
   padding: 0;
+  width: 14px;
+  height: 14px;
 }
 
 .sidebar-collapsed .sidebar__items{
@@ -345,3 +375,4 @@
     height: 100vw;
   }
 }
+

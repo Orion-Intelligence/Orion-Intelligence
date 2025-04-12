@@ -121,7 +121,7 @@ class _csidb(leak_extractor_interface, ABC):
                     m_url=self.seed_url,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_base_url=self.base_url,
-                    m_content=summary,
+                    m_content=summary + " " + self.base_url + " " + self.seed_url,
                     m_important_content=important_content,
                     m_content_type=["hacking"],
                     m_leak_date=incident_date,

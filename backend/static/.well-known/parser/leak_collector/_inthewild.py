@@ -146,7 +146,7 @@ class _inthewild(leak_extractor_interface, ABC):
                                 m_url=page.url,
                                 m_base_url=self.base_url,
                                 m_weblink=[reference_url],
-                                m_content=description_text,
+                                m_content=description_text + " " + self.base_url + " " + page.url,
                                 m_important_content=description_text,
                                 m_network=helper_method.get_network_type(self.base_url),
                                 m_leak_date=helper_method.extract_and_convert_date(last_update_date),

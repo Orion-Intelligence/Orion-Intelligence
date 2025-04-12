@@ -69,6 +69,20 @@
   display: none !important;
 }
 
+.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: .255em;
+  vertical-align: .255em;
+  content: "";
+  width: 1.5em;
+  height: 1.5em;
+  background-image: url('/assets/images/shared/search_side_dropdown_icon_dark.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+}
+
 .header_form-user--logout_icon {
   background: none;
   border: none;

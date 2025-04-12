@@ -21,7 +21,7 @@
   font-weight: 400;
   font-size: 14px;
   color: #fff;
-  font-family: 'Roboto', sans-serif !important;
+  font-family: 'Roboto', sans-serif;
   cursor: pointer;
   transition: opacity 0.2s ease-in-out, background 0.2s ease-in-out;
   opacity: 0.9;
