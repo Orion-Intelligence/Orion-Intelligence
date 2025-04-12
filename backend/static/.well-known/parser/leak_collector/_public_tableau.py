@@ -154,7 +154,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                     card_data = leak_model(
                         m_title=company_name,
                         m_section=content_parts,
-                        m_url=page.url,
+                        m_url=base_url,
                         m_base_url=base_url,
                         m_screenshot="",
                         m_content=m_content + " " + self.base_url + " " + page.url,
