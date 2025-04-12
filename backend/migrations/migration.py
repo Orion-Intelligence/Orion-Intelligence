@@ -39,7 +39,7 @@ class migration_manager:
         version_str = file.replace("migration_", "").replace(".py", "").replace("_", ".")
         migration_versions.append((version_str, file))
       migration_versions.sort(key=lambda x: [int(part) if part.isdigit() else part for part in x[0].split(".")])
-      stored_version = stored_version or "0.0.0"
+      stored_version = stored_version or version
       target_version_parts = [int(part) if part.isdigit() else part for part in version.split(".")]
       if stored_version.__contains__("_"):
         stored_version_parts = [int(part) if part.isdigit() else part for part in stored_version.split("_")]

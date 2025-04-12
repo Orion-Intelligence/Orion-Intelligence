@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_NAME="trusted-web-main"
+PROJECT_NAME="trusted-search"
 
 stop_docker() {
     docker compose -p "$PROJECT_NAME" down --remove-orphans
