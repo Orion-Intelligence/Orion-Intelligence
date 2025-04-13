@@ -18,8 +18,7 @@ module.exports = {
       controlFlowFlatteningThreshold: 0.75,
       deadCodeInjection: false,
       stringArray: true,
-      stringArrayEncoding: ['base64'],
-      stringArrayThreshold: 0.75,
+      stringArrayThreshold: 0.2,
     }, ['vendor.js'])
   ]
 };
