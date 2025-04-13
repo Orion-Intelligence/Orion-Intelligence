@@ -4,7 +4,7 @@
     <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="saveSession(item.m_hash)">
 
       <div class="dashboard__search-tags">
-        <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+        <span *ngFor="let tag of visibleResults" class="dashboard__tag">{{ tag }}</span>
       </div>
 
       <h2 class="dashboard__search-title">{{ item.m_title }}</h2>

@@ -18,6 +18,7 @@ export class DashboardResultsGridComponent implements AfterViewInit {
   @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
   currentUrl: string = '';
   queryParams: any = {};
+  itemsToShow = 5;
 
   constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute) {
   }
@@ -66,6 +67,10 @@ export class DashboardResultsGridComponent implements AfterViewInit {
         window.scrollTo({top: position, behavior: 'auto'});
       }
     }
+  }
+
+  get visibleResults(): (GeneralResultItem | LeakResultItem)[] {
+    return this.searchResults.slice(0, this.itemsToShow);
   }
 
   highlightWords(text: string, maxLength: number = 250): SafeHtml {
