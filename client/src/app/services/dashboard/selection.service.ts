@@ -35,7 +35,7 @@ export class SelectionStoreService {
       const section = match[1];
       const option = match[2];
 
-      if (!option && section !== 'home') {
+      if (!option && section !== 'home' && section !== 'directory') {
         return;
       }
       const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);

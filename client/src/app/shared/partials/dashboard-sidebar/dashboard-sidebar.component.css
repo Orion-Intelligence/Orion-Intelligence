@@ -188,6 +188,11 @@
   float: right;
 }
 
+.sidebar__item-dropdown-hotlink-active{
+  background: #ffffff12;
+  color: #fff;
+}
+
 .sidebar__item-dropdown:hover{
   background: #2A578435;
   color: #fff;

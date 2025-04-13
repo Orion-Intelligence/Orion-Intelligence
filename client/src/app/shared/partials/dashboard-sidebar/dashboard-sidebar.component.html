@@ -24,8 +24,8 @@
 </nav>
 <div class="sidebar-hotlinks"  *ngIf="this.sidebar_default" >
   <li class="sidebar__item">
-    <div class="sidebar__item-dropdown"
-         [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
+    <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+         [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
          (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
       <img ngSrc="../../../../assets/images/sidebar/directory.svg" alt="Links" height="20" width="20"
            class="sidebar__icon"> Links
@@ -62,7 +62,7 @@
 </nav>
 <div class="sidebar-hotlinks-collapsed" *ngIf="!this.sidebar_default" >
     <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
+      <div class="sidebar__item-dropdown" [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
         <img ngSrc="../../../../assets/images/sidebar/directory.svg" alt="Links" height="20" width="20" class="sidebar__icon"></div>
     </li>
 
