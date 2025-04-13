@@ -11,12 +11,10 @@ import {GeneralResultItem} from '../../../model/results/general/general.callback
 import {AppService} from '../../../../services/core/app.service';
 import {Category} from '../../../enums/pages';
 import {ApiService} from '../../../services/api.service';
+import {HttpParams} from '@angular/common/http';
 
 @Component({
-  selector: 'app-result-panel',
-  templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage],
-  animations: [fadeInDashboardItem],
+  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage], animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;
@@ -93,7 +91,28 @@ export class ReportComponent implements OnInit {
   langUpdate() {
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('lang', this.lang);
-    window.location.href = currentUrl.toString();
+
+    const segments = currentUrl.pathname.split('/').filter(Boolean);
+    const type = segments[segments.length - 3];
+    const reportId = segments[segments.length - 1];
+    const apiUrl = `search/${type}/${reportId}`;
+
+    window.history.pushState({}, '', currentUrl.toString());
+
+    this.api.get<GeneralResultItem | LeakResultItem>(apiUrl, {
+      params: new HttpParams().set('lang', this.lang)
+    }).subscribe({
+      next: (result) => {
+        this.resultItem = result;
+        this.processResultItem();
+
+        if (this.resultItem?.m_screenshot) {
+          this.loadImage(this.resultItem.m_screenshot);
+        }
+
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   shareResult() {
@@ -138,7 +157,7 @@ export class ReportComponent implements OnInit {
   }
 
   loadImage(fileName: string) {
-    const endpoint = `search/leak/screenshot/${fileName}`;
+    const endpoint = `search/breach/screenshot/${fileName}`;
 
     this.api.get<Blob>(endpoint, {
       responseType: 'blob'

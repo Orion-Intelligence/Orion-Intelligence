@@ -19,10 +19,10 @@ export class ReportResolver implements Resolve<any> {
 
     switch (category) {
       case 'breach':
-        apiUrl = hash ? `search/leak/${hash}` : `search/leak`;
+        apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
         break;
       case 'strategic':
-        apiUrl = hash ? `search/general/${hash}` : `search/general`;
+        apiUrl = hash ? `search/strategic/${hash}` : `search/strategic`;
         break;
       case 'defacement':
         apiUrl = hash ? `search/defacement/${hash}` : `search/defacement`;

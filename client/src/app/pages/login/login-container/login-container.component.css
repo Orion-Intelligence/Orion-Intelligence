@@ -34,8 +34,8 @@
 
 .login-header {
   display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
+  justify-content: left;
+  margin-bottom: 40px;
 }
 
 .login-error-message {

@@ -91,7 +91,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
     this.isLoading = true;
 
-    const apiEndpoint = this.type === Category.STRATEGIC ? 'search/general' : 'search/leak';
+    const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
 
     const queryParams = Object.fromEntries(Object.entries(this.generalParamModel).filter(([_, v]) => v != null && v !== ""));
 

@@ -49,10 +49,11 @@ class search_model:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)
     return await self.__search_callback.get_doc(result)
 
-  async def request_leak_doc(self, doc_id) -> Optional[result_item]:
+  async def request_leak_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id)
-    result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"])
-    result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"])
+    if lang:
+      result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+      result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)
     return await self.__search_callback.get_doc(result)
 
   async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:

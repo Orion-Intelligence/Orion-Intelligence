@@ -9,9 +9,8 @@
 <div *ngIf="!authenticated" id="content" class="login-container">
   <div class="login-box">
     <div class="login-header">
-      <img ngSrc="assets/images/shared/home-logo.svg" alt="logo" width="232" height="41" priority>
+      <img src="assets/images/shared/home-logo.svg" alt="logo" width="232" height="41">
     </div>
-
 
     <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
       {{ errorMessage }} </p>

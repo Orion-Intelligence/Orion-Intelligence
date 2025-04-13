@@ -1,7 +1,6 @@
 import hashlib
 import json
 import locale
-from typing import Optional
 from urllib.parse import urlparse, urlunparse
 from deep_translator import GoogleTranslator
 from starlette.requests import Request
@@ -37,16 +36,12 @@ class helper_controller:
     return f'{m_doc_size * 100:n}'
 
   @staticmethod
-  def detect_and_translate(text: str, target_lang: Optional[str] = None) -> str:
-    if not target_lang:
-      return text
+  def detect_and_translate(text: str, target_lang: str) -> str:
     try:
       translated_text = GoogleTranslator(source='auto', target=target_lang).translate(text[0:4500])
       return translated_text
     except Exception as e:
-      pass
-
-    return f"Error translating text: {str(e)}"
+      return f"Error translating text: {str(e)}"
 
   @staticmethod
   def normalize_url(input_url):
