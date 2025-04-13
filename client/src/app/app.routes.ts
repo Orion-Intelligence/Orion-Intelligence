@@ -49,7 +49,7 @@ export const routes: Routes = [{
   }, {
     path: 'breach',
     data: {animation: 'DataBreach'},
-    children: [{path: '', redirectTo: 'databases', pathMatch: 'full'}, {
+    children: [{path: '', redirectTo: 'all', pathMatch: 'full'}, {
       path: ':category',
       component: DashboardGeneralComponent,
       data: {type: 'Breach', animation: 'DataBreach'}

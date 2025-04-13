@@ -21,6 +21,7 @@ export enum GeneralSubCategory {
 }
 
 export enum BreachSubCategory {
+  ALL = 'All',
   DATABASES = 'Databases',
   TRACKING = 'Tracking',
 }
