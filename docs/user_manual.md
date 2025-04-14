@@ -18,14 +18,21 @@ Here’s an overview of the interface components
 
 ### Navbar Filter
 
-The top navigation bar consists of three main menus
+The navigation bar is now positioned on the left side of the page for improved accessibility and a more streamlined workflow. It consists of the following main menu items:
 
-1. **Home:**  Navigates back to the main page, allowing users to restart their workflow or access key features quickly and efficiently without losing context.
-2. **Links:** Shows the crawled links stored in the database.
+1. **Homepage:** Navigates back to the main page, allowing users to restart their workflow or access key features quickly and efficiently without losing context.
 
-3. **Analytics:** This is displayed on our home page, showcasing two types of data results: Generic Results, which provide a broad summary of findings, and Leaked Index, highlighting sensitive or critical information for immediate attention.
+2. **General Intelligence:** Provides access to collected intelligence data for broad analysis and understanding of the threat landscape.
 
-[![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/navbar.png)](https://github.com/Orion-Intelligence/Orion-Intelligence/blob/trusted-main/docs/user_manual.md)
+3. **Data Breach:** Displays information about identified data breaches, highlighting compromised credentials or sensitive data.
+
+4. **Defacement:** Shows reports of website defacement activities detected by the system.
+
+5. **Live APIs:** Offers real-time data feeds and APIs for integration and continuous monitoring.
+
+
+![image](https://github.com/user-attachments/assets/df167528-6a49-4db2-9d1c-0ee020d779cd)
+
 
 
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. At the top, there is a search bar designed for users to quickly search for specific information, streamlining the process of data retrieval. Below the search bar, the page is divided into two main sections: the General Index and the Leaked Index. The General Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
