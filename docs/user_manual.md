@@ -3,50 +3,57 @@
 
 let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that provide full control over the system's functionality, ensuring smooth and efficient management of operations.
 
-![screencapture-orion-genesistechnologies-org-dashboard-home-2025-04-14-14_27_53](https://github.com/user-attachments/assets/902944a6-c0df-4bc5-8be1-2269ea52ae08)
-
-
+![screencapture-orion-genesistechnologies-org-login-2025-04-14-14_35_29-modified](https://github.com/user-attachments/assets/6558f18f-eaa8-455d-83b5-c68b9371ddc2)
 
 ## Homepage Page
 
 The Orion Platform's main interface offers users straightforward access to its features. It integrates with machine learning models to improve search accuracy and enable advanced content analysis. Orion provides a variety of functions, such as searching, filtering, and visualizing data across multiple categories, making it a powerful tool for exploring data and gathering insights.
 
-![screencapture-orion-genesistechnologies-org-2025-01-08-11_43_05](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/homepage.png)
+![screencapture-orion-genesistechnologies-org-dashboard-home-2025-04-14-14_26_54-modified](https://github.com/user-attachments/assets/1997449d-7e7a-4595-80bc-98427940ee68)
+
 
 ## Directory Page
 Here’s an overview of the interface components
 
 ### Navbar Filter
 
-The top navigation bar consists of three main menus
+The navigation bar is now positioned on the left side of the page for improved accessibility and a more streamlined workflow. It consists of the following main menu items:
 
-1. **Home:**  Navigates back to the main page, allowing users to restart their workflow or access key features quickly and efficiently without losing context.
-2. **Links:** Shows the crawled links stored in the database.
+1. **Homepage:** Navigates back to the main page, allowing users to restart their workflow or access key features quickly and efficiently without losing context.
 
-3. **Analytics:** This is displayed on our home page, showcasing two types of data results: Generic Results, which provide a broad summary of findings, and Leaked Index, highlighting sensitive or critical information for immediate attention.
+2. **General Intelligence:** Provides access to collected intelligence data for broad analysis and understanding of the threat landscape.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/navbar.png)
+3. **Data Breach:** Displays information about identified data breaches, highlighting compromised credentials or sensitive data.
+
+4. **Defacement:** Shows reports of website defacement activities detected by the system.
+
+5. **Live APIs:** Offers real-time data feeds and APIs for integration and continuous monitoring.
 
 
-The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. At the top, there is a search bar designed for users to quickly search for specific information, streamlining the process of data retrieval. Below the search bar, the page is divided into two main sections: the General Index and the Leaked Index. The General Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
+![sidebar-modified](https://github.com/user-attachments/assets/cd1b7813-0f1f-4143-b38c-6c071349cd85)
+
+The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index. The Generic Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
+
 ### Key Features
 - The **search bar** at the top allows for quick and efficient searching of specific information.
-- The **General Index** provides an overview of the broad data collected, offering a summary of standard findings.
+- The **Generic Index** provides an overview of the broad data collected, offering a summary of standard findings.
 The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
 The **structured layout** divides the page into sections, ensuring an intuitive and efficient user experience.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/searchbar.png)
+![cetagories-modified](https://github.com/user-attachments/assets/4202e48f-4965-40b4-ac53-df3ee6c4f81a)
+
 
 The home page features a prominent search bar at the top, allowing users to input data for viewing or crawling. Below the search bar, the page is organized into two primary categories. These categories structure the platform’s core data for easy access and analysis.
 
 ### Categories Filter
 Selecting "Analytics" from the navigation bar displays two categories already available on the home page. This section provides a clear view of the platform’s data results. It is organized into two main categories for streamlined analysis.
 
-1. #### General Index
+1. #### Generic Index
    
- ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/genericresults.png)
- 
-The "General Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
+![generic index-modified](https://github.com/user-attachments/assets/36155cf7-e710-4739-b62b-24a550402444)
+
+
+The "Generic Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
 
 - **Document Count:** This section provides detailed information about the results obtained after fetching the data, focusing on the document count. It displays the total number of documents retrieved, presented as a single count value. This summary helps users quickly understand the volume of data collected.
 
@@ -72,9 +79,19 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 2. #### Leaked Index
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/leakedindex1.png)
+![leaked index-modified](https://github.com/user-attachments/assets/199958b0-9477-443f-9220-743dbe6ffc43)
 
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
+
+3. ### Defacement
+The Defacement category allows users to analyze data related to websites that have been compromised or defaced. Within this section, users can:
+- View the total number of websites that have been hacked or visually altered by attackers.
+- Identify and filter fake or fraudulent websites among the defaced entries.
+- Review technical metrics such as the server response speed at the time the defacement was detected.
+This category provides valuable insights into the nature and scale of web defacement incidents, enabling users to monitor emerging threats and evaluate the performance and vulnerabilities of affected web servers.
+
+![defecement-modified](https://github.com/user-attachments/assets/ecf0f26a-49e4-4dcc-89ee-91a32a78cec3)
+
 
 ### Links Filter
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
@@ -82,6 +99,7 @@ This is the second option in our navigation bar, offering a comprehensive view o
 ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/linktab.png)
 
 On this page, the live onion search table includes various elements that we will discuss individually. Each element plays a crucial role in the search and data retrieval process.
+
 In the first row, we have URLs, followed by the network type.
 
 #### Network Types
