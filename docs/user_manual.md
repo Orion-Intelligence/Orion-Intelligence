@@ -3,15 +3,15 @@
 
 let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that provide full control over the system's functionality, ensuring smooth and efficient management of operations.
 
-![screencapture-orion-genesistechnologies-org-dashboard-home-2025-04-14-14_27_53](https://github.com/user-attachments/assets/902944a6-c0df-4bc5-8be1-2269ea52ae08)
-
+![screencapture-orion-genesistechnologies-org-login-2025-04-14-14_35_29](https://github.com/user-attachments/assets/b2b91a82-47c9-4184-8e69-803e0105393f)
 
 
 ## Homepage Page
 
 The Orion Platform's main interface offers users straightforward access to its features. It integrates with machine learning models to improve search accuracy and enable advanced content analysis. Orion provides a variety of functions, such as searching, filtering, and visualizing data across multiple categories, making it a powerful tool for exploring data and gathering insights.
 
-![screencapture-orion-genesistechnologies-org-2025-01-08-11_43_05](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/homepage.png)
+![screencapture-orion-genesistechnologies-org-dashboard-home-2025-04-14-14_27_53](https://github.com/user-attachments/assets/b4847177-1d89-4eec-9dbc-e564db98d72f)
+
 
 ## Directory Page
 Here’s an overview of the interface components
