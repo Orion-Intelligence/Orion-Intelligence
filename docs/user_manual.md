@@ -83,14 +83,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
-### Links Filter
-This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/linktab.png)
-
-On this page, the live onion search table includes various elements that we will discuss individually. Each element plays a crucial role in the search and data retrieval process.
-
-### Defacement
+3. ### Defacement
 The Defacement category allows users to analyze data related to websites that have been compromised or defaced. Within this section, users can:
 - View the total number of websites that have been hacked or visually altered by attackers.
 - Identify and filter fake or fraudulent websites among the defaced entries.
@@ -98,6 +91,14 @@ The Defacement category allows users to analyze data related to websites that ha
 This category provides valuable insights into the nature and scale of web defacement incidents, enabling users to monitor emerging threats and evaluate the performance and vulnerabilities of affected web servers.
 
 ![image](https://github.com/user-attachments/assets/7e3b3c44-c89f-4110-aa85-c3da379df6f1)
+
+
+### Links Filter
+This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
+
+![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/linktab.png)
+
+On this page, the live onion search table includes various elements that we will discuss individually. Each element plays a crucial role in the search and data retrieval process.
 
 In the first row, we have URLs, followed by the network type.
 
