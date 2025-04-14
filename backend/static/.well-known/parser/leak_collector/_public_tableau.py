@@ -68,10 +68,9 @@ class _public_tableau(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-
     def parse_leak_data(self, page: Page):
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-        max_pages = 100 if is_crawled else 50000
+        max_pages = 50000 if is_crawled else 100000
 
         page.evaluate("""
             const cursor = document.createElement('div');
@@ -96,6 +95,7 @@ class _public_tableau(leak_extractor_interface, ABC):
 
         page.wait_for_selector("#tabZoneId8", state="visible", timeout=60000)
         sleep(10)
+
         viewport = page.viewport_size
         x_position = int(viewport["width"] * 0.8)
         default_y_position = 98
@@ -104,95 +104,103 @@ class _public_tableau(leak_extractor_interface, ABC):
         previous_content = None
         self._card_data = []
 
-        try:
-            for _ in range(max_pages):
+        retry_count = 0
+        max_retries = 5
 
+        for _ in range(max_pages):
+            if retry_count >= max_retries:
+                break
+
+            try:
                 page.mouse.move(x_position, y_position)
-
-
                 page.evaluate(f'moveFakeCursor({x_position}, {y_position});')
-
                 page.wait_for_selector(".tab-tooltipContainer", timeout=5000)
                 tooltip_element = page.query_selector(".tab-tooltipContainer")
-                if tooltip_element:
-                    tooltip_content = tooltip_element.inner_html()
-                    if tooltip_content == previous_content:
-                        continue
-                    previous_content = tooltip_content
+                if not tooltip_element:
+                    continue
 
-                    soup = BeautifulSoup(tooltip_content, "html.parser")
-                    all_spans = soup.select(".tab-selection-relaxation")
-                    company_name = all_spans[0].text.strip() if all_spans else "Unknown Title"
+                tooltip_content = tooltip_element.inner_html()
+                if tooltip_content == previous_content:
+                    continue
+                previous_content = tooltip_content
 
-                    tables = soup.select(".tab-ubertipTooltip table")
-                    data_dict = {}
-                    for table in tables:
-                        for row in table.find_all("tr"):
-                            tds = row.find_all("td")
-                            if len(tds) >= 3:
-                                key = tds[0].get_text(strip=True).rstrip(":")
-                                val = tds[2].get_text(strip=True)
-                                data_dict[key] = val
+                soup = BeautifulSoup(tooltip_content, "html.parser")
+                all_spans = soup.select(".tab-selection-relaxation")
+                company_name = all_spans[0].text.strip() if all_spans else "Unknown Title"
 
-                    base_url = self.base_url
-                    for table in tables:
-                        for tr in table.find_all("tr"):
-                            tds = tr.find_all("td")
-                            if len(tds) >= 3 and "Source" in tds[0].text:
-                                spans = tds[2].find_all("span", class_="tab-selection-relaxation")
-                                if spans and len(spans) > 1:
-                                    base_url = spans[-1].text.strip()
+                tables = soup.select(".tab-ubertipTooltip table")
+                data_dict = {}
+                for table in tables:
+                    for row in table.find_all("tr"):
+                        tds = row.find_all("td")
+                        if len(tds) >= 3:
+                            key = tds[0].get_text(strip=True).rstrip(":")
+                            val = tds[2].get_text(strip=True)
+                            data_dict[key] = val
 
-                    weblinks = re.findall(r'https?://[^\s<"]+', tooltip_content)
+                base_url = self.base_url
+                for table in tables:
+                    for tr in table.find_all("tr"):
+                        tds = tr.find_all("td")
+                        if len(tds) >= 3 and "Source" in tds[0].text:
+                            spans = tds[2].find_all("span", class_="tab-selection-relaxation")
+                            if spans and len(spans) > 1:
+                                base_url = spans[-1].text.strip()
 
-                    m_important = data_dict.get("Incident Details", "")
-                    content_parts = [
-                        data_dict.get("Incident Details", ""),
-                        data_dict.get("Breach Type", ""),
-                        data_dict.get("Organization Type", ""),
-                        data_dict.get("Information Impacted", "")
-                    ]
-                    m_content = "\n".join(content_parts).strip()
+                weblinks = re.findall(r'https?://[^\s<"]+', tooltip_content)
+                m_important = data_dict.get("Incident Details", "")
+                content_parts = [
+                    data_dict.get("Incident Details", ""),
+                    data_dict.get("Breach Type", ""),
+                    data_dict.get("Organization Type", ""),
+                    data_dict.get("Information Impacted", "")
+                ]
+                m_content = "\n".join(content_parts).strip()
 
-                    card_data = leak_model(
-                        m_title=company_name,
-                        m_section=content_parts,
-                        m_url=base_url,
-                        m_base_url=base_url,
-                        m_screenshot="",
-                        m_content=m_content + " " + self.base_url + " " + page.url,
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=m_important,
-                        m_weblink=weblinks,
-                        m_dumplink=[],
-                        m_content_type=["tracking"],
-                        m_leak_date=(
-                            datetime.strptime(data_dict["Breach date"], "%Y-%m-%d").date()
-                            if "Breach date" in data_dict and data_dict["Breach date"] != "UNKN"
-                            else None
-                        ),
-                        m_data_size=f"{data_dict['Total Affected']} individuals"
-                        if "Total Affected" in data_dict and data_dict["Total Affected"] != "UNKN"
-                        else None,
-                    )
+                card_data = leak_model(
+                    m_title=company_name,
+                    m_section=content_parts,
+                    m_url=base_url,
+                    m_base_url=base_url,
+                    m_screenshot="",
+                    m_content=m_content + " " + self.base_url + " " + page.url,
+                    m_network=helper_method.get_network_type(self.base_url),
+                    m_important_content=m_important,
+                    m_weblink=weblinks,
+                    m_dumplink=[],
+                    m_content_type=["tracking"],
+                    m_leak_date=(
+                        datetime.strptime(data_dict["Breach date"], "%Y-%m-%d").date()
+                        if "Breach date" in data_dict and data_dict["Breach date"] != "UNKN"
+                        else None
+                    ),
+                    m_data_size=f"{data_dict['Total Affected']} individuals"
+                    if "Total Affected" in data_dict and data_dict["Total Affected"] != "UNKN"
+                    else None,
+                )
 
-                    entity_data = entity_model(
-                        m_country_name="United States",
-                        m_industry="Healthcare" if data_dict.get("Organization Type") == "MED" else None,
-                        m_email_addresses=helper_method.extract_emails(tooltip_content),
-                        m_phone_numbers=helper_method.extract_phone_numbers(tooltip_content),
-                        m_company_name=company_name,
-                        m_states=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else [],
-                    )
+                entity_data = entity_model(
+                    m_country_name="United States",
+                    m_industry="Healthcare" if data_dict.get("Organization Type") == "MED" else None,
+                    m_email_addresses=helper_method.extract_emails(tooltip_content),
+                    m_phone_numbers=helper_method.extract_phone_numbers(tooltip_content),
+                    m_company_name=company_name,
+                    m_states=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else [],
+                )
 
-                    self.append_leak_data(card_data, entity_data)
+                self.append_leak_data(card_data, entity_data)
 
                 y_position += 20
                 hover_count += 1
+                retry_count = 0  # reset on success
+
                 if hover_count % 15 == 0:
                     page.mouse.wheel(0, 280)
                     y_position = default_y_position
-        except Exception as ex:
-            print(ex)
-        finally:
-            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)
+
+            except Exception as ex:
+                print(f"Error on hover {hover_count}: {ex}")
+                retry_count += 1
+                y_position += 20  # shift cursor anyway to avoid stuck position
+
+        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)
