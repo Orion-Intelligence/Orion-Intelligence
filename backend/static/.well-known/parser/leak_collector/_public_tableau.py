@@ -68,7 +68,7 @@ class _public_tableau(leak_extractor_interface, ABC):
 
     def parse_leak_data(self, page: Page):
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-        max_pages = 100 if is_crawled else 50000
+        max_pages = 10000 if is_crawled else 50000
 
         page.evaluate("""
             const cursor = document.createElement('div');
