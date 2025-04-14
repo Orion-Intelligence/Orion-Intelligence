@@ -32,15 +32,15 @@ The navigation bar is now positioned on the left side of the page for improved a
 
 ![sidebar-modified](https://github.com/user-attachments/assets/cd1b7813-0f1f-4143-b38c-6c071349cd85)
 
-The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index. The General Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
+The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index. The Generic Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
 
 ### Key Features
 - The **search bar** at the top allows for quick and efficient searching of specific information.
-- The **General Index** provides an overview of the broad data collected, offering a summary of standard findings.
+- The **Generic Index** provides an overview of the broad data collected, offering a summary of standard findings.
 The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
 The **structured layout** divides the page into sections, ensuring an intuitive and efficient user experience.
 
-![image](https://github.com/user-attachments/assets/e7d9c310-0dde-4eb1-a18b-9c4958995d44)
+![cetagories-modified](https://github.com/user-attachments/assets/4202e48f-4965-40b4-ac53-df3ee6c4f81a)
 
 
 The home page features a prominent search bar at the top, allowing users to input data for viewing or crawling. Below the search bar, the page is organized into two primary categories. These categories structure the platform’s core data for easy access and analysis.
@@ -48,11 +48,12 @@ The home page features a prominent search bar at the top, allowing users to inpu
 ### Categories Filter
 Selecting "Analytics" from the navigation bar displays two categories already available on the home page. This section provides a clear view of the platform’s data results. It is organized into two main categories for streamlined analysis.
 
-1. #### General Index
+1. #### Generic Index
    
-![image](https://github.com/user-attachments/assets/19119c1e-a19d-423b-80d0-0de5b295e6f7)
+![generic index-modified](https://github.com/user-attachments/assets/36155cf7-e710-4739-b62b-24a550402444)
 
-The "General Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
+
+The "Generic Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
 
 - **Document Count:** This section provides detailed information about the results obtained after fetching the data, focusing on the document count. It displays the total number of documents retrieved, presented as a single count value. This summary helps users quickly understand the volume of data collected.
 
@@ -78,7 +79,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 2. #### Leaked Index
 
-![image](https://github.com/user-attachments/assets/5aeadffd-aff5-4644-be1a-187c7870fbf9)
+![leaked index-modified](https://github.com/user-attachments/assets/199958b0-9477-443f-9220-743dbe6ffc43)
 
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
@@ -89,7 +90,7 @@ The Defacement category allows users to analyze data related to websites that ha
 - Review technical metrics such as the server response speed at the time the defacement was detected.
 This category provides valuable insights into the nature and scale of web defacement incidents, enabling users to monitor emerging threats and evaluate the performance and vulnerabilities of affected web servers.
 
-![image](https://github.com/user-attachments/assets/7e3b3c44-c89f-4110-aa85-c3da379df6f1)
+![defecement-modified](https://github.com/user-attachments/assets/ecf0f26a-49e4-4dcc-89ee-91a32a78cec3)
 
 
 ### Links Filter
