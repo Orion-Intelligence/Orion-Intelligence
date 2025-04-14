@@ -60,11 +60,13 @@ class _mirror_h(leak_extractor_interface, ABC):
     def contact_page(self) -> str:
         return "https://mirror-h.org/contact"
 
-    def append_leak_data(self, leak: defacement_model, entity: entity_model):
+    def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
-            self.callback()
+            if self.callback():
+                self._card_data.clear()
+                self._entity_data.clear()
 
     @staticmethod
     def safe_find(page, selector, attr=None):
