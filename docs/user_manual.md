@@ -41,7 +41,8 @@ The home page acts as the central hub of the platform, providing users with easy
 The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
 The **structured layout** divides the page into sections, ensuring an intuitive and efficient user experience.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/searchbar.png)
+![image](https://github.com/user-attachments/assets/e7d9c310-0dde-4eb1-a18b-9c4958995d44)
+
 
 The home page features a prominent search bar at the top, allowing users to input data for viewing or crawling. Below the search bar, the page is organized into two primary categories. These categories structure the platform’s core data for easy access and analysis.
 
@@ -50,8 +51,8 @@ Selecting "Analytics" from the navigation bar displays two categories already av
 
 1. #### General Index
    
- ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/genericresults.png)
- 
+![image](https://github.com/user-attachments/assets/19119c1e-a19d-423b-80d0-0de5b295e6f7)
+
 The "General Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
 
 - **Document Count:** This section provides detailed information about the results obtained after fetching the data, focusing on the document count. It displays the total number of documents retrieved, presented as a single count value. This summary helps users quickly understand the volume of data collected.
@@ -78,7 +79,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 2. #### Leaked Index
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/leakedindex1.png)
+![image](https://github.com/user-attachments/assets/5aeadffd-aff5-4644-be1a-187c7870fbf9)
 
 The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
 
