@@ -89,6 +89,16 @@ This is the second option in our navigation bar, offering a comprehensive view o
 ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/linktab.png)
 
 On this page, the live onion search table includes various elements that we will discuss individually. Each element plays a crucial role in the search and data retrieval process.
+
+### Defacement
+The Defacement category allows users to analyze data related to websites that have been compromised or defaced. Within this section, users can:
+- View the total number of websites that have been hacked or visually altered by attackers.
+- Identify and filter fake or fraudulent websites among the defaced entries.
+- Review technical metrics such as the server response speed at the time the defacement was detected.
+This category provides valuable insights into the nature and scale of web defacement incidents, enabling users to monitor emerging threats and evaluate the performance and vulnerabilities of affected web servers.
+
+![image](https://github.com/user-attachments/assets/7e3b3c44-c89f-4110-aa85-c3da379df6f1)
+
 In the first row, we have URLs, followed by the network type.
 
 #### Network Types
