@@ -188,9 +188,17 @@
   float: right;
 }
 
+.sidebar__item-dropdown-hotlink:hover{
+  background: #31669b35 !important;
+}
+
 .sidebar__item-dropdown-hotlink-active{
-  background: #ffffff12;
-  color: #fff;
+  background: #31669b35;
+  color: #fff !important;
+}
+
+.sidebar__item-dropdown-hotlink-active .sidebar__icon{
+  opacity: 1;
 }
 
 .sidebar__item-dropdown:hover{
