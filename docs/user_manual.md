@@ -25,7 +25,7 @@ The top navigation bar consists of three main menus
 
 3. **Analytics:** This is displayed on our home page, showcasing two types of data results: Generic Results, which provide a broad summary of findings, and Leaked Index, highlighting sensitive or critical information for immediate attention.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/navbar.png)
+[![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/navbar.png)](https://github.com/Orion-Intelligence/Orion-Intelligence/blob/trusted-main/docs/user_manual.md)
 
 
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. At the top, there is a search bar designed for users to quickly search for specific information, streamlining the process of data retrieval. Below the search bar, the page is divided into two main sections: the General Index and the Leaked Index. The General Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
