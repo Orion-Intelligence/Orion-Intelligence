@@ -1,14 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DefacementResultItem} from '../../../model/results/defacement/defacement.param.model';
-import {NgOptimizedImage} from '@angular/common';
+import {DatePipe, NgOptimizedImage} from '@angular/common';
 import {HelperService} from '../../../services/helper.service';
 import {AppService} from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-report-defacement',
-  templateUrl: './report-defacement.component.html',
-  imports: [NgOptimizedImage],
+  templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe],
   styleUrls: ['./report-defacement.component.css']
 })
 export class ReportDefacementComponent implements OnInit {

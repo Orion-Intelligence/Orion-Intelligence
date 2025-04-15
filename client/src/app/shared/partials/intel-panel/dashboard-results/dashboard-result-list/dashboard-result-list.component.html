@@ -37,7 +37,7 @@
         <td>{{ item.m_attacker.join(', ') }}</td>
         <td>{{ item.m_team }}</td>
         <td>{{ item.m_web_server.join(', ') }}</td>
-        <td>{{ item.m_date_of_leak ? item.m_date_of_leak : 'N/A' }}</td>
+        <td>{{ item?.m_date_of_leak ? (item?.m_date_of_leak | date: 'MMM d, y') : 'N/A' }}</td>
         <td>
           <a *ngIf="item.m_web_url.length" [href]="item.m_web_url[0]" class="text-decoration-none text-reset">
             {{ item.m_web_url[0] }}

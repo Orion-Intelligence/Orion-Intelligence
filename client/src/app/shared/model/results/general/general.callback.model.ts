@@ -23,6 +23,7 @@ export class GeneralResultItem {
   m_phone_numbers: string[] = [];
   m_clearnet_links: string[] = [];
   m_weblink: string[] = [];
+  m_leak_date?: string | null;
   m_dumplink: string[] = [];
   m_contact_link?: string;
   m_update_date: string = new Date().toISOString();

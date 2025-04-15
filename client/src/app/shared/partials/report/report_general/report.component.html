@@ -40,7 +40,7 @@
   <div class="search__result-detail-meta">
     <div class="search__result-detail-meta-divs">
       <p>Published on:</p>
-      <span>{{ resultItem?.m_creation_date }}</span>
+      <span>{{ resultItem?.m_leak_date ? (resultItem?.m_leak_date | date: 'MMM d, y') : 'Not found' }}</span>
     </div>
     <div class="search__result-detail-meta-divs">
       <p>Network:</p>
@@ -48,7 +48,7 @@
     </div>
     <div class="search__result-detail-meta-divs">
       <p>Updated on:</p>
-      <span>{{ resultItem?.m_update_date }}</span>
+      <span>{{ resultItem?.m_creation_date | date: 'mediumDate' }}</span>
     </div>
     <div class="search__result-detail-meta-divs">
       <p class="tags">Tags:</p>

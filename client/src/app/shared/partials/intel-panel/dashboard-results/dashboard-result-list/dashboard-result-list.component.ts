@@ -1,11 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import { DefacementResultItem } from '../../../../model/results/defacement/defacement.param.model';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-result-list',
-  standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass],
+  standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe],
   templateUrl: './dashboard-result-list.component.html',
   styleUrls: ['./dashboard-result-list.component.css']
 })

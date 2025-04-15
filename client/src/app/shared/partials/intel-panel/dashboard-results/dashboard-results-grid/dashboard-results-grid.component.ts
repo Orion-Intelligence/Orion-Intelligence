@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, Input} from '@angular/core';
-import {NgForOf} from '@angular/common';
+import {DatePipe, NgForOf} from '@angular/common';
 import {SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {HelperService} from '../../../../services/helper.service';
@@ -8,8 +8,7 @@ import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model
 
 @Component({
   selector: 'app-dashboard-results-grid',
-  templateUrl: './dashboard-results-grid.component.html',
-  imports: [NgForOf, RouterLink],
+  templateUrl: './dashboard-results-grid.component.html', imports: [NgForOf, RouterLink, DatePipe],
   standalone: true
 })
 export class DashboardResultsGridComponent implements AfterViewInit {
