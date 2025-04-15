@@ -162,6 +162,32 @@ This section contains comprehensive records related to actual data breaches. It 
 
 2. ### Track
 This section provides breach-related information tracked from forums. It is primarily used for monitoring discussions and mentions of potential breaches across underground communities. Note: This section does not contain actual breached data — it only displays references or claims gathered from forum sources.
+![track-modified](https://github.com/user-attachments/assets/f52e62a2-b27b-4fb4-9a97-1ac997fe70cd)
+
+
+## Defacement
+The Defacement section provides access to an archive list of websites that have been compromised or defaced. This section maintains a structured table that records detailed information about each hacked website, including:
+
+- Serial Number – Unique identifier for each record.
+
+- Base URL – The domain or main address associated with the defaced site.
+
+- Data Source URL – Link to where the defaced content or evidence is archived.
+
+- Attacker(s) Name – The individual or group responsible for the defacement.
+
+- Team Name (if applicable) – Name of the hacker team involved, if any.
+
+- Web Server Information – Type of web server that was running on the affected site (e.g., Apache, Nginx, etc.).
+
+- Date of Defacement – The date when the defacement occurred.
+
+- Defaced Web URL – Direct link to the defaced website or the affected page.
+
+- This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams and analysts to monitor and investigate web-based attacks efficiently.
+
+![defacement-modified](https://github.com/user-attachments/assets/5b7e7a9e-d454-43fc-b7a1-1fbb3955ee13)
+
 
 ### Links Filter
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
@@ -252,6 +278,11 @@ We have a total of 6 classifiers here.The top bar, displayed post-search, includ
 This will provide us with the overall fetch results related to the keyword.
 
 ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/foundresults.png)
+
+
+
+
+
 
 ### Enable Safe Search Button
 
