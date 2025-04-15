@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC
 from typing import List
 from bs4 import BeautifulSoup
@@ -75,13 +76,25 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
     error_count = 0
     max_errors = 20
 
-    card_urls = []
+    card_info_list = []
+
     for i in range(card_count):
       try:
         card = breach_cards.nth(i)
         card_href = card.get_attribute('href')
         dumplink = "https://monitor.mozilla.org/" + card_href
-        card_urls.append(dumplink)
+
+        card_html = card.inner_html()
+        soup = BeautifulSoup(card_html, "html.parser")
+        date_text = ""
+        for div in soup.find_all("div"):
+          dt = div.find("dt")
+          dd = div.find("dd")
+          if dt and "Breach added:" in dt.text and dd:
+            date_text = dd.text.strip()
+            break
+
+        card_info_list.append((dumplink, date_text))
       except Exception as ex:
         error_count += 1
         print(f"Error collecting URL for card {i}: {ex}")
@@ -89,7 +102,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
           break
         continue
 
-    for dumplink in card_urls:
+    for dumplink, date_text in card_info_list:
       if error_count >= max_errors:
         break
 
@@ -98,7 +111,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
         soup = BeautifulSoup(page.content(), "html.parser")
         card_content = helper_method.clean_text(soup.get_text(separator=" ", strip=True))
         card_title = helper_method.clean_text(page.locator('h1').nth(1).inner_text()[1:])
-        extracted_text = card_content  # Reuse cleaned text to avoid redundant parsing
+        extracted_text = card_content
         current_url = page.url
 
         card_data = leak_model(
@@ -112,6 +125,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
           m_weblink=[current_url],
           m_dumplink=[dumplink],
           m_content_type=["leaks"],
+          m_leak_date=datetime.datetime.strptime(date_text, '%B %d, %Y').date()
         )
 
         entity_data = entity_model(

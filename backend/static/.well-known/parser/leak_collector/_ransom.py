@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC
 from typing import List
 
@@ -98,7 +99,7 @@ class _ransom(leak_extractor_interface, ABC):
             group = None
             description = None
             website = None
-            published = None
+            m_leak_date = None
             post_url = None
             country = None
 
@@ -119,6 +120,7 @@ class _ransom(leak_extractor_interface, ABC):
                     website = line.split(":")[-1].strip()
                     data["Website"] = website
                 if "Published" in line:
+                    m_leak_date = datetime.datetime.strptime(line.split(': ', 1)[1].split()[0], '%Y-%m-%d').date()
                     published = line.split(":")[-1].strip()
                     data["Published"] = published
                 if "Post_url" in line:
@@ -140,7 +142,7 @@ class _ransom(leak_extractor_interface, ABC):
                 m_network=helper_method.get_network_type(self.base_url),
                 m_important_content=description,
                 m_weblink=[website],
-                m_leak_date=helper_method.extract_and_convert_date(published),
+                m_leak_date=m_leak_date,
                 m_dumplink=[],
                 m_content_type=["leaks"],
             )

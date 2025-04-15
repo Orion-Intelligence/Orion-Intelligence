@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -151,7 +152,7 @@ class _inthewild(leak_extractor_interface, ABC):
                                 m_content=description_text + " " + self.base_url + " " + page.url,
                                 m_important_content=description_text,
                                 m_network=helper_method.get_network_type(self.base_url),
-                                m_leak_date=helper_method.extract_and_convert_date(last_update_date),
+                                m_leak_date=datetime.strptime(last_update_date, '%m/%d/%Y').date(),
                                 m_websites=[website] if website else [],
                                 m_content_type=["leaks"],
                             )

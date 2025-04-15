@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC
 from typing import List
 from playwright.sync_api import Page
@@ -57,7 +58,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
     def contact_page(self) -> str:
         return "https://zone-xsec.com/contact"
 
-    def append_leak_data(self, leak: leak_model, entity: entity_model):
+    def append_leak_data(self, leak: defacement_model, entity: entity_model):
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
@@ -125,7 +126,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             m_content="",
                             m_base_url=self.base_url,
                             m_url=link,
-                            m_date_of_leak=helper_method.extract_and_convert_date(date),
+                            m_date_of_leak=datetime.datetime.strptime(date.split()[0], '%Y-%m-%d').date(),
                             m_team=team,
                             m_location=[location],
                             m_attacker=[defacer],

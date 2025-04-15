@@ -73,9 +73,9 @@ class _ddosecrets(leak_extractor_interface, ABC):
 
         article_divs = self.soup.find_all("div", class_="article")
         article_links = [
-            urljoin(self.base_url, div.find("h2").find("a")["href"])
+            urljoin(self.base_url, div.find("h4").find("a")["href"])
             for div in article_divs
-            if div.find("h2") and div.find("h2").find("a")
+            if div.find("h4") and div.find("h4").find("a")
         ]
 
         for article_url in article_links:

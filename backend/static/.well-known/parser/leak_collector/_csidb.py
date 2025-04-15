@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 
 from typing import List
 
@@ -94,8 +95,7 @@ class _csidb(leak_extractor_interface, ABC):
 
                 date_cell = row.select_one("td:nth-child(1) a")
                 incident_date = date_cell.get_text(strip=True) if date_cell else None
-                incident_date = helper_method.extract_and_convert_date(incident_date)
-
+                m_leak_date = datetime.strptime(incident_date.replace('.', ''), '%b %d, %Y').date()
 
                 victim_cell = row.select_one("td:nth-child(2) a")
                 victim_name = victim_cell.get_text(strip=True) if victim_cell else None
@@ -126,7 +126,7 @@ class _csidb(leak_extractor_interface, ABC):
                     m_content=summary + " " + self.base_url + " " + self.seed_url,
                     m_important_content=important_content,
                     m_content_type=["hacking"],
-                    m_leak_date=incident_date,
+                    m_leak_date=m_leak_date,
                 )
 
                 entity_data = entity_model(

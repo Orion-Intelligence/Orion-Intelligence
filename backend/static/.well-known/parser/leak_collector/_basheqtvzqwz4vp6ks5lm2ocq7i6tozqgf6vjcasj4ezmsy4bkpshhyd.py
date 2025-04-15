@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 import time
 from playwright.sync_api import Page
@@ -88,7 +89,8 @@ class _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd(leak_extractor_i
 
             deadline_element = page.query_selector('.deadline:first-of-type')
             deadline = deadline_element.inner_text().replace("Deadline: ", "").strip() if deadline_element else "N/A"
-            deadline = helper_method.extract_and_convert_date(deadline)
+            deadline = datetime.strptime(deadline.split()[0], '%Y/%m/%d').date()
+
             country_element = page.query_selector('.count__text')
             country = country_element.inner_text().strip() if country_element else "N/A"
 

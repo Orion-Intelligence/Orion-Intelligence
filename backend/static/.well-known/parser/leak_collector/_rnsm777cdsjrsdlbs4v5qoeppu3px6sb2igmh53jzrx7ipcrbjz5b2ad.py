@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC
 import re
 
@@ -160,7 +161,7 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
                             m_logo_or_images=[],
                             m_content_type=["leaks"],
                             m_data_size=leak_size,
-                            m_leak_date=helper_method.extract_and_convert_date(date_text),
+                            m_leak_date=datetime.datetime.strptime(' '.join(date_text.split()[1:]), '%d %B %Y').date(),
                         )
 
                         entity_data = entity_model(

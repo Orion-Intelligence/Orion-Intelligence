@@ -1,4 +1,5 @@
 from abc import ABC
+from time import sleep
 from typing import List
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
@@ -10,6 +11,7 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
+from datetime import datetime
 
 
 class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_interface, ABC):
@@ -79,6 +81,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
         try:
             all_leak_urls = []
             dump_links = []
+            sleep(10)
 
 
             page.goto(self.seed_url)
@@ -137,7 +140,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
 
 
                     date_element = detail_container.select_one("span.px-1")
-                    leak_date = date_element.get_text(strip=True) if date_element else None
+                    leak_date:str = date_element.get_text(strip=True) if date_element else None
 
 
                     paper_container = leak_soup.select_one("div.papper-contaner")
@@ -151,6 +154,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                                 dump_link = urljoin(self.base_url, dump_link)
                             dump_links.append(dump_link)
 
+                    m_leak_date = datetime.strptime(' '.join(leak_date.split(': ', 1)[1].split()[0:3]), '%d %b, %Y').date()
                     card_data = leak_model(
                         m_screenshot=helper_method.get_screenshot_base64(page, title),
                         m_title=title,
@@ -162,7 +166,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_important_content=description,
                         m_content_type=["leaks"],
                         m_data_size=data_size,
-                        m_leak_date=helper_method.extract_and_convert_date(leak_date)
+                        m_leak_date=m_leak_date
                     )
 
                     entity_data = entity_model(

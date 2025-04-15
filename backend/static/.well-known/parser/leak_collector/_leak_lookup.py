@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -118,7 +119,7 @@ class _leak_lookup(leak_extractor_interface, ABC):
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=modal_content_cleaned,
                         m_data_size=breach_size,
-                        m_leak_date=helper_method.extract_and_convert_date(date_indexed),
+                        m_leak_date=datetime.strptime(date_indexed, '%Y-%m-%d').date(),
                         m_content_type=["leaks"],
                     )
                     entity_data = entity_model()

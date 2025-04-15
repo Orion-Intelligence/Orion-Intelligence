@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -129,7 +130,7 @@ class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_i
                                 m_important_content=content_text.strip(),
                                 m_dumplink=links,
                                 m_content_type=["leaks"],
-                                m_leak_date=helper_method.extract_and_convert_date(date_text),
+                                m_leak_date=datetime.strptime(date_text, '%B %d, %Y').date(),
                             )
 
                             entity_data = entity_model(

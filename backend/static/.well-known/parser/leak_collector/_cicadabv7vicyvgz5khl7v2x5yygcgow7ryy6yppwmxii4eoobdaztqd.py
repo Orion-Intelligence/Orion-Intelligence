@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from time import sleep
 
 from typing import List
@@ -120,11 +121,10 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
           website_element = page.query_selector("div.mt-2.mb-1 a.text-blue-400")
           website = website_element.get_attribute("href") if website_element else "No website found"
 
-          size_element = page.query_selector("div.rounded-md.inline-block.mb-1 span.text-white.text-sm")
-          data_size = size_element.inner_text().strip() if size_element else None
+          elements = page.query_selector_all("div.rounded-md.inline-block.mb-1 span.text-white.text-sm")
 
-          created_element = page.query_selector("div.rounded-md.inline-block.mb-1 span.text-white.text-sm")
-          created_date = created_element.inner_text().strip() if created_element else "No date found"
+          data_size = elements[0].inner_text().strip() if len(elements) > 0 else None
+          created_date = elements[2].inner_text().strip() if len(elements) > 1 else "No date found"
 
           description_element = page.query_selector(
             "p.mt-1.text-gray-400.text-mg.mb-6.overflow-y-auto.whitespace-pre-wrap.rounded-lg")
@@ -136,7 +136,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
             logo_img = logo_div.query_selector("img.max-w-48.max-h-48.object-cover.rounded-3xl")
             if logo_img:
               logo_image = logo_img.get_attribute("src")
-
+          m_leak_date = datetime.strptime(created_date, '%B %d, %Y').date()
           card_data = leak_model(
             m_screenshot=helper_method.get_screenshot_base64(page, company_name),
             m_title=company_name,
@@ -149,7 +149,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
             m_logo_or_images=[logo_image] if logo_image else [],
             m_content_type=["leaks"],
             m_data_size=data_size,
-            m_leak_date=helper_method.extract_and_convert_date(created_date)
+            m_leak_date=m_leak_date
           )
 
           entity_data = entity_model(

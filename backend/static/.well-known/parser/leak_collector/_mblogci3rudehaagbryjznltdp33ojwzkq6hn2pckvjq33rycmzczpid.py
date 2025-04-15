@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -95,11 +96,11 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
 
                             title = card.query_selector("h5")
                             content = card.query_selector("p")
-                            datetime = card.query_selector(".published")
+                            datetimex = card.query_selector(".published")
 
                             title_text = title.inner_text().strip() if title else "Unknown"
                             content_text = content.inner_text().strip() if content else "No content"
-                            datetime_text = datetime.inner_text().strip() if datetime else "Unknown Date/Time"
+                            datetime_text = datetimex.inner_text().strip() if datetimex else "Unknown Date/Time"
 
                             card_url = card.get_attribute("href") or page.url
                             if card_url in processed_urls:
@@ -129,7 +130,7 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
                                 m_important_content=content_text,
                                 m_dumplink=dumplinks,
                                 m_content_type=["leaks"],
-                                m_leak_date=helper_method.extract_and_convert_date(datetime_text),
+                                m_leak_date=datetime.strptime(datetime_text.split()[0], '%Y-%m-%d').date(),
                             )
 
                             entity_data = entity_model(

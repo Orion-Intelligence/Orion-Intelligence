@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
@@ -132,7 +133,8 @@ class _handala_hack(leak_extractor_interface, ABC):
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=important_content,
                         m_content_type=["leaks"],
-                        m_leak_date=helper_method.extract_and_convert_date(date_time)
+                        m_leak_date= datetime.fromisoformat(date_time).date()
+
                     )
 
                     entity_data = entity_model(

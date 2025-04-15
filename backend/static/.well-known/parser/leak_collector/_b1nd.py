@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 
 from typing import List
 
@@ -107,6 +108,7 @@ class _b1nd(leak_extractor_interface, ABC):
               page.goto(inner_link)
               page.wait_for_load_state("load")
 
+              m_description = self.safe_find(page, ".p-description")
               m_leak_date = self.safe_find(page, "time.u-dt")
               m_content = self.safe_find(page, "div.bbWrapper")
               title = self.safe_find(page, "h1.p-title-value")
@@ -119,7 +121,7 @@ class _b1nd(leak_extractor_interface, ABC):
                   m_important_content = m_content
               else:
                 m_important_content = ""
-              m_leak_date = helper_method.extract_and_convert_date(m_leak_date)
+              m_leak_date = datetime.strptime(m_description.split("\n")[3], '%b %d, %Y').date()
 
               card_data = leak_model(
                 m_screenshot=helper_method.get_screenshot_base64(page, title),
@@ -133,6 +135,7 @@ class _b1nd(leak_extractor_interface, ABC):
                 m_content_type=["leaks"],
                 m_leak_date=m_leak_date
               )
+
               entity_data = entity_model()
               self.append_leak_data(card_data, entity_data)
 

@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC
 from typing import List
 
@@ -138,7 +139,7 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                     m_weblink=[website],
                     m_logo_or_images=image_urls,
                     m_revenue = revenue,
-                    m_leak_date=helper_method.extract_and_convert_date(date_time),
+                    m_leak_date=datetime.datetime.strptime(date_time.split()[0], '%m/%d/%Y').date(),
                     m_url=page.url,
                     m_base_url=self.base_url,
                     m_network=helper_method.get_network_type(self.base_url),
