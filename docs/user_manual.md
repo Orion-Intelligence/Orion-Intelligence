@@ -112,7 +112,7 @@ In the first row, we have URLs, followed by the network type.
 
 - **Clearnet:** Surface web links.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/networklink.png)
+![betwork type-modified](https://github.com/user-attachments/assets/dbd642f9-9549-4a38-ad6a-ce04dec7613d)
 
 
 ### Index Menu
