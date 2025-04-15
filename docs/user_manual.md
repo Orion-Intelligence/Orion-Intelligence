@@ -9,7 +9,7 @@ let's take a look at the admin panel, designed exclusively for administrative us
 
 The Orion Platform's main interface offers users straightforward access to its features. It integrates with machine learning models to improve search accuracy and enable advanced content analysis. Orion provides a variety of functions, such as searching, filtering, and visualizing data across multiple categories, making it a powerful tool for exploring data and gathering insights.
 
-![screencapture-orion-genesistechnologies-org-dashboard-home-2025-04-14-14_26_54-modified](https://github.com/user-attachments/assets/1997449d-7e7a-4595-80bc-98427940ee68)
+![main-modified](https://github.com/user-attachments/assets/2e022df7-7c23-401e-91ff-f02e39d7cc57)
 
 
 ## Directory Page
