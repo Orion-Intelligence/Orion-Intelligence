@@ -119,6 +119,34 @@ Users can view data related to any of these categories based on their search que
 
 ![General Intelligence-modified](https://github.com/user-attachments/assets/263183ec-6818-4765-b6f2-7b549d21ef8d)
 
+1. ### General
+This section contains a wide range of uncategorized intelligence data. It includes miscellaneous findings from various sources that do not specifically fall under the more targeted categories listed below.
+
+2. ### Forums
+In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
+
+3. ### News
+The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
+
+4. ### Stolen Data
+Lists data breaches involving the theft of personal, financial, or business information. It includes leaked credentials, credit card dumps, and sensitive data sold or shared on underground platforms.
+
+5. ### Drugs
+Monitors and presents listings related to the sale or trade of illegal drugs across dark web marketplaces. This helps law enforcement and monitoring teams keep track of emerging drug trends.
+
+6. ### Hacking
+Provides insights into hacking-related content such as websites exploit tutorials, malware development, and vulnerabilities being discussed or sold in hacker communities.
+
+7. ### Marketplaces
+Tracks online marketplaces (especially on the dark web) where illicit goods and services are traded. This includes weapons, fake documents, stolen data, malware, etc.
+
+8. ### Cryptocurrencies
+Analyzes cryptocurrency-related intelligence including illicit transactions, wallets linked to cybercrime, and usage of crypto for money laundering or ransom payments.
+
+9. ### Leaks
+Focuses on leaked documents, databases, or credentials published online. These could include government files, internal company data, or proprietary tools that have been exposed.
+
+
 
 ### Links Filter
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
