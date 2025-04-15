@@ -149,7 +149,16 @@ Analyzes cryptocurrency-related intelligence including illicit transactions, wal
 9. ### Leaks
 Focuses on leaked documents, databases, or credentials published online. These could include government files, internal company data, or proprietary tools that have been exposed.
 
+## DataBreach
+The Data Breach section in the navigation bar includes two subcategories:
 
+![Databreach-modified](https://github.com/user-attachments/assets/26878091-cb9f-4839-bd47-51c045920748)
+
+1. ### Databases
+This section contains comprehensive records related to actual data breaches. It includes detailed breach data such as compromised credentials, personal information, and other sensitive content obtained from various sources.
+
+2. ### Track
+This section provides breach-related information tracked from forums. It is primarily used for monitoring discussions and mentions of potential breaches across underground communities. Note: This section does not contain actual breached data — it only displays references or claims gathered from forum sources.
 
 ### Links Filter
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
