@@ -188,6 +188,21 @@ The Defacement section provides access to an archive list of websites that have 
 
 ![defacement-modified](https://github.com/user-attachments/assets/5b7e7a9e-d454-43fc-b7a1-1fbb3955ee13)
 
+## Live APIs
+
+The Live APIs section provides users with real-time investigative tools. Within this section:
+
+### Email Lookup: 
+By selecting the email option, users can input any email address to retrieve related breach information. This tool helps identify where and how the data associated with the entered email may have been leaked or exposed, offering valuable insights into potential security incidents or data breaches.
+
+### Breach Records: 
+Below the lookup interface, a list of data breach records is displayed. These records offer additional context and reference points, allowing users to explore known breaches and validate the exposure of specific information.
+
+
+
+![api-modified](https://github.com/user-attachments/assets/baa071d3-377a-4e26-8c4c-0dd2a2a678c5)
+
+
 
 ### Links Filter
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
