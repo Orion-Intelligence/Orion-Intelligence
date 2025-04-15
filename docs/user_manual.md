@@ -117,7 +117,10 @@ Leaks
 
 Users can view data related to any of these categories based on their search query. We will further explore and discuss each of these menu options individually for better understanding.
 
-![General Intelligence-modified](https://github.com/user-attachments/assets/263183ec-6818-4765-b6f2-7b549d21ef8d)
+![General Intelligence-modified (1)](https://github.com/user-attachments/assets/1785f777-2f85-481e-bafe-79ad37b2c6d1)
+
+### All
+The "All" category provides a consolidated view of intelligence data from all subcategories under the General Intelligence section. 
 
 1. ### General
 This section contains a wide range of uncategorized intelligence data. It includes miscellaneous findings from various sources that do not specifically fall under the more targeted categories listed below.
