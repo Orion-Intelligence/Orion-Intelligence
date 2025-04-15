@@ -157,6 +157,9 @@ The Data Breach section in the navigation bar includes two subcategories:
 1. ### Databases
 This section contains comprehensive records related to actual data breaches. It includes detailed breach data such as compromised credentials, personal information, and other sensitive content obtained from various sources.
 
+![databases-modified](https://github.com/user-attachments/assets/69aaac82-8b53-4229-a049-a6ff6379b5de)
+
+
 2. ### Track
 This section provides breach-related information tracked from forums. It is primarily used for monitoring discussions and mentions of potential breaches across underground communities. Note: This section does not contain actual breached data — it only displays references or claims gathered from forum sources.
 
