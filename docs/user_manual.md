@@ -92,8 +92,31 @@ This category provides valuable insights into the nature and scale of web deface
 
 ![defecement-modified](https://github.com/user-attachments/assets/ecf0f26a-49e4-4dcc-89ee-91a32a78cec3)
 
+
+
 ## General Index
-This is the second option in our navigation bar, 
+This is the second option in the navigation bar. When a user performs a search using the search bar, the results are displayed accordingly. Within the "General Intelligence" dropdown menu (accessible through the second navigation option), several subcategories become available, including:
+
+General
+
+Forums
+
+News
+
+Stolen Data
+
+Drugs
+
+Hacking
+
+Marketplaces
+
+Cryptocurrencies
+
+Leaks
+
+Users can view data related to any of these categories based on their search query. We will further explore and discuss each of these menu options individually for better understanding.
+![Uploading General Intelligence-modified.png…]()
 
 ### Links Filter
 This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
