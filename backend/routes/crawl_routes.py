@@ -4,11 +4,12 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
+from orion.api.server.entity_manager.entity_manager import entity_manager
+from orion.api.server.entity_manager.modal.EntityRelationInput import EntityRelationInput
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from configs.app_dependency import role_required
-from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
 
 crawl_routes = APIRouter()
 
@@ -38,3 +39,9 @@ async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_r
 async def index_generic(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_generic_index(GeneralDataModel(**body))
+
+@crawl_routes.post("/api/arango/set-dummy-relation", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def set_dummy_relation(request: Request):
+    body = await request.json()
+    relation = EntityRelationInput(**body)
+    return await entity_manager.get_instance().set_entity_relation(relation)
