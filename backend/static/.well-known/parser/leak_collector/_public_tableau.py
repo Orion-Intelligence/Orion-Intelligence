@@ -70,7 +70,7 @@ class _public_tableau(leak_extractor_interface, ABC):
 
   def parse_leak_data(self, page: Page):
     is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
-    max_pages = 50000 if is_crawled else 100000
+    max_pages = 500 if is_crawled else 100000
 
     page.evaluate("""
             const cursor = document.createElement('div');
@@ -101,13 +101,14 @@ class _public_tableau(leak_extractor_interface, ABC):
     default_y_position = 98
     y_position = default_y_position
     hover_count = 0
-    previous_content = None
     self._card_data = []
 
     retry_count = 0
-    max_retries = 5
+    max_retries = 10
+    xx=0
 
     for _ in range(max_pages):
+
       if retry_count >= max_retries:
         break
 
@@ -120,9 +121,6 @@ class _public_tableau(leak_extractor_interface, ABC):
           continue
 
         tooltip_content = tooltip_element.inner_html()
-        if tooltip_content == previous_content:
-          continue
-        previous_content = tooltip_content
 
         soup = BeautifulSoup(tooltip_content, "html.parser")
         all_spans = soup.select(".tab-selection-relaxation")
@@ -197,6 +195,11 @@ class _public_tableau(leak_extractor_interface, ABC):
         hover_count += 1
         retry_count = 0
 
+        if xx == 0:
+          for _ in range(934):
+            page.mouse.wheel(0, 280)
+        xx += 1
+
         if hover_count % 15 == 0:
           page.mouse.wheel(0, 280)
           y_position = default_y_position
@@ -204,6 +207,13 @@ class _public_tableau(leak_extractor_interface, ABC):
       except Exception as ex:
         print(f"Error on hover {hover_count}: {ex}")
         retry_count += 1
-        y_position += 20
+
+        page.mouse.move(10, 10)
+        page.mouse.click(10, 10)
+
+        y_position = default_y_position
+        page.evaluate(f'moveFakeCursor({x_position}, {y_position});')
+
+
 
     self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)
