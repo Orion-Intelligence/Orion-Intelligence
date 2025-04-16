@@ -239,6 +239,28 @@ Each variable can be expanded through a dropdown menu, which reveals separate an
 
 ![search results-modified](https://github.com/user-attachments/assets/e29ae344-48d9-4b35-8cba-1c265ae0bb7a)
 
+### Filters
+
+The second option alongside Analytics is the Filter menu. When we click on it, an extended submenu appears. This submenu contains two additional options.
+
+![fillter-modified](https://github.com/user-attachments/assets/e51e73eb-cb51-4187-9466-d0fb18b7b66b)
+
+### Network Types
+Onion: Dark web links.
+
+I2P: Invisible Internet Project links.
+
+Clearnet: Surface web links.
+
+![network type-modified](https://github.com/user-attachments/assets/0844c5b1-8f61-4918-bed6-bb7245f0a5bf)
+
+### Enable Safe Search Button
+
+The Safe Search feature enhances user safety by filtering out inappropriate or explicit content. To enable this feature:
+1. - Locate the Safe Search button.
+2. - Click the button to activate safe browsing.
+
+![safe search-modified](https://github.com/user-attachments/assets/e7ad92a7-524c-4f67-837c-9566af73b805)
 
 
 ### Links Filter
