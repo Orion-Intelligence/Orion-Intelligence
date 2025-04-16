@@ -202,6 +202,43 @@ Below the lookup interface, a list of data breach records is displayed. These re
 
 ![api-modified](https://github.com/user-attachments/assets/baa071d3-377a-4e26-8c4c-0dd2a2a678c5)
 
+## Fillter and Analytics
+On the left side of the page, there are two options: Analytics and Filter.
+![analytics-modified (1)](https://github.com/user-attachments/assets/90e59067-d5ca-4eed-a404-7a67d6435558)
+
+### Analytics: 
+This section provides insights related to any search performed using the navigation bar. It displays the count of results corresponding to the selected navigation options.
+
+The first two tables in the Analytics section are:
+
+Keyword Insights Table – This table presents data based on the keywords used during the search.
+
+General Coverage of Results Table – This table provides an overview of the general distribution of the search results.
+
+
+### Keyword Insight: 
+This section highlights the fetch results related to the entered search word. It provides detailed insights, including:
+
+The number of keywords identified during the crawl.
+The total count of documents fetched containing those keywords.
+The number of links or pages retrieved that are associated with the keywords. These observations offer a clear understanding of how the data is gathered and processed, ensuring that users can analyze the results efficiently and make informed decisions based on the displayed metrics.
+
+![keywords-modified](https://github.com/user-attachments/assets/4d39a666-3473-4fbc-b15c-0e63cb86b1a8)
+
+### Results General Coverage
+Below this, the "General Coverage" section displays the results in a structured format.
+
+It first shows the total number of items found during the search.
+Then, it provides a breakdown of active and inactive items, along with the results for seldom active items, offering a clear summary of the data.
+
+![results-modified](https://github.com/user-attachments/assets/0bbedfd0-ad5c-4061-8689-60f238053af4)
+
+Below the two tables mentioned above, we have detailed data associated with each category, such as URLs, titles, and networks. For instance, if the data includes URLs, it displays which specific URLs are available; if it includes titles, it shows the corresponding records; and if networks are present, it indicates the different types of networks appearing in the search results.
+
+Each variable can be expanded through a dropdown menu, which reveals separate and specific results related to that particular variable from the entire search dataset.
+
+![search results-modified](https://github.com/user-attachments/assets/e29ae344-48d9-4b35-8cba-1c265ae0bb7a)
+
 
 
 ### Links Filter
