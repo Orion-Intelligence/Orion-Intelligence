@@ -196,6 +196,7 @@ class _public_tableau(leak_extractor_interface, ABC):
         retry_count = 0
 
         if xx == 0:
+          #14000 entries on each try
           for _ in range(934):
             page.mouse.wheel(0, 280)
         xx += 1
