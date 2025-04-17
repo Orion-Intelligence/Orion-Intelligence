@@ -105,10 +105,8 @@ class _public_tableau(leak_extractor_interface, ABC):
 
     retry_count = 0
     max_retries = 10
-    xx=0
 
     for _ in range(max_pages):
-
       if retry_count >= max_retries:
         break
 
@@ -194,11 +192,6 @@ class _public_tableau(leak_extractor_interface, ABC):
         y_position += 20
         hover_count += 1
         retry_count = 0
-
-        if xx == 0:
-          for _ in range(934):
-            page.mouse.wheel(0, 280)
-        xx += 1
 
         if hover_count % 15 == 0:
           page.mouse.wheel(0, 280)
