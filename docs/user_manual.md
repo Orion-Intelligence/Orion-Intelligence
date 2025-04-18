@@ -321,68 +321,7 @@ Then we have the Person option, which displays the names of individuals associat
 ![person](https://github.com/user-attachments/assets/fe2aa912-52ff-4d50-a0c4-8d7db734a40b)
 
 
-In generic crawling, three key aspects can be observed using a machine learning model. On the right side of the page, several parameters of the results are displayed for user convenience:
 
-**Keyword Insight**: This section highlights the fetch results related to the entered search word. It provides detailed insights, including:
-- The number of keywords identified during the crawl.
-- The total count of documents fetched containing those keywords.
-- The number of links or pages retrieved that are associated with the keywords.
-These observations offer a clear understanding of how the data is gathered and processed, ensuring that users can analyze the results efficiently and make informed decisions based on the displayed metrics.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/keywordinsight.png)
-
-#### General Coverage
-Below this, the "General Coverage" section displays the results in a structured format.
-- It first shows the total number of items found during the search.
-- Then, it provides a breakdown of active and inactive items, along with the results for seldom active items, offering a clear summary of the data.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/resultgeneral2.png)
-
-#### Unique Results
-Afterward, the page presents some unique results for further analysis. The first section displays information about the extracted URLs. Below it, a table lists the unique emails identified during the crawl. This is followed by details about the archive, highlighting unique document files retrieved from the data.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/uniqueurls.png)
-
-#### Unique Cellular
-This section displays the total number of phone numbers extracted from the crawled data. It provides a clear count for easy reference and analysis.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/uniquenumbers.png)
-
-After viewing the search results, let’s explore the options available in the top navbar step by step. Each option provides specific functionalities for navigating and analyzing data.
-
-
-### Monitor Section:
-
-Next, we move to the "Monitor" tab in the top menu. This option displays a separate script for each site, providing detailed insights and monitoring capabilities. Additionally, it allows users to include custom scripts, offering flexibility to tailor the monitoring process as needed.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/monitor.png)
-
-### Market Section:
-The "Market" section provides insights into the buying and selling activities of various items, whether they involve legal or illegal goods. It acts as a monitoring tool to observe transactions and trends within the marketplace. Essentially, this section serves as a virtual store for tracking the sale and purchase of items on the dark web, offering a comprehensive overview of the trading environment.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/market.png)
-
-### Forum Section:
-In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/forum.png)
-
-### News Section:
-The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/news.png)
-
-### Email Section: 
-By selecting the email option, users can enter any email address to investigate related information. This feature helps identify where the data associated with that email has been leaked or exposed. It provides valuable insights into potential data breaches involving the specified email.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/email.png)
-
-### Network type
-At the end of the page, there is a button on the platform. When clicked, a dropdown menu appears, providing options to filter the network based on specific criteria. This feature allows users to refine their search or display preferences according to their needs.
-
-![screencapture-orion-genesistechnologies-org-search-2025-01-10-16_32_15](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/settings.png)
-
-By default, the setting will be set to "All" to display normal results. However, users have the option to modify this setting based on their preferences. This flexibility allows for more customized viewing of the data.
 
 ## Overview and Additional Features
 This provides an overview of the original scope of our project. Moving forward, we would like to highlight some additional features and elements that we have specifically developed for our client. Along with Orion, which serves as our core platform, we have integrated three other platforms to address various needs. The first is Dozzel, which caters to a particular set of functionalities; the second is Swagger, a tool that helps us manage and test APIs; and the third is Flower, a platform designed for monitoring and managing tasks. Each of these platforms serves a unique purpose, enhancing the overall system and offering greater flexibility and efficiency for the client.
