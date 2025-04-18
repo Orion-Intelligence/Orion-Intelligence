@@ -279,14 +279,7 @@ When performing a search, the results are shown in a split view, helping organiz
 ![resultfinal](https://github.com/user-attachments/assets/55cd18cd-1983-48ff-b8eb-970e048f36f4)
 
 
-The detailed view of a search result provides essential information to help users assess the nature of a website before accessing it. At the top of this view, the network type is displayed, indicating whether the site is hosted on the Onion network, I2P, or the Clearnet. This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak site, or cryptocurrency platform. Additionally, the last update date is shown, providing insight into how recently the content was modified. At the bottom of the interface, users will usually find two to three tabs, which may include:
-
-- Additional information about the site
-
-- Navigational tools
-
-- Context-specific actions or data
-
+The detailed view of a search result provides essential information to help users assess the nature of a website before accessing it.  This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak site, or cryptocurrency platform.
 When a user clicks on a specific section of the result, a separate menu appears, offering various features related to the selected site. This menu is designed for quick access to useful tools, including:
 
 **Download:** Allows the user to download available site content
@@ -297,9 +290,11 @@ When a user clicks on a specific section of the result, a separate menu appears,
 
 **Share Link:** Copies the site’s URL for easy sharing
 
-**Open in New Tab:** Loads the site in a separate browser tab for convenience
+**Open in New Tab:** Loads the site in a separate browser tab for convenience.
 
+In addition to the mentioned details, this section also displays the publish date, network type, last update date, relevant tags, and the status of the link. The status indicates whether the link is currently active or inactive, helping users quickly determine if the site is accessible.
 
+Towards the end, there is a complete menu table available, where several additional elements can be viewed, such as:
 #### Section Tab
 The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being extracted during the data crawling process. This feature helps users identify and understand the structure of the website within the fetched data. 
 
@@ -307,6 +302,24 @@ The "Section" tab provides a detailed view of the various sections of the websit
 Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
 
 ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/content1.png)
+
+#### Images
+In the Images menu, it displays the number of images related to that particular result.
+
+#### Content Type
+Next, we have the Content Type section, which shows the types of content associated with that particular result.
+
+#### Clear Net
+After that, there is the Clearnet option, which displays all the links related to the Clearnet that are associated with the selected result.
+
+![clearnetlinks](https://github.com/user-attachments/assets/edeabeab-f64b-4548-af5f-93632e491955)
+
+#### Person
+
+Then we have the Person option, which displays the names of individuals associated with the selected search result.
+
+![person](https://github.com/user-attachments/assets/fe2aa912-52ff-4d50-a0c4-8d7db734a40b)
+
 
 In generic crawling, three key aspects can be observed using a machine learning model. On the right side of the page, several parameters of the results are displayed for user convenience:
 
