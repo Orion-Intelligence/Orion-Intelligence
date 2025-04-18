@@ -242,6 +242,7 @@ Each variable can be expanded through a dropdown menu, which reveals separate an
 ### Filters
 
 The second option alongside Analytics is the Filter menu. When we click on it, an extended submenu appears. This submenu contains two additional options.
+Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the process of refining results for more targeted insights.
 
 ![fillter-modified](https://github.com/user-attachments/assets/e51e73eb-cb51-4187-9466-d0fb18b7b66b)
 
@@ -263,124 +264,44 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 ![safe search-modified](https://github.com/user-attachments/assets/e7ad92a7-524c-4f67-837c-9566af73b805)
 
 
-### Links Filter
-This is the second option in our navigation bar, offering a comprehensive view of all the links/URLs that appear in the search results. These links represent the complete URLs, primarily consisting of the main index pages from the crawled websites. By displaying these URLs, the section provides an overview of the websites that have been explored. It also enables users to track the total number of websites crawled so far, giving a clear picture of the platform’s data collection progress. This feature is useful for reviewing the breadth of data gathered through the crawling process.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/linktab.png)
-
-On this page, the live onion search table includes various elements that we will discuss individually. Each element plays a crucial role in the search and data retrieval process.
-
-In the first row, we have URLs, followed by the network type.
-
-#### Network Types
-
-- **Onion:** Dark web links.
-
-- **I2P:** Invisible Internet Project links.
-
-- **Clearnet:** Surface web links.
-
-![betwork type-modified](https://github.com/user-attachments/assets/dbd642f9-9549-4a38-ad6a-ce04dec7613d)
 
 
-### Index Menu
-
-The Index Menu includes two categories:
-
-- **General Index**  This section allows us to view all the links crawled in general mode, providing a broad overview of all indexed URLs. It helps track and manage the overall set of data collected during the crawling process.
-
-- **Leaked Index**  In this section, we can view only the links containing leaked data, filtering out non-relevant results. This allows users to focus on sensitive or critical information, streamlining the analysis of potentially high-risk data.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/index.png)
-
-#### Content Option Bar
-The content bar offers 10 different options, enabling users to view links based on their specific selection. By default, it is set to the "General" option, displaying a broad range of links. Users can open the dropdown menu to choose from a variety of categories or filters, allowing them to tailor the content to their needs. This feature enhances navigation and makes it easier to access relevant data. It ensures a flexible and user-friendly experience for viewing links.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/content.png)
-
-#### Filter
-Next to the content option, there is a small filter icon. Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the process of refining results for more targeted insights.
-
-![11111](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/filter.png)
-
-
-
-### Onion Crawl Statistics
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/crawlstatistics.png)
-
-
-The Live Onion Search Table presents real-time search results in an organized, easy-to-read format. It allows users to quickly view and analyze data as it is fetched.
-| Column        | Description                              |
-|-------------|------------------------------------------|
-| **ID**      | Unique identifier for each result.       |
-| **Service URLs**   | URLs of the services found. |
-| **Status** | Indicates the data category (e.g., leaked, forums, cryptocurrency, general). |
-| **URL**   | Displays whether the URL is active or inactive. |
-| **Leak Status**   | Specifies whether the leak is active or inactive. |
-| **Network Type**   | Indicates the type of network (e.g., Onion, I2P, Clearnet). |
-
-
-## Orion Search
 
 ### Search Results
 
 When you enter any keywords into the search bar and press enter, the system processes the input and retrieves relevant data. It then displays the search results that match the specified keywords. This allows users to efficiently find information based on their search criteria. The results are presented in an organized format for easy analysis.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/searchtype.png)
+![search](https://github.com/user-attachments/assets/b3823643-6489-4904-87b7-158a85926c0a)
 
-When performing a search, the results are shown in a split view, helping organize the information more effectively. This layout separates different data sets, making it easier for users to focus on specific results. By displaying the data side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by simplifying the navigation of search results.
-
-![screencapture-orion-genesistechnologies-org-search-2025-01-08-22_52_19](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/searchresult.png)
-
-### Top Bar Options
-
-We have a total of 6 classifiers here.The top bar, displayed post-search, includes the following options:
-
-- **All:** Shows overall data related to the entered keyword.
- 
-- **Monitor:** We are shown a separate script for each site.
-
-- **Forums:** Displays forum-related results.
-
-- **News:** Highlights news items.
-
-- **Emails:** Lists email-related results.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/datasearch.png)
-
-This will provide us with the overall fetch results related to the keyword.
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/foundresults.png)
+When performing a search, the results are shown in a split view, helping organize the information more effectively. This layout separates different data sets, making it easier for users to focus on specific results. By displaying the data side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by simplifying the navigation of search results. Below the search bar overall fetch results related to the keyword.
 
 
+![resultfinal](https://github.com/user-attachments/assets/55cd18cd-1983-48ff-b8eb-970e048f36f4)
 
 
+The detailed view of a search result provides essential information to help users assess the nature of a website before accessing it. At the top of this view, the network type is displayed, indicating whether the site is hosted on the Onion network, I2P, or the Clearnet. This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak site, or cryptocurrency platform. Additionally, the last update date is shown, providing insight into how recently the content was modified. At the bottom of the interface, users will usually find two to three tabs, which may include:
 
+- Additional information about the site
 
-### Enable Safe Search Button
+- Navigational tools
 
-The Safe Search feature enhances user safety by filtering out inappropriate or explicit content. To enable this feature:
-1. - Locate the Safe Search button.
-2. - Click the button to activate safe browsing.
-  
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/enable.png)
+- Context-specific actions or data
 
-When viewing a site from the search results, its display is based on specific factors.
-**Network Type**: The first option at the top shows the network type, such as Onion, I2P, or Clearnet.
-**Website Topic**: The next two options provide details about the site’s topic, e.g., forum, leak, cryptocurrency, etc.
-**Update Date**: Displays the last update date of the site, along with some additional related data.
-**Bottom Tabs**: At the bottom, 2-3 tabs are available:
-- The first tab shows the sections of the website.
-- The next tab provides information about the type of content available on that website.
-- These parameters collectively represent specific details for each site that appears in the search results.
+When a user clicks on a specific section of the result, a separate menu appears, offering various features related to the selected site. This menu is designed for quick access to useful tools, including:
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/companies.png)
+**Download:** Allows the user to download available site content
+
+**Translator:** Converts the content into different languages
+
+**Print:** Enables printing of the current view or content
+
+**Share Link:** Copies the site’s URL for easy sharing
+
+**Open in New Tab:** Loads the site in a separate browser tab for convenience
+
 
 #### Section Tab
 The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being extracted during the data crawling process. This feature helps users identify and understand the structure of the website within the fetched data. 
-
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/sections.png)
 
 #### Content Tab
 Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
