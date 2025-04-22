@@ -1,4 +1,4 @@
-.home__form{
+.home__form {
   margin-left: 31px !important;
 }
 
@@ -26,7 +26,22 @@
   font-size: 16px;
   color: #ffffff;
   font-weight: 400;
-  line-height: 35px;
+  line-height: 1;
+  /* 35px */
+  word-break: break-word;
+  white-space: normal;
+}
+
+@media (max-width: 500px) {
+  .home_insight__text-secondary {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 420px) {
+  .home_insight__text-secondary {
+    font-size: 8px;
+  }
 }
 
 .home_insight__header {
@@ -99,11 +114,11 @@
 
 
 @media only screen and (max-width: 943px) {
-  .home_insight__header {
+  /*.home_insight__header {
     margin-left: 0;
     margin-top: -50px;
     left: -15px;
-  }
+  }*/
 
   .home_insight__card {
     width: 100%;

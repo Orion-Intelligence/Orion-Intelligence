@@ -1,34 +1,48 @@
 <nav *ngIf="this.sidebar_default" class="sidebar">
   <div class="sidebar__header">
     <a href="">
-      <img src="assets/images/sidebar/search_nav_logo.png" alt="Logo" width="197" height="35"/>
+      <img src="assets/images/sidebar/search_nav_logo.png" alt="Logo" width="197" height="35" />
     </a>
     <button class="sidebar__header-menu" (click)="onToggleSidebar()">
-      <img src="assets/images/sidebar/nav_menu.svg" alt="Menu" height="28" width="24"/>
+      <img src="assets/images/sidebar/nav_menu.svg" alt="Menu" height="28" width="24" />
     </button>
   </div>
 
 
   <ul class="sidebar__items">
     <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === null || (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'" [queryParamsHandling]="'merge'">
+      <div class="sidebar__item-dropdown"
+        [ngClass]="{'active': (selectionStore.selectedSection$ | async) === null || (selectionStore.selectedSection$ | async) === category.HOMEPAGE}"
+        (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'" [queryParamsHandling]="'merge'">
         <img ngSrc="assets/images/sidebar/home.svg" alt="Home" height="20" width="20" class="sidebar__icon">Homepage
       </div>
     </li>
 
-    <app-dashboard-sidebar-items [title]="'General Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [category]="category.STRATEGIC" [routePrefix]="'strategic'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
-    <app-dashboard-sidebar-items [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
-    <app-dashboard-sidebar-items [title]="'Defacement'" [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
-    <app-dashboard-sidebar-items *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'General Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'"
+      [items]="generalCategories" [category]="category.STRATEGIC" [routePrefix]="'strategic'"
+      [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'"
+      [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore"
+      (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'Defacement'" [icon]="'assets/images/sidebar/defacement.svg'"
+      [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'"
+      [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'"
+      [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API"
+      [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
   </ul>
 </nav>
-<div class="sidebar-hotlinks"  *ngIf="this.sidebar_default" >
+<div class="sidebar-hotlinks" *ngIf="this.sidebar_default">
   <div class="sidebar__item">
     <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
-         [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
-         (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
+      [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
+      (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
       <img ngSrc="../../../../assets/images/sidebar/directory.svg" alt="Links" height="20" width="20"
-           class="sidebar__icon"> Links
+        class="sidebar__icon"> Links
     </div>
   </div>
 
@@ -36,7 +50,7 @@
     <div class="sidebar__item">
       <div class="sidebar__item-dropdown">
         <img ngSrc="../../../../assets/images/sidebar/documentation.svg" alt="Documentation" height="20" width="20"
-             class="sidebar__icon">Documentation
+          class="sidebar__icon">Documentation
       </div>
     </div>
   </a>
@@ -44,33 +58,54 @@
 
 <nav *ngIf="!this.sidebar_default" class="sidebar sidebar-collapsed">
   <button class="sidebar__header-menu" (click)="onToggleSidebar()">
-    <img ngSrc="../../../../assets/images/sidebar/menu-mini.svg" alt="Menu" height="20" width="20"/></button>
-  <div  class="sidebar__header"><a href="">
-    <img ngSrc="../../../../assets/images/shared/logo-min.svg" alt="Logo" priority height="30" width="30"/> </a></div>
+    <img ngSrc="../../../../assets/images/sidebar/menu-mini.svg" alt="Menu" height="20" width="20" /></button>
+  <div class="sidebar__header"><a href="">
+      <img ngSrc="../../../../assets/images/shared/logo-min.svg" alt="Logo" priority height="30" width="30" /> </a>
+  </div>
 
   <ul class="sidebar__items">
     <li class="sidebar__item">
-      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'">
-        <img ngSrc="../../../../assets/images/sidebar/home.svg" alt="Home" height="20" width="20" class="sidebar__icon"></div>
+      <div class="sidebar__item-dropdown"
+        [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}"
+        (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'">
+        <img ngSrc="../../../../assets/images/sidebar/home.svg" alt="Home" height="20" width="20" class="sidebar__icon">
+      </div>
     </li>
 
-    <app-dashboard-sidebar-collapsed [title]="'General Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [category]="category.STRATEGIC" [routePrefix]="'strategic'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed [title]="'Defacement'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed [title]="'General Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'"
+      [items]="generalCategories" [category]="category.STRATEGIC" [routePrefix]="'strategic'"
+      [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'"
+      [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore"
+      (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed [title]="'Defacement'" [icon]="'assets/images/sidebar/data_breach.svg'"
+      [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'"
+      [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'"
+      [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API"
+      [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
   </ul>
 </nav>
-<div class="sidebar-hotlinks-collapsed" *ngIf="!this.sidebar_default" >
-    <div class="sidebar__item">
-      <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}" (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
-        <img ngSrc="../../../../assets/images/sidebar/directory.svg" alt="Links" height="20" width="20" class="sidebar__icon"></div>
+<div class="sidebar-hotlinks-collapsed" *ngIf="!this.sidebar_default">
+  <div class="sidebar__item">
+    <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+      [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
+      (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
+      <img ngSrc="../../../../assets/images/sidebar/directory.svg" alt="Links" height="20" width="20"
+        class="sidebar__icon">
     </div>
+  </div>
 
-    <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
-      <div class="sidebar__item">
-        <div class="sidebar__item-dropdown">
-          <img ngSrc="../../../../assets/images/sidebar/documentation.svg" alt="Documentation" height="20" width="20" class="sidebar__icon">
-        </div>
+  <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
+    <div class="sidebar__item">
+      <div class="sidebar__item-dropdown">
+        <img ngSrc="../../../../assets/images/sidebar/documentation.svg" alt="Documentation" height="20" width="20"
+          class="sidebar__icon">
       </div>
-    </a>
+    </div>
+  </a>
 </div>

@@ -4,15 +4,15 @@
   height: auto;
   overflow: hidden;
   background: linear-gradient(to bottom,
-  rgba(18, 52, 84, 1),
-  rgba(41, 87, 132, 1) 50vh,
-  rgba(41, 87, 132, 1) 100%) !important;
+      rgba(18, 52, 84, 1),
+      rgba(41, 87, 132, 1) 50vh,
+      rgba(41, 87, 132, 1) 100%) !important;
   max-height: 100vh;
   z-index: 1;
 }
 
 .dashboard-content-scroll {
-  height: 100vh;
+  height: 10vh;
   overflow-y: auto;
   padding: 0;
 }
@@ -116,9 +116,11 @@
     margin-left: 70px;
   }
 }
-.filters-container{
+
+.filters-container {
   z-index: 3;
 }
+
 @media only screen and (max-width: 460px) {
   .filters-container {
     display: none !important;

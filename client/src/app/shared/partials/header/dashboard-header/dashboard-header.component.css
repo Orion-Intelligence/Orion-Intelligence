@@ -22,7 +22,7 @@
   align-items: center;
 }
 
-.breadcrumb-item{
+.breadcrumb-item {
   color: #ffffff50;
   font-size: 15px;
   font-weight: 500;
@@ -30,15 +30,15 @@
   cursor: pointer;
 }
 
-.breadcrumb-item:hover{
+.breadcrumb-item:hover {
   color: #fcfcfc;
 }
 
-.breadcrumb-active{
+.breadcrumb-active {
   color: #ffffff;
 }
 
-.header-bar__breadcrum{
+.header-bar__breadcrum {
   margin-top: 2px;
   margin-left: 5px;
   margin-right: 5px;
@@ -58,6 +58,7 @@
   display: inline-block;
   transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
 }
+
 .header-bar__left-arrow {
   margin-top: -1px;
   margin-right: 10px;
@@ -78,6 +79,7 @@
   cursor: default;
   pointer-events: none;
 }
+
 @media only screen and (max-width: 943px) {
   .header-bar__title-container {
     margin-left: 0;
