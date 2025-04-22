@@ -14,6 +14,10 @@
   margin-top: 10px;
 }
 
+.sidebar__header-collapsed{
+  margin: 4px !important;
+}
+
 .sidebar__header-menu {
   background: none;
   border: none;

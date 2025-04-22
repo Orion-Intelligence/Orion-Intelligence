@@ -51,7 +51,7 @@
   opacity: 0.5;
   position: absolute;
   margin-left: -20px;
-  margin-top: -45px;
+  margin-top: -65px;
 }
 
 .home_insight__content {
@@ -114,11 +114,9 @@
 
 
 @media only screen and (max-width: 943px) {
-  /*.home_insight__header {
-    margin-left: 0;
-    margin-top: -50px;
-    left: -15px;
-  }*/
+  .home__form {
+    margin-left: 21px !important;
+  }
 
   .home_insight__card {
     width: 100%;
@@ -126,6 +124,12 @@
 
   .home_insight__container {
     padding: 20px;
+    padding-right: 0;
     margin-left: 0;
   }
+
+  #analytics {
+    margin-top:60px
+  }
+
 }
