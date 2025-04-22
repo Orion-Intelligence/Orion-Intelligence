@@ -27,6 +27,7 @@
   opacity: 0.9;
 
 }
+
 .dash-search-button:hover {
   opacity: 1;
 }
@@ -35,6 +36,7 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
 .dashboard__search-table-header {
   padding-top: 15px;
   padding-bottom: 0;
@@ -107,6 +109,7 @@
     padding: 15px 15px 15px 0;
     margin: 0;
   }
+
   .default-input-container {
     margin-right: 15px;
   }

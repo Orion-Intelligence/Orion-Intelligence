@@ -115,7 +115,8 @@ table {
   white-space: nowrap;
 }
 
-table td, table th {
+table td,
+table th {
   border: 0 !important;
   border-bottom: 1px solid #FCFCFC12 !important;
   font-family: 'Inter', sans-serif;
