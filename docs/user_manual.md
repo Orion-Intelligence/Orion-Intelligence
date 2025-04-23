@@ -7,7 +7,7 @@ let's take a look at the admin panel, designed exclusively for administrative us
 
 ## Homepage Page
 
-The Orion Platform's main interface offers users straightforward access to its features. It integrates with machine learning models to improve search accuracy and enable advanced content analysis. Orion provides a variety of functions, such as searching, filtering, and visualizing data across multiple categories, making it a powerful tool for exploring data and gathering insights.
+The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined access to its wide range of features. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
 ![main-modified](https://github.com/user-attachments/assets/2e022df7-7c23-401e-91ff-f02e39d7cc57)
 
@@ -19,15 +19,20 @@ Here’s an overview of the interface components
 
 The navigation bar is now positioned on the left side of the page for improved accessibility and a more streamlined workflow. It consists of the following main menu items:
 
-1. **Homepage:** Navigates back to the main page, allowing users to restart their workflow or access key features quickly and efficiently without losing context.
+1. **Homepage:** Navigates back to the platform’s main page, serving as a central hub for all primary operations.
+It allows users to quickly restart their workflow or re-access key features without losing progress or context.
 
-2. **General Intelligence:** Provides access to collected intelligence data for broad analysis and understanding of the threat landscape.
+2. **General Intelligence:** Provides comprehensive access to aggregated intelligence data from various sources.
+This feature enables users to conduct broad, high-level analysis to better understand emerging threats and trends.
 
-3. **Data Breach:** Displays information about identified data breaches, highlighting compromised credentials or sensitive data.
+3. **Data Breach:** Displays detailed reports of identified data breaches affecting different platforms and sectors.
+Users can view information on compromised credentials, leaked sensitive data, and impacted entities.
 
-4. **Defacement:** Shows reports of website defacement activities detected by the system.
+4. **Defacement:** Presents findings related to website defacement incidents detected by the monitoring system.
+It includes insights into affected domains, attacker signatures, and the nature of the defacement.
 
-5. **Live APIs:** Offers real-time data feeds and APIs for integration and continuous monitoring.
+6. **Live APIs:** Offers real-time data streams through APIs, facilitating integration with external systems and tools.
+This feature supports continuous monitoring and enables timely responses to evolving cybersecurity events.
 
 
 ![sidebar-modified](https://github.com/user-attachments/assets/cd1b7813-0f1f-4143-b38c-6c071349cd85)
@@ -35,44 +40,53 @@ The navigation bar is now positioned on the left side of the page for improved a
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index. The Generic Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
 
 ### Key Features
-- The **search bar** at the top allows for quick and efficient searching of specific information.
-- The **Generic Index** provides an overview of the broad data collected, offering a summary of standard findings.
-The **Leaked Index** highlights sensitive or critical information, helping users quickly identify and prioritize high-priority data.
-The **structured layout** divides the page into sections, ensuring an intuitive and efficient user experience.
+- The **search bar** at the top of the interface allows users to quickly and efficiently find specific pieces of information. It supports keyword-based queries, making the process of locating data fast and straightforward. This feature enhances productivity by reducing the time spent on manual searching.
+
+- The **Generic Index** offers a summarized view of the broad data collected from various sources. It presents standard findings in an organized format, giving users a quick understanding of general trends. This helps in forming a base for more detailed analysis and decision-making.
+
+- The **Leaked Index** highlights data that is sensitive, confidential, or potentially compromised. It brings attention to high-priority information such as leaked credentials, making it easier for users to act quickly. This ensures critical threats are addressed before they escalate.
+
+- The **structured layout** of the platform breaks the interface into clear, logical sections for better usability. This design allows users to navigate smoothly through different features without confusion. It creates a more intuitive and efficient experience for both new and experienced users.
 
 ![cetagories-modified](https://github.com/user-attachments/assets/4202e48f-4965-40b4-ac53-df3ee6c4f81a)
 
 
-The home page features a prominent search bar at the top, allowing users to input data for viewing or crawling. Below the search bar, the page is organized into two primary categories. These categories structure the platform’s core data for easy access and analysis.
+The home page features a prominent search bar positioned at the top, designed to let users quickly input data for either viewing or initiating a crawl process. This search bar acts as the central entry point for user interaction, streamlining access to the platform’s core functions. Just below the search bar, the page is neatly divided into two primary categories, each representing a key area of focus within the system. These categories help organize the data in a clear and logical manner, allowing users to easily navigate and analyze the content. This structured layout ensures an efficient and user-friendly experience right from the start.
 
 ### Categories Filter
-Selecting "Analytics" from the navigation bar displays two categories already available on the home page. This section provides a clear view of the platform’s data results. It is organized into two main categories for streamlined analysis.
+Selecting "Analytics" from the navigation bar takes users to a detailed view that mirrors the two main categories already shown on the home page. This section is designed to provide a focused look at the platform’s collected data and analytical results. It presents information in a structured format, allowing users to explore key insights efficiently. The clear layout supports streamlined analysis and quick interpretation of complex data.
 
 1. #### Generic Index
    
 ![generic index-modified](https://github.com/user-attachments/assets/36155cf7-e710-4739-b62b-24a550402444)
 
 
-The "Generic Index" category displays information related to the crawling process, allowing users to observe various states. These states represent different aspects of the fetched data. Users can review the data systematically, one state at a time.
+The "Generic Index" category displays information related to the crawling process, providing users with insights into various states of the fetched data. These states represent different aspects of the crawling operation, each offering valuable details. By reviewing the data systematically, one state at a time, users can gain a comprehensive understanding of the progress and status of the crawl. This structure ensures users can focus on specific areas of interest without being overwhelmed by unnecessary information.
 
-- **Document Count:** This section provides detailed information about the results obtained after fetching the data, focusing on the document count. It displays the total number of documents retrieved, presented as a single count value. This summary helps users quickly understand the volume of data collected.
+- **Document Count:** This section provides detailed information about the results obtained after the data is fetched, focusing on the total document count. It displays the total number of documents retrieved from the crawl, presented as a single count value for clarity. This summary helps users quickly understand the volume of data collected and gauge the breadth of the crawl. It offers a snapshot of how extensive the data collection process has been.
 
-- **Most Recent Date:** This state will inform us about the most recent updates to our crawled data, ensuring users stay up-to-date with the latest information. It helps quickly identify new entries in the dataset.
+- **Most Recent Date:** This state informs users about the most recent updates to the crawled data, ensuring they are kept up-to-date with the latest information available. It displays the most recent entries in the dataset, helping users quickly identify any new data that has been fetched. This is especially useful for tracking changes and monitoring updates in near real-time.
 
-- **Oldes Update:** This section will display the results related to the oldest updates in the data, showing when the data was fetched in the past. This is useful for tracking long-term changes or identifying outdated information.
+- **Oldes Update:** This section displays information about the oldest updates in the data, indicating when the data was last fetched in the past. By showing the oldest updates, users can track long-term changes and identify any outdated or irrelevant data. This is useful for distinguishing between fresh data and data that may no longer be applicable or valid.
 
-- **Update five days:**   This section will provide information about the updates from the last 5 days,It helps users focus on the most relevant and recent data.
+- **Update five days:**   This section provides information about the updates from the last five days, allowing users to focus on recent changes that are highly relevant. By highlighting data updates within the past five days, this feature helps users quickly analyze recent changes without sifting through older, less relevant data. It ensures the focus remains on the most up-to-date information.
 
-- **Update Nine days:**  This section will provide information about the updates from the last 9 days, allowing users to monitor a slightly longer period for any significant changes.
-- **Average Score:**  An average score count of our results will be displayed here, helping users assess the overall quality of the fetched data. This metric is valuable for evaluating the effectiveness of the crawling process.
+- **Update Nine days:**  This section provides insights into the updates from the last nine days, offering users a view of changes over a slightly longer period. It helps users monitor data for any significant changes or trends that may have developed in the past week or so. This feature is useful for tracking medium-term updates that may not be as immediate but are still important for ongoing analysis.
+- 
+- **Average Score:**  This section displays the average score count of the results, providing users with an overall assessment of the data quality. The average score metric is important for evaluating how well the crawling process performed in terms of the relevance and quality of the data fetched. It allows users to assess the overall effectiveness of the crawling process and decide whether further adjustments are needed.
 
-- **URL/Documents:** The count of URLs being extracted from sites will be displayed here, offering a clear view of the total number of URLs found. This helps users understand the volume of data being sourced from different websites.
-- **Archive/Documents:**  This refers to how many archived URLs were found on each website, allowing users to assess the historical relevance of the crawled data. It provides insight into the longevity and preservation of online content.
-- **Email/Documents:**  This section will show us the number of emails in our fetched data, assisting in identifying key communication points within the dataset. 
-- **Phone/Documents:** The phone section will indicate how many phone numbers are being fetched from every site, offering a detailed count of contact information in the data.
-- **Clearnet/Document:** This section informs us about the clearnet-type URLs being displayed. On average, each link provides around 4 URLs, which belong to the clearnet, a standard type of network.
-- **Common Type:** These are the general types supported by our network, helping categorize the different types of content available. This section ensures users can understand the variety and scope of data collected from different sources.
+- **URL/Documents:** This section shows the count of URLs being extracted from the sites during the crawl, offering a clear view of the total number of URLs found. By displaying the URL count, users can gauge how many web pages were captured during the crawl, helping them understand the extent of the data sourced. This metric is particularly useful for analyzing the scale of the crawling operation.
+- 
+- **Archive/Documents:**  This refers to the number of archived URLs found on each website, allowing users to assess the historical relevance of the crawled data. The archived URLs give insight into the longevity and preservation of online content, helping users understand how much of the data being crawled has been preserved over time. This is valuable for monitoring the ongoing availability of older content.
+- 
+- **Email/Documents:**  This section will show the number of email addresses found within the crawled data, helping users identify key communication points. By tracking the emails found during the crawl, users can extract important contact details for analysis. This is crucial for identifying potential communication channels and understanding the nature of the content within the dataset.
+-  
+- **Phone/Documents:** This section indicates how many phone numbers were fetched from each site during the crawl, providing users with detailed contact information. By tracking phone numbers, users can understand the level of personal or business contact data within the dataset. This feature allows for a deeper analysis of how connected or widespread the data is across different platforms.
+- 
+- **Clearnet/Document:** This section informs users about the clearnet-type URLs that were captured during the crawl. On average, each clearnet link provides around four URLs, which belong to the standard public internet network. This section helps users understand the volume of accessible, non-hidden data collected, which is essential for distinguishing between regular web content and more obscure or private data.
 
+- **Common Type:** These are the general types of data supported by the network, helping users categorize the different types of content collected. This section ensures that users can easily understand the variety and scope of data being gathered from diverse sources. It also helps in organizing the data into recognizable categories, making analysis more straightforward and manageable.
+- 
 ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/generalindex.png)
 
 In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers represent updates on a weekly basis.
@@ -81,49 +95,33 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 ![leaked index-modified](https://github.com/user-attachments/assets/199958b0-9477-443f-9220-743dbe6ffc43)
 
-The Leaked Index provides detailed information about the states of leaked data related to the specific information being sought. It helps identify and track sensitive or critical data within the dataset.
+The Leaked Index offers detailed insights into the various states of leaked data within the dataset, specifically targeting sensitive or confidential information. It helps users identify critical data that has been exposed, making it easier to track potential risks or security breaches. By providing a clear overview of the leaked data, this index allows for more focused analysis and prioritization of high-risk information. This feature is essential for ensuring that important threats are detected and addressed promptly.
 
 3. ### Defacement
-The Defacement category allows users to analyze data related to websites that have been compromised or defaced. Within this section, users can:
-- View the total number of websites that have been hacked or visually altered by attackers.
-- Identify and filter fake or fraudulent websites among the defaced entries.
-- Review technical metrics such as the server response speed at the time the defacement was detected.
-This category provides valuable insights into the nature and scale of web defacement incidents, enabling users to monitor emerging threats and evaluate the performance and vulnerabilities of affected web servers.
+The Defacement category allows users to deeply analyze data related to websites that have been compromised or visually altered by attackers. Within this section, users can:
+
+- View the total number of websites that have been hacked or defaced, giving a comprehensive overview of the scale of such incidents. This helps to quantify the number of attacks and monitor the impact on the web ecosystem.
+
+- Identify and filter fake or fraudulent websites among the defaced entries, ensuring that users can focus on legitimate threats and exclude irrelevant or misleading data.
+
+- Review technical metrics, such as the server response speed at the time the defacement was detected, offering insights into how server performance may have been affected by the attack.
+
+This category provides essential insights into the nature and scale of web defacement incidents, enabling users to track emerging threats in real time. By understanding the specific vulnerabilities that led to these attacks, users can assess the overall security posture of affected web servers. Furthermore, this information helps in improving website defense strategies and mitigating future risks associated with web defacements.
 
 ![defecement-modified](https://github.com/user-attachments/assets/ecf0f26a-49e4-4dcc-89ee-91a32a78cec3)
 
 
 
 ## General Index
-This is the second option in the navigation bar. When a user performs a search using the search bar, the results are displayed accordingly. Within the "General Intelligence" dropdown menu (accessible through the second navigation option), several subcategories become available, including:
-
-General
-
-Forums
-
-News
-
-Stolen Data
-
-Drugs
-
-Hacking
-
-Marketplaces
-
-Cryptocurrencies
-
-Leaks
-
-Users can view data related to any of these categories based on their search query. We will further explore and discuss each of these menu options individually for better understanding.
+This is the second option in the navigation bar, designed to give users easy access to a wide range of data categories. When a user performs a search using the search bar, the results are automatically displayed based on the query, providing tailored information for efficient exploration. Within the "General Intelligence" dropdown menu, accessible through the second navigation option, several subcategories become available, allowing users to delve deeper into specific areas of interest. These subcategories include General, Forums, News, Stolen Data, Drugs, Hacking, Marketplaces, Cryptocurrencies, and Leaks, each containing relevant data for the user to explore. Depending on the search query, users can view data associated with any of these categories, providing them with focused and detailed information. In the following sections, we will explore each of these subcategories individually to offer a better understanding of their contents and how users can leverage them effectively.
 
 ![General Intelligence-modified (1)](https://github.com/user-attachments/assets/1785f777-2f85-481e-bafe-79ad37b2c6d1)
 
 ### All
-The "All" category provides a consolidated view of intelligence data from all subcategories under the General Intelligence section. 
+The "All" category offers a comprehensive and unified view of intelligence data, consolidating information from every subcategory under the General Intelligence section. This enables users to access a broad range of data in one place, making it easier to analyze and compare information across various categories. The "All" category serves as a centralized hub for quickly reviewing the full spectrum of collected intelligence.
 
 1. ### General
-This section contains a wide range of uncategorized intelligence data. It includes miscellaneous findings from various sources that do not specifically fall under the more targeted categories listed below.
+This section houses a diverse collection of uncategorized intelligence data, encompassing various findings that don’t fit neatly into the more specific categories outlined elsewhere. It includes miscellaneous insights and discoveries gathered from different sources, providing users with a broader scope of information. This section ensures that no valuable data goes overlooked, even if it doesn't fall under a specific category.
 
 2. ### Forums
 In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
@@ -132,13 +130,13 @@ In a forum, various platforms can be utilized, such as blogs, websites, or media
 The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
 
 4. ### Stolen Data
-Lists data breaches involving the theft of personal, financial, or business information. It includes leaked credentials, credit card dumps, and sensitive data sold or shared on underground platforms.
+This section lists data breaches that involve the theft of sensitive personal, financial, or business information. It includes incidents where credentials, credit card dumps, and other confidential data have been exposed, often being sold or shared on underground platforms. Users can explore the extent of these breaches and gain insights into the compromised data to assess potential risks.
 
 5. ### Drugs
-Monitors and presents listings related to the sale or trade of illegal drugs across dark web marketplaces. This helps law enforcement and monitoring teams keep track of emerging drug trends.
+This section monitors and displays listings related to the sale or trade of illegal drugs across dark web marketplaces, providing a comprehensive overview of illicit activity in this area. By tracking these listings, it helps law enforcement and monitoring teams stay informed about emerging drug trends, enabling more effective intervention. The data serves as a valuable resource for identifying new patterns and taking action against illegal drug distribution.
 
 6. ### Hacking
-Provides insights into hacking-related content such as websites exploit tutorials, malware development, and vulnerabilities being discussed or sold in hacker communities.
+Provides valuable insights into hacking-related content, including tutorials on website exploits, malware development, and discussions or sales of vulnerabilities within hacker communities. It offers a closer look at the tools and techniques being shared, helping security teams stay informed about potential threats. Monitoring this data is crucial for understanding evolving hacking methods and strengthening cybersecurity defenses.
 
 7. ### Marketplaces
 Tracks online marketplaces (especially on the dark web) where illicit goods and services are traded. This includes weapons, fake documents, stolen data, malware, etc.
@@ -155,7 +153,7 @@ The Data Breach section in the navigation bar includes two subcategories:
 ![Databreach-modified](https://github.com/user-attachments/assets/26878091-cb9f-4839-bd47-51c045920748)
 
 1. ### Databases
-This section contains comprehensive records related to actual data breaches. It includes detailed breach data such as compromised credentials, personal information, and other sensitive content obtained from various sources.
+This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
 
 ![databases-modified](https://github.com/user-attachments/assets/69aaac82-8b53-4229-a049-a6ff6379b5de)
 
@@ -319,7 +317,6 @@ After that, there is the Clearnet option, which displays all the links related t
 Then we have the Person option, which displays the names of individuals associated with the selected search result.
 
 ![person](https://github.com/user-attachments/assets/fe2aa912-52ff-4d50-a0c4-8d7db734a40b)
-
 
 
 
