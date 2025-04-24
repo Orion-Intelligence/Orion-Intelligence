@@ -1,0 +1,37 @@
+<div class="graph-controls-container">
+  <div class="graph-form-row">
+    <div class="graph-form-block">
+      <select class="form-select graph-form-element" [(ngModel)]="selectedType">
+        <option value="cluster">Cluster</option>
+        <option value="document">Document</option>
+        <option value="property">Property</option>
+      </select>
+    </div>
+
+    <div class="graph-form-block" *ngIf="selectedType === 'cluster'">
+      <select class="form-select graph-form-element" [(ngModel)]="singleInput">
+        <option *ngFor="let option of clusterOptions" [value]="option">{{ option }}</option>
+      </select>
+    </div>
+
+    <div class="graph-form-block" *ngIf="selectedType === 'document'">
+      <input type="text" class="form-control graph-form-element" [(ngModel)]="singleInput" placeholder="Enter Document ID">
+    </div>
+
+    <div class="graph-form-block" *ngIf="selectedType === 'property'">
+      <select class="form-select graph-form-element" [(ngModel)]="propertyType">
+        <option *ngFor="let prop of allowedProperties" [value]="prop.key">{{ prop.label }}</option>
+      </select>
+    </div>
+
+    <div class="graph-form-block" *ngIf="selectedType === 'property'">
+      <input type="text" class="form-control graph-form-element" [(ngModel)]="propertyValue" placeholder="Property Value">
+    </div>
+
+    <div class="graph-form-button-block">
+      <button class="btn btn-primary graph-form-button" (click)="search()">Search</button>
+    </div>
+  </div>
+</div>
+
+<div #networkContainer class="graph-container"></div>

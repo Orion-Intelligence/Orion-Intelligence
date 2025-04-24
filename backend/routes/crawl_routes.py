@@ -1,3 +1,4 @@
+from orion.api.server.crawl_manager.class_model.entity_model import entity_model
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -40,8 +41,7 @@ async def index_generic(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_generic_index(GeneralDataModel(**body))
 
-@crawl_routes.post("/api/arango/set-dummy-relation", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
-async def set_dummy_relation(request: Request):
+@crawl_routes.post("/api/index/entity", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def index_entity(request: Request):
     body = await request.json()
-    relation = EntityRelationInput(**body)
-    return await entity_manager.get_instance().set_entity_relation(relation)
+    await crawl_controller.getInstance().invoke_entity_index(entity_model(**body))

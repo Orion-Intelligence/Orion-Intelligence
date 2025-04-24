@@ -33,6 +33,7 @@
               "src/assets/fonts"
             ],
             "styles": [
+              "node_modules/vis-network/styles/vis-network.css",
               "src/styles.scss"
             ],
             "scripts": ["src/assets/libs/bootstrap.min.js"]
@@ -70,7 +71,8 @@
                 "src/assets/fonts"
               ],
               "styles": [
-                "src/styles.scss"
+              "node_modules/vis-network/styles/vis-network.css",
+              "src/styles.scss"
               ],
               "scripts": ["src/assets/libs/bootstrap.min.js"]
             },
@@ -121,6 +123,7 @@
               "src/assets/fonts"
             ],
             "styles": [
+              "node_modules/vis-network/styles/vis-network.css",
               "src/styles.scss"
             ],
             "scripts": ["src/assets/libs/bootstrap.min.js"]

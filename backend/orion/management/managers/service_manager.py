@@ -44,9 +44,8 @@ class service_manager:
                 await migration_manager.get_instance().init_migration()
 
                 await asyncio.sleep(5)
-                arango = arango_controller.get_instance()
-                arango.link_connection()
-                arango.initialize()
+                arango_controller.get_instance().link_connection()
+                arango_controller.get_instance().initialize()
 
                 self._is_available = True
                 return True
