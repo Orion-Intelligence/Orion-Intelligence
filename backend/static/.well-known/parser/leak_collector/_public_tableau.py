@@ -54,7 +54,7 @@ class _public_tableau(leak_extractor_interface, ABC):
   def entity_data(self) -> List[entity_model]:
     return self._entity_data
 
-  def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
+  def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
     return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
   def contact_page(self) -> str:
@@ -105,10 +105,8 @@ class _public_tableau(leak_extractor_interface, ABC):
 
     retry_count = 0
     max_retries = 10
-    xx=0
 
     for _ in range(max_pages):
-
       if retry_count >= max_retries:
         break
 
@@ -194,12 +192,6 @@ class _public_tableau(leak_extractor_interface, ABC):
         y_position += 20
         hover_count += 1
         retry_count = 0
-
-        if xx == 0:
-          #14000 entries on each try
-          for _ in range(934):
-            page.mouse.wheel(0, 280)
-        xx += 1
 
         if hover_count % 15 == 0:
           page.mouse.wheel(0, 280)

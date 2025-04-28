@@ -1,37 +1,24 @@
-<div class="graph-controls-container">
-  <div class="graph-form-row">
-    <div class="graph-form-block">
-      <select class="form-select graph-form-element" [(ngModel)]="selectedType">
-        <option value="cluster">Cluster</option>
-        <option value="document">Document</option>
-        <option value="property">Property</option>
-      </select>
-    </div>
+<div #networkContainer class="graph-container d-none d-md-block"></div>
 
-    <div class="graph-form-block" *ngIf="selectedType === 'cluster'">
-      <select class="form-select graph-form-element" [(ngModel)]="singleInput">
-        <option *ngFor="let option of clusterOptions" [value]="option">{{ option }}</option>
-      </select>
-    </div>
+<graph-sidebar class="d-none d-md-block" (filtersApplied)="onSidebarApply($event)"></graph-sidebar>
 
-    <div class="graph-form-block" *ngIf="selectedType === 'document'">
-      <input type="text" class="form-control graph-form-element" [(ngModel)]="singleInput" placeholder="Enter Document ID">
-    </div>
+<app-graph-info
+  class="d-none d-md-block"
+  (physicsToggled)="onPhysicsToggled($event)"
+  [selectedType]="selectedType"
+  [singleInput]="singleInput"
+  [propertyType]="propertyType"
+  [propertyValue]="propertyValue">
+</app-graph-info>
 
-    <div class="graph-form-block" *ngIf="selectedType === 'property'">
-      <select class="form-select graph-form-element" [(ngModel)]="propertyType">
-        <option *ngFor="let prop of allowedProperties" [value]="prop.key">{{ prop.label }}</option>
-      </select>
-    </div>
-
-    <div class="graph-form-block" *ngIf="selectedType === 'property'">
-      <input type="text" class="form-control graph-form-element" [(ngModel)]="propertyValue" placeholder="Property Value">
-    </div>
-
-    <div class="graph-form-button-block">
-      <button class="btn btn-primary graph-form-button" (click)="search()">Search</button>
-    </div>
-  </div>
+<div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
+  <img src="assets/images/shared/cti-empty.svg" alt="No Data" class="img-fluid w-auto" />
 </div>
 
-<div #networkContainer class="graph-container"></div>
+<div class="blocked-media d-block d-md-none text-center p-4">
+  <h5 class="mb-3">Mobile Access Not Supported</h5>
+  <p class="mb-0">
+    This CTI Graph is designed for desktop use only.<br>
+    Please switch to a larger screen for the best experience.
+  </p>
+</div>

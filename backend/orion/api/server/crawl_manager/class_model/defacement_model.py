@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class CardExtractionModel(BaseModel):
-    m_location: List[str]
+    m_location_info: List[str]
     m_attacker: List[str]
     m_team: str
     m_web_server: List[str]

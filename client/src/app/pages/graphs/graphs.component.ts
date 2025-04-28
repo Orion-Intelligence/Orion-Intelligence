@@ -1,133 +1,97 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {HttpParams} from '@angular/common/http';
-import {ApiService} from '../../shared/services/api.service';
+import {ActivatedRoute} from '@angular/router';
 import {Network, DataSet, Node, Edge} from 'vis-network/standalone';
 import {FormsModule} from '@angular/forms';
-import {NgIf, NgFor} from '@angular/common';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ApiService} from '../../shared/services/api.service';
+import {SidebarComponent} from './sidebar/sidebar.component';
+import {GraphInfoComponent} from './graph-info/graph-info.component';
+import {NgIf} from '@angular/common';
+import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
   styleUrls: ['./graphs.component.css'],
-  imports: [FormsModule, NgIf, NgFor]
+  animations: [fadeInDashboardItem],
+  imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf]
 })
 export class GraphComponent implements OnInit {
   @ViewChild('networkContainer', {static: true}) networkContainer!: ElementRef;
-
   network!: Network;
-
   selectedType = 'cluster';
-  singleInput = 'general';
-  propertyType = 'm_email_addresses';
+  singleInput = 'all';
+  propertyType = 'all';
   propertyValue = '';
+  physicsEnabled = true;
+  isEmpty = false;
 
-  clusterOptions = ['general', 'leak', 'defacement'];
-
-  allowedProperties = [
-    {label: 'Email Addresses', key: 'm_email_addresses'},
-    {label: 'Phone Numbers', key: 'm_phone_numbers'},
-    {label: 'States', key: 'm_states'},
-    {label: 'Location Info', key: 'm_location_info'},
-    {label: 'Social Media Profiles', key: 'm_social_media_profiles'},
-    {label: 'Name', key: 'm_name'},
-    {label: 'Industry', key: 'm_industry'},
-    {label: 'Company Name', key: 'm_company_name'},
-    {label: 'Country Name', key: 'm_country_name'},
-    {label: 'IP', key: 'm_ip'}
-  ];
-
-  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {
+  constructor(private api: ApiService, private route: ActivatedRoute,) {
   }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      this.selectedType = params['selectedType'] || 'cluster';
-      this.singleInput = params['singleInput'] || 'general';
-      this.propertyType = params['propertyType'] || 'm_email_addresses';
-      this.propertyValue = params['propertyValue'] || '';
+      const selectedType = params['selectedType'] || 'cluster';
+      const singleInput = params['singleInput'] || 'general';
+      const propertyType = params['propertyType'] || 'm_email_addresses';
+      const propertyValue = params['propertyValue'] || '';
 
-      if (this.selectedType === 'property' && this.propertyType && this.propertyValue) {
-        this.loadGraphByNode(this.propertyType, this.propertyValue);
-      } else if ((this.selectedType === 'cluster' || this.selectedType === 'document') && this.singleInput) {
-        this.loadGraphByNode(this.selectedType, this.singleInput);
+      if (selectedType === 'property' && propertyType && propertyValue) {
+        this.loadGraphByNode(selectedType, propertyType, propertyValue);
+      } else if ((selectedType === 'cluster' || selectedType === 'document') && singleInput) {
+        this.loadGraphByNode(selectedType, selectedType, singleInput);
       }
     });
   }
 
-  search(): void {
-    let type = '';
-    let value = '';
-
-    if (this.selectedType === 'property' && this.propertyType && this.propertyValue) {
-      type = this.propertyType;
-      value = this.propertyValue;
-    } else if ((this.selectedType === 'cluster' || this.selectedType === 'document') && this.singleInput) {
-      type = this.selectedType;
-      value = this.singleInput;
-    }
-
-    if (type && value) {
-      this.router.navigate([], {
-        queryParams: {
-          selectedType: this.selectedType,
-          singleInput: this.singleInput,
-          propertyType: this.propertyType,
-          propertyValue: this.propertyValue
-        }
-      }).then();
-
-      this.loadGraphByNode(type, value);
-    }
-  }
-
-  loadGraphByNode(type: string, value: string): void {
-    const params = new HttpParams()
-      .set('model_type', type)
-      .set('query_value', value);
+  loadGraphByNode(data_point_type: string, type: string, value: string): void {
+    const params = new HttpParams().set('data_point_type', data_point_type).set('model_type', type).set('query_value', value);
 
     this.api.get<any[]>('graph', {params}).subscribe({
-      next: (data) => {
-        this.renderGraph(data, type, value);
-      },
-      error: (err) => {
-        console.error('❌ Request failed:', err);
-      }
+      next: data => this.renderGraph(data, type, value),
+      error: err => console.error('❌ Request failed:', err),
     });
+  }
+
+  private _sanitize(value: string): string {
+    return value
+      .replace(/ /g, "_")
+      .replace(/[^a-zA-Z0-9_\-\.@()+,=;$!*'%:]/g, '')
+      .toLowerCase();
   }
 
   renderGraph(data: any[], queryType: string, queryValue: string): void {
+    this.isEmpty = data.length <= 0;
     const nodes = new DataSet<Node>();
     const edges = new DataSet<Edge>();
     const nodeMap = new Map<string, Node>();
+
+    const centralId = `cti_vertices/${queryType === 'property' ? queryValue : `${queryType}:${queryValue}`}`;
 
     data.forEach(item => {
       const vertex = item.vertex;
       const nodeId = vertex._id;
 
-      let label = '';
-      let color = '#AAAAAA';
+      let label: string;
+      if (vertex.type === 'cluster') label = vertex._key;
+      else if (vertex.type === 'document') label = vertex.m_document_id.substring(0, 8) + '...';
+      else if (vertex.value) label = this._sanitize(vertex.value).toUpperCase();
+      else label = vertex._key;
 
-      if (vertex.type === 'cluster') {
-        label = vertex._key;
-      } else if (vertex.type === 'document') {
-        label = vertex.m_document_id.substring(0, 8) + '...';
-      } else if (vertex.type === 'm_location_info') {
-        label = vertex.value.replace('_', ' ').toUpperCase();
-      }
-
-      const isCenter =
-        (queryType === 'cluster' && vertex._key === queryValue) ||
-        (queryType === 'document' && vertex.m_document_id === queryValue) ||
-        (queryType === 'm_location_info' && vertex.value === queryValue);
+      const isCenter = nodeId === centralId;
 
       const node: Node = {
         id: nodeId,
         label,
-        color: isCenter ? 'yellow' : '#FFF',
+        color: isCenter ? 'yellow' : '#40bf40',
         shape: 'dot',
-        font: {size: 14, color: '#FFFFFF'},
+        font: {
+          size: 14,
+          color: '#FFFFFF',
+          background: '#000',
+          strokeWidth: 0
+        },
         size: isCenter ? 30 : 20,
         x: isCenter ? 0 : undefined,
         y: isCenter ? 0 : undefined
@@ -146,51 +110,75 @@ export class GraphComponent implements OnInit {
       if (!nodeMap.has(fromId)) {
         nodeMap.set(fromId, {
           id: fromId,
-          label: fromId.split('/')[1],
-          color: '#AAAAAA',
+          label: fromId,
+          color: 'yellow',
           shape: 'dot',
-          font: {size: 14, color: '#FFFFFF'}
+          font: {
+            size: 14,
+            color: '#FFFFFF',
+            background: '#000',
+            strokeWidth: 0
+          },
+          size: 20
         });
       }
 
-      const isCenter = queryType === 'm_location_info' && toId.toLowerCase() === `cti_vertices/m_location_info:${queryValue.toLowerCase()}`;
+      const centralIdNormalized = this._sanitize(centralId.toLowerCase());
+      const isCenter = toId.toLowerCase() === centralIdNormalized || toId.includes(centralIdNormalized.split("all:")[1]) || toId.includes(centralIdNormalized.split("document:")[1]);
 
       nodeMap.set(toId, {
         id: toId,
-        label: toId.split(':')[1]?.replace(/_/g, ' ').toUpperCase() || toId,
+        label: toId,
         color: isCenter ? 'yellow' : (toId.includes('cti_vertices/') && toId.split('/')[1].length === 64 ? '#FF6666' : '#538cc6'),
         shape: 'dot',
-        font: {size: 14, color: '#FFFFFF'},
+        font: {
+          size: 14,
+          color: '#FFFFFF',
+          background: '#000',
+          strokeWidth: 0
+        },
         size: isCenter ? 30 : 20,
-        x: isCenter ? 0 : undefined,
-        y: isCenter ? 0 : undefined
       });
 
+      const edgeColor = isCenter ? 'yellow' : '#FFFFFF';
       if (isCenter) {
         edges.add({
           from: toId,
           to: fromId,
+          arrows: {to: {enabled: false}},
+          color: {color: edgeColor},
+          width: 4
+        });
+      } else {
+        edges.add({
+          from: fromId,
+          to: toId,
           arrows: 'to',
-          color: {color: '#FFFFFF'},
+          color: {color: edgeColor},
           width: 2
         });
-      }else {
-      edges.add({
-        from: toId,
-        to: fromId,
-        arrows: 'to',
-        color: {color: '#FFFFFF'},
-        width: 2
-      });
       }
     });
-
     nodes.add(Array.from(nodeMap.values()));
 
     const container = this.networkContainer.nativeElement;
-    const networkData = {nodes, edges};
-    const options = {
-      physics: {enabled: false},
+    this.network = new Network(container, {nodes, edges}, {
+      physics: {
+        enabled: this.physicsEnabled,
+        solver: 'forceAtlas2Based',
+        timestep: 1,
+        stabilization: {
+          iterations: 20,
+          fit: true
+        },
+        forceAtlas2Based: {
+          gravitationalConstant: -170,
+          centralGravity: 0.005,
+          springLength: 10,
+          springConstant: 0.08,
+          avoidOverlap: 1
+        }
+      },
       edges: {
         arrows: {to: {enabled: true, scaleFactor: 1}},
         color: {color: '#FFFFFF'},
@@ -199,14 +187,36 @@ export class GraphComponent implements OnInit {
       nodes: {
         shape: 'dot',
         size: 20,
-        font: {size: 14, color: '#FFFFFF'}
+        font: {
+          size: 14,
+          color: '#FFFFFF'
+        }
       },
       layout: {
         randomSeed: 42
+      },
+      interaction: {
+        selectConnectedEdges: false
       }
-    };
+    });
 
-    this.network = new Network(container, networkData, options);
+    this.network.on('selectNode', (params: any) => {
+      const connectedEdges = this.network.getConnectedEdges(params.nodes[0]);
+
+      edges.forEach((edge: any) => {
+        edges.update({id: edge.id, color: {color: '#FFFFFF'}, width: 2});
+      });
+
+      (connectedEdges as (string | number)[]).forEach(edgeId => {
+        edges.update({id: edgeId, color: {color: 'yellow'}, width: 3});
+      });
+    });
+
+    this.network.on('deselectNode', () => {
+      edges.forEach((edge: any) => {
+        edges.update({id: edge.id, color: {color: '#FFFFFF'}, width: 2});
+      });
+    });
 
     const searchNodeId = nodes.getIds().find(id => nodeMap.get(String(id))?.color === 'yellow');
     if (searchNodeId !== undefined) {
@@ -214,6 +224,32 @@ export class GraphComponent implements OnInit {
         scale: 1.0,
         animation: true
       });
+    }
+  }
+
+
+  onPhysicsToggled(enabled: boolean): void {
+    this.physicsEnabled = enabled;
+    if (this.network) {
+      this.network.setOptions({physics: {enabled}});
+    }
+  }
+
+  onSidebarApply(filters: {
+    selectedType: string;
+    singleInput: string;
+    propertyType: string;
+    propertyValue: string;
+  }): void {
+    this.selectedType = filters.selectedType;
+    this.singleInput = filters.singleInput;
+    this.propertyType = filters.propertyType;
+    this.propertyValue = filters.propertyValue;
+
+    if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
+      this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue);
+    } else if ((filters.selectedType === 'cluster' || filters.selectedType === 'document') && filters.singleInput) {
+      this.loadGraphByNode(this.selectedType, filters.selectedType, filters.singleInput);
     }
   }
 }

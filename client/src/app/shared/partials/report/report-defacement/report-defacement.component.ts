@@ -6,9 +6,7 @@ import {HelperService} from '../../../services/helper.service';
 import {AppService} from '../../../../services/core/app.service';
 
 @Component({
-  selector: 'app-report-defacement',
-  templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe],
-  styleUrls: ['./report-defacement.component.css']
+  selector: 'app-report-defacement', templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe], styleUrls: ['./report-defacement.component.css']
 })
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
@@ -40,6 +38,19 @@ export class ReportDefacementComponent implements OnInit {
     if (this.defacementData && this.defacementData.m_web_url) {
       window.open(this.defacementData.m_url, '_blank');
     }
+  }
+
+  open_graph() {
+    const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+    const parts = window.location.pathname.split('/');
+    const singleInput = parts[parts.length - 1];
+
+    const params = new URLSearchParams({
+      selectedType: 'document', singleInput: singleInput
+    });
+
+    const fullUrl = `${baseUrl}?${params.toString()}`;
+    window.open(fullUrl, '_blank');
   }
 
   ngOnInit(): void {

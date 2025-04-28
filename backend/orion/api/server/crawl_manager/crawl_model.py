@@ -14,7 +14,6 @@ from fastapi.responses import FileResponse
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 import os
 import base64
-from io import BytesIO
 
 from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
 
@@ -29,11 +28,11 @@ class crawl_model:
     return crawl_model.__instance
 
   def __init__(self):
+    self._engine = mongo_controller.get_instance().get_engine()
     if crawl_model.__instance is not None:
       pass
     else:
       crawl_model.__instance = self
-      self._engine = mongo_controller.get_instance().get_engine()
 
   async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list, network_type: str, is_leak_update: bool):
     general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == base_url)

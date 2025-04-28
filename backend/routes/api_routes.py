@@ -9,6 +9,7 @@ from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
+from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
@@ -70,9 +71,9 @@ async def get_screenshot(filename: str):
 
 
 @api_routes.get("/api/graph", description="Fetch the graph relationships for a given entity based on its model type and value.")
-async def get_entity_relations(model_type: str = Query(..., description="Type of the model (e.g. document, cluster, or property key)"), query_value: str = Query(..., description="The unique value or ID used to identify the entity.")):
+async def get_entity_relations(query: EntityQueryModel = Depends()):
   manager = entity_manager.get_instance()
-  return await manager.get_entity_relations(query=type("EntityQueryInput", (object,), {"model_type": model_type, "query_value": query_value})())
+  return await manager.get_entity_relations(query)
 
 
 @api_routes.get("/api/public", description="Get publicly exposed configuration values for frontend initialization.")

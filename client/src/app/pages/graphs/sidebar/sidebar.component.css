@@ -1,0 +1,30 @@
+.graph-sidebar__container {
+  width: 280px;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to bottom, #0E2D4D, #144170);
+}
+
+.graph-sidebar__container .filter__input{
+  font-size: 14px;
+}
+
+.graph-sidebar__container .filter__input-form{
+  border: 2px solid #2C86DD;
+}
+
+.graph-sidebar__container-logo {
+  margin: 17px 12px 12px;
+}
+
+.graph-sidebar__container .filter__form {
+  background: none;
+  padding: 12px 17px 12px 12px;
+  height: 90vh;
+}
+
+.graph-sidebar__container .filter__submit{
+  margin-bottom: 20px;
+}

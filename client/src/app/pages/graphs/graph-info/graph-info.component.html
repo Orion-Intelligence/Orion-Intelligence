@@ -1,0 +1,87 @@
+<div class="graph-filters__container">
+
+  <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleAnimation()">
+    <div class="analytics d-flex align-items-center gap-2">
+      <input type="checkbox" id="switch" [checked]="animationEnabled">
+      <label for="switch" class="mb-0"></label>
+      <span>&nbsp; Toggle Physics</span>
+    </div>
+  </div>
+  <br>
+
+  <div class="graph-filters__details">
+    <div class="graph-filters__details-header d-flex justify-content-between align-items-center"
+         data-bs-toggle="collapse" data-bs-target="#detailsCollapse" aria-expanded="true" style="cursor: pointer;">
+      <span>Details</span>
+      <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron transition"/>
+    </div>
+    <div id="detailsCollapse" class="collapse show">
+      <br>
+      <ng-container *ngIf="selectedType === 'all'">
+        <div class="detail-section">
+          <div class="detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="detail-line">{{ 'no filter' | titlecase }}</div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedType === 'cluster' || selectedType === 'document'">
+        <div class="detail-section">
+          <div class="detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="detail-line">{{ selectedType | titlecase }}</div>
+        </div>
+        <div class="detail-section mt-4">
+          <div class="detail-heading">{{ "Cluster Type" | titlecase }}</div>
+          <div class="detail-line">{{ singleInput | titlecase }}</div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedType === 'property'">
+        <div class="detail-section">
+          <div class="detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="detail-line">{{ selectedType | titlecase }}</div>
+        </div>
+        <div class="detail-section mt-4">
+          <div class="detail-heading">{{ "Property Type" | titlecase }}</div>
+          <div class="detail-line">{{ formatPropertyName(propertyType) | titlecase }}</div>
+        </div>
+        <div class="detail-section mt-4">
+          <div class="detail-heading">{{ "Property Value" | titlecase }}</div>
+          <div class="detail-line">{{ (propertyValue || 'empty') | titlecase }}</div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="graph-filters__details">
+    <div class="graph-filters__details-header d-flex justify-content-between align-items-center"
+         data-bs-toggle="collapse" data-bs-target="#indicatorsCollapse" aria-expanded="true" style="cursor: pointer;">
+      <span>Indicators</span>
+      <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron transition"/>
+    </div>
+    <div id="indicatorsCollapse" class="collapse">
+      <br>
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-success rounded-circle p-1"></div>
+        <div class="ml-2">Cluster</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-danger rounded-circle p-1"></div>
+        <div class="ml-2">Document</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-warning rounded-circle p-1"></div>
+        <div class="ml-2">Property Type</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-primary rounded-circle p-1"></div>
+        <div class="ml-2">Property Value</div>
+      </div>
+    </div>
+  </div>
+
+</div>

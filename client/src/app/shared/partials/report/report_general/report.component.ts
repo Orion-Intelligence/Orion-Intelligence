@@ -125,6 +125,19 @@ export class ReportComponent implements OnInit {
     }
   }
 
+  open_graph() {
+    const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+    const parts = window.location.pathname.split('/');
+    const singleInput = parts[parts.length - 1];
+
+    const params = new URLSearchParams({
+      selectedType: 'document', singleInput: singleInput
+    });
+
+    const fullUrl = `${baseUrl}?${params.toString()}`;
+    window.open(fullUrl, '_blank');
+  }
+
   getStatusText(dateString?: string): string {
     if (!dateString) return 'Inactive';
     const createdDate = new Date(dateString);
