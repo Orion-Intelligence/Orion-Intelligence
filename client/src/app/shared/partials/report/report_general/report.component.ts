@@ -1,20 +1,21 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
-import {ResultListComponent} from '../../result-components/result-list/result-list.component';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {last} from 'rxjs';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {HelperService} from '../../../services/helper.service';
-import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
-import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
-import {AppService} from '../../../../services/core/app.service';
-import {Category} from '../../../enums/pages';
-import {ApiService} from '../../../services/api.service';
-import {HttpParams} from '@angular/common/http';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
+import { ResultListComponent } from '../../result-components/result-list/result-list.component';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { last } from 'rxjs';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { HelperService } from '../../../services/helper.service';
+import { LeakResultItem } from '../../../model/results/leak/leak.callback.model';
+import { GeneralResultItem } from '../../../model/results/general/general.callback.model';
+import { AppService } from '../../../../services/core/app.service';
+import { Category } from '../../../enums/pages';
+import { ApiService } from '../../../services/api.service';
+import { HttpParams } from '@angular/common/http';
+import { TooltipPosition, MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
-  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage], animations: [fadeInDashboardItem],
+  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, MatTooltipModule], animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;
@@ -33,7 +34,7 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({reportdata, type}) => {
+    this.route.data.subscribe(({ reportdata, type }) => {
       this.resultItem = reportdata;
       this.type = type;
       this.processResultItem();

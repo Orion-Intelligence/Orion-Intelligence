@@ -158,6 +158,7 @@
   border-bottom: 3px solid #fff !important;
 }
 
+
 .search__result-detail .tags span {
   background-color: #1F4B73;
   padding: 5px 10px;
@@ -299,7 +300,8 @@
 }
 
 .dashboard__search-link:not([href]):hover {
-  color: #D0D0D0;;
+  color: #D0D0D0;
+  ;
 }
 
 
@@ -407,7 +409,8 @@
   background: #EFFDFF !important;
 }
 
-.grid-container .default-input-button:hover, .default-input-button:focus {
+.grid-container .default-input-button:hover,
+.default-input-button:focus {
   background: #EFFDFF !important;
 }
 

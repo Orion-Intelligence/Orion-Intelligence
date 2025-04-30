@@ -1,20 +1,21 @@
-import {Component, EventEmitter, OnInit, Output, OnDestroy} from '@angular/core';
-import {NgOptimizedImage, NgClass, NgIf, AsyncPipe} from '@angular/common';
-import {ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory} from '../../enums/pages';
-import {AppService} from '../../../services/core/app.service';
-import {NavigationEnd, Router, RouterLink} from '@angular/router';
-import {filter} from 'rxjs';
-import {SelectionStoreService} from '../../../services/dashboard/selection.service';
-import {DashboardSidebarItemsComponent} from './dashboard-sidebar-items/dashboard-sidebar-items.component';
-import {SidebarSectionComponent} from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {GeneralCallbackModel} from '../../model/results/general/general.callback.model';
-import {LeakCallbackModel} from '../../model/results/leak/leak.callback.model';
+import { Component, EventEmitter, OnInit, Output, OnDestroy } from '@angular/core';
+import { NgOptimizedImage, NgClass, NgIf, AsyncPipe } from '@angular/common';
+import { ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory } from '../../enums/pages';
+import { AppService } from '../../../services/core/app.service';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { SelectionStoreService } from '../../../services/dashboard/selection.service';
+import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
+import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { GeneralCallbackModel } from '../../model/results/general/general.callback.model';
+import { LeakCallbackModel } from '../../model/results/leak/leak.callback.model';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent],
+  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, MatTooltipModule],
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
@@ -27,8 +28,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   category = Category;
+  Explore: string | undefined;
 
-  constructor(protected dashboardService:DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
+  constructor(protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
   }
 
   ngOnInit() {
@@ -58,7 +60,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.selectionStore.getSelectedSection() === section) {
       this.selectionStore.setSelectedSection("");
       this.selectionStore.setSelectedOption("");
-     } else {
+    } else {
       this.selectionStore.setSelectedSection(section);
 
       let firstSubcategory: string | undefined;
@@ -79,14 +81,14 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
       if (firstSubcategory) {
         this.selectionStore.setSelectedOption(firstSubcategory);
-        if(this.min_detected && this.sidebar_default){
+        if (this.min_detected && this.sidebar_default) {
           this.onToggleSidebar();
         }
       }
     }
   }
 
-  onResetCallback(){
+  onResetCallback() {
     this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
     this.dashboardService.leakCallbackModel = new LeakCallbackModel()
   }
@@ -94,7 +96,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   onOptionSelected(option: string) {
     this.onResetCallback()
     this.selectionStore.setSelectedOption(option);
-    if(this.min_detected && this.sidebar_default){
+    if (this.min_detected && this.sidebar_default) {
       this.onToggleSidebar();
     }
   }

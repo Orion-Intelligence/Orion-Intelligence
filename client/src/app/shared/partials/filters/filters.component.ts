@@ -4,12 +4,13 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
 import { last } from 'rxjs';
 import { filterAnimation } from '../../animations/filter.animation';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
-  imports: [FormsModule, CommonModule, NgOptimizedImage],
+  imports: [FormsModule, CommonModule, NgOptimizedImage, MatTooltipModule],
   animations: [filterAnimation]
 })
 export class FiltersComponent implements OnInit {

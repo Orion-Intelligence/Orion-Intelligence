@@ -1,13 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {DefacementResultItem} from '../../../model/results/defacement/defacement.param.model';
-import {DatePipe, NgOptimizedImage} from '@angular/common';
-import {HelperService} from '../../../services/helper.service';
-import {AppService} from '../../../../services/core/app.service';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { DefacementResultItem } from '../../../model/results/defacement/defacement.param.model';
+import { DatePipe, NgOptimizedImage } from '@angular/common';
+import { HelperService } from '../../../services/helper.service';
+import { AppService } from '../../../../services/core/app.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-report-defacement',
-  templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe],
+  templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe, MatTooltipModule],
   styleUrls: ['./report-defacement.component.css']
 })
 export class ReportDefacementComponent implements OnInit {

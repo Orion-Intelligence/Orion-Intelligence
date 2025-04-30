@@ -1,27 +1,28 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {Observable} from 'rxjs';
-import {EmptyResultComponent} from '../empty-result/empty-result.component';
-import {FormsModule} from '@angular/forms';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {LoadingFormComponent} from '../loading-form/loading-form.component';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {SidebarService} from '../../services/sidebar.service';
-import {FiltersComponent} from '../filters/filters.component';
-import {FilterModel} from '../../model/filter/filter.model';
-import {SuggestionComponent} from '../suggestion/suggestion.component';
-import {EmptyQueryComponent} from '../empty-query/empty-query.component';
-import {Suggestion} from '../../model/results/shared/common-result';
-import {query} from '@angular/animations';
-import {Category} from "../../enums/pages";
-import {RouterLink} from '@angular/router';
-import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Observable } from 'rxjs';
+import { EmptyResultComponent } from '../empty-result/empty-result.component';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { LoadingFormComponent } from '../loading-form/loading-form.component';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { SidebarService } from '../../services/sidebar.service';
+import { FiltersComponent } from '../filters/filters.component';
+import { FilterModel } from '../../model/filter/filter.model';
+import { SuggestionComponent } from '../suggestion/suggestion.component';
+import { EmptyQueryComponent } from '../empty-query/empty-query.component';
+import { Suggestion } from '../../model/results/shared/common-result';
+import { query } from '@angular/animations';
+import { Category } from "../../enums/pages";
+import { RouterLink } from '@angular/router';
+import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent,],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, MatTooltipModule],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
@@ -73,15 +74,15 @@ export class ResultComponent implements OnInit, OnChanges {
     this.result_triggered = true
   }
 
-  onGetSuggestion(){
-    if (this.suggestion && this.suggestion.options.length>0 && this.suggestion.options.length<15 ) {
-      return  this.searchQuery.replace(this.suggestion?.text, this.suggestion?.options[0].text)
-    }else {
+  onGetSuggestion() {
+    if (this.suggestion && this.suggestion.options.length > 0 && this.suggestion.options.length < 15) {
+      return this.searchQuery.replace(this.suggestion?.text, this.suggestion?.options[0].text)
+    } else {
       return ""
     }
   }
 
-  onUpdateSuggestion(suggestion:string) {
+  onUpdateSuggestion(suggestion: string) {
     if (this.suggestion && this.suggestion.options.length) {
       this.searchQuery = suggestion
       this.updateQuery.emit(suggestion)

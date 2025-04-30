@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 @Component({
   selector: 'app-result-list',
   standalone: true,
@@ -21,4 +21,25 @@ export class ResultListComponent {
     }
     return rows;
   }
+
+
+
+
+
+
+  copiedIndex: number | null = null;
+
+  copyText(text: string, index: number) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.copiedIndex = index;
+      setTimeout(() => this.copiedIndex = null, 2000);
+    });
+  }
+
+  hideCopied(index: number) {
+    if (this.copiedIndex === index) {
+      this.copiedIndex = null;
+    }
+  }
+
 }

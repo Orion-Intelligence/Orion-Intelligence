@@ -10,7 +10,7 @@
 
 
   <ul class="sidebar__items">
-    <li class="sidebar__item">
+    <li class="sidebar__item" matTooltip="Discover with Orion" matTooltipPosition="above" matTooltipClass="mat-tooltip">
       <div class="sidebar__item-dropdown"
         [ngClass]="{'active': (selectionStore.selectedSection$ | async) === null || (selectionStore.selectedSection$ | async) === category.HOMEPAGE}"
         (click)="onSectionSelected(category.HOMEPAGE)" [routerLink]="'home'" [queryParamsHandling]="'merge'">
@@ -21,24 +21,26 @@
     <app-dashboard-sidebar-items [title]="'General Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'"
       [items]="generalCategories" [category]="category.STRATEGIC" [routePrefix]="'strategic'"
       [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+      (optionSelected)="onOptionSelected($event)" [tooltip]="'Explore Intelligence'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'"
       [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore"
-      (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+      (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"
+      [tooltip]="'Breach Insights'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items [title]="'Defacement'" [icon]="'assets/images/sidebar/defacement.svg'"
       [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'"
       [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+      (optionSelected)="onOptionSelected($event)"
+      [tooltip]="'Web Threat Monitor/Website Tampering'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'"
       [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API"
       [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+      (optionSelected)="onOptionSelected($event)" [tooltip]="'Real-Time Feeds'"></app-dashboard-sidebar-items>
   </ul>
 </nav>
 <div class="sidebar-hotlinks" *ngIf="this.sidebar_default">
   <div class="sidebar__item">
-    <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+    <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" matTooltip="URL Feed" matTooltipPosition="above"
+      matTooltipClass="mat-tooltip"
       [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
       (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
       <img ngSrc="../../../../assets/images/sidebar/directory.svg" alt="Links" height="20" width="20"
@@ -48,7 +50,8 @@
 
   <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
     <div class="sidebar__item">
-      <div class="sidebar__item-dropdown">
+      <div class="sidebar__item-dropdown" matTooltip="User Guide" matTooltipPosition="above"
+        matTooltipClass="mat-tooltip">
         <img ngSrc="../../../../assets/images/sidebar/documentation.svg" alt="Documentation" height="20" width="20"
           class="sidebar__icon">Documentation
       </div>
@@ -75,24 +78,26 @@
     <app-dashboard-sidebar-collapsed [title]="'General Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'"
       [items]="generalCategories" [category]="category.STRATEGIC" [routePrefix]="'strategic'"
       [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+      (optionSelected)="onOptionSelected($event)" [tooltip]="'Explore Intelligence'"></app-dashboard-sidebar-collapsed>
     <app-dashboard-sidebar-collapsed [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'"
       [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore"
-      (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+      (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"
+      [tooltip]="'Breach Insights'"></app-dashboard-sidebar-collapsed>
     <app-dashboard-sidebar-collapsed [title]="'Defacement'" [icon]="'assets/images/sidebar/data_breach.svg'"
       [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'"
       [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+      (optionSelected)="onOptionSelected($event)"
+      [tooltip]="'Web Threat Monitor/Website Tampering'"></app-dashboard-sidebar-collapsed>
     <app-dashboard-sidebar-collapsed *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'"
       [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API"
       [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
-      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+      (optionSelected)="onOptionSelected($event)" [tooltip]="'Real-Time Feeds'"></app-dashboard-sidebar-collapsed>
   </ul>
 </nav>
 <div class="sidebar-hotlinks-collapsed" *ngIf="!this.sidebar_default">
   <div class="sidebar__item">
-    <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+    <div class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" matTooltip="URL Feed" matTooltipPosition="above"
+      matTooltipClass="mat-tooltip"
       [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
       (click)="onSectionSelected(category.DIRECTORY)" [routerLink]="'directory'">
       <img ngSrc="../../../../assets/images/sidebar/directory.svg" alt="Links" height="20" width="20"
@@ -102,7 +107,8 @@
 
   <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
     <div class="sidebar__item">
-      <div class="sidebar__item-dropdown">
+      <div class="sidebar__item-dropdown" matTooltip="User Guide" matTooltipPosition="above"
+        matTooltipClass="mat-tooltip">
         <img ngSrc="../../../../assets/images/sidebar/documentation.svg" alt="Documentation" height="20" width="20"
           class="sidebar__icon">
       </div>
