@@ -7,8 +7,6 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
-from orion.api.server.entity_manager.entity_manager import entity_manager
-from orion.api.server.entity_manager.modal.EntityRelationInput import EntityRelationInput
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller

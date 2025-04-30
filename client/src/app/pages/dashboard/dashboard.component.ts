@@ -15,7 +15,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     NgClass,
     RouterOutlet,
     ScrollingModule,
-    NgIf
+    NgIf,
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
