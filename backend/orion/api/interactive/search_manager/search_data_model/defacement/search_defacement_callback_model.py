@@ -8,7 +8,7 @@ class suggestion(BaseModel):
     options: List[dict]
 
 class result_item(BaseModel):
-    m_location: List[str]
+    m_location_info: List[str]
     m_attacker: List[str]
     m_team: str
     m_hash: str

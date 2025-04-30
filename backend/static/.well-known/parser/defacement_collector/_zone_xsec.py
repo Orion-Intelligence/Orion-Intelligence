@@ -52,7 +52,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
+    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
         return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
@@ -127,15 +127,15 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             m_base_url=self.base_url,
                             m_url=link,
                             m_date_of_leak=datetime.datetime.strptime(date.split()[0], '%Y-%m-%d').date(),
-                            m_team=team,
-                            m_location=[location],
-                            m_attacker=[defacer],
                             m_mirror_links=[m_mirror],
                             m_network=helper_method.get_network_type(self.base_url),
                         )
 
                         entity_data = entity_model(
                             m_ip=[ip],
+                            m_location_info = [location],
+                            m_team = team,
+                            m_attacker = [defacer],
                         )
 
                         self.append_leak_data(card_data, entity_data)

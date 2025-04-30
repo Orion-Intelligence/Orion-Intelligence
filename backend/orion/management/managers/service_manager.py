@@ -4,6 +4,7 @@ from asyncio import sleep
 from migrations.migration import migration_manager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
+from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -41,6 +42,10 @@ class service_manager:
                 await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)
                 await migration_manager.get_instance().init_migration()
+
+                await asyncio.sleep(5)
+                arango_controller.get_instance().link_connection()
+                arango_controller.get_instance().initialize()
 
                 self._is_available = True
                 return True

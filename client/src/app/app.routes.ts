@@ -13,6 +13,7 @@ import { ReportComponent } from './shared/partials/report/report_general/report.
 import { DashboardEmailApiComponent } from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
 import { DashboardDefacementComponent } from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
 import { ReportDefacementComponent } from './shared/partials/report/report-defacement/report-defacement.component';
+import {GraphComponent} from './pages/graphs/graphs.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,15 @@ export const routes: Routes = [
     path: 'strategic',
     redirectTo: 'dashboard/strategic/all',
     pathMatch: 'full'
+  {
+    path: 'login',
+    component: LoginComponent,
+    data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'loginx',
+    component: LoginComponent,
+    data: { animation: 'LoginPage' }
   },
   {
     path: 'dashboard',
@@ -93,3 +103,117 @@ export const routes: Routes = [
   {
     path: '**', component: ErrorHandlerComponent, data: { animation: 'ErrorPage' }
   }];
+    children: [
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full'
+      },
+      {
+        path: 'home',
+        component: HomepageComponent,
+        resolve: { insights: InsightResolver },
+        data: { animation: 'HomePage' }
+      },
+      {
+        path: 'ctigraph',
+        component: GraphComponent,
+        data: { animation: 'ctigraph' }
+      },
+      {
+        path: 'directory',
+        component: DirectoryComponent,
+        resolve: { directory: DirectoryResolver },
+        data: { animation: 'DirectoryPage' }
+      },
+      {
+        path: 'api',
+        data: { animation: 'APIPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'email',
+            pathMatch: 'full'
+          },
+          {
+            path: 'email',
+            component: DashboardEmailApiComponent,
+            data: { animation: 'EmailAPI' }
+          }
+        ]
+      },
+      {
+        path: 'breach',
+        data: { animation: 'DataBreach' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardGeneralComponent,
+            data: { type: 'Breach', animation: 'DataBreach' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Breach', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'strategic',
+        data: { animation: 'StrategicPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardGeneralComponent,
+            data: { type: 'Strategic', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Strategic', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'defacement',
+        data: { animation: 'DefacementPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'archive',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardDefacementComponent,
+            data: { type: 'Defacement', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportDefacementComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Defacement', animation: 'HashPage' }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    path: '**',
+    component: ErrorHandlerComponent,
+    data: { animation: 'ErrorPage' }
+  }
+];
+

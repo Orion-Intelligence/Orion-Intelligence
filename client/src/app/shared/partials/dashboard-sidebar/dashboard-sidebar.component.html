@@ -34,6 +34,20 @@
       [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API"
       [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
       (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'General Intelligence'" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [category]="category.STRATEGIC" [routePrefix]="'strategic'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'Data Breach'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [category]="category.BREACH" [routePrefix]="'breach'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'Defacement'" [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <div class="sidebar__item">
+      <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+         [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
+         href="/dashboard/ctigraph"
+         target="_blank">
+        <img ngSrc="assets/images/sidebar/graph.svg" alt="Links" height="20" width="20"
+             class="sidebar__icon"> CTI Graph
+      </a>
+    </div>
+
   </ul>
 </nav>
 <div class="sidebar-hotlinks" *ngIf="this.sidebar_default">

@@ -86,6 +86,7 @@
   position: sticky;
   padding: 0;
   height: 100vh;
+  min-height: 900px;
   background: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
   transition: width 0.25s ease-in-out;
 }

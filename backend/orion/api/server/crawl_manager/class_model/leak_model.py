@@ -26,6 +26,10 @@ class CardExtractionModel(BaseModel):
     m_data_size: Optional[str] = None
     m_country_name: Optional[str] = None
     m_revenue: Optional[str] = None
+    m_states: List[str] = []
+    m_location_info: List[str] = []
+    m_ip: Optional[List[str]] = None
+
 
 class LeakDataModel(BaseModel):
     cards_data: List[CardExtractionModel] = Field(default_factory=list)

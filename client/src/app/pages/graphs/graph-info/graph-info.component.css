@@ -1,0 +1,79 @@
+.graph-filters__container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.graph-filters__details {
+  width: 240px;
+  color: #fff;
+  background: #17406959;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ffffff15;
+}
+
+.graph-pointer{
+  cursor: pointer;
+}
+
+.graph-filters__details-header {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #359AFF;
+}
+
+.detail-heading {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #D0D0D0;
+}
+
+.detail-line {
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
+  font-size: 15px;
+  line-height: 1;
+  margin-top: 12px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-filters__container .chevron {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+.graph-filters__container .collapsed .chevron {
+  transform: rotate(180deg);
+}
+
+.graph-filters__container .detail-section {
+  margin-top: 8px;
+}
+
+.graph-filters__container .btn{
+  height: 48px;
+}
+
+.graph-filters__container .btn-danger-graph{
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+@media (max-width: 799px) {
+  .graph-filters__container {
+    display: none;
+  }
+}

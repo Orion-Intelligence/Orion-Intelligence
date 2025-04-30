@@ -10,6 +10,7 @@ services:
     depends_on:
       - elasticsearch
       - mongo
+      - arangodb
     volumes:
       - ./backend/orion:/app/orion:cached
       - ./backend/routes:/app/routes:cached
@@ -29,6 +30,27 @@ services:
       start_period: 10s
     command: >
       sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+
+  arangodb:
+    container_name: trusted-web-arangodb
+    image: arangodb:3.11
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD}
+      ARANGODB_DEFAULT_SERVER_ENDPOINT: tcp://0.0.0.0:8529
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb:/var/lib/arangodb3
+    networks:
+      backend:
+        ipv4_address: 172.20.1.15
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   nginx:
     container_name: trusted-web-nginx
@@ -213,3 +235,4 @@ volumes:
   elastic:
   static_volume:
   media_volume:
+  arangodb:

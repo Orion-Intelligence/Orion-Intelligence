@@ -1,0 +1,86 @@
+<div class="graph-sidebar__container">
+  <a href="#"><img class="graph-sidebar__container-logo" src="assets/images/sidebar/search_nav_logo.png" alt="Logo"
+                   width="197" height="35"/></a>
+  <form class="filter__form">
+    <div class="filter__content">
+
+      <label class="filter__label mt-3">Type</label>
+      <div class="dropdown mb-3">
+        <button
+          class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+          type="button" id="dropdownType" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selectedType | titlecase }}
+        </button>
+        <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3"
+            aria-labelledby="dropdownType">
+          <li *ngFor="let type of typeOptions">
+            <a class="dropdown-item py-0 d-flex align-items-center"
+               (click)="onTypeChange(type)">{{ type | titlecase }}</a>
+            <ng-container *ngIf="type !== typeOptions[typeOptions.length - 1]">
+              <li class="dropdown-divider m-0 mx-3"></li>
+            </ng-container>
+          </li>
+        </ul>
+      </div>
+
+      <ng-container *ngIf="selectedType === 'cluster'">
+        <label class="filter__label mt-3">Cluster Type</label>
+        <div class="dropdown">
+          <button
+            class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+            type="button" id="dropdownCluster" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ singleInput | titlecase }}
+          </button>
+          <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3"
+              aria-labelledby="dropdownCluster">
+            <li *ngFor="let option of clusterOptions">
+              <a class="dropdown-item py-0 d-flex align-items-center" (click)="singleInput = option">{{ option }}</a>
+              <ng-container *ngIf="option !== clusterOptions[clusterOptions.length - 1]">
+                <li class="dropdown-divider m-0 mx-3"></li>
+              </ng-container>
+            </li>
+          </ul>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedType === 'property'">
+        <label class="filter__label mt-3">Property Type</label>
+        <div class="dropdown">
+          <button
+            class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+            type="button" id="dropdownProperty" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ onFormatPropertyType(propertyType) | titlecase }}
+          </button>
+          <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3"
+              aria-labelledby="dropdownProperty">
+            <li *ngFor="let property of allowedProperties">
+              <a class="dropdown-item py-0 d-flex align-items-center"
+                 (click)="propertyType = property.key">{{ property.label }}</a>
+              <ng-container *ngIf="property !== allowedProperties[allowedProperties.length - 1]">
+                <li class="dropdown-divider m-0 mx-3"></li>
+              </ng-container>
+            </li>
+          </ul>
+        </div>
+        <label class="filter__label mt-3">Property Value</label>
+        <input type="text" class="form-control filter__input filter__input-form" [(ngModel)]="propertyValue" name="propertyValue"
+               placeholder="Enter value"/>
+      </ng-container>
+
+      <ng-container *ngIf="selectedType === 'document'">
+        <label class="filter__label mt-3">Document ID</label>
+        <input type="text" class="form-control filter__input" [(ngModel)]="singleInput" name="singleInput"
+               placeholder="Enter ID"/>
+      </ng-container>
+
+      <div class="filter__submit">
+        <div class="filter__submit d-flex flex-column mt-4">
+          <button type="button" class="btn btn-primary filter__submit-button" (click)="applyFilters()">Apply</button>
+        </div>
+        <button type="button" class="btn btn-secondary mb-4 filter__submit-button" (click)="resetFilters()">
+          Reset
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

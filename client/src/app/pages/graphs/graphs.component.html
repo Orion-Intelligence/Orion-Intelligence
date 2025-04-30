@@ -1,0 +1,24 @@
+<div #networkContainer class="graph-container d-none d-md-block"></div>
+
+<graph-sidebar class="d-none d-md-block" (filtersApplied)="onSidebarApply($event)"></graph-sidebar>
+
+<app-graph-info
+  class="d-none d-md-block"
+  (physicsToggled)="onPhysicsToggled($event)"
+  [selectedType]="selectedType"
+  [singleInput]="singleInput"
+  [propertyType]="propertyType"
+  [propertyValue]="propertyValue">
+</app-graph-info>
+
+<div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
+  <img src="assets/images/shared/cti-empty.svg" alt="No Data" class="img-fluid w-auto" />
+</div>
+
+<div class="blocked-media d-block d-md-none text-center p-4">
+  <h5 class="mb-3">Mobile Access Not Supported</h5>
+  <p class="mb-0">
+    This CTI Graph is designed for desktop use only.<br>
+    Please switch to a larger screen for the best experience.
+  </p>
+</div>
