@@ -1,10 +1,13 @@
 from datetime import datetime, timezone
 
+import httpx
 import requests
 from starlette.responses import JSONResponse
+from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
+from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -14,8 +17,6 @@ from fastapi.responses import FileResponse
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 import os
 import base64
-from io import BytesIO
-
 from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
 
 
@@ -56,6 +57,39 @@ class crawl_model:
 
     await self._engine.save(general_model)
     return JSONResponse(content={"message": CRAWL_CALLBACK_RESPONSES.M_WEBSITE_INDEXED}, status_code=200)
+
+  @staticmethod
+  async def make_cti_request(text: str):
+    async with httpx.AsyncClient() as client:
+      response = await client.post(
+        "http://localhost:8000/cti_classifier/classify",
+        json={"text": text}
+      )
+      return response.json()
+
+  @staticmethod
+  async def parse_chat(model:nlp_data_model):
+    try:
+      async with httpx.AsyncClient() as client:
+        response = await client.post(
+          "http://trusted-micros-api:8010/nlp/parse",
+          json={"data": model.data},
+          timeout=10
+        )
+        return response.json()
+    except Exception as ex:
+      return {"error": str(ex)}
+
+  async def invoke_chat_index(self, chat_index: chat_data_model):
+    m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())
+    await elastic_controller.get_instance().index_data(m_data)
+    return await self._update_or_create_model(
+      base_url=chat_index.m_source_channel_url,
+      new_content_type=["chat"],
+      new_index_type=["chat"],
+      network_type=chat_index.m_network,
+      is_leak_update=False
+    )
 
   async def init_general(self, general_index: GeneralDataModel):
     m_data = elastic_request_generator().index_query_general(general_index.model_dump())

@@ -4,7 +4,7 @@ export const directory_filters: FilterModel = {
   filters: {
     network: {
       title: "Network Type",
-      options: ["all", "onion", "i2p", "clearnet"],
+      options: ["all", "onion", "i2p", "clearnet", "telegram"],
       type: "dropdown",
     },
     index: {
@@ -26,6 +26,7 @@ export const directory_filters: FilterModel = {
         "cryptocurrency",
         "leaks",
         "adult",
+        "chat"
       ],
       type: "dropdown",
     },

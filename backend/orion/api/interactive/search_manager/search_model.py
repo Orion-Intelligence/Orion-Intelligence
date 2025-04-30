@@ -1,11 +1,13 @@
 from typing import Optional
 
 from orion.api.interactive.search_manager.search_callback_model import search_callback
+from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model as SearchChatCallbackModel
+from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import search_defacement_callback_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_callback_model import breach_data
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
-from orion.api.interactive.search_manager.search_data_model.enums import general_listing, leak_listing
+from orion.api.interactive.search_manager.search_data_model.enums import general_listing, leak_listing, chat_listing
 from orion.api.interactive.search_manager.search_data_model.general import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import search_general_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import search_leak_callback_model
@@ -70,6 +72,16 @@ class search_model:
       m_status, m_documents,
       search_general_callback_model,
       general_listing
+    )
+
+  async def search_telegram_result(self, param: search_chat_param_model):
+    document, data_filter = elastic_request_generator().on_search_telegram_data(param)
+    m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+    return await self.__search_callback.search_handler(
+      m_status, m_documents,
+      SearchChatCallbackModel,
+      chat_listing
     )
 
   async def search_leak_result(self, param: search_leak_param_model):

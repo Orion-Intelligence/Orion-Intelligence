@@ -6,3 +6,5 @@ general_listing = {
   "m_content",
   "m_section"
 }
+
+chat_listing = {}

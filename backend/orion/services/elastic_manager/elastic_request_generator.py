@@ -312,6 +312,93 @@ class elastic_request_generator:
     return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
   @staticmethod
+  def on_search_telegram_data(p_query_model):
+    raw_query = p_query_model.q.strip()
+    if not raw_query:
+      return ELASTIC_INDEX.S_CHATS_INDEX, {"query": {"match_none": {}}, "size": 0}
+
+    m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
+
+    must_clauses = []
+    must_not_clause = []
+
+    search_fields = [
+      "m_content^3",
+      "m_channel_name^2",
+      "m_file_name^1.5",
+      "m_media_caption^2",
+      "m_forwarded_from^1.2"
+    ]
+
+    query = {
+      "min_score": 0,
+      "query": {
+        "function_score": {
+          "query": {
+            "bool": {
+              "filter": must_clauses,
+              "must_not": must_not_clause,
+              "should": [
+                {
+                  "query_string": {
+                    "query": raw_query + "*",
+                    "fields": search_fields,
+                    "default_operator": "OR",
+                    "analyze_wildcard": True,
+                    "lenient": True
+                  }
+                },
+                {
+                  "wildcard": {
+                    "m_content.keyword": {
+                      "value": f"*{raw_query}*",
+                      "boost": 1.5,
+                      "case_insensitive": True
+                    }
+                  }
+                }
+              ],
+              "minimum_should_match": 1
+            }
+          },
+          "functions": [
+            {
+              "gauss": {
+                "m_message_date": {
+                  "origin": "now",
+                  "scale": "30d",
+                  "offset": "10d",
+                  "decay": 0.5
+                }
+              },
+              "weight": 1.5
+            }
+          ],
+          "score_mode": "sum",
+          "boost_mode": "multiply"
+        }
+      },
+      "suggest": {
+        "telegram_suggestion": {
+          "text": raw_query,
+          "term": {
+            "field": "m_content",
+            "min_word_length": 3,
+            "max_term_freq": 0.05,
+            "sort": "score",
+            "string_distance": "levenshtein"
+          }
+        }
+      },
+      "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
+      "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+      "track_total_hits": True,
+      "explain": True
+    }
+
+    return ELASTIC_INDEX.S_CHATS_INDEX, query
+
+  @staticmethod
   def on_search_general_data(p_query_model):
     raw_query = p_query_model.q.strip()
     if not raw_query:
@@ -478,6 +565,18 @@ class elastic_request_generator:
           ELASTIC_KEYS.S_VALUE: p_index_data,
         }
       )
+
+    return index_entries
+
+  @staticmethod
+  def index_query_chat(p_index_data):
+    index_entries = []
+    for chat in p_index_data.get("m_chat_data", []):
+      chat["m_hash"] = helper_controller.generate_data_hash(chat.get("m_message_id"))
+      index_entries.append({
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_CHATS_INDEX,
+        ELASTIC_KEYS.S_VALUE: chat
+      })
 
     return index_entries
 

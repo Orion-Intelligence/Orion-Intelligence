@@ -1,5 +1,7 @@
+from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
+from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
@@ -8,7 +10,6 @@ from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from configs.app_dependency import role_required
-from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
 
 crawl_routes = APIRouter()
 
@@ -38,3 +39,12 @@ async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_r
 async def index_generic(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_generic_index(GeneralDataModel(**body))
+
+@crawl_routes.post("/api/nlp/parse", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def parse_text(payload: nlp_data_model):
+    return await crawl_controller.getInstance().parse_chat(payload)
+
+@crawl_routes.post("/api/index/chat", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def index_chat_data(request: Request):
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_chat_index(chat_data_model(**body))

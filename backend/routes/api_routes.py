@@ -6,6 +6,7 @@ from starlette.responses import RedirectResponse
 
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
+from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
@@ -34,6 +35,9 @@ async def get_insight():
 async def search_general(param: search_general_param_model = Depends()):
   return await search_model.getInstance().search_general_result(param)
 
+@api_routes.get("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def search_telegram(param: search_chat_param_model = Depends()):
+  return await search_model.getInstance().search_telegram_result(param)
 
 @api_routes.get("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_leak(param: search_leak_param_model = Depends()):

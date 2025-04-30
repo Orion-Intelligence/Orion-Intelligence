@@ -38,6 +38,7 @@ class elastic_controller:
       mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
       mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
       mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
+      mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
 
       if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
         await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
@@ -47,6 +48,9 @@ class elastic_controller:
 
       if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX):
         await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model)
+
+      if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX):
+        await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model)
 
     except Exception as ex:
       log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
@@ -89,7 +93,6 @@ class elastic_controller:
         aggs = result.get("aggregations", {})
         m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
 
-        # Process all aggregations in the result
         for key in aggs:
           value = "-"
           if "value" in aggs[key]:
@@ -98,14 +101,11 @@ class elastic_controller:
             buckets = aggs[key].get("buckets", [])
             value = capwords(buckets[0]["key"]) if buckets else "-"
 
-          # Format dates for time-based aggregations
           if key in ["Most Recent", "Oldest Update"] and value and isinstance(value, (int, float)):
             value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
-          # Round floats
           if isinstance(value, float):
             value = round(value, 2)
 
-          # Assign value based on index and mapping
           if value is not None:
             if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX and key in GENERIC_AGGREGATION_MAPPING:
               setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)

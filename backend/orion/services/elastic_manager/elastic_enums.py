@@ -5,6 +5,7 @@ class ELASTIC_INDEX:
   S_GENERIC_INDEX = "generic_model"
   S_LEAK_INDEX = "leak_model"
   S_DEFACEMENT_INDEX = "defacement_model"
+  S_CHATS_INDEX = "chat_model"
 
 
 class ELASTIC_CONNECTIONS:
@@ -145,4 +146,45 @@ class ELASTIC_ENUMS:
         "m_mirror_links": {"type": "keyword"}
       }
     }
+  }
+  mapping_chat_model = {
+      "settings": {
+          "number_of_shards": 1,
+          "number_of_replicas": 0,
+          "max_result_window": 1000000
+      },
+      "mappings": {
+          "dynamic_templates": [
+              {
+                  "strings_as_keywords": {
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type": "keyword"
+                      }
+                  }
+              }
+          ],
+          "properties": {
+              "m_content": {"type": "text"},
+              "m_message_date": {"type": "date"},
+              "m_message_id": {"type": "keyword"},
+              "m_message_sharable_link": {"type": "keyword"},
+              "m_channel_id": {"type": "keyword"},
+              "m_views": {"type": "keyword"},
+              "m_file_name": {"type": "keyword"},
+              "m_file_size": {"type": "keyword"},
+              "m_forwarded_from": {"type": "keyword"},
+              "m_sender_name": {"type": "keyword"},
+              "m_sender_username": {"type": "keyword"},
+              "m_message_type": {"type": "keyword"},
+              "m_media_url": {"type": "keyword"},
+              "m_media_caption": {"type": "text"},
+              "m_reply_to_message_id": {"type": "keyword"},
+              "m_message_status": {"type": "keyword"},
+              "m_file_saved_as": {"type": "keyword"},
+              "m_file_path": {"type": "keyword"},
+              "m_channel_name": {"type": "keyword"},
+              "m_m_weblink": {"type": "keyword"}
+          }
+      }
   }

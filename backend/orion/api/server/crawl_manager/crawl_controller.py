@@ -1,3 +1,4 @@
+from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
@@ -31,6 +32,12 @@ class crawl_controller:
 
   async def invoke_generic_index(self, leak_index: GeneralDataModel):
     return await self.__crawl_model.init_general(leak_index)
+
+  async def parse_chat(self, model):
+    return await self.__crawl_model.parse_chat(model)
+
+  async def invoke_chat_index(self, leak_index: chat_data_model):
+    return await self.__crawl_model.invoke_chat_index(leak_index)
 
   async def invoke_fetch_parser(self):
     return await self.__crawl_model.fetch_parser()
