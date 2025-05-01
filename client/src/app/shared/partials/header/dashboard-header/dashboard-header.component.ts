@@ -4,17 +4,18 @@ import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs';
 import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [FormsModule, ProfileComponent, NgIf, NgForOf, TitleCasePipe, NgOptimizedImage],
+  imports: [FormsModule, ProfileComponent, NgIf, NgForOf, TitleCasePipe, NgOptimizedImage, MatTooltipModule],
   templateUrl: './dashboard-header.component.html',
 })
 export class DashboardHeaderComponent implements OnInit {
   breadcrumb: { path: string; label: string }[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit() {
     this.updateBreadcrumb(this.router.url);

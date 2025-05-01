@@ -14,6 +14,7 @@ from routes.api_routes import api_routes
 from routes.admin_routes import admin_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
+from routes.test_routes import test_router
 from interface import interface
 from fastapi.exceptions import RequestValidationError
 
@@ -43,3 +44,14 @@ app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
+
+app.include_router(test_router)
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],  # Angular runs on port 4200
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

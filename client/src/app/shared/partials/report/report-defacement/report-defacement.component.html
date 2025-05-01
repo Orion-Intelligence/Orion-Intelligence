@@ -1,24 +1,29 @@
-<img src="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" >
+<img src="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover">
 
 <div class="d-flex justify-content-start">
   <div class="btn-group report-menu-option-container">
-    <button class="p-0 report-menu-option" (click)="downloadCSV()">
+    <button class="p-0 report-menu-option" (click)="downloadCSV()" matTooltip="Download" matTooltipPosition="above"
+      matTooltipClass="mat-tooltip">
       <img ngSrc="../../../../../assets/images/shared/download.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="langUpdate()">
+    <button class="p-0 report-menu-option" (click)="langUpdate()" matTooltip="Translator" matTooltipPosition="above"
+      matTooltipClass="mat-tooltip">
       <img ngSrc="../../../../../assets/images/shared/translate.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="printPage()">
+    <button class="p-0 report-menu-option" (click)="printPage()" matTooltip="Print" matTooltipPosition="above"
+      matTooltipClass="mat-tooltip">
       <img ngSrc="../../../../../assets/images/shared/print.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="shareResult()">
+    <button class="p-0 report-menu-option" (click)="shareResult()" matTooltip="Share" matTooltipPosition="above"
+      matTooltipClass="mat-tooltip">
       <img ngSrc="../../../../../assets/images/shared/share.svg" alt="background" height="22" width="22">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="redirectToUrl()">
+    <button class="p-0 report-menu-option" (click)="redirectToUrl()" matTooltip="Open in new Tab"
+      matTooltipPosition="above" matTooltipClass="mat-tooltip">
       <img ngSrc="../../../../../assets/images/shared/redirect.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
@@ -31,12 +36,14 @@
   <div class="dashboard__defacement-detail-header">
     <div class="dashboard__defacement-detail-header-url">{{ defacementData?.m_web_url }}</div>
     <div class="dashboard__defacement-detail-header-row">
-      <div class="dashboard__defacement-detail-header-items"><strong>Saved on:</strong> {{ defacementData?.m_date_of_leak ? (defacementData?.m_date_of_leak | date: 'MMM d, y') : 'Not found' }}
+      <div class="dashboard__defacement-detail-header-items"><strong>Saved on:</strong> {{
+        defacementData?.m_date_of_leak ? (defacementData?.m_date_of_leak | date: 'MMM d, y') : 'Not found' }}
       </div>
       <div class="dashboard__defacement-detail-header-items"><strong>Defacer:</strong> {{ defacementData?.m_attacker }}
       </div>
       <div class="dashboard__defacement-detail-header-items"><strong>Team:</strong> {{ defacementData?.m_team }}</div>
-      <div class="dashboard__defacement-detail-header-items"><strong>Web Server:</strong> {{ defacementData?.m_web_server }}
+      <div class="dashboard__defacement-detail-header-items"><strong>Web Server:</strong> {{
+        defacementData?.m_web_server }}
       </div>
       <div class="dashboard__defacement-detail-header-items"><strong>Breach:</strong> {{ defacementData?.m_url }}</div>
       <div class="dashboard__defacement-detail-header-items"><strong>IP:</strong> {{ defacementData?.m_ip }}</div>

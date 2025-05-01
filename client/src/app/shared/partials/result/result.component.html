@@ -3,41 +3,41 @@
     <div class="col-md-10 col-sm-12 col-xs-12">
       <div class="input-group default-input-sub-container">
         <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..."
-               class="form-control default-input dashboard-general-input" maxlength="150" name="q"
-               [(ngModel)]="local_query">
+          class="form-control default-input dashboard-general-input" maxlength="150" name="q" [(ngModel)]="local_query">
         <input type="hidden" value="1">
         <button class="btn btn-primary default-input-button" type="submit">
           <img ngSrc="../../../../assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority height="16"
-               width="16">
+            width="16">
         </button>
       </div>
       <ng-container *ngIf="type == Category.STRATEGIC">
         <div class="default-notification-banner">
           <span>
             <img src="../../../../assets/images/shared/hint.svg" class="default-notification-banner-icon"
-                 alt="Info Icon">
-              <span>
-                Current results are general and may lack accuracy. For precise insights, open the &nbsp;
-                <u><b>
-                  <a
-                    class="cursor-pointer text-reset text-decoration-none"
-                    routerLink="/dashboard/breach/databases"
-                    queryParamsHandling="preserve">
+              alt="Info Icon">
+            <span>
+              Current results are general and may lack accuracy. For precise insights, open the &nbsp;
+              <u><b>
+                  <a class="cursor-pointer text-reset text-decoration-none" routerLink="/dashboard/breach/databases"
+                    queryParamsHandling="preserve" matTooltip="Go to Breach Details" matTooltipPosition="above"
+                    matTooltipClass="mat-tooltip">
                     Data Breaches</a>
                 </b></u> &nbsp; section in sidebar.
-              </span>
+            </span>
           </span>
         </div>
       </ng-container>
     </div>
 
     <div class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3" *ngIf="!shrinkmenu && filterModel">
-      <div class="analytics d-flex align-items-center gap-2">
-        <input type="checkbox" id="switch" (click)="onToggleAnalytics()"/>
+      <div class="analytics d-flex align-items-center gap-2" matTooltip="Insights Breakdown" matTooltipPosition="above"
+        matTooltipClass="mat-tooltip">
+        <input type="checkbox" id="switch" (click)="onToggleAnalytics()" />
         <label for="switch" class="mb-0"></label><span>&nbsp; Analytics</span>
       </div>
 
-      <label class="filters-button d-flex align-items-center" (click)="sidebarService.openSidebar()">
+      <label class="filters-button d-flex align-items-center" (click)="sidebarService.openSidebar()"
+        matTooltip="Customize Results" matTooltipPosition="above" matTooltipClass="mat-tooltip">
         <img ngSrc="../../../../assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority>
         <span class="ms-2">Filter</span>
       </label>
@@ -51,10 +51,9 @@
 </ng-container>
 
 <div *ngIf="filterModel && !shrinkmenu" class="filters-container"
-     [class.filter__container-enable]="isFilterOpen$ | async"
-     [class.filter__container-disable]="!(isFilterOpen$ | async)">
+  [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
   <app-filters [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async" (filterChanged)="applyFilters($event)"
-               (filterReset)="resetFilters()" (filterClose)="sidebarService.closeSidebar()"></app-filters>
+    (filterReset)="resetFilters()" (filterClose)="sidebarService.closeSidebar()"></app-filters>
 </div>
 
 <div *ngIf="isLoading" @fadeInDashboardItem>
@@ -78,4 +77,3 @@
 <div *ngIf="!isLoading && result_count>0" @fadeInDashboardItem>
   <app-scroll-top></app-scroll-top>
 </div>
-
