@@ -14,8 +14,7 @@
         [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}"
         [routerLink]="[routePrefix, item.toLowerCase()]" queryParamsHandling="merge">
         <div class="sidebar__subitem-content"
-          [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}"
-          [matTooltip]="itemTooltips[item]" matTooltipPosition="above" matTooltipClass="mat-tooltip">
+          [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">
           {{ item }}
         </div>
       </div>

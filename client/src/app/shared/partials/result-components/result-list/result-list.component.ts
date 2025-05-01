@@ -29,10 +29,10 @@ export class ResultListComponent {
 
   copiedIndex: number | null = null;
 
-  copyText(text: string, index: number) {
+  copyText(text: string, index: number): void {
     navigator.clipboard.writeText(text).then(() => {
       this.copiedIndex = index;
-      setTimeout(() => this.copiedIndex = null, 2000);
+      this.copiedIndex = null;
     });
   }
 
@@ -41,5 +41,4 @@ export class ResultListComponent {
       this.copiedIndex = null;
     }
   }
-
 }

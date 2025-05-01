@@ -11,7 +11,8 @@
         {{ item.m_message_sharable_link }}
       </div>
 
-      <p class="dashboard__search-description highlight">
+      <h5 class="dashboard__search-title dashboard__search-title-secondary">Message</h5>
+      <p class="dashboard__search-description highlight mt-2">
         {{ item.m_content || 'No content available' }} </p>
 
       <ng-container *ngIf="item.m_file_name?.length">

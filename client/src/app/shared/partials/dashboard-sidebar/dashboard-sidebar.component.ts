@@ -1,28 +1,16 @@
-import {Component, EventEmitter, OnInit, Output, OnDestroy} from '@angular/core';
-import {NgOptimizedImage, NgClass, NgIf, AsyncPipe} from '@angular/common';
-import {ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory, SocialSubCategory} from '../../enums/pages';
-import {AppService} from '../../../services/core/app.service';
-import {NavigationEnd, Router, RouterLink} from '@angular/router';
-import {filter} from 'rxjs';
-import {SelectionStoreService} from '../../../services/dashboard/selection.service';
-import {DashboardSidebarItemsComponent} from './dashboard-sidebar-items/dashboard-sidebar-items.component';
-import {SidebarSectionComponent} from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {GeneralCallbackModel} from '../../model/results/general/general.callback.model';
-import {LeakCallbackModel} from '../../model/results/leak/leak.callback.model';
 import { Component, EventEmitter, OnInit, Output, OnDestroy } from '@angular/core';
 import { NgOptimizedImage, NgClass, NgIf, AsyncPipe } from '@angular/common';
-import { ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory } from '../../enums/pages';
-import { AppService } from '../../../services/core/app.service';
+import {ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory, SocialSubCategory} from '../../enums/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
-import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { GeneralCallbackModel } from '../../model/results/general/general.callback.model';
 import { LeakCallbackModel } from '../../model/results/leak/leak.callback.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {SelectionStoreService} from '../../../services/dashboard/selection.service';
+import {AppService} from '../../../services/core/app.service';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -41,7 +29,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
   category = Category;
-  Explore: string | undefined;
 
   constructor(protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
   }

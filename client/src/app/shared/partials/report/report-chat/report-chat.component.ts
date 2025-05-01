@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
 import { HelperService } from '../../../services/helper.service';
 import {
-  DatePipe,
   NgForOf,
   NgIf,
   NgOptimizedImage,
@@ -22,7 +21,6 @@ import { fadeInDashboardItem } from '../../../animations/dashboard.item.animatio
     NgIf,
     NgForOf,
     TitleCasePipe,
-    DatePipe,
     NgOptimizedImage,
     ResultListComponent,
     ResultSectionComponent
@@ -98,7 +96,7 @@ export class ReportChatComponent implements OnInit {
 
   redirectToUrl() {
     if (this.resultItem?.m_weblink?.length) {
-      window.open(this.resultItem.m_weblink[0], '_blank');
+      window.open(this.resultItem.m_message_sharable_link, '_blank');
     }
   }
 }

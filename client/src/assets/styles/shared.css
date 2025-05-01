@@ -293,12 +293,19 @@ table a:visited {
 }
 
 .mat-tooltip {
-  background-color: #000000;
-  color: rgb(255, 255, 255);
+  background-color: #00000070;
+  color: #ffffff;
   font-size: 10px;
   text-align: center;
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 3px 3px 1px;
+  margin-bottom: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out !important;
+}
+
+.mat-tooltip.mat-tooltip-show {
+  opacity: 1;
 }
 
 @media only screen and (max-width: 550px) {

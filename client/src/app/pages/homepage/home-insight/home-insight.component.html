@@ -1,8 +1,7 @@
 <div id="analytics">
   <div *ngFor="let model of models">
     <div class="home_insight__container">
-      <div class="home_insight__card" *ngFor="let key of getKeys(insights[model]); let first = first"
-        [matTooltip]="tooltipMap[key]" matTooltipPosition="above" matTooltipClass="mat-tooltip">
+      <div class="home_insight__card" *ngFor="let key of getKeys(insights[model]); let first = first">
         <div class="home_insight__content">
           <div *ngIf="first" class="home_insight__header" [matTooltip]=" model === 'general'
             ? 'Track Data States/Crawl Insights Panel'
