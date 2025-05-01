@@ -1,0 +1,33 @@
+# GLOBAL KEYS
+S_SUPER_PASSWORD_V1='your_super_password'
+
+# ELASTIC KEYS
+ELASTIC_ROOT_USERNAME='your_elastic_username'
+ELASTIC_ROOT_PASSWORD='your_elastic_password'
+
+# MONGO KEYS
+MONGO_ROOT_USERNAME='your_mongo_username'
+MONGO_ROOT_PASSWORD='your_mongo_password'
+MONGO_DATABASE='your_mongo_database'
+
+# REDIS KEYS
+REDIS_PASSWORD='your_redis_password'
+
+# TRAEFIK KEYS
+TRAEFIK_USERNAME='your_traefik_username'
+TRAEFIK_PASSWORD='your_traefik_password'
+
+# DEMO KEYS
+DEMO_USERNAME='your_demo_username'
+DEMO_PASSWORD='your_demo_password'
+
+# ARANGO KEYS
+ARANGO_USERNAME='your_arango_username'
+ARANGO_PASSWORD='your_arango_password'
+
+# PRODUCTION MODE
+AUTH='1'
+API_SWAGGER='1'
+API_ACCESS='1'
+PRODUCTION='1'
+PRODUCTION_DOMAIN='*'
