@@ -42,6 +42,7 @@ export class GraphComponent implements OnInit {
       } else if ((selectedType === 'cluster' || selectedType === 'document') && singleInput) {
         this.loadGraphByNode(selectedType, selectedType, singleInput);
       }
+
     });
   }
 

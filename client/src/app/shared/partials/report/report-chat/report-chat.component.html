@@ -1,0 +1,72 @@
+<div class="d-flex justify-content-start">
+  <div class="btn-group report-menu-option-container">
+    <button class="p-0 report-menu-option" (click)="downloadCSV()">
+      <img ngSrc="../../../../../assets/images/shared/download.svg" alt="download" height="25" width="25">
+    </button>
+    <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="printPage()">
+      <img ngSrc="../../../../../assets/images/shared/print.svg" alt="print" height="25" width="25">
+    </button>
+    <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="shareResult()">
+      <img ngSrc="../../../../../assets/images/shared/share.svg" alt="share" height="22" width="22">
+    </button>
+    <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="redirectToUrl()">
+      <img ngSrc="../../../../../assets/images/shared/redirect.svg" alt="redirect" height="25" width="25">
+    </button>
+  </div>
+</div>
+
+<div class="search__result-detail" *ngIf="resultItem">
+  <h2 class="search__result-detail-heading">{{ resultItem.m_channel_name || 'Untitled Channel' }}</h2>
+
+  <p class="search__result-detail-description">
+    {{ resultItem.m_content || 'No content available' }}
+  </p>
+
+  <p class="search__result-detail-url-p text-truncate" *ngIf="resultItem.m_message_sharable_link">
+    <a [href]="resultItem.m_message_sharable_link" target="_blank" class="search__result-detail-url text-truncate">
+      {{ resultItem.m_message_sharable_link }}
+    </a>
+  </p>
+
+  <div class="search__result-detail-meta search__result-detail-meta-chat">
+    <div class="search__result-detail-meta-divs">
+      <p>Message Date:</p>
+      <span>{{ resultItem.m_message_date}}</span>
+    </div>
+    <div class="search__result-detail-meta-divs" *ngIf="resultItem.m_views">
+      <p>Views:</p>
+      <span>{{ resultItem.m_views }}</span>
+    </div>
+    <div class="search__result-detail-meta-divs" *ngIf="resultItem.m_sender_name">
+      <p>Sender:</p>
+      <span>{{ resultItem.m_sender_name }}</span>
+    </div>
+  </div>
+
+  <div class="search__result-detail-tabs-div" *ngIf="arrayKeys.length">
+    <div class="tabs d-flex align-items-center search__result-detail-container">
+      <ng-container *ngFor="let key of arrayKeys; let last = last">
+        <button class="search__result-tabs" [class.active]="activeTab === key" (click)="setActiveTab(key)">
+          {{ (key.startsWith('m_') ? key.slice(2) : key).split('_').join(' ') | titlecase }}
+        </button>
+        <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
+      </ng-container>
+    </div>
+
+    <app-result-section
+      *ngIf="activeTab === 'm_content'"
+      [listItems]="[content]"
+      @fadeInDashboardItem>
+    </app-result-section>
+
+    <app-result-list
+      *ngIf="activeTab !== 'm_content'"
+      [listItems]="listItems"
+      [activeTab]="activeTab"
+      @fadeInDashboardItem>
+    </app-result-list>
+  </div>
+</div>

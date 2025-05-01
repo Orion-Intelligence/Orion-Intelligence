@@ -1,7 +1,7 @@
 <div class="dashboard__search-container">
   <ng-container *ngFor="let item of searchResults" class="dashboard__search-card">
 
-    <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="saveSession(item.m_hash)">
+    <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="scrollService.saveSession(item.m_hash)">
 
       <div class="dashboard__search-tags">
         <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>

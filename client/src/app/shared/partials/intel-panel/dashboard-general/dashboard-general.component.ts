@@ -9,7 +9,7 @@ import {Analytics} from '../../../model/analytics/analytics.model';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 import {GeneralCallbackModel, GeneralResultItem} from '../../../model/results/general/general.callback.model';
 import {LeakCallbackModel, LeakResultItem} from '../../../model/results/leak/leak.callback.model';
-import {GeneralParamModel} from '../../../model/results/shared/generalParamModel';
+import {GeneralParamModel} from '../../../model/results/shared/general.param.model';
 import {Category} from '../../../enums/pages';
 import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
 import {ResultComponent} from '../../result/result.component';

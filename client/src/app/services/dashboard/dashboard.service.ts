@@ -5,7 +5,9 @@ import {catchError, map, takeUntil} from 'rxjs/operators';
 import {ApiService} from '../../shared/services/api.service';
 import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
 import {GeneralCallbackModel} from '../../shared/model/results/general/general.callback.model';
-import {GeneralParamModel} from '../../shared/model/results/shared/generalParamModel';
+import {GeneralParamModel} from '../../shared/model/results/shared/general.param.model';
+import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.model';
+import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.param.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,9 @@ import {GeneralParamModel} from '../../shared/model/results/shared/generalParamM
 export class DashboardService {
   generalParamModel: GeneralParamModel = new GeneralParamModel();
   generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
+  chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
   leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
+  defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
 
   private cancelRequest$ = new Subject<void>();
 

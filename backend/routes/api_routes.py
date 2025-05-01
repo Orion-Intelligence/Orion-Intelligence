@@ -63,6 +63,10 @@ async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
   return await search_model.getInstance().request_general_doc(doc_id, lang)
 
+@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Get a specific strategic report document by its document ID and optional language.")
+async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
+  return await search_model.getInstance().request_chat_doc(doc_id, lang)
+
 
 @api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Depends()):

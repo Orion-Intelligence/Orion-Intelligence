@@ -77,6 +77,7 @@ if [ "$COMMAND" = "build" ]; then
             ;;
         -p)
             client_build "$FLAG"
+
             use_compose_file "production"
             cp nginx/nginx-prod.conf nginx/nginx.conf
             ;;
@@ -94,5 +95,5 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
+docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
 echo "Server started"

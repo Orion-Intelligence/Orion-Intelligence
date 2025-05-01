@@ -49,7 +49,7 @@ class entity_manager:
 
             if query.data_point_type == "cluster" and normalized_type == "cluster":
                 if normalized_value == "all":
-                    query_str = "FOR cluster IN cti_vertices FILTER cluster.type == 'cluster' AND cluster._key IN ['general','leak','defacement'] FOR v,e,p IN 1..2 ANY cluster._id GRAPH 'cti_graph' RETURN {vertex: v, edge: e, path: p}"
+                    query_str = "FOR cluster IN cti_vertices FILTER cluster.type == 'cluster' AND cluster._key IN ['general','leak','defacement','chat'] FOR v,e,p IN 1..2 ANY cluster._id GRAPH 'cti_graph' RETURN {vertex: v, edge: e, path: p}"
                 else:
                     query_str = "FOR v,e,p IN 1..2 ANY @cluster_id GRAPH 'cti_graph' RETURN {vertex: v, edge: e, path: p}"
                     bind_vars = {"cluster_id": f"cti_vertices/{normalized_value}"}

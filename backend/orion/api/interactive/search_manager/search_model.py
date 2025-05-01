@@ -58,6 +58,12 @@ class search_model:
       result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)
     return await self.__search_callback.get_doc(result)
 
+  async def request_chat_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+    result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_CHATS_INDEX, doc_id)
+    if lang:
+      result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+    return await self.__search_callback.get_doc(result)
+
   async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id)
     if lang:

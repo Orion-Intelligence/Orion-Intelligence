@@ -27,6 +27,9 @@ export class ReportResolver implements Resolve<any> {
       case 'defacement':
         apiUrl = hash ? `search/defacement/${hash}` : `search/defacement`;
         break;
+      case 'social':
+        apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
+        break;
       default:
         return of(null);
     }

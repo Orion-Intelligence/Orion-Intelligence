@@ -1,24 +1,25 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {DatePipe, NgForOf} from '@angular/common';
 import {SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {HelperService} from '../../../../services/helper.service';
 import {GeneralResultItem} from '../../../../model/results/general/general.callback.model';
 import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
+import {ScrollService} from '../../../../services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-results-grid',
   templateUrl: './dashboard-results-grid.component.html', imports: [NgForOf, RouterLink, DatePipe],
   standalone: true
 })
-export class DashboardResultsGridComponent implements AfterViewInit {
+export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
   @Input() query!: string;
   @Input() type!: string;
   @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
   currentUrl: string = '';
   queryParams: any = {};
 
-  constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute) {
+  constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngOnInit() {
@@ -29,42 +30,7 @@ export class DashboardResultsGridComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.scrollToSavedPosition();
-  }
-
-  saveSession(itemId: string) {
-    if (itemId) {
-      sessionStorage.setItem('selectedItem', itemId);
-      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + itemId);
-      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
-        scrollableContainer = scrollableContainer.parentElement;
-      }
-      const scrollPosition = scrollableContainer ? scrollableContainer.scrollTop : window.scrollY;
-      sessionStorage.setItem('scrollPosition', scrollPosition.toString());
-    }
-  }
-
-  private isScrollable(element: HTMLElement): boolean {
-    const style = window.getComputedStyle(element);
-    const overflowY = style.overflowY;
-    return (overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight;
-  }
-
-  scrollToSavedPosition() { // Renamed from scrollToSavedItem
-    const savedPosition = sessionStorage.getItem('scrollPosition');
-    const savedItemId = sessionStorage.getItem('selectedItem');
-    if (savedPosition !== null && savedItemId) {
-      const position = parseInt(savedPosition, 10);
-      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + savedItemId);
-      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
-        scrollableContainer = scrollableContainer.parentElement;
-      }
-      if (scrollableContainer) {
-        scrollableContainer.scrollTop = position;
-      } else {
-        window.scrollTo({top: position, behavior: 'auto'});
-      }
-    }
+    this.scrollService.scrollToSavedPosition();
   }
 
   highlightWords(text: string, maxLength: number = 250): SafeHtml {

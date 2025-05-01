@@ -1,0 +1,20 @@
+.dashboard__search-title{
+  margin-bottom: 0;
+}
+.dashboard__search-link-chat{
+  margin-bottom: 20px;
+  margin-top: 5px;
+}
+
+.dashboard__search-info-chat{
+  align-items: flex-start;
+  justify-content: left;
+  margin-top: 20px;
+}
+
+.dashboard__search-title-secondary{
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  font-family: 'Inter', sans-serif;
+}

@@ -1,0 +1,46 @@
+<div class="dashboard__search-container dashboard__search-container-chat">
+  <ng-container *ngFor="let item of searchResults" class="dashboard__search-card">
+
+    <div class="dashboard__search-main-div" [id]="'item-' + item.m_message_id" (click)="scrollService.saveSession(item.m_message_id ?? '')" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
+
+      <div class="d-flex align-items-center gap-2">
+        <img src="/assets/images/shared/channel.svg" alt="Channel" width="20" height="20"/>
+        <h2 class="dashboard__search-title mb-0 ml-2">{{ item.m_channel_name || 'Untitled' }}</h2>
+      </div>
+      <div class="dashboard__search-link dashboard__search-link-chat" *ngIf="item.m_message_sharable_link">
+        {{ item.m_message_sharable_link }}
+      </div>
+
+      <p class="dashboard__search-description highlight">
+        {{ item.m_content || 'No content available' }} </p>
+
+      <ng-container *ngIf="item.m_file_name?.length">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary">Embedded Files</h5>
+        <div class="dashboard__search-link" *ngFor="let file of item.m_file_name | slice:0:3">
+          {{ file }}
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="item.m_weblink?.length">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Embedded URL</h5>
+        <div class="dashboard__search-link" *ngFor="let link of item.m_weblink | slice:0:3">
+          {{ link }}
+        </div>
+      </ng-container>
+
+      <div class="dashboard__search-info dashboard__search-info-chat">
+        <div class="dashboard__search-info-item">
+          <span class="dashboard__info-label">Message Date:</span> <span class="dashboard__info-value">
+            {{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : 'Not available' }}
+          </span>
+        </div>
+
+        <div class="dashboard__search-info-item" *ngIf="item.m_views">
+          <span class="dashboard__info-label">Views:</span> <span class="dashboard__info-value">{{ item.m_views }}</span>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+</div>

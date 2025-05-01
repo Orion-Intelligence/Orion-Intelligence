@@ -1,7 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import { DefacementResultItem } from '../../../../model/results/defacement/defacement.param.model';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {ScrollService} from '../../../../services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-result-list',
@@ -9,17 +10,21 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
   templateUrl: './dashboard-result-list.component.html',
   styleUrls: ['./dashboard-result-list.component.css']
 })
-export class DashboardResultListComponent implements OnInit {
+export class DashboardResultListComponent implements OnInit, AfterViewInit{
   @Input() searchResults: DefacementResultItem[] = [];
   currentUrl: string = '';
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {}
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
     this.route.queryParams.subscribe(_ => {});
+  }
+
+  ngAfterViewInit() {
+    this.scrollService.scrollToSavedPosition();
   }
 
   sortTable(column: string) {

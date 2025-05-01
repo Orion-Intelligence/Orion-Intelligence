@@ -4,6 +4,7 @@ export enum Category {
   HOMEPAGE = 'Home',
   DIRECTORY = 'Directory',
   DEFACEMENT = 'Defacement',
+  SOCIAL = 'Social',
   API = 'Api'
 }
 
@@ -32,4 +33,8 @@ export enum DefacementSubCategory {
 
 export enum ApiSubCategory {
   EMAIL = 'Email',
+}
+
+export enum SocialSubCategory {
+  TELEGRAM = 'Telegram',
 }

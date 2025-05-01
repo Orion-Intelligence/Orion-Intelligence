@@ -13,6 +13,9 @@ import { ReportComponent } from './shared/partials/report/report_general/report.
 import { DashboardEmailApiComponent } from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
 import { DashboardDefacementComponent } from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
 import { ReportDefacementComponent } from './shared/partials/report/report-defacement/report-defacement.component';
+import {GraphComponent} from './pages/graphs/graphs.component';
+import {DashboardChatsComponent} from './shared/partials/intel-panel/dashboard-chats/dashboard-chats.component';
+import {ReportChatComponent} from './shared/partials/report/report-chat/report-chat.component';
 
 export const routes: Routes = [
   {
@@ -36,66 +39,138 @@ export const routes: Routes = [
     component: DashboardComponent,
     canActivate: [AuthGuard],
     data: { animation: 'DashboardPage' },
-    children: [{ path: '', redirectTo: 'home', pathMatch: 'full' }, {
-      path: 'home',
-      component: HomepageComponent,
-      resolve: { insights: InsightResolver },
-      data: { animation: 'HomePage' }
-    }, {
-      path: 'directory',
-      component: DirectoryComponent,
-      resolve: { directory: DirectoryResolver },
-      data: { animation: 'DirectoryPage' }
-    }, {
-      path: 'api',
-      data: { animation: 'APIPage' },
-      children: [{ path: '', redirectTo: 'email', pathMatch: 'full' }, {
-        path: 'email',
-        component: DashboardEmailApiComponent,
-        data: { animation: 'EmailAPI' }
-      }]
-    }, {
-      path: 'breach',
-      data: { animation: 'DataBreach' },
-      children: [{ path: '', redirectTo: 'all', pathMatch: 'full' }, {
-        path: ':category',
-        component: DashboardGeneralComponent,
-        data: { type: 'Breach', animation: 'DataBreach' }
-      }, {
-        path: ':category/:m_hash',
-        component: ReportComponent,
-        resolve: { reportdata: ReportResolver },
-        data: { type: 'Breach', animation: 'HashPage' }
-      }]
-    }, {
-      path: 'strategic',
-      data: { animation: 'StrategicPage' },
-      children: [{ path: '', redirectTo: 'all', pathMatch: 'full' }, {
-        path: ':category',
-        component: DashboardGeneralComponent,
-        data: { type: 'Strategic', animation: 'CategoryPage' }
-      }, {
-        path: ':category/:m_hash',
-        component: ReportComponent,
-        resolve: { reportdata: ReportResolver },
-        data: { type: 'Strategic', animation: 'HashPage' }
-      }]
-    }, {
-      path: 'defacement',
-      data: { animation: 'DefacementPage' },
-      children: [{ path: '', redirectTo: 'archive', pathMatch: 'full' }, {
-        path: ':category',
-        component: DashboardDefacementComponent,
-        data: { type: 'Defacement', animation: 'CategoryPage' }
-      }, {
-        path: ':category/:m_hash',
-        component: ReportDefacementComponent,
-        resolve: { reportdata: ReportResolver },
-        data: { type: 'Defacement', animation: 'HashPage' }
-      }]
-    }],
+    children: [
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full'
+      },
+      {
+        path: 'home',
+        component: HomepageComponent,
+        resolve: { insights: InsightResolver },
+        data: { animation: 'HomePage' }
+      },
+      {
+        path: 'ctigraph',
+        component: GraphComponent,
+        data: { animation: 'ctigraph' }
+      },
+      {
+        path: 'directory',
+        component: DirectoryComponent,
+        resolve: { directory: DirectoryResolver },
+        data: { animation: 'DirectoryPage' }
+      },
+      {
+        path: 'api',
+        data: { animation: 'APIPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'email',
+            pathMatch: 'full'
+          },
+          {
+            path: 'email',
+            component: DashboardEmailApiComponent,
+            data: { animation: 'EmailAPI' }
+          }
+        ]
+      },
+      {
+        path: 'breach',
+        data: { animation: 'DataBreach' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardGeneralComponent,
+            data: { type: 'Breach', animation: 'DataBreach' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Breach', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'strategic',
+        data: { animation: 'StrategicPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardGeneralComponent,
+            data: { type: 'Strategic', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Strategic', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'defacement',
+        data: { animation: 'DefacementPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'archive',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardDefacementComponent,
+            data: { type: 'Defacement', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportDefacementComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Defacement', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'social',
+        data: { animation: 'SocialPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'telegram',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardChatsComponent,
+            data: { type: 'Social', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Social', animation: 'HashPage' }
+          }
+        ]
+      }
+    ]
   },
   {
-    path: '**', component: ErrorHandlerComponent, data: { animation: 'ErrorPage' }
-  }];
-
+    path: '**',
+    component: ErrorHandlerComponent,
+    data: { animation: 'ErrorPage' }
+  }
+];

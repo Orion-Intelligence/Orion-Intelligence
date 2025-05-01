@@ -1,6 +1,7 @@
 import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AppService} from '../../../services/core/app.service';
+import {max} from 'rxjs';
 
 @Component({
   selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgOptimizedImage]
@@ -36,4 +37,6 @@ export class PaginationComponent implements OnInit {
       this.pageChange.emit(this.currentPage);
     }
   }
+
+  protected readonly max = max;
 }

@@ -1,3 +1,4 @@
+<img src="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" >
 <app-result [searchQuery]="query" [shrinkmenu] = true [isLoading]="isLoading" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(result_count)"></app-result>
 
 <div *ngIf="!isLoading && this.defacementCallbackModel.Result.length" @fadeInDashboardItem>

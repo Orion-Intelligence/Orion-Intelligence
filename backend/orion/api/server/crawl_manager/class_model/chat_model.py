@@ -25,6 +25,10 @@ class telegram_chat_model(BaseModel):
     m_channel_name: Optional[str] = None
     m_weblink: Optional[List[str]] = Field(default_factory=list)
 
+    model_config = {
+        "extra": "allow"
+    }
+
 class chat_data_model(BaseModel):
     m_chat_data: List[telegram_chat_model] = Field(default_factory=list)
     m_network: str = "telegram"

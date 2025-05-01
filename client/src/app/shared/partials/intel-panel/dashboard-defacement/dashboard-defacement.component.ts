@@ -34,6 +34,9 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.defacementCallbackModel = {...this.dashboardService.defacementCallbackModel} as DefacementCallbackModel;
+    this.result_count = this.defacementCallbackModel.Result.length
+
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
@@ -74,7 +77,8 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       .subscribe(response => {
         if (response.success && response.data) {
           this.defacementCallbackModel = response.data as DefacementCallbackModel;
-        } else {
+          this.dashboardService.defacementCallbackModel = response.data as DefacementCallbackModel;
+       } else {
           this.defacementCallbackModel = new DefacementCallbackModel();
         }
         this.isLoading = false;

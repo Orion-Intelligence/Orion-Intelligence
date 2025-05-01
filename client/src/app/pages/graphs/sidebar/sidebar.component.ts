@@ -17,7 +17,7 @@ export class SidebarComponent implements OnInit {
   propertyValue = '';
 
   typeOptions = ['cluster', 'document', 'property'];
-  clusterOptions = ['all', 'general', 'leak', 'defacement'];
+  clusterOptions = ['all', 'general', 'leak', 'defacement', 'chat'];
   allowedProperties = [
     { label: 'All', key: 'all' },
     { label: 'Email Addresses', key: 'm_email_addresses' },
