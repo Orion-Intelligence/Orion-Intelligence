@@ -180,11 +180,9 @@ class _public_tableau(leak_extractor_interface, ABC):
 
         entity_data = entity_model(
           m_country_name="United States",
-          m_industry="Healthcare" if data_dict.get("Organization Type") == "MED" else None,
-          m_email_addresses=helper_method.extract_emails(tooltip_content),
-          m_phone_numbers=[],
           m_company_name=company_name,
           m_states=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else [],
+          m_location_info=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else []
         )
 
         self.append_leak_data(card_data, entity_data)

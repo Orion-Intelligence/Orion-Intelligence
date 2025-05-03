@@ -9,6 +9,7 @@ from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayl
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
+from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -38,7 +39,10 @@ class crawl_model:
       crawl_model.__instance = self
 
   async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list, network_type: str, is_leak_update: bool):
-    general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == base_url)
+    normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
+
+    general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)
+
     if general_model:
       general_model.content_type = list(set((general_model.content_type or []) + new_content_type))
       general_model.index_type = list(set((general_model.index_type or []) + new_index_type))
@@ -47,14 +51,8 @@ class crawl_model:
       else:
         general_model.geneic_model_last_update = datetime.now(timezone.utc)
     else:
-      general_model = db_url_data_model(
-        url=base_url,
-        content_type=list(set(new_content_type)),
-        index_type=list(set(new_index_type)),
-        network_type=network_type,
-        leak_model_last_update=datetime.now(timezone.utc) if is_leak_update else None,
-        geneic_model_last_update=datetime.now(timezone.utc) if not is_leak_update else None
-      )
+      general_model = db_url_data_model(url=normalized_url, content_type=list(set(new_content_type)), index_type=list(set(new_index_type)), network_type=network_type, leak_model_last_update=datetime.now(timezone.utc) if is_leak_update else None,
+        geneic_model_last_update=datetime.now(timezone.utc) if not is_leak_update else None)
 
     await self._engine.save(general_model)
     return JSONResponse(content={"message": CRAWL_CALLBACK_RESPONSES.M_WEBSITE_INDEXED}, status_code=200)

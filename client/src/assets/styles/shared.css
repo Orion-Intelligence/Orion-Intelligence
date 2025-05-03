@@ -308,6 +308,10 @@ table a:visited {
   opacity: 1;
 }
 
+.cdk-describedby-message-container {
+  display: none !important;
+}
+
 @media only screen and (max-width: 550px) {
   .default-input-container {
     display: grid;

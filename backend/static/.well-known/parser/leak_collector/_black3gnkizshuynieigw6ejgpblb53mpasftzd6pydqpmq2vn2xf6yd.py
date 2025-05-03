@@ -9,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 from datetime import datetime
 
@@ -43,7 +43,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block =False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -53,8 +53,8 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd.onion/contacts"
@@ -81,81 +81,66 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
         try:
             all_leak_urls = []
             dump_links = []
-            sleep(10)
-
+            sleep(50)
 
             page.goto(self.seed_url)
             page.wait_for_load_state('domcontentloaded')
+            soup = BeautifulSoup(page.content(), 'html.parser')
 
+            card_divs = soup.find_all("div", class_="card-success")
+            for card in card_divs:
+                a_tag = card.select_one("div.card-header a")
+                if a_tag and a_tag.get('href'):
+                    full_url = urljoin(self.base_url, a_tag['href'])
+                    all_leak_urls.append(full_url)
 
-            page_html = page.content()
-            soup = BeautifulSoup(page_html, 'html.parser')
-
-
-            card_headers = soup.select("div.card-header")
-
-            for header in card_headers:
-                link_element = header.select_one("a.link-offset-2.link-underline.link-underline-opacity-0.text-white")
-                if link_element and link_element.get('href'):
-                    item_url = link_element.get('href')
-                    if not item_url.startswith(('http://', 'https://')):
-                        item_url = urljoin(self.base_url, item_url)
-                    all_leak_urls.append(item_url)
-
-            print(f"Found {len(all_leak_urls)} leak URLs to process")
-
-            
             for leak_url in all_leak_urls:
                 try:
-                    print(f"Processing: {leak_url}")
                     page.goto(leak_url)
                     page.wait_for_load_state('domcontentloaded')
+                    leak_soup = BeautifulSoup(page.content(), 'html.parser')
 
-                    leak_html = page.content()
-                    leak_soup = BeautifulSoup(leak_html, 'html.parser')
-
-
-                    content_container = leak_soup.select_one("div.d-flex.flex-row")
-                    if not content_container:
-                        print(f"No content container found for {leak_url}")
+                    header = leak_soup.select_one("div.d-flex.flex-row")
+                    detail = leak_soup.select_one("div.d-flex.flex-column.justify-content-between")
+                    if not header or not detail:
                         continue
 
-
-                    detail_container = content_container.select_one("div.d-flex.flex-column.justify-content-between")
-                    if not detail_container:
-                        print(f"No detail container found for {leak_url}")
-                        continue
-
-
-                    title_element = detail_container.select_one("h2")
+                    title_element = detail.select_one("h2")
                     title = title_element.get_text(strip=True) if title_element else "No title"
 
-
-                    desc_elements = detail_container.find_all(["p", "pre"])
+                    desc_elements = detail.find_all(["p", "pre"])
                     description = " ".join(p.get_text(strip=True) for p in desc_elements)
 
-
-                    size_element = detail_container.select_one("p.text-danger")
+                    size_element = detail.select_one("p.text-danger")
                     data_size = size_element.get_text(strip=True) if size_element else None
 
-
-                    date_element = detail_container.select_one("span.px-1")
-                    leak_date:str = date_element.get_text(strip=True) if date_element else None
-
+                    date_element = detail.select_one("span.px-1")
+                    leak_date = None
+                    if date_element:
+                        try:
+                            date_text = ' '.join(date_element.text.split(': ', 1)[1].split()[0:3])
+                            leak_date = datetime.strptime(date_text, "%d %b, %Y").date()
+                        except:
+                            pass
 
                     paper_container = leak_soup.select_one("div.papper-contaner")
                     dump_link = None
                     if paper_container:
-                        dump_link_element = paper_container.select_one(
-                            "a.list-group-item.list-group-item-action.text-center.text-uppercase")
-                        if dump_link_element and dump_link_element.get('href'):
-                            dump_link = dump_link_element.get('href')
-                            if not dump_link.startswith(('http://', 'https://')):
-                                dump_link = urljoin(self.base_url, dump_link)
+                        link = paper_container.select_one("a.list-group-item")
+                        if link and link.get('href'):
+                            dump_link = urljoin(self.base_url, link['href'])
                             dump_links.append(dump_link)
 
-                    m_leak_date = datetime.strptime(' '.join(leak_date.split(': ', 1)[1].split()[0:3]), '%d %b, %Y').date()
+                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL,
+                                                CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, False)
+                    ref_html = None
+                    if not is_crawled:
+                        ref_html = helper_method.extract_refhtml(title)
+                        if ref_html:
+                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title,True)
+
                     card_data = leak_model(
+                        m_ref_html=ref_html,
                         m_screenshot=helper_method.get_screenshot_base64(page, title),
                         m_title=title,
                         m_url=leak_url,
@@ -166,25 +151,20 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_important_content=description,
                         m_content_type=["leaks"],
                         m_data_size=data_size,
-                        m_leak_date=m_leak_date
+                        m_leak_date=leak_date
                     )
 
                     entity_data = entity_model(
-                        m_email_addresses=helper_method.extract_emails(description) if description else [],
-                        m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
-                        m_company_name=title,
+                        m_email_addresses=helper_method.extract_emails(description),
+                        m_ip=[title],
                     )
 
                     self.append_leak_data(card_data, entity_data)
-
-                    print(f"Successfully processed: {title}")
 
                 except Exception as item_ex:
                     print(f"Error processing item {leak_url}: {str(item_ex)}")
                     continue
 
-            print(f"Total cards created: {len(self._card_data)}")
-            print(f"Total dump links found: {len(dump_links)}")
             return self._card_data
 
         except Exception as ex:

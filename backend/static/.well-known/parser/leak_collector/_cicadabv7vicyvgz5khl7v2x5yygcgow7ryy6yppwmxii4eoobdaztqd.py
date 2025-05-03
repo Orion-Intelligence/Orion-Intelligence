@@ -11,7 +11,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -54,8 +54,8 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
   def entity_data(self) -> List[entity_model]:
     return self._entity_data
 
-  def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-    return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+  def invoke_db(self, command: int, key: str, default_value):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
   def contact_page(self) -> str:
     return self.seed_url
@@ -80,7 +80,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
 
   def parse_leak_data(self, page: Page):
     try:
-
+      sleep(50)
       all_hrefs = []
 
       for page_num in range(0, 3):
@@ -130,14 +130,17 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
             "p.mt-1.text-gray-400.text-mg.mb-6.overflow-y-auto.whitespace-pre-wrap.rounded-lg")
           description = description_element.inner_text().strip() if description_element else "No description found"
 
-          logo_image = None
-          logo_div = page.query_selector("div.top-0.right-0.flex-shrink-0")
-          if logo_div:
-            logo_img = logo_div.query_selector("img.max-w-48.max-h-48.object-cover.rounded-3xl")
-            if logo_img:
-              logo_image = logo_img.get_attribute("src")
           m_leak_date = datetime.strptime(created_date, '%B %d, %Y').date()
+
+          is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, False)
+          ref_html = None
+          if not is_crawled:
+            ref_html = helper_method.extract_refhtml(website)
+            if ref_html:
+              self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, True)
+
           card_data = leak_model(
+            m_ref_html=ref_html,
             m_screenshot=helper_method.get_screenshot_base64(page, company_name),
             m_title=company_name,
             m_url=url,
@@ -146,16 +149,15 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
             m_base_url=self.base_url,
             m_content=description + " " + self.base_url + " " + url,
             m_important_content=description,
-            m_logo_or_images=[logo_image] if logo_image else [],
             m_content_type=["leaks"],
             m_data_size=data_size,
             m_leak_date=m_leak_date
           )
 
           entity_data = entity_model(
+            m_email_addresses=helper_method.extract_emails(description),
             m_company_name=company_name,
-            m_email_addresses=helper_method.extract_emails(description) if description else [],
-            m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
+            m_ip=[website]
           )
 
           self.append_leak_data(card_data, entity_data)

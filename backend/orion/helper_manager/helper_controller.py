@@ -17,6 +17,13 @@ class helper_controller:
     }
 
   @staticmethod
+  def get_base_url(url):
+    parsed_url = urlparse(url)
+    netloc = parsed_url.netloc.replace('www.', '') if parsed_url.netloc.startswith('www.') else parsed_url.netloc
+    base_url = f"{parsed_url.scheme}://{netloc}"
+    return base_url
+
+  @staticmethod
   def generate_data_hash(data):
     if isinstance(data, dict):
       data_copy = {key: value for key, value in data.items() if key not in {'m_update_date', 'm_base_url', 'm_url'}}

@@ -9,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -53,8 +53,8 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "hackteam@dnmx.su"
@@ -72,7 +72,7 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
 
         while True:
             try:
-                page.wait_for_selector(".list tbody tr", timeout=10000)
+                page.wait_for_selector(".list tbody tr", timeout=400)
                 rows = page.query_selector_all(".list tbody tr")
 
                 for row in rows:
@@ -98,23 +98,38 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                         #
                         description_element = buy_page.query_selector(".order-details tr:nth-child(4) td")
                         description = description_element.inner_text().strip() if description_element else "No description"
+                        btc_address = ""
+                        address_element = buy_page.query_selector(".paycontainer pre")
+                        if address_element:
+                            btc_address = address_element.inner_text().strip()
+
+                        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site, False)
+                        ref_html = None
+                        if not is_crawled:
+                            ref_html = helper_method.extract_refhtml(site)
+                            if ref_html:
+                                self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site, True)
 
                         card_data = leak_model(
+                            m_ref_html=ref_html,
                             m_screenshot="",
                             m_title=database,
                             m_url=page.url,
                             m_base_url=self.base_url,
-                            m_content=description if description else f"{year} | {database} | {site} | {records} | {price}" + " " + self.base_url + " " + page.url,
+                            m_content=description + btc_address if description else f"{year} | {database} | {site} | {records} | {price}" + " " + self.base_url + " " + page.url + " - " + btc_address,
                             m_network=helper_method.get_network_type(self.base_url),
-                            m_important_content=description if description else f"{year} | {database} | {site} | {records} | {price}",
+                            m_important_content=description[:500],
                             m_weblink=[site],
                             m_content_type=["leaks"],
+                            m_data_size=records,
                             m_leak_date=datetime.strptime(year, '%Y').date(),
                         )
 
                         entity_data = entity_model(
                             m_email_addresses=helper_method.extract_emails(description),
-                            m_phone_numbers=helper_method.extract_phone_numbers(description),
+                            m_company_name=database,
+                            m_ip=[site],
+                            m_crypto_addresses=[btc_address]
                         )
 
                         self.append_leak_data(card_data, entity_data)

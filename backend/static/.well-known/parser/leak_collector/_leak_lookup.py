@@ -9,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -53,8 +53,8 @@ class _leak_lookup(leak_extractor_interface, ABC):
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "https://twitter.com/LeakLookup"
@@ -110,19 +110,32 @@ class _leak_lookup(leak_extractor_interface, ABC):
 
                     modal_content_cleaned = "\n".join(modal_content_cleaned)
 
+                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site_name, False)
+                    ref_html = None
+                    if not is_crawled:
+                        ref_html = helper_method.extract_refhtml(site_name)
+                        if ref_html:
+                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site_name, True)
+                    cleaned = " - ".join(line.strip() for line in modal_content_cleaned.strip().splitlines() if line.strip())
+
                     card_data = leak_model(
+                        m_ref_html=ref_html,
                         m_screenshot=helper_method.get_screenshot_base64(page, site_name),
                         m_title=site_name,
                         m_url=site_url,
                         m_base_url=self.base_url,
                         m_content=modal_content_cleaned + " " + self.base_url + " " + site_url,
                         m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=modal_content_cleaned,
+                        m_important_content=cleaned,
                         m_data_size=breach_size,
                         m_leak_date=datetime.strptime(date_indexed, '%Y-%m-%d').date(),
                         m_content_type=["leaks"],
                     )
-                    entity_data = entity_model()
+                    entity_data = entity_model(
+                        m_email_addresses=helper_method.extract_emails(modal_content_cleaned),
+                        m_company_name=site_name,
+                        m_ip=[site_name] ,
+                    )
 
                     self.append_leak_data(card_data, entity_data)
 

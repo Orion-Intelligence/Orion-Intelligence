@@ -1,6 +1,9 @@
 import {Suggestion} from '../shared/common-result';
 
 export class LeakResultItem {
+  m_crypto_addresses: string[] = [];
+  m_ref_html?: string | null;
+  m_password: string = "";
   m_title: string = "";
   m_url?: string;
   m_base_url?: string;

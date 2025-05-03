@@ -7,7 +7,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -51,8 +51,8 @@ class _ransomlook(leak_extractor_interface, ABC):
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "https://www.ransomlook.io/telegrams"
@@ -109,8 +109,15 @@ class _ransomlook(leak_extractor_interface, ABC):
                     m_columns = columns_element.inner_text().strip() if columns_element else ""
 
                     m_content = m_columns.replace("[", "").replace("]", "")
+                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + m_title, False)
+                    ref_html = None
+                    if not is_crawled:
+                        ref_html = helper_method.extract_refhtml(m_title)
+                        if ref_html:
+                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + m_title, True)
 
                     card_data = leak_model(
+                        m_ref_html=ref_html,
                         m_screenshot=helper_method.get_screenshot_base64(page, m_title),
                         m_title=m_title,
                         m_url=page.url,
@@ -123,7 +130,11 @@ class _ransomlook(leak_extractor_interface, ABC):
                         m_leak_date=datetime.datetime.strptime(m_date, '%Y-%m-%d').date()
 
                     )
-                    entity_data = entity_model()
+                    entity_data = entity_model(
+                        m_email_addresses=helper_method.extract_emails(m_content),
+                        m_ip=[m_title]
+                    )
+
                     self.append_leak_data(card_data, entity_data)
 
                 break

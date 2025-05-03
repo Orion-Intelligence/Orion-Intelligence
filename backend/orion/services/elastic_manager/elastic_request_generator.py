@@ -125,6 +125,7 @@ class elastic_request_generator:
     }
 
     return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
+
   @staticmethod
   def on_search_leakdata(p_query_model):
     raw_query = p_query_model.q.strip()
@@ -132,6 +133,7 @@ class elastic_request_generator:
       return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
 
     import re
+    from urllib.parse import urlparse
     exact_phrases = re.findall(r'"([^"]+)"', raw_query)
     loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
 
@@ -141,7 +143,6 @@ class elastic_request_generator:
     m_network = p_query_model.mNetwork
     m_search_type = p_query_model.pSearchParamType
 
-    from urllib.parse import urlparse
     parsed_url = urlparse(raw_query)
     domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
     path = parsed_url.path.lstrip("/") or ("/".join(raw_query.split("/")[1:]) if "/" in raw_query else "")
@@ -152,14 +153,10 @@ class elastic_request_generator:
     if m_search_type == "databases":
       m_search_type = "leaks"
       must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-
     if m_search_type == "tracking":
       must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-
-
     if m_safe_search == "True":
       must_not_clause.append({"term": {"m_content_type": "adult"}})
-
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network": m_network.lower()}})
 
@@ -198,7 +195,8 @@ class elastic_request_generator:
             {"match_phrase": {"m_title": {"query": phrase, "boost": 4}}},
             {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
             {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-            {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}}
+            {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}},
+            {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
           ],
           "minimum_should_match": 1
         }
@@ -213,7 +211,8 @@ class elastic_request_generator:
             "m_title^4",
             "m_content^1.5",
             "m_important_content^1.5",
-            "m_company_name^2.5"
+            "m_company_name^2.5",
+            "m_ref_html^1.0"
           ],
           "default_operator": "OR",
           "lenient": True,
@@ -231,7 +230,8 @@ class elastic_request_generator:
             "m_title^4",
             "m_content^1.5",
             "m_important_content^1.5",
-            "m_company_name^2.5"
+            "m_company_name^2.5",
+            "m_ref_html^1.0"
           ],
           "default_operator": "OR",
           "lenient": True,
@@ -602,20 +602,19 @@ class elastic_request_generator:
   def index_query_leak(p_index_data):
     contact_link = p_index_data.get("contact_link", "")
     index_entries = []
-    utc_now = datetime.now(timezone.utc)
-    current_timestamp = utc_now.isoformat()
+    current_timestamp = datetime.now(timezone.utc).isoformat()
 
     for card in p_index_data.get("cards_data", []):
-      data_hash = helper_controller.generate_data_hash(card["m_url"]+"_"+card["m_important_content"])
-      card["m_hash"] = data_hash
+      card["m_hash"] = helper_controller.generate_data_hash(card["m_url"] + "_" + card["m_important_content"])
       card["m_update_date"] = current_timestamp
       card["m_contact_link"] = contact_link
-      index_entries.append(
-        {
-          ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
-          ELASTIC_KEYS.S_VALUE: card,
-        }
-      )
+
+      cleaned_card = {k: v for k, v in card.items() if v is not None}
+
+      index_entries.append({
+        ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
+        ELASTIC_KEYS.S_VALUE: cleaned_card,
+      })
 
     return index_entries
 

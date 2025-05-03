@@ -78,82 +78,179 @@ class _b1nd(leak_extractor_interface, ABC):
 
   def parse_leak_data(self, page: Page):
     try:
-      outer_list = []
+      current_time = "2025-05-03 20:20:32"
+      current_user = "Ibrahim-sayys"
+
+      thread_links = []
+
       page.goto(self.seed_url)
       page.wait_for_load_state("load")
 
-      outer_elements = page.query_selector_all("h3.node-title a")
-      for element in outer_elements:
-        href = element.get_attribute("href")
-        if href:
-          outer_list.append(urljoin(self.base_url, href))
+      db_link_element = page.query_selector('h3.node-title a[href*="/forums/databases"]')
+      if not db_link_element:
+        db_link_element = page.query_selector('a[href="/forums/databases.5/"]')
 
-      for outer_link in outer_list:
+      if not db_link_element:
+        raise Exception("Could not find databases category link")
 
-        page.goto(outer_link)
-        page.wait_for_load_state("load")
+      db_link = db_link_element.get_attribute("href")
+      full_db_link = urljoin(self.base_url, db_link)
 
-        while True:
-          inner_list = []
-          inner_elements = page.query_selector_all("div.structItem-title a")
+      page.goto(full_db_link)
+      page.wait_for_load_state("load")
 
-          for element in inner_elements:
-            href = element.get_attribute("href")
-            if href:
-              inner_list.append(urljoin(self.base_url, href))
+      current_page = 1
+      max_pages = 13
 
-          for inner_link in inner_list:
+      while current_page <= max_pages:
+        page.wait_for_selector('div.structItem-title a')
+
+        thread_elements = page.query_selector_all('div.structItem-title a')
+
+        for element in thread_elements:
+          href = element.get_attribute("href")
+          if href:
+            full_url = urljoin(self.base_url, href)
+            if full_url not in thread_links:
+              thread_links.append(full_url)
+
+        current_page += 1
+        if current_page <= max_pages:
+          next_page_url = f"{full_db_link}page-{current_page}"
+          page.goto(next_page_url)
+          page.wait_for_load_state("load")
+
+      for idx, thread_url in enumerate(thread_links):
+        try:
+          page.goto(thread_url)
+          page.wait_for_load_state("load")
+
+          date_element = page.query_selector('time.u-dt')
+          date_text = ""
+          if date_element:
+            date_text = date_element.get_attribute("data-date-string")
+
+          title_element = page.query_selector('h1.p-title-value')
+          title = ""
+          if title_element:
+            title = title_element.inner_text().strip()
+
+          content_element = page.query_selector('article.message-body div.bbWrapper')
+          content = ""
+          if content_element:
+            content_html = content_element.inner_html()
+            content = content_element.inner_text().strip()
+            content = content.replace('\n', ' ')
+
+          image_logos = []
+          img_elements = page.query_selector_all('article.message-body div.bbWrapper img')
+          for img in img_elements:
+            src = img.get_attribute("src")
+            if src:
+              full_img_url = urljoin(self.base_url, src)
+              image_logos.append(full_img_url)
+
+          websites = []
+          domain_pattern = r'https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:/\S*)?|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:/\S*)?|[a-zA-Z0-9.-]+\.onion(?:/\S*)?'
+
+          if content:
+            import re
+            matches = re.findall(domain_pattern, content)
+            for match in matches:
+              if match not in websites:
+                websites.append(match)
+
+          link_elements = page.query_selector_all('article.message-body div.bbWrapper a')
+          for link in link_elements:
+            href = link.get_attribute("href")
+            if href and (href.startswith("http") or ".com" in href or ".net" in href or ".onion" in href):
+              if href not in websites:
+                websites.append(href)
+
+          password = ""
+          password_js = """
+                () => {
+                    const spans = Array.from(document.querySelectorAll('span'));
+                    const passwordSpan = spans.find(span => span.textContent.includes('Passwords:'));
+
+                    if (passwordSpan) {
+                        const text = passwordSpan.textContent;
+                        const parts = text.split('Passwords:');
+                        if (parts.length > 1) {
+                            return parts[1].trim();
+                        }
+                    }
+
+                    const signature = document.querySelector('aside.message-signature div.bbWrapper');
+                    if (signature && signature.textContent.includes('Passwords:')) {
+                        const text = signature.textContent;
+                        const parts = text.split('Passwords:');
+                        if (parts.length > 1) {
+                            return parts[1].trim();
+                        }
+                    }
+
+                    const allElements = document.querySelectorAll('*');
+                    for (const el of allElements) {
+                        if (el.textContent && el.textContent.includes('Passwords:') && 
+                            el.children.length === 0) {
+                            const text = el.textContent;
+                            const parts = text.split('Passwords:');
+                            if (parts.length > 1) {
+                                return parts[1].trim();
+                            }
+                        }
+                    }
+
+                    return '';
+                }
+                """
+
+          try:
+            password = page.evaluate(password_js)
+          except Exception:
+            pass
+
+          m_leak_date = None
+          if date_text:
             try:
+              m_leak_date = datetime.strptime(date_text, '%b %d, %Y').date()
+            except Exception:
+              pass
 
-              page.goto(inner_link)
-              page.wait_for_load_state("load")
-
-              m_description = self.safe_find(page, ".p-description")
-              m_leak_date = self.safe_find(page, "time.u-dt")
-              m_content = self.safe_find(page, "div.bbWrapper")
-              title = self.safe_find(page, "h1.p-title-value")
-
-              if m_content:
-                words = m_content.split()
-                if len(words) > 500:
-                  m_important_content = " ".join(words[:500])
-                else:
-                  m_important_content = m_content
-              else:
-                m_important_content = ""
-              m_leak_date = datetime.strptime(m_description.split("\n")[3], '%b %d, %Y').date()
-
-              card_data = leak_model(
-                m_screenshot=helper_method.get_screenshot_base64(page, title),
-                m_title=title,
-                m_weblink=[inner_link],
-                m_url=inner_link,
-                m_base_url=self.base_url,
-                m_content=m_content if m_content else "" + " " + self.base_url + " " + inner_link,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=m_important_content,
-                m_content_type=["leaks"],
-                m_leak_date=m_leak_date
-              )
-
-              entity_data = entity_model()
-              self.append_leak_data(card_data, entity_data)
-
-            except Exception as _:
-              continue
-
-          next_button = page.query_selector(".block-router-main .pageNav-jump--next")
-          if next_button:
-            next_url = next_button.get_attribute("href")
-            if next_url:
-
-              page.goto(urljoin(self.base_url, next_url))
-              page.wait_for_load_state("load")
-              continue
+          important_content = ""
+          if content:
+            words = content.split()
+            if len(words) > 500:
+              important_content = " ".join(words[:500])
             else:
-              break
-          else:
-            break
+              important_content = content
+
+          card_data = leak_model(
+            m_screenshot=helper_method.get_screenshot_base64(page, title),
+            m_title=title,
+            m_weblink=websites,
+            m_url=thread_url,
+            m_base_url=self.base_url,
+            m_content=content + " " + self.base_url + " " + thread_url if content else self.base_url + " " + thread_url,
+            m_network=helper_method.get_network_type(self.base_url),
+            m_important_content=important_content,
+            m_content_type=["leaks"],
+            m_leak_date=m_leak_date,
+            m_logo_or_images=image_logos,
+          )
+
+          entity_data = entity_model(
+            m_email_addresses=helper_method.extract_emails(content) if content else [],
+            m_phone_numbers=helper_method.extract_phone_numbers(content) if content else [],
+            m_company_name=title,
+            m_password=password
+          )
+
+          self.append_leak_data(card_data, entity_data)
+
+        except Exception:
+          continue
 
     except Exception as e:
       print(f"An error occurred: {e}")

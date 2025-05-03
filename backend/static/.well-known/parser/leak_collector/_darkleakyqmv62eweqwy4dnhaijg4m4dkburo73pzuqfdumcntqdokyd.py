@@ -1,3 +1,4 @@
+import re
 from abc import ABC
 
 from typing import List
@@ -7,7 +8,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS
 from urllib.parse import urljoin
 from playwright.sync_api import Page
 
@@ -122,8 +123,7 @@ class _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_email_addresses=helper_method.extract_emails(content) if content else [],
-                        m_phone_numbers=helper_method.extract_phone_numbers(content) if content else [],
+                        m_email_addresses=helper_method.extract_emails(content),
                         m_company_name=title,
                     )
 

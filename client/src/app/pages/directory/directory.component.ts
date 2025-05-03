@@ -1,18 +1,18 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
-import { FiltersComponent } from '../../shared/partials/filters/filters.component';
-import { DirectoryListComponent } from './directory-list/directory-list.component';
-import { AsyncPipe, NgOptimizedImage } from '@angular/common';
-import { FilterModel } from '../../shared/model/filter/filter.model';
-import { directory_filters } from '../../shared/constants/filters';
-import { SidebarService } from '../../shared/services/sidebar.service';
-import { DirectoryService } from '../../services/directory/directory.service';
-import { DirectoryCallbackModel } from '../../shared/model/directory/directory.model';
+import {Component} from '@angular/core';
+import {Observable} from 'rxjs';
+import {FiltersComponent} from '../../shared/partials/filters/filters.component';
+import {DirectoryListComponent} from './directory-list/directory-list.component';
+import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import {FilterModel} from '../../shared/model/filter/filter.model';
+import {directory_filters} from '../../shared/constants/filters';
+import {SidebarService} from '../../shared/services/sidebar.service';
+import {DirectoryService} from '../../services/directory/directory.service';
+import {DirectoryCallbackModel} from '../../shared/model/directory/directory.model';
 import {
   PaginationComponent
 } from '../../shared/partials/pagination/pagination.component';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {ActivatedRoute, Router} from '@angular/router';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-directory', templateUrl: './directory.component.html', imports: [MatTooltipModule, FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent,],
@@ -51,12 +51,17 @@ export class DirectoryComponent {
 
   resetFilters() {
     this.selectedFilters = {};
-    this.reloadDirectory();
+
+    const currentUrl = this.router.url.split('?')[0];
+
+    this.router.navigateByUrl(currentUrl, {replaceUrl: true}).then(() => {
+      this.reloadDirectory();
+    });
   }
 
   onPageChange(currentPage: number) {
     this.directoryService.setCurrentPage(currentPage);
-    this.directoryService.reloadDirectoryData({ page: currentPage });
+    this.directoryService.reloadDirectoryData({page: currentPage});
   }
 
   private reloadDirectory(): void {

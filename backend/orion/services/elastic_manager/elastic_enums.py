@@ -56,6 +56,7 @@ class ELASTIC_ENUMS:
       "properties": {
         "m_hash": {"type": "keyword"},
         "m_title": {"type": "text"},
+        "m_ref_html": {"type": "text"},
         "m_url": {"type": "keyword"},
         "m_base_url": {"type": "keyword"},
         "m_content": {"type": "text"},

@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import List
+from urllib.parse import urlparse
 
 from playwright.sync_api import Page
 
@@ -8,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -36,7 +37,7 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
     @property
     def seed_url(self) -> str:
 
-        return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/posts.php?pid=kjR1jYcN0m8P5Il0SbJ6hvDm"
+            return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/posts.php?pid=kjR1jYcN0m8P5Il0SbJ6hvDm"
 
     @property
     def base_url(self) -> str:
@@ -57,9 +58,9 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
+    def invoke_db(self, command: int, key: str, default_value):
 
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/index.php#contact"
@@ -85,25 +86,20 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
             page.goto(url)
 
             title = page.query_selector('st').inner_text() if page.query_selector('st') else ""
-            card_title = page.query_selector('card in h h1').inner_text() if page.query_selector('card in h h1') else ""
+            weblink = page.query_selector('card in h h1').inner_text() if page.query_selector('card in h h1') else ""
             description = page.query_selector('card in p').inner_text() if page.query_selector('card in p') else ""
-            payment_title = page.query_selector('card.rs h2').inner_text() if page.query_selector('card.rs h2') else ""
             payment_info = page.query_selector('card.rs in cont p').inner_text() if page.query_selector('card.rs in cont p') else ""
 
-            description = f"{card_title}: {description}" if card_title and description else description
-            payment_info = f"{payment_title}: {payment_info}" if payment_title and payment_info else payment_info
-
-            content = f"{description}{payment_info}"
-            words = content.split()
-            if len(words) > 500:
-                important_content = ' '.join(words[:500])
-            else:
-                important_content = content
-
+            content = f"{title}: {description} {payment_info}"
+            important_content=description
 
             gallery_images = page.query_selector_all('gallery img')
-            images = [img.get_attribute('src').strip() for img in gallery_images if
-                      img.get_attribute('src') and img.get_attribute('src').endswith('.png')]
+            images = []
+            for img in gallery_images:
+                img_src = img.get_attribute('src')
+                if img_src:
+                    parsed_url = urlparse(img_src)
+                    images.append(parsed_url.path.strip())
 
             download_url = ""
             download_btn = page.query_selector('a.btn[onclick*="showdir"]')
@@ -114,25 +110,33 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
                     end = onclick.rfind("'")
                     if start != -1 and end != -1:
                         download_url = onclick[start:end].strip()
-                        if not download_url.startswith('http'):
-                            download_url = f"http://{download_url}"
+
+            is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink, False)
+            ref_html = None
+            if not is_crawled:
+                ref_html = helper_method.extract_refhtml(weblink)
+                if ref_html:
+                    self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink, True)
 
             card_data = leak_model(
-                m_screenshot=helper_method.get_screenshot_base64(page, title),
+                m_ref_html=ref_html,
+                m_screenshot=helper_method.get_screenshot_base64(page,title),
                 m_title=title,
                 m_url=url,
                 m_base_url=self.base_url,
-                m_content=content + " " + self.base_url + " " + url,
+                m_content=content,
                 m_network=helper_method.get_network_type(self.base_url),
                 m_important_content=important_content,
                 m_dumplink=[download_url],
                 m_content_type=["leaks"],
                 m_logo_or_images=images,
+                m_weblink=[weblink],
             )
 
             entity_data = entity_model(
-                m_email_addresses=helper_method.extract_emails(content),
-                m_phone_numbers=helper_method.extract_phone_numbers(content),
+                m_email_addresses=helper_method.extract_emails(important_content),
+                m_company_name=title,
+                m_ip=[weblink]
             )
 
             self.append_leak_data(card_data, entity_data)

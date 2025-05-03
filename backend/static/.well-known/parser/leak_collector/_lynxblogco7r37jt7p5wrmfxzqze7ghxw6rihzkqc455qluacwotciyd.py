@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 from playwright.sync_api import Page
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
@@ -8,6 +9,8 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
+import time
+import re
 
 class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_interface, ABC):
     _instance = None
@@ -23,7 +26,7 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
     def init_callback(self, callback=None):
         self.callback = callback
 
-    def __new__(cls):
+    def __new__(cls, callback=None):
         if cls._instance is None:
             cls._instance = super(_lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd, cls).__new__(cls)
             cls._instance._initialized = False
@@ -39,7 +42,7 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -49,81 +52,138 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command:REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
-        return "http://weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd.onion/?contact"
+        return "http://lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd.onion/leaks"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
-            if self.callback():
-                self._card_data.clear()
-                self._entity_data.clear()
+            self.callback()
 
-    def parse_leak_data(self, page:Page ):
-
+    def parse_leak_data(self, page: Page):
         try:
-            description = revenue = ""
+            time.sleep(30)
 
-            # Get all cards
-            cardss = page.query_selector_all('.news_grid .chat_block')
+            processed_urls = set()
 
-            for card in cardss:
-                # Extract title and date from the card
-                title = card.query_selector('.chat__block-title').inner_text().strip() if card.query_selector(
-                    '.chat__block-title') else "No Title"
-                date = card.query_selector('.chat__block-date span').inner_text().strip() if card.query_selector(
-                    '.chat__block-date span') else "No Date"
+            while True:
+                cards = page.query_selector_all('.news__block.chat__block')
+                new_cards_found = False
 
-                # Extract the link to the publication page
-                link = card.query_selector('.button.button-blue').get_attribute('href') if card.query_selector(
-                    '.button.button-blue') else None
+                for card in cards:
+                    title = card.query_selector('.chat__block-title').inner_text().strip() if card.query_selector(
+                        '.chat__block-title') else "No Title"
+                    date = card.query_selector('.chat__block-date span').inner_text().strip() if card.query_selector(
+                        '.chat__block-date span') else "No Date"
+                    relative_url = card.query_selector('a.button-blue').get_attribute('href') if card.query_selector(
+                        'a.button-blue') else None
+                    full_url = self.base_url + relative_url if relative_url else None
 
-                if link:
-                    # Open the linked page in a new tab
-                    publication_page = page.context.new_page()
-                    publication_page.goto(link)
+                    if full_url in processed_urls:
+                        continue
 
-                    # Extract information from the publication page
-                    description = publication_page.query_selector(
-                        '.detailed p').inner_text() if publication_page.query_selector(
-                        '.detailed p') else "No description available"
-                    revenue = publication_page.query_selector('text=Revenue:').locator('..').query_selector(
-                        'p').inner_text() if publication_page.query_selector('text=Revenue:') else "No revenue info"
-                    employees = publication_page.query_selector('text=Employees:').locator('..').query_selector(
-                        'p').inner_text() if publication_page.query_selector('text=Employees:') else "No team size info"
-                    download = publication_page.query_selector('text=Downloaded:').locator('..').query_selector(
-                        'p').inner_text() if publication_page.query_selector('text=Downloaded:') else "No download data"
-                    income = publication_page.query_selector('text=Income').locator('..').query_selector(
-                        'p').inner_text() if publication_page.query_selector('text=Income') else "No income info"
+                    processed_urls.add(full_url)
+                    new_cards_found = True
 
-                    # Close the publication page after extraction
-                    publication_page.close()
+                    date = datetime.strptime(date, "%d/%m/%Y").date() if date != "No Date" else None
 
-                # Create the leak model to store the data
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=page.url,
-                    m_base_url=self.base_url,
-                    m_screenshot="",
-                    m_content=description,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=description,
-                    m_content_type=["leaks"],
-                    m_revenue=revenue,
-                )
+                    description = revenue = downloaded = industry = categories = publication_category = ""
+                    images = []
+                    income = employees = "No data available"
 
-                # Create the entity model for emails and phone numbers
-                entity_data = entity_model(
-                    m_email_addresses=helper_method.extract_emails(description),
-                    m_phone_numbers=helper_method.extract_phone_numbers(description),
-                )
+                    if full_url:
+                        detail_page = page.context.new_page()
+                        detail_page.goto(full_url)
 
-                # Append the extracted data to the collection
-                self.append_leak_data(card_data, entity_data)
+                        try:
+                            detail_page.wait_for_selector('.detailed p', timeout=10000)
+                        except:
+                            detail_page.close()
+                            continue
+
+                        description_element = detail_page.query_selector('.detailed p')
+                        if description_element:
+                            description = description_element.inner_text().strip()
+
+                            revenue_match = re.search(r"Revenue:\s*([\d\w\s.$]+)", description)
+                            revenue = revenue_match.group(1) if revenue_match else "No revenue info"
+
+                            employees_match = re.search(r"Employees:\s*(\d+)", description)
+                            employees = employees_match.group(1) if employees_match else "No employee info"
+
+                            industry_match = re.search(r"Industry:\s*([\w\s]+)", description)
+                            industry = industry_match.group(1) if industry_match else "No industry info"
+
+                            downloaded_match = re.search(r"Downloaded:\s*([\w\d.]+)", description)
+                            downloaded = downloaded_match.group(1) if downloaded_match else "No downloaded info"
+
+                        income_element = detail_page.query_selector('div.col-md-6 span:has-text("Income") + p')
+                        if income_element:
+                            income = income_element.inner_text().strip()
+
+                        publication_category_element = detail_page.query_selector(
+                            'div.col-md-6 span:has-text("Publication category") + p')
+                        if publication_category_element:
+                            publication_category = publication_category_element.inner_text().strip()
+
+                        disclosure_categories_element = detail_page.query_selector(
+                            'div.row p span:has-text("Categories") + p')
+                        if disclosure_categories_element:
+                            categories = disclosure_categories_element.inner_text().strip()
+
+                        description += f"\nEmployees count: {employees}\nIncome: {income}\nPublication Category: {publication_category}\nDisclosure Categories: {categories}"
+
+                        images = [
+                            self.base_url + img.get_attribute('src')
+                            for img in detail_page.query_selector_all('.disclosured__images img')
+                            if img.get_attribute('src')
+                        ]
+
+                        detail_page.close()
+                    ip=""
+                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, False)
+                    m_ref_html = None
+                    if not is_crawled:
+                        m_ref_html = helper_method.extract_refhtml(title)
+                        if m_ref_html:
+                            ip = title
+                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, True)
+
+                    card_data = leak_model(
+                        m_ref_html= m_ref_html,
+                        m_title=title,
+                        m_url=page.url,
+                        m_base_url=self.base_url,
+                        m_screenshot=helper_method.get_screenshot_base64(page, title),
+                        m_content=description,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=description[:500],
+                        m_content_type=["leaks"],
+                        m_revenue=revenue,
+                        m_data_size=downloaded,
+                        m_leak_date=date,
+                        m_logo_or_images=images,
+                    )
+
+                    entity_data = entity_model(
+                        m_email_addresses=helper_method.extract_emails(description),
+                        m_industry=industry,
+                        m_company_name=title,
+                        m_ip=[ip]
+                    )
+
+                    self.append_leak_data(card_data, entity_data)
+
+                show_more_button = page.query_selector('button.button-blue:has-text("Show more")')
+                if new_cards_found and show_more_button:
+                    show_more_button.click()
+                    time.sleep(5)
+                else:
+                    break
 
         except Exception as e:
             print(f"An error occurred while parsing leak data: {e}")

@@ -51,8 +51,8 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command:REDIS_COMMANDS, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command:int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd.onion/?contact"
@@ -82,10 +82,21 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
 
                 title_text = helper_method.clean_text(title.get_text(strip=True)) if title else ""
                 content = ' '.join(helper_method.clean_text(text.get_text(strip=True)) for text in text_elements if text)
-                weblinks = [urljoin(self.base_url, title.a['href'])] if title and title.a else []
                 dumplinks = [urljoin(self.base_url, link.a['href']) for link in link_elements if link and link.a]
+                website_element = card.select_one(".url a")
+                website_url = website_element["href"].strip() if website_element and website_element.has_attr("href") else ""
+                weblinks = [website_url] if website_url else ([urljoin(self.base_url, title.a['href'])] if title and title.a else [])
+
+                ref_html = None
+                if weblinks and len(weblinks)>0:
+                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblinks[0], False)
+                    if not is_crawled:
+                        ref_html = helper_method.extract_refhtml(weblinks[0])
+                        if ref_html:
+                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblinks[0], True)
 
                 card_data = leak_model(
+                    m_ref_html=ref_html,
                     m_screenshot=helper_method.get_screenshot_base64(page, title_text),
                     m_title=title_text,
                     m_url=page_url,
@@ -99,7 +110,8 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_company_name=title_text,
+                    m_ip=weblinks,
                     m_email_addresses= helper_method.extract_emails(content),
-                    m_phone_numbers= helper_method.extract_phone_numbers(content),
                 )
                 self.append_leak_data(card_data, entity_data)

@@ -1,3 +1,4 @@
+import re
 from abc import ABC
 from typing import List
 
@@ -8,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -52,8 +53,8 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion"
@@ -70,37 +71,69 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
         self._card_data = []
 
         try:
-            page.wait_for_selector("div.border.border-warning.card-body.shadow-lg",
-                                   timeout=30000)
+            page.wait_for_selector("div.border.border-warning.card-body.shadow-lg", timeout=30000)
             cards = page.query_selector_all("div.border.border-warning.card-body.shadow-lg")
-
             if not cards:
                 return
 
             for card in cards:
                 try:
-                    title_element = card.query_selector("h4.card-title")
-                    company_name = title_element.inner_text().strip() if title_element else "Unknown"
+                    # Title
+                    title_el = card.query_selector("h4.card-title")
+                    company_name = title_el.inner_text().strip() if title_el else "Unknown"
 
-                    website_element = card.query_selector("h6.card-subtitle a")
-                    website = website_element.get_attribute("href").strip() if website_element else "N/A"
+                    # Description (first paragraph only)
+                    description_el = card.query_selector("p.card-text")
+                    description = description_el.inner_text().strip() if description_el else "No content available"
+                    imp_content = description[:500]
 
-                    content_element = card.query_selector("p.card-text")
-                    content_text = content_element.inner_text().strip() if content_element else "No content available"
-                    imp_content = content_text[:500]
+                    # Website URL (from line like "Web Site: <a>...</a>")
+                    website = ""
+                    subtitle_blocks = card.query_selector_all("h6.card-subtitle")
+                    for h6 in subtitle_blocks:
+                        if "Web Site:" in h6.inner_text():
+                            a_tag = h6.query_selector("a[href]")
+                            if a_tag:
+                                website = a_tag.get_attribute("href").strip()
+                            break
 
+                    # Dump links (from any h6 a[href] after description)
                     dumplinks = []
-                    links = card.query_selector_all("h6.card-subtitle a")
-                    if links:
-                        dumplinks = [link.get_attribute("href").strip() for link in links if link.get_attribute("href")]
+                    for h6 in subtitle_blocks:
+                        a_tag = h6.query_selector("a[href]")
+                        if a_tag:
+                            href = a_tag.get_attribute("href")
+                            if href:
+                                dumplinks.append(href.strip())
+
+                    if not dumplinks or not website:
+                        continue
+
+                    title_el = card.query_selector("h4.card-title")
+                    raw_title = title_el.inner_text().strip() if title_el else "Unknown"
+                    match = re.search(r"(.*?)\s*\(([^)]+)\)", raw_title)
+                    if match:
+                        company_name = match.group(1).strip()
+                        location = match.group(2).strip()
+                    else:
+                        company_name = raw_title
+                        location = None
+
+                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, False)
+                    ref_html = None
+                    if not is_crawled:
+                        ref_html = helper_method.extract_refhtml(website)
+                        if ref_html:
+                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, True)
 
                     card_data = leak_model(
+                        m_ref_html=ref_html,
                         m_screenshot=helper_method.get_screenshot_base64(page, company_name),
                         m_title=company_name,
                         m_url=page.url,
-                        m_websites=[website],
+                        m_websites=[website] if website else [],
                         m_base_url=self.base_url,
-                        m_content=content_text + " " + self.base_url + " " + page.url,
+                        m_content=f"{description} {self.base_url} {page.url}",
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=imp_content,
                         m_content_type=["leaks"],
@@ -108,9 +141,10 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
+                        m_email_addresses=helper_method.extract_emails(description),
                         m_company_name=company_name,
-                        m_email_addresses=helper_method.extract_emails(content_text),
-                        m_phone_numbers=helper_method.extract_phone_numbers(content_text),
+                        m_ip=[website],
+                        m_location_info=location.split(",")
                     )
 
                     self.append_leak_data(card_data, entity_data)
@@ -120,6 +154,5 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
 
         except Exception as e:
             print(f"Error in parsing: {e}")
-
 
 

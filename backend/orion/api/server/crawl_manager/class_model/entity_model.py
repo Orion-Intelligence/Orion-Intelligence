@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 class entity_model(BaseModel):
+    m_password: Optional[str] = None
     m_cluster_id: Optional[str] = None
     m_document_id: Optional[str] = None
     m_email_addresses: Optional[List[str]] = None

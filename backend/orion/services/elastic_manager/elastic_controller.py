@@ -130,10 +130,19 @@ class elastic_controller:
       if isinstance(p_data, list):
         for entry in p_data:
           entry = ensure_creation_date(entry)
-          await self.__m_connection.index(index=entry[ELASTIC_KEYS.S_DOCUMENT], id=entry[ELASTIC_KEYS.S_VALUE]["m_hash"], body=entry[ELASTIC_KEYS.S_VALUE])
+          await self.__m_connection.update(
+            index=entry[ELASTIC_KEYS.S_DOCUMENT],
+            id=entry[ELASTIC_KEYS.S_VALUE]["m_hash"],
+            body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
+          )
       else:
         p_data = ensure_creation_date(p_data)
-        await self.__m_connection.index(index=p_data[ELASTIC_KEYS.S_DOCUMENT], id=p_data[ELASTIC_KEYS.S_VALUE]["m_hash"], body=p_data[ELASTIC_KEYS.S_VALUE])
+        await self.__m_connection.update(
+          index=p_data[ELASTIC_KEYS.S_DOCUMENT],
+          id=p_data[ELASTIC_KEYS.S_VALUE]["m_hash"],
+          body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
+        )
+
       return True, None
     except Exception as ex:
       log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")

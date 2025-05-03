@@ -1,4 +1,5 @@
 import datetime
+import re
 from abc import ABC
 from typing import List
 from bs4 import BeautifulSoup
@@ -8,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -52,8 +53,8 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
   def entity_data(self) -> List[entity_model]:
     return self._entity_data
 
-  def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-    return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+  def invoke_db(self, command: int, key: str, default_value):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
   def contact_page(self) -> str:
     return "https://support.mozilla.org"
@@ -106,15 +107,25 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
       if error_count >= max_errors:
         break
 
+
       try:
         page.goto(dumplink, wait_until="domcontentloaded")
         soup = BeautifulSoup(page.content(), "html.parser")
         card_content = helper_method.clean_text(soup.get_text(separator=" ", strip=True))
-        card_title = helper_method.clean_text(page.locator('h1').nth(1).inner_text()[1:])
+        card_title = helper_method.clean_text(page.locator('h1').nth(1).inner_text()[0:])
         extracted_text = card_content
         current_url = page.url
+        weblink = re.search(r'<a[^>]+href=["\'](https?://[^"\']+)', page.content()).group(1)
+
+        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value+weblink, False)
+        ref_html = None
+        if not is_crawled:
+          ref_html = helper_method.extract_refhtml(weblink)
+          if ref_html:
+            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value+weblink, True)
 
         card_data = leak_model(
+          m_ref_html=ref_html,
           m_screenshot=helper_method.get_screenshot_base64(page, card_title),
           m_title=card_title,
           m_url=current_url,
@@ -130,7 +141,8 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
 
         entity_data = entity_model(
           m_email_addresses=helper_method.extract_emails(extracted_text),
-          m_phone_numbers=helper_method.extract_phone_numbers(extracted_text),
+          m_ip=[weblink],
+          m_company_name=card_title
         )
 
         self.append_leak_data(card_data, entity_data)

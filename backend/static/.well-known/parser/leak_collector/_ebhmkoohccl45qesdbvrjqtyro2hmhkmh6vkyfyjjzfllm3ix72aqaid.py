@@ -1,5 +1,5 @@
+import re
 from abc import ABC
-from datetime import datetime
 from typing import List
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
@@ -8,7 +8,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from urllib.parse import urljoin
 
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -54,8 +54,8 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "https://mirror-h.org/contact"
@@ -80,37 +80,42 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
             full_url = self.seed_url
-            print("full url ")
             page.goto(full_url,timeout=30000)
             page.wait_for_load_state('load')
-            print("full url load")
             page.wait_for_selector("div.advert_col",timeout=30000)
-            print("full url cols added")
-
-            today_date = datetime.today().strftime('%Y-%m-%d')
 
             advert_blocks = page.query_selector_all("div.advert_col")
             for block in advert_blocks:
                 soup = BeautifulSoup(block.inner_html(), 'html.parser')
 
-                # Extract title
                 title = soup.select_one('div.advert_info_title').text.strip()
 
-                # Extract content
                 content = soup.select_one('div.advert_info_p').get_text(separator="\n", strip=True)
 
-                # Extract website link
                 web_url_element = soup.select_one('div.advert_info_p a')
                 web_url = web_url_element['href'] if web_url_element else None
 
-                # Extract image URLs
                 image_urls = []
                 for img in soup.select('div.advert_imgs_block img'):
                     img_src = img.get('src')
                     full_img_url = urljoin(self.base_url, img_src)
                     image_urls.append(full_img_url)
 
+                size = None
+                info_code_div = soup.select_one('div.advert_info_code')
+                if info_code_div:
+                    size_match = re.search(r'Size:\s*([\d.,]+\s*[A-Z]+)', info_code_div.text)
+                    size = size_match.group(1) if size_match else None
+
+                is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_url, False)
+                ref_html = None
+                if not is_crawled:
+                    ref_html = helper_method.extract_refhtml(web_url)
+                    if ref_html:
+                        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_url, True)
+
                 card_data = leak_model(
+                    m_ref_html= ref_html,
                     m_screenshot=helper_method.get_screenshot_base64(page, title),
                     m_title=title,
                     m_weblink=[web_url] if web_url else [],
@@ -121,14 +126,13 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     m_important_content=content,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_content_type=["leaks"],
-                    m_leak_date=datetime.strptime(today_date, '%Y-%m-%d').date()
+                    m_data_size=size,
                 )
 
                 entity_data = entity_model(
-                    m_email_addresses=[],
-                    m_phone_numbers=[],
-                    m_location_info=[],
-                    m_name=title,
+                    m_email_addresses=helper_method.extract_emails(content),
+                    m_ip=[web_url],
+                    m_company_name=title,
                 )
 
                 self.append_leak_data(card_data, entity_data)

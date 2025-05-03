@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from contextlib import asynccontextmanager
-
 from configs.SimpleAuthProvider import setup_admin
 from configs.swagger_config import configure_swagger
 from orion.middleware.middleware_setup import setup_middlewares
@@ -14,7 +13,6 @@ from routes.api_routes import api_routes
 from routes.admin_routes import admin_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
-from routes.test_routes import test_router
 from interface import interface
 from fastapi.exceptions import RequestValidationError
 
@@ -45,7 +43,6 @@ app.include_router(api_routes)
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
-app.include_router(test_router)
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(

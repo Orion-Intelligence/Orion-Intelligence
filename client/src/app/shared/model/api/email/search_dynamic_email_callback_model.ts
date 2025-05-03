@@ -1,4 +1,8 @@
 export class CardData {
+  m_crypto_addresses: string[] = [];
+  m_attacker: string[] = [];
+  m_ref_html: string = "";
+  m_password: string = "";
   m_title: string = "";
   m_url: string = "";
   m_base_url: string = "";
