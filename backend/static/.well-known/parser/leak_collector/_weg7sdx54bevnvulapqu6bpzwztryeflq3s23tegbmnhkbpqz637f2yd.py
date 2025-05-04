@@ -113,5 +113,6 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
                     m_company_name=title_text,
                     m_ip=weblinks,
                     m_email_addresses= helper_method.extract_emails(content),
+                    m_team="black suit"
                 )
                 self.append_leak_data(card_data, entity_data)

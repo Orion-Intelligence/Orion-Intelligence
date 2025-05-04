@@ -161,6 +161,7 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                     m_email_addresses=helper_method.extract_emails(detail_soup.text),
                     m_ip=[website],
                     m_industry=industry,
+                    m_team="kairos"
                 )
 
                 self.append_leak_data(card_data, entity_data)

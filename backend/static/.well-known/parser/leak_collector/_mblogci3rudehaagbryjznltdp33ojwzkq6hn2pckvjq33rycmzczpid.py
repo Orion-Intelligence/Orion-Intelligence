@@ -135,7 +135,7 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
 
                             entity_data = entity_model(
                                 m_email_addresses=helper_method.extract_emails(content_text),
-                                m_company_name=title_text
+                                m_company_name=title_text,
                             )
 
                             self.append_leak_data(card_data, entity_data)

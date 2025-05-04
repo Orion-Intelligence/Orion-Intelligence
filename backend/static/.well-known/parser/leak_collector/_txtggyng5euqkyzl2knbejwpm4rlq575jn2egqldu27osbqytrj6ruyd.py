@@ -147,7 +147,8 @@ class _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd(leak_extractor_i
                     entity_data = entity_model(
                         m_email_addresses=helper_method.extract_emails(description),
                         m_company_name=company_name,
-                        m_ip=[company_link]
+                        m_ip=[company_link],
+                        m_team="trinity"
                     )
                     self.append_leak_data(card_data, entity_data)
 

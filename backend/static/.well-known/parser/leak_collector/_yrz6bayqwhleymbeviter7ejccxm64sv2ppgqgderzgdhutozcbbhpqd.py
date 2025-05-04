@@ -156,7 +156,8 @@ class _yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd(leak_extractor_i
                     m_email_addresses=helper_method.extract_emails(m_content),
                     m_country_name=country,
                     m_ip=[weblink],
-                    m_company_name=page.title()
+                    m_company_name=page.title(),
+                    m_team="apos blog"
                 )
 
                 self.append_leak_data(card_data, entity_data)

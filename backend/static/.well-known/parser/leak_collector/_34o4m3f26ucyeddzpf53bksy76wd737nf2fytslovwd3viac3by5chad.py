@@ -145,6 +145,7 @@ class _34o4m3f26ucyeddzpf53bksy76wd737nf2fytslovwd3viac3by5chad(leak_extractor_i
                             m_location_info=location.replace(" ","").split(","),
                             m_company_name=company_name,
                             m_industry=industry,
+                            m_team = "frag"
                         )
 
                         self.append_leak_data(card_data, entity_data)

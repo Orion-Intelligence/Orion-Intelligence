@@ -143,7 +143,8 @@ class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_i
 
                             entity_data = entity_model(
                                 m_email_addresses=helper_method.extract_emails(content_text.strip()),
-                                m_ip=[title_text]
+                                m_ip=[title_text],
+                                m_team="fsociety"
                             )
 
                             self.append_leak_data(card_data, entity_data)

@@ -135,6 +135,7 @@ class _leak_lookup(leak_extractor_interface, ABC):
                         m_email_addresses=helper_method.extract_emails(modal_content_cleaned),
                         m_company_name=site_name,
                         m_ip=[site_name] ,
+                        m_team="leak lookup"
                     )
 
                     self.append_leak_data(card_data, entity_data)

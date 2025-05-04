@@ -2,10 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class CardExtractionModel(BaseModel):
-    m_crypto_addresses: List[str] = []
-    m_attacker: Optional[List[str]] = None
-    m_ref_html: Optional[str] = None
-    m_password: Optional[str] = None
     m_title: str = ""
     m_url: str
     m_screenshot: str
@@ -33,6 +29,11 @@ class CardExtractionModel(BaseModel):
     m_states: List[str] = []
     m_location_info: List[str] = []
     m_ip: Optional[List[str]] = None
+    m_crypto_addresses: List[str] = []
+    m_attacker: Optional[List[str]] = None
+    m_ref_html: Optional[str] = None
+    m_password: Optional[str] = None
+    m_team: Optional[str] = None
 
 
 class LeakDataModel(BaseModel):

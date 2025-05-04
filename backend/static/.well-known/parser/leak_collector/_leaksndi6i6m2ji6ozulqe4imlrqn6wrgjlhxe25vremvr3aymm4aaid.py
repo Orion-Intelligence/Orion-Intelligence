@@ -129,7 +129,8 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                             m_email_addresses=helper_method.extract_emails(description),
                             m_company_name=database,
                             m_ip=[site],
-                            m_crypto_addresses=[btc_address]
+                            m_crypto_addresses=[btc_address],
+                            m_team="Hacked databases store"
                         )
 
                         self.append_leak_data(card_data, entity_data)

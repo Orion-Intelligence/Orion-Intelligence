@@ -121,7 +121,8 @@ class _5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid(leak_extractor_i
                 entity_data = entity_model(
                     m_email_addresses=helper_method.extract_emails(description),
                     m_ip=[weblink],
-                    m_company_name=title
+                    m_company_name=title,
+                    m_team = "space bears"
                 )
 
                 self.append_leak_data(card_data, entity_data)

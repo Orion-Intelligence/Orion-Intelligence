@@ -152,6 +152,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
           m_company_name=title_name if title_name else None,
           m_ip=[title_url] if title_url else None,
           m_password=password if password else None,
+          m_team="abyss"
         )
 
         self.append_leak_data(card_data, entity_data)

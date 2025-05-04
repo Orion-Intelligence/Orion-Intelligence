@@ -139,6 +139,7 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
                         m_ip=[domain],
                         m_location_info=[country],
                         m_country_name=country,
+                        m_team="crypto74"
                     )
 
                     self.append_leak_data(card_data, entity_data)

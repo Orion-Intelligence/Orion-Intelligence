@@ -58,7 +58,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
-        return "https://mirror-h.org/contact"
+        return "http://ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
@@ -133,6 +133,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     m_email_addresses=helper_method.extract_emails(content),
                     m_ip=[web_url],
                     m_company_name=title,
+                    m_team="interlock"
                 )
 
                 self.append_leak_data(card_data, entity_data)

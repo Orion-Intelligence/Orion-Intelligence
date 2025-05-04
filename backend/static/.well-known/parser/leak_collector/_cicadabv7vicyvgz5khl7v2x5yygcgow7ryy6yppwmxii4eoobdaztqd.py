@@ -157,7 +157,8 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
           entity_data = entity_model(
             m_email_addresses=helper_method.extract_emails(description),
             m_company_name=company_name,
-            m_ip=[website]
+            m_ip=[website],
+            m_team="cicada"
           )
 
           self.append_leak_data(card_data, entity_data)

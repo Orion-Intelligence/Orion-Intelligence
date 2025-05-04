@@ -170,6 +170,7 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
                         m_ip=web_urls,
                         m_email_addresses=helper_method.extract_emails(description),
                         m_company_name=extracted_title,
+                        m_team="ransomeware"
                     )
 
                     self.append_leak_data(card_data, entity_data)

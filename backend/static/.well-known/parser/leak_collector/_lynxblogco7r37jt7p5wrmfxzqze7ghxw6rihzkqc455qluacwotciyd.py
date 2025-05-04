@@ -173,7 +173,8 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
                         m_email_addresses=helper_method.extract_emails(description),
                         m_industry=industry,
                         m_company_name=title,
-                        m_ip=[ip]
+                        m_ip=[ip],
+                        m_team="lynx"
                     )
 
                     self.append_leak_data(card_data, entity_data)

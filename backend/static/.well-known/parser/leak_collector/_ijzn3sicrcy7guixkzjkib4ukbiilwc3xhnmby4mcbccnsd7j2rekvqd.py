@@ -156,7 +156,8 @@ class _ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd(leak_extractor_i
                         entity_data = entity_model(
                             m_email_addresses=helper_method.extract_emails(description),
                             m_company_name=title,
-                            m_ip=[company_url]
+                            m_ip=[company_url],
+                            m_team="qilin blog"
                         )
                         self.append_leak_data(card_data, entity_data)
                         break

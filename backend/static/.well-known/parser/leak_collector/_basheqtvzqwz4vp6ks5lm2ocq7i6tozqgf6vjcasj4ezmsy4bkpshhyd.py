@@ -152,6 +152,7 @@ class _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd(leak_extractor_i
                 m_country_name=country,
                 m_location_info=[country],
                 m_ip=[title],
+                m_team="bashe"
             )
 
             self.append_leak_data(card_data, entity_data)

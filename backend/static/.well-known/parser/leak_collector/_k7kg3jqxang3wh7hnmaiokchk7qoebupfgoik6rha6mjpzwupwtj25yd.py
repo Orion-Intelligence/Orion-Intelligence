@@ -181,7 +181,8 @@ class _k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd(leak_extractor_i
                         m_country_name=country_name,
                         m_ip=[weblink],
                         m_location_info=[country_name],
-                        m_password = rar_passwords
+                        m_password = rar_passwords,
+                        m_team="play news"
                     )
 
                     self.append_leak_data(card_data, entity_data)

@@ -127,7 +127,7 @@ class _mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id(leak_extractor_i
             )
 
             entity_data = entity_model(
-                m_email_addresses=helper_method.extract_emails(description),
+                m_email_addresses=helper_method.extract_emails(description)
             )
 
             self.append_leak_data(card_data, entity_data)

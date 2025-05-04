@@ -1,5 +1,7 @@
 import hashlib
+import re
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlparse
 
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.constants.constant import CONSTANTS
@@ -207,13 +209,7 @@ class elastic_request_generator:
       term_query = {
         "query_string": {
           "query": term.lower() + "*",
-          "fields": [
-            "m_title^4",
-            "m_content^1.5",
-            "m_important_content^1.5",
-            "m_company_name^2.5",
-            "m_ref_html^1.0"
-          ],
+          "fields": ["*"],
           "default_operator": "OR",
           "lenient": True,
           "analyze_wildcard": True,
@@ -226,13 +222,7 @@ class elastic_request_generator:
       content_query = {
         "query_string": {
           "query": raw_query.lower().rstrip("/") + "*",
-          "fields": [
-            "m_title^4",
-            "m_content^1.5",
-            "m_important_content^1.5",
-            "m_company_name^2.5",
-            "m_ref_html^1.0"
-          ],
+          "fields": ["*"],
           "default_operator": "OR",
           "lenient": True,
           "analyze_wildcard": True,

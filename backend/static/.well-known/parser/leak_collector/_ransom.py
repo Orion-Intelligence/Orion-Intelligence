@@ -158,6 +158,7 @@ class _ransom(leak_extractor_interface, ABC):
                 m_location_info=[country],
                 m_company_name=group,
                 m_email_addresses=helper_method.extract_emails(soup.text),
+                m_team="ransom wiki"
             )
 
             self.append_leak_data(card_data, entity_data)

@@ -73,7 +73,6 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
 
             for card in cards:
                 try:
-                    # Extract the link to open
                     link_el = card.query_selector("a.stretched-link")
                     if not link_el:
                         continue
@@ -84,11 +83,9 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
 
                     detail_url = href if href.startswith("http") else base_url.rstrip("/") + "/" + href.lstrip("/")
 
-                    # Open the new tab and parse
                     detail_page = page.context.new_page()
                     detail_page.goto(detail_url, wait_until="domcontentloaded", timeout=30000)
 
-                    # Now parse the detail page
                     soup = BeautifulSoup(detail_page.content(), "html.parser")
 
                     title = soup.find("h1").get_text(strip=True)
@@ -150,6 +147,7 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
                         m_ip=[title],
                         m_country_name=country,
                         m_location_info=[country],
+                        m_team="underground"
                     )
 
                     self.append_leak_data(card_data, entity_data)

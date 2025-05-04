@@ -41,14 +41,6 @@ app.include_router(micro_routes)
 app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
+
+# noinspection PyTypeChecker
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
-
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:8080"],  # Angular runs on port 4200
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)

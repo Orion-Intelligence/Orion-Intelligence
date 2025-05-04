@@ -132,7 +132,8 @@ class _csidb(leak_extractor_interface, ABC):
           m_email_addresses=helper_method.extract_emails(description) if description else [],
           m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
           m_country_name=country,
-          m_location_info=[country]
+          m_location_info=[country],
+          m_team="csidb"
         )
 
         self.append_leak_data(card, entity)
@@ -154,7 +155,6 @@ class _csidb(leak_extractor_interface, ABC):
           date = page.query_selector("p.col-8.d-inline.text-start.bg-white.text-nowrap.m-0.border.ps-2")
           title = page.query_selector("h1.col.h-100.text-center.text-white.text-wrap a.link-info")
           desc_el = page.query_selector("div.container div.row div.col") or page.query_selector("div.p-2, p.p-2")
-          loc_el = page.query_selector("p.col-8 span.flag-icon + span")
 
           websites = [a.get_attribute("href") for a in page.query_selector_all("td.align-middle a") if a.get_attribute("href").startswith("http")]
           date_val = parser.parse(date.inner_text().strip()).date() if date else None

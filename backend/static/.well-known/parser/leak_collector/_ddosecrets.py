@@ -149,7 +149,8 @@ class _ddosecrets(leak_extractor_interface, ABC):
                     m_email_addresses=helper_method.extract_emails(content_text),
                     m_attacker=[sources],
                     m_location_info=countries,
-                    m_country_name=country
+                    m_country_name=country,
+                    m_team="ddosecret"
                 )
 
                 self.append_leak_data(card_data, entity_data)

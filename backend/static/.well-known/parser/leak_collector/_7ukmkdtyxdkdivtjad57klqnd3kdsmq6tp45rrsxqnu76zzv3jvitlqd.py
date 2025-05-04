@@ -144,7 +144,8 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
                         m_email_addresses=helper_method.extract_emails(description),
                         m_company_name=company_name,
                         m_ip=[website],
-                        m_location_info=location.split(",")
+                        m_location_info=location.split(","),
+                        m_team = "diaxin"
                     )
 
                     self.append_leak_data(card_data, entity_data)

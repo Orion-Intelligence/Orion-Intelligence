@@ -120,6 +120,7 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
             m_ip=[external_link],
             m_email_addresses=helper_method.extract_emails(content),
             m_phone_numbers=helper_method.extract_phone_numbers(content),
+            m_team="rhysida"
           )
 
           self.append_leak_data(card_data, entity_data)

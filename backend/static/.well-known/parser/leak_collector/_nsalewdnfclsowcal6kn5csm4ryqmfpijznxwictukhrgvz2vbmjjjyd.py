@@ -203,6 +203,7 @@ class _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd(leak_extractor_i
                         m_company_name=company_name,
                         m_ip=weblinks,
                         m_password=passwords,
+                        m_team="dunghill leak"
                     )
 
                     self.append_leak_data(card_data, entity_data)

@@ -163,7 +163,8 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                 entity_data = entity_model(
                     m_email_addresses=helper_method.extract_emails(description),
                     m_company_name=card_title,
-                    m_ip=[company_url]
+                    m_ip=[company_url],
+                    m_team="public ocra"
                 )
 
                 self.append_leak_data(card_data, entity_data)

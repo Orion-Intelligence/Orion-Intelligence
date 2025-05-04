@@ -259,6 +259,7 @@ class _nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd(leak_extractor_i
                         m_email_addresses=helper_method.extract_emails(m_description),
                         m_company_name=title,
                         m_ip=[m_weblinks],
+                        m_team="nitrogen"
                     )
                     self.append_leak_data(card_data, entity_data)
 
