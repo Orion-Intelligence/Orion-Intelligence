@@ -3,27 +3,35 @@ import {
   ElementRef,
   Renderer2,
   Input,
-  HostListener
+  HostListener,
+  OnDestroy
 } from '@angular/core';
 
 @Directive({
   selector: '[appTooltip]'
 })
-export class TooltipDirective {
+export class TooltipDirective implements OnDestroy {
   @Input('appTooltip') tooltipText: string = '';
   private tooltip: HTMLElement | null = null;
+  private showTimeout: any = null;
 
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
   @HostListener('mouseenter')
   onMouseEnter(): void {
     if (this.tooltipText.trim()) {
-      this.createTooltip();
+      this.showTimeout = setTimeout(() => {
+        this.createTooltip();
+      }, 600);
     }
   }
 
   @HostListener('mouseleave')
   onMouseLeave(): void {
+    if (this.showTimeout) {
+      clearTimeout(this.showTimeout);
+      this.showTimeout = null;
+    }
     this.removeTooltip();
   }
 
@@ -36,6 +44,7 @@ export class TooltipDirective {
     this.renderer.addClass(this.tooltip, 'custom-tooltip');
     this.renderer.setStyle(this.tooltip, 'position', 'absolute');
     this.renderer.setStyle(this.tooltip, 'opacity', '0');
+    this.renderer.setStyle(this.tooltip, 'text-transform', 'capitalize');
     this.renderer.appendChild(document.body, this.tooltip);
 
     requestAnimationFrame(() => {
@@ -91,5 +100,12 @@ export class TooltipDirective {
       }, 200);
       this.tooltip = null;
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.showTimeout) {
+      clearTimeout(this.showTimeout);
+    }
+    this.removeTooltip();
   }
 }
