@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgClass, NgForOf, NgIf, NgOptimizedImage } from '@angular/common';
 import { InsightCallbackModel, GenericModel, LeakModel, DefacementModel } from '../../../shared/model/homepage/insight.model';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
-  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, MatTooltipModule],
+  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, TooltipDirective],
   standalone: true
 })
 export class HomeInsightComponent implements OnInit {

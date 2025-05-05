@@ -12,10 +12,10 @@ import {
   PaginationComponent
 } from '../../shared/partials/pagination/pagination.component';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import {TooltipDirective} from '../../shared/directive/tooltip-directive.directive';
 
 @Component({
-  selector: 'app-directory', templateUrl: './directory.component.html', imports: [MatTooltipModule, FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent,],
+  selector: 'app-directory', templateUrl: './directory.component.html', imports: [FiltersComponent, DirectoryListComponent, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent, TooltipDirective,],
 })
 export class DirectoryComponent {
   directoryData$: Observable<DirectoryCallbackModel | null>;

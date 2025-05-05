@@ -4,12 +4,11 @@ import { DefacementResultItem } from '../../../model/results/defacement/defaceme
 import { DatePipe, NgOptimizedImage } from '@angular/common';
 import { HelperService } from '../../../services/helper.service';
 import { AppService } from '../../../../services/core/app.service';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-report-defacement',
-  templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe, MatTooltipModule],
-  styleUrls: ['./report-defacement.component.css']
+  templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe, TooltipDirective]
 })
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;

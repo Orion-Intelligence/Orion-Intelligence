@@ -1,12 +1,13 @@
 import {Injectable} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
 
-  constructor(private sanitizer: DomSanitizer) {
+  constructor(private sanitizer: DomSanitizer, private router: Router) {
   }
 
   downloadAsCSV(data: any) {
@@ -39,6 +40,13 @@ export class HelperService {
     } else {
       alert('Sharing is not supported on this browser.');
     }
+  }
+
+  reset_query_param(): void {
+    this.router.navigate([], {
+      queryParams: {},
+      replaceUrl: true
+    }).then();
   }
 
   highlightWords(text: string, query: string, maxLength: number = 250): SafeHtml {

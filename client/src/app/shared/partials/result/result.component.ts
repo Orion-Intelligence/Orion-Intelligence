@@ -15,14 +15,15 @@ import { query } from '@angular/animations';
 import { Category } from "../../enums/pages";
 import { RouterLink } from '@angular/router';
 import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {HelperService} from '../../services/helper.service';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, MatTooltipModule],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
@@ -44,7 +45,7 @@ export class ResultComponent implements OnInit, OnChanges {
   result_triggered = false
   local_query = ""
 
-  constructor(public sidebarService: SidebarService) {
+  constructor(public sidebarService: SidebarService, private helper_service:HelperService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -65,6 +66,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.reloadFilters.emit(["", ""]);
     this.reloadData.emit()
     this.result_triggered = true
+    this.helper_service.reset_query_param()
   }
 
   onFormSubmit() {

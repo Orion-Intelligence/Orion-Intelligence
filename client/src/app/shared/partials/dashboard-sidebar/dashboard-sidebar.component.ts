@@ -7,7 +7,6 @@ import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashbo
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
 import { GeneralCallbackModel } from '../../model/results/general/general.callback.model';
 import { LeakCallbackModel } from '../../model/results/leak/leak.callback.model';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {SelectionStoreService} from '../../../services/dashboard/selection.service';
 import {AppService} from '../../../services/core/app.service';
@@ -15,7 +14,7 @@ import {AppService} from '../../../services/core/app.service';
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, MatTooltipModule],
+  imports: [NgOptimizedImage, NgClass, NgIf, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent],
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {

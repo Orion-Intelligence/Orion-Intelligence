@@ -14,11 +14,6 @@ import { TestService } from '../../../services/test/test.service';
 })
 export class HomeSearchComponent {
   searchQuery: string = '';
-
-  responseMessage: string = '';
-  saveResult: any;
-  searchResult: any;
-
   constructor(private route: ActivatedRoute, private router: Router, private testService: TestService) {
   }
 
@@ -33,47 +28,4 @@ export class HomeSearchComponent {
       queryParamsHandling: 'merge'
     }).then();
   }
-
-
-
-  // my test code 
-
-  // saveData() {
-  //   const sampleData = { message: 'Hello from Angular!' };
-  //   this.testService.saveMessage(sampleData).subscribe({
-  //     next: res => {
-  //       this.saveResult = res;
-  //       console.log('Saved!', res);
-  //     },
-  //     error: err => {
-  //       console.error('Save failed', err);
-  //       this.saveResult = 'Save failed';
-  //     }
-  //   });
-  // }
-
-  // searchData() {
-  //   this.testService.searchMessages().subscribe({
-  //     next: res => {
-  //       this.searchResult = res;
-  //       console.log('Search result', res);
-  //     },
-  //     error: err => {
-  //       console.error('Search failed', err);
-  //       this.searchResult = 'Search failed';
-  //     }
-  //   });
-  // }
-
-  // callHelloWorld() {
-  //   this.testService.getHelloWorld().subscribe({
-  //     next: (data) => {
-  //       this.responseMessage = data.message;
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //       this.responseMessage = 'API call failed!';
-  //     }
-  //   });
-  // }
 }

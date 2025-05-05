@@ -40,7 +40,7 @@ export const general_filters: FilterModel = {
   filters: {
     mNetwork: {
       title: "Network Type",
-      options: ["all", "onion", "i2p", "freenet"],
+      options: ["all", "onion", "i2p", "clearnet"],
       type: "dropdown",
       tooltip: "Web Layers"
     },

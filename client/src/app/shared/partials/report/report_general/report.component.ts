@@ -12,10 +12,10 @@ import { AppService } from '../../../../services/core/app.service';
 import { Category } from '../../../enums/pages';
 import { ApiService } from '../../../services/api.service';
 import { HttpParams } from '@angular/common/http';
-import { TooltipPosition, MatTooltipModule } from '@angular/material/tooltip';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
-  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, MatTooltipModule], animations: [fadeInDashboardItem],
+  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective], animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;

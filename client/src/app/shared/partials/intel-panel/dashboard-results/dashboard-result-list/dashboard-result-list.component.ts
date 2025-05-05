@@ -7,8 +7,7 @@ import {ScrollService} from '../../../../services/scroll.service';
 @Component({
   selector: 'app-dashboard-result-list',
   standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe],
-  templateUrl: './dashboard-result-list.component.html',
-  styleUrls: ['./dashboard-result-list.component.css']
+  templateUrl: './dashboard-result-list.component.html'
 })
 export class DashboardResultListComponent implements OnInit, AfterViewInit{
   @Input() searchResults: DefacementResultItem[] = [];

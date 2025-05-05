@@ -3,14 +3,25 @@
     <div class="home_insight__container">
       <div class="home_insight__card" *ngFor="let key of getKeys(insights[model]); let first = first">
         <div class="home_insight__content">
-          <div *ngIf="first" class="home_insight__header" [matTooltip]=" model === 'general'
-            ? 'Track Data States/Crawl Insights Panel'
-            : model === 'leak'
-            ? 'This is the Leaked Data'
-            : 'This is the Defacement'" matTooltipPosition="above" matTooltipClass="mat-tooltip">
-            {{ model === 'general' ? 'Generic Index' : model === 'leak' ? 'Leaked Index' : 'Defacement Index' }}
+          <div
+            *ngIf="first"
+            class="home_insight__header"
+            [appTooltip]="
+              model === 'general'
+                ? 'Track Data States/Crawl Insights Panel'
+                : model === 'leak'
+                ? 'This is the Leaked Data'
+                : 'This is the Defacement'
+            "
+          >
+            {{
+              model === 'general'
+                ? 'Generic Index'
+                : model === 'leak'
+                ? 'Leaked Index'
+                : 'Defacement Index'
+            }}
           </div>
-
           <div class="home_insight__icon">
             <img ngSrc="/assets/images/statistics/{{ key }}.svg" alt="{{ key }}" width="32" height="32">
           </div>

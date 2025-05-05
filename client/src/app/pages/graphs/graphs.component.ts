@@ -13,7 +13,6 @@ import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animat
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
-  styleUrls: ['./graphs.component.css'],
   animations: [fadeInDashboardItem],
   imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf]
 })
@@ -26,6 +25,7 @@ export class GraphComponent implements OnInit {
   propertyValue = '';
   physicsEnabled = true;
   isEmpty = false;
+  limitReached = false
 
   constructor(private api: ApiService, private route: ActivatedRoute,) {
   }
@@ -47,11 +47,22 @@ export class GraphComponent implements OnInit {
   }
 
   loadGraphByNode(data_point_type: string, type: string, value: string): void {
-    const params = new HttpParams().set('data_point_type', data_point_type).set('model_type', type).set('query_value', value);
+    const params = new HttpParams()
+      .set('data_point_type', data_point_type)
+      .set('model_type', type)
+      .set('query_value', value);
 
-    this.api.get<any[]>('graph', {params}).subscribe({
-      next: data => this.renderGraph(data, type, value),
-      error: err => console.error('❌ Request failed:', err),
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
+      next: response => {
+        const { results, limit_reached } = response;
+        this.renderGraph(results, type, value);
+        this.limitReached = limit_reached;
+      },
+      error: err => {
+        console.error('❌ Request failed:', err);
+        this.isEmpty = true;
+        this.limitReached = false;
+      },
     });
   }
 

@@ -1,8 +1,7 @@
 <div *ngIf="analytics" class="insight-general__div">
   <div *ngFor="let section of sections" class="insight-general__container insight-general__container-background">
     <input type="checkbox" [id]="section.title + '-toggle'" checked>
-    <label class="insight-general__header" [for]="section.title + '-toggle'" [matTooltip]="section.tooltip"
-      matTooltipPosition="left" matTooltipClass="mat-tooltip">
+    <label class="insight-general__header" [for]="section.title + '-toggle'" appTooltip="{{section.tooltip}}">
       {{ section.title }}
       <img ngSrc="../../../../../assets/images/shared/dropdown_left.svg" alt="" width="20" height="20">
     </label>

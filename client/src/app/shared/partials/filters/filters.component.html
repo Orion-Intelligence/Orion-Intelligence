@@ -12,8 +12,7 @@
 <form class="filter__form">
   <div class="filter__content">
     <div *ngFor="let key of Object.keys(filterModel.filters)">
-      <label class="filter__label" [matTooltip]="filterModel.filters[key].tooltip" matTooltipPosition="above"
-        matTooltipClass="mat-tooltip">
+      <label class="filter__label" appTooltip="{{filterModel.filters[key].tooltip}}">
         {{ filterModel.filters[key].title }}
       </label>
       <div class="dropdown">

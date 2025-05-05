@@ -4,7 +4,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
 
 @Component({
-  selector: 'graph-sidebar', standalone: true, templateUrl: './sidebar.component.html', styleUrl: './sidebar.component.css', imports: [FormsModule, ReactiveFormsModule, NgForOf, NgIf, TitleCasePipe],
+  selector: 'graph-sidebar', standalone: true, templateUrl: './sidebar.component.html', imports: [FormsModule, ReactiveFormsModule, NgForOf, NgIf, TitleCasePipe],
 })
 export class SidebarComponent implements OnInit {
   @Output() filtersApplied = new EventEmitter<{

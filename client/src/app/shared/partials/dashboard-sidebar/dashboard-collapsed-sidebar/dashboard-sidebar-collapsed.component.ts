@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AsyncPipe, NgClass, NgForOf, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
   standalone: true,
-  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, MatTooltipModule],
+  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective],
   templateUrl: './dashboard-sidebar-collapsed.component.html',
 })
 export class SidebarSectionComponent {

@@ -29,7 +29,7 @@ export class SelectionStoreService {
 
   private setInitialSelectionFromUrl(url: string) {
     const pathOnly = url.split('?')[0].split('#')[0];
-    const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+)?)?$/);
+    const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
 
     if (match) {
       const section = match[1];
@@ -38,6 +38,7 @@ export class SelectionStoreService {
       if (!option && section !== 'home' && section !== 'directory') {
         return;
       }
+
       const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
       this.setSelectedSection(capitalizedSection);
 

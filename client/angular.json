@@ -61,7 +61,11 @@
                 "scripts": true,
                 "fonts": true
               },
-              "sourceMap": false,
+              "sourceMap": {
+                "scripts": true,
+                "styles": true,
+                "vendor": false
+              },
               "extractLicenses": true,
               "namedChunks": false,
               "assets": [
@@ -79,7 +83,11 @@
             "development": {
               "aot": true,
               "optimization": false,
-              "sourceMap": false,
+              "sourceMap": {
+                "scripts": true,
+                "styles": true,
+                "vendor": false
+              },
               "extractLicenses": false,
               "namedChunks": true
             }

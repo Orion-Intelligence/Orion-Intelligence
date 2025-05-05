@@ -1,8 +1,5 @@
 import hashlib
-import re
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
-
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
@@ -26,7 +23,7 @@ class elastic_request_generator:
     must_not_clause = []
 
     if m_network and m_network.lower() not in ("", "all"):
-      must_clauses.append({"term": {"m_network.keyword": m_network.lower()}})
+      must_clauses.append({"term": {"m_network": m_network.lower()}})
 
     main_query = {
       "bool": {
@@ -410,10 +407,10 @@ class elastic_request_generator:
     must_not_clause = []
 
     if m_network and m_network.lower() not in ("", "all"):
-      must_clauses.append({"term": {"m_network.keyword": m_network.lower()}})
+      must_clauses.append({"term": {"m_network": m_network.lower()}})
 
     if m_safe_search == "True":
-      must_not_clause.append({"term": {"m_content_type.keyword": "adult"}})
+      must_not_clause.append({"term": {"m_content_type": "adult"}})
 
     if m_search_type != "all":
       must_clauses.append({"terms": {"m_content_type": [m_search_type]}})

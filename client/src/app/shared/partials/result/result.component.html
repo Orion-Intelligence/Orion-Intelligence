@@ -19,8 +19,7 @@
               Current results are general and may lack accuracy. For precise insights, open the &nbsp;
               <u><b>
                   <a class="cursor-pointer text-reset text-decoration-none" routerLink="/dashboard/breach/databases"
-                    queryParamsHandling="preserve" matTooltip="Go to Breach Details" matTooltipPosition="above"
-                    matTooltipClass="mat-tooltip">
+                    queryParamsHandling="preserve" appTooltip="Go to Breach Details">
                     Data Breaches</a>
                 </b></u> &nbsp; section in sidebar.
             </span>
@@ -30,14 +29,13 @@
     </div>
 
     <div class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3" *ngIf="!shrinkmenu && filterModel">
-      <div class="analytics d-flex align-items-center gap-2" matTooltip="Insights Breakdown" matTooltipPosition="above"
-        matTooltipClass="mat-tooltip">
+      <div class="analytics d-flex align-items-center gap-2" appTooltip="Insights Breakdown">
         <input type="checkbox" id="switch" (click)="onToggleAnalytics()" />
         <label for="switch" class="mb-0"></label><span>&nbsp; Analytics</span>
       </div>
 
       <label class="filters-button d-flex align-items-center" (click)="sidebarService.openSidebar()"
-        matTooltip="Customize Results" matTooltipPosition="above" matTooltipClass="mat-tooltip">
+        appTooltip="Customize Results">
         <img ngSrc="../../../../assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority>
         <span class="ms-2">Filter</span>
       </label>
@@ -74,6 +72,6 @@
   </div>
 </div>
 
-<div *ngIf="!isLoading && result_count>0" @fadeInDashboardItem>
+<div *ngIf="!isLoading && result_count>0">
   <app-scroll-top></app-scroll-top>
 </div>

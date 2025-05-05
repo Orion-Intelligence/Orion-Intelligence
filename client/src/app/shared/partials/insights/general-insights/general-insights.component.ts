@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-general-insights',
@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   imports: [
     CommonModule,
     NgOptimizedImage,
-    MatTooltipModule
+    TooltipDirective,
   ]
 })
 export class GeneralInsightsComponent implements OnChanges {

@@ -20,8 +20,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
     DashboardResultChatComponent
   ],
   templateUrl: './dashboard-chats.component.html',
-  animations: [fadeInDashboardItem],
-  styleUrl: './dashboard-chats.component.css'
+  animations: [fadeInDashboardItem]
 })
 export class DashboardChatsComponent implements OnInit , AfterViewInit{
   public chatParamModel: ChatParamModel = new ChatParamModel();

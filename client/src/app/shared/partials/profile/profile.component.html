@@ -1,5 +1,5 @@
 <div class="profile-header header_form-user--logout" (click)="toggleDropdown($event)" *ngIf="this.username$|async">
-  <a class="profile-dropdown-toggle">
+  <a class="profile-dropdown-toggle" appTooltip="This is a secure tooltip">
     <div class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold">
       <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logout" width="24" height="24" priority>
     </div>

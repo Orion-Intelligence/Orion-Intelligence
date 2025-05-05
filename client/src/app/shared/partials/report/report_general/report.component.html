@@ -1,31 +1,26 @@
 <div class="d-flex justify-content-start">
   <div class="btn-group report-menu-option-container">
-    <button class="p-0 report-menu-option" (click)="downloadCSV()" matTooltip="Download" matTooltipPosition="above"
-      matTooltipClass="mat-tooltip">
+    <button class="p-0 report-menu-option" (click)="downloadCSV()" appTooltip="Download">
       <img ngSrc="../../../../../assets/images/shared/download.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="langUpdate()" matTooltip="Translator" matTooltipPosition="above"
-      matTooltipClass="mat-tooltip">
+    <button class="p-0 report-menu-option" (click)="langUpdate()" appTooltip="Translator">
       <img ngSrc="../../../../../assets/images/shared/translate.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="printPage()" matTooltip="Print" matTooltipPosition="above"
-      matTooltipClass="mat-tooltip">
+    <button class="p-0 report-menu-option" (click)="printPage()" appTooltip="Print">
       <img ngSrc="../../../../../assets/images/shared/print.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="shareResult()" matTooltip="Share" matTooltipPosition="above"
-      matTooltipClass="mat-tooltip">
+    <button class="p-0 report-menu-option" (click)="shareResult()" appTooltip="Share">
       <img ngSrc="../../../../../assets/images/shared/share.svg" alt="background" height="22" width="22">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="redirectToUrl()" matTooltip="Open in new Tab"
-      matTooltipPosition="above" matTooltipClass="mat-tooltip">
+    <button class="p-0 report-menu-option" (click)="redirectToUrl()" appTooltip="Open in new Tab">
       <img ngSrc="../../../../../assets/images/shared/redirect.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="open_graph()">
+    <button class="p-0 report-menu-option" (click)="open_graph()" appTooltip="Open CTI Graph">
       <img ngSrc="../../../../../assets/images/sidebar/graph.svg" alt="background" height="17" width="17">
     </button>
   </div>
@@ -87,8 +82,7 @@
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of arrayKeys; let last = last">
         <button class="search__result-tabs" [class.active]="activeTab === key" (click)="setActiveTab(key)"
-          matTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}" matTooltipPosition="above"
-          matTooltipClass="mat-tooltip">
+          appTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}">
           {{ key.replace('m_', '').replace('_', ' ') | titlecase }}
         </button>
         <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>

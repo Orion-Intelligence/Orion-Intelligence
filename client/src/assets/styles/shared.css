@@ -292,20 +292,19 @@ table a:visited {
   text-align: center;
 }
 
-.mat-tooltip {
-  background-color: #00000070;
+.custom-tooltip {
+  position: absolute;
+  background: #000000;
   color: #ffffff;
-  font-size: 10px;
-  text-align: center;
-  border-radius: 6px;
-  padding: 3px 3px 1px;
-  margin-bottom: 2px;
+  padding: 8px 12px;
+  font-size: 13px;
+  z-index: 1000;
   opacity: 0;
-  transition: opacity 0.2s ease-in-out !important;
-}
-
-.mat-tooltip.mat-tooltip-show {
-  opacity: 1;
+  transition: opacity 0.1s ease-in-out;
+  max-width: 300px;
+  white-space: normal;
+  border-radius: 7px;
+  pointer-events: none;
 }
 
 .cdk-describedby-message-container {

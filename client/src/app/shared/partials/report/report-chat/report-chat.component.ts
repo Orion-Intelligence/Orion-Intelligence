@@ -15,7 +15,6 @@ import { fadeInDashboardItem } from '../../../animations/dashboard.item.animatio
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
-  styleUrls: ['./report-chat.component.css'],
   standalone: true,
   imports: [
     NgIf,

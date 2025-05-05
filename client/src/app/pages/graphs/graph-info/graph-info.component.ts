@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {NgIf, TitleCasePipe} from '@angular/common';
 
 @Component({
-  selector: 'app-graph-info', imports: [TitleCasePipe, NgIf], templateUrl: './graph-info.component.html', styleUrl: './graph-info.component.css'
+  selector: 'app-graph-info', imports: [TitleCasePipe, NgIf], templateUrl: './graph-info.component.html'
 })
 export class GraphInfoComponent {
   @Output() physicsToggled = new EventEmitter<boolean>();

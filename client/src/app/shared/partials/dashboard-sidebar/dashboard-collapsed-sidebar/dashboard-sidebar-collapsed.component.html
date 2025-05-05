@@ -1,7 +1,6 @@
 <li class="sidebar__item">
   <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}"
-    (click)="selectSection()" [routerLink]="routePrefix" queryParamsHandling="merge" [matTooltip]="tooltip"
-    matTooltipPosition="above" matTooltipClass="mat-tooltip">
+    (click)="selectSection()" [routerLink]="routePrefix" queryParamsHandling="merge" appTooltip="{{tooltip}}">
     <img [ngSrc]="icon" [alt]="title" height="20" width="20" class="sidebar__icon">
   </div>
 
@@ -13,7 +12,7 @@
         [routerLink]="routePrefix + '/' + item.toLowerCase()" queryParamsHandling="merge">
         <div class="sidebar__subitem-content"
           [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}"
-          [matTooltip]="itemTooltips[item]" matTooltipPosition="above" matTooltipClass="mat-tooltip">
+          appTooltip=="itemTooltips[item]">
           <img ngSrc="assets/images/sidebar/sub_{{item.toLowerCase()}}.svg" [alt]="item" height="20" width="20"
             class="sidebar__icon-min">
         </div>

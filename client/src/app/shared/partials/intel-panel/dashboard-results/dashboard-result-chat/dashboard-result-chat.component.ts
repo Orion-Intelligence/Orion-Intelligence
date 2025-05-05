@@ -13,8 +13,7 @@ import {ScrollService} from '../../../../services/scroll.service';
     SlicePipe,
     RouterLink
   ],
-  templateUrl: './dashboard-result-chat.component.html',
-  styleUrl: './dashboard-result-chat.component.css'
+  templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   @Input() searchResults: ChatResultItem[] = [];
