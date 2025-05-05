@@ -1,13 +1,13 @@
 import {Injectable} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
 
-  constructor(private sanitizer: DomSanitizer, private router: Router) {
+  constructor(private sanitizer: DomSanitizer, private router: Router, private activatedRoute: ActivatedRoute) {
   }
 
   downloadAsCSV(data: any) {

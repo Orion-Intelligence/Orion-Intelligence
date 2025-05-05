@@ -2,9 +2,8 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
-import { last } from 'rxjs';
 import { filterAnimation } from '../../animations/filter.animation';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-filters',
@@ -27,11 +26,13 @@ export class FiltersComponent implements OnInit {
   }
 
   private initializeFilters() {
-    this.selectedFilters = Object.keys(this.filterModel.filters)
-      .reduce((acc, key) => ({
+    this.selectedFilters = Object.keys(this.filterModel.filters).reduce((acc, key) => {
+      const selected = (this.filterModel.filters as any)[key].selected || null;
+      return {
         ...acc,
-        [key]: null,
-      }), {});
+        [key]: selected
+      };
+    }, {});
   }
 
   onSelectionChange(key: string, value: string) {
@@ -40,7 +41,7 @@ export class FiltersComponent implements OnInit {
 
   applyFilters() {
     this.filterChanged.emit({ ...this.selectedFilters });
-    this.closeFilter()
+    this.closeFilter();
   }
 
   closeFilter() {
@@ -48,11 +49,10 @@ export class FiltersComponent implements OnInit {
   }
 
   resetFilters() {
-    this.closeFilter()
-    this.initializeFilters();
+    this.selectedFilters = {}
     this.filterReset.emit();
+    this.closeFilter();
   }
 
   protected readonly Object = Object;
-  protected readonly last = last;
 }

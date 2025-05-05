@@ -1,5 +1,5 @@
 <img src="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" >
-<app-result (onToggleSwitch)="onToggleAnalyticsTrigger()" [type]="type" [filterModel]="general_filters" [analyticsToggle]="onToggleAnalytics" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(currentCallbackModel.Result.length)"></app-result>
+<app-result (onToggleSwitch)="onToggleAnalyticsTrigger()" [type]="type" [filterModel]="general_filters" [analyticsToggle]="onToggleAnalytics" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [isLoading]="isLoading" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" (reloadData)="fetchSearchResults()" [result_count]="Math.ceil(currentCallbackModel.Result.length)"></app-result>
 
 <div *ngIf="onToggleAnalytics && !isLoading" @fadeInDashboardItem>
   <app-insights [analytics]="analyticsData"></app-insights>

@@ -25,7 +25,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   public generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   public leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
 
-  query = ""
+  query: string = ""
   analyticsData = {} as Analytics;
   type = Category.STRATEGIC
 
@@ -59,7 +59,8 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         this.generalParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH))) {
           this.isLoading = false;
-          this.query = this.generalParamModel.q
+          if (this.generalParamModel.q)
+            this.query = this.generalParamModel.q
         } else {
           this.cdr.detectChanges();
           this.fetchSearchResults()
@@ -76,14 +77,15 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
-  fetchSearchResults() {
+  fetchSearchResults(reset: boolean=false) {
     if (this.isLoading) return;
 
     if (!this.generalParamModel.q) {
       this.isLoading = false;
 
       this.router.navigate([], {
-        queryParams: {}, queryParamsHandling: 'merge'
+        queryParams: {},
+        queryParamsHandling: ''
       }).then();
 
       return;
@@ -93,11 +95,29 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
     const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
 
-    const queryParams = Object.fromEntries(Object.entries(this.generalParamModel).filter(([_, v]) => v != null && v !== ""));
+    const cleanedParams: any = {};
+
+    Object.entries(this.generalParamModel).forEach(([key, value]) => {
+      const isDefault =
+        (key === 'mSearchParamPage' && value === 1) ||
+        (key === 'mSearchParamSafeSearch' && value === false) ||
+        (key === 'mNetwork' && value === 'all') ||
+        (value == null || value === "");
+
+      if (!reset || !isDefault) {
+        if (!isDefault) cleanedParams[key] = value;
+      }
+    });
 
     this.router.navigate([], {
-      queryParams: queryParams, queryParamsHandling: 'merge'
+      queryParams: cleanedParams,
+      queryParamsHandling: reset ? '' : 'merge'
     }).then();
+
+    if (reset) {
+      this.isLoading = false;
+      return;
+    }
 
     this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.generalParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
@@ -123,12 +143,18 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
+  resetFilters(_: void) {
+    this.generalParamModel.mSearchParamSafeSearch = false
+    this.generalParamModel.mNetwork = "all"
+    this.fetchSearchResults(true);
+  }
+
   reloadFilters(event: [string | null, string | null]) {
     const [mNetwork, mSearchParamSafeSearch] = event;
     if (mNetwork != null) {
       this.generalParamModel.mNetwork = mNetwork;
     }
-    this.generalParamModel.mSearchParamSafeSearch = mSearchParamSafeSearch != 'yes';
+    this.generalParamModel.mSearchParamSafeSearch = mSearchParamSafeSearch == 'yes';
     this.fetchSearchResults();
   }
 
