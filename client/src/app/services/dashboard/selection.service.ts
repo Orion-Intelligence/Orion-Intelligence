@@ -13,6 +13,8 @@ export class SelectionStoreService {
   selectedSection$ = this.selectedSectionSubject.asObservable();
   selectedOption$ = this.selectedOptionSubject.asObservable();
 
+  first_trigger = true
+
   constructor(private router: Router) {
     this.setInitialSelectionFromUrl(this.router.url);
 
@@ -32,13 +34,17 @@ export class SelectionStoreService {
     const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
 
     if (match) {
+
       const section = match[1];
       const option = match[2];
 
-      if (!option && section !== 'home' && section !== 'directory') {
+      const currentSection = this.getSelectedSection();
+      const currentOption = this.selectedOptionSubject.value;
+
+      if (!this.first_trigger && ((!option && section !== 'home' && section !== 'directory') || (!currentSection && !currentOption))) {
         return;
       }
-
+      this.first_trigger = false
       const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
       this.setSelectedSection(capitalizedSection);
 
