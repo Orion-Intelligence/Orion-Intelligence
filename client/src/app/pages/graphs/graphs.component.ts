@@ -9,10 +9,16 @@ import {GraphInfoComponent} from './graph-info/graph-info.component';
 import {NgIf} from '@angular/common';
 import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
 
+interface ExtendedNode extends Node {
+  isGroup?: boolean;
+  subNodes?: string[];
+}
+
 @Component({
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
+  styleUrls: ['./graphs.component.css'],
   animations: [fadeInDashboardItem],
   imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf]
 })
@@ -24,10 +30,20 @@ export class GraphComponent implements OnInit {
   propertyType = 'all';
   propertyValue = '';
   physicsEnabled = true;
+  expandEnabled = false;
   isEmpty = false;
   limitReached = false
+  result: any[] = []
 
-  constructor(private api: ApiService, private route: ActivatedRoute,) {
+  private rawNodes: ExtendedNode[] = [];
+  private rawEdges: Edge[] = [];
+  private nodeSet!: DataSet<ExtendedNode>;
+  private edgeSet!: DataSet<Edge>;
+  private groupInfo: Record<string, string[]> = {};
+  private groupExpandedState: Record<string, boolean> = {};
+  private highlightedNodeId: string | null = null;
+
+  constructor(private api: ApiService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
@@ -42,7 +58,6 @@ export class GraphComponent implements OnInit {
       } else if ((selectedType === 'cluster' || selectedType === 'document') && singleInput) {
         this.loadGraphByNode(selectedType, selectedType, singleInput);
       }
-
     });
   }
 
@@ -52,10 +67,11 @@ export class GraphComponent implements OnInit {
       .set('model_type', type)
       .set('query_value', value);
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
       next: response => {
-        const { results, limit_reached } = response;
-        this.renderGraph(results, type, value);
+        const {results, limit_reached} = response;
+        this.result = results
+        this.renderGraph(this.result);
         this.limitReached = limit_reached;
       },
       error: err => {
@@ -66,123 +82,167 @@ export class GraphComponent implements OnInit {
     });
   }
 
-  private _sanitize(value: string): string {
-    return value
-      .replace(/ /g, "_")
-      .replace(/[^a-zA-Z0-9_\-\.@()+,=;$!*'%:]/g, '')
-      .toLowerCase();
-  }
 
-  renderGraph(data: any[], queryType: string, queryValue: string): void {
-    this.isEmpty = data.length <= 0;
-    const nodes = new DataSet<Node>();
-    const edges = new DataSet<Edge>();
-    const nodeMap = new Map<string, Node>();
+  private renderGraph(data: any[], reset = false): void {
+    this.isEmpty = data.length === 0;
+    this.rawNodes = [];
+    this.rawEdges = [];
+    this.groupInfo = {};
+    this.groupExpandedState = {};
 
-    const centralId = `cti_vertices/${queryType === 'property' ? queryValue : `${queryType}:${queryValue}`}`;
+    const edgeMap: Record<string, number> = {};
+    const rawNodeMap: Map<string, ExtendedNode> = new Map();
 
     data.forEach(item => {
-      const vertex = item.vertex;
-      const nodeId = vertex._id;
+      const v = item.vertex;
+      const id = v._id;
 
-      let label: string;
-      if (vertex.type === 'cluster') label = vertex._key;
-      else if (vertex.type === 'document') label = vertex.m_document_id.substring(0, 8) + '...';
-      else if (vertex.value) label = this._sanitize(vertex.value).toUpperCase();
-      else label = vertex._key;
+      let label = v._key;
+      if (v.value) {
+        label = `${v._key}`;
+        label = label.replace(":", " :: ").replace("m_", "")
+      }
 
-      const isCenter = nodeId === centralId;
-
-      const node: Node = {
-        id: nodeId,
+      rawNodeMap.set(id, {
+        id,
         label,
-        color: isCenter ? 'yellow' : '#40bf40',
+        color: '#FF6666',
         shape: 'dot',
         font: {
-          size: 14,
-          color: '#FFFFFF',
-          background: '#000',
-          strokeWidth: 0
+          size: 20,
+          color: '#FFFFFF'
         },
-        size: isCenter ? 30 : 20,
-        x: isCenter ? 0 : undefined,
-        y: isCenter ? 0 : undefined
-      };
+        size: 20
+      });
+      console.log('All node labels:', Array.from(rawNodeMap.values()).map(n => n.label));
 
-      nodeMap.set(nodeId, node);
-    });
+      const pathVertices = item.path?.vertices || [];
+      pathVertices.forEach((pv: { _id: string; _key: any; value: any[]; }) => {
+        if (!pv._id || rawNodeMap.has(pv._id)) return;
 
-    data.forEach(item => {
-      const edge = item.edge;
-      if (!edge) return;
+        let label = pv._key || pv._id;
+        if (pv.value) {
+          label = `${pv._key}`;
+          label = label.replace(":", " :: ").replace("m_", "")
+        }
 
-      const fromId = edge._from;
-      const toId = edge._to;
-
-      if (!nodeMap.has(fromId)) {
-        nodeMap.set(fromId, {
-          id: fromId,
-          label: fromId,
-          color: 'yellow',
+        rawNodeMap.set(pv._id, {
+          id: pv._id,
+          label,
+          color: '#538cc6',
           shape: 'dot',
           font: {
-            size: 14,
-            color: '#FFFFFF',
-            background: '#000',
-            strokeWidth: 0
+            size: 20,
+            color: '#FFFFFF'
           },
           size: 20
         });
-      }
-
-      const centralIdNormalized = this._sanitize(centralId.toLowerCase());
-      const isCenter = toId.toLowerCase() === centralIdNormalized || toId.includes(centralIdNormalized.split("all:")[1]) || toId.includes(centralIdNormalized.split("document:")[1]);
-
-      nodeMap.set(toId, {
-        id: toId,
-        label: toId,
-        color: isCenter ? 'yellow' : (toId.includes('cti_vertices/') && toId.split('/')[1].length === 64 ? '#FF6666' : '#538cc6'),
-        shape: 'dot',
-        font: {
-          size: 14,
-          color: '#FFFFFF',
-          background: '#000',
-          strokeWidth: 0
-        },
-        size: isCenter ? 30 : 20,
       });
 
-      const edgeColor = isCenter ? 'yellow' : '#FFFFFF';
-      if (isCenter) {
-        edges.add({
-          from: toId,
-          to: fromId,
-          arrows: {to: {enabled: false}},
-          color: {color: edgeColor},
-          width: 4
-        });
-      } else {
-        edges.add({
-          from: fromId,
-          to: toId,
-          arrows: 'to',
-          color: {color: edgeColor},
-          width: 2
-        });
+    });
+
+
+    data.forEach(item => {
+      const e = item.edge;
+      if (!e || !e._from || !e._to) return;
+
+      this.rawEdges.push({
+        id: e._id || `${e._from}->${e._to}`,
+        from: e._from,
+        to: e._to,
+        arrows: 'to',
+        color: {color: '#FFFFFF'},
+        width: 2
+      });
+
+      edgeMap[e._from] = (edgeMap[e._from] || 0) + 1;
+    });
+
+    this.rawNodes = [];
+
+    const groupCandidates: ExtendedNode[] = [];
+
+    rawNodeMap.forEach(node => {
+      const idStr = String(node.id);
+      const labelStr = String(node.label);
+      const isLeakNode = idStr.toLowerCase().includes('leak') || labelStr.toLowerCase().includes('leak');
+      const degree = edgeMap[idStr] || 0;
+
+      if (degree > 6 && !isLeakNode) {
+        groupCandidates.push(node);
       }
     });
-    nodes.add(Array.from(nodeMap.values()));
+
+    const enableGrouping = groupCandidates.length >= 5;
+    const clusters = ['leak', 'defacement', 'chat'];
+
+    rawNodeMap.forEach(node => {
+      const idStr = String(node.id).toLowerCase();
+      const labelStr = String(node.label).toLowerCase();
+
+      const isClusterNode = clusters.includes(idStr) || clusters.includes(labelStr);
+
+      let degree = edgeMap[idStr] || 0;
+      if (this.expandEnabled) {
+        degree = 0
+      }
+      const isGroupable = degree > 6 && !isClusterNode;
+
+      if (isGroupable && enableGrouping) {
+        const subNodes = this.rawEdges
+          .filter(e => e.from === node.id)
+          .map(e => e.to as string);
+
+        this.groupInfo[idStr] = subNodes;
+
+        this.rawNodes.push({
+          id: node.id,
+          label: `Group: ${node.label}\nSub Nodes: ${subNodes.length}`,
+          color: '#ffc966',
+          shape: 'dot',
+          isGroup: true,
+          subNodes,
+          font: {
+            size: 20,
+            color: '#FFFFFF',
+            strokeWidth: 1
+          },
+          size: 20
+        });
+      } else {
+        if (labelStr === 'leak') {
+          node.color = '#40bf40';
+        } else {
+          const hasOutgoing = edgeMap[node.id as string];
+          if (!hasOutgoing) {
+            node.color = '#1E90FF';
+          }
+        }
+
+        this.rawNodes.push(node);
+      }
+    });
+
+    const groupedSubNodeIds = new Set(Object.values(this.groupInfo).flat());
+    const visibleNodes = this.rawNodes.filter(
+      node => node.isGroup || !groupedSubNodeIds.has(node.id as string)
+    );
+
+    const visibleEdges = this.rawEdges.filter(edge => {
+      const subNodes = this.groupInfo[edge.from as string];
+      return !(subNodes && subNodes.includes(edge.to as string));
+    });
+
+    this.nodeSet = new DataSet(visibleNodes);
+    this.edgeSet = new DataSet(visibleEdges);
 
     const container = this.networkContainer.nativeElement;
-    this.network = new Network(container, {nodes, edges}, {
+    this.network = new Network(container, {nodes: this.nodeSet, edges: this.edgeSet}, {
       physics: {
         enabled: this.physicsEnabled,
         solver: 'forceAtlas2Based',
         timestep: 1,
-        stabilization: {
-          iterations: 20,
-          fit: true
-        },
+        stabilization: {iterations: 20, fit: true},
         forceAtlas2Based: {
           gravitationalConstant: -170,
           centralGravity: 0.005,
@@ -199,52 +259,220 @@ export class GraphComponent implements OnInit {
       nodes: {
         shape: 'dot',
         size: 20,
-        font: {
-          size: 14,
-          color: '#FFFFFF'
+        font: {size: 20, color: '#FFFFFF'}
+      },
+      interaction: {selectConnectedEdges: false}
+    });
+    setTimeout(() => {
+      this.physicsEnabled = false;
+      let enabled = false
+      if (this.network) {
+        this.network.setOptions({physics: {enabled}});
+      }
+    }, 1500);
+
+    this.network.on('click', params => {
+      const nodeId = params.nodes[0];
+
+      if (!nodeId) return;
+
+      const node = this.nodeSet.get(nodeId) as ExtendedNode;
+
+      if (node?.isGroup && node.subNodes) {
+        const isExpanded = this.groupExpandedState[nodeId] || false;
+        if (!isExpanded) {
+          const centerPos = this.network.getPositions([nodeId])[nodeId];
+          const radius = 200;
+
+          const newEdges = this.rawEdges.filter(
+            e => e.from === nodeId && node.subNodes!.includes(e.to as string)
+          );
+          this.edgeSet.add(newEdges);
+          this.groupExpandedState[nodeId] = true;
+
+          const newNodes: ExtendedNode[] = [];
+
+          node.subNodes.forEach((subId, index) => {
+            if (this.nodeSet.get(subId)) return;
+
+            const rawNode = this.rawNodes.find(n => n.id === subId);
+            if (!rawNode) return;
+
+            // @ts-ignore
+            const angle = (2 * Math.PI * index) / node.subNodes.length;
+            const x = centerPos.x + radius * Math.cos(angle);
+            const y = centerPos.y + radius * Math.sin(angle);
+
+            newNodes.push({
+              ...rawNode,
+              x,
+              y,
+              physics: true
+            });
+          });
+
+          this.nodeSet.add(newNodes);
+
+          this.nodeSet.update({
+            id: nodeId,
+            color: {background: '#bf80ff', border: '#bf80ff'}
+          });
+          this.network.selectNodes([nodeId]);
+          this.network.unselectAll();
+        } else {
+          node.subNodes.forEach(subId => {
+            if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
+          });
+
+          const edgeIdsToRemove = this.rawEdges
+            .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
+            .map(e => e.id as string);
+
+          this.edgeSet.remove(edgeIdsToRemove);
+          this.groupExpandedState[nodeId] = false;
+
+          this.nodeSet.update({
+            id: nodeId,
+            color: {background: '#F2F3F4', border: '#F2F3F4'}
+          });
         }
-      },
-      layout: {
-        randomSeed: 42
-      },
-      interaction: {
-        selectConnectedEdges: false
+
+      } else {
+        const isSameNodeClicked = this.highlightedNodeId === nodeId;
+        const allEdges = this.edgeSet.get();
+        const resetEdges = allEdges
+          .filter(e => e.id)
+          .map(e => ({
+            id: e.id!,
+            color: {color: '#FFFFFF'},
+            width: 2
+          }));
+        this.edgeSet.update(resetEdges);
+
+
+        if (isSameNodeClicked) {
+          this.highlightedNodeId = null;
+        } else {
+          const connectedEdges = this.edgeSet.get({
+            filter: edge => edge.from === nodeId || edge.to === nodeId
+          });
+
+          const highlightEdges = connectedEdges
+            .filter(e => e.id)
+            .map(e => ({
+              id: e.id!,
+              color: {color: 'yellow'},
+              width: 3
+            }));
+          this.edgeSet.update(highlightEdges);
+
+          this.highlightedNodeId = nodeId;
+
+        }
+      }
+    });
+    const matchedNodeIds: string[] = [];
+
+    this.nodeSet.get().forEach(node => {
+      const label = (node.label || '').toString().toLowerCase();
+      if (this.propertyValue !== "" && label.includes(this.propertyValue.toLowerCase())) {
+        matchedNodeIds.push(node.id as string);
+        this.nodeSet.update({
+          id: node.id,
+          color: 'yellow'
+        });
       }
     });
 
-    this.network.on('selectNode', (params: any) => {
-      const connectedEdges = this.network.getConnectedEdges(params.nodes[0]);
-
-      edges.forEach((edge: any) => {
-        edges.update({id: edge.id, color: {color: '#FFFFFF'}, width: 2});
-      });
-
-      (connectedEdges as (string | number)[]).forEach(edgeId => {
-        edges.update({id: edgeId, color: {color: 'yellow'}, width: 3});
-      });
+    const matchedEdges = this.edgeSet.get({
+      filter: edge =>
+        matchedNodeIds.includes(edge.from as string) ||
+        matchedNodeIds.includes(edge.to as string)
     });
 
-    this.network.on('deselectNode', () => {
-      edges.forEach((edge: any) => {
-        edges.update({id: edge.id, color: {color: '#FFFFFF'}, width: 2});
-      });
-    });
-
-    const searchNodeId = nodes.getIds().find(id => nodeMap.get(String(id))?.color === 'yellow');
-    if (searchNodeId !== undefined) {
-      this.network.focus(String(searchNodeId), {
-        scale: 1.0,
-        animation: true
-      });
-    }
+    this.edgeSet.update(
+      matchedEdges.map(edge => ({
+        id: edge.id!,
+        color: {color: 'yellow'},
+        dashes: true,
+        width: 3,
+        arrows: {to: {enabled: false}}
+      }))
+    );
   }
-
 
   onPhysicsToggled(enabled: boolean): void {
     this.physicsEnabled = enabled;
     if (this.network) {
       this.network.setOptions({physics: {enabled}});
     }
+  }
+
+  private physicsTimeoutId: any = null;
+
+  onExpandToggled(enabled: boolean): void {
+    if (this.physicsTimeoutId !== null) {
+      clearTimeout(this.physicsTimeoutId);
+      this.physicsTimeoutId = null;
+    }
+
+    if (!this.physicsEnabled) {
+      if (this.network) {
+        this.network.setOptions({physics: {enabled: true}});
+      }
+
+      this.physicsTimeoutId = setTimeout(() => {
+        this.physicsEnabled = false;
+        if (this.network) {
+          this.network.setOptions({physics: {enabled: false}});
+        }
+        this.physicsTimeoutId = null;
+      }, 1500);
+    }
+
+    this.nodeSet.get().forEach(node => {
+      const extNode = node as ExtendedNode;
+      if (!extNode.isGroup || !extNode.subNodes) return;
+
+      const isExpanded = this.groupExpandedState[extNode.id as string] || false;
+
+      if (enabled && !isExpanded) {
+        const newNodes = extNode.subNodes
+          .filter(subId => !this.nodeSet.get(subId))
+          .map(subId => this.rawNodes.find(n => n.id === subId))
+          .filter((n): n is ExtendedNode => n !== undefined);
+
+        const newEdges = this.rawEdges.filter(
+          e => e.from === extNode.id && extNode.subNodes!.includes(e.to as string)
+        );
+
+        this.nodeSet.add(newNodes);
+        this.edgeSet.add(newEdges);
+        this.groupExpandedState[extNode.id as string] = true;
+
+        this.nodeSet.update({
+          id: extNode.id,
+          color: {background: '#bf80ff', border: '#bf80ff'}
+        });
+
+      } else if (!enabled && isExpanded) {
+        extNode.subNodes.forEach(subId => {
+          if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
+        });
+
+        const edgeIdsToRemove = this.rawEdges
+          .filter(e => e.from === extNode.id && extNode.subNodes!.includes(e.to as string))
+          .map(e => e.id as string);
+
+        this.edgeSet.remove(edgeIdsToRemove);
+        this.groupExpandedState[extNode.id as string] = false;
+
+        this.nodeSet.update({
+          id: extNode.id,
+          color: {background: '#ffc966', border: '#ffc966'}
+        });
+      }
+    });
   }
 
   onSidebarApply(filters: {

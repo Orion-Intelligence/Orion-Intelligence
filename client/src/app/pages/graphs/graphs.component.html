@@ -5,11 +5,24 @@
 <app-graph-info
   class="d-none d-md-block"
   (physicsToggled)="onPhysicsToggled($event)"
+  (expandToggled)="onExpandToggled($event)"
   [selectedType]="selectedType"
   [singleInput]="singleInput"
   [propertyType]="propertyType"
+  [physicsEnabled] = physicsEnabled
   [propertyValue]="propertyValue">
 </app-graph-info>
+
+<div class="graph-notification" *ngIf="limitReached">
+  <div class="default-notification-banner">
+    <span>
+      <img src="assets/images/shared/hint.svg" class="default-notification-banner-icon" alt="Info Icon">
+      <span>
+        You can see 200 nodes at a time, results containing more than 200 nodes will scale down;
+      </span>
+    </span>
+  </div>
+</div>
 
 <div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
   <img src="assets/images/shared/cti-empty.svg" alt="No Data" class="img-fluid w-auto" />

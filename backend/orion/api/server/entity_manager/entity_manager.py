@@ -44,19 +44,21 @@ class entity_manager:
                 "m_email_addresses", "m_phone_numbers", "m_states", "m_location_info", "m_social_media_profiles",
                 "m_name", "m_industry", "m_company_name", "m_country_name", "m_ip", "m_team", "m_attacker", "m_au_abn",
                 "m_au_acn", "m_au_medicare", "m_au_tfn", "m_credit_cards", "m_crypto_addresses",
-                "m_crypto_btc_addresses",
-                "m_iban_codes", "m_in_aadhaar_numbers", "m_in_pan_numbers", "m_in_passport_numbers",
-                "m_in_vehicle_registrations", "m_in_voter_ids", "m_medical_licenses", "m_nrp_numbers", "m_persons",
-                "m_sg_nric_fin_numbers", "m_uk_nhs_numbers", "m_uk_nino_numbers", "m_urls", "m_us_bank_numbers",
-                "m_us_driver_licenses", "m_us_itin_numbers", "m_us_passport_numbers", "m_us_ssn_numbers",
-                "m_title", "m_url", "m_weblink", "m_dumplink", "m_websites"
+                "m_crypto_btc_addresses", "m_iban_codes", "m_in_aadhaar_numbers", "m_in_pan_numbers",
+                "m_in_passport_numbers", "m_in_vehicle_registrations", "m_in_voter_ids", "m_medical_licenses",
+                "m_nrp_numbers", "m_persons", "m_sg_nric_fin_numbers", "m_uk_nhs_numbers", "m_uk_nino_numbers",
+                "m_urls", "m_us_bank_numbers", "m_us_driver_licenses", "m_us_itin_numbers", "m_us_passport_numbers",
+                "m_us_ssn_numbers", "m_title", "m_url", "m_weblink", "m_dumplink", "m_websites"
             ]
 
             query_str = ""
             bind_vars = {}
+            queried_id = None
+            matched_vertex_ids = []
 
             if query.data_point_type == "cluster" and normalized_type == "cluster":
                 if normalized_value == "all":
+                    queried_id = "all_clusters"
                     query_str = """
                     LET clusters = (
                       FOR cluster IN cti_vertices
@@ -79,10 +81,12 @@ class entity_manager:
                       depth1: SLICE(depth1, 0, 100),
                       depth2: SLICE(depth2, 0, 100),
                       limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100
+                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      matched_ids: clusters
                     }
                     """
                 else:
+                    queried_id = f"cti_vertices/{normalized_value}"
                     query_str = """
                     LET depth1 = (
                       FOR v, e, p IN 1..1 ANY @cluster_id GRAPH 'cti_graph'
@@ -98,13 +102,15 @@ class entity_manager:
                       depth1: SLICE(depth1, 0, 100),
                       depth2: SLICE(depth2, 0, 100),
                       limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100
+                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      matched_ids: [@cluster_id]
                     }
                     """
                     bind_vars = {"cluster_id": f"cti_vertices/{normalized_value}"}
 
             elif query.data_point_type == "property" and normalized_type == "all":
                 if normalized_value == "all":
+                    queried_id = "all_properties"
                     query_str = f"""
                     LET props = (
                       FOR property IN cti_vertices
@@ -127,10 +133,12 @@ class entity_manager:
                       depth1: SLICE(depth1, 0, 100),
                       depth2: SLICE(depth2, 0, 100),
                       limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100
+                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      matched_ids: props
                     }}
                     """
                 else:
+                    queried_id = normalized_value
                     query_str = f"""
                     LET props = (
                       FOR property IN cti_vertices
@@ -153,13 +161,15 @@ class entity_manager:
                       depth1: SLICE(depth1, 0, 100),
                       depth2: SLICE(depth2, 0, 100),
                       limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100
+                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      matched_ids: props
                     }}
                     """
                     bind_vars = {"search_value": normalized_value}
 
             else:
                 start_vertex = f"cti_vertices/{normalized_value}" if query.data_point_type == "document" else f"cti_vertices/{normalized_type}:{normalized_value}"
+                queried_id = start_vertex
                 query_str = """
                 LET depth1 = (
                   FOR v, e, p IN 1..1 ANY @start_vertex GRAPH 'cti_graph'
@@ -175,7 +185,8 @@ class entity_manager:
                   depth1: SLICE(depth1, 0, 100),
                   depth2: SLICE(depth2, 0, 100),
                   limit_hit_depth1: LENGTH(depth1) > 100,
-                  limit_hit_depth2: LENGTH(depth2) > 100
+                  limit_hit_depth2: LENGTH(depth2) > 100,
+                  matched_ids: [@start_vertex]
                 }
                 """
                 bind_vars = {"start_vertex": start_vertex}
@@ -184,7 +195,8 @@ class entity_manager:
             result_obj = result_obj[0] if result_obj else {}
 
             results = result_obj.get("depth1", []) + result_obj.get("depth2", [])
-            limit_reached = result_obj.get("limit_hit_depth1", False) or result_obj.get("limit_hit_depth2", False)
+            matched_vertex_ids = result_obj.get("matched_ids", []) or []
+            limit_reached = len(result_obj.get("depth1", [])) >= 200 or len(result_obj.get("depth2", [])) >= 200
 
             unique_edges = set()
             final_results = []
@@ -200,14 +212,18 @@ class entity_manager:
 
             return {
                 "results": final_results,
-                "limit_reached": limit_reached
+                "limit_reached": limit_reached,
+                "queried_id": queried_id,
+                "matched_vertex_ids": matched_vertex_ids
             }
 
         except Exception as ex:
             log.g().e(f"ARANGO ENTITY RELATION FETCH ERROR: {ex}")
             return {
                 "results": [],
-                "limit_reached": False
+                "limit_reached": False,
+                "queried_id": None,
+                "matched_vertex_ids": []
             }
 
     async def create_or_update_entity_nodes(self, entity: entity_model):

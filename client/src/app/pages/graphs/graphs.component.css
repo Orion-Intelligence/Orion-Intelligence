@@ -38,3 +38,9 @@
   width: 100%;
   padding-left: 10px;
 }
+
+.graph-notification{
+  position: absolute;
+  top:0;
+  left: 300px
+}

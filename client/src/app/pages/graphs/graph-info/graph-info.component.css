@@ -12,9 +12,10 @@
   padding: 20px;
   border-radius: 8px;
   border: 1px solid #ffffff15;
+  cursor: pointer;
 }
 
-.graph-pointer{
+.graph-pointer {
   cursor: pointer;
 }
 
@@ -51,7 +52,6 @@
 .graph-filters__container .chevron {
   width: 16px;
   height: 16px;
-  transition: transform 0.3s ease;
 }
 
 .graph-filters__container .collapsed .chevron {
@@ -62,11 +62,11 @@
   margin-top: 8px;
 }
 
-.graph-filters__container .btn{
+.graph-filters__container .btn {
   height: 48px;
 }
 
-.graph-filters__container .btn-danger-graph{
+.graph-filters__container .btn-danger-graph {
   color: #fff;
   background-color: #dc3545;
   border-color: #dc3545;
@@ -76,4 +76,16 @@
   .graph-filters__container {
     display: none;
   }
+}
+
+.chevron.rotate {
+  transform: rotate(180deg);
+}
+
+.group-expand{
+  background: #bf80ff;
+}
+
+.group-collapse{
+  background: #fff;
 }

@@ -36,14 +36,9 @@ class entity_model(BaseModel):
     m_sg_nric_fin_numbers: Optional[List[str]] = None
     m_uk_nhs_numbers: Optional[List[str]] = None
     m_uk_nino_numbers: Optional[List[str]] = None
-    m_urls: Optional[List[str]] = None
     m_us_bank_numbers: Optional[List[str]] = None
     m_us_driver_licenses: Optional[List[str]] = None
     m_us_itin_numbers: Optional[List[str]] = None
     m_us_passport_numbers: Optional[List[str]] = None
     m_us_ssn_numbers: Optional[List[str]] = None
     m_title: Optional[str] = None
-    m_url: Optional[str] = None
-    m_weblink: Optional[List[str]] = None
-    m_dumplink: Optional[List[str]] = None
-    m_websites: Optional[List[str]] = None
