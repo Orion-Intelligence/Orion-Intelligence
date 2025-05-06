@@ -8,18 +8,18 @@ class suggestion(BaseModel):
     options: List[dict]
 
 class result_item(BaseModel):
-    m_location_info: List[str]
-    m_attacker: List[str]
-    m_team: str
-    m_hash: str
-    m_web_server: List[str]
-    m_base_url: str
-    m_url: str
-    m_ip: List[str]
+    m_location_info: Optional[List[str]] = None
+    m_attacker: Optional[List[str]] = None
+    m_team: Optional[str] = None
+    m_hash: Optional[str] = None
+    m_web_server: Optional[List[str]] = None
+    m_base_url: Optional[str] = None
+    m_url: Optional[str] = None
+    m_ip: Optional[List[str]] = None
     m_date_of_leak: Optional[str] = None
-    m_web_url: List[str]
+    m_web_url: Optional[List[str]] = None
     m_screenshot: Optional[str] = None
-    m_mirror_links: List[str] = Field(default_factory=list)
+    m_mirror_links: Optional[List[str]] = Field(default_factory=list)
 
 class search_defacement_callback_model(BaseModel):
     Result: Optional[List[result_item]] = None
