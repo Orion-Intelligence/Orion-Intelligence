@@ -2,8 +2,8 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 class card_data(BaseModel):
-    m_crypto_addresses: List[str] = []
-    m_attacker: List[str]
+    m_attacker: Optional[str] = None
+    m_crypto_addresses: Optional[str] = None
     m_ref_html: Optional[str] = None
     m_password: Optional[str] = None
     m_title: Optional[str] = None
