@@ -83,7 +83,6 @@ export class ResultComponent implements OnInit, OnChanges {
       };
 
       this.selectedFilters = updatedSelectedFilters;
-      console.log(this.selectedFilters)
       this.reloadFilters.emit([
         this.selectedFilters['mNetwork'] || null,
         this.selectedFilters['mSearchParamSafeSearch'] || null

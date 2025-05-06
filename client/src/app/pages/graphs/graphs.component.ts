@@ -114,7 +114,6 @@ export class GraphComponent implements OnInit {
         },
         size: 20
       });
-      console.log('All node labels:', Array.from(rawNodeMap.values()).map(n => n.label));
 
       const pathVertices = item.path?.vertices || [];
       pathVertices.forEach((pv: { _id: string; _key: any; value: any[]; }) => {

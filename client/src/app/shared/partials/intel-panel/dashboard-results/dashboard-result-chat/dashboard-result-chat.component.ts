@@ -28,7 +28,6 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    console.log(this.searchResults)
     this.currentUrl = this.router.url.split('?')[0];
     this.route.queryParams.subscribe(params => {
       this.queryParams = params;
