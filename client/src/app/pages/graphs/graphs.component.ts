@@ -54,12 +54,13 @@ export class GraphComponent implements OnInit {
       const propertyValue = params['propertyValue'] || '';
 
       if (selectedType === 'property' && propertyType && propertyValue) {
-        this.loadGraphByNode(selectedType, propertyType, propertyValue);
-      } else if ((selectedType === 'cluster' || selectedType === 'document') && singleInput) {
-        this.loadGraphByNode(selectedType, selectedType, singleInput);
+        this.loadGraphByNode('property', propertyType, propertyValue);
+      } else {
+        this.loadGraphByNode('cluster', 'cluster', singleInput);  // always treat general as cluster
       }
     });
   }
+
 
   loadGraphByNode(data_point_type: string, type: string, value: string): void {
     const params = new HttpParams()
@@ -173,7 +174,7 @@ export class GraphComponent implements OnInit {
     });
 
     const enableGrouping = groupCandidates.length >= 5;
-    const clusters = ['leak', 'defacement', 'chat'];
+    const clusters = ['leak', 'defacement', 'chat', 'general'];
 
     rawNodeMap.forEach(node => {
       const idStr = String(node.id).toLowerCase();
@@ -209,7 +210,7 @@ export class GraphComponent implements OnInit {
           size: 20
         });
       } else {
-        if (labelStr === 'leak') {
+        if (clusters.includes(labelStr)) {
           node.color = '#40bf40';
         } else {
           const hasOutgoing = edgeMap[node.id as string];
@@ -262,13 +263,25 @@ export class GraphComponent implements OnInit {
       },
       interaction: {selectConnectedEdges: false}
     });
-    setTimeout(() => {
-      this.physicsEnabled = false;
-      let enabled = false
+
+    if (this.physicsTimeoutId !== null) {
+      clearTimeout(this.physicsTimeoutId);
+      this.physicsTimeoutId = null;
+    }
+
+    if (!this.physicsEnabled) {
       if (this.network) {
-        this.network.setOptions({physics: {enabled}});
+        this.network.setOptions({physics: {enabled: true}});
       }
-    }, 1500);
+
+      this.physicsTimeoutId = setTimeout(() => {
+        this.physicsEnabled = false;
+        if (this.network) {
+          this.network.setOptions({physics: {enabled: false}});
+        }
+        this.physicsTimeoutId = null;
+      }, 1500);
+    }
 
     this.network.on('click', params => {
       const nodeId = params.nodes[0];
@@ -484,6 +497,7 @@ export class GraphComponent implements OnInit {
     this.singleInput = filters.singleInput;
     this.propertyType = filters.propertyType;
     this.propertyValue = filters.propertyValue;
+
 
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
       this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue);
