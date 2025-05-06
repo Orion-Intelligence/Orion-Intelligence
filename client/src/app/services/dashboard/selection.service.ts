@@ -30,43 +30,43 @@ export class SelectionStoreService {
       });
   }
 
-  private setInitialSelectionFromUrl(url: string) {
-    const pathOnly = url.split('?')[0].split('#')[0];
-    const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
+private setInitialSelectionFromUrl(url: string) {
+  const pathOnly = url.split('?')[0].split('#')[0];
+  const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
 
-    if (match) {
-      const section = match[1];
-      const option = match[2];
+  if (match) {
+    const section = match[1];
+    const option = match[2];
 
-      const currentSection = this.getSelectedSection();
-      const currentOption = this.selectedOptionSubject.value;
+    const currentSection = this.getSelectedSection();
+    const currentOption = this.selectedOptionSubject.value;
 
-      const shouldRedirectToHome =
-        !this.first_trigger &&
-        ((!option && section !== 'home' && section !== 'directory') || (!currentSection && !currentOption));
+    const shouldRedirectToHome =
+      !this.first_trigger &&
+      (!currentSection && !currentOption);
 
-      this.first_trigger = false;
+    this.first_trigger = false;
 
-      if (shouldRedirectToHome && this.router.url !== '/dashboard/home') {
-        this.router.navigate(['/dashboard', 'home'], {
-          replaceUrl: true,
-          queryParams: {},
-          queryParamsHandling: '',
-        }).then();
-        return;
-      }
+    if (shouldRedirectToHome && this.router.url !== '/dashboard/home') {
+      this.router.navigate(['/dashboard', 'home'], {
+        replaceUrl: true,
+        queryParams: {},
+        queryParamsHandling: '',
+      }).then();
+      return;
+    }
 
-      const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
-      this.setSelectedSection(capitalizedSection);
+    const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
+    this.setSelectedSection(capitalizedSection);
 
-      if (option) {
-        const capitalizedOption = option.charAt(0).toUpperCase() + option.slice(1);
-        this.setSelectedOption(capitalizedOption);
-      } else {
-        this.setSelectedOption('');
-      }
+    if (option) {
+      const capitalizedOption = option.charAt(0).toUpperCase() + option.slice(1);
+      this.setSelectedOption(capitalizedOption);
+    } else {
+      this.setSelectedOption('');
     }
   }
+}
 
   setSelectedSection(section: string) {
     this.selectedSectionSubject.next(section);
