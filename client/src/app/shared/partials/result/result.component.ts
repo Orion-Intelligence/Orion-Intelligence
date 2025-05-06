@@ -59,22 +59,23 @@ export class ResultComponent implements OnInit, OnChanges {
       const newFilters: any = {};
       const updatedSelectedFilters: { [key: string]: string } = {};
 
-      Object.keys(this.filterModel.filters).forEach(key => {
-        const base = this.filterModel.filters[key];
-        let value = params[key];
+      if (this.filterModel)
+        Object.keys(this.filterModel.filters).forEach(key => {
+          const base = this.filterModel.filters[key];
+          let value = params[key];
 
-        if (key === 'mSearchParamSafeSearch') {
-          if (value === 'true') value = 'yes';
-          if (value === 'false') value = 'no';
-        }
+          if (key === 'mSearchParamSafeSearch') {
+            if (value === 'true') value = 'yes';
+            if (value === 'false') value = 'no';
+          }
 
-        if (value && base.options.includes(value)) {
-          newFilters[key] = {...base, selected: value};
-          updatedSelectedFilters[key] = value;
-        } else {
-          newFilters[key] = {...base};
-        }
-      });
+          if (value && base.options.includes(value)) {
+            newFilters[key] = {...base, selected: value};
+            updatedSelectedFilters[key] = value;
+          } else {
+            newFilters[key] = {...base};
+          }
+        });
 
       this.filterModel = {
         ...this.filterModel,
