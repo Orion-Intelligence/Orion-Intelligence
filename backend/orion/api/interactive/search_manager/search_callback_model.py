@@ -1,8 +1,7 @@
 from typing import Optional
 
 from pydantic import ValidationError
-from orion.api.interactive.search_manager.search_data_model.search_callback_model import search_callback_model, \
-  result_item
+from orion.api.interactive.search_manager.search_data_model.search_callback_model import search_callback_model, result_item
 from orion.constants.constant import CONSTANTS
 
 
@@ -26,6 +25,10 @@ class search_callback:
         m_service = m_document.get('_source', None)
         if not m_service:
           continue
+
+        # ✅ Attach highlight if available
+        if "highlight" in m_document:
+          m_service["highlight"] = m_document["highlight"]
 
         m_service['m_sub_host'] = m_service.get('m_sub_host', '/')
         m_service['m_host'] = m_service.get('m_host', '')
@@ -61,26 +64,25 @@ class search_callback:
     parsed_result = await self.__parse_filtered_documents(m_documents)
     m_parsed_documents, m_suggestions_content, total_pages = parsed_result
 
-    allowed_fields = {
-      'm_title',
-      'm_url',
-      'm_base_url',
-      'm_important_content',
-      'm_content_type',
-      'm_update_date',
-      'm_leak_date',
-    }
-
     def clean_document(doc):
+      if "highlight" in doc and "m_important_content" in doc["highlight"]:
+        highlighted_fragments = doc["highlight"]["m_important_content"]
+        if highlighted_fragments:
+          doc["m_important_content"] = highlighted_fragments[0]
+
+      if listing_filter is not None:
+        doc = {k: v for k, v in doc.items() if k not in listing_filter}
+
+      for key, value in doc.items():
+        if isinstance(value, list) and len(value) > 3:
+          doc[key] = value[:3]
+
       return {
         k: v for k, v in doc.items()
-        if k in allowed_fields and v not in (None, '', []) and (not isinstance(v, dict) or v)
+        if v not in (None, '', []) and (not isinstance(v, dict) or v)
       }
 
-    filtered_results = []
-    for doc in m_parsed_documents:
-      cleaned_doc = clean_document(doc)
-      filtered_results.append(cleaned_doc)
+    filtered_results = [clean_document(doc) for doc in m_parsed_documents]
 
     return callback_model(
       Result=filtered_results,
@@ -90,9 +92,9 @@ class search_callback:
 
   @staticmethod
   async def get_doc(results) -> Optional[result_item]:
-    try:
-      if results and isinstance(results, list) and len(results) > 0:
-        return results[0]
-      return None
-    except ValidationError:
-      return None
+      try:
+          if results and isinstance(results, list) and len(results) > 0:
+              return results[0]
+          return None
+      except ValidationError:
+          return None

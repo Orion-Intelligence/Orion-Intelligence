@@ -268,6 +268,16 @@ class elastic_request_generator:
           "boost_mode": "multiply"
         }
       },
+      "highlight": {
+        "fields": {
+          "m_important_content": {
+            "fragment_size": 500,
+            "number_of_fragments": 3,
+            "pre_tags": ["<em><b>"],
+            "post_tags": ["</em></b>"]
+          }
+        }
+      },
       "suggest": {
         "important_content_suggestion": {
           "text": raw_query,

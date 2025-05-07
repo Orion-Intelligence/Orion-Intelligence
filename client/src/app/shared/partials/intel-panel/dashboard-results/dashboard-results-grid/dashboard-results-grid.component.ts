@@ -34,6 +34,6 @@ export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
   }
 
   highlightWords(text: string, maxLength: number = 250): SafeHtml {
-    return this.helperService.highlightWords(text, this.query, maxLength);
+    return this.helperService.highlightWords(text);
   }
 }

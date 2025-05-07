@@ -49,65 +49,14 @@ export class HelperService {
     }).then();
   }
 
-  highlightWords(text: string, query: string, maxLength: number = 250): SafeHtml {
-    if (!query || text.length <= maxLength) {
-      let truncatedText = text.substring(0, maxLength);
-      if (text.length > maxLength) {
-        const lastSpaceIndex = truncatedText.lastIndexOf(' ');
-        if (lastSpaceIndex > 0) {
-          truncatedText = truncatedText.substring(0, lastSpaceIndex);
-        }
-        truncatedText += '...';
-      }
-      return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(truncatedText));
-    }
+  highlightWords(text: string): SafeHtml {
+    if (!text) return '';
 
-    const queryWords = query
-      .split(/\s+/)
-      .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').toLowerCase());
-    const effectiveMaxLength = maxLength - 3;
+    const highlighted = text
+      .replace(/<em>/g, '<span class="dashboard__search-highlight">')
+      .replace(/<\/em>/g, '</span>');
 
-    let bestSubstring = '';
-    let maxKeywordCount = 0;
-    let bestStartIndex = 0;
-
-    for (let i = 0; i <= text.length - effectiveMaxLength; i++) {
-      const windowText = text.slice(i, i + effectiveMaxLength);
-      const wordCount = queryWords.reduce((count, word) => count + (windowText.toLowerCase().split(word).length - 1), 0);
-
-      if (wordCount > maxKeywordCount) {
-        maxKeywordCount = wordCount;
-        bestSubstring = windowText;
-        bestStartIndex = i;
-      }
-    }
-
-    if (!bestSubstring) {
-      bestSubstring = text.substring(0, effectiveMaxLength);
-      bestStartIndex = 0;
-    }
-
-    if (bestStartIndex > 0) {
-      let adjustedStart = text.lastIndexOf('. ', bestStartIndex - 1);
-      if (adjustedStart === -1 || adjustedStart < bestStartIndex - effectiveMaxLength) {
-        adjustedStart = text.lastIndexOf(' ', bestStartIndex - 1);
-      }
-      if (adjustedStart !== -1 && adjustedStart >= 0) {
-        bestSubstring = text.slice(adjustedStart + 1, adjustedStart + 1 + effectiveMaxLength);
-      }
-    }
-
-    const lastSpaceIndex = bestSubstring.lastIndexOf(' ');
-    if (lastSpaceIndex > 0 && bestSubstring.length === effectiveMaxLength) {
-      bestSubstring = bestSubstring.substring(0, lastSpaceIndex);
-    }
-
-    const regex = new RegExp(`\\b(${queryWords.join('|')})\\b`, 'gi');
-    let escapedSnippet = this.escapeHtml(bestSubstring);
-    let highlightedText = escapedSnippet.replace(regex, match => `<span class="dashboard__search-highlight">${match}</span>`);
-
-    highlightedText += '...';
-    return this.sanitizer.bypassSecurityTrustHtml(highlightedText);
+    return this.sanitizer.bypassSecurityTrustHtml(highlighted);
   }
 
   private escapeHtml(text: string): string {
