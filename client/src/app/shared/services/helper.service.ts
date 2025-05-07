@@ -59,7 +59,7 @@ export class HelperService {
         .replace(/<em>/g, '<span class="dashboard__search-highlight">')
         .replace(/<\/em>/g, '</span>');
     } else {
-      highlighted = text.length > 500 ? text.substring(0, 300) : text;
+      highlighted = text.length > 500 ? text.substring(0, 500) : text;
     }
 
     return this.sanitizer.bypassSecurityTrustHtml(highlighted);
