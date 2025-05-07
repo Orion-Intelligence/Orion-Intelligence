@@ -273,8 +273,8 @@ class elastic_request_generator:
           "m_important_content": {
             "fragment_size": 500,
             "number_of_fragments": 3,
-            "pre_tags": ["<em><b>"],
-            "post_tags": ["</em></b>"]
+            "pre_tags": [""],
+            "post_tags": [""]
           }
         }
       },

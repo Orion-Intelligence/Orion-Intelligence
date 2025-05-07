@@ -282,7 +282,7 @@
 
 .dashboard__search-highlight {
   color: #00CCCC;
-  font-weight: 500;
+  font-weight: bold;
 }
 
 .dashboard__search-link {
@@ -419,7 +419,7 @@
 }
 
 .dashboard__search-highlight {
-  font-weight: 500;
+  font-weight: bold;
   color: #00CCCC;
 }
 
