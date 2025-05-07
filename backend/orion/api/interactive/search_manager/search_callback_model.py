@@ -1,7 +1,7 @@
 from typing import Optional
 
 from pydantic import ValidationError
-from orion.api.interactive.search_manager.search_data_model.search_callback_model import search_callback_model, result_item
+from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.constants.constant import CONSTANTS
 
 
@@ -26,26 +26,31 @@ class search_callback:
         if not m_service:
           continue
 
-        # ✅ Attach highlight if available
         if "highlight" in m_document:
-          m_service["highlight"] = m_document["highlight"]
+          m_highlight = m_document["highlight"]
+          if "m_important_content" in m_highlight:
+            m_service["m_important_content"] = " ... ".join(m_highlight["m_important_content"])
+          elif "m_content" in m_highlight:
+            m_service["m_important_content"] = " ... ".join(m_highlight["m_content"])
+
+          m_service["highlight"] = m_highlight
 
         m_service['m_sub_host'] = m_service.get('m_sub_host', '/')
         m_service['m_host'] = m_service.get('m_host', '')
 
         m_content_preview = m_service.get("m_content", "")[:500]
         m_hash = m_service.get("m_hash", "")
-
         dedup_key = m_content_preview if m_content_preview else m_hash
 
-        if type(dedup_key) is not list and dedup_key in mDescription:
-          continue
+        if isinstance(dedup_key, list):
+          if any(item in mDescription for item in dedup_key):
+            continue
+          for item in dedup_key:
+            mDescription.add(item)
         else:
-          if type(dedup_key) is not list:
-            mDescription.add(dedup_key)
-          else:
-            for item in dedup_key:
-              mDescription.add(item)
+          if dedup_key in mDescription:
+            continue
+          mDescription.add(dedup_key)
 
         mRelevanceListData.append(m_service)
 

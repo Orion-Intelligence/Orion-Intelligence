@@ -516,7 +516,7 @@ class elastic_request_generator:
       },
       "highlight": {
         "fields": {
-          "m_important_content": {
+          "m_content": {
             "fragment_size": 500,
             "number_of_fragments": 3,
             "pre_tags": ["<em>"],
