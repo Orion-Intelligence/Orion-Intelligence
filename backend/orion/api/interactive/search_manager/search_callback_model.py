@@ -42,7 +42,6 @@ class search_callback:
           if len(highlight_text) < 250 and href_fragments:
             highlight_text = f"{highlight_text} ... {' ... '.join(href_fragments)}".strip(" .")
 
-
           if highlight_text:
             m_service["m_important_content"] = highlight_text
 
