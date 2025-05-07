@@ -83,10 +83,6 @@ export class ResultComponent implements OnInit, OnChanges {
       };
 
       this.selectedFilters = updatedSelectedFilters;
-      this.reloadFilters.emit([
-        this.selectedFilters['mNetwork'] || null,
-        this.selectedFilters['mSearchParamSafeSearch'] || null
-      ]);
     });
     if(this.local_query){
       this.result_triggered = true

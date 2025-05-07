@@ -9,11 +9,11 @@ export class ScrollService {
     this.resetOnReload();
   }
 
-  private resetOnReload(): void {
+  public resetOnReload(ingore=false): void {
     const navEntries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[];
     const isHardReload = navEntries?.[0]?.type === 'reload';
 
-    if (isHardReload) {
+    if (isHardReload || ingore) {
       sessionStorage.setItem('scrollPosition', '0');
       sessionStorage.setItem('selectedItem', '');
       window.scrollTo(0, 0);
