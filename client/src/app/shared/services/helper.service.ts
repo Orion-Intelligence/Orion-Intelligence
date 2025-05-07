@@ -52,12 +52,19 @@ export class HelperService {
   highlightWords(text: string): SafeHtml {
     if (!text) return '';
 
-    const highlighted = text
-      .replace(/<em>/g, '<span class="dashboard__search-highlight">')
-      .replace(/<\/em>/g, '</span>');
+    let highlighted: string;
+
+    if (text.includes('<em>') && text.includes('</em>')) {
+      highlighted = text
+        .replace(/<em>/g, '<span class="dashboard__search-highlight">')
+        .replace(/<\/em>/g, '</span>');
+    } else {
+      highlighted = text.length > 500 ? text.substring(0, 300) : text;
+    }
 
     return this.sanitizer.bypassSecurityTrustHtml(highlighted);
   }
+
 
   private escapeHtml(text: string): string {
     let tempDiv = document.createElement("div");
