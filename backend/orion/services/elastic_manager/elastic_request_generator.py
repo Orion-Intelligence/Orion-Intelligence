@@ -1,6 +1,7 @@
 import hashlib
 from datetime import datetime, timedelta, timezone
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
+  search_defacement_param_model
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
@@ -277,6 +278,16 @@ class elastic_request_generator:
             "number_of_fragments": 3,
             "pre_tags": ["<em>"],
             "post_tags": ["</em>"]
+          }, "m_content": {
+            "fragment_size": 250,
+            "number_of_fragments": 3,
+            "pre_tags": ["<em>"],
+            "post_tags": ["</em>"]
+          }, "m_ref_html": {
+            "fragment_size": 250,
+            "number_of_fragments": 3,
+            "pre_tags": ["<em>"],
+            "post_tags": ["</em>"]
           }
         }
       },
@@ -378,14 +389,22 @@ class elastic_request_generator:
           "boost_mode": "multiply"
         }
       },
-      "highlight": {
-        "fields": {
-          "m_important_content": {
-            "fragment_size": 500,
-            "number_of_fragments": 3,
-            "pre_tags": ["<em>"],
-            "post_tags": ["</em>"]
-          }
+      "fields": {
+        "m_important_content": {
+          "fragment_size": 500,
+          "number_of_fragments": 3,
+          "pre_tags": ["<em>"],
+          "post_tags": ["</em>"]
+        }, "m_content": {
+          "fragment_size": 250,
+          "number_of_fragments": 3,
+          "pre_tags": ["<em>"],
+          "post_tags": ["</em>"]
+        }, "m_ref_html": {
+          "fragment_size": 250,
+          "number_of_fragments": 3,
+          "pre_tags": ["<em>"],
+          "post_tags": ["</em>"]
         }
       },
       "suggest": {
@@ -514,14 +533,12 @@ class elastic_request_generator:
           "boost_mode": "sum",
         }
       },
-      "highlight": {
-        "fields": {
-          "m_content": {
-            "fragment_size": 200,
-            "number_of_fragments": 3,
-            "pre_tags": ["<em>"],
-            "post_tags": ["</em>"]
-          }
+      "fields": {
+        "m_content": {
+          "fragment_size": 250,
+          "number_of_fragments": 3,
+          "pre_tags": ["<em>"],
+          "post_tags": ["</em>"]
         }
       },
       "suggest": {

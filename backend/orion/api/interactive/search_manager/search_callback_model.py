@@ -4,7 +4,6 @@ from pydantic import ValidationError
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.constants.constant import CONSTANTS
 
-
 class search_callback:
   __instance = None
 
@@ -26,12 +25,31 @@ class search_callback:
         if not m_service:
           continue
 
+        highlight_text = ""
         if "highlight" in m_document:
           m_highlight = m_document["highlight"]
-          if "m_important_content" in m_highlight:
-            m_service["m_important_content"] = " ... ".join(m_highlight["m_important_content"])
-          elif "m_content" in m_highlight:
-            m_service["m_important_content"] = " ... ".join(m_highlight["m_content"])
+
+          important_fragments = m_highlight.get("m_important_content", [])
+          content_fragments = m_highlight.get("m_content", [])
+          href_fragments = m_highlight.get("m_href_html", [])
+
+          if important_fragments:
+            print(":::::::::::::::::::::::::::::::::::::::::::x1", flush=True)
+            print(important_fragments, flush=True)
+            print(":::::::::::::::::::::::::::::::::::::::::::x1", flush=True)
+            highlight_text = " ... ".join(important_fragments)
+
+          if len(highlight_text) < 250 and content_fragments:
+            print(":::::::::::::::::::::::::::::::::::::::::::x2", flush=True)
+            highlight_text = f"{highlight_text} ... {' ... '.join(content_fragments)}".strip(" .")
+
+          if len(highlight_text) < 250 and href_fragments:
+            print(":::::::::::::::::::::::::::::::::::::::::::x3", flush=True)
+            highlight_text = f"{highlight_text} ... {' ... '.join(href_fragments)}".strip(" .")
+
+
+          if highlight_text:
+            m_service["m_important_content"] = highlight_text
 
           m_service["highlight"] = m_highlight
 
@@ -51,11 +69,8 @@ class search_callback:
           if dedup_key in mDescription:
             continue
           mDescription.add(dedup_key)
-
         mRelevanceListData.append(m_service)
-
       content_suggestions = p_paged_documents.get('suggest', {}).get('content_suggestion', [])
-
       return mRelevanceListData, content_suggestions, total_pages
 
     except Exception as e:
