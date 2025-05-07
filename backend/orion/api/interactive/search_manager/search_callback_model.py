@@ -1,7 +1,8 @@
 from typing import Optional
 
 from pydantic import ValidationError
-from orion.api.interactive.search_manager.search_data_model.search_callback_model import search_callback_model, result_item
+from orion.api.interactive.search_manager.search_data_model.search_callback_model import search_callback_model, \
+  result_item
 from orion.constants.constant import CONSTANTS
 
 
@@ -60,16 +61,24 @@ class search_callback:
     parsed_result = await self.__parse_filtered_documents(m_documents)
     m_parsed_documents, m_suggestions_content, total_pages = parsed_result
 
+    allowed_fields = {
+      'm_title',
+      'm_url',
+      'm_base_url',
+      'm_important_content',
+      'm_content_type',
+      'm_update_date',
+      'm_leak_date',
+    }
+
     def clean_document(doc):
       return {
         k: v for k, v in doc.items()
-        if k != 'm_content' and v not in (None, '', []) and (not isinstance(v, dict) or v)
+        if k in allowed_fields and v not in (None, '', []) and (not isinstance(v, dict) or v)
       }
 
     filtered_results = []
     for doc in m_parsed_documents:
-      if listing_filter is not None:
-        doc = {k: v for k, v in doc.items() if k not in listing_filter}
       cleaned_doc = clean_document(doc)
       filtered_results.append(cleaned_doc)
 
@@ -81,9 +90,9 @@ class search_callback:
 
   @staticmethod
   async def get_doc(results) -> Optional[result_item]:
-      try:
-          if results and isinstance(results, list) and len(results) > 0:
-              return results[0]
-          return None
-      except ValidationError:
-          return None
+    try:
+      if results and isinstance(results, list) and len(results) > 0:
+        return results[0]
+      return None
+    except ValidationError:
+      return None
