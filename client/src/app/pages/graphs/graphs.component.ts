@@ -160,40 +160,35 @@ export class GraphComponent implements OnInit {
 
     this.rawNodes = [];
 
-    const groupCandidates: ExtendedNode[] = [];
-
-    rawNodeMap.forEach(node => {
-      const idStr = String(node.id);
-      const labelStr = String(node.label);
-      const isLeakNode = idStr.toLowerCase().includes('leak') || labelStr.toLowerCase().includes('leak');
-      const degree = edgeMap[idStr] || 0;
-
-      if (degree > 6 && !isLeakNode) {
-        groupCandidates.push(node);
-      }
+    const nodeTypeMap: Record<string, string> = {};
+    data.forEach(item => {
+      nodeTypeMap[item.vertex._id] = item.vertex.type || '';
+      // @ts-ignore
+      (item.path?.vertices || []).forEach(pv => {
+        if (pv._id && pv.type) {
+          nodeTypeMap[pv._id] = pv.type;
+        }
+      });
     });
 
-    const enableGrouping = groupCandidates.length >= 5;
-    const clusters = ['leak', 'defacement', 'chat', 'general'];
-
     rawNodeMap.forEach(node => {
-      const idStr = String(node.id).toLowerCase();
-      const labelStr = String(node.label).toLowerCase();
+      const nodeId = node.id as string;
+      const nodeType = nodeTypeMap[nodeId] || '';
+      let degree = edgeMap[nodeId] || 0;
 
-      const isClusterNode = clusters.includes(idStr) || clusters.includes(labelStr);
-
-      let degree = edgeMap[idStr] || 0;
+      const isClusterNode = nodeType === 'cluster';
       if (this.expandEnabled) {
-        degree = 0
+        degree = 0;
       }
-      const isGroupable = degree > 6 && !isClusterNode;
 
-      if (isGroupable && enableGrouping) {
+      const isGroupable = degree > 2 && !isClusterNode;
+
+      if (isGroupable) {
         const subNodes = this.rawEdges
           .filter(e => e.from === node.id)
           .map(e => e.to as string);
 
-        this.groupInfo[idStr] = subNodes;
+        this.groupInfo[nodeId] = subNodes;
 
         this.rawNodes.push({
           id: node.id,
@@ -210,7 +205,7 @@ export class GraphComponent implements OnInit {
           size: 20
         });
       } else {
-        if (clusters.includes(labelStr)) {
+        if (isClusterNode) {
           node.color = '#40bf40';
         } else {
           const hasOutgoing = edgeMap[node.id as string];

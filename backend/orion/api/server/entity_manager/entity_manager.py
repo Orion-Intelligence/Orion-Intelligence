@@ -235,6 +235,14 @@ class entity_manager:
             cluster_vertex = f"cti_vertices/{normalized_cluster_id}"
 
             doc_data = entity.model_dump(exclude={"m_cluster_id"})
+            properties = entity.model_dump(exclude={"m_cluster_id", "m_document_id"})
+
+            has_valid_property = any(
+                v not in (None, "", [], {}) for v in properties.values()
+            )
+
+            if not has_valid_property:
+                return {"status": "skipped", "message": f"Entity {normalized_doc_id} has no valid properties."}
 
             normalized_doc_data = {}
             for k, v in doc_data.items():
@@ -246,12 +254,23 @@ class entity_manager:
                     normalized_doc_data[k] = v
 
             if normalized_doc_data:
-                await run_in_threadpool(lambda: self.__db.collection("cti_vertices").insert({"_key": normalized_doc_id, "type": "document", **normalized_doc_data}, overwrite=True))
+                await run_in_threadpool(lambda: self.__db.collection("cti_vertices").insert({
+                    "_key": normalized_doc_id,
+                    "type": "document",
+                    **normalized_doc_data
+                }, overwrite=True))
 
-            await run_in_threadpool(lambda: self.__db.collection("cti_vertices").insert({"_key": normalized_cluster_id, "type": "cluster"}, overwrite=True))
-            await run_in_threadpool(lambda: self.__db.collection("cti_edges").insert({"_key": f"{normalized_cluster_id}_to_{normalized_doc_id}", "_from": cluster_vertex, "_to": doc_vertex, "type": "cluster_to_doc"}, overwrite=True))
+            await run_in_threadpool(lambda: self.__db.collection("cti_vertices").insert({
+                "_key": normalized_cluster_id,
+                "type": "cluster"
+            }, overwrite=True))
 
-            properties = entity.model_dump(exclude={"m_cluster_id", "m_document_id"})
+            await run_in_threadpool(lambda: self.__db.collection("cti_edges").insert({
+                "_key": f"{normalized_cluster_id}_to_{normalized_doc_id}",
+                "_from": cluster_vertex,
+                "_to": doc_vertex,
+                "type": "cluster_to_doc"
+            }, overwrite=True))
 
             for key, value in properties.items():
                 if value in (None, "", [], {}):
@@ -264,13 +283,22 @@ class entity_manager:
                         continue
 
                     normalized_item = self._sanitize(self._normalize_key(item))
-
                     prop_key = f"{key}:{normalized_item}"
                     prop_vertex = f"cti_vertices/{prop_key}"
                     edge_key = f"{normalized_doc_id}_{key}_{normalized_item}"
 
-                    await run_in_threadpool(lambda: self.__db.collection("cti_vertices").insert({"_key": prop_key, "value": normalized_item, "type": key}, overwrite=True))
-                    await run_in_threadpool(lambda: self.__db.collection("cti_edges").insert({"_key": edge_key, "_from": doc_vertex, "_to": prop_vertex, "type": f"has_{key}"}, overwrite=True))
+                    await run_in_threadpool(lambda: self.__db.collection("cti_vertices").insert({
+                        "_key": prop_key,
+                        "value": normalized_item,
+                        "type": key
+                    }, overwrite=True))
+
+                    await run_in_threadpool(lambda: self.__db.collection("cti_edges").insert({
+                        "_key": edge_key,
+                        "_from": doc_vertex,
+                        "_to": prop_vertex,
+                        "type": f"has_{key}"
+                    }, overwrite=True))
 
             return {"status": "success", "message": f"Entity {normalized_doc_id} processed."}
 
