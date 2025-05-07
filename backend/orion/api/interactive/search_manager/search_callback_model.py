@@ -34,17 +34,12 @@ class search_callback:
           href_fragments = m_highlight.get("m_href_html", [])
 
           if important_fragments:
-            print(":::::::::::::::::::::::::::::::::::::::::::x1", flush=True)
-            print(important_fragments, flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::::::x1", flush=True)
             highlight_text = " ... ".join(important_fragments)
 
           if len(highlight_text) < 250 and content_fragments:
-            print(":::::::::::::::::::::::::::::::::::::::::::x2", flush=True)
             highlight_text = f"{highlight_text} ... {' ... '.join(content_fragments)}".strip(" .")
 
           if len(highlight_text) < 250 and href_fragments:
-            print(":::::::::::::::::::::::::::::::::::::::::::x3", flush=True)
             highlight_text = f"{highlight_text} ... {' ... '.join(href_fragments)}".strip(" .")
 
 
