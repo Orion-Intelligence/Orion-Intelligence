@@ -4,7 +4,8 @@ import locale
 from urllib.parse import urlparse, urlunparse
 from deep_translator import GoogleTranslator
 from starlette.requests import Request
-
+from stopwords import get_stopwords
+import re
 
 class helper_controller:
   __instance = None
@@ -32,7 +33,6 @@ class helper_controller:
       data_string = data
     else:
       raise ValueError("Input must be a dictionary or a string")
-
     return hashlib.sha256(data_string.encode('utf-8')).hexdigest()
 
   @staticmethod
@@ -56,3 +56,34 @@ class helper_controller:
     normalized = parsed._replace(query='', fragment='')
     normalized_url = urlunparse(normalized).rstrip('/')
     return normalized_url
+
+  @staticmethod
+  def remove_stopwords_from_string(text: str) -> str:
+    # Start with default English stopwords
+    stopword_set = set(get_stopwords("en"))
+
+    # Extend with more common stopwords
+    additional_stopwords = {
+      "was", "by", "were", "been", "being", "have", "has", "had", "do", "does", "did",
+      "will", "would", "shall", "should", "may", "might", "can", "could", "must",
+      "i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "them",
+      "my", "your", "his", "its", "our", "their", "mine", "yours", "hers", "ours", "theirs",
+      "this", "that", "these", "those", "here", "there", "where", "when", "why", "how",
+      "also", "just", "still", "even", "yet", "so", "than", "then", "very", "too",
+      "because", "while", "though", "although", "if", "unless", "until", "before", "after",
+      "once", "again", "ever", "always", "sometimes", "often", "never", "each", "every",
+      "any", "all", "some", "no", "none", "both", "either", "neither", "few", "several",
+      "many", "much", "most", "more", "less", "lot", "lots", "such",
+      "get", "got", "gets", "getting", "make", "makes", "made", "say", "says", "said",
+      "go", "goes", "went", "gone", "see", "sees", "saw", "seen", "know", "knows", "knew", "known",
+      "take", "takes", "took", "taken", "come", "comes", "came", "coming",
+      "thing", "things", "something", "anything", "everything", "nothing"
+    }
+
+    # Merge both
+    stopword_set.update(additional_stopwords)
+
+    # Tokenize and filter
+    tokens = re.findall(r'\b\w+\b', text)
+    filtered_tokens = [word for word in tokens if word.lower() not in stopword_set]
+    return ' '.join(filtered_tokens)

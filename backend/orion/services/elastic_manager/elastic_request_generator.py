@@ -11,6 +11,7 @@ class elastic_request_generator:
   @staticmethod
   def on_search_defacementdata(p_query_model: search_defacement_param_model):
     raw_query = p_query_model.q.strip().lower()
+    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
     if not raw_query:
       return ELASTIC_INDEX.S_DEFACEMENT_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -128,6 +129,7 @@ class elastic_request_generator:
   @staticmethod
   def on_search_leakdata(p_query_model):
     raw_query = p_query_model.q.strip()
+    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
     if not raw_query:
       return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -311,6 +313,7 @@ class elastic_request_generator:
   @staticmethod
   def on_search_telegram_data(p_query_model):
     raw_query = p_query_model.q.strip()
+    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
     if not raw_query:
       return ELASTIC_INDEX.S_CHATS_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -375,6 +378,16 @@ class elastic_request_generator:
           "boost_mode": "multiply"
         }
       },
+      "highlight": {
+        "fields": {
+          "m_important_content": {
+            "fragment_size": 500,
+            "number_of_fragments": 3,
+            "pre_tags": ["<em>"],
+            "post_tags": ["</em>"]
+          }
+        }
+      },
       "suggest": {
         "telegram_suggestion": {
           "text": raw_query,
@@ -398,6 +411,7 @@ class elastic_request_generator:
   @staticmethod
   def on_search_general_data(p_query_model):
     raw_query = p_query_model.q.strip()
+    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
     if not raw_query:
       return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -498,6 +512,16 @@ class elastic_request_generator:
             }
           ],
           "boost_mode": "sum",
+        }
+      },
+      "highlight": {
+        "fields": {
+          "m_important_content": {
+            "fragment_size": 500,
+            "number_of_fragments": 3,
+            "pre_tags": ["<em>"],
+            "post_tags": ["</em>"]
+          }
         }
       },
       "suggest": {

@@ -55,7 +55,49 @@ export class HelperService {
     let highlighted: string;
 
     if (text.includes('<em>') && text.includes('</em>')) {
-      highlighted = text
+      const regex = /<em>(.*?)<\/em>/g;
+      const matches = [...text.matchAll(regex)];
+
+      let result = '';
+      let lastIndex = 0;
+      let i = 0;
+
+      while (i < matches.length) {
+        let merged = matches[i][1];
+        let start = matches[i].index!;
+        let end = start + matches[i][0].length;
+        let j = i + 1;
+
+        while (j < matches.length) {
+          const prevEnd = end;
+          const nextStart = matches[j].index!;
+          const betweenText = text.slice(prevEnd, nextStart);
+
+          const wordGap = betweenText
+            .replace(/<[^>]+>/g, '') // remove tags
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean).length;
+
+          if (wordGap <= 2) {
+            const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
+            merged += ` ${cleanBetween} ${matches[j][1]}`;
+            end = matches[j].index! + matches[j][0].length;
+            j++;
+          } else {
+            break;
+          }
+        }
+
+        result += text.slice(lastIndex, start);
+        result += `<em>${merged}</em>`;
+        lastIndex = end;
+        i = j;
+      }
+
+      result += text.slice(lastIndex);
+
+      highlighted = result
         .replace(/<em>/g, '<span class="dashboard__search-highlight">')
         .replace(/<\/em>/g, '</span>');
     } else {
