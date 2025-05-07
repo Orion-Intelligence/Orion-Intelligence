@@ -8,7 +8,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
+from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS
 from urllib.parse import urljoin
 
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -54,8 +54,8 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value):
-        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
+        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
 
     def contact_page(self) -> str:
         return "http://orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id.onion"
@@ -79,10 +79,8 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
         try:
-
             page.goto(self.seed_url)
             page.wait_for_load_state('load')
-
 
             card_links = page.query_selector_all("a.blog__card-btn.--button")
             if not card_links:
@@ -91,61 +89,56 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
 
             card_urls = [urljoin(self.base_url, link.get_attribute("href")) for link in card_links]
 
-
             for card_url in card_urls:
-
-                try:
-                    page.goto(card_url, timeout=15000)
-                except Exception as _:
-                    pass
-
+                page.goto(card_url)
+                page.wait_for_load_state('load')
 
                 page_html = page.content()
                 self.soup = BeautifulSoup(page_html, 'html.parser')
-
 
                 card_inner = self.soup.select_one("div.card__inner")
                 if not card_inner:
                     print(f"No card inner found on the page: {card_url}")
                     continue
 
-
                 description = self.safe_find(page, "div.card__description-content", attr=None)
+                
                 company_url = self.safe_find(page, "a.card__info-text.--card__info-text-link", attr="href")
                 download_url = self.safe_find(page, "a.card__download.--button", attr="href")
                 card_title = self.safe_find(page, "h1.card__title", attr=None)
 
 
-                number_of_files = None
+                image_logos = []
+                card_photos_images = self.soup.select("img.card__photos-img")
+                for img in card_photos_images:
+                    if img.has_attr("src"):
+                        image_logos.append(img["src"])
+
                 date_of_publication = None
+                data_size = None
 
                 info_items = card_inner.select("div.card__info-item")
                 for item in info_items:
                     title_elem = item.select_one("h2.card__info-item-title")
-                    if not title_elem:
+                    value_elem = item.select_one("p.card__info-text")
+                    if not title_elem or not value_elem:
                         continue
 
                     title_text = title_elem.get_text(strip=True).lower()
-                    if "date of publication" in title_text:
-                        date_elem = item.select_one("p.card__info-text")
-                        if date_elem:
-                            date_of_publication = date_elem.get_text(strip=True)
-                    elif "number of files" in title_text:
-                        number_elem = item.select_one("p.card__info-text")
-                        if number_elem:
-                            number_of_files = number_elem.get_text(strip=True)
+                    value_text = value_elem.get_text(strip=True)
+
+                    if "open in" in title_text:
+                        date_of_publication = value_text
+                    elif "files size" in title_text:
+                        data_size = value_text
 
                 if date_of_publication is None:
                     date_of_publication = ""
-                is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + company_url, False)
-                ref_html = None
-                if not is_crawled:
-                    ref_html = helper_method.extract_refhtml(company_url)
-                    if ref_html:
-                        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + company_url, True)
+
+                if not company_url:
+                    company_url = ""
 
                 card_data = leak_model(
-                    m_ref_html=ref_html,
                     m_screenshot=helper_method.get_screenshot_base64(page, card_title),
                     m_title=card_title,
                     m_url=self.base_url,
@@ -154,18 +147,20 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                     m_network=helper_method.get_network_type(self.base_url),
                     m_base_url=self.base_url,
                     m_content=description + " " + self.base_url + " " + page.url,
-                    m_important_content = description,
+                    m_important_content=description[:500],
                     m_content_type=["leaks"],
-                    m_data_size=number_of_files,
-                    m_leak_date=datetime.datetime.strptime(date_of_publication, '%d/%m/%Y').date(),
+                    m_data_size=data_size,
+                    m_leak_date=datetime.datetime.strptime(date_of_publication,'%d/%m/%Y').date() if date_of_publication else None,
                 )
 
                 entity_data = entity_model(
-                    m_email_addresses=helper_method.extract_emails(description),
+                    m_email_addresses=helper_method.extract_emails(description) if description else [],
+                    m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
                     m_company_name=card_title,
                     m_ip=[company_url],
                     m_team="public ocra"
                 )
+
 
                 self.append_leak_data(card_data, entity_data)
 

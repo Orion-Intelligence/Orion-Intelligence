@@ -55,18 +55,23 @@ class search_callback:
 
   async def search_handler(self, m_status, m_documents, callback_model, listing_filter=None):
     if not m_status:
-      return search_callback_model(Result=[], Suggestions=[], Page_Count=0)
+      return callback_model(Result=[], Suggestions=[], Page_Count=0)
 
     parsed_result = await self.__parse_filtered_documents(m_documents)
     m_parsed_documents, m_suggestions_content, total_pages = parsed_result
 
-    if listing_filter is not None:
-      filtered_results = [
-        {k: v for k, v in doc.items() if k not in listing_filter}
-        for doc in m_parsed_documents
-      ]
-    else:
-      filtered_results = m_parsed_documents
+    def clean_document(doc):
+      return {
+        k: v for k, v in doc.items()
+        if k != 'm_content' and v not in (None, '', []) and (not isinstance(v, dict) or v)
+      }
+
+    filtered_results = []
+    for doc in m_parsed_documents:
+      if listing_filter is not None:
+        doc = {k: v for k, v in doc.items() if k not in listing_filter}
+      cleaned_doc = clean_document(doc)
+      filtered_results.append(cleaned_doc)
 
     return callback_model(
       Result=filtered_results,

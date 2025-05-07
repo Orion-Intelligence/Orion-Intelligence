@@ -4,8 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from "@angular/common";
 
-import { TestService } from '../../../services/test/test.service';
-
 @Component({
   selector: 'app-home-search',
   standalone: true,
@@ -14,7 +12,7 @@ import { TestService } from '../../../services/test/test.service';
 })
 export class HomeSearchComponent {
   searchQuery: string = '';
-  constructor(private route: ActivatedRoute, private router: Router, private testService: TestService) {
+  constructor(private route: ActivatedRoute, private router: Router) {
   }
 
   onSearchSubmit(): void {
