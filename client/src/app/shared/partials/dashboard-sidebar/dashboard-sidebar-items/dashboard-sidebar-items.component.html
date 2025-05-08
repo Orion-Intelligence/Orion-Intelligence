@@ -1,6 +1,6 @@
 <li class="sidebar__item">
   <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}"
-    (click)="selectSection()" [routerLink]="[routePrefix]" queryParamsHandling="merge" appTooltip="{{tooltip}}">
+    (click)="selectSection()" [routerLink]="[routePrefix]" [queryParams]="{ mSearchParamPage: 1 }" queryParamsHandling="merge" appTooltip="{{tooltip}}">
     <img src="{{icon}}" [alt]="title" height="20" width="20" class="sidebar__icon">
     {{ title }}
     <img class="sidebar__dropdown-icon" ngSrc="../../../../../assets/images/shared/search_side_dropdown_icon.svg"
@@ -11,7 +11,7 @@
     <li *ngFor="let item of items">
       <div class="sidebar__subitem" (click)="selectOption(item)"
         [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}"
-        [routerLink]="[routePrefix, item.toLowerCase()]" queryParamsHandling="merge">
+        [routerLink]="[routePrefix, item.toLowerCase()]" [queryParams]="{ mSearchParamPage: 1 }" queryParamsHandling="merge">
         <div class="sidebar__subitem-content"
           [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">
           {{ item }}
