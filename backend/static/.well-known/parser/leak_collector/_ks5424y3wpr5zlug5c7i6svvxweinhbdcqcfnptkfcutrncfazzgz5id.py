@@ -14,130 +14,152 @@ from crawler.crawler_services.shared.helper_method import helper_method
 
 
 class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_interface, ABC):
-    _instance = None
+  _instance = None
 
-    def __init__(self, callback=None):
-        self.callback = callback
-        self._card_data = []
-        self._entity_data = []
-        self.soup = None
-        self._initialized = None
-        self._redis_instance = redis_controller()
+  def __init__(self, callback=None):
+    self.callback = callback
+    self._card_data = []
+    self._entity_data = []
+    self.soup = None
+    self._initialized = None
+    self._redis_instance = redis_controller()
 
-    def init_callback(self, callback=None):
-        self.callback = callback
+  def init_callback(self, callback=None):
+    self.callback = callback
 
-    def __new__(cls):
+  def __new__(cls):
 
-        if cls._instance is None:
-            cls._instance = super(_ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
+    if cls._instance is None:
+      cls._instance = super(_ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id, cls).__new__(cls)
+      cls._instance._initialized = False
+    return cls._instance
 
-    @property
-    def seed_url(self) -> str:
+  @property
+  def seed_url(self) -> str:
 
-            return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/posts.php?pid=kjR1jYcN0m8P5Il0SbJ6hvDm"
+    return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/posts.php?pid=kjR1jYcN0m8P5Il0SbJ6hvDm"
 
-    @property
-    def base_url(self) -> str:
+  @property
+  def base_url(self) -> str:
 
-        return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion"
+    return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion"
 
-    @property
-    def rule_config(self) -> RuleModel:
+  @property
+  def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
 
-    @property
-    def card_data(self) -> List[leak_model]:
+  @property
+  def card_data(self) -> List[leak_model]:
 
-        return self._card_data
+    return self._card_data
 
-    @property
-    def entity_data(self) -> List[entity_model]:
-        return self._entity_data
+  @property
+  def entity_data(self) -> List[entity_model]:
+    return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value):
+  def invoke_db(self, command: int, key: str, default_value):
 
-        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
-    def contact_page(self) -> str:
-        return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/index.php#contact"
+  def contact_page(self) -> str:
+    return "http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion/index.php#contact"
 
-    def append_leak_data(self, leak: leak_model, entity: entity_model):
-        self._card_data.append(leak)
-        self._entity_data.append(entity)
-        if self.callback:
-            if self.callback():
-                self._card_data.clear()
-                self._entity_data.clear()
+  def append_leak_data(self, leak: leak_model, entity: entity_model):
+    self._card_data.append(leak)
+    self._entity_data.append(entity)
+    if self.callback:
+      if self.callback():
+        self._card_data.clear()
+        self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-        links = page.query_selector_all('a[post]')
-        link_urls = []
-        for link in links:
-            href = link.get_attribute('href')
-            if href:
-                full_url = f"{self.base_url}/posts.php{href}"
-                link_urls.append(full_url)
+  def parse_leak_data(self, page: Page):
+    links = page.query_selector_all('a[post]')
+    link_urls = []
+    for link in links:
+      href = link.get_attribute('href')
+      if href:
+        full_url = f"{self.base_url}/posts.php{href}"
+        link_urls.append(full_url)
 
-        for url in link_urls:
-            page.goto(url)
+    error_count = 0
+    for url in link_urls:
+      try:
+        page.goto(url)
 
-            title = page.query_selector('st').inner_text() if page.query_selector('st') else ""
-            weblink = page.query_selector('card in h h1').inner_text() if page.query_selector('card in h h1') else ""
-            description = page.query_selector('card in p').inner_text() if page.query_selector('card in p') else ""
-            payment_info = page.query_selector('card.rs in cont p').inner_text() if page.query_selector('card.rs in cont p') else ""
+        title_el = page.query_selector('st')
+        title = title_el.inner_text() if title_el else ""
 
-            content = f"{title}: {description} {payment_info}"
-            important_content=description
+        weblink_el = page.query_selector('card in h h1')
+        weblink = weblink_el.inner_text() if weblink_el else ""
 
-            gallery_images = page.query_selector_all('gallery img')
-            images = []
-            for img in gallery_images:
-                img_src = img.get_attribute('src')
-                if img_src:
-                    parsed_url = urlparse(img_src)
-                    images.append(parsed_url.path.strip())
+        description_el = page.query_selector('card in p')
+        description = description_el.inner_text() if description_el else ""
 
-            download_url = ""
-            download_btn = page.query_selector('a.btn[onclick*="showdir"]')
-            if download_btn:
-                onclick = download_btn.get_attribute('onclick')
-                if onclick:
-                    start = onclick.find("'") + 1
-                    end = onclick.rfind("'")
-                    if start != -1 and end != -1:
-                        download_url = onclick[start:end].strip()
+        payment_el = page.query_selector('card.rs in cont p')
+        payment_info = payment_el.inner_text() if payment_el else ""
 
-            is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink, False)
-            ref_html = None
-            if not is_crawled:
-                ref_html = helper_method.extract_refhtml(weblink)
-                if ref_html:
-                    self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink, True)
+        content = f"{title}: {description} {payment_info}"
+        important_content = description
 
-            card_data = leak_model(
-                m_ref_html=ref_html,
-                m_screenshot=helper_method.get_screenshot_base64(page,title),
-                m_title=title,
-                m_url=url,
-                m_base_url=self.base_url,
-                m_content=content,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=important_content,
-                m_dumplink=[download_url],
-                m_content_type=["leaks"],
-                m_logo_or_images=images,
-                m_weblink=[weblink],
+        gallery_images = page.query_selector_all('gallery img')
+        images = []
+        for img in gallery_images:
+          img_src = img.get_attribute('src')
+          if img_src:
+            parsed_url = urlparse(img_src)
+            images.append(parsed_url.path.strip())
+
+        download_url = ""
+        download_btn = page.query_selector('a.btn[onclick*="showdir"]')
+        if download_btn:
+          onclick = download_btn.get_attribute('onclick')
+          if onclick:
+            start = onclick.find("'") + 1
+            end = onclick.rfind("'")
+            if start != -1 and end != -1:
+              download_url = onclick[start:end].strip()
+
+        is_crawled = self.invoke_db(
+          REDIS_COMMANDS.S_GET_BOOL,
+          CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink,
+          False
+        )
+        ref_html = None
+        if not is_crawled:
+          ref_html = helper_method.extract_refhtml(weblink)
+          self.invoke_db(
+              REDIS_COMMANDS.S_SET_BOOL,
+              CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink,
+              True
             )
 
-            entity_data = entity_model(
-                m_email_addresses=helper_method.extract_emails(important_content),
-                m_company_name=title,
-                m_ip=[weblink],
-                m_team="ks"
-            )
+        card_data = leak_model(
+          m_ref_html=ref_html,
+          m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
+          m_title=title,
+          m_url=url,
+          m_base_url=self.base_url,
+          m_content=content,
+          m_network=helper_method.get_network_type(self.base_url),
+          m_important_content=important_content,
+          m_dumplink=[download_url],
+          m_content_type=["leaks"],
+          m_logo_or_images=images,
+          m_weblink=[weblink],
+        )
 
-            self.append_leak_data(card_data, entity_data)
+        entity_data = entity_model(
+          m_email_addresses=helper_method.extract_emails(important_content),
+          m_company_name=title,
+          m_ip=[weblink],
+          m_team="ks"
+        )
+
+        self.append_leak_data(card_data, entity_data)
+        error_count = 0
+
+      except Exception:
+        error_count += 1
+        if error_count >= 3:
+          break

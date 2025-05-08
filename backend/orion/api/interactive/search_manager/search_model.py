@@ -1,5 +1,8 @@
 from typing import Optional
 
+from fastapi import HTTPException
+from starlette import status
+
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model as SearchChatCallbackModel
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
@@ -49,23 +52,33 @@ class search_model:
 
   async def request_defacement_doc(self, doc_id) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)
+    if not result:
+      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     return await self.__search_callback.get_doc(result)
 
   async def request_leak_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id)
+    if not result:
+      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
     if lang:
       result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
       result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)
+
     return await self.__search_callback.get_doc(result)
 
   async def request_chat_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_CHATS_INDEX, doc_id)
+    if not result:
+      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     if lang:
       result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
     return await self.__search_callback.get_doc(result)
 
   async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
     result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id)
+    if not result:
+      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     if lang:
       result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
       result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)

@@ -68,33 +68,43 @@ class _darkfeed(leak_extractor_interface, ABC):
       try:
         self.soup = BeautifulSoup(page.content(), 'html.parser')
 
+        error_count = 0
+
         for article in self.soup.find_all("article", class_="elementor-post"):
-          title_link = article.find("h3", class_="elementor-post__title").find("a")
-          url = title_link['href'] if title_link else None
-          title = title_link.get_text(strip=True) if title_link else None
+          try:
+            title_link = article.find("h3", class_="elementor-post__title").find("a")
+            url = title_link['href'] if title_link else None
+            title = title_link.get_text(strip=True) if title_link else None
 
-          date_element = article.find("span", class_="elementor-post-date")
-          posted_date = date_element.get_text(strip=True) if date_element else None
+            date_element = article.find("span", class_="elementor-post-date")
+            posted_date = date_element.get_text(strip=True) if date_element else None
 
-          if url and title and posted_date:
-            content_message = f"{title}, To visit or explore more visit the website: {url}"
+            if url and title and posted_date:
+              content_message = f"{title}, To visit or explore more visit the website: {url}"
 
-            card_data = leak_model(
-              m_screenshot=helper_method.get_screenshot_base64(page, title),
-              m_title=title,
-              m_url=url,
-              m_base_url=self.base_url,
-              m_content=content_message + " " + self.base_url + " " + url,
-              m_network=helper_method.get_network_type(self.base_url),
-              m_important_content=content_message,
-              m_content_type=["leaks"],
-            )
+              card_data = leak_model(
+                m_screenshot="",
+                m_title=title,
+                m_url=url,
+                m_base_url=self.base_url,
+                m_content=content_message + " " + self.base_url + " " + url,
+                m_network=helper_method.get_network_type(self.base_url),
+                m_important_content=content_message,
+                m_content_type=["leaks"],
+              )
 
-            entity_data = entity_model(
-              m_email_addresses=helper_method.extract_emails(content_message),
-              m_team="dark feed"
-            )
-            self.append_leak_data(card_data, entity_data)
+              entity_data = entity_model(
+                m_email_addresses=helper_method.extract_emails(content_message),
+                m_team="dark feed"
+              )
+
+              self.append_leak_data(card_data, entity_data)
+              error_count = 0
+
+          except Exception:
+            error_count += 1
+            if error_count >= 3:
+              break
 
       except Exception as ex:
         print(ex)

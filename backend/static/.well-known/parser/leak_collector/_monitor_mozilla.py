@@ -116,18 +116,19 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
         extracted_text = card_content
         current_url = page.url
         weblink = re.search(r'<a[^>]+href=["\'](https?://[^"\']+)', page.content()).group(1)
+        if len(card_title)>3 and card_title[1]==' ' and card_title[0] == card_title[2]:
+          card_title = card_title[2:]
 
         is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value+weblink, False)
         ref_html = None
         if not is_crawled:
           ref_html = helper_method.extract_refhtml(weblink)
-          if ref_html:
-            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value+weblink, True)
+          self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value+weblink, True)
 
         card_data = leak_model(
           m_ref_html=ref_html,
-          m_screenshot=helper_method.get_screenshot_base64(page, card_title),
-          m_title=card_title[2:],
+          m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
+          m_title=card_title,
           m_url=current_url,
           m_base_url=self.base_url,
           m_content=extracted_text + " " + self.base_url + " " + current_url,

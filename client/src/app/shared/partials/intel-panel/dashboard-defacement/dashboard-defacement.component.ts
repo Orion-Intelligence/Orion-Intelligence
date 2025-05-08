@@ -30,7 +30,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(1)
+    this.appService.updatePage(this.defacementParamModel.mSearchParamPage)
   }
 
   ngOnInit(): void {

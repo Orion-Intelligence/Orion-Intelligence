@@ -47,6 +47,9 @@ class search_callback:
 
           m_service["highlight"] = m_highlight
 
+        if "m_ref_html" in m_service and len(m_service["m_important_content"]) < 250 and len(m_service["m_ref_html"])>20:
+          m_service["m_important_content"] = "TARGET WEBDATA 〡 " + m_service["m_ref_html"]
+
         m_service['m_sub_host'] = m_service.get('m_sub_host', '/')
         m_service['m_host'] = m_service.get('m_host', '')
 

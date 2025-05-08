@@ -11,150 +11,141 @@ from crawler.crawler_services.shared.helper_method import helper_method
 
 
 class _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd(leak_extractor_interface, ABC):
-    _instance = None
+  _instance = None
 
-    def __init__(self, callback=None):
+  def __init__(self, callback=None):
 
-        self.callback = callback
-        self._card_data = []
-        self._entity_data = []
-        self.soup = None
-        self._initialized = None
-        self._redis_instance = redis_controller()
+    self.callback = callback
+    self._card_data = []
+    self._entity_data = []
+    self.soup = None
+    self._initialized = None
+    self._redis_instance = redis_controller()
 
-    def init_callback(self, callback=None):
+  def init_callback(self, callback=None):
 
-        self.callback = callback
+    self.callback = callback
 
-    def __new__(cls, callback=None):
+  def __new__(cls, callback=None):
 
-        if cls._instance is None:
-            cls._instance = super(_txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
+    if cls._instance is None:
+      cls._instance = super(_txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd, cls).__new__(cls)
+      cls._instance._initialized = False
+    return cls._instance
 
-    @property
-    def seed_url(self) -> str:
+  @property
+  def seed_url(self) -> str:
 
-        return "http://txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.onion/articles"
+    return "http://txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.onion/articles"
 
-    @property
-    def base_url(self) -> str:
+  @property
+  def base_url(self) -> str:
 
-        return "http://txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.onion/articles"
+    return "http://txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.onion/articles"
 
-    @property
-    def rule_config(self) -> RuleModel:
+  @property
+  def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
 
-    @property
-    def card_data(self) -> List[leak_model]:
+  @property
+  def card_data(self) -> List[leak_model]:
 
-        return self._card_data
+    return self._card_data
 
-    @property
-    def entity_data(self) -> List[entity_model]:
+  @property
+  def entity_data(self) -> List[entity_model]:
 
-        return self._entity_data
+    return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value):
+  def invoke_db(self, command: int, key: str, default_value):
 
-        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
 
-    def contact_page(self) -> str:
+  def contact_page(self) -> str:
 
-        return "http://txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.onion/articles"
+    return "http://txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.onion/articles"
 
-    def append_leak_data(self, leak: leak_model, entity: entity_model):
+  def append_leak_data(self, leak: leak_model, entity: entity_model):
 
-        self._card_data.append(leak)
-        self._entity_data.append(entity)
-        if self.callback:
-            if self.callback():
-                self._card_data.clear()
-                self._entity_data.clear()
+    self._card_data.append(leak)
+    self._entity_data.append(entity)
+    if self.callback:
+      if self.callback():
+        self._card_data.clear()
+        self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+  def parse_leak_data(self, page: Page):
+    try:
+
+      page.goto(self.seed_url)
+
+      page.wait_for_selector('.card-body')
+
+      card_elements = page.query_selector_all('.card-body')
+
+      error_count = 0
+
+      for card in card_elements:
         try:
+          title_element = card.query_selector('h5.card-title')
+          title = title_element.inner_text().strip() if title_element else ""
 
-            page.goto(self.seed_url)
+          description_element = card.query_selector('p.card-text:has(strong:has-text("Description:"))')
+          description = description_element.inner_text().replace("Description:",
+                                                                 "").strip() if description_element else ""
 
-            page.wait_for_selector('.card-body')
+          revenue_element = card.query_selector('p.card-text:has(strong:has-text("Revenue:"))')
+          revenue = revenue_element.inner_text().replace("Revenue:", "").strip() if revenue_element else ""
+
+          company_name_element = card.query_selector('p.card-text:has(strong:has-text("Company name:"))')
+          company_name = company_name_element.inner_text().replace("Company name:",
+                                                                   "").strip() if company_name_element else ""
+
+          show_leaks_element = card.query_selector('a.btn.btn-primary')
+          show_leaks_link = show_leaks_element.get_attribute('href') if show_leaks_element else ""
+          if show_leaks_link and not show_leaks_link.startswith('http'):
+            show_leaks_link = f"{self.base_url}{show_leaks_link}" if show_leaks_link.startswith(
+              '/') else f"{self.base_url}/{show_leaks_link}"
+
+          is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL,
+                                      CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, False)
+          ref_html = None
+          if not is_crawled:
+            ref_html = helper_method.extract_refhtml(title)
+            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, True)
+
+          company_link = next((t.strip('",;()[]<>') for t in company_name.split() if '.' in t), "")
+
+          card_data = leak_model(
+            m_ref_html=ref_html,
+            m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
+            m_title=title,
+            m_url=show_leaks_link,
+            m_revenue=revenue,
+            m_base_url=self.base_url,
+            m_dumplink=[show_leaks_link],
+            m_content=f"Description: {description}, Revenue: {revenue}, Company Name: {company_name}",
+            m_network=helper_method.get_network_type(self.base_url),
+            m_important_content=f"Description: {description}, Revenue: {revenue}, Company Name: {company_name}",
+            m_content_type=["leaks"],
+          )
+
+          entity_data = entity_model(
+            m_email_addresses=helper_method.extract_emails(description),
+            m_company_name=company_name,
+            m_ip=[company_link],
+            m_team="trinity"
+          )
+
+          self.append_leak_data(card_data, entity_data)
+          error_count = 0
+
+        except Exception:
+          error_count += 1
+          if error_count >= 3:
+            break
 
 
-            card_elements = page.query_selector_all('.card-body')
-
-
-            for card in card_elements:
-                try:
-
-                    title_element = card.query_selector('h5.card-title')
-                    title = title_element.inner_text().strip() if title_element else ""
-
-                    description_element = card.query_selector('p.card-text:has(strong:has-text("Description:"))')
-                    description = ""
-                    if description_element:
-
-                        description = description_element.inner_text().replace("Description:", "").strip()
-
-                    revenue_element = card.query_selector('p.card-text:has(strong:has-text("Revenue:"))')
-                    revenue = ""
-                    if revenue_element:
-
-                        revenue = revenue_element.inner_text().replace("Revenue:", "").strip()
-
-
-                    company_name_element = card.query_selector('p.card-text:has(strong:has-text("Company name:"))')
-                    company_name = ""
-                    if company_name_element:
-
-                        company_name = company_name_element.inner_text().replace("Company name:", "").strip()
-
-
-                    show_leaks_element = card.query_selector('a.btn.btn-primary')
-                    show_leaks_link = show_leaks_element.get_attribute('href') if show_leaks_element else ""
-
-
-
-                    if show_leaks_link and not show_leaks_link.startswith('http'):
-                        if show_leaks_link.startswith('/'):
-                            show_leaks_link = f"{self.base_url}{show_leaks_link}"
-                        else:
-                            show_leaks_link = f"{self.base_url}/{show_leaks_link}"
-
-                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, False)
-                    ref_html = None
-                    if not is_crawled:
-                        ref_html = helper_method.extract_refhtml(title)
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, True)
-                    company_link = next((t.strip('",;()[]<>') for t in company_name.split() if '.' in t), "")
-                    card_data = leak_model(
-                        m_ref_html = ref_html,
-                        m_screenshot=helper_method.get_screenshot_base64(page, title),
-                        m_title=title,
-                        m_url=show_leaks_link,
-                        m_revenue=revenue,
-                        m_base_url=self.base_url,
-                        m_dumplink=[show_leaks_link],
-                        m_content=f"Description: {description}, Revenue: {revenue}, Company Name: {company_name}",
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=f"Description: {description}, Revenue: {revenue}, Company Name: {company_name}",
-                        m_content_type=["leaks"],
-                    )
-
-                    entity_data = entity_model(
-                        m_email_addresses=helper_method.extract_emails(description),
-                        m_company_name=company_name,
-                        m_ip=[company_link],
-                        m_team="trinity"
-                    )
-                    self.append_leak_data(card_data, entity_data)
-
-                except Exception as e:
-                    print(f"Error processing card: {str(e)}")
-                    continue
-
-        except Exception as e:
-            print(f"Error in parse_leak_data: {str(e)}")
+    except Exception as e:
+      print(f"Error in parse_leak_data: {str(e)}")

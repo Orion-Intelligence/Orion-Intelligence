@@ -37,7 +37,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(1)
+    this.appService.updatePage(this.generalParamModel.mSearchParamPage)
   }
 
   ngOnInit(): void {

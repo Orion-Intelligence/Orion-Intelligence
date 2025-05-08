@@ -105,8 +105,6 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
                     download_link_element = cells[4].query_selector('a')
                     dump_link = download_link_element.get_attribute('href') if download_link_element else ""
 
-                    comment = cells[5].get_attribute('title') or cells[5].inner_text().strip()
-
                     entry_id = f"{country}_{company_name}_{domain}"
                     if entry_id in processed_entries:
                         continue
@@ -115,13 +113,12 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
                     ref_html = None
                     if not is_crawled:
                         ref_html = helper_method.extract_refhtml(domain)
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + domain, True)
+                        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + domain, True)
                     comment = cells[5].get_attribute('title') or cells[5].inner_text().strip()
 
                     card_data = leak_model(
                         m_ref_html= ref_html,
-                        m_screenshot=helper_method.get_screenshot_base64(page, company_name),
+                        m_screenshot=helper_method.get_screenshot_base64(page, company_name, self.base_url),
                         m_title=company_name,
                         m_url=domain,
                         m_base_url=self.base_url,

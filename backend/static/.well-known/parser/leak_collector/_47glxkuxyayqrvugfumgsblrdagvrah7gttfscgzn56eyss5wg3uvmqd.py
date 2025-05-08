@@ -71,6 +71,7 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
             cards = page.query_selector_all(".col-lg-6")
             base_url = self.base_url
 
+            error_count = 0
             for card in cards:
                 try:
                     link_el = card.query_selector("a.stretched-link")
@@ -117,19 +118,26 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
 
                     full_text = f"Title: {title} | Revenue: {revenue} | Country: {country} | Date: {leak_date_raw} | Size: {size} | {description}"
 
-                    is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, False)
+                    is_crawled = self.invoke_db(
+                        REDIS_COMMANDS.S_GET_BOOL,
+                        CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title,
+                        False
+                    )
                     ref_html = None
                     if not is_crawled:
                         ref_html = helper_method.extract_refhtml(title)
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, True)
+                        self.invoke_db(
+                                REDIS_COMMANDS.S_SET_BOOL,
+                                CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title,
+                                True
+                            )
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
                         m_title=title,
                         m_url=detail_url,
                         m_base_url=base_url,
-                        m_screenshot=helper_method.get_screenshot_base64(detail_page, title),
+                        m_screenshot=helper_method.get_screenshot_base64(detail_page, None, self.base_url),
                         m_content=full_text,
                         m_network=helper_method.get_network_type(base_url),
                         m_important_content=description[:500],
@@ -153,9 +161,12 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
                     self.append_leak_data(card_data, entity_data)
 
                     detail_page.close()
+                    error_count = 0
 
-                except Exception as e:
-                    print(f"Error processing card: {e}")
+                except Exception:
+                    error_count += 1
+                    if error_count >= 3:
+                        break
 
         except Exception as e:
             print(f"An error occurred while parsing leak data: {e}")

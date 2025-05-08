@@ -73,6 +73,8 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
         last_card_count = 0
         no_new_card_attempts = 0
 
+        error_count = 0
+
         while True:
             try:
                 page.wait_for_selector(".leak-card", timeout=10000)
@@ -94,13 +96,13 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
                             cards = page.query_selector_all(".leak-card")
                             card = cards[index]
 
-                            title = card.query_selector("h5")
-                            content = card.query_selector("p")
-                            datetimex = card.query_selector(".published")
+                            title_el = card.query_selector("h5")
+                            content_el = card.query_selector("p")
+                            datetime_el = card.query_selector(".published")
 
-                            title_text = title.inner_text().strip() if title else "Unknown"
-                            content_text = content.inner_text().strip() if content else "No content"
-                            datetime_text = datetimex.inner_text().strip() if datetimex else "Unknown Date/Time"
+                            title_text = title_el.inner_text().strip() if title_el else "Unknown"
+                            content_text = content_el.inner_text().strip() if content_el else "No content"
+                            datetime_text = datetime_el.inner_text().strip() if datetime_el else "Unknown Date/Time"
 
                             card_url = card.get_attribute("href") or page.url
                             if card_url in processed_urls:
@@ -121,7 +123,7 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
                             page.wait_for_selector(".leak-card", timeout=10000)
 
                             card_data = leak_model(
-                                m_screenshot=helper_method.get_screenshot_base64(page, title_text),
+                                m_screenshot=helper_method.get_screenshot_base64(page, title_text, self.base_url),
                                 m_title=title_text,
                                 m_url=page.url,
                                 m_base_url=self.base_url,
@@ -139,19 +141,16 @@ class _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid(leak_extractor_i
                             )
 
                             self.append_leak_data(card_data, entity_data)
+                            error_count = 0
 
-
-                        except Exception as e:
-                            print({e})
+                        except Exception:
+                            pass
 
                     for _ in range(3):
                         page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
                         page.wait_for_timeout(2000)
 
-            except Exception as e:
-                print({e})
-                break
-
-
-
-
+            except Exception:
+                error_count += 1
+                if error_count >= 3:
+                    break

@@ -108,40 +108,47 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
               if full_url not in all_hrefs:
                 all_hrefs.append(full_url)
 
+      error_count = 0
+
       for index, url in enumerate(all_hrefs):
         try:
-
           page.goto(url)
           page.wait_for_load_state('load')
 
-          company_name_element = page.query_selector(
-            "h2.font-bold.text-yellow-500.mb-4.break-words.uppercase")
+          company_name_element = page.query_selector("h2.font-bold.text-yellow-500.mb-4.break-words.uppercase")
           company_name = company_name_element.inner_text().strip() if company_name_element else "No company name found"
 
           website_element = page.query_selector("div.mt-2.mb-1 a.text-blue-400")
           website = website_element.get_attribute("href") if website_element else "No website found"
 
           elements = page.query_selector_all("div.rounded-md.inline-block.mb-1 span.text-white.text-sm")
-
           data_size = elements[0].inner_text().strip() if len(elements) > 0 else None
           created_date = elements[2].inner_text().strip() if len(elements) > 1 else "No date found"
 
           description_element = page.query_selector(
-            "p.mt-1.text-gray-400.text-mg.mb-6.overflow-y-auto.whitespace-pre-wrap.rounded-lg")
+            "p.mt-1.text-gray-400.text-mg.mb-6.overflow-y-auto.whitespace-pre-wrap.rounded-lg"
+          )
           description = description_element.inner_text().strip() if description_element else "No description found"
 
           m_leak_date = datetime.strptime(created_date, '%B %d, %Y').date()
 
-          is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, False)
+          is_crawled = self.invoke_db(
+            REDIS_COMMANDS.S_GET_BOOL,
+            CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website,
+            False
+          )
           ref_html = None
           if not is_crawled:
             ref_html = helper_method.extract_refhtml(website)
-            if ref_html:
-              self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, True)
+            self.invoke_db(
+                REDIS_COMMANDS.S_SET_BOOL,
+                CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website,
+                True
+              )
 
           card_data = leak_model(
             m_ref_html=ref_html,
-            m_screenshot=helper_method.get_screenshot_base64(page, company_name),
+            m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
             m_title=company_name,
             m_url=url,
             m_weblink=[url, website],
@@ -162,9 +169,12 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
           )
 
           self.append_leak_data(card_data, entity_data)
+          error_count = 0
 
-        except Exception as _:
-          continue
+        except Exception:
+          error_count += 1
+          if error_count >= 3:
+            break
 
     except Exception as ex:
       print(f"An error occurred in parse_leak_data: {ex}")

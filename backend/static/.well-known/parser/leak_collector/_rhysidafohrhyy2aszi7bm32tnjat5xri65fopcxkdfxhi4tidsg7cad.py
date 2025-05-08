@@ -75,6 +75,8 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
       company_text = page.locator("#companies_online").text_content()
       company_count = int(re.search(r'\d+', company_text).group()) if company_text else 0
 
+      error_count = 0
+
       for company_id in range(company_count, 0, -1):
         try:
           url = f"{self.base_url}/archive.php?company={company_id}"
@@ -93,19 +95,27 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
           images = [img.get_attribute("src") for img in image_els if img.get_attribute("src")]
 
           content = f"{title}\n{description}\n{external_link}"
-          is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + external_link, False)
+
+          is_crawled = self.invoke_db(
+            REDIS_COMMANDS.S_GET_BOOL,
+            CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + external_link,
+            False
+          )
           ref_html = None
           if not is_crawled:
             ref_html = helper_method.extract_refhtml(external_link)
-            if ref_html:
-              self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + external_link, True)
+            self.invoke_db(
+                REDIS_COMMANDS.S_SET_BOOL,
+                CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + external_link,
+                True
+              )
 
           card_data = leak_model(
             m_ref_html=ref_html,
             m_title=title,
             m_url=url,
             m_base_url=self.base_url,
-            m_screenshot="",
+            m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
             m_content=content,
             m_network=helper_method.get_network_type(self.base_url),
             m_important_content=content[:500],
@@ -125,8 +135,12 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
 
           self.append_leak_data(card_data, entity_data)
 
-        except Exception as e:
-          print(f"Error parsing company {company_id}: {e}")
+          error_count = 0
+
+        except Exception:
+          error_count += 1
+          if error_count >= 3:
+            break
 
     except Exception as e:
       print(f"Failed to parse company list: {e}")

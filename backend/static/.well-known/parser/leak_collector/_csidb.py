@@ -116,7 +116,7 @@ class _csidb(leak_extractor_interface, ABC):
         important_content = " ".join(description.split()[:500]) if description else ""
         card = leak_model(
           m_title=title,
-          m_screenshot="",
+          m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
           m_url=url,
           m_base_url=self.base_url,
           m_network=helper_method.get_network_type(self.base_url),
@@ -163,7 +163,7 @@ class _csidb(leak_extractor_interface, ABC):
           location_label = page.query_selector("h5:has-text('Location:')")
           country = location_label.evaluate("el => el.nextElementSibling.textContent.trim()") if location_label else None
 
-          build_card(title.inner_text().strip() if title else None, incident_url, desc_text, desc_text, websites, date_val, "hacking", country)
+          build_card(title.inner_text().strip() if title else None, incident_url, desc_text, desc_text, websites, date_val, "leaks", country)
 
         except Exception:
           traceback.print_exc()

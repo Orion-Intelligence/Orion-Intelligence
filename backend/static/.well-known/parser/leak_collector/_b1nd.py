@@ -1,3 +1,4 @@
+import re
 from abc import ABC
 from datetime import datetime
 
@@ -78,9 +79,6 @@ class _b1nd(leak_extractor_interface, ABC):
 
   def parse_leak_data(self, page: Page):
     try:
-      current_time = "2025-05-03 20:20:32"
-      current_user = "Ibrahim-sayys"
-
       thread_links = []
 
       page.goto(self.seed_url)
@@ -120,27 +118,22 @@ class _b1nd(leak_extractor_interface, ABC):
           page.goto(next_page_url)
           page.wait_for_load_state("load")
 
+      error_count = 0
       for idx, thread_url in enumerate(thread_links):
         try:
           page.goto(thread_url)
           page.wait_for_load_state("load")
 
           date_element = page.query_selector('time.u-dt')
-          date_text = ""
-          if date_element:
-            date_text = date_element.get_attribute("data-date-string")
+          date_text = date_element.get_attribute("data-date-string") if date_element else ""
 
           title_element = page.query_selector('h1.p-title-value')
-          title = ""
-          if title_element:
-            title = title_element.inner_text().strip()
+          title = title_element.inner_text().strip() if title_element else ""
 
           content_element = page.query_selector('article.message-body div.bbWrapper')
           content = ""
           if content_element:
-            content_html = content_element.inner_html()
-            content = content_element.inner_text().strip()
-            content = content.replace('\n', ' ')
+            content = content_element.inner_text().strip().replace('\n', ' ')
 
           image_logos = []
           img_elements = page.query_selector_all('article.message-body div.bbWrapper img')
@@ -154,7 +147,6 @@ class _b1nd(leak_extractor_interface, ABC):
           domain_pattern = r'https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:/\S*)?|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:/\S*)?|[a-zA-Z0-9.-]+\.onion(?:/\S*)?'
 
           if content:
-            import re
             matches = re.findall(domain_pattern, content)
             for match in matches:
               if match not in websites:
@@ -169,43 +161,41 @@ class _b1nd(leak_extractor_interface, ABC):
 
           password = ""
           password_js = """
-                () => {
-                    const spans = Array.from(document.querySelectorAll('span'));
-                    const passwordSpan = spans.find(span => span.textContent.includes('Passwords:'));
+                  () => {
+                      const spans = Array.from(document.querySelectorAll('span'));
+                      const passwordSpan = spans.find(span => span.textContent.includes('Passwords:'));
 
-                    if (passwordSpan) {
-                        const text = passwordSpan.textContent;
-                        const parts = text.split('Passwords:');
-                        if (parts.length > 1) {
-                            return parts[1].trim();
-                        }
-                    }
+                      if (passwordSpan) {
+                          const text = passwordSpan.textContent;
+                          const parts = text.split('Passwords:');
+                          if (parts.length > 1) {
+                              return parts[1].trim();
+                          }
+                      }
 
-                    const signature = document.querySelector('aside.message-signature div.bbWrapper');
-                    if (signature && signature.textContent.includes('Passwords:')) {
-                        const text = signature.textContent;
-                        const parts = text.split('Passwords:');
-                        if (parts.length > 1) {
-                            return parts[1].trim();
-                        }
-                    }
+                      const signature = document.querySelector('aside.message-signature div.bbWrapper');
+                      if (signature && signature.textContent.includes('Passwords:')) {
+                          const text = signature.textContent;
+                          const parts = text.split('Passwords:');
+                          if (parts.length > 1) {
+                              return parts[1].trim();
+                          }
+                      }
 
-                    const allElements = document.querySelectorAll('*');
-                    for (const el of allElements) {
-                        if (el.textContent && el.textContent.includes('Passwords:') && 
-                            el.children.length === 0) {
-                            const text = el.textContent;
-                            const parts = text.split('Passwords:');
-                            if (parts.length > 1) {
-                                return parts[1].trim();
-                            }
-                        }
-                    }
+                      const allElements = document.querySelectorAll('*');
+                      for (const el of allElements) {
+                          if (el.textContent && el.textContent.includes('Passwords:') && el.children.length === 0) {
+                              const text = el.textContent;
+                              const parts = text.split('Passwords:');
+                              if (parts.length > 1) {
+                                  return parts[1].trim();
+                              }
+                          }
+                      }
 
-                    return '';
-                }
-                """
-
+                      return '';
+                  }
+              """
           try:
             password = page.evaluate(password_js)
           except Exception:
@@ -227,7 +217,7 @@ class _b1nd(leak_extractor_interface, ABC):
               important_content = content
 
           card_data = leak_model(
-            m_screenshot=helper_method.get_screenshot_base64(page, title),
+            m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
             m_title=title,
             m_weblink=websites,
             m_url=thread_url,
@@ -249,9 +239,13 @@ class _b1nd(leak_extractor_interface, ABC):
           )
 
           self.append_leak_data(card_data, entity_data)
+          error_count = 0
 
         except Exception:
-          continue
+          error_count += 1
+          if error_count >= 3:
+            break
+
 
     except Exception as e:
       print(f"An error occurred: {e}")

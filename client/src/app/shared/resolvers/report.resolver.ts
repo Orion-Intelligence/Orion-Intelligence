@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
@@ -8,7 +8,7 @@ import { ApiService } from '../services/api.service';
   providedIn: 'root'
 })
 export class ReportResolver implements Resolve<any> {
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private router: Router) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
     const category = route.parent?.url[0]?.path || '';
@@ -31,6 +31,7 @@ export class ReportResolver implements Resolve<any> {
         apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
         break;
       default:
+        this.router.navigate(['/']);
         return of(null);
     }
 
@@ -40,6 +41,7 @@ export class ReportResolver implements Resolve<any> {
 
     return this.apiService.get<any>(apiUrl).pipe(
       catchError((_) => {
+        this.router.navigate(['/']).then();
         return of(null);
       })
     );

@@ -73,71 +73,93 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
     page.goto(self.seed_url)
     page.wait_for_selector('div.category-item.js-open-chat')
 
-    category_items = page.query_selector_all('div.category-item.js-open-chat')
+    error_count = 0
+    index = 0
 
-    for item in category_items:
-      translit = item.get_attribute('data-translit')
-      if not translit:
-        continue
+    while True:
+      try:
+        category_items = page.query_selector_all('div.category-item.js-open-chat')
+        if index >= len(category_items):
+          break
 
-      page.wait_for_timeout(3000)
-      item.click()
-      page.wait_for_timeout(3000)
+        item = category_items[index]
+        index += 1
 
-      timeline_item = page.query_selector(f"li.timeline-item[data-translit='{translit}']")
-      if not timeline_item:
-        continue
+        translit = item.get_attribute('data-translit')
+        if not translit:
+          continue
 
-      title_element = timeline_item.query_selector("h3")
-      description_element = timeline_item.query_selector("p.publication-description")
-      date_element = timeline_item.query_selector("div.date-view")
-      views_element = timeline_item.query_selector("div.count-view")
-      image_elements = timeline_item.query_selector_all("a.form-image-preview img")
+        item.click()
+        page.wait_for_timeout(1000)
+        item.click()
+        page.wait_for_timeout(5000)
 
-      title = title_element.inner_text().strip() if title_element else "No title"
-      description = description_element.inner_text().strip() if description_element else ""
-      date = date_element.inner_text().strip() if date_element else ""
-      views = views_element.inner_text().strip() if views_element else ""
+        timeline_item = page.query_selector(f"li.timeline-item[data-translit='{translit}']")
+        if not timeline_item:
+          continue
 
-      images = []
-      for img in image_elements:
-        src = img.get_attribute("src")
-        if src:
-          images.append(urljoin(self.base_url, src))
+        title_element = timeline_item.query_selector("h3")
+        description_element = timeline_item.query_selector("p.publication-description")
+        date_element = timeline_item.query_selector("div.date-view")
+        views_element = timeline_item.query_selector("div.count-view")
+        image_elements = timeline_item.query_selector_all("a.form-image-preview img")
 
-      content = f"{title}\n{description}\nDate: {date}\nViews: {views}"
+        title = title_element.inner_text().strip() if title_element else "No title"
+        description = description_element.inner_text().strip() if description_element else ""
+        date = date_element.inner_text().strip() if date_element else ""
+        views = views_element.inner_text().strip() if views_element else ""
 
-      cleaned_content = content.replace('\n', ' - ')
-      match = re.search(r'https?://[^\s\-]+', cleaned_content)
-      first_url = match.group(0) if match else None
+        images = []
+        for img in image_elements:
+          src = img.get_attribute("src")
+          if src:
+            images.append(urljoin(self.base_url, src))
 
-      is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + first_url, False)
-      ref_html = None
-      if not is_crawled:
-        ref_html = helper_method.extract_refhtml(first_url)
-        if ref_html:
-          self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + first_url, True)
+        content = f"{title}\n{description}\nDate: {date}\nViews: {views}"
+        cleaned_content = content.replace('\n', ' - ')
+        match = re.search(r'https?://[^\s\-]+', cleaned_content)
+        first_url = match.group(0) if match else None
 
-      card_data = leak_model(
-        m_ref_html=ref_html,
-        m_screenshot=helper_method.get_screenshot_base64(page, title),
-        m_title=title,
-        m_url=f"{self.seed_url}/{translit}",
-        m_base_url=self.base_url,
-        m_content=content,
-        m_network=helper_method.get_network_type(self.base_url),
-        m_important_content=description[:500],
-        m_dumplink=[],
-        m_content_type=["leaks"],
-        m_logo_or_images=images,
-        m_weblink=[]
-      )
+        is_crawled = self.invoke_db(
+          REDIS_COMMANDS.S_GET_BOOL,
+          CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + (first_url or title),
+          False
+        )
+        ref_html = None
+        if not is_crawled:
+          ref_html = helper_method.extract_refhtml(first_url or title)
+          self.invoke_db(
+              REDIS_COMMANDS.S_SET_BOOL,
+              CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + (first_url or title),
+              True
+            )
 
-      entity_data = entity_model(
-        m_company_name=title,
-        m_ip=[first_url],
-        m_email_addresses=helper_method.extract_emails(description),
-        m_team="everest group"
-      )
+        card_data = leak_model(
+          m_ref_html=ref_html,
+          m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
+          m_title=title,
+          m_url=f"{self.seed_url}/{translit}",
+          m_base_url=self.base_url,
+          m_content=content,
+          m_network=helper_method.get_network_type(self.base_url),
+          m_important_content=description[:500],
+          m_dumplink=[],
+          m_content_type=["leaks"],
+          m_logo_or_images=images,
+          m_weblink=[]
+        )
 
-      self.append_leak_data(card_data, entity_data)
+        entity_data = entity_model(
+          m_company_name=title,
+          m_ip=[first_url] if first_url else [],
+          m_email_addresses=helper_method.extract_emails(description),
+          m_team="everest group"
+        )
+
+        self.append_leak_data(card_data, entity_data)
+        error_count = 0
+
+      except Exception as ex:
+        error_count += 1
+        if error_count >= 3:
+          break

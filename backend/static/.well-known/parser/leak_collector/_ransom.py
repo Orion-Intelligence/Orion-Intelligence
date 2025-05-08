@@ -83,82 +83,96 @@ class _ransom(leak_extractor_interface, ABC):
                 clean_name = text.replace("Victime:", "").strip().rstrip("...")
                 victim_names.append(clean_name)
 
+        error_count = 0
+
         for victim_name in victim_names:
-            search_box = page.locator('input#search_box')
-            search_box.fill(victim_name)
-            search_box.press('Enter')
+            try:
+                search_box = page.locator('input#search_box')
+                search_box.fill(victim_name)
+                search_box.press('Enter')
 
-            page.wait_for_selector('table.table', timeout=5000)
-            table_row = page.locator('table.table tbody tr td')
-            raw_data = table_row.inner_text()
+                page.wait_for_selector('table.table', timeout=5000)
+                table_row = page.locator('table.table tbody tr td')
+                raw_data = table_row.inner_text()
 
-            data = {}
-            lines = raw_data.split('\n')
+                data = {}
+                lines = raw_data.split('\n')
 
-            victim = None
-            group = None
-            description = None
-            website = None
-            m_leak_date = None
-            post_url = None
-            country = None
+                victim = None
+                group = None
+                description = None
+                website = None
+                m_leak_date = None
+                post_url = None
+                country = None
 
-            for line in lines:
-                if "Victime" in line:
-                    victim = line.split(":")[-1].strip()
-                    data["Victime"] = victim
-                if "Group" in line:
-                    group = line.split(":")[-1].strip()
-                    data["Group"] = group
-                if "Discovered" in line:
-                    discovered = line.split(":")[-1].strip()
-                    data["Discovered"] = discovered
-                if "Description" in line:
-                    description = line.split(":")[-1].strip()
-                    data["Description"] = description
-                if "Website" in line:
-                    website = line.split(":")[-1].strip()
-                    data["Website"] = website
-                if "Published" in line:
-                    m_leak_date = datetime.datetime.strptime(line.split(': ', 1)[1].split()[0], '%Y-%m-%d').date()
-                    published = line.split(":")[-1].strip()
-                    data["Published"] = published
-                if "Post_url" in line:
-                    post_url = line.split(":")[-1].strip()
-                    data["Post_url"] = post_url
-                if "Country" in line:
-                    country = line.split(":")[-1].strip()
-                    data["Country"] = country
+                for line in lines:
+                    if "Victime" in line:
+                        victim = line.split(":")[-1].strip()
+                        data["Victime"] = victim
+                    if "Group" in line:
+                        group = line.split(":")[-1].strip()
+                        data["Group"] = group
+                    if "Discovered" in line:
+                        discovered = line.split(":")[-1].strip()
+                        data["Discovered"] = discovered
+                    if "Description" in line:
+                        description = line.split(":")[-1].strip()
+                        data["Description"] = description
+                    if "Website" in line:
+                        website = line.split(":")[-1].strip()
+                        data["Website"] = website
+                    if "Published" in line:
+                        m_leak_date = datetime.datetime.strptime(line.split(': ', 1)[1].split()[0], '%Y-%m-%d').date()
+                        published = line.split(":")[-1].strip()
+                        data["Published"] = published
+                    if "Post_url" in line:
+                        post_url = line.split(":")[-1].strip()
+                        data["Post_url"] = post_url
+                    if "Country" in line:
+                        country = line.split(":")[-1].strip()
+                        data["Country"] = country
 
-            if victim is None:
-                continue
-            is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, False)
-            ref_html = None
-            if not is_crawled:
-                ref_html = helper_method.extract_refhtml(website)
-                if ref_html:
-                    self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, True)
+                if victim is None:
+                    error_count += 1
+                    if error_count >= 3:
+                        break
+                    continue
 
-            card_data = leak_model(
-                m_ref_html=ref_html,
-                m_screenshot=helper_method.get_screenshot_base64(page, victim),
-                m_title=victim,
-                m_url=post_url,
-                m_base_url=self.base_url,
-                m_content=description + " " + post_url + " " + page.url,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=description,
-                m_weblink=[website],
-                m_leak_date=m_leak_date,
-                m_dumplink=[],
-                m_content_type=["leaks"],
-            )
+                is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL,
+                                            CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, False)
+                ref_html = None
+                if not is_crawled:
+                    ref_html = helper_method.extract_refhtml(website)
+                    self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website,
+                                       True)
 
-            entity_data = entity_model(
-                m_location_info=[country],
-                m_company_name=group,
-                m_email_addresses=helper_method.extract_emails(soup.text),
-                m_team="ransom wiki"
-            )
+                card_data = leak_model(
+                    m_ref_html=ref_html,
+                    m_screenshot=helper_method.get_screenshot_base64(page, victim, self.base_url),
+                    m_title=victim,
+                    m_url=post_url,
+                    m_base_url=self.base_url,
+                    m_content=description + " " + post_url + " " + page.url,
+                    m_network=helper_method.get_network_type(self.base_url),
+                    m_important_content=description,
+                    m_weblink=[website],
+                    m_leak_date=m_leak_date,
+                    m_dumplink=[],
+                    m_content_type=["leaks"],
+                )
 
-            self.append_leak_data(card_data, entity_data)
+                entity_data = entity_model(
+                    m_location_info=[country],
+                    m_company_name=group,
+                    m_email_addresses=helper_method.extract_emails(soup.text),
+                    m_team="ransom wiki"
+                )
+
+                self.append_leak_data(card_data, entity_data)
+                error_count = 0
+
+            except Exception:
+                error_count += 1
+                if error_count >= 3:
+                    break

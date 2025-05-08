@@ -34,7 +34,7 @@ export class DashboardChatsComponent implements OnInit , AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(1)
+    this.appService.updatePage(this.chatParamModel.mSearchParamPage)
   }
 
   ngOnInit(): void {

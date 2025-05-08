@@ -44,7 +44,6 @@ export class DashboardHeaderComponent implements OnInit {
       const secondLastPath = '/dashboard/' + this.breadcrumb.slice(0, -1).map((crumb) => crumb.path).join('/');
       const secondLastUrlTree = this.router.createUrlTree([secondLastPath], { queryParams });
       const secondLastUrl = this.router.serializeUrl(secondLastUrlTree);
-
       this.router.navigateByUrl(secondLastUrl).then();
     }
   }

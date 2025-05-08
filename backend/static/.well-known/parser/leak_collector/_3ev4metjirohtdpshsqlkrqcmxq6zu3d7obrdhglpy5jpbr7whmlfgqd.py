@@ -1,14 +1,13 @@
 import re
 from abc import ABC
+from time import sleep
 from typing import List
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
-from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import \
-  leak_extractor_interface
+from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, \
-  FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -30,8 +29,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
 
   def __new__(cls):
     if cls._instance is None:
-      cls._instance = super(_3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd, cls).__new__(
-        cls)
+      cls._instance = super(_3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd, cls).__new__(cls)
     return cls._instance
 
   @property
@@ -44,8 +42,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
 
   @property
   def rule_config(self) -> RuleModel:
-    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT,
-                     m_resoource_block=True)
+    return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False)
 
   @property
   def card_data(self) -> List[leak_model]:
@@ -76,6 +73,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
     cards = self.soup.find_all("div", class_="card")
 
     for index, card in enumerate(cards, start=1):
+      attempt = 0
       try:
         title_element = card.find("h5", class_="card-title")
         card_title_url = helper_method.clean_text(title_element.get_text(strip=True)) if title_element else ""
@@ -83,8 +81,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
         text_element = card.find("p", class_="card-text")
         card_text = text_element.get_text(" ", strip=True) if text_element else ""
 
-        size_match = re.search(r"\b(\d+(?:\.\d+)?\s?(?:KB|MB|GB|TB|PB|KiB|MiB|GiB|TiB))\b", card_text,
-                               flags=re.IGNORECASE)
+        size_match = re.search(r"\b(\d+(?:\.\d+)?\s?(?:KB|MB|GB|TB|PB|KiB|MiB|GiB|TiB))\b", card_text, flags=re.IGNORECASE)
         dump_size = size_match.group(1).upper() if size_match else None
 
         page.locator(f'button:has-text("Show")').nth(index - 1).click()
@@ -126,37 +123,32 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
         dump_links = [link["href"] for link in links_element.find_all("a", href=True)] if links_element else []
 
         full_text = f"{title_url or ''}\n{title_name}\n{description_text}\n{self.seed_url}\n{self.base_url}"
-        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value+title_url, False)
+        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title_url, False)
         ref_html = None
         if not is_crawled:
           ref_html = helper_method.extract_refhtml(title_url)
-          if ref_html:
-            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value+title_url, True)
+          self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title_url, True)
+        sleep(0.5)
+        card_data = leak_model(m_ref_html=ref_html,
+                               m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url), m_title=title_name, m_url=page.url, m_base_url=self.base_url, m_content=full_text,
+                               m_network=helper_method.get_network_type(self.base_url),
+                               m_important_content=description_text,
+                               m_dumplink=dump_links,
+                               m_content_type=["leaks"],
+                               m_data_size=dump_size, )
 
-        card_data = leak_model(
-          m_ref_html=ref_html,
-          m_screenshot=helper_method.get_screenshot_base64(page, title_name),
-          m_title=title_name,
-          m_url=page.url,
-          m_base_url=self.base_url,
-          m_content=full_text,
-          m_network=helper_method.get_network_type(self.base_url),
-          m_important_content=description_text,
-          m_dumplink=dump_links,
-          m_content_type=["leaks"],
-          m_data_size = dump_size,
-        )
-
-        entity_data = entity_model(
-          m_email_addresses=helper_method.extract_emails(full_text),
-          m_company_name=title_name if title_name else None,
-          m_ip=[title_url] if title_url else None,
-          m_password=password if password else None,
-          m_team="abyss"
-        )
+        entity_data = entity_model(m_email_addresses=helper_method.extract_emails(full_text),
+                                   m_company_name=title_name if title_name else None,
+                                   m_ip=[title_url] if title_url else None,
+                                   m_password=password if password else None,
+                                   m_team="abyss")
 
         self.append_leak_data(card_data, entity_data)
         page.locator(".modal .btn-close").click()
+        attempt = 0
 
       except Exception as e:
-        print(f"Error processing card {index}: {e}")
+        attempt += 1
+        print(f"Error processing card {index}, attempt {attempt}: {e}")
+        if attempt >= 3:
+          break
