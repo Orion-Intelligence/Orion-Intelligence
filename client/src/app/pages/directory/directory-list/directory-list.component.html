@@ -17,10 +17,18 @@
           {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
         </td>
 
+
         <td data-label="Service URL">
-          <a [href]="item.url" class="directory-list__table-url text-decoration-none text-reset">
-            {{ item.url }}
-          </a>
+          <ng-container *ngIf="item.network_type === 'telegram'">
+            <a class="directory-list__table-url text-decoration-none text-reset">
+              {{ item.name?.toLowerCase() }}
+            </a>
+          </ng-container>
+          <ng-container *ngIf="item.network_type !== 'telegram'">
+            <a class="directory-list__table-url text-decoration-none text-reset">
+              {{ item.url }}
+            </a>
+          </ng-container>
         </td>
 
         <td data-label="Category">

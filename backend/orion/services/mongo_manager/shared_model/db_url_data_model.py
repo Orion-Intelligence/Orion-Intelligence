@@ -10,3 +10,4 @@ class db_url_data_model(Model):
     leak_model_last_update: Optional[datetime] = None
     geneic_model_last_update: Optional[datetime] = None
     network_type: Optional[str] = "onion"
+    name: Optional[str] = None

@@ -34,7 +34,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() shrinkmenu: boolean = false;
   @Input() type!: Category;
 
-  @Output() reloadFilters = new EventEmitter<[string | null, string | null]>();
+  @Output() reloadFilters = new EventEmitter<{ [key: string]: string | null }>();
   @Output() resetFilter = new EventEmitter<void>();
   @Output() reloadData = new EventEmitter<void>();
   @Output() updateQuery = new EventEmitter<string>();
@@ -91,7 +91,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
   applyFilters(filters: { [key: string]: string | null }) {
     this.selectedFilters = filters;
-    this.reloadFilters.emit([this.selectedFilters['mNetwork'], this.selectedFilters['mSearchParamSafeSearch']]);
+    this.reloadFilters.emit(this.selectedFilters);
   }
 
   resetFilters() {

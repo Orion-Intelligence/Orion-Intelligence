@@ -3,6 +3,10 @@
 
     <div class="dashboard__search-main-div" [id]="'item-' + item.m_message_id" (click)="scrollService.saveSession(item.m_message_id ?? '')" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
 
+      <div class="dashboard__search-tags">
+        <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+      </div>
+
       <div class="d-flex align-items-center gap-2">
         <img src="/assets/images/shared/channel.svg" alt="Channel" width="20" height="20"/>
         <h2 class="dashboard__search-title mb-0 ml-2">{{ item.m_channel_name || 'Untitled' }}</h2>
@@ -11,14 +15,36 @@
         {{ item.m_message_sharable_link }}
       </div>
 
-      <h5 class="dashboard__search-title dashboard__search-title-secondary">Message</h5>
-      <p class="dashboard__search-description highlight mt-2">
-        {{ item.m_content || 'No content available' }} </p>
+      <p class="dashboard__search-description highlight mt-2" *ngIf="item.m_content; else noContent">
+        <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
+          {{ part }}<br *ngIf="!last" />...
+        </ng-container>
+        <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
+      </p>
+      <ng-template #noContent>
+        <p class="dashboard__search-description highlight mt-2">No content available</p>
+      </ng-template>
 
       <ng-container *ngIf="item.m_file_name?.length">
         <h5 class="dashboard__search-title dashboard__search-title-secondary">Embedded Files</h5>
         <div class="dashboard__search-link" *ngFor="let file of item.m_file_name | slice:0:3">
-          {{ file }}
+          <ng-container *ngFor="let part of file.split(' - ')">
+            <div>{{ part }}</div>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="item.m_caption && item.m_caption.length > 5">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Caption</h5>
+        <div class="dashboard__search-link">
+          {{ item.m_caption.slice(0, 300) }}...
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Media Caption</h5>
+        <div class="dashboard__search-link">
+          {{ item.m_media_caption.slice(0, 300) }}...
         </div>
       </ng-container>
 

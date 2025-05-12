@@ -118,7 +118,7 @@ export class DirectoryComponent implements OnInit {
       relativeTo: this.route,
       queryParams: filteredParams,
       queryParamsHandling: 'merge',
-    });
+    }).then();
 
     this.directoryService.reloadDirectoryData(filteredParams);
   }

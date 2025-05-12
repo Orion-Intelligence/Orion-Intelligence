@@ -20,6 +20,7 @@ class search_callback:
 
       m_result_final = p_paged_documents.get('hits', {}).get('hits', [])
 
+
       for m_document in m_result_final:
         m_service = m_document.get('_source', None)
         if not m_service:
@@ -32,6 +33,7 @@ class search_callback:
           important_fragments = m_highlight.get("m_important_content", [])
           content_fragments = m_highlight.get("m_content", [])
           href_fragments = m_highlight.get("m_href_html", [])
+          caption_fragments = m_highlight.get("m_caption", [])
 
           if important_fragments:
             highlight_text = " ... ".join(important_fragments)
@@ -42,12 +44,15 @@ class search_callback:
           if len(highlight_text) < 250 and href_fragments:
             highlight_text = f"{highlight_text} ... {' ... '.join(href_fragments)}".strip(" .")
 
+          if len(highlight_text) < 250 and caption_fragments:
+            highlight_text = f"{highlight_text} ... {' ... '.join(caption_fragments)}".strip(" .")
+
           if highlight_text:
             m_service["m_important_content"] = highlight_text
 
           m_service["highlight"] = m_highlight
 
-        if "m_ref_html" in m_service and len(m_service["m_important_content"]) < 250 and len(m_service["m_ref_html"])>20:
+        if "m_ref_html" in m_service and m_service["m_ref_html"] and len(m_service.get("m_important_content", "")) < 250 and len(m_service["m_ref_html"]) > 20:
           m_service["m_important_content"] = "TARGET WEBDATA 〡 " + m_service["m_ref_html"]
 
         m_service['m_sub_host'] = m_service.get('m_sub_host', '/')
@@ -66,7 +71,9 @@ class search_callback:
           if dedup_key in mDescription:
             continue
           mDescription.add(dedup_key)
+
         mRelevanceListData.append(m_service)
+
       content_suggestions = p_paged_documents.get('suggest', {}).get('content_suggestion', [])
       return mRelevanceListData, content_suggestions, total_pages
 
@@ -91,8 +98,8 @@ class search_callback:
         doc = {k: v for k, v in doc.items() if k not in listing_filter}
 
       for key, value in doc.items():
-        if isinstance(value, list) and len(value) > 3:
-          doc[key] = value[:3]
+        if isinstance(value, list) and len(value) > 7:
+          doc[key] = value[:7]
 
       return {
         k: v for k, v in doc.items()

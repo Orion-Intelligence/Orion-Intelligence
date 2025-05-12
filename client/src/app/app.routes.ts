@@ -15,6 +15,8 @@ import {DashboardDefacementComponent} from './shared/partials/intel-panel/dashbo
 import {ReportDefacementComponent} from './shared/partials/report/report-defacement/report-defacement.component';
 import {DashboardChatsComponent} from './shared/partials/intel-panel/dashboard-chats/dashboard-chats.component';
 import {ReportChatComponent} from './shared/partials/report/report-chat/report-chat.component';
+import {DumpComponent} from './pages/dump/dump.component';
+import {DumpResolver} from './shared/resolvers/dump.resolver';
 
 export const routes: Routes = [
   {
@@ -60,6 +62,12 @@ export const routes: Routes = [
         component: DirectoryComponent,
         resolve: {directory: DirectoryResolver},
         data: {animation: 'DirectoryPage'}
+      },
+      {
+        path: 'dumps',
+        component: DumpComponent,
+        resolve: {dump: DumpResolver},
+        data: {animation: 'DumpsPage'}
       },
       {
         path: 'api',

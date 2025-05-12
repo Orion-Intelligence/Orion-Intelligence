@@ -3,6 +3,7 @@ export enum Category {
   BREACH = 'Breach',
   HOMEPAGE = 'Home',
   DIRECTORY = 'Directory',
+  DUMP = 'Dumps',
   DEFACEMENT = 'Defacement',
   SOCIAL = 'Social',
   API = 'Api'

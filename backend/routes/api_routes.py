@@ -3,6 +3,8 @@ from typing import Optional
 from fastapi import Depends, Query
 from fastapi import APIRouter
 from orion.api.interactive.directory_manager.directory_model import directory_model
+from orion.api.interactive.dump_manager.dump_model import dump_model
+from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model import dump_param_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
@@ -25,6 +27,9 @@ api_routes = APIRouter()
 async def get_directory(param: directory_param_model = Depends()):
   return await directory_model.getInstance().invoke_directory(param)
 
+@api_routes.get("/api/dumps", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Fetch the directory listing with optional filters for categories, types, or tags.")
+async def get_directory(param: dump_param_model = Depends()):
+  return await dump_model.getInstance().invoke_dump(param)
 
 @api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Retrieve analytics and strategic insights for dashboard overview.")
 async def get_insight():

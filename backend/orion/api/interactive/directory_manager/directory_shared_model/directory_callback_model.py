@@ -11,6 +11,7 @@ class directory_callback_link(BaseModel):
     leak_model_last_update: Optional[datetime]
     geneic_model_last_update: Optional[datetime]
     network_type: Optional[str]
+    name: Optional[str]
 
     @classmethod
     def from_odmantic(cls, odmantic_doc: db_url_data_model):

@@ -149,12 +149,11 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults(true);
   }
 
-  reloadFilters(event: [string | null, string | null]) {
-    const [mNetwork, mSearchParamSafeSearch] = event;
-    if (mNetwork != null) {
-      this.generalParamModel.mNetwork = mNetwork;
+  reloadFilters(event: { [key: string]: string | null }) {
+    if (event['mNetwork'] != null) {
+      this.generalParamModel.mNetwork = event['mNetwork'];
     }
-    this.generalParamModel.mSearchParamSafeSearch = mSearchParamSafeSearch == 'yes';
+    this.generalParamModel.mSearchParamSafeSearch = event['mSearchParamSafeSearch'] === 'yes';
     this.fetchSearchResults();
   }
 

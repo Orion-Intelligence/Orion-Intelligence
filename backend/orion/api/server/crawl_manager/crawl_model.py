@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
-
 import httpx
 import requests
+from datetime import datetime, timezone
 from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
+from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
@@ -15,7 +15,9 @@ from orion.services.elastic_manager.elastic_request_generator import elastic_req
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from fastapi.responses import FileResponse
+from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
+
 import os
 import base64
 
@@ -38,21 +40,32 @@ class crawl_model:
     else:
       crawl_model.__instance = self
 
-  async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list, network_type: str, is_leak_update: bool):
-    normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
+  async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list, network_type: str, is_leak_update: bool, name: str = None):
+    normalized_url = base_url
+    if network_type!="telegram":
+      normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
 
     general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)
 
     if general_model:
       general_model.content_type = list(set((general_model.content_type or []) + new_content_type))
       general_model.index_type = list(set((general_model.index_type or []) + new_index_type))
+      if name:
+        general_model.name = name
       if is_leak_update:
         general_model.leak_model_last_update = datetime.now(timezone.utc)
       else:
         general_model.geneic_model_last_update = datetime.now(timezone.utc)
     else:
-      general_model = db_url_data_model(url=normalized_url, content_type=list(set(new_content_type)), index_type=list(set(new_index_type)), network_type=network_type, leak_model_last_update=datetime.now(timezone.utc) if is_leak_update else None,
-        geneic_model_last_update=datetime.now(timezone.utc) if not is_leak_update else None)
+      general_model = db_url_data_model(
+        url=normalized_url,
+        content_type=list(set(new_content_type)),
+        index_type=list(set(new_index_type)),
+        network_type=network_type,
+        name=name,
+        leak_model_last_update=datetime.now(timezone.utc) if is_leak_update else None,
+        geneic_model_last_update=datetime.now(timezone.utc) if not is_leak_update else None
+      )
 
     await self._engine.save(general_model)
     return JSONResponse(content={"message": CRAWL_CALLBACK_RESPONSES.M_WEBSITE_INDEXED}, status_code=200)
@@ -82,9 +95,11 @@ class crawl_model:
   async def invoke_chat_index(self, chat_index: chat_data_model):
     m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())
     await elastic_controller.get_instance().index_data(m_data)
+
     return await self._update_or_create_model(
       base_url=chat_index.m_source_channel_url,
-      new_content_type=["chat"],
+      new_content_type=["channel"],
+      name=chat_index.m_channel_name,
       new_index_type=["chat"],
       network_type=chat_index.m_network,
       is_leak_update=False
@@ -162,6 +177,21 @@ class crawl_model:
       return {
         "error": f"Failed to save screenshot: {str(e)}"
       }
+
+  async def index_dump_record(self, dump_model: DumpModel):
+    try:
+      dump_record = db_dump_record_model(
+        id=dump_model.id,
+        parsed_status= False,
+        leak_url=", ".join(dump_model.leak_url),
+        source=dump_model.source,
+        group=dump_model.group,
+        link=dump_model.link
+      )
+      await self._engine.save(dump_record)
+      return JSONResponse(content={"message": "Dump record saved successfully"}, status_code=200)
+    except Exception as e:
+      return JSONResponse(content={"error": f"Failed to save dump record: {str(e)}"}, status_code=500)
 
   @staticmethod
   async def fetch_cti_label(payload: CTITextRequest):

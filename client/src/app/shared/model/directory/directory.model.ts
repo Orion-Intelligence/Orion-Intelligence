@@ -11,4 +11,5 @@ export interface DocumentModel {
   leak_model_last_update?: string;
   geneic_model_last_update?: string;
   network_type?: string;
+  name?: string;
 }

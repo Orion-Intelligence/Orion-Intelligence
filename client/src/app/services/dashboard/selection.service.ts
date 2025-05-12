@@ -48,7 +48,7 @@ private setInitialSelectionFromUrl(url: string) {
 
     this.first_trigger = false;
 
-    if ((!option && section !== 'home' && section !== 'directory') || (currentSection === section && currentOption === option)) {
+    if ((!option && section !== 'home' && section !== 'directory' && section !== 'dumps') || (currentSection === section && currentOption === option)) {
       return;
     }
 

@@ -21,13 +21,14 @@
     <app-dashboard-sidebar-items [title]="'Defacement'" [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items [title]="'Social'" [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories" [category]="category.SOCIAL" [routePrefix]="'social'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <li class="sidebar__item">
+      <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DUMP}" (click)="onSectionSelected(category.DUMP)" [routerLink]="'dumps'" [queryParamsHandling]="'merge'">
+        <img ngSrc="assets/images/sidebar/cloud-storage.svg" alt="Dump" height="20" width="20" class="sidebar__icon"> Data Dumps
+      </div>
+    </li>
+
     <div class="sidebar__item">
-      <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
-         href="/dashboard/ctigraph"
-         target="_blank">
-        <img ngSrc="assets/images/sidebar/graph.svg" alt="Links" height="20" width="20"
-             class="sidebar__icon"> CTI Graph
-      </a>
+      <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph" target="_blank"> <img ngSrc="assets/images/sidebar/graph.svg" alt="Links" height="20" width="20" class="sidebar__icon"> CTI Graph </a>
     </div>
 
   </ul>
@@ -69,11 +70,17 @@
     <app-dashboard-sidebar-collapsed [title]="'Defacement'" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="defacementCategories" [category]="category.DEFACEMENT" [routePrefix]="'defacement'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
     <app-dashboard-sidebar-collapsed [title]="'Social'" [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories" [category]="category.SOCIAL" [routePrefix]="'social'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
     <app-dashboard-sidebar-collapsed *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API" [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)" (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
-    <div class="sidebar__item" appTooltip="CTI Graph">
-      <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink"
+    <li class="sidebar__item">
+      <div class="sidebar__item-dropdown" appTooltip="Breach Dumps" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DUMP}" (click)="onSectionSelected(category.DUMP)" [routerLink]="'dumps'" [queryParamsHandling]="'merge'">
+        <img ngSrc="assets/images/sidebar/cloud-storage.svg" alt="Dump" height="20" width="20" class="sidebar__icon">
+      </div>
+    </li>
+
+    <div class="sidebar__item">
+      <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" appTooltip="CTI Graph"
          href="/dashboard/ctigraph"
          target="_blank">
-        <img ngSrc="assets/images/sidebar/graph.svg" alt="Links" height="23" width="23"
+        <img ngSrc="assets/images/sidebar/graph.svg" alt="Links" height="19" width="19"
              class="sidebar__icon">
       </a>
     </div>

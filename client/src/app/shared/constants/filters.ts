@@ -1,5 +1,17 @@
 import { FilterModel } from '../model/filter/filter.model';
 
+
+export const dump_filters: FilterModel = {
+  filters: {
+    source: {
+      title: "Source",
+      options: ["all", "telegram", "websites"],
+      type: "dropdown",
+      tooltip: "Leak origin sources"
+    }
+  }
+};
+
 export const directory_filters: FilterModel = {
   filters: {
     network: {
@@ -51,4 +63,57 @@ export const general_filters: FilterModel = {
       tooltip: "Enable Filtering"
     },
   },
+};
+
+export const chat_filters: FilterModel = {
+  filters: {
+    content_type: {
+      title: "Content Type",
+      options: [
+        "all",
+        "data",
+        "credential",
+        "ransomware",
+        "phishing",
+        "scam",
+        "malware",
+        "infostealer",
+        "c2",
+        "ddos",
+        "exploit",
+        "leak",
+        "logs",
+        "vpn",
+        "carding",
+        "rat",
+        "keylogger",
+        "spyware",
+        "sqlinjection",
+        "xss",
+        "supplychain",
+        "insider",
+        "fraud",
+        "obfuscation",
+        "crack",
+        "cheats",
+        "cve",
+        "zero_day",
+        "rootkit",
+        "apt",
+        "threat_intel",
+        "darkweb",
+        "rce",
+        "lpe",
+        "exfiltration",
+        "persistence",
+        "reconnaissance",
+        "hack",
+        "news",
+        "credentials_common",
+        "war"
+      ],
+      type: "dropdown",
+      tooltip: ""
+    }
+  }
 };

@@ -1,5 +1,8 @@
 import hashlib
+import re
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlparse
+
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
@@ -133,8 +136,6 @@ class elastic_request_generator:
     if not raw_query:
       return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
 
-    import re
-    from urllib.parse import urlparse
     exact_phrases = re.findall(r'"([^"]+)"', raw_query)
     loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
 
@@ -325,19 +326,30 @@ class elastic_request_generator:
     raw_query = p_query_model.q.strip()
     raw_query = helper_controller.remove_stopwords_from_string(raw_query)
     if not raw_query:
-      return ELASTIC_INDEX.S_CHATS_INDEX, {"query": {"match_none": {}}, "size": 0}
+      return ELASTIC_INDEX.S_CHATS_INDEX, {
+        "query": {"match_none": {}},
+        "size": 0
+      }
+    if len(raw_query)<2:
+      raw_query="*"
 
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
+    m_search_type = p_query_model.pSearchParamType
 
     must_clauses = []
     must_not_clause = []
+    if m_search_type != "all":
+      must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
     search_fields = [
       "m_content^3",
+      "m_caption^2.5",
       "m_channel_name^2",
-      "m_file_name^1.5",
+      "m_file_name^2",
       "m_media_caption^2",
-      "m_forwarded_from^1.2"
+      "m_forwarded_from^1.2",
+      "m_hashtags^1.2",
+      "m_users^1.1"
     ]
 
     query = {
@@ -390,17 +402,19 @@ class elastic_request_generator:
       },
       "highlight": {
         "fields": {
-          "m_important_content": {
-            "fragment_size": 500,
-            "number_of_fragments": 3,
-            "pre_tags": ["<em>"],
-            "post_tags": ["</em>"]
-          }, "m_content": {
+          "m_content": {
             "fragment_size": 250,
             "number_of_fragments": 3,
             "pre_tags": ["<em>"],
             "post_tags": ["</em>"]
-          }, "m_ref_html": {
+          },
+          "m_caption": {
+            "fragment_size": 250,
+            "number_of_fragments": 3,
+            "pre_tags": ["<em>"],
+            "post_tags": ["</em>"]
+          },
+          "m_ref_html": {
             "fragment_size": 250,
             "number_of_fragments": 3,
             "pre_tags": ["<em>"],

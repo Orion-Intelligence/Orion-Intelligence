@@ -10,6 +10,7 @@ import {PaginationComponent} from '../../pagination/pagination.component';
 import {ResultComponent} from '../../result/result.component';
 import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {chat_filters} from '../../../constants/filters';
 
 @Component({
   selector: 'app-dashboard-chats',
@@ -22,7 +23,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
   templateUrl: './dashboard-chats.component.html',
   animations: [fadeInDashboardItem]
 })
-export class DashboardChatsComponent implements OnInit , AfterViewInit{
+export class DashboardChatsComponent implements OnInit, AfterViewInit {
   public chatParamModel: ChatParamModel = new ChatParamModel();
   public chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
 
@@ -58,16 +59,50 @@ export class DashboardChatsComponent implements OnInit , AfterViewInit{
       });
   }
 
-  fetchSearchResults() {
+  fetchSearchResults(reset: boolean = false) {
     if (this.isLoading) return;
 
+    if (!this.chatParamModel.q) {
+      this.isLoading = false;
+
+      this.router.navigate([], {
+        queryParams: {},
+        queryParamsHandling: ''
+      }).then();
+
+      return;
+    }
+
     this.isLoading = true;
+
     const apiEndpoint = 'chat/telegram';
-    const queryParams = Object.fromEntries(Object.entries(this.chatParamModel).filter(([_, v]) => v != null && v !== ""));
+    const cleanedParams: any = {};
+
+    if (reset) {
+      cleanedParams['pSearchParamType'] = 'all';
+      cleanedParams['q'] = this.chatParamModel.q;
+    } else {
+      const typeValue = this.chatParamModel['pSearchParamType'];
+      if (typeValue != null && typeValue !== '') {
+        cleanedParams['pSearchParamType'] = typeValue;
+      }
+
+      const qValue = this.chatParamModel.q;
+      if (qValue != null && qValue !== '') {
+        cleanedParams['q'] = qValue;
+      }
+    }
 
     this.router.navigate([], {
-      queryParams: queryParams, queryParamsHandling: 'merge'
+      queryParams: cleanedParams,
+      queryParamsHandling: reset ? '' : 'merge'
     }).then();
+
+    if (reset) {
+      this.chatParamModel.pSearchParamType = 'all';
+      this.isLoading = false;
+      return;
+    }
 
     this.dashboardService.fetchSearchResults<ChatCallbackModel>(apiEndpoint, this.chatParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
@@ -80,6 +115,7 @@ export class DashboardChatsComponent implements OnInit , AfterViewInit{
         this.isLoading = false;
       });
   }
+
   onPageChange(step: number) {
     this.chatParamModel.mSearchParamPage = step;
     this.fetchSearchResults();
@@ -93,6 +129,18 @@ export class DashboardChatsComponent implements OnInit , AfterViewInit{
     return this.chatCallbackModel?.Result?.length ?? 0;
   }
 
+  resetFilters(_: void) {
+    this.fetchSearchResults(true);
+  }
+
+  reloadFilters(event: { [key: string]: string | null }) {
+    if (event['content_type'] != null) {
+      this.chatParamModel.pSearchParamType = event['content_type'];
+    }
+    this.fetchSearchResults();
+  }
+
   protected readonly Math = Math;
+  protected readonly leak_filters = chat_filters;
 
 }
