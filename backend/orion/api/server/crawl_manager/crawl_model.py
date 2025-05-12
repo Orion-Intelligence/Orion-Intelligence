@@ -180,18 +180,19 @@ class crawl_model:
 
   async def index_dump_record(self, dump_model: DumpModel):
     try:
-      dump_record = db_dump_record_model(
-        id=dump_model.id,
-        parsed_status= False,
-        leak_url=", ".join(dump_model.leak_url),
-        source=dump_model.source,
-        group=dump_model.group,
-        link=dump_model.link
-      )
-      await self._engine.save(dump_record)
-      return JSONResponse(content={"message": "Dump record saved successfully"}, status_code=200)
+      for index, url in enumerate(dump_model.leak_url):
+        dump_record = db_dump_record_model(
+          id=f"{dump_model.id}_{index}",
+          parsed_status=False,
+          leak_url=url,
+          source=dump_model.source,
+          group=dump_model.group,
+          link=dump_model.link
+        )
+        await self._engine.save(dump_record)
+      return JSONResponse(content={"message": "Dump records saved successfully"}, status_code=200)
     except Exception as e:
-      return JSONResponse(content={"error": f"Failed to save dump record: {str(e)}"}, status_code=500)
+      return JSONResponse(content={"error": f"Failed to save dump records: {str(e)}"}, status_code=500)
 
   @staticmethod
   async def fetch_cti_label(payload: CTITextRequest):
