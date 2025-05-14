@@ -3,6 +3,7 @@ import {Suggestion} from '../shared/common-result';
 export class ChatResultItem {
   m_content?: string;
   m_caption?: string;
+  m_summary: string[] = [];
   m_message_date?: string;
   m_time?: string;
   m_message_id?: string;

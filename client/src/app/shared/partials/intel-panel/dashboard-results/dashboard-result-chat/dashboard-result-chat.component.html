@@ -25,6 +25,13 @@
         <p class="dashboard__search-description highlight mt-2">No content available</p>
       </ng-template>
 
+      <ng-container *ngIf="item.m_summary[0] && item.m_summary[0].length > 5">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">AI Summary</h5>
+        <div class="dashboard__search-link">
+          {{ item.m_summary[0].slice(0, 500) }}...
+        </div>
+      </ng-container>
+
       <ng-container *ngIf="item.m_file_name?.length">
         <h5 class="dashboard__search-title dashboard__search-title-secondary">Embedded Files</h5>
         <div class="dashboard__search-link" *ngFor="let file of item.m_file_name | slice:0:3">

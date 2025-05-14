@@ -39,6 +39,9 @@ class crawl_controller:
   async def parse_chat(self, model):
     return await self.__crawl_model.parse_chat(model)
 
+  async def parse_chat_ai(self, model):
+    return await self.__crawl_model.parse_chat_ai(model)
+
   async def invoke_chat_index(self, leak_index: chat_data_model):
     return await self.__crawl_model.invoke_chat_index(leak_index)
 

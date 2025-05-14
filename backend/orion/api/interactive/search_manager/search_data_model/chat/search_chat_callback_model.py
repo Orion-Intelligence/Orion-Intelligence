@@ -31,7 +31,7 @@ class result_item(BaseModel):
     m_reply_to_message_id: Optional[str] = None
     m_message_status: Optional[str] = None
     m_file_saved_as: Optional[str] = None
-    m_file_path: Optional[str] = None
+    m_file_path: Optional[List[str]] = None
     m_channel_name: Optional[str] = None
     m_weblink: Optional[List[str]] = Field(default_factory=list)
     m_users: Optional[List[str]] = None

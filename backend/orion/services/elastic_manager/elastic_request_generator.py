@@ -33,7 +33,7 @@ class elastic_request_generator:
       "bool": {
         "should": [
           {"match": {"m_location": {"query": raw_query, "boost": 50}}},
-          {"match": {"m_ip": {"query": raw_query, "boost": 50}}},
+          { "term": { "m_ip": "1.2.3.4" }},
           {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
           {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
           {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},

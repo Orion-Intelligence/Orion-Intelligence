@@ -1,16 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
-import { HelperService } from '../../../services/helper.service';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {ChatResultItem} from '../../../model/results/chat/chat.callback.model';
+import {HelperService} from '../../../services/helper.service';
 import {
   NgForOf,
   NgIf,
   NgOptimizedImage,
   TitleCasePipe
 } from '@angular/common';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-report-chat',
@@ -32,14 +32,16 @@ export class ReportChatComponent implements OnInit {
   listItems: any[] = [];
   activeTab: string = '';
   content: string = '';
+  summary: string = '';
 
   constructor(
     private route: ActivatedRoute,
     private helper: HelperService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata }) => {
+    this.route.data.subscribe(({reportdata}) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });
@@ -48,16 +50,30 @@ export class ReportChatComponent implements OnInit {
   processResultItem() {
     if (this.resultItem) {
       this.content = this.resultItem.m_content || '';
+      this.summary = this.resultItem.m_summary[0] || '';
       this.arrayKeys = [];
+
+      const addedKeys = new Set<string>();
 
       if (this.resultItem.m_content?.trim()) {
         this.arrayKeys.push('m_content');
+        addedKeys.add('m_content');
+      }
+
+      if (this.resultItem.m_summary[0]?.trim()) {
+        this.arrayKeys.push('m_summary');
+        addedKeys.add('m_summary');
       }
 
       Object.keys(this.resultItem).forEach((key) => {
         const value = (this.resultItem as any)[key];
-        if (Array.isArray(value) && value.length > 0) {
+        if (
+          Array.isArray(value) &&
+          value.length > 0 &&
+          !addedKeys.has(key)
+        ) {
           this.arrayKeys.push(key);
+          addedKeys.add(key);
         }
       });
     }
@@ -72,7 +88,7 @@ export class ReportChatComponent implements OnInit {
 
     this.activeTab = tab;
 
-    if (tab === 'm_content') {
+    if (tab === 'm_content' || tab === 'm_summary') {
       this.listItems = [];
     } else if (this.resultItem && Array.isArray((this.resultItem as any)[tab])) {
       this.listItems = (this.resultItem as any)[tab].slice(0, 3);

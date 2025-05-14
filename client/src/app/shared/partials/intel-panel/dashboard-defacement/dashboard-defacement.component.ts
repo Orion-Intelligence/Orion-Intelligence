@@ -44,16 +44,14 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         this.defacementParamModel.q = params['q'] || '';
         this.defacementParamModel.mSearchParamPage = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1;
 
-        if (this.firstTrigger && this.defacementCallbackModel.Result.length > 0) {
+        if (this.firstTrigger && ((this.defacementCallbackModel.Result.length > 0))) {
           this.isLoading = false;
-          this.query = this.defacementParamModel.q;
-        } else if (this.firstTrigger) {
-          this.defacementParamModel.q = '*';
-          this.query = '';
-          this.fetchSearchResults();
+          this.query = this.defacementParamModel.q
+        } else {
           this.cdr.detectChanges();
+          this.fetchSearchResults()
         }
-        this.firstTrigger = false;
+        this.firstTrigger = false
       });
   }
 

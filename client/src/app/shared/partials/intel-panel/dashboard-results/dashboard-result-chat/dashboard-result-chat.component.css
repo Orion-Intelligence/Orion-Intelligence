@@ -1,4 +1,5 @@
 .dashboard__search-title{
+  font-size: 24px;
   margin-bottom: 0;
 }
 .dashboard__search-link-chat{
@@ -13,7 +14,7 @@
 }
 
 .dashboard__search-title-secondary{
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 500;
   margin-bottom: 10px;
   font-family: 'Inter', sans-serif;
