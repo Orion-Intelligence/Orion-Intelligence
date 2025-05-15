@@ -391,3 +391,10 @@
     height: 100vw;
   }
 }
+
+@media (max-height: 749px) {
+  .sidebar-hotlinks {
+    display: none;
+  }
+}
+

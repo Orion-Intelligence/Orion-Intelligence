@@ -1,13 +1,25 @@
 import {Injectable} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {ActivatedRoute, Router} from '@angular/router';
+import {franc} from 'franc-min';
+import {LANGUAGE_MAP} from '../constants/enums';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
 
-  constructor(private sanitizer: DomSanitizer, private router: Router, private activatedRoute: ActivatedRoute) {
+  constructor(private sanitizer: DomSanitizer) {
+  }
+
+  detectLanguageName(text: string): string {
+    const iso639_3 = franc(text);
+
+    if (iso639_3 === 'und') {
+      return "en";
+    }
+
+    const match = LANGUAGE_MAP[iso639_3];
+    return match ? match.iso1 : "en";
   }
 
   downloadAsCSV(data: any) {
@@ -40,13 +52,6 @@ export class HelperService {
     } else {
       alert('Sharing is not supported on this browser.');
     }
-  }
-
-  reset_query_param(): void {
-    this.router.navigate([], {
-      queryParams: {},
-      replaceUrl: true
-    }).then();
   }
 
   highlightWords(text: string): SafeHtml {
@@ -107,10 +112,4 @@ export class HelperService {
     return this.sanitizer.bypassSecurityTrustHtml(highlighted);
   }
 
-
-  private escapeHtml(text: string): string {
-    let tempDiv = document.createElement("div");
-    tempDiv.textContent = text;
-    return tempDiv.innerHTML;
-  }
 }

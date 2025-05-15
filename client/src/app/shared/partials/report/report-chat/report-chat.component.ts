@@ -11,6 +11,7 @@ import {
 import {ResultListComponent} from '../../result-components/result-list/result-list.component';
 import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-report-chat',

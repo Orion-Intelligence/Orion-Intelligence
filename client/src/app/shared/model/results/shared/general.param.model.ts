@@ -4,12 +4,11 @@ export class GeneralParamModel {
   mSearchParamPage: number = 1;
   mSearchParamSafeSearch: boolean = false;
   mNetwork: string = "all";
+  mDateRange: string = ""
+  mContentType: string = "all"
+  mEntity: string = ""
 
   constructor(init?: Partial<GeneralParamModel>) {
     Object.assign(this, init);
-  }
-
-  toJSON() {
-    return JSON.stringify(this);
   }
 }

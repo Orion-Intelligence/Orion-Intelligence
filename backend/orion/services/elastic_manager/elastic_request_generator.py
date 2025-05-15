@@ -1,12 +1,12 @@
 import hashlib
 import re
-from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
 
+from datetime import datetime, timedelta, timezone
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
+from urllib.parse import urlparse
 
 
 class elastic_request_generator:
@@ -33,7 +33,7 @@ class elastic_request_generator:
       "bool": {
         "should": [
           {"match": {"m_location": {"query": raw_query, "boost": 50}}},
-          { "term": { "m_ip": "1.2.3.4" }},
+          {"match": {"m_ip": {"query": raw_query, "boost": 50}}},
           {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
           {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
           {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
@@ -455,14 +455,49 @@ class elastic_request_generator:
     m_search_type = p_query_model.pSearchParamType
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
+    m_date_range=p_query_model.mDateRange
+    m_content_type=p_query_model.mContentType
+    m_entity=p_query_model.mEntity
 
-    from urllib.parse import urlparse
     parsed_url = urlparse(raw_query)
     domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
     path = parsed_url.path.lstrip("/") or ("/".join(raw_query.split("/")[1:]) if "/" in raw_query else "")
 
     must_clauses = []
     must_not_clause = []
+
+    if m_date_range:
+      parts = m_date_range.split(',')
+      if len(parts) == 2:
+        try:
+          from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
+          from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
+
+          to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
+          to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
+
+          must_clauses.append({
+            "range": {
+              "m_update_date": {
+                "gte": from_date,
+                "lte": to_date
+              }
+            }
+          })
+        except ValueError:
+          pass
+
+    if m_entity:
+      entity_list = [e.strip().lower() for e in m_entity.split(',') if e.strip()]
+      if entity_list:
+        must_clauses.append({
+          "terms": {
+            "m_entity": entity_list
+          }
+        })
+
+    if m_content_type and m_content_type.lower() not in ("", "all"):
+      must_clauses.append({"term": {"m_content_type": m_content_type.lower()}})
 
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network": m_network.lower()}})

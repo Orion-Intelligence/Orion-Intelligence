@@ -62,6 +62,24 @@ export const general_filters: FilterModel = {
       type: "dropdown",
       tooltip: "Enable Filtering"
     },
+    mDateRange: {
+      title: "Date Range",
+      options: [],
+      type: 'daterange',
+      tooltip: "Date Range"
+    },
+    mContentType: {
+      title: "Content Type",
+      options: ["all", "forums", "leaks", "marketplaces", "cryptocurrency", "general"],
+      type: 'dropdown',
+      tooltip: "Content Filter"
+    },
+    mEntity: {
+      title: "Entity Type",
+      options: ["AU_ABN", "AU_ACN", "AU_TFN", "IN_PAN", "NRP", "UK_NHS", "US_SSN"],
+      type: 'multiSelection',
+      tooltip: "Entity Filter"
+    },
   },
 };
 

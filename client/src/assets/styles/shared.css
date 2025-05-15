@@ -275,6 +275,10 @@ table a:visited {
   margin-bottom: 10px;
 }
 
+.report-icon-top {
+  margin-top: 3px;
+}
+
 .report-menu-option-container {
   border-radius: 12px;
   margin-left: 30px;

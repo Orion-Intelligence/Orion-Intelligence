@@ -10,22 +10,39 @@
 </label>
 
 <form class="filter__form">
-  <div *ngFor="let key of Object.keys(filterModel.filters)">
-    <label class="filter__label" appTooltip="{{filterModel.filters[key].tooltip}}"> {{ filterModel.filters[key].title }} </label>
-    <div class="dropdown">
-      <button class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" type="button" id="dropdown{{ key }}" data-bs-toggle="dropdown" aria-expanded="false">
-        {{ selectedFilters[key] ? selectedFilters[key] : 'Select ' + filterModel.filters[key].title }}
-      </button>
-
-      <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3" [attr.aria-labelledby]="'dropdown' + key">
-        <li *ngFor="let option of filterModel.filters[key].options; let last = last">
-          <a class="dropdown-item py-0 d-flex align-items-center" (click)="onSelectionChange(key, option)"> {{ option | titlecase }} </a>
-          <ng-container *ngIf="!last">
+  <div class="filter__content">
+    <div *ngFor="let key of Object.keys(filterModel.filters)">
+      <label class="filter__label" appTooltip="{{filterModel.filters[key].tooltip}}">
+        {{ filterModel.filters[key].title }}
+      </label>
+      <ng-container *ngIf="filterModel.filters[key].type === 'daterange'">
+        <app-date-picker [key]="key" (dateSelected)="updateFilter($event)"></app-date-picker>
+      </ng-container>
+      <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
+        <div class="dropdown">
+          <button
+            class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+            type="button" id="dropdown{{ key }}" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ selectedFilters[key] ? selectedFilters[key] : 'Select ' + filterModel.filters[key].title }}
+          </button>
+          <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3"
+            [attr.aria-labelledby]="'dropdown' + key">
+            <li *ngFor="let option of filterModel.filters[key].options; let last = last">
+              <a class="dropdown-item py-0 d-flex align-items-center" (click)="onSelectionChange(key, option)">
+                {{ option | titlecase }}
+              </a>
+              <ng-container *ngIf="!last">
             <li class="dropdown-divider m-0 mx-3"></li>
-          </ng-container>
-        </li>
+      </ng-container>
+      </li>
       </ul>
     </div>
+    </ng-container>
+    <ng-container *ngIf="filterModel.filters[key].type === 'multiSelection'">
+      <app-multiple-selection [key]="key" [filterModel]="filterModel" (selectedFiltersChange)="updateFilter($event)">
+      </app-multiple-selection>
+    </ng-container>
+  </div>
   </div>
 
   <div class="filter__submit d-flex flex-column">

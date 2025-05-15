@@ -14,12 +14,12 @@ export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
   lang: string = "en";
 
-  constructor(private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
+  constructor(private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
   }
 
   downloadCSV() {
-    this.resultHelperService.downloadAsCSV(this.defacementData);
+    this.helperService.downloadAsCSV(this.defacementData);
   }
 
   langUpdate() {
@@ -29,11 +29,11 @@ export class ReportDefacementComponent implements OnInit {
   }
 
   printPage() {
-    this.resultHelperService.printPage();
+    this.helperService.printPage();
   }
 
   shareResult() {
-    this.resultHelperService.shareResult(this.defacementData?.m_url || '');
+    this.helperService.shareResult(this.defacementData?.m_url || '');
   }
 
   redirectToUrl() {

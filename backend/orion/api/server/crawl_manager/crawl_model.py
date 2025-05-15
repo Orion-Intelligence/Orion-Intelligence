@@ -93,6 +93,19 @@ class crawl_model:
       return {"error": str(ex)}
 
   @staticmethod
+  async def parse_summarize_ai(model:nlp_data_model):
+    try:
+      async with httpx.AsyncClient() as client:
+        response = await client.post(
+          "http://trusted-micros-api:8010/nlp/summarize/ai",
+          json={"data": model.data},
+          timeout=10
+        )
+        return response.json()
+    except Exception as ex:
+      return {"error": str(ex)}
+
+  @staticmethod
   async def parse_chat_ai(model:nlp_data_model):
     try:
       async with httpx.AsyncClient() as client:

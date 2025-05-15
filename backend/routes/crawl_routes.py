@@ -50,6 +50,10 @@ async def parse_text(payload: nlp_data_model):
 async def parse_text(payload: nlp_data_model):
     return await crawl_controller.getInstance().parse_chat_ai(payload)
 
+@crawl_routes.post("/api/nlp/summarize/ai", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def parse_text(payload: nlp_data_model):
+    return await crawl_controller.getInstance().parse_summarize_ai(payload)
+
 @crawl_routes.post("/api/index/chat", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_chat_data(request: Request):
     body = await request.json()

@@ -153,6 +153,15 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     if (event['mNetwork'] != null) {
       this.generalParamModel.mNetwork = event['mNetwork'];
     }
+    if (event['mDateRange']) {
+      this.generalParamModel.mDateRange = event['mDateRange']
+    }
+    if (event['mContentType'] != null) {
+      this.generalParamModel.mContentType = event['mContentType'];
+    }
+    if (event['mEntity'] != null) {
+      this.generalParamModel.mEntity = event['mEntity'];
+    }
     this.generalParamModel.mSearchParamSafeSearch = event['mSearchParamSafeSearch'] === 'yes';
     this.fetchSearchResults();
   }

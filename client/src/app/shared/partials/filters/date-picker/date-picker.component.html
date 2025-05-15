@@ -1,0 +1,22 @@
+<form class="row">
+    <div class="col-12">
+        <div class="input-group">
+            <input ngbDatepicker #datepicker="ngbDatepicker"
+                class="form-control dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+                [autoClose]="'outside'" (dateSelect)="onDateSelection($event)" [displayMonths]="2" [dayTemplate]="t"
+                outsideDays="hidden" [startDate]="fromDate!" tabindex="-1"
+                [value]="formatDateRange()" readonly placeholder="Select date range" (click)="datepicker.toggle()" />
+            <button class="btn date_picker_button_bg" (click)="datepicker.toggle()" type="button">
+                <img src="assets/images/shared/calendar.png" alt="Send" class="date_picker_button_image " />
+            </button>
+        </div>
+
+        <ng-template #t let-date let-focused="focused">
+            <span class="custom-day" [class.focused]="focused" [class.range]="isRange(date)"
+                [class.faded]="isHovered(date) || isInside(date)" (mouseenter)="hoveredDate = date"
+                (mouseleave)="hoveredDate = null">
+                {{ date.day }}
+            </span>
+        </ng-template>
+    </div>
+</form>

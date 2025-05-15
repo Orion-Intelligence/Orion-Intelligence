@@ -24,13 +24,17 @@ export class ReportComponent implements OnInit {
   activeTab: string = '';
   content: string = '';
   lang = "en"
+  lang_detected = "en"
   type = ""
   isImageLoaded: boolean = false;
   isImageError: boolean = false;
   imageSrc: string | null = null;
+  aiSuggestStatus:boolean = false
+  aiSuggestSummary = ""
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private resultHelperService: HelperService, appService: AppService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
+    this.lang_detected = appService.getConfig().language_allowed
   }
 
   ngOnInit(): void {
@@ -41,6 +45,10 @@ export class ReportComponent implements OnInit {
 
       if (this.resultItem?.m_screenshot) {
         this.loadImage(this.resultItem.m_screenshot);
+      }
+      let content = this.resultItem?.m_content
+      if (content){
+        this.lang_detected = this.helperService.detectLanguageName(content);
       }
     });
   }
@@ -82,11 +90,28 @@ export class ReportComponent implements OnInit {
   }
 
   downloadCSV() {
-    this.resultHelperService.downloadAsCSV(this.resultItem);
+    this.helperService.downloadAsCSV(this.resultItem);
   }
 
   printPage() {
-    this.resultHelperService.printPage();
+    this.helperService.printPage();
+  }
+
+  aiSuggest() {
+    const apiUrl = '/nlp/summarize/ai';
+
+    this.api.post<{ result: string }>(apiUrl, {
+      data: this.resultItem?.m_content
+    }).subscribe({
+      next: (response) => {
+        this.aiSuggestStatus = true;
+        this.aiSuggestSummary = response.result || 'No summary available';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Summarization failed', err);
+      }
+    });
   }
 
   langUpdate() {
@@ -117,7 +142,7 @@ export class ReportComponent implements OnInit {
   }
 
   shareResult() {
-    this.resultHelperService.shareResult(this.resultItem?.m_url || '');
+    this.helperService.shareResult(this.resultItem?.m_url || '');
   }
 
   redirectToUrl() {
