@@ -6,5 +6,5 @@
 </div>
 
 <div *ngIf="!isLoading && this.defacementCallbackModel.Result.length > 0" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.ceil(this.defacementParamModel.mSearchParamPage * this.defacementCallbackModel.Page_Count)"></app-pagination>
+  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.floor(this.defacementParamModel.mSearchParamPage * this.defacementCallbackModel.Page_Count)"></app-pagination>
 </div>

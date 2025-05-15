@@ -497,7 +497,7 @@ class elastic_request_generator:
         })
 
     if m_content_type and m_content_type.lower() not in ("", "all"):
-      must_clauses.append({"term": {"m_content_type": m_content_type.lower()}})
+      must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})
 
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network": m_network.lower()}})

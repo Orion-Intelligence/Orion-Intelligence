@@ -23,6 +23,18 @@
     color: white;
 }
 
+.form-check-input{
+  margin-right: 15px;
+}
+
+#multiDropdownmEntity{
+  overflow: clip;
+}
+
+#multiDropdownmEntity .ng-select .ng-select-container {
+  padding-right: 12px;
+}
+
 .custom-day.faded {
     background-color: rgba(2, 117, 216, 0.5);
 }

@@ -63,25 +63,26 @@ export const general_filters: FilterModel = {
       tooltip: "Enable Filtering"
     },
     mDateRange: {
-      title: "Date Range",
+      title: "Creation Date",
       options: [],
       type: 'daterange',
-      tooltip: "Date Range"
+      tooltip: "Creation Date"
     },
     mContentType: {
-      title: "Content Type",
-      options: ["all", "forums", "leaks", "marketplaces", "cryptocurrency", "general"],
+      title: "Mitre TTP",
+      options: ["attack-pattern", "campaign", "course-of-action", "identity", "intrusion-set", "malware", "marking-definition", "relationship", "tool", "x-mitre-collection", "x-mitre-data-component", "x-mitre-data-source", "x-mitre-matrix", "x-mitre-tactic"],
       type: 'dropdown',
       tooltip: "Content Filter"
     },
     mEntity: {
       title: "Entity Type",
-      options: ["AU_ABN", "AU_ACN", "AU_TFN", "IN_PAN", "NRP", "UK_NHS", "US_SSN"],
+      options: ["EMAILS","HASHES","IOCS","IPS","IPV4S","IPV6S","MD5_HASHES","SHA1_HASHES","SHA256_HASHES","SHA512_HASHES","TELEPHONE_NUMS","UNENCODED_URLS","URLS","EMAIL_ADDRESSES_COMPLETE","EMAIL_ADDRESSES","DOMAINS","SHA512S","SHA256S","SHA1S","MD5S","SSDEEPS","CVES","GOOGLE_ANALYTICS_TRACKER_IDS","BITCOIN_ADDRESSES","MAC_ADDRESSES","API_KEY","AWS_SECRET","AZURE_RESOURCE_ID","REGISTRY_KEY","FILE_PATH","YARA_RULE","PHONE_NUMBER","COUNTRY","ORG","GPE","NORP","PRODUCT","PERSON","LOC","LAW","CREDIT_CARD","IBAN_CODE","IN_AADHAAR","AU_ABN","AU_TFN","IN_VEHICLE_REGISTRATION","IP_ADDRESS","IN_PAN","LOCATION","NRP","SG_NRIC_FIN","US_ITIN","IN_VOTER","US_DRIVER_LICENSE","URL","US_SSN","US_PASSPORT","IN_PASSPORT","US_BANK_NUMBER","USERNAME","PASSWORD","HASHTAG","MENTION","MITRE_TTP"],
       type: 'multiSelection',
       tooltip: "Entity Filter"
     },
   },
 };
+
 
 export const chat_filters: FilterModel = {
   filters: {

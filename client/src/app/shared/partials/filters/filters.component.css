@@ -51,6 +51,32 @@
   margin-bottom: 15px;
 }
 
+.filter__input_date{
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.filter__input_date-button{
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  height: 40px;
+}
+
+.filter__input_date-container .dropdown-menu{
+  width: 262px;
+  margin-left: -15px !important;
+  margin-top: 8px !important;
+}
+
+.filter__input_date-container .ngb-dp-month{
+  margin-left: 14px;
+  margin-top: 15px;
+}
+
+.custom-day.range, .custom-day:hover{
+  border-radius: 4px;
+}
+
 .filter__input {
   display: block;
   color: #3c3c43;
@@ -60,11 +86,11 @@
   background-color: #ffffff;
   padding: 11px 11px 11px 15px;
   border-radius: 7px;
-  width: 100%;
   height: 40px;
   text-align: left;
   box-shadow: 0 1px 2px 0 #1018280d;
   border: 1px solid #ffffff;
+  width: 100%;
 }
 
 .filter__submit {
@@ -99,6 +125,15 @@
   background: #4EA2F140;
   border: 2px solid #359AFF;
 }
+
+.filter__submit .btn-secondary:focus,
+.filter__submit .btn-secondary:active {
+  background: #4EA2F160 !important;
+  border: 2px solid #359AFF !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 
 .filter__submit-button:hover {
   background: #1176d4;
