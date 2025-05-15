@@ -35,3 +35,7 @@
     width: 20px;
     height: 20px;
 }
+
+.dropdown-menu {
+    left: auto !important;
+}

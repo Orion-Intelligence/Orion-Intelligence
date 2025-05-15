@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {franc} from 'franc-min';
-import {LANGUAGE_MAP} from '../constants/enums';
+import { Injectable } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { franc } from 'franc-min';
+import { LANGUAGE_MAP } from '../constants/enums';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,7 @@ export class HelperService {
 
   downloadAsCSV(data: any) {
     const csvContent = this.convertToCSV(data);
-    const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
