@@ -52,44 +52,33 @@ class entity_manager:
                         FILTER cluster.type == 'cluster' AND cluster._key IN ['general','leak','defacement','chat']
                         RETURN cluster._id
                     )
-                    LET depth1 = (
+                    LET raw_depth1 = (
                       FOR id IN clusters
                         FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
                         LIMIT 101
                         RETURN {vertex: v, edge: e, path: p}
                     )
-                    LET depth2 = (
-                      FOR id IN clusters
-                        FOR v, e, p IN 2..2 ANY id GRAPH 'cti_graph'
-                        LIMIT 101
-                        RETURN {vertex: v, edge: e, path: p}
-                    )
+                    LET depth1 = SLICE(raw_depth1, 0, 100)
+                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
                     RETURN {
-                      depth1: SLICE(depth1, 0, 100),
-                      depth2: SLICE(depth2, 0, 100),
-                      limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      depth1,
+                      limit_hit_depth1,
                       matched_ids: clusters
                     }
                     """
                 else:
                     queried_id = f"cti_vertices/{normalized_value}"
                     query_str = """
-                    LET depth1 = (
+                    LET raw_depth1 = (
                       FOR v, e, p IN 1..1 ANY @cluster_id GRAPH 'cti_graph'
                       LIMIT 101
                       RETURN {vertex: v, edge: e, path: p}
                     )
-                    LET depth2 = (
-                      FOR v, e, p IN 2..2 ANY @cluster_id GRAPH 'cti_graph'
-                      LIMIT 101
-                      RETURN {vertex: v, edge: e, path: p}
-                    )
+                    LET depth1 = SLICE(raw_depth1, 0, 100)
+                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
                     RETURN {
-                      depth1: SLICE(depth1, 0, 100),
-                      depth2: SLICE(depth2, 0, 100),
-                      limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      depth1,
+                      limit_hit_depth1,
                       matched_ids: [@cluster_id]
                     }
                     """
@@ -103,23 +92,17 @@ class entity_manager:
                       FOR property IN cti_vertices
                         RETURN property._id
                     )
-                    LET depth1 = (
+                    LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
                         LIMIT 101
                         RETURN {vertex: v, edge: e, path: p}
                     )
-                    LET depth2 = (
-                      FOR id IN props
-                        FOR v, e, p IN 2..2 ANY id GRAPH 'cti_graph'
-                        LIMIT 101
-                        RETURN {vertex: v, edge: e, path: p}
-                    )
+                    LET depth1 = SLICE(raw_depth1, 0, 100)
+                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
                     RETURN {
-                      depth1: SLICE(depth1, 0, 100),
-                      depth2: SLICE(depth2, 0, 100),
-                      limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      depth1,
+                      limit_hit_depth1,
                       matched_ids: props
                     }
                     """
@@ -131,23 +114,17 @@ class entity_manager:
                         FILTER CONTAINS(LOWER(property.value), @search_value)
                         RETURN property._id
                     )
-                    LET depth1 = (
+                    LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
                         LIMIT 101
                         RETURN {vertex: v, edge: e, path: p}
                     )
-                    LET depth2 = (
-                      FOR id IN props
-                        FOR v, e, p IN 2..2 ANY id GRAPH 'cti_graph'
-                        LIMIT 101
-                        RETURN {vertex: v, edge: e, path: p}
-                    )
+                    LET depth1 = SLICE(raw_depth1, 0, 100)
+                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
                     RETURN {
-                      depth1: SLICE(depth1, 0, 100),
-                      depth2: SLICE(depth2, 0, 100),
-                      limit_hit_depth1: LENGTH(depth1) > 100,
-                      limit_hit_depth2: LENGTH(depth2) > 100,
+                      depth1,
+                      limit_hit_depth1,
                       matched_ids: props
                     }
                     """
@@ -157,21 +134,16 @@ class entity_manager:
                 start_vertex = f"cti_vertices/{normalized_value}" if query.data_point_type == "document" else f"cti_vertices/{normalized_type}:{normalized_value}"
                 queried_id = start_vertex
                 query_str = """
-                LET depth1 = (
+                LET raw_depth1 = (
                   FOR v, e, p IN 1..1 ANY @start_vertex GRAPH 'cti_graph'
                   LIMIT 101
                   RETURN {vertex: v, edge: e, path: p}
                 )
-                LET depth2 = (
-                  FOR v, e, p IN 2..2 ANY @start_vertex GRAPH 'cti_graph'
-                  LIMIT 101
-                  RETURN {vertex: v, edge: e, path: p}
-                )
+                LET depth1 = SLICE(raw_depth1, 0, 100)
+                LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
                 RETURN {
-                  depth1: SLICE(depth1, 0, 100),
-                  depth2: SLICE(depth2, 0, 100),
-                  limit_hit_depth1: LENGTH(depth1) > 100,
-                  limit_hit_depth2: LENGTH(depth2) > 100,
+                  depth1,
+                  limit_hit_depth1,
                   matched_ids: [@start_vertex]
                 }
                 """
@@ -180,9 +152,9 @@ class entity_manager:
             result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
             result_obj = result_obj[0] if result_obj else {}
 
-            results = result_obj.get("depth1", []) + result_obj.get("depth2", [])
+            results = result_obj.get("depth1", [])
             matched_vertex_ids = result_obj.get("matched_ids", []) or []
-            limit_reached = len(result_obj.get("depth1", [])) >= 200 or len(result_obj.get("depth2", [])) >= 200
+            limit_reached = result_obj.get("limit_hit_depth1", False)
 
             unique_edges = set()
             final_results = []
@@ -193,8 +165,6 @@ class entity_manager:
                     if signature not in unique_edges:
                         unique_edges.add(signature)
                         final_results.append(item)
-                else:
-                    final_results.append(item)
 
             return {
                 "results": final_results,
