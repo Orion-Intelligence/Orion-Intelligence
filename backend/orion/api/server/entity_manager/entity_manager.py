@@ -182,7 +182,7 @@ class entity_manager:
 
             results = result_obj.get("depth1", []) + result_obj.get("depth2", [])
             matched_vertex_ids = result_obj.get("matched_ids", []) or []
-            limit_reached = len(result_obj.get("depth1", [])) >= 400 or len(result_obj.get("depth2", [])) >= 400
+            limit_reached = len(result_obj.get("depth1", [])) >= 200 or len(result_obj.get("depth2", [])) >= 200
 
             unique_edges = set()
             final_results = []
