@@ -40,17 +40,6 @@ class entity_manager:
             normalized_value = self._sanitize(self._normalize_key(query.query_value))
             normalized_type = self._sanitize(self._normalize_key(query.model_type)) if query.model_type else None
 
-            base_types = [
-                "m_email", "m_phone_numbers", "m_states", "m_location", "m_social_media_profiles",
-                "m_name", "m_industry", "m_company_name", "m_country_name", "m_ip", "m_team", "m_attacker", "m_au_abn",
-                "m_au_acn", "m_au_medicare", "m_au_tfn", "m_credit_cards", "m_crypto_addresses",
-                "m_crypto_btc_addresses", "m_iban_codes", "m_in_aadhaar_numbers", "m_in_pan_numbers",
-                "m_in_passport_numbers", "m_in_vehicle_registrations", "m_in_voter_ids", "m_medical_licenses",
-                "m_nrp_numbers", "m_persons", "m_sg_nric_fin_numbers", "m_uk_nhs_numbers", "m_uk_nino_numbers",
-                "m_urls", "m_us_bank_numbers", "m_us_driver_licenses", "m_us_itin_numbers", "m_us_passport_numbers",
-                "m_us_ssn_numbers", "m_title", "m_url", "m_weblink", "m_dumplink", "m_websites"
-            ]
-
             query_str = ""
             bind_vars = {}
 
@@ -109,59 +98,58 @@ class entity_manager:
             elif query.data_point_type == "property" and normalized_type == "all":
                 if normalized_value == "all":
                     queried_id = "all_properties"
-                    query_str = f"""
+                    query_str = """
                     LET props = (
                       FOR property IN cti_vertices
-                        FILTER property.type IN {base_types}
                         RETURN property._id
                     )
                     LET depth1 = (
                       FOR id IN props
                         FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
                         LIMIT 101
-                        RETURN {{vertex: v, edge: e, path: p}}
+                        RETURN {vertex: v, edge: e, path: p}
                     )
                     LET depth2 = (
                       FOR id IN props
                         FOR v, e, p IN 2..2 ANY id GRAPH 'cti_graph'
                         LIMIT 101
-                        RETURN {{vertex: v, edge: e, path: p}}
+                        RETURN {vertex: v, edge: e, path: p}
                     )
-                    RETURN {{
+                    RETURN {
                       depth1: SLICE(depth1, 0, 100),
                       depth2: SLICE(depth2, 0, 100),
                       limit_hit_depth1: LENGTH(depth1) > 100,
                       limit_hit_depth2: LENGTH(depth2) > 100,
                       matched_ids: props
-                    }}
+                    }
                     """
                 else:
                     queried_id = normalized_value
-                    query_str = f"""
+                    query_str = """
                     LET props = (
                       FOR property IN cti_vertices
-                        FILTER property.type IN {base_types} AND CONTAINS(LOWER(property.value), @search_value)
+                        FILTER CONTAINS(LOWER(property.value), @search_value)
                         RETURN property._id
                     )
                     LET depth1 = (
                       FOR id IN props
                         FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
                         LIMIT 101
-                        RETURN {{vertex: v, edge: e, path: p}}
+                        RETURN {vertex: v, edge: e, path: p}
                     )
                     LET depth2 = (
                       FOR id IN props
                         FOR v, e, p IN 2..2 ANY id GRAPH 'cti_graph'
                         LIMIT 101
-                        RETURN {{vertex: v, edge: e, path: p}}
+                        RETURN {vertex: v, edge: e, path: p}
                     )
-                    RETURN {{
+                    RETURN {
                       depth1: SLICE(depth1, 0, 100),
                       depth2: SLICE(depth2, 0, 100),
                       limit_hit_depth1: LENGTH(depth1) > 100,
                       limit_hit_depth2: LENGTH(depth2) > 100,
                       matched_ids: props
-                    }}
+                    }
                     """
                     bind_vars = {"search_value": normalized_value}
 
@@ -301,6 +289,5 @@ class entity_manager:
             return {"status": "success", "message": f"Entity {normalized_doc_id} processed."}
 
         except Exception as ex:
-            print(ex, flush=True)
             log.g().e(f"ARANGO ENTITY UPSERT ERROR: {ex}")
             return {"status": "error", "message": str(ex)}

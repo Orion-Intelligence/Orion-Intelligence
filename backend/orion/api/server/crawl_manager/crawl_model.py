@@ -1,3 +1,5 @@
+import uuid
+
 import httpx
 import requests
 from datetime import datetime, timezone
@@ -206,9 +208,13 @@ class crawl_model:
 
   async def index_dump_record(self, dump_model: DumpModel):
     try:
+      batch_id = dump_model.id
+
       for index, url in enumerate(dump_model.leak_url):
+        record_id = f"{batch_id}_{index}"
+
         dump_record = db_dump_record_model(
-          id=f"{dump_model.id}_{index}",
+          id=record_id,
           parsed_status=False,
           leak_url=url,
           source=dump_model.source,
@@ -216,7 +222,9 @@ class crawl_model:
           link=dump_model.link
         )
         await self._engine.save(dump_record)
+
       return JSONResponse(content={"message": "Dump records saved successfully"}, status_code=200)
+
     except Exception as e:
       return JSONResponse(content={"error": f"Failed to save dump records: {str(e)}"}, status_code=500)
 

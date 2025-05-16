@@ -4,7 +4,7 @@
   border: 1px solid #ffffff20;
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 15px 32px 32px;
+  margin: 15px 32px 15px;
   min-height: auto;
   height: auto !important;
   display: block;
@@ -172,8 +172,27 @@
 
 .search__result-detail .tabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin: 20px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-color: white transparent;
+  scrollbar-width: thin;
+}
+
+.search__result-detail .tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.search__result-detail .tabs::-webkit-scrollbar-thumb {
+  background-color: white;
+  border-radius: 10px;
+}
+
+.search__result-detail .tabs::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
 .search__result-detail .tabs button {

@@ -13,7 +13,7 @@
     <tbody *ngIf="(dumpData$ | async) as dumpData">
     <tr *ngFor="let item of dumpData.mDumpCallbackLinks; let i = index">
       <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
-      <td>{{ item.link }}</td>
+      <td (click)="copyRowData(item.leak_url)" class="copy_url">{{ item.leak_url }}</td>
       <td>{{ item.source }}</td>
       <td>{{ item.group }}</td>
       <td>

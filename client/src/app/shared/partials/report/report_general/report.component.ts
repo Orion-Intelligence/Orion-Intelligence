@@ -98,7 +98,7 @@ export class ReportComponent implements OnInit {
   }
 
   aiSuggest() {
-    const apiUrl = '/nlp/summarize/ai';
+    const apiUrl = 'nlp/summarize/ai';
 
     this.api.post<{ result: string }>(apiUrl, {
       data: this.resultItem?.m_content

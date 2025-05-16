@@ -1,44 +1,8 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional
 
 class entity_model(BaseModel):
     m_password: Optional[str] = None
-    m_cluster_id: Optional[str] = None
-    m_document_id: Optional[str] = None
-    m_email: Optional[List[str]] = None
-    m_phone_numbers: Optional[List[str]] = None
-    m_states: Optional[List[str]] = None
-    m_location: Optional[List[str]] = None
-    m_social_media_profiles: Optional[List[str]] = None
-    m_name: Optional[str] = None
-    m_industry: Optional[str] = None
-    m_company_name: Optional[str] = None
-    m_country_name: Optional[str] = None
-    m_ip: Optional[List[str]] = None
-    m_team: Optional[str] = None
-    m_attacker: Optional[List[str]] = None
-    m_au_abn: Optional[List[str]] = None
-    m_au_acn: Optional[List[str]] = None
-    m_au_medicare: Optional[List[str]] = None
-    m_au_tfn: Optional[List[str]] = None
-    m_credit_cards: Optional[List[str]] = None
-    m_crypto_addresses: Optional[List[str]] = None
-    m_crypto_btc_addresses: Optional[List[str]] = None
-    m_iban_codes: Optional[List[str]] = None
-    m_in_aadhaar_numbers: Optional[List[str]] = None
-    m_in_pan_numbers: Optional[List[str]] = None
-    m_in_passport_numbers: Optional[List[str]] = None
-    m_in_vehicle_registrations: Optional[List[str]] = None
-    m_in_voter_ids: Optional[List[str]] = None
-    m_medical_licenses: Optional[List[str]] = None
-    m_nrp_numbers: Optional[List[str]] = None
-    m_persons: Optional[List[str]] = None
-    m_sg_nric_fin_numbers: Optional[List[str]] = None
-    m_uk_nhs_numbers: Optional[List[str]] = None
-    m_uk_nino_numbers: Optional[List[str]] = None
-    m_us_bank_numbers: Optional[List[str]] = None
-    m_us_driver_licenses: Optional[List[str]] = None
-    m_us_itin_numbers: Optional[List[str]] = None
-    m_us_passport_numbers: Optional[List[str]] = None
-    m_us_ssn_numbers: Optional[List[str]] = None
-    m_title: Optional[str] = None
+    model_config = {
+        "extra": "allow"
+    }

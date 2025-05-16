@@ -21,16 +21,20 @@
   margin-right: 10px;
 }
 
+.copy_url {
+  cursor: pointer !important;
+}
+
 .directory-list__column-service-url {
-  width: 45%;
+  width: 60%;
 }
 
 .directory-list__column-category {
-  width: 20%;
+  width: 15%;
 }
 
 .directory-list__column-url-status {
-  width: 10%;
+  width: 15%;
 }
 
 .directory-list__column-leak-status {
