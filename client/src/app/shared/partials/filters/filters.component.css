@@ -52,6 +52,9 @@
 }
 
 .filter__input_date{
+  outline: none;
+  height: 40px;
+  border-radius: 8px !important;
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
 }
@@ -161,13 +164,35 @@
 }
 
 .filter__form .dropdown-item {
-  height: 45px;
+  height: 40px;
   font-size: 15px;
   vertical-align: center;
 }
 
 .filter__form .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  float: left;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 1rem;
+  color: #212529;
+  text-align: left;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
+.dropdown-item{
+  padding-left: 15px !important;
 }
 
 .filter__form .dropdown-item:hover {

@@ -9,7 +9,7 @@
             <label class="dropdown-item py-0 d-flex align-items-center" style="cursor: pointer;">
                 <input type="checkbox" class="form-check-input me-2"
                     [checked]="(mSelectedFilters[key] || []).includes(option)" (click)="onMultiSelectionToggle(option)">
-                {{ option | titlecase }}
+                      {{ formatOptionLabel(option) }}
             </label>
         </li>
     </ul>

@@ -1,12 +1,12 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-multiple-selection',
   imports: [CommonModule],
   templateUrl: './multiple-selection.component.html',
 })
-export class MultipleSelectionComponent{
+export class MultipleSelectionComponent {
   @Input() key: string = '';
   @Input() filterModel: any;
   @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
@@ -26,6 +26,14 @@ export class MultipleSelectionComponent{
     }
 
     this.mSelectedFilters[this.key] = [...this.mSelectedFilters[this.key]];
+  }
+
+  formatOptionLabel(value: string): string {
+    if (!value) return '';
+    return value
+      .replace(/[_-]/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, char => char.toUpperCase());
   }
 
   getMultiSelectedText(): string {

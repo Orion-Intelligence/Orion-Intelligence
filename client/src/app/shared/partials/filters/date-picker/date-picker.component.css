@@ -1,33 +1,65 @@
-.dp-hidden {
-    width: 0;
-    margin: 0;
-    border: none;
-    padding: 0;
+.filter__input_date-container {
+  margin-top: 1rem;
+}
+
+.datepicker-input {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 13px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 100%;
 }
 
 .custom-day {
-    text-align: center;
-    padding: 0.185rem 0.25rem;
-    display: inline-block;
-    height: 2rem;
-    width: 2rem;
+  text-align: center;
+  padding: 0.185rem 0.25rem;
+  display: inline-block;
+  height: 2rem;
+  width: 2rem;
+  line-height: 2rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
 }
 
 .custom-day.focused {
-    background-color: #e6e6e6;
+  background-color: #e6e6e6;
 }
 
 .custom-day.range,
 .custom-day:hover {
-    background-color: rgb(2, 117, 216);
-    color: white;
+  background-color: rgb(2, 117, 216);
+  color: white;
 }
 
-.form-check-input{
+.custom-day.faded {
+  background-color: rgba(2, 117, 216, 0.5);
+}
+
+.date_picker_button_bg {
+  outline: none;
+  box-shadow:none !important;
+  background-color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.375rem 10px 0.375rem 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date_picker_button_image {
+  width: 20px;
+  height: 20px;
+}
+
+.form-check-input {
   margin-right: 15px;
+  margin-left: -5px;
 }
 
-#multiDropdownmEntity{
+#multiDropdownmEntity {
   overflow: clip;
 }
 
@@ -35,19 +67,6 @@
   padding-right: 12px;
 }
 
-.custom-day.faded {
-    background-color: rgba(2, 117, 216, 0.5);
-}
-
-.date_picker_button_bg {
-    background-color: white;
-}
-
-.date_picker_button_image {
-    width: 20px;
-    height: 20px;
-}
-
 .dropdown-menu {
-    left: auto !important;
+  left: auto !important;
 }

@@ -40,14 +40,14 @@
                 'text-success': insights[model][key].change_daily?.startsWith('+'),
                 'text-warning': insights[model][key].change_daily?.startsWith('-'),
                 'home_insight__percentage-default': !insights[model][key].change_daily
-              }">
+              }" appTooltip="stat changes daily">
               {{ insights[model][key].change_daily || '-' }}
             </div>
             <div [ngClass]="{
                 'text-success': insights[model][key].change_weekly?.startsWith('+'),
                 'text-warning': insights[model][key].change_weekly?.startsWith('-'),
                 'home_insight__percentage-default': !insights[model][key].change_weekly
-              }">
+              }" appTooltip="stat changes weekly">
               {{ insights[model][key].change_weekly || '-' }}
             </div>
           </div>

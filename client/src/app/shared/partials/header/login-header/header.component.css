@@ -65,6 +65,7 @@
   align-content: start;
 }
 
+
 .header .dropdown-toggle::after {
   display: none !important;
 }
