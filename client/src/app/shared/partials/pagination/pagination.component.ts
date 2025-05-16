@@ -2,6 +2,7 @@ import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AppService} from '../../../services/core/app.service';
 import {max} from 'rxjs';
+import {flush} from '@angular/core/testing';
 
 @Component({
   selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgOptimizedImage]
@@ -20,17 +21,17 @@ export class PaginationComponent implements OnInit {
   }
 
   getPageRange(): number[] {
-    const totalVisible = 5;
-    let start = Math.max(1, this.currentPage - Math.floor(totalVisible / 2));
-    let end = start + totalVisible - 1;
-
-    if (end > this.maxPages) {
-      end = this.maxPages;
-      start = Math.max(1, end - totalVisible + 1);
-    }
-
+    const leftBound = Math.max(1, this.currentPage - 2);
+    const rightBound = Math.min(this.maxPages, this.currentPage + 2);
     const pageNumbers: number[] = [];
-    for (let i = start; i <= end; i++) {
+
+    alert(this.currentPage)
+    alert(this.maxPages)
+    alert(leftBound)
+    alert(rightBound)
+    alert(pageNumbers)
+
+    for (let i = leftBound; i <= rightBound; i++) {
       pageNumbers.push(i);
     }
 
