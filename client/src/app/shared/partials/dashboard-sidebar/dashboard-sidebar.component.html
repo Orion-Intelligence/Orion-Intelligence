@@ -1,7 +1,7 @@
 <nav *ngIf="this.sidebar_default" class="sidebar">
   <div class="sidebar__header">
     <a href="">
-      <a href="#"><img class="graph-sidebar__container-logo img-fluid" [src]="appService.getConfig()?.logo_url || 'assets/images/sidebar/search_nav_logo.png'" alt="Logo" width="197" height="35" /></a>
+      <a href="#"><img class="graph-sidebar__container-logo img-fluid" [src]="appService.getConfig().logo_url || 'assets/images/sidebar/search_nav_logo.png'" alt="Logo" width="197" height="35" /></a>
     </a>
     <button class="sidebar__header-menu" (click)="onToggleSidebar()">
       <img src="assets/images/sidebar/nav_menu.svg" alt="Menu" height="28" width="24"/>

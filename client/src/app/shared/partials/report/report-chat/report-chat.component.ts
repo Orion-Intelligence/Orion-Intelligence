@@ -20,7 +20,6 @@ import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
   imports: [
     NgIf,
     NgForOf,
-    TitleCasePipe,
     NgOptimizedImage,
     ResultListComponent,
     ResultSectionComponent
