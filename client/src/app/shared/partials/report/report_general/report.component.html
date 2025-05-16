@@ -40,7 +40,9 @@
 </div>
 
 <div class="search__result-detail">
-  <h2 class="search__result-detail-heading">{{ resultItem?.m_title | slice:0:150 }}{{ resultItem?.m_title?.length > 150 ? '...' : '' }}</h2>
+  <h2 class="search__result-detail-heading" *ngIf="resultItem?.m_title as title">
+    {{ title.length > 150 ? (title.slice(0, 150) + '...') : title }}
+  </h2>
 
   <span class="search__result-detail-description-span">Description</span>
   <p class="search__result-detail-description">
