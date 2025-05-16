@@ -25,11 +25,8 @@ export class PaginationComponent implements OnInit {
     const rightBound = Math.min(this.maxPages, this.currentPage + 2);
     const pageNumbers: number[] = [];
 
-    alert(this.currentPage)
+    alert((this.currentPage + 2))
     alert(this.maxPages)
-    alert(leftBound)
-    alert(rightBound)
-    alert(pageNumbers)
 
     for (let i = leftBound; i <= rightBound; i++) {
       pageNumbers.push(i);
