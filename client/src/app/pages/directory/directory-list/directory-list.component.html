@@ -34,7 +34,7 @@
         <td data-label="Category">
           <div class="d-flex flex-wrap">
             <ng-container *ngIf="item.content_type.length; else noCategory">
-              <div class="directory-list__content-category px-2 py-1" *ngFor="let category of item.content_type | slice:0:3">
+              <div class="directory-list__content-category px-2 py-1" *ngFor="let category of item.content_type | slice:0:2">
                 {{ category | titlecase }}
               </div>
             </ng-container>
