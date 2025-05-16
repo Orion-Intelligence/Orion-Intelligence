@@ -134,11 +134,12 @@ class _ransomlook(leak_extractor_interface, ABC):
             )
 
             entity_data = entity_model(
-              m_email_addresses=helper_method.extract_emails(m_content),
+              m_email=helper_method.extract_emails(m_content),
               m_ip=[m_title],
               m_team="ransom look"
             )
 
+            entity_data = helper_method.extract_entities(m_content, entity_data)
             self.append_leak_data(card_data, entity_data)
 
             error_count = 0

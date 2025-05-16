@@ -50,7 +50,7 @@ export class GraphComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const selectedType = params['selectedType'] || 'cluster';
       const singleInput = params['singleInput'] || 'general';
-      const propertyType = params['propertyType'] || 'm_email_addresses';
+      const propertyType = params['propertyType'] || 'm_email';
       const propertyValue = params['propertyValue'] || '';
 
       if (selectedType === 'property' && propertyType && propertyValue) {

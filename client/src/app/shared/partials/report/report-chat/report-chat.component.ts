@@ -106,6 +106,11 @@ export class ReportChatComponent implements OnInit {
     this.helper.printPage();
   }
 
+  formatKeyTitle(key: string): string {
+    const cleaned = (key.startsWith('m_') ? key.slice(2) : key).split('_').join(' ');
+    return cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
+  }
+
   shareResult() {
     this.helper.shareResult(this.resultItem?.m_message_sharable_link ?? '');
   }

@@ -149,12 +149,13 @@ class _leak_lookup(leak_extractor_interface, ABC):
                         )
 
                         entity_data = entity_model(
-                            m_email_addresses=helper_method.extract_emails(modal_content_cleaned),
+                            m_email=helper_method.extract_emails(modal_content_cleaned),
                             m_company_name=site_name,
                             m_ip=[site_name],
                             m_team="leak lookup"
                         )
 
+                        entity_data = helper_method.extract_entities(modal_content_cleaned, entity_data)
                         self.append_leak_data(card_data, entity_data)
                         error_count = 0
 

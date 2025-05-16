@@ -159,11 +159,12 @@ class _inthewild(leak_extractor_interface, ABC):
               )
 
               entity_data = entity_model(
-                m_email_addresses=helper_method.extract_emails(description_text),
+                m_email=helper_method.extract_emails(description_text),
                 m_social_media_profiles=[social_media_profile] if social_media_profile else [],
                 m_team="in the wild"
               )
               error_count = 0
+              entity_data = helper_method.extract_entities(description_text, entity_data)
 
               self.append_leak_data(card_data, entity_data)
 

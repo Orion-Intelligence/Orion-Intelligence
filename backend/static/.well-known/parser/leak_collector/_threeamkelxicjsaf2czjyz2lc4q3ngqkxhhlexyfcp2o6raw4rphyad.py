@@ -137,11 +137,13 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                         m_content_type=["leaks"],
                         m_leak_date=helper_method.extract_and_convert_date(date_text),
                         m_data_size=file_size_text,
+                        m_logo_or_images=[profile_img] if profile_img != "Unknown" else []
                     )
 
                     entity_data = entity_model(
-                        m_email_addresses=helper_method.extract_emails(description_text),
+                        m_email=helper_method.extract_emails(description_text),
                     )
+                    entity_data = helper_method.extract_entities(description_text, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as e:

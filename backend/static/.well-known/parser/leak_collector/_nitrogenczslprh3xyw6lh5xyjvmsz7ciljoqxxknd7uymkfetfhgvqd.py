@@ -225,12 +225,13 @@ class _nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(m_description),
+            m_email=helper_method.extract_emails(m_description),
             m_company_name=title,
             m_ip=[m_weblinks],
             m_team="nitrogen"
           )
 
+          entity_data = helper_method.extract_entities(m_description, entity_data)
           self.append_leak_data(card_data, entity_data)
           error_count = 0
 

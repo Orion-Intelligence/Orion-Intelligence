@@ -172,11 +172,12 @@ class _blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd(leak_extractor_i
         )
 
         entity_data = entity_model(
-          m_email_addresses=helper_method.extract_emails(m_content),
+          m_email=helper_method.extract_emails(m_content),
           m_company_name=title,
           m_ip=weblinks,
           m_team="money message"
         )
+        entity_data = helper_method.extract_entities(m_content, entity_data)
 
         self.append_leak_data(card_data, entity_data)
         error_count = 0

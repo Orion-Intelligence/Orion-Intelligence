@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+from pydantic.v1 import Extra
+
+
 class CardExtractionModel(BaseModel):
     m_title: str = ""
     m_url: str
@@ -14,7 +17,7 @@ class CardExtractionModel(BaseModel):
     m_dumplink: List[str] = Field(default_factory=list)
     m_name: str = ""
     m_section: Optional[List[str]] = Field(default_factory=list)
-    m_email_addresses: List[str] = Field(default_factory=list)
+    m_email: List[str] = Field(default_factory=list)
     m_industry: Optional[str] = None
     m_phone_numbers: List[str] = Field(default_factory=list)
     m_addresses: List[str] = Field(default_factory=list)
@@ -27,7 +30,7 @@ class CardExtractionModel(BaseModel):
     m_country_name: Optional[str] = None
     m_revenue: Optional[str] = None
     m_states: List[str] = []
-    m_location_info: List[str] = []
+    m_location: List[str] = []
     m_ip: Optional[List[str]] = None
     m_crypto_addresses: List[str] = []
     m_attacker: Optional[List[str]] = None
@@ -35,6 +38,8 @@ class CardExtractionModel(BaseModel):
     m_password: Optional[str] = None
     m_team: Optional[str] = None
 
+    class Config:
+        extra = Extra.allow
 
 class LeakDataModel(BaseModel):
     cards_data: List[CardExtractionModel] = Field(default_factory=list)

@@ -182,9 +182,10 @@ class _public_tableau(leak_extractor_interface, ABC):
           m_country_name="United States",
           m_company_name=company_name,
           m_states=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else [],
-          m_location_info=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else []
+          m_location=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else []
         )
 
+        entity_data = helper_method.extract_entities(m_content, entity_data)
         self.append_leak_data(card_data, entity_data)
 
         y_position += 20

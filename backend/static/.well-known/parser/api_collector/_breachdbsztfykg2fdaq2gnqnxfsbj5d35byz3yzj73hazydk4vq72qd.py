@@ -111,7 +111,7 @@ class _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd(api_collector_in
       )
 
       entity_data = entity_model(
-        m_email_addresses=list(email_list),
+        m_email=list(email_list),
         m_name=", ".join(username_list)
       )
       self.append_leak_data(card_data, entity_data)

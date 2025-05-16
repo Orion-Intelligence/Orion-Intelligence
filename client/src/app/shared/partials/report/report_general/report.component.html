@@ -96,7 +96,7 @@
       <ng-container *ngFor="let key of arrayKeys; let last = last">
         <button class="search__result-tabs" [class.active]="activeTab === key" (click)="setActiveTab(key)"
           appTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}">
-          {{ key.replace('m_', '').replace('_', ' ') | titlecase }}
+          {{ formatKeyLabel(key) }}
         </button>
         <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
       </ng-container>

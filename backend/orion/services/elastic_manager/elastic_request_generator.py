@@ -144,6 +144,9 @@ class elastic_request_generator:
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
     m_search_type = p_query_model.pSearchParamType
+    m_date_range=p_query_model.mDateRange
+    m_content_type=p_query_model.mContentType
+    m_entity=p_query_model.mEntity
 
     parsed_url = urlparse(raw_query)
     domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
@@ -151,6 +154,48 @@ class elastic_request_generator:
 
     must_clauses = []
     must_not_clause = []
+
+    if m_date_range:
+      parts = m_date_range.split(',')
+      if len(parts) == 2:
+        try:
+          from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
+          from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
+
+          to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
+          to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
+
+          must_clauses.append({
+            "range": {
+              "m_leak_date": {
+                "gte": from_date,
+                "lte": to_date
+              }
+            }
+          })
+        except ValueError:
+          pass
+
+    if m_entity:
+      entity_list = [
+        e if e.startswith("m_") else f"m_{e}"
+        for e in [
+          i.strip().lower().replace(" ", "_") for i in m_entity.split(",") if i.strip()
+        ]
+      ]
+
+      if entity_list:
+        must_clauses.append({
+          "bool": {
+            "should": [
+              {"exists": {"field": entity}} for entity in entity_list
+            ],
+            "minimum_should_match": 1
+          }
+        })
+
+    if m_content_type and m_content_type.lower() not in ("", "all"):
+      must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})
 
     if m_search_type == "databases":
       m_search_type = "leaks"
@@ -488,13 +533,14 @@ class elastic_request_generator:
           pass
 
     if m_entity:
-      entity_list = [e.strip().lower() for e in m_entity.split(',') if e.strip()]
-      if entity_list:
-        must_clauses.append({
-          "terms": {
-            "m_entity": entity_list
-          }
-        })
+      must_clauses.append({
+        "bool": {
+          "should": [
+            {"exists": {"field": entity}} for entity in m_entity
+          ],
+          "minimum_should_match": 1
+        }
+      })
 
     if m_content_type and m_content_type.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})

@@ -2,7 +2,6 @@ export class CardData {
   m_crypto_addresses: string[] = [];
   m_attacker: string[] = [];
   m_ref_html: string = "";
-  m_password: string = "";
   m_title: string = "";
   m_url: string = "";
   m_base_url: string = "";
@@ -13,10 +12,9 @@ export class CardData {
   m_weblink: string[] = [];
   m_dumplink: string[] = [];
   m_name: string = "";
-  m_email_addresses: string[] = [];
+  m_email: string[] = [];
   m_industry?: string;
   m_phone_numbers: string[] = [];
-  m_addresses: string[] = [];
   m_social_media_profiles: string[] = [];
   m_websites: string[] = [];
   m_company_name?: string;

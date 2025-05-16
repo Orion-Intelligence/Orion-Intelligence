@@ -141,12 +141,13 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
         )
 
         entity_data = entity_model(
-          m_email_addresses=helper_method.extract_emails(extracted_text),
+          m_email=helper_method.extract_emails(extracted_text),
           m_ip=[weblink],
           m_company_name=card_title,
           m_team="mozilla monitor"
         )
 
+        entity_data = helper_method.extract_entities(extracted_text, entity_data)
         self.append_leak_data(card_data, entity_data)
 
         error_count = 0

@@ -131,13 +131,14 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_email_addresses=helper_method.extract_emails(comment),
+                        m_email=helper_method.extract_emails(comment),
                         m_company_name=company_name,
                         m_ip=[domain],
-                        m_location_info=[country],
+                        m_location=[country],
                         m_country_name=country,
                         m_team="crypto74"
                     )
+                    entity_data = helper_method.extract_entities(comment, entity_data)
 
                     self.append_leak_data(card_data, entity_data)
                     processed_entries.add(entry_id)

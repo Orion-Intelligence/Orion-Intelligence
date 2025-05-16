@@ -127,10 +127,11 @@ class _weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd(leak_extractor_i
           entity_data = entity_model(
             m_company_name=title_text,
             m_ip=weblinks,
-            m_email_addresses=helper_method.extract_emails(content),
+            m_email=helper_method.extract_emails(content),
             m_team="black suit"
           )
 
+          entity_data = helper_method.extract_entities(content, entity_data)
           self.append_leak_data(card_data, entity_data)
 
         error_count = 0

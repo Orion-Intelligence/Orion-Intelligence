@@ -176,13 +176,14 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
 
             entity_data = entity_model(
               m_ip=web_urls,
-              m_email_addresses=helper_method.extract_emails(description),
+              m_email=helper_method.extract_emails(description),
               m_company_name=extracted_title,
               m_team="ransomeware"
             )
 
+            entity_data = helper_method.extract_entities(description, entity_data)
             self.append_leak_data(card_data, entity_data)
-            error_count = 0  # Reset on success
+            error_count = 0
 
             page.goto(current_url, timeout=60000)
             page.wait_for_load_state('networkidle')

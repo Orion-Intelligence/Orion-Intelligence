@@ -150,13 +150,14 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_email_addresses=helper_method.extract_emails(full_text),
+                        m_email=helper_method.extract_emails(full_text),
                         m_company_name=title,
                         m_ip=[title],
                         m_country_name=country,
-                        m_location_info=[country],
+                        m_location=[country],
                         m_team="underground"
                     )
+                    entity_data = helper_method.extract_entities(full_text, entity_data)
 
                     self.append_leak_data(card_data, entity_data)
 

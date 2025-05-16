@@ -22,7 +22,7 @@ class result_item(BaseModel):
     m_weblink: Optional[List[str]] = None
     m_dumplink: Optional[List[str]] = None
     m_name: Optional[str] = None
-    m_email_addresses: Optional[List[str]] = None
+    m_email: Optional[List[str]] = None
     m_industry: Optional[str] = None
     m_phone_numbers: Optional[List[str]] = None
     m_addresses: Optional[List[str]] = None

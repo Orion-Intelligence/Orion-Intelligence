@@ -14,7 +14,7 @@ export class LeakResultItem {
   m_content_type: string[] = [];
   m_weblink: string[] = [];
   m_dumplink: string[] = [];
-  m_email_addresses: string[] = [];
+  m_email: string[] = [];
   m_phone_numbers: string[] = [];
   m_social_media_profiles: string[] = [];
   m_websites: string[] = [];

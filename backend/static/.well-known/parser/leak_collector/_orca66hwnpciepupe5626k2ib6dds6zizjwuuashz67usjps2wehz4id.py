@@ -158,13 +158,14 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(description) if description else [],
+            m_email=helper_method.extract_emails(description) if description else [],
             m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
             m_company_name=card_title,
             m_ip=[company_url],
             m_team="public ocra"
           )
 
+          entity_data = helper_method.extract_entities(description, entity_data)
           self.append_leak_data(card_data, entity_data)
           error_count = 0
 

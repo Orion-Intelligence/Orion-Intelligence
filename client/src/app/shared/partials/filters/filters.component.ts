@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
@@ -61,4 +61,5 @@ export class FiltersComponent implements OnInit {
 
   protected readonly Object = Object;
   protected readonly last = last;
+  protected readonly JSON = JSON;
 }

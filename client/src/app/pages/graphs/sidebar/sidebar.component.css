@@ -16,7 +16,12 @@
 }
 
 .graph-sidebar__container-logo {
-  margin: 17px 12px 12px;
+  margin: 0 12px 12px 0;
+}
+
+.graph-sidebar__container-logo-padded {
+  margin-left: 12px;
+  margin-top: 20px;
 }
 
 .graph-sidebar__container .filter__form {

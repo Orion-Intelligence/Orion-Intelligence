@@ -138,10 +138,11 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
 
         entity_data = entity_model(
           m_company_name=title_text,
-          m_email_addresses=helper_method.extract_emails(m_content),
+          m_email=helper_method.extract_emails(m_content),
           m_team="brain cipher"
         )
 
+        entity_data = helper_method.extract_entities(m_content, entity_data)
         self.append_leak_data(card_data, entity_data)
         error_count = 0
 

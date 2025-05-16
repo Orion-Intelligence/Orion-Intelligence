@@ -150,12 +150,13 @@ class _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd(leak_extractor_i
         )
 
         entity_data = entity_model(
-          m_email_addresses=helper_method.extract_emails(description),
+          m_email=helper_method.extract_emails(description),
           m_country_name=country,
-          m_location_info=[country],
+          m_location=[country],
           m_ip=[title],
           m_team="bashe"
         )
+        entity_data = helper_method.extract_entities(description, entity_data)
 
         self.append_leak_data(card_data, entity_data)
         error_count = 0

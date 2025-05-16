@@ -128,11 +128,12 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
           entity_data = entity_model(
             m_company_name=title,
             m_ip=[external_link],
-            m_email_addresses=helper_method.extract_emails(content),
+            m_email=helper_method.extract_emails(content),
             m_phone_numbers=helper_method.extract_phone_numbers(content),
             m_team="rhysida"
           )
 
+          entity_data = helper_method.extract_entities(content, entity_data)
           self.append_leak_data(card_data, entity_data)
 
           error_count = 0

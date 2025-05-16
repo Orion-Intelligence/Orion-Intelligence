@@ -2,6 +2,7 @@ import {Component, EventEmitter, Output, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import {AppService} from '../../../services/core/app.service';
 
 @Component({
   selector: 'graph-sidebar', standalone: true, templateUrl: './sidebar.component.html', imports: [FormsModule, ReactiveFormsModule, NgForOf, NgIf, TitleCasePipe],
@@ -20,10 +21,10 @@ export class SidebarComponent implements OnInit {
   clusterOptions = ['all', 'general', 'leak', 'defacement', 'chat'];
   allowedProperties = [
     { label: 'All', key: 'all' },
-    { label: 'Email Addresses', key: 'm_email_addresses' },
+    { label: 'Email Addresses', key: 'm_email' },
     { label: 'Phone Numbers', key: 'm_phone_numbers' },
     { label: 'States', key: 'm_states' },
-    { label: 'Location Info', key: 'm_location_info' },
+    { label: 'Location Info', key: 'm_location' },
     { label: 'Social Media Profiles', key: 'm_social_media_profiles' },
     { label: 'Name', key: 'm_name' },
     { label: 'Industry', key: 'm_industry' },
@@ -64,7 +65,7 @@ export class SidebarComponent implements OnInit {
     { label: 'Websites', key: 'm_websites' }
   ];
 
-  constructor(private router: Router, private route: ActivatedRoute) {
+  constructor(protected appService: AppService, private router: Router, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {

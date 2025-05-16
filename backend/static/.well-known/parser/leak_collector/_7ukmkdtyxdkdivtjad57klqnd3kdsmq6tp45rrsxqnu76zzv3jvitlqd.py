@@ -142,12 +142,13 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(description),
+            m_email=helper_method.extract_emails(description),
             m_company_name=company_name,
             m_ip=[website],
-            m_location_info=location.split(",") if location else None,
+            m_location=location.split(",") if location else None,
             m_team="diaxin"
           )
+          entity_data = helper_method.extract_entities(description, entity_data)
 
           self.append_leak_data(card_data, entity_data)
           error_count = 0

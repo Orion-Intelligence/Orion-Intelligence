@@ -150,12 +150,13 @@ class _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id(leak_extractor_i
         )
 
         entity_data = entity_model(
-          m_email_addresses=helper_method.extract_emails(important_content),
+          m_email=helper_method.extract_emails(important_content),
           m_company_name=title,
           m_ip=[weblink],
           m_team="ks"
         )
 
+        entity_data = helper_method.extract_entities(content, entity_data)
         self.append_leak_data(card_data, entity_data)
         error_count = 0
 

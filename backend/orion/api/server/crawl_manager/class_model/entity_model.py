@@ -5,10 +5,10 @@ class entity_model(BaseModel):
     m_password: Optional[str] = None
     m_cluster_id: Optional[str] = None
     m_document_id: Optional[str] = None
-    m_email_addresses: Optional[List[str]] = None
+    m_email: Optional[List[str]] = None
     m_phone_numbers: Optional[List[str]] = None
     m_states: Optional[List[str]] = None
-    m_location_info: Optional[List[str]] = None
+    m_location: Optional[List[str]] = None
     m_social_media_profiles: Optional[List[str]] = None
     m_name: Optional[str] = None
     m_industry: Optional[str] = None

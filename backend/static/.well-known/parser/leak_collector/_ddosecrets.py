@@ -147,12 +147,13 @@ class _ddosecrets(leak_extractor_interface, ABC):
 
         country = " - ".join(countries) if countries else None
         entity_data = entity_model(
-          m_email_addresses=helper_method.extract_emails(content_text),
+          m_email=helper_method.extract_emails(content_text),
           m_attacker=[sources],
-          m_location_info=countries,
+          m_location=countries,
           m_country_name=country,
           m_team="ddosecret"
         )
+        entity_data = helper_method.extract_entities(content_text, entity_data)
 
         self.append_leak_data(card_data, entity_data)
         error_count = 0

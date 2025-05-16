@@ -117,11 +117,12 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(description),
+            m_email=helper_method.extract_emails(description),
             m_ip=[weblink],
             m_company_name=title,
           )
 
+          entity_data = helper_method.extract_entities(description, entity_data)
           self.append_leak_data(card_data, entity_data)
           error_count = 0
 

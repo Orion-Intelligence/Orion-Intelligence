@@ -204,13 +204,14 @@ class _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(content_text),
+            m_email=helper_method.extract_emails(content_text),
             m_company_name=company_name,
             m_ip=weblinks,
             m_password=passwords,
             m_team="dunghill leak"
           )
 
+          entity_data = helper_method.extract_entities(content_text, entity_data)
           self.append_leak_data(card_data, entity_data)
           error_count = 0
 

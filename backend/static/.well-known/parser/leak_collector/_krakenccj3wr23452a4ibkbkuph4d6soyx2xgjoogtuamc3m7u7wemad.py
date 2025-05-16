@@ -150,10 +150,11 @@ class _krakenccj3wr23452a4ibkbkuph4d6soyx2xgjoogtuamc3m7u7wemad(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(description),
+            m_email=helper_method.extract_emails(description),
             m_team="kraken leaks"
           )
 
+          entity_data = helper_method.extract_entities(description, entity_data)
           self.append_leak_data(card_data, entity_data)
           error_count = 0
 

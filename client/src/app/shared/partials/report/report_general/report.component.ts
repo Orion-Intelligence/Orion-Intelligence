@@ -218,6 +218,11 @@ export class ReportComponent implements OnInit {
     });
   }
 
+  formatKeyLabel(key: string): string {
+    const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
+    return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
+  }
+
   protected readonly last = last;
   protected readonly Category = Category;
 }

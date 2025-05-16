@@ -156,14 +156,15 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
         )
 
         entity_data = entity_model(
-          m_location_info=[address] if address != "N/A" else [],
+          m_location=[address] if address != "N/A" else [],
           m_company_name=title,
-          m_email_addresses=helper_method.extract_emails(detail_soup.text),
+          m_email=helper_method.extract_emails(detail_soup.text),
           m_ip=[website],
           m_industry=industry,
           m_team="kairos"
         )
 
+        entity_data = helper_method.extract_entities(content, entity_data)
         self.append_leak_data(card_data, entity_data)
 
         page.go_back()

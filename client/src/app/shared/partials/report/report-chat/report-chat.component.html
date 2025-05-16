@@ -50,7 +50,7 @@
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of arrayKeys; let last = last">
         <button class="search__result-tabs" [class.active]="activeTab === key" (click)="setActiveTab(key)">
-          {{ (key.startsWith('m_') ? key.slice(2) : key).split('_').join(' ') | titlecase }}
+          {{ formatKeyTitle(key) }}
         </button>
         <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
       </ng-container>

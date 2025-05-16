@@ -150,12 +150,13 @@ class _rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(description),
+            m_email=helper_method.extract_emails(description),
             m_company_name=title,
             m_ip=list(weblink) if weblink else None,
             m_team="run some wares"
           )
 
+          entity_data = helper_method.extract_entities(description, entity_data)
           self.append_leak_data(card_data, entity_data)
 
           error_count = 0

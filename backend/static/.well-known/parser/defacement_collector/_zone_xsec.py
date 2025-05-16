@@ -133,7 +133,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
                         entity_data = entity_model(
                             m_ip=[ip],
-                            m_location_info = [location],
+                            m_location = [location],
                             m_team = team,
                             m_attacker = [defacer],
                         )

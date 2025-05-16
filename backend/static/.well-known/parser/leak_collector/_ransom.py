@@ -163,12 +163,13 @@ class _ransom(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
-                    m_location_info=[country],
+                    m_location=[country],
                     m_company_name=group,
-                    m_email_addresses=helper_method.extract_emails(soup.text),
+                    m_email=helper_method.extract_emails(description),
                     m_team="ransom wiki"
                 )
 
+                entity_data = helper_method.extract_entities(description, entity_data)
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 

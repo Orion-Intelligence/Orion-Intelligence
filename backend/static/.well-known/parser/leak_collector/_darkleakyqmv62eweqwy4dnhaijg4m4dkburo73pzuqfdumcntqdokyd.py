@@ -117,10 +117,11 @@ class _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(content),
+            m_email=helper_method.extract_emails(content),
             m_company_name=title,
             m_team="dark leak"
           )
+          entity_data = helper_method.extract_entities(content, entity_data)
 
           self.append_leak_data(card_data, entity_data)
           error_count = 0

@@ -129,12 +129,13 @@ class _csidb(leak_extractor_interface, ABC):
 
         entity = entity_model(
           m_company_name=title,
-          m_email_addresses=helper_method.extract_emails(description) if description else [],
+          m_email=helper_method.extract_emails(description) if description else [],
           m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
           m_country_name=country,
-          m_location_info=[country],
+          m_location=[country],
           m_team="csidb"
         )
+        entity = helper_method.extract_entities(description, entity)
 
         self.append_leak_data(card, entity)
 

@@ -186,13 +186,14 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
               )
 
               entity_data = entity_model(
-                m_email_addresses=helper_method.extract_emails(description),
+                m_email=helper_method.extract_emails(description),
                 m_industry=industry,
                 m_company_name=title,
                 m_ip=[ip],
                 m_team="lynx"
               )
 
+              entity_data = helper_method.extract_entities(description, entity_data)
               self.append_leak_data(card_data, entity_data)
 
             except Exception:

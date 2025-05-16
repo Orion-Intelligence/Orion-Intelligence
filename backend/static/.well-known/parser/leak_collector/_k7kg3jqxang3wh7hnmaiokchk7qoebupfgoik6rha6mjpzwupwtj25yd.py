@@ -184,14 +184,15 @@ class _k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd(leak_extractor_i
           )
 
           entity_data = entity_model(
-            m_email_addresses=helper_method.extract_emails(description),
+            m_email=helper_method.extract_emails(description),
             m_country_name=country_name,
             m_ip=[weblink],
-            m_location_info=[country_name],
+            m_location=[country_name],
             m_password=rar_passwords,
             m_team="play news"
           )
 
+          entity_data = helper_method.extract_entities(description, entity_data)
           self.append_leak_data(card_data, entity_data)
           error_count = 0
 

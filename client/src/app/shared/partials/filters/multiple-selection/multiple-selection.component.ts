@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -6,12 +6,11 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   templateUrl: './multiple-selection.component.html',
 })
-export class MultipleSelectionComponent {
+export class MultipleSelectionComponent{
   @Input() key: string = '';
   @Input() filterModel: any;
   @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
-
-  mSelectedFilters: { [key: string]: string[] } = {};
+  @Input() mSelectedFilters: any
 
 
   onMultiSelectionToggle(option: string): void {
@@ -26,14 +25,7 @@ export class MultipleSelectionComponent {
       this.mSelectedFilters[this.key].splice(index, 1);
     }
 
-    // Optional: Clone array to trigger change detection
     this.mSelectedFilters[this.key] = [...this.mSelectedFilters[this.key]];
-
-    // Emit joined string as value
-    this.selectedFiltersChange.emit({
-      key: this.key,
-      value: this.mSelectedFilters[this.key].join(','),
-    });
   }
 
   getMultiSelectedText(): string {

@@ -41,7 +41,7 @@ class entity_manager:
             normalized_type = self._sanitize(self._normalize_key(query.model_type)) if query.model_type else None
 
             base_types = [
-                "m_email_addresses", "m_phone_numbers", "m_states", "m_location_info", "m_social_media_profiles",
+                "m_email", "m_phone_numbers", "m_states", "m_location", "m_social_media_profiles",
                 "m_name", "m_industry", "m_company_name", "m_country_name", "m_ip", "m_team", "m_attacker", "m_au_abn",
                 "m_au_acn", "m_au_medicare", "m_au_tfn", "m_credit_cards", "m_crypto_addresses",
                 "m_crypto_btc_addresses", "m_iban_codes", "m_in_aadhaar_numbers", "m_in_pan_numbers",
@@ -53,8 +53,6 @@ class entity_manager:
 
             query_str = ""
             bind_vars = {}
-            queried_id = None
-            matched_vertex_ids = []
 
             if query.data_point_type == "cluster" and normalized_type == "cluster":
                 if normalized_value == "all":
@@ -196,7 +194,7 @@ class entity_manager:
 
             results = result_obj.get("depth1", []) + result_obj.get("depth2", [])
             matched_vertex_ids = result_obj.get("matched_ids", []) or []
-            limit_reached = len(result_obj.get("depth1", [])) >= 200 or len(result_obj.get("depth2", [])) >= 200
+            limit_reached = len(result_obj.get("depth1", [])) >= 400 or len(result_obj.get("depth2", [])) >= 400
 
             unique_edges = set()
             final_results = []

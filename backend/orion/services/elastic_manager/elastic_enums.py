@@ -66,7 +66,7 @@ class ELASTIC_ENUMS:
         "m_weblink": {"type": "keyword"},
         "m_dumplink": {"type": "keyword"},
         "m_name": {"type": "text"},
-        "m_email_addresses": {"type": "keyword"},
+        "m_email": {"type": "keyword"},
         "m_industry": {"type": "keyword"},
         "m_phone_numbers": {"type": "keyword"},
         "m_addresses": {"type": "keyword"},

@@ -126,7 +126,7 @@ class _mirror_h(leak_extractor_interface, ABC):
           card_data = defacement_model(m_date_of_leak=helper_method.extract_and_convert_date(date), m_web_server=[web_server] if web_server else [], m_web_url=[web_url] if web_url else [], m_base_url=self.base_url, m_network=helper_method.get_network_type(self.base_url), m_content=content,
             m_url=link, m_mirror_links=[iframe_url] if iframe_url else [])
 
-          entity_data = entity_model(m_ip=[server_ip] if server_ip else [], m_location_info=[location] if location else [], m_attacker=[attacker] if attacker else [], )
+          entity_data = entity_model(m_ip=[server_ip] if server_ip else [], m_location=[location] if location else [], m_attacker=[attacker] if attacker else [], )
 
           self.append_leak_data(card_data, entity_data)
 
