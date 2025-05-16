@@ -40,7 +40,7 @@
 </div>
 
 <div class="search__result-detail">
-  <h2 class="search__result-detail-heading">{{ resultItem?.m_title }}</h2>
+  <h2 class="search__result-detail-heading">{{ resultItem?.m_title | slice:0:150 }}{{ resultItem?.m_title?.length > 150 ? '...' : '' }}</h2>
 
   <span class="search__result-detail-description-span">Description</span>
   <p class="search__result-detail-description">
@@ -49,6 +49,7 @@
     ? (resultItem?.m_important_content | slice:0:650) + ' ...'
     : resultItem?.m_important_content
     }}
+  </p>
   <p class="search__result-detail-url-p text-truncate">
     <a [href]="resultItem?.m_url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate"
       style="max-width: 100%;" target="_blank">

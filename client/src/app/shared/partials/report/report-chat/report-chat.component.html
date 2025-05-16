@@ -19,7 +19,10 @@
 </div>
 
 <div class="search__result-detail" *ngIf="resultItem">
-  <h2 class="search__result-detail-heading">{{ resultItem.m_channel_name || 'Untitled Channel' }}</h2>
+  <h2 class="search__result-detail-heading">
+    {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:150 }}
+    {{ (resultItem.m_channel_name?.length || 'Untitled Channel'.length) > 150 ? '...' : '' }}
+  </h2>
 
   <p class="search__result-detail-description">
     {{ resultItem.m_content || 'No content available' }}

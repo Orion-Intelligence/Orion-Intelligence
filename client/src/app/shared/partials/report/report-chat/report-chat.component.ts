@@ -5,7 +5,7 @@ import {HelperService} from '../../../services/helper.service';
 import {
   NgForOf,
   NgIf,
-  NgOptimizedImage,
+  NgOptimizedImage, SlicePipe,
   TitleCasePipe
 } from '@angular/common';
 import {ResultListComponent} from '../../result-components/result-list/result-list.component';
@@ -22,7 +22,8 @@ import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
     NgForOf,
     NgOptimizedImage,
     ResultListComponent,
-    ResultSectionComponent
+    ResultSectionComponent,
+    SlicePipe
   ],
   animations: [fadeInDashboardItem]
 })
