@@ -21,3 +21,5 @@ PyJWT~=2.10.1
 toml~=0.10.2
 deep-translator==1.11.4
 python-arango==8.1.6
+sphinx
+myst-parser
