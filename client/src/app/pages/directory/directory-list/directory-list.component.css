@@ -26,15 +26,15 @@
 }
 
 .directory-list__column-service-url {
-  width: 60%;
+  width: 55%;
 }
 
 .directory-list__column-category {
-  width: 15%;
+  width: 10%;
 }
 
 .directory-list__column-url-status {
-  width: 15%;
+  width: 10%;
 }
 
 .directory-list__column-leak-status {
