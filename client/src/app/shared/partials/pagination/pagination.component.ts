@@ -20,11 +20,17 @@ export class PaginationComponent implements OnInit {
   }
 
   getPageRange(): number[] {
-    const leftBound = Math.max(1, this.currentPage - 2);
-    const rightBound = Math.min(this.maxPages, this.currentPage + 2);
-    const pageNumbers: number[] = [];
+    const totalVisible = 5;
+    let start = Math.max(1, this.currentPage - Math.floor(totalVisible / 2));
+    let end = start + totalVisible - 1;
 
-    for (let i = leftBound; i <= rightBound; i++) {
+    if (end > this.maxPages) {
+      end = this.maxPages;
+      start = Math.max(1, end - totalVisible + 1);
+    }
+
+    const pageNumbers: number[] = [];
+    for (let i = start; i <= end; i++) {
       pageNumbers.push(i);
     }
 
