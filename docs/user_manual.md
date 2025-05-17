@@ -243,6 +243,36 @@ The platform categorizes and indexes this information for further analysis and c
 
 ![dump-modified](https://github.com/user-attachments/assets/c218ae0d-de70-4445-a2b7-7a6a04ce5b47)
 
+##CTI Graph
+The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
+
+![cti-modified](https://github.com/user-attachments/assets/2f718103-3325-46da-8096-95e247a2e79f)
+
+When the CTI Graph module is clicked, it automatically opens in a new tab. This module displays a connection graph composed of various nodes, visually representing complex relationships between different cyber threat entities.
+
+On the leftmost side of the interface, there are two levels of filters. In the first-level filter, users can choose from three categories: Cluster, Document, and Property. Based on the selected category, the second-level filter below dynamically updates to show options relevant to the chosen category, allowing users to refine and customize the graph view for more focused analysis.
+
+
+**Cluster** If the Cluster filter is selected in the first-level filter, the second-level filter presents four options: General, Leak, Defacement, and Chat.
+
+**Document** If the Document filter is selected, the second-level filter prompts the user to enter a Document ID.
+
+**Property** Similarly, if the Property filter is selected, the second-level filter asks the user to choose a property type—such as email, hashes, etc.—and then specify the property value for a more targeted query.
+
+![ctifilter-modified](https://github.com/user-attachments/assets/c5af2eab-74f6-42b7-8914-2395f544c704)
+
+  On the rightmost side of the CTI Graph interface, there are several additional options:
+
+  - The first option is a toggle to enable or disable physics, which controls the animation and movement behavior of the graph nodes.
+
+  - The second option allows users to expand the CTI graph for a broader and more detailed view.
+
+   - Below that, the Details section displays information related to the filters selected on the left side of the graph, providing context about the current view.
+
+  - Finally, there is a Color Indicators section, which explains the meaning of different node colors used within the graph for easier interpretation.
+
+![toggle-modified](https://github.com/user-attachments/assets/bb0bedca-818b-4929-80da-453091ef6c8b)
+
 
 
 ## Fillter and Analytics
