@@ -9,8 +9,7 @@ let's take a look at the admin panel, designed exclusively for administrative us
 
 The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined access to its wide range of features. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
-![main-modified](https://github.com/user-attachments/assets/2e022df7-7c23-401e-91ff-f02e39d7cc57)
-
+![homepage](https://github.com/user-attachments/assets/4f44383c-5d39-41a3-bf33-f9eab2ba17e8)
 
 ## Directory Page
 Here’s an overview of the interface components
@@ -31,11 +30,28 @@ Users can view information on compromised credentials, leaked sensitive data, an
 4. **Defacement:** Presents findings related to website defacement incidents detected by the monitoring system.
 It includes insights into affected domains, attacker signatures, and the nature of the defacement.
 
+5. **Social:**  Monitors threat intelligence shared across social platforms, particularly Telegram.
+The system integrates with Telegram channels to automatically fetch and display relevant threat data.
+This feature helps identify early indicators of cyber threats, ongoing attacks, or planned activities by malicious actors.
+
 6. **Live APIs:** Offers real-time data streams through APIs, facilitating integration with external systems and tools.
 This feature supports continuous monitoring and enables timely responses to evolving cybersecurity events.
 
+7. **Data Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
+These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
-![sidebar-modified](https://github.com/user-attachments/assets/cd1b7813-0f1f-4143-b38c-6c071349cd85)
+In this module, the system actively collects data from:
+
+- Telegram channels: Extracts downloadable files and shared dump links related to breaches or leaks.
+
+- Websites and forums: Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious actors.
+
+- Other open-source intelligence (OSINT) platforms: Tracks and organizes dump-related information for quick analysis.
+
+8. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
+
+![nav](https://github.com/user-attachments/assets/a61f3546-413b-47f9-8dd5-9a468564a36f)
+
 
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index. The Generic Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
 
