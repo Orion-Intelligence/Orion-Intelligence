@@ -53,7 +53,6 @@
   <app-filters [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async" (filterChanged)="applyFilters($event)"
     (filterReset)="resetFilters()" (filterClose)="sidebarService.closeSidebar()"></app-filters>
 </div>
-
 <div *ngIf="isLoading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>

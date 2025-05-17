@@ -62,6 +62,17 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults() {
+    if (!this.defacementParamModel.q) {
+      this.isLoading = false;
+
+      this.router.navigate([], {
+        queryParams: {},
+        queryParamsHandling: ''
+      }).then();
+
+      return;
+    }
+
     this.isLoading = true;
     this.router.navigate([], {
       relativeTo: this.route, queryParams: {
@@ -76,7 +87,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         if (response.success && response.data) {
           this.defacementCallbackModel = response.data as DefacementCallbackModel;
           this.dashboardService.defacementCallbackModel = response.data as DefacementCallbackModel;
-       } else {
+        } else {
           this.defacementCallbackModel = new DefacementCallbackModel();
         }
         this.isLoading = false;
