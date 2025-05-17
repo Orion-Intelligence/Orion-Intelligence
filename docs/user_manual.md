@@ -307,6 +307,18 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 
 ![safe search-modified](https://github.com/user-attachments/assets/e7ad92a7-524c-4f67-837c-9566af73b805)
 
+### Creation Date
+
+![date-modified](https://github.com/user-attachments/assets/21d7a6e0-6c41-49d3-8a52-e3f24b7ee701)
+
+### Mitre TTP
+
+![mitre-modified](https://github.com/user-attachments/assets/b2de0b34-a88d-40b8-b891-7fe90469df1a)
+
+### Entity Type
+
+![entity-modified](https://github.com/user-attachments/assets/2289a79b-adaa-44a8-adf7-d567ea0856df)
+
 
 
 ### Search Results
