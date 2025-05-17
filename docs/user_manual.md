@@ -359,8 +359,7 @@ When you enter any keywords into the search bar and press enter, the system proc
 
 When performing a search, the results are shown in a split view, helping organize the information more effectively. This layout separates different data sets, making it easier for users to focus on specific results. By displaying the data side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by simplifying the navigation of search results. Below the search bar overall fetch results related to the keyword.
 
-
-![resultfinal](https://github.com/user-attachments/assets/55cd18cd-1983-48ff-b8eb-970e048f36f4)
+![resultoptions-modified](https://github.com/user-attachments/assets/ae7fcd3d-8310-4bdd-ad3a-b7c81011efab)
 
 
 The detailed view of a search result provides essential information to help users assess the nature of a website before accessing it.  This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak site, or cryptocurrency platform.
@@ -368,13 +367,14 @@ When a user clicks on a specific section of the result, a separate menu appears,
 
 **Download:** Allows the user to download available site content
 
-**Translator:** Converts the content into different languages
-
 **Print:** Enables printing of the current view or content
+
+**AI Summary:** Summarize from AI
 
 **Share Link:** Copies the site’s URL for easy sharing
 
 **Open in New Tab:** Loads the site in a separate browser tab for convenience.
+**Open CTI Graph:** This option redirects the user from the search results to the corresponding page on the CTI Graph, displaying relevant visual relationships based on the selected search item.
 
 In addition to the mentioned details, this section also displays the publish date, network type, last update date, relevant tags, and the status of the link. The status indicates whether the link is currently active or inactive, helping users quickly determine if the site is accessible.
 
