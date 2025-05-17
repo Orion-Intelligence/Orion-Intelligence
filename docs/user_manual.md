@@ -93,21 +93,21 @@ The "Generic Index" category displays information related to the crawling proces
 - **Update five days:**   This section provides information about the updates from the last five days, allowing users to focus on recent changes that are highly relevant. By highlighting data updates within the past five days, this feature helps users quickly analyze recent changes without sifting through older, less relevant data. It ensures the focus remains on the most up-to-date information.
 
 - **Update Nine days:**  This section provides insights into the updates from the last nine days, offering users a view of changes over a slightly longer period. It helps users monitor data for any significant changes or trends that may have developed in the past week or so. This feature is useful for tracking medium-term updates that may not be as immediate but are still important for ongoing analysis.
-- 
+ 
 - **Average Score:**  This section displays the average score count of the results, providing users with an overall assessment of the data quality. The average score metric is important for evaluating how well the crawling process performed in terms of the relevance and quality of the data fetched. It allows users to assess the overall effectiveness of the crawling process and decide whether further adjustments are needed.
 
 - **URL/Documents:** This section shows the count of URLs being extracted from the sites during the crawl, offering a clear view of the total number of URLs found. By displaying the URL count, users can gauge how many web pages were captured during the crawl, helping them understand the extent of the data sourced. This metric is particularly useful for analyzing the scale of the crawling operation.
-- 
+  
 - **Archive/Documents:**  This refers to the number of archived URLs found on each website, allowing users to assess the historical relevance of the crawled data. The archived URLs give insight into the longevity and preservation of online content, helping users understand how much of the data being crawled has been preserved over time. This is valuable for monitoring the ongoing availability of older content.
-- 
+  
 - **Email/Documents:**  This section will show the number of email addresses found within the crawled data, helping users identify key communication points. By tracking the emails found during the crawl, users can extract important contact details for analysis. This is crucial for identifying potential communication channels and understanding the nature of the content within the dataset.
--  
+   
 - **Phone/Documents:** This section indicates how many phone numbers were fetched from each site during the crawl, providing users with detailed contact information. By tracking phone numbers, users can understand the level of personal or business contact data within the dataset. This feature allows for a deeper analysis of how connected or widespread the data is across different platforms.
-- 
+  
 - **Clearnet/Document:** This section informs users about the clearnet-type URLs that were captured during the crawl. On average, each clearnet link provides around four URLs, which belong to the standard public internet network. This section helps users understand the volume of accessible, non-hidden data collected, which is essential for distinguishing between regular web content and more obscure or private data.
 
 - **Common Type:** These are the general types of data supported by the network, helping users categorize the different types of content collected. This section ensures that users can easily understand the variety and scope of data being gathered from diverse sources. It also helps in organizing the data into recognizable categories, making analysis more straightforward and manageable.
-- 
+  
 ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/generalindex.png)
 
 In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers represent updates on a weekly basis.
@@ -118,7 +118,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 The Leaked Index offers detailed insights into the various states of leaked data within the dataset, specifically targeting sensitive or confidential information. It helps users identify critical data that has been exposed, making it easier to track potential risks or security breaches. By providing a clear overview of the leaked data, this index allows for more focused analysis and prioritization of high-risk information. This feature is essential for ensuring that important threats are detected and addressed promptly.
 
-3. ### Defacement
+3. #### Defacement
 The Defacement category allows users to deeply analyze data related to websites that have been compromised or visually altered by attackers. Within this section, users can:
 
 - View the total number of websites that have been hacked or defaced, giving a comprehensive overview of the scale of such incidents. This helps to quantify the number of attacks and monitor the impact on the web ecosystem.
@@ -203,7 +203,7 @@ The Defacement section provides access to an archive list of websites that have 
 
 - Defaced Web URL – Direct link to the defaced website or the affected page.
 
-- This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams and analysts to monitor and investigate web-based attacks efficiently.
+This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams and analysts to monitor and investigate web-based attacks efficiently.
 
 ![archive-modified](https://github.com/user-attachments/assets/fcc2876a-449f-4792-bb13-45dc482cad11)
 
@@ -243,7 +243,7 @@ The platform categorizes and indexes this information for further analysis and c
 
 ![dump-modified](https://github.com/user-attachments/assets/c218ae0d-de70-4445-a2b7-7a6a04ce5b47)
 
-##CTI Graph
+## CTI Graph
 The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
 
 ![cti-modified](https://github.com/user-attachments/assets/2f718103-3325-46da-8096-95e247a2e79f)
