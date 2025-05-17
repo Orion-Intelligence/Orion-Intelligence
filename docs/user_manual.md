@@ -207,6 +207,13 @@ The Defacement section provides access to an archive list of websites that have 
 
 ![archive-modified](https://github.com/user-attachments/assets/fcc2876a-449f-4792-bb13-45dc482cad11)
 
+## Social
+
+The Social module is designed to monitor and analyze threat intelligence shared across social media and messaging platforms, with a primary focus on Telegram—a widely used channel among cybercriminal groups for sharing illicit information. This module integrates directly with selected Telegram channels, groups, and bots that are known to circulate cyber threat data, including leaked credentials, data dumps, malware samples, and discussions of planned cyberattacks.
+
+![social-modified](https://github.com/user-attachments/assets/e1180853-35b6-4123-af06-4940fa1d17e5)
+
+
 ## Live APIs
 
 The Live APIs section provides users with real-time investigative tools. Within this section:
@@ -218,8 +225,22 @@ By selecting the email option, users can input any email address to retrieve rel
 Below the lookup interface, a list of data breach records is displayed. These records offer additional context and reference points, allowing users to explore known breaches and validate the exposure of specific information.
 
 
+![apilive-modified](https://github.com/user-attachments/assets/6019f8ca-ba2d-4f70-9596-506639773d84)
 
-![api-modified](https://github.com/user-attachments/assets/baa071d3-377a-4e26-8c4c-0dd2a2a678c5)
+## Data Dump
+Provides access to large collections of compromised data gathered from various underground and open sources.
+These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
+
+ - Data is collected from:
+
+ - Telegram channels (shared files or links)
+
+ - Dark web forums and sites
+
+ - Open-source leak platforms
+
+The platform categorizes and indexes this information for further analysis and correlation with threat activity.
+
 
 ## Fillter and Analytics
 On the left side of the page, there are two options: Analytics and Filter.
