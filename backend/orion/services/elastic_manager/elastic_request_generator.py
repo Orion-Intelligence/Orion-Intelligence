@@ -29,54 +29,63 @@ class elastic_request_generator:
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-    main_query = {
-      "bool": {
-        "should": [
-          {"match": {"m_location": {"query": raw_query, "boost": 50}}},
-          {"match": {"m_ip": {"query": raw_query, "boost": 50}}},
-          {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
-          {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
-          {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
-          {
-            "multi_match": {
-              "query": raw_query,
-              "fields": [
-                "m_location^5",
-                "m_ip^5",
-                "m_web_url^5",
-                "m_base_url^5",
-                "m_web_server^3",
-                "m_attacker^5",
-                "m_team^5",
-                "m_network^3",
-                "m_mirror_links^5"
-              ],
-              "type": "best_fields",
-              "boost": 5
-            }
-          },
-          {
-            "bool": {
-              "should": [
-                {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_ip": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
-              ],
-              "minimum_should_match": 1
-            }
-          }
-        ],
-        "minimum_should_match": 1,
-        "filter": must_clauses,
-        "must_not": must_not_clause
+    if raw_query == "*":
+      main_query = {
+        "bool": {
+          "must": [{"match_all": {}}],
+          "filter": must_clauses,
+          "must_not": must_not_clause
+        }
       }
-    }
+    else:
+      main_query = {
+        "bool": {
+          "should": [
+            {"match": {"m_location": {"query": raw_query, "boost": 50}}},
+            {"match": {"m_ip": {"query": raw_query, "boost": 50}}},
+            {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
+            {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
+            {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
+            {
+              "multi_match": {
+                "query": raw_query,
+                "fields": [
+                  "m_location^5",
+                  "m_ip^5",
+                  "m_web_url^5",
+                  "m_base_url^5",
+                  "m_web_server^3",
+                  "m_attacker^5",
+                  "m_team^5",
+                  "m_network^3",
+                  "m_mirror_links^5"
+                ],
+                "type": "best_fields",
+                "boost": 5
+              }
+            },
+            {
+              "bool": {
+                "should": [
+                  {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                  {"wildcard": {"m_ip": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                  {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                  {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                  {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
+                  {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                  {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                  {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
+                  {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
+                ],
+                "minimum_should_match": 1
+              }
+            }
+          ],
+          "minimum_should_match": 1,
+          "filter": must_clauses,
+          "must_not": must_not_clause
+        }
+      }
 
     query_statement = {
       "min_score": 0,
@@ -144,9 +153,9 @@ class elastic_request_generator:
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
     m_search_type = p_query_model.pSearchParamType
-    m_date_range=p_query_model.mDateRange
-    m_content_type=p_query_model.mContentType
-    m_entity=p_query_model.mEntity
+    m_date_range = p_query_model.mDateRange
+    m_content_type = p_query_model.mContentType
+    m_entity = p_query_model.mEntity
 
     parsed_url = urlparse(raw_query)
     domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
@@ -375,8 +384,8 @@ class elastic_request_generator:
         "query": {"match_none": {}},
         "size": 0
       }
-    if len(raw_query)<2:
-      raw_query="*"
+    if len(raw_query) < 2:
+      raw_query = "*"
 
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_search_type = p_query_model.pSearchParamType
@@ -500,9 +509,9 @@ class elastic_request_generator:
     m_search_type = p_query_model.pSearchParamType
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
-    m_date_range=p_query_model.mDateRange
-    m_content_type=p_query_model.mContentType
-    m_entity=p_query_model.mEntity
+    m_date_range = p_query_model.mDateRange
+    m_content_type = p_query_model.mContentType
+    m_entity = p_query_model.mEntity
 
     parsed_url = urlparse(raw_query)
     domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
