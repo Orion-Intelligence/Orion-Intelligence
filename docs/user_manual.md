@@ -239,7 +239,10 @@ These data dumps often include leaked databases, user credentials, email lists, 
 
  - Open-source leak platforms
 
-The platform categorizes and indexes this information for further analysis and correlation with threat activity.
+The platform categorizes and indexes this information for further analysis and correlation with threat activity. In the Data Dumps module, a **filtering option** is available on the right-hand side of the interface. This feature allows users to selectively view data dumps based on their preferred source. Users can filter dumps originating from specific websites, Telegram channels, or other monitored resources, enabling more efficient navigation and targeted analysis of the collected data.
+
+![dump-modified](https://github.com/user-attachments/assets/c218ae0d-de70-4445-a2b7-7a6a04ce5b47)
+
 
 
 ## Fillter and Analytics
@@ -284,7 +287,8 @@ Each variable can be expanded through a dropdown menu, which reveals separate an
 The second option alongside Analytics is the Filter menu. When we click on it, an extended submenu appears. This submenu contains two additional options.
 Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the process of refining results for more targeted insights.
 
-![fillter-modified](https://github.com/user-attachments/assets/e51e73eb-cb51-4187-9466-d0fb18b7b66b)
+![fillter new-modified](https://github.com/user-attachments/assets/4118a0e4-308f-4e3f-b813-f35f091cfcd2)
+
 
 ### Network Types
 Onion: Dark web links.
@@ -302,8 +306,6 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 2. - Click the button to activate safe browsing.
 
 ![safe search-modified](https://github.com/user-attachments/assets/e7ad92a7-524c-4f67-837c-9566af73b805)
-
-
 
 
 
