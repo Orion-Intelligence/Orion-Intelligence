@@ -40,18 +40,23 @@ This feature supports continuous monitoring and enables timely responses to evol
 7. **Data Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
 These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
-In this module, the system actively collects data from:
+      In this module, the system actively collects data from:
 
-- Telegram channels: Extracts downloadable files and shared dump links related to breaches or leaks.
+   - Telegram channels: Extracts downloadable files and shared dump links related to breaches or leaks.
 
-- Websites and forums: Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious actors.
+    - Websites and forums: Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious actors.
 
-- Other open-source intelligence (OSINT) platforms: Tracks and organizes dump-related information for quick analysis.
+    - Other open-source intelligence (OSINT) platforms: Tracks and organizes dump-related information for quick analysis.
 
 8. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
 
+9. **Link:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
+
+10. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
+
 ![nav](https://github.com/user-attachments/assets/a61f3546-413b-47f9-8dd5-9a468564a36f)
 
+## Homepage
 
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index. The Generic Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
 
