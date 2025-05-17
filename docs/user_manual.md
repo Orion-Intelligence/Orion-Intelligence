@@ -176,12 +176,12 @@ The Data Breach section in the navigation bar includes two subcategories:
 1. ### Databases
 This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
 
-![databases-modified](https://github.com/user-attachments/assets/69aaac82-8b53-4229-a049-a6ff6379b5de)
+![databasebreach-modified](https://github.com/user-attachments/assets/29c0fd5b-56bb-4b90-b79f-196f77186362)
 
 
 2. ### Track
 This section provides breach-related information tracked from forums. It is primarily used for monitoring discussions and mentions of potential breaches across underground communities. Note: This section does not contain actual breached data — it only displays references or claims gathered from forum sources.
-![track-modified](https://github.com/user-attachments/assets/f52e62a2-b27b-4fb4-9a97-1ac997fe70cd)
+![tracking-modified](https://github.com/user-attachments/assets/657279c5-e9e3-441e-9dd0-c691dc535d86)
 
 
 ## Defacement
@@ -205,7 +205,7 @@ The Defacement section provides access to an archive list of websites that have 
 
 - This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams and analysts to monitor and investigate web-based attacks efficiently.
 
-![defacement-modified](https://github.com/user-attachments/assets/5b7e7a9e-d454-43fc-b7a1-1fbb3955ee13)
+![archive-modified](https://github.com/user-attachments/assets/fcc2876a-449f-4792-bb13-45dc482cad11)
 
 ## Live APIs
 
