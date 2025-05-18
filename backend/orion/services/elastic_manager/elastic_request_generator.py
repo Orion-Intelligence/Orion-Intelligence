@@ -14,20 +14,26 @@ class elastic_request_generator:
   @staticmethod
   def on_search_defacementdata(p_query_model: search_defacement_param_model):
     raw_query = p_query_model.q.strip().lower()
-    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
-    if not raw_query:
-      return ELASTIC_INDEX.S_DEFACEMENT_INDEX, {"query": {"match_none": {}}, "size": 0}
+    if not raw_query or raw_query == "":
+      raw_query = "*"
 
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_network = getattr(p_query_model, 'mNetwork', None)
-    if raw_query.__eq__(""):
-      raw_query = "*"
 
     must_clauses = []
     must_not_clause = []
+    should_clauses = []
 
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network": m_network.lower()}})
+
+    import ipaddress
+
+    try:
+      ipaddress.ip_address(raw_query)
+      is_ip = True
+    except ValueError:
+      is_ip = False
 
     if raw_query == "*":
       main_query = {
@@ -38,49 +44,51 @@ class elastic_request_generator:
         }
       }
     else:
+      if is_ip:
+        should_clauses.append({"term": {"m_ip": raw_query}})
+      else:
+        should_clauses.extend([
+          {"match": {"m_location": {"query": raw_query, "boost": 50}}},
+          {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
+          {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
+          {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
+          {
+            "multi_match": {
+              "query": raw_query,
+              "fields": [
+                "m_location^5",
+                "m_web_url^5",
+                "m_base_url^5",
+                "m_web_server^3",
+                "m_attacker^5",
+                "m_team^5",
+                "m_network^3",
+                "m_mirror_links^5"
+              ],
+              "type": "best_fields",
+              "boost": 5
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
+                {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
+                {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
+              ],
+              "minimum_should_match": 1
+            }
+          }
+        ])
+
       main_query = {
         "bool": {
-          "should": [
-            {"match": {"m_location": {"query": raw_query, "boost": 50}}},
-            {"match": {"m_ip": {"query": raw_query, "boost": 50}}},
-            {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
-            {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
-            {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
-            {
-              "multi_match": {
-                "query": raw_query,
-                "fields": [
-                  "m_location^5",
-                  "m_ip^5",
-                  "m_web_url^5",
-                  "m_base_url^5",
-                  "m_web_server^3",
-                  "m_attacker^5",
-                  "m_team^5",
-                  "m_network^3",
-                  "m_mirror_links^5"
-                ],
-                "type": "best_fields",
-                "boost": 5
-              }
-            },
-            {
-              "bool": {
-                "should": [
-                  {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                  {"wildcard": {"m_ip": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                  {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                  {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                  {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                  {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                  {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                  {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                  {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
-                ],
-                "minimum_should_match": 1
-              }
-            }
-          ],
+          "should": should_clauses,
           "minimum_should_match": 1,
           "filter": must_clauses,
           "must_not": must_not_clause
@@ -140,8 +148,16 @@ class elastic_request_generator:
 
   @staticmethod
   def on_search_leakdata(p_query_model):
-    raw_query = p_query_model.q.strip()
-    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+    from urllib.parse import urlparse
+    from datetime import datetime
+    if p_query_model.q != "*":
+      raw_query = p_query_model.q.strip()
+      raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+    else:
+      raw_query = "*"
+    if raw_query == "":
+      raw_query = "*"
+
     if not raw_query:
       return ELASTIC_INDEX.S_LEAK_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -163,6 +179,7 @@ class elastic_request_generator:
 
     must_clauses = []
     must_not_clause = []
+
 
     if m_date_range:
       parts = m_date_range.split(',')
@@ -242,47 +259,50 @@ class elastic_request_generator:
       }
     }
 
-    content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+    if raw_query == "*":
+      content_query = {"match_all": {}}
+    else:
+      content_query = {"bool": {"should": [], "minimum_should_match": 1}}
 
-    for phrase in exact_phrases:
-      phrase_query = {
-        "bool": {
-          "should": [
-            {"match_phrase": {"m_title": {"query": phrase, "boost": 4}}},
-            {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-            {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-            {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}},
-            {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
-          ],
-          "minimum_should_match": 1
+      for phrase in exact_phrases:
+        phrase_query = {
+          "bool": {
+            "should": [
+              {"match_phrase": {"m_title": {"query": phrase, "boost": 4}}},
+              {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+              {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
+              {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}},
+              {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
+            ],
+            "minimum_should_match": 1
+          }
         }
-      }
-      content_query["bool"]["should"].append(phrase_query)
+        content_query["bool"]["should"].append(phrase_query)
 
-    for term in loose_terms:
-      term_query = {
-        "query_string": {
-          "query": term.lower() + "*",
-          "fields": ["*"],
-          "default_operator": "OR",
-          "lenient": True,
-          "analyze_wildcard": True,
-          "boost": 2
+      for term in loose_terms:
+        term_query = {
+          "query_string": {
+            "query": term.lower() + "*",
+            "fields": ["*"],
+            "default_operator": "OR",
+            "lenient": True,
+            "analyze_wildcard": True,
+            "boost": 2
+          }
         }
-      }
-      content_query["bool"]["should"].append(term_query)
+        content_query["bool"]["should"].append(term_query)
 
-    if not exact_phrases and not loose_terms:
-      content_query = {
-        "query_string": {
-          "query": raw_query.lower().rstrip("/") + "*",
-          "fields": ["*"],
-          "default_operator": "OR",
-          "lenient": True,
-          "analyze_wildcard": True,
-          "boost": 2
+      if not exact_phrases and not loose_terms:
+        content_query = {
+          "query_string": {
+            "query": raw_query.lower().rstrip("/") + "*",
+            "fields": ["*"],
+            "default_operator": "OR",
+            "lenient": True,
+            "analyze_wildcard": True,
+            "boost": 2
+          }
         }
-      }
 
     query_statement = {
       "min_score": 0,
@@ -325,19 +345,21 @@ class elastic_request_generator:
           "boost_mode": "multiply"
         }
       },
-      "highlight": {
+      "highlight": {} if raw_query == "*" else {
         "fields": {
           "m_important_content": {
             "fragment_size": 500,
             "number_of_fragments": 3,
             "pre_tags": ["<em>"],
             "post_tags": ["</em>"]
-          }, "m_content": {
+          },
+          "m_content": {
             "fragment_size": 250,
             "number_of_fragments": 3,
             "pre_tags": ["<em>"],
             "post_tags": ["</em>"]
-          }, "m_ref_html": {
+          },
+          "m_ref_html": {
             "fragment_size": 250,
             "number_of_fragments": 3,
             "pre_tags": ["<em>"],
@@ -377,16 +399,13 @@ class elastic_request_generator:
 
   @staticmethod
   def on_search_telegram_data(p_query_model):
-    raw_query = p_query_model.q.strip()
-    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
-    if not raw_query:
-      return ELASTIC_INDEX.S_CHATS_INDEX, {
-        "query": {"match_none": {}},
-        "size": 0
-      }
-    if len(raw_query) < 2:
+    if p_query_model.q != "*":
+      raw_query = p_query_model.q.strip()
+      raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+    else:
       raw_query = "*"
-
+    if raw_query == "":
+      raw_query = "*"
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_search_type = p_query_model.pSearchParamType
 
@@ -454,7 +473,7 @@ class elastic_request_generator:
           "boost_mode": "multiply"
         }
       },
-      "highlight": {
+      "highlight": {} if raw_query == "*" else {
         "fields": {
           "m_content": {
             "fragment_size": 250,
@@ -498,8 +517,14 @@ class elastic_request_generator:
 
   @staticmethod
   def on_search_general_data(p_query_model):
-    raw_query = p_query_model.q.strip()
-    raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+    if p_query_model.q != "*":
+      raw_query = p_query_model.q.strip()
+      raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+    else:
+      raw_query = "*"
+    if raw_query == "":
+      raw_query = "*"
+
     if not raw_query:
       return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -519,6 +544,8 @@ class elastic_request_generator:
 
     must_clauses = []
     must_not_clause = []
+    if p_query_model.q != "*":
+      pass
 
     if m_date_range:
       parts = m_date_range.split(',')
@@ -638,7 +665,7 @@ class elastic_request_generator:
           "boost_mode": "sum",
         }
       },
-      "highlight": {
+      "highlight": {} if raw_query == "*" else {
         "fields": {
           "m_content": {
             "fragment_size": 200,

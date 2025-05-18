@@ -375,11 +375,11 @@ table a:visited {
   }
 
   .default-notification-banner {
-    margin-bottom: 10px;
+    margin-bottom: 0;
   }
 
   .side-menu-container {
-    margin: 0 !important;
+    margin: 10px 0 0 !important;
   }
 
   .side-menu-container {

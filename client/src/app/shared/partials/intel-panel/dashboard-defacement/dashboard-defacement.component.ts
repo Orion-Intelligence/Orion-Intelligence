@@ -64,13 +64,13 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   fetchSearchResults() {
     if (!this.defacementParamModel.q) {
       this.isLoading = false;
+      this.defacementParamModel.q=""
 
       this.router.navigate([], {
         queryParams: {},
         queryParamsHandling: ''
       }).then();
 
-      return;
     }
 
     this.isLoading = true;

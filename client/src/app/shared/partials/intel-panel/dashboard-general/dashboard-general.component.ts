@@ -77,18 +77,16 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
-  fetchSearchResults(reset: boolean=false) {
+  fetchSearchResults(reset: boolean = false) {
     if (this.isLoading) return;
 
     if (!this.generalParamModel.q) {
       this.isLoading = false;
-
+      this.generalParamModel.q=""
       this.router.navigate([], {
         queryParams: {},
         queryParamsHandling: ''
       }).then();
-
-      return;
     }
 
     this.isLoading = true;
@@ -143,17 +141,17 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
-resetFilters(_: void) {
-  this.generalParamModel.pSearchParamType = "all";
-  this.generalParamModel.mSearchParamPage = 1;
-  this.generalParamModel.mSearchParamSafeSearch = false;
-  this.generalParamModel.mNetwork = "all";
-  this.generalParamModel.mDateRange = "";
-  this.generalParamModel.mContentType = "all";
-  this.generalParamModel.mEntity = "";
+  resetFilters(_: void) {
+    this.generalParamModel.pSearchParamType = "all";
+    this.generalParamModel.mSearchParamPage = 1;
+    this.generalParamModel.mSearchParamSafeSearch = false;
+    this.generalParamModel.mNetwork = "all";
+    this.generalParamModel.mDateRange = "";
+    this.generalParamModel.mContentType = "all";
+    this.generalParamModel.mEntity = "";
 
-  this.fetchSearchResults(true);
-}
+    this.fetchSearchResults(true);
+  }
 
   reloadFilters(event: { [key: string]: string | null }) {
     if (event['mNetwork'] != null) {

@@ -64,13 +64,13 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
     if (!this.chatParamModel.q) {
       this.isLoading = false;
+      this.chatParamModel.q=""
 
       this.router.navigate([], {
         queryParams: {},
         queryParamsHandling: ''
       }).then();
 
-      return;
     }
 
     this.isLoading = true;
