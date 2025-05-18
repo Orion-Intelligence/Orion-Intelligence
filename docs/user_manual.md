@@ -339,14 +339,17 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 
 ### Creation Date
 
+In this, you can select a custom date and view the updated results or sites specific to that date.
+
 ![date-modified](https://github.com/user-attachments/assets/21d7a6e0-6c41-49d3-8a52-e3f24b7ee701)
 
 ### Mitre TTP
 
+It means that if we select something from the MITRE type, we will see comments or pages related to that attack type, content that corresponds to the selected attack type.
 ![mitre-modified](https://github.com/user-attachments/assets/b2de0b34-a88d-40b8-b891-7fe90469df1a)
 
 ### Entity Type
-
+In the entity type menu, it means that if someone wants to see results related to a specific category — such as emails, hashes, or IOCs, etc. — they can do so.
 ![entity-modified](https://github.com/user-attachments/assets/2289a79b-adaa-44a8-adf7-d567ea0856df)
 
 
@@ -369,7 +372,7 @@ When a user clicks on a specific section of the result, a separate menu appears,
 
 **Print:** Enables printing of the current view or content
 
-**AI Summary:** Summarize from AI
+**AI Summary:** Search results we receive are in another language, the AI Summary will generate a summary for us in our preferred language.
 
 **Share Link:** Copies the site’s URL for easy sharing
 
@@ -377,6 +380,9 @@ When a user clicks on a specific section of the result, a separate menu appears,
 **Open CTI Graph:** This option redirects the user from the search results to the corresponding page on the CTI Graph, displaying relevant visual relationships based on the selected search item.
 
 In addition to the mentioned details, this section also displays the publish date, network type, last update date, relevant tags, and the status of the link. The status indicates whether the link is currently active or inactive, helping users quickly determine if the site is accessible.
+
+##### Search Insight:
+In this, if we open any result obtained from the search, the bottom section—referred to as Search Insight—displays additional parameters related to that site or search result. These may include the section, context, location type, IP address, and any web links or URLs found within it.
 
 Towards the end, there is a complete menu table available, where several additional elements can be viewed, such as:
 #### Section Tab
