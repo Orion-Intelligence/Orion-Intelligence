@@ -268,7 +268,7 @@ class elastic_request_generator:
         phrase_query = {
           "bool": {
             "should": [
-              {"match_phrase": {"m_title": {"query": phrase, "boost": 4}}},
+              {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
               {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
               {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
               {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}},
@@ -620,7 +620,7 @@ class elastic_request_generator:
       "query_string": {
         "query": m_user_query,
         "fields": [
-          "m_title^3",
+          "m_title^6",
           "m_meta_description^2",
           "m_content^1.5",
           "m_important_content^1.5",

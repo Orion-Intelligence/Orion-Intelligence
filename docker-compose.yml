@@ -116,7 +116,7 @@ services:
 
   elasticsearch:
     container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.20
     environment:
       - discovery.type=single-node
       - network.host=0.0.0.0
@@ -125,7 +125,6 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
     env_file:
@@ -140,6 +139,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    command:
+      - bash
+      - -c
+      - |
+        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m"
+        exec /usr/local/bin/docker-entrypoint.sh eswrapper
     networks:
       backend:
         ipv4_address: 172.20.1.11
@@ -147,6 +152,7 @@ services:
       resources:
         limits:
           memory: 1G
+
 
   redis_server:
     container_name: trusted-web-redis

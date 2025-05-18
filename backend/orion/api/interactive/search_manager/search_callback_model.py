@@ -36,16 +36,19 @@ class search_callback:
           caption_fragments = m_highlight.get("m_caption", [])
 
           if important_fragments:
-            highlight_text = " ... ".join(important_fragments)
+            highlight_text = important_fragments
+
+          if len(highlight_text) < 50 and m_service["m_important_content"]:
+            highlight_text = m_service["m_important_content"]
 
           if len(highlight_text) < 250 and content_fragments:
             highlight_text = f"{highlight_text} ... {' ... '.join(content_fragments)}".strip(" .")
 
-          if len(highlight_text) < 250 and href_fragments:
-            highlight_text = f"{highlight_text} ... {' ... '.join(href_fragments)}".strip(" .")
-
           if len(highlight_text) < 250 and caption_fragments:
             highlight_text = f"{highlight_text} ... {' ... '.join(caption_fragments)}".strip(" .")
+
+          if len(highlight_text) < 250 and href_fragments:
+            highlight_text = f"{highlight_text} ... {' ... '.join(href_fragments)}".strip(" .")
 
           if highlight_text:
             m_service["m_important_content"] = highlight_text

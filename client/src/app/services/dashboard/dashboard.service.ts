@@ -8,6 +8,7 @@ import {GeneralCallbackModel} from '../../shared/model/results/general/general.c
 import {GeneralParamModel} from '../../shared/model/results/shared/general.param.model';
 import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.model';
 import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.param.model';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) {
+  constructor(private apiService: ApiService,   private router: Router, private route: ActivatedRoute) {
   }
 
   fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{
@@ -29,11 +30,23 @@ export class DashboardService {
   }> {
     this.cancelOngoingRequest();
 
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: paramModel,
+      queryParamsHandling: 'merge'
+    });
+
     const params = new HttpParams({fromObject: paramModel as any});
 
-    return this.apiService.get<T>(apiEndpoint, {params}).pipe(takeUntil(this.cancelRequest$), map((response: T) => ({
-      success: true, isEmpty: (response.Result?.length === 0 || response.cards_data?.length === 0), data: response
-    })), catchError(() => of({success: false, isEmpty: false, data: null})));
+    return this.apiService.get<T>(apiEndpoint, {params}).pipe(
+      takeUntil(this.cancelRequest$),
+      map((response: T) => ({
+        success: true,
+        isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
+        data: response
+      })),
+      catchError(() => of({success: false, isEmpty: false, data: null}))
+    );
   }
 
   private cancelOngoingRequest() {
