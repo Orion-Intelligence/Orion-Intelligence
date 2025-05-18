@@ -9,8 +9,7 @@ let's take a look at the admin panel, designed exclusively for administrative us
 
 The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined access to its wide range of features. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
-![main-modified](https://github.com/user-attachments/assets/2e022df7-7c23-401e-91ff-f02e39d7cc57)
-
+![homepage](https://github.com/user-attachments/assets/4f44383c-5d39-41a3-bf33-f9eab2ba17e8)
 
 ## Directory Page
 Here’s an overview of the interface components
@@ -31,11 +30,33 @@ Users can view information on compromised credentials, leaked sensitive data, an
 4. **Defacement:** Presents findings related to website defacement incidents detected by the monitoring system.
 It includes insights into affected domains, attacker signatures, and the nature of the defacement.
 
+5. **Social:**  Monitors threat intelligence shared across social platforms, particularly Telegram.
+The system integrates with Telegram channels to automatically fetch and display relevant threat data.
+This feature helps identify early indicators of cyber threats, ongoing attacks, or planned activities by malicious actors.
+
 6. **Live APIs:** Offers real-time data streams through APIs, facilitating integration with external systems and tools.
 This feature supports continuous monitoring and enables timely responses to evolving cybersecurity events.
 
+7. **Data Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
+These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
-![sidebar-modified](https://github.com/user-attachments/assets/cd1b7813-0f1f-4143-b38c-6c071349cd85)
+      In this module, the system actively collects data from:
+
+   - Telegram channels: Extracts downloadable files and shared dump links related to breaches or leaks.
+
+    - Websites and forums: Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious actors.
+
+    - Other open-source intelligence (OSINT) platforms: Tracks and organizes dump-related information for quick analysis.
+
+8. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
+
+9. **Link:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
+
+10. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
+
+![nav](https://github.com/user-attachments/assets/a61f3546-413b-47f9-8dd5-9a468564a36f)
+
+## Homepage
 
 The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index. The Generic Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast, the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
 
@@ -72,21 +93,21 @@ The "Generic Index" category displays information related to the crawling proces
 - **Update five days:**   This section provides information about the updates from the last five days, allowing users to focus on recent changes that are highly relevant. By highlighting data updates within the past five days, this feature helps users quickly analyze recent changes without sifting through older, less relevant data. It ensures the focus remains on the most up-to-date information.
 
 - **Update Nine days:**  This section provides insights into the updates from the last nine days, offering users a view of changes over a slightly longer period. It helps users monitor data for any significant changes or trends that may have developed in the past week or so. This feature is useful for tracking medium-term updates that may not be as immediate but are still important for ongoing analysis.
-- 
+ 
 - **Average Score:**  This section displays the average score count of the results, providing users with an overall assessment of the data quality. The average score metric is important for evaluating how well the crawling process performed in terms of the relevance and quality of the data fetched. It allows users to assess the overall effectiveness of the crawling process and decide whether further adjustments are needed.
 
 - **URL/Documents:** This section shows the count of URLs being extracted from the sites during the crawl, offering a clear view of the total number of URLs found. By displaying the URL count, users can gauge how many web pages were captured during the crawl, helping them understand the extent of the data sourced. This metric is particularly useful for analyzing the scale of the crawling operation.
-- 
+  
 - **Archive/Documents:**  This refers to the number of archived URLs found on each website, allowing users to assess the historical relevance of the crawled data. The archived URLs give insight into the longevity and preservation of online content, helping users understand how much of the data being crawled has been preserved over time. This is valuable for monitoring the ongoing availability of older content.
-- 
+  
 - **Email/Documents:**  This section will show the number of email addresses found within the crawled data, helping users identify key communication points. By tracking the emails found during the crawl, users can extract important contact details for analysis. This is crucial for identifying potential communication channels and understanding the nature of the content within the dataset.
--  
+   
 - **Phone/Documents:** This section indicates how many phone numbers were fetched from each site during the crawl, providing users with detailed contact information. By tracking phone numbers, users can understand the level of personal or business contact data within the dataset. This feature allows for a deeper analysis of how connected or widespread the data is across different platforms.
-- 
+  
 - **Clearnet/Document:** This section informs users about the clearnet-type URLs that were captured during the crawl. On average, each clearnet link provides around four URLs, which belong to the standard public internet network. This section helps users understand the volume of accessible, non-hidden data collected, which is essential for distinguishing between regular web content and more obscure or private data.
 
 - **Common Type:** These are the general types of data supported by the network, helping users categorize the different types of content collected. This section ensures that users can easily understand the variety and scope of data being gathered from diverse sources. It also helps in organizing the data into recognizable categories, making analysis more straightforward and manageable.
-- 
+  
 ![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/generalindex.png)
 
 In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers represent updates on a weekly basis.
@@ -97,7 +118,7 @@ In this diagram, the values displayed within the boxes represent the crawling da
 
 The Leaked Index offers detailed insights into the various states of leaked data within the dataset, specifically targeting sensitive or confidential information. It helps users identify critical data that has been exposed, making it easier to track potential risks or security breaches. By providing a clear overview of the leaked data, this index allows for more focused analysis and prioritization of high-risk information. This feature is essential for ensuring that important threats are detected and addressed promptly.
 
-3. ### Defacement
+3. #### Defacement
 The Defacement category allows users to deeply analyze data related to websites that have been compromised or visually altered by attackers. Within this section, users can:
 
 - View the total number of websites that have been hacked or defaced, giving a comprehensive overview of the scale of such incidents. This helps to quantify the number of attacks and monitor the impact on the web ecosystem.
@@ -155,12 +176,12 @@ The Data Breach section in the navigation bar includes two subcategories:
 1. ### Databases
 This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
 
-![databases-modified](https://github.com/user-attachments/assets/69aaac82-8b53-4229-a049-a6ff6379b5de)
+![databasebreach-modified](https://github.com/user-attachments/assets/29c0fd5b-56bb-4b90-b79f-196f77186362)
 
 
 2. ### Track
 This section provides breach-related information tracked from forums. It is primarily used for monitoring discussions and mentions of potential breaches across underground communities. Note: This section does not contain actual breached data — it only displays references or claims gathered from forum sources.
-![track-modified](https://github.com/user-attachments/assets/f52e62a2-b27b-4fb4-9a97-1ac997fe70cd)
+![tracking-modified](https://github.com/user-attachments/assets/657279c5-e9e3-441e-9dd0-c691dc535d86)
 
 
 ## Defacement
@@ -182,9 +203,16 @@ The Defacement section provides access to an archive list of websites that have 
 
 - Defaced Web URL – Direct link to the defaced website or the affected page.
 
-- This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams and analysts to monitor and investigate web-based attacks efficiently.
+This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams and analysts to monitor and investigate web-based attacks efficiently.
 
-![defacement-modified](https://github.com/user-attachments/assets/5b7e7a9e-d454-43fc-b7a1-1fbb3955ee13)
+![archive-modified](https://github.com/user-attachments/assets/fcc2876a-449f-4792-bb13-45dc482cad11)
+
+## Social
+
+The Social module is designed to monitor and analyze threat intelligence shared across social media and messaging platforms, with a primary focus on Telegram—a widely used channel among cybercriminal groups for sharing illicit information. This module integrates directly with selected Telegram channels, groups, and bots that are known to circulate cyber threat data, including leaked credentials, data dumps, malware samples, and discussions of planned cyberattacks.
+
+![social-modified](https://github.com/user-attachments/assets/e1180853-35b6-4123-af06-4940fa1d17e5)
+
 
 ## Live APIs
 
@@ -197,8 +225,55 @@ By selecting the email option, users can input any email address to retrieve rel
 Below the lookup interface, a list of data breach records is displayed. These records offer additional context and reference points, allowing users to explore known breaches and validate the exposure of specific information.
 
 
+![apilive-modified](https://github.com/user-attachments/assets/6019f8ca-ba2d-4f70-9596-506639773d84)
 
-![api-modified](https://github.com/user-attachments/assets/baa071d3-377a-4e26-8c4c-0dd2a2a678c5)
+## Data Dump
+Provides access to large collections of compromised data gathered from various underground and open sources.
+These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
+
+ - Data is collected from:
+
+ - Telegram channels (shared files or links)
+
+ - Dark web forums and sites
+
+ - Open-source leak platforms
+
+The platform categorizes and indexes this information for further analysis and correlation with threat activity. In the Data Dumps module, a **filtering option** is available on the right-hand side of the interface. This feature allows users to selectively view data dumps based on their preferred source. Users can filter dumps originating from specific websites, Telegram channels, or other monitored resources, enabling more efficient navigation and targeted analysis of the collected data.
+
+![dump-modified](https://github.com/user-attachments/assets/c218ae0d-de70-4445-a2b7-7a6a04ce5b47)
+
+## CTI Graph
+The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
+
+![cti-modified](https://github.com/user-attachments/assets/2f718103-3325-46da-8096-95e247a2e79f)
+
+When the CTI Graph module is clicked, it automatically opens in a new tab. This module displays a connection graph composed of various nodes, visually representing complex relationships between different cyber threat entities.
+
+On the leftmost side of the interface, there are two levels of filters. In the first-level filter, users can choose from three categories: Cluster, Document, and Property. Based on the selected category, the second-level filter below dynamically updates to show options relevant to the chosen category, allowing users to refine and customize the graph view for more focused analysis.
+
+
+**Cluster** If the Cluster filter is selected in the first-level filter, the second-level filter presents four options: General, Leak, Defacement, and Chat.
+
+**Document** If the Document filter is selected, the second-level filter prompts the user to enter a Document ID.
+
+**Property** Similarly, if the Property filter is selected, the second-level filter asks the user to choose a property type—such as email, hashes, etc.—and then specify the property value for a more targeted query.
+
+![ctifilter-modified](https://github.com/user-attachments/assets/c5af2eab-74f6-42b7-8914-2395f544c704)
+
+  On the rightmost side of the CTI Graph interface, there are several additional options:
+
+  - The first option is a toggle to enable or disable physics, which controls the animation and movement behavior of the graph nodes.
+
+  - The second option allows users to expand the CTI graph for a broader and more detailed view.
+
+   - Below that, the Details section displays information related to the filters selected on the left side of the graph, providing context about the current view.
+
+  - Finally, there is a Color Indicators section, which explains the meaning of different node colors used within the graph for easier interpretation.
+
+![toggle-modified](https://github.com/user-attachments/assets/bb0bedca-818b-4929-80da-453091ef6c8b)
+
+
 
 ## Fillter and Analytics
 On the left side of the page, there are two options: Analytics and Filter.
@@ -242,7 +317,8 @@ Each variable can be expanded through a dropdown menu, which reveals separate an
 The second option alongside Analytics is the Filter menu. When we click on it, an extended submenu appears. This submenu contains two additional options.
 Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the process of refining results for more targeted insights.
 
-![fillter-modified](https://github.com/user-attachments/assets/e51e73eb-cb51-4187-9466-d0fb18b7b66b)
+![fillter new-modified](https://github.com/user-attachments/assets/4118a0e4-308f-4e3f-b813-f35f091cfcd2)
+
 
 ### Network Types
 Onion: Dark web links.
@@ -261,7 +337,20 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 
 ![safe search-modified](https://github.com/user-attachments/assets/e7ad92a7-524c-4f67-837c-9566af73b805)
 
+### Creation Date
 
+In this, you can select a custom date and view the updated results or sites specific to that date.
+
+![date-modified](https://github.com/user-attachments/assets/21d7a6e0-6c41-49d3-8a52-e3f24b7ee701)
+
+### Mitre TTP
+
+It means that if we select something from the MITRE type, we will see comments or pages related to that attack type, content that corresponds to the selected attack type.
+![mitre-modified](https://github.com/user-attachments/assets/b2de0b34-a88d-40b8-b891-7fe90469df1a)
+
+### Entity Type
+In the entity type menu, it means that if someone wants to see results related to a specific category — such as emails, hashes, or IOCs, etc. — they can do so.
+![entity-modified](https://github.com/user-attachments/assets/2289a79b-adaa-44a8-adf7-d567ea0856df)
 
 
 
@@ -273,8 +362,7 @@ When you enter any keywords into the search bar and press enter, the system proc
 
 When performing a search, the results are shown in a split view, helping organize the information more effectively. This layout separates different data sets, making it easier for users to focus on specific results. By displaying the data side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by simplifying the navigation of search results. Below the search bar overall fetch results related to the keyword.
 
-
-![resultfinal](https://github.com/user-attachments/assets/55cd18cd-1983-48ff-b8eb-970e048f36f4)
+![resultoptions-modified](https://github.com/user-attachments/assets/ae7fcd3d-8310-4bdd-ad3a-b7c81011efab)
 
 
 The detailed view of a search result provides essential information to help users assess the nature of a website before accessing it.  This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak site, or cryptocurrency platform.
@@ -282,15 +370,19 @@ When a user clicks on a specific section of the result, a separate menu appears,
 
 **Download:** Allows the user to download available site content
 
-**Translator:** Converts the content into different languages
-
 **Print:** Enables printing of the current view or content
+
+**AI Summary:** Search results we receive are in another language, the AI Summary will generate a summary for us in our preferred language.
 
 **Share Link:** Copies the site’s URL for easy sharing
 
 **Open in New Tab:** Loads the site in a separate browser tab for convenience.
+**Open CTI Graph:** This option redirects the user from the search results to the corresponding page on the CTI Graph, displaying relevant visual relationships based on the selected search item.
 
 In addition to the mentioned details, this section also displays the publish date, network type, last update date, relevant tags, and the status of the link. The status indicates whether the link is currently active or inactive, helping users quickly determine if the site is accessible.
+
+##### Search Insight:
+In this, if we open any result obtained from the search, the bottom section—referred to as Search Insight—displays additional parameters related to that site or search result. These may include the section, context, location type, IP address, and any web links or URLs found within it.
 
 Towards the end, there is a complete menu table available, where several additional elements can be viewed, such as:
 #### Section Tab
