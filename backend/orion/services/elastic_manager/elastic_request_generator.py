@@ -20,6 +20,14 @@ class elastic_request_generator:
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_network = getattr(p_query_model, 'mNetwork', None)
 
+    if raw_query.__eq__(""):
+      raw_query = "*"
+    
+    m_date_range=p_query_model.mDateRange
+    m_attacker=p_query_model.mAttacker
+    m_team=p_query_model.mTeam
+
+
     must_clauses = []
     must_not_clause = []
     should_clauses = []
@@ -27,27 +35,33 @@ class elastic_request_generator:
     if m_network and m_network.lower() not in ("", "all"):
       must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-    import ipaddress
+    if m_date_range:
+      parts = m_date_range.split(',')
+      if len(parts) == 2:
+        try:
+          from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+          to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
 
-    try:
-      ipaddress.ip_address(raw_query)
-      is_ip = True
-    except ValueError:
-      is_ip = False
+          must_clauses.append({
+            "range": {
+              "m_date_of_leak": {
+                "gte": from_date,
+                "lte": to_date
+              }
+            }
+          })
+        except ValueError:
+          pass
 
-    if raw_query == "*":
-      main_query = {
-        "bool": {
-          "must": [{"match_all": {}}],
-          "filter": must_clauses,
-          "must_not": must_not_clause
-        }
-      }
-    else:
-      if is_ip:
-        should_clauses.append({"term": {"m_ip": raw_query}})
-      else:
-        should_clauses.extend([
+    if m_attacker and m_attacker.split().lower() not in (""):
+      must_clauses.append({"terms": {"m_attacker": [m_attacker]}})
+
+    if m_team and m_team.split().lower() not in (""):
+      must_clauses.append({"terms": {"m_team": [m_team]}})
+
+    main_query = {
+      "bool": {
+        "should": [
           {"match": {"m_location": {"query": raw_query, "boost": 50}}},
           {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
           {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
@@ -84,16 +98,18 @@ class elastic_request_generator:
               "minimum_should_match": 1
             }
           }
-        ])
-
-      main_query = {
-        "bool": {
-          "should": should_clauses,
-          "minimum_should_match": 1,
-          "filter": must_clauses,
-          "must_not": must_not_clause
-        }
+        ]
       }
+    }
+
+    main_query = {
+      "bool": {
+        "should": should_clauses,
+        "minimum_should_match": 1,
+        "filter": must_clauses,
+        "must_not": must_not_clause
+      }
+    }
 
     query_statement = {
       "min_score": 0,
