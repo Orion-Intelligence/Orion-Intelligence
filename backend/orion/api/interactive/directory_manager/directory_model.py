@@ -53,7 +53,7 @@ class directory_model:
                 }
             ]
 
-        except Exception as e:
+        except Exception as _:
            pass
          
 
