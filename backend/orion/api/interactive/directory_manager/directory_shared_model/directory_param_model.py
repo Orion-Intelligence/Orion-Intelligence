@@ -7,4 +7,4 @@ class directory_param_model(BaseModel):
     content_type: Optional[str] = "all"
     index: Optional[str] = "all"
     network: Optional[str] = "all"
-    dateRange:Optional[str]=""
+    mDateRange:Optional[str]=""

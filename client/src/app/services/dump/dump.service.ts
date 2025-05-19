@@ -36,10 +36,6 @@ export class DumpService {
     this.filters = filters;
   }
 
-  getSelectedFilters(): { [key: string]: string } {
-    return this.filters;
-  }
-
   setCurrentPage(page: number): void {
     if (page > 0) {
       this.currentPageSubject.next(page);
@@ -48,19 +44,5 @@ export class DumpService {
 
   toggleFilter(open: boolean): void {
     this.filterOpenSubject.next(open);
-  }
-
-  applyFilters(newFilters: any): void {
-    this.filterModel = newFilters;
-    this.reloadDumpData({ ...newFilters, page: this.currentPageSubject.getValue() });
-  }
-
-  resetFilters(): void {
-    this.filterModel = {
-      source: 'all',
-      group: 'all',
-      parsed_status: 'all'
-    };
-    this.reloadDumpData({ page: 1 });
   }
 }

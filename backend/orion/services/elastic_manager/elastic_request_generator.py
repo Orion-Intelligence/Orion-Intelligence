@@ -20,27 +20,23 @@ class elastic_request_generator:
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_network = getattr(p_query_model, 'mNetwork', None)
 
-    if raw_query.__eq__(""):
-      raw_query = "*"
-    
-    m_date_range=p_query_model.mDateRange
-    m_attacker=p_query_model.mAttacker
-    m_team=p_query_model.mTeam
-
-
     must_clauses = []
     must_not_clause = []
     should_clauses = []
 
-    if m_network and m_network.lower() not in ("", "all"):
-      must_clauses.append({"term": {"m_network": m_network.lower()}})
+    m_attacker=p_query_model.mAttacker
+    m_team=p_query_model.mTeam
+    m_date_range = p_query_model.mDateRange
 
     if m_date_range:
       parts = m_date_range.split(',')
       if len(parts) == 2:
         try:
-          from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
-          to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+          from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
+          from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
+
+          to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
+          to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
 
           must_clauses.append({
             "range": {
@@ -53,15 +49,36 @@ class elastic_request_generator:
         except ValueError:
           pass
 
-    if m_attacker and m_attacker.split().lower() not in (""):
-      must_clauses.append({"terms": {"m_attacker": [m_attacker]}})
+    if m_network and m_network.lower() not in ("", "all"):
+      must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-    if m_team and m_team.split().lower() not in (""):
-      must_clauses.append({"terms": {"m_team": [m_team]}})
+    if m_attacker:
+      must_clauses.append({"term": {"m_attacker": m_attacker}})
 
-    main_query = {
-      "bool": {
-        "should": [
+    if m_team :
+      must_clauses.append({"term": {"m_team": m_team}})
+
+    import ipaddress
+
+    try:
+      ipaddress.ip_address(raw_query)
+      is_ip = True
+    except ValueError:
+      is_ip = False
+
+    if raw_query == "*":
+      main_query = {
+        "bool": {
+          "must": [{"match_all": {}}],
+          "filter": must_clauses,
+          "must_not": must_not_clause
+        }
+      }
+    else:
+      if is_ip:
+        should_clauses.append({"term": {"m_ip": raw_query}})
+      else:
+        should_clauses.extend([
           {"match": {"m_location": {"query": raw_query, "boost": 50}}},
           {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
           {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
@@ -98,18 +115,16 @@ class elastic_request_generator:
               "minimum_should_match": 1
             }
           }
-        ]
-      }
-    }
+        ])
 
-    main_query = {
-      "bool": {
-        "should": should_clauses,
-        "minimum_should_match": 1,
-        "filter": must_clauses,
-        "must_not": must_not_clause
+      main_query = {
+        "bool": {
+          "should": should_clauses,
+          "minimum_should_match": 1,
+          "filter": must_clauses,
+          "must_not": must_not_clause
+        }
       }
-    }
 
     query_statement = {
       "min_score": 0,
@@ -164,8 +179,6 @@ class elastic_request_generator:
 
   @staticmethod
   def on_search_leakdata(p_query_model):
-    from urllib.parse import urlparse
-    from datetime import datetime
     if p_query_model.q != "*":
       raw_query = p_query_model.q.strip()
       raw_query = helper_controller.remove_stopwords_from_string(raw_query)

@@ -1,17 +1,17 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ResultComponent } from '../../result/result.component';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { PaginationComponent } from '../../pagination/pagination.component';
-import { DashboardResultListComponent } from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { DefacementParamModel } from '../../../model/results/defacement/defacement.callback.model';
-import { DefacementCallbackModel } from '../../../model/results/defacement/defacement.param.model';
-import { AppService } from '../../../../services/core/app.service';
-import { defacement_filters } from '../../../constants/filters';
-import { Category } from '../../../enums/pages';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {NgIf} from '@angular/common';
+import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ResultComponent} from '../../result/result.component';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {PaginationComponent} from '../../pagination/pagination.component';
+import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {DefacementParamModel} from '../../../model/results/defacement/defacement.callback.model';
+import {DefacementCallbackModel} from '../../../model/results/defacement/defacement.param.model';
+import {AppService} from '../../../../services/core/app.service';
+import {defacement_filters, general_filters} from '../../../constants/filters';
+import {Category} from '../../../enums/pages';
 
 @Component({
   selector: 'app-dashboard-defacement',
@@ -23,11 +23,11 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   defacementParamModel: DefacementParamModel = new DefacementParamModel();
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
   result_count = 0;
+  type = Category.DEFACEMENT
 
   query = '';
   isLoading = false;
   firstTrigger = true;
-  type = Category.DEFACEMENT
 
   constructor(public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
   }
@@ -37,7 +37,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.defacementCallbackModel = { ...this.dashboardService.defacementCallbackModel } as DefacementCallbackModel;
+    this.defacementCallbackModel = {...this.dashboardService.defacementCallbackModel} as DefacementCallbackModel;
     this.result_count = this.defacementCallbackModel.Result.length
 
     combineLatest([this.route.queryParams, this.route.url])
@@ -46,6 +46,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         this.query = params['q'] || '';
         this.defacementParamModel.q = params['q'] || '';
         this.defacementParamModel.mSearchParamPage = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1;
+        this.defacementParamModel.mDateRange = params['mDateRange'] || '';
 
         if (this.firstTrigger && ((this.defacementCallbackModel.Result.length > 0))) {
           this.isLoading = false;
@@ -65,19 +66,17 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(reset: boolean = false) {
-    if (this.isLoading) return;
-
-    // Exit early if query is empty
+    if (reset)
+      this.defacementParamModel.mSearchParamPage = 1
     if (!this.defacementParamModel.q) {
       this.isLoading = false;
+      this.defacementParamModel.q = ""
 
       this.router.navigate([], {
         queryParams: {},
         queryParamsHandling: ''
       }).then();
 
-
-      return;
     }
 
     this.isLoading = true;
@@ -96,7 +95,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       }
     });
 
-    // Set query parameters in the URL
     this.router.navigate([], {
       queryParams: cleanedParams,
       queryParamsHandling: reset ? '' : 'merge',
@@ -104,7 +102,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       relativeTo: this.route
     }).then();
 
-    // Stop here if reset (to avoid unnecessary API call)
     if (reset) {
       this.isLoading = false;
       return;
@@ -120,13 +117,11 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         } else {
           this.defacementCallbackModel = new DefacementCallbackModel();
         }
-
         this.isLoading = false;
         this.result_count = this.defacementCallbackModel.Result.length;
         this.cdr.detectChanges();
       });
   }
-
 
   onPageChange(step: number) {
     this.defacementParamModel.mSearchParamPage = step;
@@ -134,13 +129,15 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   resetFilters(_: void) {
-    delete (this.defacementParamModel as any)['mDateRange'];
-    delete (this.defacementParamModel as any)['mTeam'];
-    delete (this.defacementParamModel as any)['mAttacker'];
+    this.defacementParamModel.mDateRange = "";
+    this.defacementParamModel.mTeam = "";
+    this.defacementParamModel.mAttacker = "";
+
     this.fetchSearchResults(true);
   }
 
   reloadFilters(event: { [key: string]: string | null }) {
+    this.defacementParamModel.mSearchParamPage = 1
     if (event['mDateRange']) {
       this.defacementParamModel.mDateRange = event['mDateRange']
     }
@@ -153,10 +150,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
-
-  get currentCallbackModel(): DefacementCallbackModel {
-    return this.defacementCallbackModel;
-  }
   protected readonly Math = Math;
   protected readonly defacement_filters = defacement_filters;
 }

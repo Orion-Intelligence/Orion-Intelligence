@@ -21,9 +21,7 @@ export class DirectoryResolver implements Resolve<DirectoryCallbackModel> {
 
     for (const key of Object.keys(filterConfig)) {
       const value = queryParams[key];
-      const validOptions = filterConfig[key].options;
-
-      if (value && validOptions.includes(value)) {
+      if (value) {
         validFilters[key] = value;
       }
     }
@@ -33,6 +31,7 @@ export class DirectoryResolver implements Resolve<DirectoryCallbackModel> {
     }
     this.directoryService.setSelectedFilters(validFilters);
 
+    console.log(httpParams)
     return this.apiService.get<DirectoryCallbackModel>('directory', {
       params: httpParams
     }).pipe(tap((data) => this.directoryService.setDirectoryData(data)));

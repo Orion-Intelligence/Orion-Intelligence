@@ -6,4 +6,4 @@ class dump_param_model(BaseModel):
     source: Optional[str] = "all"
     group: Optional[str] = "all"
     parsed_status: Optional[bool | str] = "all"
-    dateRange:Optional[str]=""
+    mDateRange:Optional[str]=""

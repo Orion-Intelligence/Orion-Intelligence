@@ -21,9 +21,7 @@ export class DumpResolver implements Resolve<DumpCallbackModel> {
 
     for (const key of Object.keys(filterConfig)) {
       const value = queryParams[key];
-      const validOptions = filterConfig[key].options;
-
-      if (value && validOptions.includes(value)) {
+      if (value) {
         validFilters[key] = value;
       }
     }

@@ -69,7 +69,6 @@ export class DumpComponent implements OnInit {
       };
 
       this.selectedFilters = initialSelectedFilters;
-      this.dumpService.reloadDumpData({ ...this.selectedFilters, page: 1 });
     });
   }
 

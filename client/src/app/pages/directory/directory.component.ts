@@ -72,7 +72,6 @@ export class DirectoryComponent implements OnInit {
 
       this.selectedFilters = initialSelectedFilters;
 
-      this.directoryService.reloadDirectoryData(this.selectedFilters);
     });
   }
 

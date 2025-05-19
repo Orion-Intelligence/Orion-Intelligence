@@ -7,8 +7,11 @@
         <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
       </div>
 
-      <h2 class="dashboard__search-title">{{ item.m_title }}</h2>
-      <p class="dashboard__search-description" [innerHTML]="item.m_important_content.slice(0,600)"></p>
+      <ng-container *ngIf="item.m_important_content">
+        <h2 class="dashboard__search-title">{{ item.m_title }}</h2>
+        <p class="dashboard__search-description" [innerHTML]="item.m_important_content.slice(0,600)"></p>
+      </ng-container>
+
 
       <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
         <span class="search__result-detail-description-span highlight"><b>Search Tracker</b></span>

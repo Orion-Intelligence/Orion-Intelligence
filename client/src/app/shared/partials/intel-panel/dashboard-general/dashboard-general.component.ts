@@ -54,6 +54,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         this.generalParamModel.q = params['q'] || '';
         this.generalParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
         this.generalParamModel.mSearchParamSafeSearch = params['mSearchParamSafeSearch'] === 'true';
+        this.generalParamModel.mDateRange = params['mDateRange'] || '';
         this.generalParamModel.mNetwork = params['mNetwork'] || 'all';
 
         this.generalParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
@@ -79,6 +80,8 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   fetchSearchResults(reset: boolean = false) {
     if (this.isLoading) return;
+    if (reset)
+      this.generalParamModel.mSearchParamPage = 1
 
     if (!this.generalParamModel.q) {
       this.isLoading = false;
@@ -154,6 +157,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   }
 
   reloadFilters(event: { [key: string]: string | null }) {
+    this.generalParamModel.mSearchParamPage = 1
     if (event['mNetwork'] != null) {
       this.generalParamModel.mNetwork = event['mNetwork'];
     }

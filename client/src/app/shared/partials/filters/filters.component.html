@@ -15,7 +15,8 @@
       <label class="filter__label" appTooltip="{{filterModel.filters[key].tooltip}}"> {{ filterModel.filters[key].title
         }} </label>
       <ng-container *ngIf="filterModel.filters[key].type === 'daterange'">
-        <app-date-picker [key]="key" (dateSelected)="updateFilter($event)"></app-date-picker>
+        <app-date-picker [key]="key" [filterModel]="filterModel" [mSelectedFilters]="selectedFilters"
+        (selectedFiltersChange)="updateFilter($event)" (dateSelected)="updateFilter($event)"></app-date-picker>
       </ng-container>
       <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
         <div class="dropdown">
@@ -42,7 +43,7 @@
     </ng-container>
     <ng-container *ngIf="filterModel.filters[key].type === 'text'">
       <div class="mb-2">
-        <input type="text" class="btn filter__input w-100 text-start d-flex justify-content-between align-items-center"
+        <input type="text" class="filter__input w-100 text-start d-flex justify-content-between align-items-center"
           placeholder="{{ filterModel.filters[key].title }}" [(ngModel)]="selectedFilters[key]"
           (ngModelChange)="onSelectionChange(key, selectedFilters[key])" name="{{ key }}" />
       </div>
