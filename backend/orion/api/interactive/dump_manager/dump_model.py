@@ -2,7 +2,7 @@ from orion.api.interactive.dump_manager.dump_shared_model.dump_callback_model im
 from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model import dump_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
-
+from datetime import datetime
 
 class dump_model:
 
@@ -30,6 +30,20 @@ class dump_model:
 
         if params.parsed_status != "all":
             query["parsed_status"] = params.parsed_status
+        
+        if params.dateRange:
+            try:
+                start_str, end_str = [s.strip() for s in params.dateRange.split(",")]
+                start_date =  datetime.strptime(start_str.strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                end_date = datetime.strptime(end_str.strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+          
+                query["$or"] = [
+                {"created_at": {"$gte": start_date, "$lt": end_date}}
+                ]
+
+            except Exception as e:
+                pass
+
 
         total_count = await self._engine.count(db_dump_record_model, query)
         data = await self._engine.find(

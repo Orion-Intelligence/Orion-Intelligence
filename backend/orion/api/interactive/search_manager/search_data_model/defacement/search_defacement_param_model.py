@@ -6,3 +6,6 @@ class search_defacement_param_model(BaseModel):
     pSearchParamType: Optional[str] = "all"
     mSearchParamPage: Optional[int] = 1
     mNetwork: str = "all"
+    mDateRange:Optional[str]=""
+    mAttacker:Optional[str]=""
+    mTeam:Optional[str]=""

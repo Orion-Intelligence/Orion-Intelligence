@@ -1,16 +1,16 @@
 import { Component, EventEmitter, OnInit, Output, OnDestroy } from '@angular/core';
 import { NgOptimizedImage, NgClass, NgIf, AsyncPipe } from '@angular/common';
-import {ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory, SocialSubCategory} from '../../enums/pages';
+import { ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory, SocialSubCategory } from '../../enums/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
 import { GeneralCallbackModel } from '../../model/results/general/general.callback.model';
 import { LeakCallbackModel } from '../../model/results/leak/leak.callback.model';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {SelectionStoreService} from '../../../services/dashboard/selection.service';
-import {AppService} from '../../../services/core/app.service';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { SelectionStoreService } from '../../../services/dashboard/selection.service';
+import { AppService } from '../../../services/core/app.service';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -62,7 +62,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       this.selectionStore.setSelectedOption("");
     } else {
       this.selectionStore.setSelectedSection(section);
-
       let firstSubcategory: string | undefined;
       switch (section) {
         case Category.STRATEGIC:

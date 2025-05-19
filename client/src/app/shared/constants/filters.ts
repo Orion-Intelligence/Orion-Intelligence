@@ -8,6 +8,12 @@ export const dump_filters: FilterModel = {
       options: ["all", "telegram", "websites"],
       type: "dropdown",
       tooltip: "Leak origin sources"
+    },
+    dateRange: {
+      title: "Date Range",
+      options: [],
+      type: "daterange",
+      tooltip: "Select Range"
     }
   }
 };
@@ -44,6 +50,12 @@ export const directory_filters: FilterModel = {
       ],
       type: "dropdown",
       tooltip: ""
+    },
+    dateRange: {
+      title: "Date Range",
+      options: [],
+      type: 'daterange',
+      tooltip: "Date Range"
     },
   },
 };
@@ -135,4 +147,27 @@ export const chat_filters: FilterModel = {
       tooltip: ""
     }
   }
+};
+
+export const defacement_filters: FilterModel = {
+  filters: {
+    mDateRange: {
+      title: "Date Range",
+      options: [],
+      type: 'daterange',
+      tooltip: "Date Range"
+    },
+    mAttacker: {
+      title: "Attacker Type",
+      options: [],
+      type: 'text',
+      tooltip: "Content Filter"
+    },
+    mTeam: {
+      title: "Team Type",
+      options: [],
+      type: 'text',
+      tooltip: "Entity Filter"
+    },
+  },
 };

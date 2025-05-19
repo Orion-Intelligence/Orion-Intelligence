@@ -6,8 +6,8 @@ import { last } from 'rxjs';
 import { filterAnimation } from '../../animations/filter.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import {DatePickerComponent} from './date-picker/date-picker.component';
-import {MultipleSelectionComponent} from './multiple-selection/multiple-selection.component';
+import { DatePickerComponent } from './date-picker/date-picker.component';
+import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
 
 @Component({
   selector: 'app-filters',
@@ -40,7 +40,7 @@ export class FiltersComponent implements OnInit {
   updateFilter(event: { key: string; value: string }) {
     this.selectedFilters[event.key] = event.value;
   }
-  onSelectionChange(key: string, value: string) {
+  onSelectionChange(key: string, value: string | null) {
     this.selectedFilters[key] = value;
   }
 

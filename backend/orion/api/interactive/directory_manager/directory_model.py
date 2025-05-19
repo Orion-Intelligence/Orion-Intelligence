@@ -2,7 +2,7 @@ from orion.api.interactive.directory_manager.directory_shared_model.directory_ca
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
-
+from datetime import datetime
 
 class directory_model:
 
@@ -30,6 +30,32 @@ class directory_model:
 
       if params.network != "all":
           query["network_type"] = params.network
+
+      if params.dateRange:
+        try:
+          start_str, end_str = [s.strip() for s in params.dateRange.split(",")]
+          start_date =  datetime.strptime(start_str.strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+          end_date = datetime.strptime(end_str.strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+          
+          query["$or"] = [
+                {
+                    "leak_model_last_update": {
+                        "$gte": start_date, "$lt": end_date
+                    }
+                },
+                {
+                    "$and": [
+                        {"leak_model_last_update": {"$exists": False}},
+                        {"geneic_model_last_update": {
+                            "$gte": start_date, "$lt": end_date
+                        }}
+                    ]
+                }
+            ]
+
+        except Exception as e:
+           pass
+         
 
       total_count = await self._engine.count(db_url_data_model, query)
       data = await self._engine.find(db_url_data_model, query, skip=(params.page - 1) * 100, limit=100)

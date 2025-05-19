@@ -1,22 +1,22 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {Observable} from 'rxjs';
-import {EmptyResultComponent} from '../empty-result/empty-result.component';
-import {FormsModule} from '@angular/forms';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {LoadingFormComponent} from '../loading-form/loading-form.component';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {SidebarService} from '../../services/sidebar.service';
-import {FiltersComponent} from '../filters/filters.component';
-import {FilterModel} from '../../model/filter/filter.model';
-import {SuggestionComponent} from '../suggestion/suggestion.component';
-import {EmptyQueryComponent} from '../empty-query/empty-query.component';
-import {Suggestion} from '../../model/results/shared/common-result';
-import {query} from '@angular/animations';
-import {Category} from "../../enums/pages";
-import {ActivatedRoute, RouterLink} from '@angular/router';
-import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {HelperService} from '../../services/helper.service';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Observable } from 'rxjs';
+import { EmptyResultComponent } from '../empty-result/empty-result.component';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { LoadingFormComponent } from '../loading-form/loading-form.component';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { SidebarService } from '../../services/sidebar.service';
+import { FiltersComponent } from '../filters/filters.component';
+import { FilterModel } from '../../model/filter/filter.model';
+import { SuggestionComponent } from '../suggestion/suggestion.component';
+import { EmptyQueryComponent } from '../empty-query/empty-query.component';
+import { Suggestion } from '../../model/results/shared/common-result';
+import { query } from '@angular/animations';
+import { Category } from "../../enums/pages";
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { HelperService } from '../../services/helper.service';
 
 @Component({
   selector: 'app-result',
@@ -33,6 +33,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() analyticsToggle: boolean = false;
   @Input() shrinkmenu: boolean = false;
   @Input() type!: Category;
+  @Input() showAnalytics: boolean = true;
 
   @Output() reloadFilters = new EventEmitter<{ [key: string]: string | null }>();
   @Output() resetFilter = new EventEmitter<void>();
@@ -70,10 +71,10 @@ export class ResultComponent implements OnInit, OnChanges {
           }
 
           if (value && base.options.includes(value)) {
-            newFilters[key] = {...base, selected: value};
+            newFilters[key] = { ...base, selected: value };
             updatedSelectedFilters[key] = value;
           } else {
-            newFilters[key] = {...base};
+            newFilters[key] = { ...base };
           }
         });
 
@@ -84,7 +85,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
       this.selectedFilters = updatedSelectedFilters;
     });
-    if(this.local_query){
+    if (this.local_query) {
       this.result_triggered = true
     }
   }
