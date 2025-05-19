@@ -58,9 +58,8 @@ class _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd(leak_extractor_i
 
     return self._entity_data
 
-  def invoke_db(self, command: int, key: str, default_value):
-
-    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
+  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
   def contact_page(self) -> str:
 
@@ -108,12 +107,14 @@ class _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd(leak_extractor_i
             show_leaks_link = f"{self.base_url}{show_leaks_link}" if show_leaks_link.startswith(
               '/') else f"{self.base_url}/{show_leaks_link}"
 
-          is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL,
-                                      CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, False)
+          is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, 0, RAW_PATH_CONSTANTS.HREF_TIMEOUT))
           ref_html = None
-          if not is_crawled:
+          if is_crawled != -1 and is_crawled < 5:
             ref_html = helper_method.extract_refhtml(title)
-            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, True)
+            if ref_html:
+              self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+            else:
+              self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
 
           company_link = next((t.strip('",;()[]<>') for t in company_name.split() if '.' in t), "")
 

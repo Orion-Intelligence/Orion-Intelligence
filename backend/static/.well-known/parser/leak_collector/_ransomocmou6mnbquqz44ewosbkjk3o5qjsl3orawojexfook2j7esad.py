@@ -2,6 +2,8 @@ import re
 from abc import ABC
 from typing import List
 from playwright.sync_api import Page
+
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -55,9 +57,8 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
   def entity_data(self) -> List[entity_model]:
     return self._entity_data
 
-  def invoke_db(self, command: int, key: str, default_value):
-
-    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
+  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
   def contact_page(self) -> str:
     return "http://ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.onion/about"
@@ -120,19 +121,14 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
         match = re.search(r'https?://[^\s\-]+', cleaned_content)
         first_url = match.group(0) if match else None
 
-        is_crawled = self.invoke_db(
-          REDIS_COMMANDS.S_GET_BOOL,
-          CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + (first_url or title),
-          False
-        )
+        is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + (first_url or title), 0, RAW_PATH_CONSTANTS.HREF_TIMEOUT))
         ref_html = None
-        if not is_crawled:
-          ref_html = helper_method.extract_refhtml(first_url or title)
-          self.invoke_db(
-              REDIS_COMMANDS.S_SET_BOOL,
-              CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + (first_url or title),
-              True
-            )
+        if is_crawled != -1 and is_crawled < 5:
+          ref_html = helper_method.extract_refhtml((first_url or title))
+          if ref_html:
+            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + (first_url or title), -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+          else:
+            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + (first_url or title), is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
 
         card_data = leak_model(
           m_ref_html=ref_html,

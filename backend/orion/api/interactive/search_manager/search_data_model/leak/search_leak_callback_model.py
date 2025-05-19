@@ -16,7 +16,7 @@ class result_item(BaseModel):
     m_url: Optional[str] = None
     m_base_url: Optional[str] = None
     m_content: Optional[str] = None
-    m_important_content: Optional[str] = None
+    m_important_content: Optional[str] = ""
     m_network: Optional[str] = None
     m_content_type: Optional[Union[str, List[str]]] = None
     m_weblink: Optional[List[str]] = None
@@ -38,6 +38,7 @@ class result_item(BaseModel):
     m_update_date: Optional[str] = None
     m_contact_link: Optional[str] = None
     m_creation_date: Optional[str] = None
+    m_highlighted: Optional[str] = ""
 
 class search_leak_callback_model(BaseModel):
     Result: Optional[List[result_item]] = None

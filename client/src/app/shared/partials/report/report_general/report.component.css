@@ -454,6 +454,15 @@
   }
 }
 
+.dashboard__search-container .search__result-detail-description-span {
+  font-size: 14px !important;
+  margin-bottom: 130px !important;
+}
+
+.dashboard__search-container .dashboard__search-description-light{
+  opacity: 0.6;
+}
+
 @media only screen and (max-width: 768px) {
   .dashboard__search-card {
     flex: 1 1 100%;

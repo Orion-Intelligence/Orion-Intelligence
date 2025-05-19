@@ -6,7 +6,9 @@ export class GeneralResultItem {
   m_base_url?: string;
   m_content: string = "";
   m_screenshot = ""
+  m_ref_html?: string | null;
   m_important_content: string = "";
+  m_highlighted: string = "";
   m_network?: string;
   m_meta_description?: string;
   m_images: string[] = [];

@@ -52,8 +52,8 @@ class _zone_xsec(leak_extractor_interface, ABC):
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-        return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
         return "https://zone-xsec.com/contact"
@@ -76,7 +76,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
             return ""
 
     def parse_leak_data(self, page: Page):
-        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, False)
+        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value, False)
         max_pages = 50 if is_crawled else 500
 
         current_page = 1
@@ -156,4 +156,4 @@ class _zone_xsec(leak_extractor_interface, ABC):
                 current_page += 1
                 continue
 
-        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED, True)
+        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value, True)

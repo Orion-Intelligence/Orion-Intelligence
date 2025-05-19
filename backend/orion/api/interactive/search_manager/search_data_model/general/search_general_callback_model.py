@@ -35,6 +35,7 @@ class result_item(BaseModel):
     m_hash: Optional[str] = None
     m_creation_date: Optional[str] = None
     m_contact_link: Optional[str] = None
+    m_highlighted: Optional[str] = None
     class Config:
         extra = Extra.allow
 

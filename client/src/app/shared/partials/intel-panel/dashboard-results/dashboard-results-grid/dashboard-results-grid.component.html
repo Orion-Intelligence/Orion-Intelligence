@@ -8,8 +8,12 @@
       </div>
 
       <h2 class="dashboard__search-title">{{ item.m_title }}</h2>
+      <p class="dashboard__search-description" [innerHTML]="item.m_important_content.slice(0,600)"></p>
 
-    <p class="dashboard__search-description highlight" [innerHTML]="highlightWords(item.m_important_content)"></p>
+      <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
+        <span class="search__result-detail-description-span highlight"><b>Search Tracker</b></span>
+        <p class="dashboard__search-description dashboard__search-description-light" [innerHTML]="highlightWords(item.m_highlighted)"></p>
+      </ng-container>
 
       <div class="dashboard__search-link">{{ item.m_url }}</div>
 

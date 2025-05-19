@@ -10,6 +10,7 @@ export class LeakResultItem {
   m_content: string = "";
   m_screenshot: string = "";
   m_important_content: string = "";
+  m_highlighted: string = "";
   m_network?: string;
   m_content_type: string[] = [];
   m_weblink: string[] = [];

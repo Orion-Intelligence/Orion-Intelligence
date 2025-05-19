@@ -1,9 +1,10 @@
+import time
 from abc import ABC
 from datetime import datetime
 from typing import List
-
 from playwright.sync_api import Page
 
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -43,7 +44,7 @@ class _leak_lookup(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block =False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -53,8 +54,8 @@ class _leak_lookup(leak_extractor_interface, ABC):
     def entity_data(self) -> List[entity_model]:
         return self._entity_data
 
-    def invoke_db(self, command: int, key: str, default_value):
-        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value])
+    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
         return "https://twitter.com/LeakLookup"
@@ -71,6 +72,7 @@ class _leak_lookup(leak_extractor_interface, ABC):
         rows = page.query_selector_all("table tr")
 
         error_count = 0
+        m_prev_content = ""
 
         for row in rows:
             try:
@@ -103,11 +105,19 @@ class _leak_lookup(leak_extractor_interface, ABC):
                     if info_link:
                         info_link.click()
 
+                        page.wait_for_selector('h5.modal-title#modalTitle')
                         page.wait_for_selector("#breachModal .modal-body")
 
                         modal_content_element = page.query_selector("#breachModal .modal-body")
-                        modal_content = modal_content_element.inner_text() if modal_content_element else "No data available"
+                        start = time.time()
+                        while time.time() - start < 5:
+                            m_data = page.query_selector("#breachModal .modal-body").inner_text()
+                            if page.query_selector("#breachModal .modal-body").inner_text() != m_prev_content:
+                                break
+                            page.wait_for_timeout(200)
 
+                        m_prev_content = page.query_selector("#breachModal .modal-body").inner_text()
+                        modal_content = modal_content_element.inner_text() if modal_content_element else "No data available"
                         modal_content_cleaned = []
                         for line in modal_content.split("\n"):
                             stripped_line = line.strip()
@@ -116,19 +126,14 @@ class _leak_lookup(leak_extractor_interface, ABC):
 
                         modal_content_cleaned = "\n".join(modal_content_cleaned)
 
-                        is_crawled = self.invoke_db(
-                            REDIS_COMMANDS.S_GET_BOOL,
-                            CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site_name,
-                            False
-                        )
+                        is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site_name, 0, RAW_PATH_CONSTANTS.HREF_TIMEOUT))
                         ref_html = None
-                        if not is_crawled:
+                        if is_crawled != -1 and is_crawled < 5:
                             ref_html = helper_method.extract_refhtml(site_name)
-                            self.invoke_db(
-                                    REDIS_COMMANDS.S_SET_BOOL,
-                                    CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site_name,
-                                    True
-                                )
+                            if ref_html:
+                                self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site_name, -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                            else:
+                                self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + site_name, is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
 
                         cleaned = " - ".join(
                             line.strip() for line in modal_content_cleaned.strip().splitlines() if line.strip()

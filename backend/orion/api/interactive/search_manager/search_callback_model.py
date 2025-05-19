@@ -36,10 +36,7 @@ class search_callback:
           caption_fragments = m_highlight.get("m_caption", [])
 
           if important_fragments:
-            highlight_text = important_fragments
-
-          if len(highlight_text) < 50 and m_service["m_important_content"]:
-            highlight_text = m_service["m_important_content"]
+            highlight_text = " ... ".join(important_fragments).strip(" .")
 
           if len(highlight_text) < 250 and content_fragments:
             highlight_text = f"{highlight_text} ... {' ... '.join(content_fragments)}".strip(" .")
@@ -51,12 +48,16 @@ class search_callback:
             highlight_text = f"{highlight_text} ... {' ... '.join(href_fragments)}".strip(" .")
 
           if highlight_text:
-            m_service["m_important_content"] = highlight_text
+            if len(highlight_text) < 300:
+              m_service["m_highlighted"] = highlight_text
+            else:
+              m_service["m_highlighted"] = highlight_text[0:300] + " ..."
 
-          m_service["highlight"] = m_highlight
+          if len(m_service["m_important_content"]) > 500:
+            m_service["m_important_content"] = m_service["m_important_content"][0:500] + " ..."
 
-        if "m_ref_html" in m_service and m_service["m_ref_html"] and len(m_service.get("m_important_content", "")) < 250 and len(m_service["m_ref_html"]) > 20:
-          m_service["m_important_content"] = "TARGET WEBDATA 〡 " + m_service["m_ref_html"]
+        if "m_ref_html" in m_service and m_service["m_ref_html"] and len(m_service.get("m_highlighted", "")) < 250 and len(m_service["m_ref_html"]) > 20:
+          m_service["m_highlighted"] = m_service["m_ref_html"]
 
         m_service['m_sub_host'] = m_service.get('m_sub_host', '/')
         m_service['m_host'] = m_service.get('m_host', '')
@@ -64,6 +65,10 @@ class search_callback:
         m_content_preview = m_service.get("m_content", "")[:500]
         m_hash = m_service.get("m_hash", "")
         dedup_key = m_content_preview if m_content_preview else m_hash
+
+        if "m_highlighted" not in m_service:
+          m_service["m_highlighted"] = ""
+
 
         if isinstance(dedup_key, list):
           if any(item in mDescription for item in dedup_key):
@@ -92,10 +97,10 @@ class search_callback:
     m_parsed_documents, m_suggestions_content, total_pages = parsed_result
 
     def clean_document(doc):
-      if "highlight" in doc and "m_important_content" in doc["highlight"]:
-        highlighted_fragments = doc["highlight"]["m_important_content"]
+      if "highlight" in doc and "m_highlighted" in doc["highlight"]:
+        highlighted_fragments = doc["highlight"]["m_highlighted"]
         if highlighted_fragments:
-          doc["m_important_content"] = highlighted_fragments[0]
+          doc["m_highlighted"] = highlighted_fragments[0]
 
       if listing_filter is not None:
         doc = {k: v for k, v in doc.items() if k not in listing_filter}

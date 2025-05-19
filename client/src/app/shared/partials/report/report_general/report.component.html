@@ -52,6 +52,15 @@
     : resultItem?.m_important_content
     }}
   </p>
+  <span class="search__result-detail-description-span" *ngIf="resultItem?.m_ref_html?.length">Web Reference</span>
+  <p class="search__result-detail-description">
+    {{
+    ((resultItem?.m_ref_html ?? '').length > 650)
+    ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
+    : resultItem?.m_ref_html
+    }}
+  </p>
+
   <p class="search__result-detail-url-p text-truncate">
     <a [href]="resultItem?.m_url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate"
       style="max-width: 100%;" target="_blank">

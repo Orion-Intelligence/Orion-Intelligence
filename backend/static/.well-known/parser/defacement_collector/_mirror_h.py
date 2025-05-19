@@ -54,8 +54,8 @@ class _mirror_h(leak_extractor_interface, ABC):
   def entity_data(self) -> List[entity_model]:
     return self._entity_data
 
-  def invoke_db(self, command: int, key: CUSTOM_SCRIPT_REDIS_KEYS, default_value):
-    return self._redis_instance.invoke_trigger(command, [key.value + self.__class__.__name__, default_value])
+  def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+    return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
   def contact_page(self) -> str:
     return "https://mirror-h.org/contact"
