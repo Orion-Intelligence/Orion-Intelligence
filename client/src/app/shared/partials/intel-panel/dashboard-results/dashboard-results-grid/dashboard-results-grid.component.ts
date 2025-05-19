@@ -6,9 +6,6 @@ import {HelperService} from '../../../../services/helper.service';
 import {GeneralResultItem} from '../../../../model/results/general/general.callback.model';
 import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
 import {ScrollService} from '../../../../services/scroll.service';
-import retextStringify from 'retext-stringify';
-import retextEnglish from 'retext-english';
-import {unified} from 'unified';
 
 @Component({
   selector: 'app-dashboard-results-grid',
@@ -34,15 +31,6 @@ export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
 
   ngAfterViewInit() {
     this.scrollService.scrollToSavedPosition();
-  }
-
-  async processRawTextWithRetext(raw: string): Promise<string> {
-    const processor = unified()
-      .use(retextEnglish)
-      .use(retextStringify);
-
-    const file = await processor.process(raw);
-    return String(file);
   }
 
   highlightWords(text: string, maxLength: number = 250): SafeHtml {
