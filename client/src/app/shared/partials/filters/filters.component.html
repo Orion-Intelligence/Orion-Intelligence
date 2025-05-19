@@ -47,6 +47,13 @@
           (ngModelChange)="onSelectionChange(key, selectedFilters[key])" name="{{ key }}" />
       </div>
     </ng-container>
+    <ng-container *ngIf="filterModel.filters[key].type === 'text'">
+      <div class="mb-2">
+        <input type="text" class="btn filter__input w-100 text-start d-flex justify-content-between align-items-center"
+          placeholder="{{ filterModel.filters[key].title }}" [(ngModel)]="selectedFilters[key]"
+          (ngModelChange)="onSelectionChange(key, selectedFilters[key])" name="{{ key }}" />
+      </div>
+    </ng-container>
   </div>
   </div>
 

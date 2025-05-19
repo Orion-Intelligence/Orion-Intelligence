@@ -75,9 +75,10 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         queryParams: {},
         queryParamsHandling: ''
       }).then();
+
+
       return;
     }
-
 
     this.isLoading = true;
 
