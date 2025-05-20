@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
@@ -8,6 +8,7 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-filters',
@@ -25,8 +26,13 @@ export class FiltersComponent implements OnInit {
 
   selectedFilters: { [key: string]: string | null } = {};
 
+  constructor(private route: ActivatedRoute) { }
+
+
   ngOnInit() {
     this.initializeFilters();
+
+    this.readFiltersFromUrl();
   }
 
   private initializeFilters() {
@@ -35,6 +41,14 @@ export class FiltersComponent implements OnInit {
         ...acc,
         [key]: null,
       }), {});
+  }
+
+  private readFiltersFromUrl() {
+    this.route.queryParams.subscribe(params => {
+      Object.keys(this.filterModel.filters).forEach(key => {
+        this.selectedFilters[key] = params[key] ?? null;
+      });
+    });
   }
 
   updateFilter(event: { key: string; value: string }) {
