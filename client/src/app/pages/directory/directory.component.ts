@@ -20,8 +20,7 @@ import { TooltipDirective } from '../../shared/directive/tooltip-directive.direc
     DirectoryListComponent,
     PaginationComponent,
     NgOptimizedImage,
-    AsyncPipe,
-    TooltipDirective
+    AsyncPipe
   ],
 })
 export class DirectoryComponent implements OnInit {

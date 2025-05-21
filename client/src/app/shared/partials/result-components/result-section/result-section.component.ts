@@ -1,5 +1,5 @@
-import {Component,Input} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-result-section',
@@ -8,4 +8,14 @@ import {CommonModule} from '@angular/common';
 })
 export class ResultSectionComponent {
   @Input() listItems: string[] = [];
+
+  filteredListItems: string[] = [];
+
+  ngOnInit() {
+    this.filteredListItems = this.listItems.filter(item => {
+      const cleaned = item?.trim();
+      return cleaned && cleaned.length > 1;
+    });
+
+  }
 }

@@ -1,29 +1,55 @@
 <div class="dashboard__search-container">
   <ng-container *ngFor="let item of searchResults" class="dashboard__search-card">
 
-    <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="scrollService.saveSession(item.m_hash)">
-
+    <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
         <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+        <img [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams"
+          (click)="scrollService.saveSession(item.m_hash)" class="dashboard__search-button"
+          src="/assets/images/shared/redirect.svg" width="20" height="20" />
       </div>
 
       <ng-container *ngIf="item.m_important_content">
-        <h2 class="dashboard__search-title">{{ item.m_title }}</h2>
-        <p class="dashboard__search-description" [innerHTML]="item.m_important_content.slice(0,600)"></p>
+        <ng-container *ngIf="item?.m_title as title; else noTitle">
+          <h2 class="dashboard__search-title" *ngIf="title.trim().length > 1; else noTitle">
+            {{ title }}
+          </h2>
+        </ng-container>
+        <ng-template #noTitle>
+          <h2 class="dashboard__search-title">Title not available</h2>
+        </ng-template>
+
+        <ng-container *ngIf="item?.m_important_content as content; else noDescription">
+          <p class="dashboard__search-description" *ngIf="content.trim().length > 1; else noDescription"
+            [innerHTML]="content.slice(0, 600)">
+          </p>
+        </ng-container>
+        <ng-template #noDescription>
+          <p class="dashboard__search-description">Description not available</p>
+        </ng-template>
       </ng-container>
 
 
       <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
         <span class="search__result-detail-description-span highlight"><b>Search Tracker</b></span>
-        <p class="dashboard__search-description dashboard__search-description-light" [innerHTML]="highlightWords(item.m_highlighted)"></p>
+        <p class="dashboard__search-description dashboard__search-description-light"
+          [innerHTML]="highlightWords(item.m_highlighted)"></p>
       </ng-container>
 
-      <div class="dashboard__search-link">{{ item.m_url }}</div>
+      <ng-container *ngIf="item?.m_url as url; else noUrl">
+        <div class="dashboard__search-link" *ngIf="url.trim().length > 1; else noUrl">
+          {{ url }}
+        </div>
+      </ng-container>
+      <ng-template #noUrl>
+        <div class="dashboard__search-link">URL not available</div>
+      </ng-template>
 
       <div class="dashboard__search-info">
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Published on:</span>
-            <span class="dashboard__info-value">{{ item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : 'Not found' }}</span>
+          <span class="dashboard__info-value">{{ item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : 'Not found'
+            }}</span>
         </div>
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Network:</span>

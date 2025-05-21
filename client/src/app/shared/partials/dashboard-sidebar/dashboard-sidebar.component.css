@@ -14,7 +14,7 @@
   margin-top: 10px;
 }
 
-.sidebar__header-collapsed{
+.sidebar__header-collapsed {
   margin: 4px !important;
 }
 
@@ -82,6 +82,7 @@
 .sidebar__item {
   margin: 6px 0 0;
   border-radius: 8px;
+  user-select: none;
 }
 
 .sidebar__icon {
@@ -397,4 +398,3 @@
     display: none;
   }
 }
-

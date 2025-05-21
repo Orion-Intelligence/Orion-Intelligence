@@ -4,7 +4,7 @@
       <img ngSrc="../../../../../assets/images/shared/download.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" *ngIf="lang!==lang_detected"  (click)="langUpdate()" appTooltip="Translator">
+    <button class="p-0 report-menu-option" *ngIf="lang!==lang_detected" (click)="langUpdate()" appTooltip="Translator">
       <img ngSrc="../../../../../assets/images/shared/translate.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
@@ -31,27 +31,39 @@
 </div>
 <div class="search__result-detail" *ngIf="aiSuggestStatus" @fadeInDashboardItem>
   <div class="d-flex align-items-start">
-    <img class="report-icon-top" src="../../../../../assets/images/shared/ai.svg" alt="background" height="25" width="25">
+    <img class="report-icon-top" src="../../../../../assets/images/shared/ai.svg" alt="background" height="25"
+      width="25">
     <h2 class="search__result-detail-heading ms-2"> &nbsp; AI Report</h2>
   </div>
   <p class="search__result-detail-description">
-      {{ aiSuggestSummary }}
+    {{ aiSuggestSummary }}
   </p>
 </div>
 
 <div class="search__result-detail">
-  <h2 class="search__result-detail-heading" *ngIf="resultItem?.m_title as title">
-    {{ title.length > 150 ? (title.slice(0, 150) + '...') : title }}
-  </h2>
+  <ng-container *ngIf="resultItem?.m_title as title; else noTitle">
+    <ng-container *ngIf="title.trim().length > 1; else noTitle">
+      <h2 class="search__result-detail-heading">
+        {{ title.length > 150 ? (title.slice(0, 150) + '...') : title }}
+      </h2>
+    </ng-container>
+  </ng-container>
+  <ng-template #noTitle>
+    <h2 class="search__result-detail-heading">Title not available</h2>
+  </ng-template>
 
   <span class="search__result-detail-description-span">Description</span>
-  <p class="search__result-detail-description">
-    {{
-    ((resultItem?.m_important_content ?? '').length > 650)
-    ? (resultItem?.m_important_content | slice:0:650) + ' ...'
-    : resultItem?.m_important_content
-    }}
-  </p>
+  <ng-container *ngIf="resultItem?.m_important_content as content; else noDescription">
+    <ng-container *ngIf="content.length > 1; else noDescription">
+      <p class="search__result-detail-description">
+        {{ content.length > 650 ? (content | slice:0:650) + ' ...' : content }}
+      </p>
+    </ng-container>
+  </ng-container>
+  <ng-template #noDescription>
+    <p class="search__result-detail-description">Description not available</p>
+  </ng-template>
+
   <span class="search__result-detail-description-span" *ngIf="resultItem?.m_ref_html?.length">Web Reference</span>
   <p class="search__result-detail-description">
     {{
@@ -61,12 +73,19 @@
     }}
   </p>
 
-  <p class="search__result-detail-url-p text-truncate">
-    <a [href]="resultItem?.m_url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate"
-      style="max-width: 100%;" target="_blank">
-      {{ resultItem?.m_url }}
-    </a>
-  </p>
+  <ng-container *ngIf="resultItem?.m_url as url; else noUrl">
+    <ng-container *ngIf="url.trim().length > 1; else noUrl">
+      <p class="search__result-detail-url-p text-truncate">
+        <a [href]="url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate"
+          style="max-width: 100%;" target="_blank">
+          {{ url }}
+        </a>
+      </p>
+    </ng-container>
+  </ng-container>
+  <ng-template #noUrl>
+    <p class="gc-clear-selection search__result-detail-url d-inline-block text-truncate">URL not available</p>
+  </ng-template>
   <div class="search__result-detail-meta">
     <div class="search__result-detail-meta-divs">
       <p>Published on:</p>
