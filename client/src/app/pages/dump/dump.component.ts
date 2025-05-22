@@ -9,7 +9,7 @@ import { dump_filters } from '../../shared/constants/filters';
 import { DumpListComponent } from './dump-list/dump-list.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
+import { DumpCallbackModel } from '../../shared/model/dump/dump.mode';
 
 @Component({
   selector: 'app-dump',
@@ -17,7 +17,6 @@ import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
   templateUrl: './dump.component.html',
   imports: [
     NgOptimizedImage,
-    TooltipDirective,
     PaginationComponent,
     AsyncPipe,
     FiltersComponent,

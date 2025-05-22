@@ -441,6 +441,11 @@
   color: #00CCCC;
 }
 
+.dashboard__search-button {
+  margin-left: auto;
+  cursor: pointer;
+}
+
 @media (max-width: 1024px) {
   .dashboard__search-card {
     flex: 1 1 calc(50% - 20px);
@@ -459,7 +464,7 @@
   margin-bottom: 130px !important;
 }
 
-.dashboard__search-container .dashboard__search-description-light{
+.dashboard__search-container .dashboard__search-description-light {
   opacity: 0.6;
 }
 
