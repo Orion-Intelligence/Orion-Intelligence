@@ -123,8 +123,19 @@ class elastic_controller:
   async def index_data(self, p_data):
     try:
       def ensure_creation_date(p_entry):
-        if "m_creation_date" not in p_entry[ELASTIC_KEYS.S_VALUE]:
-          p_entry[ELASTIC_KEYS.S_VALUE]["m_creation_date"] = datetime.now(timezone.utc).isoformat()
+        data = p_entry[ELASTIC_KEYS.S_VALUE]
+        if "m_creation_date" not in data:
+          data["m_creation_date"] = datetime.now(timezone.utc).isoformat()
+        for key in list(data.keys()):
+          value = data[key]
+          if isinstance(value, list):
+            filtered = [v for v in value if v not in (None, "") and str(v).lower() != "null"]
+            if filtered:
+              data[key] = filtered
+            else:
+              del data[key]
+          elif value is None or value == "" or (isinstance(value, str) and value.lower() == "null"):
+            del data[key]
         return p_entry
 
       if isinstance(p_data, list):
