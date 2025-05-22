@@ -25,7 +25,7 @@
         <p class="dashboard__search-description highlight mt-2">No content available</p>
       </ng-template>
 
-      <ng-container *ngIf="item.m_summary[0] && item.m_summary[0].length > 5">
+      <ng-container *ngIf="item.m_summary && item.m_summary[0] && item.m_summary[0].length > 5">
         <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">AI Summary</h5>
         <div class="dashboard__search-link">
           {{ item.m_summary[0].slice(0, 500) }}...
