@@ -263,7 +263,7 @@
 .dashboard__search-tags {
   display: flex;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 17px;
 }
 
 .dashboard__tag {
@@ -444,6 +444,13 @@
 .dashboard__search-button {
   margin-left: auto;
   cursor: pointer;
+}
+
+.dashboard__search-button-inner {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-top: 0px;
 }
 
 @media (max-width: 1024px) {

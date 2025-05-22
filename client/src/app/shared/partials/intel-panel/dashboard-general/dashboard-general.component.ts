@@ -1,20 +1,20 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NgIf} from '@angular/common';
-import {DashboardResultsGridComponent} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
-import {PaginationComponent} from '../../pagination/pagination.component';
-import {InsightsComponent} from '../../insights/insights.component';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {Analytics} from '../../../model/analytics/analytics.model';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {GeneralCallbackModel, GeneralResultItem} from '../../../model/results/general/general.callback.model';
-import {LeakCallbackModel, LeakResultItem} from '../../../model/results/leak/leak.callback.model';
-import {GeneralParamModel} from '../../../model/results/shared/general.param.model';
-import {Category} from '../../../enums/pages';
-import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {ResultComponent} from '../../result/result.component';
-import {general_filters} from '../../../constants/filters';
-import {AppService} from '../../../../services/core/app.service';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgIf } from '@angular/common';
+import { DashboardResultsGridComponent } from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
+import { PaginationComponent } from '../../pagination/pagination.component';
+import { InsightsComponent } from '../../insights/insights.component';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { Analytics } from '../../../model/analytics/analytics.model';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { GeneralCallbackModel, GeneralResultItem } from '../../../model/results/general/general.callback.model';
+import { LeakCallbackModel, LeakResultItem } from '../../../model/results/leak/leak.callback.model';
+import { GeneralParamModel } from '../../../model/results/shared/general.param.model';
+import { Category } from '../../../enums/pages';
+import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { ResultComponent } from '../../result/result.component';
+import { general_filters } from '../../../constants/filters';
+import { AppService } from '../../../../services/core/app.service';
 
 @Component({
   selector: 'app-dashboard-general', imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent], templateUrl: './dashboard-general.component.html', animations: [fadeInDashboardItem],
@@ -42,9 +42,9 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.type = this.route.snapshot.data['type'];
-    this.generalParamModel = {...this.dashboardService.generalParamModel} as GeneralParamModel;
-    this.generalCallbackModel = {...this.dashboardService.generalCallbackModel} as GeneralCallbackModel;
-    this.leakCallbackModel = {...this.dashboardService.leakCallbackModel} as LeakCallbackModel;
+    this.generalParamModel = { ...this.dashboardService.generalParamModel } as GeneralParamModel;
+    this.generalCallbackModel = { ...this.dashboardService.generalCallbackModel } as GeneralCallbackModel;
+    this.leakCallbackModel = { ...this.dashboardService.leakCallbackModel } as LeakCallbackModel;
 
     this.initAnalytics()
     combineLatest([this.route.queryParams, this.route.url])
@@ -85,7 +85,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
     if (!this.generalParamModel.q) {
       this.isLoading = false;
-      this.generalParamModel.q=""
+      this.generalParamModel.q = ""
       this.router.navigate([], {
         queryParams: {},
         queryParamsHandling: ''
@@ -109,7 +109,6 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         if (!isDefault) cleanedParams[key] = value;
       }
     });
-
     this.router.navigate([], {
       queryParams: cleanedParams,
       queryParamsHandling: reset ? '' : 'merge'

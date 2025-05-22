@@ -12,7 +12,7 @@ import { AppService } from '../../../../services/core/app.service';
 import { Category } from '../../../enums/pages';
 import { ApiService } from '../../../services/api.service';
 import { HttpParams } from '@angular/common/http';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective], animations: [fadeInDashboardItem],
@@ -29,7 +29,7 @@ export class ReportComponent implements OnInit {
   isImageLoaded: boolean = false;
   isImageError: boolean = false;
   imageSrc: string | null = null;
-  aiSuggestStatus:boolean = false
+  aiSuggestStatus: boolean = false
   aiSuggestSummary = ""
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
@@ -47,7 +47,7 @@ export class ReportComponent implements OnInit {
         this.loadImage(this.resultItem.m_screenshot);
       }
       let content = this.resultItem?.m_content
-      if (content){
+      if (content) {
         this.lang_detected = this.helperService.detectLanguageName(content);
       }
     });
@@ -72,6 +72,13 @@ export class ReportComponent implements OnInit {
         }
       });
     }
+  }
+
+  get filteredArrayKeys(): string[] {
+    return this.arrayKeys.filter(key => {
+      const val = (this.resultItem as any)?.[key];
+      return val != null && (!Array.isArray(val) || val.length > 0);
+    });
   }
 
   setActiveTab(tab: string) {
