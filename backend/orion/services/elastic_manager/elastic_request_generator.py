@@ -437,11 +437,48 @@ class elastic_request_generator:
       raw_query = "*"
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_search_type = p_query_model.pSearchParamType
+    m_message_date=p_query_model.pSearchParamDate
+    m_entity=p_query_model.pSearchParamEntity
+    m_mitryTtp=p_query_model.pSearchParamMitryTtp
 
     must_clauses = []
     must_not_clause = []
     if m_search_type != "all":
       must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
+
+    if m_message_date:
+      parts = m_message_date.split(',')
+      if len(parts) == 2:
+        try:
+          from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
+          from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
+
+          to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
+          to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
+
+          must_clauses.append({
+            "range": {
+              "m_message_date": {
+                "gte": from_date,
+                "lte": to_date
+              }
+            }
+          })
+        except ValueError:
+          pass
+
+      if m_entity:
+        must_clauses.append({
+          "bool": {
+            "should": [
+              {"exists": {"field": entity}} for entity in m_entity
+            ],
+            "minimum_should_match": 1
+          }
+        })
+
+      if m_mitryTtp and m_mitryTtp.lower() not in ("", "all"):
+        must_clauses.append({"term": {"m_mitre_ttp_type": m_mitryTtp.lower()}})
 
     search_fields = [
       "m_content^3",

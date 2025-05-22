@@ -16,7 +16,7 @@
         }} </label>
       <ng-container *ngIf="filterModel.filters[key].type === 'daterange'">
         <app-date-picker [key]="key" [filterModel]="filterModel" [mSelectedFilters]="selectedFilters"
-        (selectedFiltersChange)="updateFilter($event)" (dateSelected)="updateFilter($event)"></app-date-picker>
+          (selectedFiltersChange)="updateFilter($event)" (dateSelected)="updateFilter($event)"></app-date-picker>
       </ng-container>
       <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
         <div class="dropdown">

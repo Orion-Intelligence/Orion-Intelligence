@@ -124,7 +124,7 @@
 
   <div class="search__result-detail-tabs-div">
     <div class="tabs d-flex align-items-center search__result-detail-container">
-      <ng-container *ngFor="let key of arrayKeys; let last = last">
+      <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
         <button class="search__result-tabs" [class.active]="activeTab === key" (click)="setActiveTab(key)"
           appTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}">
           {{ formatKeyLabel(key) }}

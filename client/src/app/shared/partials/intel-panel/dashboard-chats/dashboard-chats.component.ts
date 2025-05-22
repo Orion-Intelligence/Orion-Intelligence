@@ -1,16 +1,16 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {AppService} from '../../../../services/core/app.service';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {ChatParamModel} from '../../../model/results/chat/chat.param.model';
-import {ChatCallbackModel} from '../../../model/results/chat/chat.callback.model';
-import {NgIf} from '@angular/common';
-import {PaginationComponent} from '../../pagination/pagination.component';
-import {ResultComponent} from '../../result/result.component';
-import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {chat_filters} from '../../../constants/filters';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AppService } from '../../../../services/core/app.service';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { ChatParamModel } from '../../../model/results/chat/chat.param.model';
+import { ChatCallbackModel } from '../../../model/results/chat/chat.callback.model';
+import { NgIf } from '@angular/common';
+import { PaginationComponent } from '../../pagination/pagination.component';
+import { ResultComponent } from '../../result/result.component';
+import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { chat_filters } from '../../../constants/filters';
 
 @Component({
   selector: 'app-dashboard-chats',
@@ -39,7 +39,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.chatCallbackModel = {...this.dashboardService.chatCallbackModel} as ChatCallbackModel;
+    this.chatCallbackModel = { ...this.dashboardService.chatCallbackModel } as ChatCallbackModel;
 
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
@@ -64,7 +64,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
     if (!this.chatParamModel.q) {
       this.isLoading = false;
-      this.chatParamModel.q=""
+      this.chatParamModel.q = ""
 
       this.router.navigate([], {
         queryParams: {},
@@ -81,10 +81,25 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     if (reset) {
       cleanedParams['pSearchParamType'] = 'all';
       cleanedParams['q'] = this.chatParamModel.q;
+      cleanedParams['pSearchParamDate'] = "";
+      cleanedParams['pSearchParamEntity'] = "";
+      cleanedParams['pSearchParamMitryTtp'] = ""
     } else {
       const typeValue = this.chatParamModel['pSearchParamType'];
       if (typeValue != null && typeValue !== '') {
         cleanedParams['pSearchParamType'] = typeValue;
+      }
+      const dateValue = this.chatParamModel['pSearchParamDate'];
+      if (dateValue != null && dateValue !== '') {
+        cleanedParams['pSearchParamDate'] = dateValue;
+      }
+      const entityValue = this.chatParamModel['pSearchParamEntity'];
+      if (entityValue != null && entityValue !== '') {
+        cleanedParams['pSearchParamEntity'] = entityValue;
+      }
+      const mitryTtpValue = this.chatParamModel['pSearchParamMitryTtp'];
+      if (mitryTtpValue != null && mitryTtpValue !== '') {
+        cleanedParams['pSearchParamMitryTtp'] = mitryTtpValue;
       }
 
       const qValue = this.chatParamModel.q;
@@ -100,6 +115,8 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
     if (reset) {
       this.chatParamModel.pSearchParamType = 'all';
+      this.chatParamModel.pSearchParamDate = "";
+      this.chatParamModel.pSearchParamEntity = "";
       this.isLoading = false;
       return;
     }
@@ -136,6 +153,15 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   reloadFilters(event: { [key: string]: string | null }) {
     if (event['content_type'] != null) {
       this.chatParamModel.pSearchParamType = event['content_type'];
+    }
+    if (event['dateRange'] != null) {
+      this.chatParamModel.pSearchParamDate = event['dateRange'];
+    }
+    if (event['entity'] != null) {
+      this.chatParamModel.pSearchParamEntity = event['entity'];
+    }
+    if (event['mitreTtpType'] != null) {
+      this.chatParamModel.pSearchParamMitryTtp = event['mitreTtpType'];
     }
     this.fetchSearchResults();
   }

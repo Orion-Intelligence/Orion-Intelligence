@@ -68,7 +68,7 @@ export class FiltersComponent implements OnInit {
   }
 
   resetFilters() {
-    this.closeFilter()
+    this.closeFilter();
     this.initializeFilters();
     this.filterReset.emit();
   }
