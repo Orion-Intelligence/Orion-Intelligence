@@ -263,17 +263,17 @@
 .dashboard__search-tags {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .dashboard__tag {
   background-color: #ffffff15;
   padding: 6px 13px;
-  border-radius: 50px;
+  border-radius: 25px;
   font-size: 12px;
   font-weight: 400;
   color: #D4D4D4;
-
+  height: 31px;
 }
 
 .dashboard__search-title {
