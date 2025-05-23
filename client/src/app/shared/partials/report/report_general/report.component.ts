@@ -13,9 +13,11 @@ import { Category } from '../../../enums/pages';
 import { ApiService } from '../../../services/api.service';
 import { HttpParams } from '@angular/common/http';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { JsonViewerComponent } from "../json-viewer/json-viewer.component";
 
 @Component({
-  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective], animations: [fadeInDashboardItem],
+  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonViewerComponent], animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;
@@ -31,6 +33,7 @@ export class ReportComponent implements OnInit {
   imageSrc: string | null = null;
   aiSuggestStatus: boolean = false
   aiSuggestSummary = ""
+  isExpanded = false;
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
@@ -51,6 +54,9 @@ export class ReportComponent implements OnInit {
         this.lang_detected = this.helperService.detectLanguageName(content);
       }
     });
+  }
+  toggleContent(): void {
+    this.isExpanded = !this.isExpanded;
   }
 
   processResultItem() {

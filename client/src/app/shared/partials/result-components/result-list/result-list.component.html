@@ -1,15 +1,11 @@
 <div class="search__result-detail-section-content" *ngIf="listItems.length > 0">
   <ng-container *ngFor="let row of getRows(listItems, 3); let rowIndex = index; let last = last">
     <div class="row p-1">
-      <ul class="grid-list">
-        <li *ngFor="let item of row; let i = index" class="copy-item" (click)="copyText(item, rowIndex * 3 + i)">
-          <span class="item-number">{{ rowIndex * 3 + i + 1 }}.</span> <span class="item-text">
-            {{ item }}<img src="../../../../../assets/images/shared/copy.svg" class="copy-icon" #copyIcon alt="Copy"/>
-          </span> <span *ngIf="copiedIndex === (rowIndex * 3 + i)" class="copied-label">Copied!</span>
-        </li>
-      </ul>
+      <li *ngFor="let item of row; let i = index" class="copy-item" (click)="copyText(item, rowIndex * 3 + i)">
+        <span class="tag-item">
+          {{ item }}<img src="../../../../../assets/images/shared/copy.svg" class="copy-icon" #copyIcon alt="Copy" />
+        </span> <span *ngIf="copiedIndex === (rowIndex * 3 + i)" class="copied-label">Copied!</span>
+      </li>
     </div>
-
-    <div *ngIf="!last" class="border-bottom border-bottom-background border-secondary my-2"></div>
   </ng-container>
 </div>

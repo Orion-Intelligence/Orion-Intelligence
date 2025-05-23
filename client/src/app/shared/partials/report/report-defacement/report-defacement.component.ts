@@ -1,21 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DefacementResultItem } from '../../../model/results/defacement/defacement.param.model';
-import { DatePipe, NgOptimizedImage } from '@angular/common';
+import { DatePipe, NgOptimizedImage, CommonModule } from '@angular/common';
 import { HelperService } from '../../../services/helper.service';
 import { AppService } from '../../../../services/core/app.service';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { JsonViewerComponent } from "../json-viewer/json-viewer.component";
 
 @Component({
   selector: 'app-report-defacement',
-  templateUrl: './report-defacement.component.html', imports: [NgOptimizedImage, DatePipe, TooltipDirective]
+  templateUrl: './report-defacement.component.html',
+  imports: [CommonModule, NgOptimizedImage, DatePipe, TooltipDirective, JsonViewerComponent]
 })
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
   lang: string = "en";
+  isExpanded = false;
 
   constructor(private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
+  }
+  toggleContent(): void {
+    this.isExpanded = !this.isExpanded;
   }
 
   downloadCSV() {
