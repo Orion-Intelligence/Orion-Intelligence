@@ -453,6 +453,50 @@
   padding-top: 0px;
 }
 
+
+
+.collapsible-container {
+  border: 1px solid #ffffff15;
+  border-radius: 8px;
+  border-color: rgba(255, 255, 255, 0.2);
+  padding: 16px;
+  margin: 20px auto;
+  background-color: black;
+  /* font-family: Arial, sans-serif; */
+  /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+}
+
+.file-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: transparent;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: rgb(211, 211, 211);
+}
+
+.toggle-btn {
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.content {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.rotated {
+  transform: rotate(-90deg);
+  transition: transform 0.3s ease;
+}
+
+
+
 @media (max-width: 1024px) {
   .dashboard__search-card {
     flex: 1 1 calc(50% - 20px);

@@ -1,17 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ChatResultItem} from '../../../model/results/chat/chat.callback.model';
-import {HelperService} from '../../../services/helper.service';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
+import { HelperService } from '../../../services/helper.service';
 import {
+  CommonModule,
   NgForOf,
   NgIf,
   NgOptimizedImage, SlicePipe,
   TitleCasePipe
 } from '@angular/common';
-import {ResultListComponent} from '../../result-components/result-list/result-list.component';
-import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import { ResultListComponent } from '../../result-components/result-list/result-list.component';
+import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { JsonViewerComponent } from "../json-viewer/json-viewer.component";
 
 @Component({
   selector: 'app-report-chat',
@@ -23,7 +25,8 @@ import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
     NgOptimizedImage,
     ResultListComponent,
     ResultSectionComponent,
-    SlicePipe
+    SlicePipe, CommonModule,
+    JsonViewerComponent
   ],
   animations: [fadeInDashboardItem]
 })
@@ -34,6 +37,7 @@ export class ReportChatComponent implements OnInit {
   activeTab: string = '';
   content: string = '';
   summary: string = '';
+  isExpanded = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,10 +46,13 @@ export class ReportChatComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({reportdata}) => {
+    this.route.data.subscribe(({ reportdata }) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });
+  }
+  toggleContent(): void {
+    this.isExpanded = !this.isExpanded;
   }
 
   processResultItem() {

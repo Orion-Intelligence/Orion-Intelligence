@@ -14,7 +14,8 @@
       <img ngSrc="../../../../../assets/images/shared/share.svg" alt="background" height="22" width="22">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="redirectToUrl()" appTooltip="Open in new Tab" matTooltipClass="mat-tooltip">
+    <button class="p-0 report-menu-option" (click)="redirectToUrl()" appTooltip="Open in new Tab"
+      matTooltipClass="mat-tooltip">
       <img ngSrc="../../../../../assets/images/shared/redirect.svg" alt="background" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
@@ -41,5 +42,17 @@
       <div class="dashboard__defacement-detail-header-items"><strong>Location:</strong> {{ defacementData?.m_location }}
       </div>
     </div>
+
+    <div class="collapsible-container ">
+      <div class="file-header">
+        <span class="title">This is file</span>
+        <div class="toggle-btn" (click)="toggleContent()" [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'">
+          <img [src]="'../../../../../assets/images/shared/search_side_dropdown_icon.svg'"
+            [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon">
+        </div>
+      </div>
+      <div class="content" *ngIf="isExpanded">
+        <app-json-viewer [json]="defacementData"></app-json-viewer>
+      </div>
+    </div>
   </div>
-</div>
