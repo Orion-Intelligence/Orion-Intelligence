@@ -99,7 +99,7 @@ class crawl_model:
         response = await client.post(
           "http://168.231.86.34:8010/nlp/summarize/ai",
           json={"data": model.data},
-          timeout=10
+          timeout=200
         )
         return response.json()
     except Exception as ex:
