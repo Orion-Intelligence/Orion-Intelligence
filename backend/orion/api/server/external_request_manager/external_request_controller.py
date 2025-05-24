@@ -26,7 +26,7 @@ class external_request_controller:
         return hashlib.sha256(hash_input.encode()).hexdigest()
 
     async def fetch_email_leak(self, p_data):
-        url = "http://168.231.86.34:8010/runtime/parse"
+        url = "http://168.231.86.34:8010:8010/runtime/parse"
         param = {"text": p_data.model_dump()}
         cache_key = self.generate_cache_key(url, param)
 

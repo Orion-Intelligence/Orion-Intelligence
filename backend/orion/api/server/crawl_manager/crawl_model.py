@@ -84,7 +84,7 @@ class crawl_model:
     try:
       async with httpx.AsyncClient() as client:
         response = await client.post(
-          "http://168.231.86.34:8010/nlp/parse",
+          "http://trusted-micros-api:8010/nlp/parse",
           json={"data": model.data},
           timeout=10
         )
@@ -228,7 +228,7 @@ class crawl_model:
 
   @staticmethod
   async def fetch_cti_label(payload: CTITextRequest):
-    url = "http://168.231.86.34:8010/cti_classifier/classify"
+    url = "http://trusted-micros-api:8010/cti_classifier/classify"
     payload = {
       "data": payload.data
     }

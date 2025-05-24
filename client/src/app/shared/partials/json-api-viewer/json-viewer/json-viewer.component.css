@@ -1,0 +1,67 @@
+.json-tree {
+  list-style: none;
+  font-family: monospace;
+  padding-left: 0;
+  color: rgb(211, 211, 211);
+}
+
+.json-tree__node {
+  position: relative;
+}
+
+.json-tree__line {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.json-tree__line::before {
+  content: "├── ";
+  position: absolute;
+  left: 0;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.json-tree__node--last .json-tree__line::before {
+  content: "└── ";
+}
+
+.json-tree__toggle {
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+  user-select: none;
+  margin-right: 4px;
+}
+
+.json-tree__key {
+  cursor: pointer;
+}
+
+.json-tree__key--faded {
+  opacity: 0.6;
+}
+
+.json-tree__value {
+  color: rgb(211, 211, 211);
+  font-size: 12px;
+}
+
+.json-tree__line--leaf {
+  font-weight: normal;
+}
+
+.json-tree__children {
+  margin-left: 0;
+}
+
+.json-tree--depth-0 { margin-left: 0; }
+.json-tree--depth-1 { margin-left: 20px; }
+.json-tree--depth-2 { margin-left: 20px; }
+.json-tree--depth-3 { margin-left: 60px; }
+.json-tree--depth-4 { margin-left: 80px; }
+.json-tree--depth-5 { margin-left: 100px; }
+.json-tree--depth-6 { margin-left: 120px; }
+.json-tree--depth-7 { margin-left: 140px; }
+.json-tree--depth-8 { margin-left: 160px; }

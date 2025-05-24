@@ -2,6 +2,7 @@
   padding: 10px 15px 5px;
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-top: 10px;
 }
 
 .search__result-detail-section-content .row {

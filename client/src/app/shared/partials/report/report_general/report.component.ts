@@ -14,10 +14,11 @@ import { ApiService } from '../../../services/api.service';
 import { HttpParams } from '@angular/common/http';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
-import { JsonViewerComponent } from "../json-viewer/json-viewer.component";
+import { JsonViewerComponent } from "../../json-api-viewer/json-viewer/json-viewer.component";
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
 
 @Component({
-  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonViewerComponent], animations: [fadeInDashboardItem],
+  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent], animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;

@@ -68,16 +68,5 @@
     </app-result-list>
   </div>
 
-  <div class="collapsible-container ">
-    <div class="file-header">
-      <span class="title">This is file</span>
-      <div class="toggle-btn" (click)="toggleContent()" [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'">
-        <img [src]="'../../../../../assets/images/shared/search_side_dropdown_icon.svg'"
-          [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon">
-      </div>
-    </div>
-    <div class="content" *ngIf="isExpanded">
-      <app-json-viewer [json]="resultItem"></app-json-viewer>
-    </div>
-  </div>
+  <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 </div>

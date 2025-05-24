@@ -5,12 +5,13 @@ import { DatePipe, NgOptimizedImage, CommonModule } from '@angular/common';
 import { HelperService } from '../../../services/helper.service';
 import { AppService } from '../../../../services/core/app.service';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonViewerComponent } from "../json-viewer/json-viewer.component";
+import { JsonViewerComponent } from "../../json-api-viewer/json-viewer/json-viewer.component";
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
 
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
-  imports: [CommonModule, NgOptimizedImage, DatePipe, TooltipDirective, JsonViewerComponent]
+  imports: [CommonModule, NgOptimizedImage, DatePipe, TooltipDirective, JsonApiViewerComponent]
 })
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;

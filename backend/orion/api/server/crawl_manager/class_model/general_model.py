@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 from pydantic.v1 import Extra
 
@@ -19,7 +19,7 @@ class GeneralDataModel(BaseModel):
     m_archive_url: List[str]
     m_validity_score: int
     m_meta_keywords: str
-    m_content_type: List[str]
+    m_content_type: Optional[List[str]] = None
     m_section: List[str]
     m_clearnet_links: List[str]
 

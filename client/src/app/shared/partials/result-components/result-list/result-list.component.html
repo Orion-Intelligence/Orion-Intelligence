@@ -1,11 +1,10 @@
 <div class="search__result-detail-section-content" *ngIf="listItems.length > 0">
-  <ng-container *ngFor="let row of getRows(listItems, 3); let rowIndex = index; let last = last">
-    <div class="row p-1">
-      <li *ngFor="let item of row; let i = index" class="copy-item" (click)="copyText(item, rowIndex * 3 + i)">
-        <span class="tag-item">
-          {{ item }}<img src="../../../../../assets/images/shared/copy.svg" class="copy-icon" #copyIcon alt="Copy" />
-        </span> <span *ngIf="copiedIndex === (rowIndex * 3 + i)" class="copied-label">Copied!</span>
-      </li>
-    </div>
-  </ng-container>
+  <div class="row p-1 flex-wrap">
+    <li *ngFor="let item of listItems; let i = index" class="copy-item" (click)="copyText(item, i)">
+      <span class="tag-item-content">
+        {{ item }}
+        <span class="tooltip" *ngIf="copiedIndex === i">Copied!</span>
+      </span>
+    </li>
+  </div>
 </div>

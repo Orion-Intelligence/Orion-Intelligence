@@ -13,7 +13,8 @@ import { ResultListComponent } from '../../result-components/result-list/result-
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonViewerComponent } from "../json-viewer/json-viewer.component";
+import { JsonViewerComponent } from "../../json-api-viewer/json-viewer/json-viewer.component";
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
 
 @Component({
   selector: 'app-report-chat',
@@ -26,7 +27,7 @@ import { JsonViewerComponent } from "../json-viewer/json-viewer.component";
     ResultListComponent,
     ResultSectionComponent,
     SlicePipe, CommonModule,
-    JsonViewerComponent
+    JsonApiViewerComponent
   ],
   animations: [fadeInDashboardItem]
 })
