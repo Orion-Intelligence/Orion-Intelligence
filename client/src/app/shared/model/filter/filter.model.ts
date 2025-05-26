@@ -1,9 +1,9 @@
 export interface FilterOption {
-  options: string[];
+  options: { key: string; label: string }[];
   type: string;
   title: string;
   tooltip: string;
-  selected: string|[];
+  selected: string | [];
 }
 
 export interface FilterModel {

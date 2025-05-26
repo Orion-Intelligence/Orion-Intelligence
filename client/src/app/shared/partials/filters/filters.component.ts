@@ -1,15 +1,15 @@
-import {Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {FilterModel} from '../../model/filter/filter.model';
-import {last} from 'rxjs';
-import {filterAnimation} from '../../animations/filter.animation';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {DatePickerComponent} from './date-picker/date-picker.component';
-import {MultipleSelectionComponent} from './multiple-selection/multiple-selection.component';
-import {ActivatedRoute} from '@angular/router';
-import {ALT} from '@angular/cdk/keycodes';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { FilterModel } from '../../model/filter/filter.model';
+import { last } from 'rxjs';
+import { filterAnimation } from '../../animations/filter.animation';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { DatePickerComponent } from './date-picker/date-picker.component';
+import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
+import { ActivatedRoute } from '@angular/router';
+import { ALT } from '@angular/cdk/keycodes';
 
 @Component({
   selector: 'app-filters',
@@ -66,7 +66,7 @@ export class FiltersComponent implements OnInit {
   }
 
   applyFilters() {
-    this.filterChanged.emit({...this.selectedFilters});
+    this.filterChanged.emit({ ...this.selectedFilters });
     this.closeFilter();
   }
 
@@ -79,7 +79,14 @@ export class FiltersComponent implements OnInit {
     this.initializeFilters();
     this.filterReset.emit();
   }
+  getOptionLabel(filterKey: string): string {
+    const selectedKey = this.selectedFilters[filterKey];
+    if (!selectedKey) return 'Select ' + this.filterModel.filters[filterKey].title;
 
+    const options = this.filterModel.filters[filterKey].options;
+    const option = options.find(opt => opt.key === selectedKey);
+    return option ? option.label : 'Select ' + this.filterModel.filters[filterKey].title;
+  }
   protected readonly Object = Object;
   protected readonly last = last;
   protected readonly JSON = JSON;
