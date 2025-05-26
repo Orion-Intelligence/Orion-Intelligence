@@ -2,14 +2,15 @@
     <button
         class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
         type="button" id="multiDropdown{{ key }}" data-bs-toggle="dropdown" aria-expanded="false">
-        {{ getMultiSelectedText() }}
+        {{ getOptionLabel() }}
     </button>
     <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3">
         <li *ngFor="let option of filterModel.filters[key]?.options" (click)="$event.stopPropagation()">
             <label class="dropdown-item py-0 d-flex align-items-center" style="cursor: pointer; padding: 0; margin: 0;">
                 <input type="checkbox" class="form-check-input me-2"
-                    [checked]="(mSelectedFilters[key] || []).includes(option)" (click)="onMultiSelectionToggle(option)">
-                {{ formatOptionLabel(option) }}
+                    [checked]="(mSelectedFilters[key] || []).includes(option.key)"
+                    (click)="onMultiSelectionToggle(option.key)">
+                {{ option.label }}
             </label>
         </li>
     </ul>
