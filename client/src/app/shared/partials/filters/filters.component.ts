@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { FilterModel } from '../../model/filter/filter.model';
-import { last } from 'rxjs';
-import { filterAnimation } from '../../animations/filter.animation';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { DatePickerComponent } from './date-picker/date-picker.component';
-import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
-import { ActivatedRoute } from '@angular/router';
+import {Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {FilterModel} from '../../model/filter/filter.model';
+import {last} from 'rxjs';
+import {filterAnimation} from '../../animations/filter.animation';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {DatePickerComponent} from './date-picker/date-picker.component';
+import {MultipleSelectionComponent} from './multiple-selection/multiple-selection.component';
+import {ActivatedRoute} from '@angular/router';
 import {ALT} from '@angular/cdk/keycodes';
 
 @Component({
@@ -27,7 +27,8 @@ export class FiltersComponent implements OnInit {
 
   selectedFilters: { [key: string]: string | null } = {};
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute) {
+  }
 
 
   ngOnInit() {
@@ -37,10 +38,15 @@ export class FiltersComponent implements OnInit {
 
   private initializeFilters() {
     this.selectedFilters = Object.keys(this.filterModel.filters)
-      .reduce((acc, key) => ({
-        ...acc,
-        [key]: null,
-      }), {});
+      .reduce((acc, key) => {
+        const defaultValue = this.filterModel.filters[key].selected;
+        const isDefault = defaultValue === 'all' || defaultValue === '' || (Array.isArray(defaultValue) && defaultValue.length === 0);
+
+        return {
+          ...acc,
+          [key]: isDefault ? null : defaultValue
+        };
+      }, {});
   }
 
   private readFiltersFromUrl() {
@@ -54,12 +60,13 @@ export class FiltersComponent implements OnInit {
   updateFilter(event: { key: string; value: string }) {
     this.selectedFilters[event.key] = event.value;
   }
+
   onSelectionChange(key: string, value: string | null) {
     this.selectedFilters[key] = value;
   }
 
   applyFilters() {
-    this.filterChanged.emit({ ...this.selectedFilters });
+    this.filterChanged.emit({...this.selectedFilters});
     this.closeFilter();
   }
 
