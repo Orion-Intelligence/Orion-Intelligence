@@ -30,11 +30,11 @@ export class DashboardService {
   }> {
     this.cancelOngoingRequest();
 
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: paramModel,
-      queryParamsHandling: 'merge'
-    });
+    // this.router.navigate([], {
+    //   relativeTo: this.route,
+    //   queryParams: paramModel,
+    //   queryParamsHandling: 'merge'
+    // });
 
     const params = new HttpParams({fromObject: paramModel as any});
 

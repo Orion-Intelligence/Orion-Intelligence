@@ -197,7 +197,7 @@ class elastic_request_generator:
     m_safe_search = p_query_model.mSearchParamSafeSearch
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
-    m_search_type = p_query_model.pSearchParamType
+    m_search_type = p_query_model.mSearchParamType
     m_date_range = p_query_model.mDateRange
     m_content_type = p_query_model.mContentType
     m_entity = p_query_model.mEntity
@@ -436,7 +436,7 @@ class elastic_request_generator:
     if raw_query == "":
       raw_query = "*"
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
-    m_search_type = p_query_model.pSearchParamType
+    m_search_type = p_query_model.mSearchParamType
     m_message_date=p_query_model.pSearchParamDate
     m_entity=p_query_model.pSearchParamEntity
     m_mitryTtp=p_query_model.pSearchParamMitryTtp
@@ -597,7 +597,7 @@ class elastic_request_generator:
     m_user_query = raw_query.lower().rstrip("/") + "*"
     m_url_query = raw_query
     m_safe_search = p_query_model.mSearchParamSafeSearch
-    m_search_type = p_query_model.pSearchParamType
+    m_search_type = p_query_model.mSearchParamType
     m_page_number = p_query_model.mSearchParamPage
     m_network = p_query_model.mNetwork
     m_date_range = p_query_model.mDateRange

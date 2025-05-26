@@ -9,6 +9,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
 import { ActivatedRoute } from '@angular/router';
+import {ALT} from '@angular/cdk/keycodes';
 
 @Component({
   selector: 'app-filters',
@@ -31,7 +32,6 @@ export class FiltersComponent implements OnInit {
 
   ngOnInit() {
     this.initializeFilters();
-
     this.readFiltersFromUrl();
   }
 

@@ -57,7 +57,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         this.generalParamModel.mDateRange = params['mDateRange'] || '';
         this.generalParamModel.mNetwork = params['mNetwork'] || 'all';
 
-        this.generalParamModel.pSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        this.generalParamModel.mSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH))) {
           this.isLoading = false;
           if (this.generalParamModel.q)
@@ -144,7 +144,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   }
 
   resetFilters(_: void) {
-    this.generalParamModel.pSearchParamType = "all";
+    this.generalParamModel.mSearchParamType = "all";
     this.generalParamModel.mSearchParamPage = 1;
     this.generalParamModel.mSearchParamSafeSearch = false;
     this.generalParamModel.mNetwork = "all";

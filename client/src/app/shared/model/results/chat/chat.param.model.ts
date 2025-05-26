@@ -1,8 +1,8 @@
 export class ChatParamModel {
   q: string = "";
   mSearchParamPage: number = 1;
-  pSearchParamType: string = "all";
-  pSearchParamDate: string = "";
-  pSearchParamEntity: string = "";
-  pSearchParamMitryTtp: string = "";
+  mContentType: string = "all";
+  mDateRange: string = "";
+  mEntity: string = "";
+  mMitreTtp: string = "";
 }

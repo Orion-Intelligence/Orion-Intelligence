@@ -1,6 +1,6 @@
 export class GeneralParamModel {
   q: string = "";
-  pSearchParamType: string = "all";
+  mSearchParamType: string = "all";
   mSearchParamPage: number = 1;
   mSearchParamSafeSearch: boolean = false;
   mNetwork: string = "all";

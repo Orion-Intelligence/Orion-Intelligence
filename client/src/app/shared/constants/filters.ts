@@ -107,7 +107,7 @@ export const general_filters: FilterModel = {
 
 export const chat_filters: FilterModel = {
   filters: {
-    content_type: {
+    mContentType: {
       title: "Content Type",
       options: [
         "all",
@@ -156,21 +156,21 @@ export const chat_filters: FilterModel = {
       tooltip: "",
       selected: "all"
     },
-    dateRange: {
+    mDateRange: {
       title: "Message Date",
       options: [],
       type: 'daterange',
       tooltip: "Message Date",
       selected: ""
     },
-    entity: {
+    mEntity: {
       title: "Entity Type",
       options: ["EMAILS", "HASHES", "IOCS", "IPS", "IPV4S", "IPV6S", "MD5_HASHES", "SHA1_HASHES", "SHA256_HASHES", "SHA512_HASHES", "TELEPHONE_NUMS", "UNENCODED_URLS", "URLS", "EMAIL_ADDRESSES_COMPLETE", "EMAIL_ADDRESSES", "DOMAINS", "SHA512S", "SHA256S", "SHA1S", "MD5S", "SSDEEPS", "CVES", "BITCOIN_ADDRESSES", "MAC_ADDRESSES", "API_KEY", "AWS_SECRET", "AZURE_RESOURCE_ID", "REGISTRY_KEY", "FILE_PATH", "YARA_RULE", "PHONE_NUMBER", "COUNTRY", "ORG", "GPE", "NORP", "PRODUCT", "PERSON", "LOC", "LAW", "CREDIT_CARD", "IBAN_CODE", "IN_AADHAAR", "AU_ABN", "AU_TFN", "IN_VEHICLE_REGISTRATION", "IP_ADDRESS", "IN_PAN", "LOCATION", "NRP", "SG_NRIC_FIN", "US_ITIN", "IN_VOTER", "US_DRIVER_LICENSE", "URL", "US_SSN", "US_PASSPORT", "IN_PASSPORT", "US_BANK_NUMBER", "USERNAME", "PASSWORD", "HASHTAG", "MENTION", "MITRE_TTP_TYPE"],
       type: 'multiSelection',
       tooltip: "Entity Filter",
       selected: []
     },
-    mitreTtpType: {
+    mMitreTtp: {
       title: "Mitre TTP",
       options: ["attack-pattern", "campaign", "course-of-action", "identity", "intrusion-set", "malware", "marking-definition", "relationship", "tool", "x-mitre-collection", "x-mitre-data-component", "x-mitre-data-source", "x-mitre-matrix", "x-mitre-tactic"],
       type: 'dropdown',
