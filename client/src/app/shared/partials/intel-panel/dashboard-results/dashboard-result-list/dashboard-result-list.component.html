@@ -2,51 +2,37 @@
   <div class="directory-list__container list-container">
     <table class="table table-striped directory-list__table clear-paddings">
       <thead>
-      <tr>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('#')" [ngClass]="getSortClass('#')">
-          #
-        </th>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')">
-          Base URL
-        </th>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')">
-          IP Addresses
-        </th>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')">
-          Attacker
-        </th>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')">
-          Team
-        </th>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')">
-          Web Server
-        </th>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_date_of_leak')" [ngClass]="getSortClass('m_date_of_leak')">
-          Leak Date
-        </th>
-        <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')">
-          Web URL
-        </th>
-      </tr>
+        <tr>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('#')" [ngClass]="getSortClass('#')">#</th>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')">Base URL</th>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')">IP Addresses</th>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')">Attacker</th>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')">Team</th>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')">Web Server</th>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_date_of_leak')" [ngClass]="getSortClass('m_date_of_leak')">Leak Date</th>
+          <th scope="col" class="directory-list__container-sort" (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')">Web URL</th>
+        </tr>
       </thead>
       <tbody>
-
-      <ng-container *ngFor="let item of searchResults; let i = index">
-        <tr [id]="'item-' + item.m_hash" (click)="scrollService.saveSession(item.m_hash)" [routerLink]="[currentUrl, item.m_hash]">
-          <td>{{ i + 1 }}</td>
-          <td>{{ item.m_base_url }}</td>
-<!--          <td>{{ item.m_ip.join(', ') }}</td>-->
-<!--          <td>{{ item.m_attacker.join(', ') }}</td>-->
-<!--          <td>{{ item.m_team }}</td>-->
-<!--          <td>{{ item.m_web_server.join(', ') }}</td>-->
-          <td>
-            {{ item?.m_date_of_leak ? (item.m_date_of_leak | date: 'MMM d, y') : 'N/A' }}
-          </td>
-          <td>
-            <a *ngIf="item.m_web_url.length" [href]="item.m_web_url[0]" class="text-decoration-none text-reset"> {{ item.m_web_url[0] }} </a>
-          </td>
-        </tr>
-      </ng-container>
+        <ng-container *ngFor="let item of searchResults; let i = index">
+          <tr [id]="'item-' + item.m_hash" (click)="scrollService.saveSession(item.m_hash)" [routerLink]="[currentUrl, item.m_hash]">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.m_base_url || 'Not Found' }}</td>
+            <td>{{ item.m_ip?.length ? item.m_ip.join(', ') : 'Not Found' }}</td>
+            <td>{{ item.m_attacker?.length ? item.m_attacker.join(', ') : 'Not Found' }}</td>
+            <td>{{ item.m_team || 'Not Found' }}</td>
+            <td>{{ item.m_web_server?.length ? item.m_web_server.join(', ') : 'Not Found' }}</td>
+            <td>
+              {{ item?.m_date_of_leak ? (item.m_date_of_leak | date: 'MMM d, y') : 'Not Found' }}
+            </td>
+            <td>
+              <a *ngIf="item.m_web_url?.length" [href]="item.m_web_url[0]" class="text-decoration-none text-reset">
+                {{ item.m_web_url[0] }}
+              </a>
+              <span *ngIf="!item.m_web_url?.length">Not Found</span>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
   </div>
