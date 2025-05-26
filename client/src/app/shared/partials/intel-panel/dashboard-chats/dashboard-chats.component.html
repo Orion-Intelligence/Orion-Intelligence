@@ -9,6 +9,5 @@
 </div>
 
 <div *ngIf="!isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)"
-    [maxPages]="Math.floor(chatCallbackModel.Page_Count)"></app-pagination>
+  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.floor(this.chatParamModel.mSearchParamPage)"></app-pagination>
 </div>

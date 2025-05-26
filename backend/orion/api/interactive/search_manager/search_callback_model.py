@@ -20,7 +20,6 @@ class search_callback:
 
       m_result_final = p_paged_documents.get('hits', {}).get('hits', [])
 
-
       for m_document in m_result_final:
         m_service = m_document.get('_source', None)
         if not m_service:
@@ -30,10 +29,10 @@ class search_callback:
         if "highlight" in m_document:
           m_highlight = m_document["highlight"]
 
-          important_fragments = m_highlight.get("m_important_content", [])
-          content_fragments = m_highlight.get("m_content", [])
-          href_fragments = m_highlight.get("m_href_html", [])
-          caption_fragments = m_highlight.get("m_caption", [])
+          important_fragments = m_highlight.get("m_important_content") or []
+          content_fragments = m_highlight.get("m_content") or []
+          href_fragments = m_highlight.get("m_href_html") or []
+          caption_fragments = m_highlight.get("m_caption") or []
 
           if important_fragments:
             highlight_text = " ... ".join(important_fragments).strip(" .")
@@ -51,10 +50,11 @@ class search_callback:
             if len(highlight_text) < 300:
               m_service["m_highlighted"] = highlight_text
             else:
-              m_service["m_highlighted"] = highlight_text[0:300] + " ..."
+              m_service["m_highlighted"] = highlight_text[:300] + " ..."
 
-          if len(m_service["m_important_content"]) > 500:
-            m_service["m_important_content"] = m_service["m_important_content"][0:500] + " ..."
+          if isinstance(m_service.get("m_important_content"), str):
+            if len(m_service["m_important_content"]) > 500:
+              m_service["m_important_content"] = m_service["m_important_content"][:500] + " ..."
 
         if "m_ref_html" in m_service and m_service["m_ref_html"] and len(m_service.get("m_highlighted", "")) < 250 and len(m_service["m_ref_html"]) > 20:
           m_service["m_highlighted"] = m_service["m_ref_html"]
@@ -68,7 +68,6 @@ class search_callback:
 
         if "m_highlighted" not in m_service:
           m_service["m_highlighted"] = ""
-
 
         if isinstance(dedup_key, list):
           if any(item in mDescription for item in dedup_key):

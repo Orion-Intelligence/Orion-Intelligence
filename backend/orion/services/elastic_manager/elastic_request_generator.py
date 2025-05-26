@@ -467,18 +467,18 @@ class elastic_request_generator:
         except ValueError:
           pass
 
-      if m_entity:
-        must_clauses.append({
-          "bool": {
-            "should": [
-              {"exists": {"field": entity}} for entity in m_entity
-            ],
-            "minimum_should_match": 1
-          }
-        })
+    if m_entity:
+      must_clauses.append({
+        "bool": {
+          "should": [
+            {"exists": {"field": entity}} for entity in m_entity
+          ],
+          "minimum_should_match": 1
+        }
+      })
 
-      if m_mitryTtp and m_mitryTtp.lower() not in ("", "all"):
-        must_clauses.append({"term": {"m_mitre_ttp_type": m_mitryTtp.lower()}})
+    if m_mitryTtp and m_mitryTtp.lower() not in ("", "all"):
+      must_clauses.append({"term": {"m_mitre_ttp_type": m_mitryTtp.lower()}})
 
     search_fields = [
       "m_content^3",

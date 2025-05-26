@@ -3,7 +3,7 @@
 
     <div class="dashboard__search-main-div" [id]="'item-' + item.m_message_id" (click)="scrollService.saveSession(item.m_message_id ?? '')" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
 
-      <div class="dashboard__search-tags">
+      <div class="dashboard__search-tags mb-4">
         <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
       </div>
 
