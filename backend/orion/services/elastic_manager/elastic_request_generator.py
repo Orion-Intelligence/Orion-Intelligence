@@ -591,6 +591,9 @@ class elastic_request_generator:
     if raw_query == "":
       raw_query = "*"
 
+    if not raw_query or raw_query == "":
+      raw_query = "*"
+
     if not raw_query:
       return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 

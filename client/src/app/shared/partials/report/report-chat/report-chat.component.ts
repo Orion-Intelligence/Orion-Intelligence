@@ -27,7 +27,7 @@ import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.comp
     ResultListComponent,
     ResultSectionComponent,
     SlicePipe, CommonModule,
-    JsonApiViewerComponent
+    JsonApiViewerComponent, TooltipDirective
   ],
   animations: [fadeInDashboardItem]
 })
@@ -121,6 +121,19 @@ export class ReportChatComponent implements OnInit {
 
   shareResult() {
     this.helper.shareResult(this.resultItem?.m_message_sharable_link ?? '');
+  }
+
+  open_graph() {
+    const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+    const parts = window.location.pathname.split('/');
+    const singleInput = parts[parts.length - 1];
+
+    const params = new URLSearchParams({
+      selectedType: 'document', singleInput: singleInput
+    });
+
+    const fullUrl = `${baseUrl}?${params.toString()}`;
+    window.open(fullUrl, '_blank');
   }
 
   redirectToUrl() {
