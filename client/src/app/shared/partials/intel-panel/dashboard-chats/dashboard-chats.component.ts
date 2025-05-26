@@ -93,7 +93,6 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
         if (!isDefault) cleanedParams[key] = value;
       }
     });
-    console.log(cleanedParams)
     this.router.navigate([], {
       queryParams: cleanedParams,
       queryParamsHandling: reset ? '' : 'merge',

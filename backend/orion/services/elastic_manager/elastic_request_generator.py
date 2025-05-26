@@ -436,15 +436,15 @@ class elastic_request_generator:
     if raw_query == "":
       raw_query = "*"
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
-    m_search_type = p_query_model.mSearchParamType
-    m_message_date=p_query_model.pSearchParamDate
-    m_entity=p_query_model.pSearchParamEntity
-    m_mitryTtp=p_query_model.pSearchParamMitryTtp
+    m_search_type = p_query_model.mContentType
+    m_message_date=p_query_model.mDateRange
+    m_entity=p_query_model.mEntity
+    m_mitryTtp=p_query_model.mMitreTtp
 
     must_clauses = []
     must_not_clause = []
     if m_search_type != "all":
-      must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
+      must_clauses.append({"term": {"m_content_type": [m_search_type]}})
 
     if m_message_date:
       parts = m_message_date.split(',')
