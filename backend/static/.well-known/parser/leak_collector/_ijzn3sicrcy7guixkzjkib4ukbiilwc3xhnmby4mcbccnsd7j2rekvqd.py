@@ -82,7 +82,7 @@ class _ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd(leak_extractor_i
       all_hrefs = []
 
       current_page = 1
-      while current_page <= 18:
+      while current_page <= 5:
         page.goto(f"{base_url}/?page={current_page}")
         page.wait_for_selector('.col-md-3.ps-lg-0.text-right.mb-2')
 
