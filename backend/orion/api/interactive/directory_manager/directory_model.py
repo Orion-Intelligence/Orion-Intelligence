@@ -50,7 +50,7 @@ class directory_model:
 
     total_count = await self._engine.count(db_url_data_model, query)
     data = await self._engine.find(
-      db_url_data_model, query, sort=[("leak_model_last_update", -1)], skip=(params.page - 1) * 100, limit=100
+      db_url_data_model, query, skip=(params.page - 1) * 100, limit=100
     )
 
     return data, total_count

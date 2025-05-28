@@ -51,7 +51,6 @@ class dump_model:
         data = await self._engine.find(
             db_dump_record_model,
             query,
-            sort=[("created_at", -1)],
             skip=(params.page - 1) * 100,
             limit=100
         )
