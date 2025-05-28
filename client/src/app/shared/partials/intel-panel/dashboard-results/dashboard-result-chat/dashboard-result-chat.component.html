@@ -4,7 +4,12 @@
     <div class="dashboard__search-main-div" [id]="'item-' + item.m_message_id">
       <div class="dashboard__search-tags">
         <div class="dashboard__search-tags">
-          <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+          <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
+            <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+          </ng-container>
+          <ng-template #unknownTag>
+            <span class="dashboard__tag">unknown</span>
+          </ng-template>
         </div>
         <div class="dashboard__search-button" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams"
           (click)="scrollService.saveSession(item.m_message_id ?? '')">

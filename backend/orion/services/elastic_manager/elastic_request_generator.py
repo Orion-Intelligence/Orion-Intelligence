@@ -428,13 +428,13 @@ class elastic_request_generator:
 
   @staticmethod
   def on_search_telegram_data(p_query_model):
+    if p_query_model.q == "":
+      raw_query = "*"
+
     if p_query_model.q != "*":
       raw_query = p_query_model.q.strip()
       raw_query = helper_controller.remove_stopwords_from_string(raw_query)
-    else:
-      raw_query = "*"
-    if raw_query == "":
-      raw_query = "*"
+
     m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
     m_search_type = p_query_model.mContentType
     m_message_date=p_query_model.mDateRange

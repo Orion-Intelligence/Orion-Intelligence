@@ -1,20 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
-import { HelperService } from '../../../services/helper.service';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {ChatResultItem} from '../../../model/results/chat/chat.callback.model';
+import {HelperService} from '../../../services/helper.service';
 import {
   CommonModule,
   NgForOf,
   NgIf,
   NgOptimizedImage, SlicePipe,
-  TitleCasePipe
 } from '@angular/common';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonViewerComponent } from "../../json-api-viewer/json-viewer/json-viewer.component";
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import {ApiService} from '../../../services/api.service';
+import {last} from 'rxjs';
 
 @Component({
   selector: 'app-report-chat',
@@ -38,28 +38,26 @@ export class ReportChatComponent implements OnInit {
   activeTab: string = '';
   content: string = '';
   summary: string = '';
-  isExpanded = false;
+  aiSuggestStatus: boolean = false
+  aiSuggestSummary = ""
 
   constructor(
-    private route: ActivatedRoute,
-    private helper: HelperService
+    private helper: HelperService,
+    private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute
   ) {
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata }) => {
+    this.route.data.subscribe(({reportdata}) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });
-  }
-  toggleContent(): void {
-    this.isExpanded = !this.isExpanded;
   }
 
   processResultItem() {
     if (this.resultItem) {
       this.content = this.resultItem.m_content || '';
-      this.summary = this.resultItem.m_summary[0] || '';
+      this.summary = (this.resultItem.m_summary?.[0]) || '';
       this.arrayKeys = [];
 
       const addedKeys = new Set<string>();
@@ -69,7 +67,7 @@ export class ReportChatComponent implements OnInit {
         addedKeys.add('m_content');
       }
 
-      if (this.resultItem.m_summary[0]?.trim()) {
+      if (Array.isArray(this.resultItem.m_summary) && this.resultItem.m_summary[0]?.trim()) {
         this.arrayKeys.push('m_summary');
         addedKeys.add('m_summary');
       }
@@ -114,6 +112,24 @@ export class ReportChatComponent implements OnInit {
     this.helper.printPage();
   }
 
+  aiSuggest() {
+    const apiUrl = 'nlp/summarize/ai';
+
+    this.api.post<{ result: string }>(apiUrl, {
+      data: this.resultItem?.m_content
+    }).subscribe({
+        next: (response) => {
+          this.aiSuggestStatus = true;
+          this.aiSuggestSummary = response.result || 'No summary available';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Summarization failed', err);
+        }
+      }
+    );
+  }
+
   formatKeyTitle(key: string): string {
     const cleaned = (key.startsWith('m_') ? key.slice(2) : key).split('_').join(' ');
     return cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
@@ -136,9 +152,24 @@ export class ReportChatComponent implements OnInit {
     window.open(fullUrl, '_blank');
   }
 
+  formatKeyLabel(key: string): string {
+    const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
+    return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
+  }
+
+  get filteredArrayKeys(): string[] {
+    console.log(this.arrayKeys)
+    return this.arrayKeys.filter(key => {
+      const val = (this.resultItem as any)?.[key];
+      return val != null && (!Array.isArray(val) || val.length > 0);
+    });
+  }
+
   redirectToUrl() {
     if (this.resultItem?.m_weblink?.length) {
       window.open(this.resultItem.m_message_sharable_link, '_blank');
     }
   }
+
+  protected readonly last = last;
 }

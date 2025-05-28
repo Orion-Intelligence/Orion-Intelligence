@@ -8,6 +8,10 @@
       <img ngSrc="../../../../../assets/images/shared/print.svg" alt="print" height="25" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
+    <button class="p-0 report-menu-option" (click)="aiSuggest()" appTooltip="AI Summary">
+      <img ngSrc="../../../../../assets/images/shared/ai.svg" alt="background" height="25" width="25">
+    </button>
+    <div class="vr report-menu-divider"></div>
     <button class="p-0 report-menu-option" (click)="shareResult()">
       <img ngSrc="../../../../../assets/images/shared/share.svg" alt="share" height="22" width="22">
     </button>
@@ -19,6 +23,16 @@
       <img ngSrc="../../../../../assets/images/sidebar/graph.svg" alt="background" height="17" width="17">
     </button>
   </div>
+</div>
+<div class="search__result-detail" *ngIf="aiSuggestStatus" @fadeInDashboardItem>
+  <div class="d-flex align-items-start">
+    <img class="report-icon-top" src="../../../../../assets/images/shared/ai.svg" alt="background" height="25"
+      width="25">
+    <h2 class="search__result-detail-heading ms-2"> &nbsp; AI Report</h2>
+  </div>
+  <p class="search__result-detail-description">
+    {{ aiSuggestSummary }}
+  </p>
 </div>
 
 <div class="search__result-detail" *ngIf="resultItem">

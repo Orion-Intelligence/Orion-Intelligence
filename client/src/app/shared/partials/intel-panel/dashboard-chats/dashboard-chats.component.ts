@@ -72,8 +72,6 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
         queryParams: {},
         queryParamsHandling: ''
       }).then();
-
-      return;
     }
 
     this.isLoading = true;
