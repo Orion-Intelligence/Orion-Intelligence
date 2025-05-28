@@ -148,6 +148,19 @@ class elastic_request_generator:
           "boost_mode": "multiply"
         }
       },
+      "sort": [
+        {
+          "m_date_of_leak": {
+          "order": "desc",
+          "missing": "_last"
+          }
+        },
+        {
+          "m_update_date": {
+          "order": "desc"
+          }
+        }
+      ],
       "suggest": {
         "attacker_suggestion": {
           "text": raw_query,
@@ -173,6 +186,7 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * 100),
       "size": 100,
       "track_total_hits": True
+      
     }
 
     return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
@@ -396,6 +410,19 @@ class elastic_request_generator:
           }
         }
       },
+      "sort": [
+        {
+          "m_leak_date": {
+          "order": "desc",
+          "missing": "_last"
+          }
+        },
+        {
+          "m_update_date": {
+          "order": "desc"
+          }
+        }
+      ],
       "suggest": {
         "important_content_suggestion": {
           "text": raw_query,
@@ -576,7 +603,10 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
-      "explain": True
+      "explain": True,
+      "sort": [
+        {"m_message_date": {"order": "desc"}}
+      ]
     }
 
     return ELASTIC_INDEX.S_CHATS_INDEX, query
@@ -766,7 +796,10 @@ class elastic_request_generator:
       "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
       "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
       "track_total_hits": True,
-      "explain": True
+      "explain": True,
+      "sort": [
+        {"m_update_date": {"order": "desc"}}
+      ]
     }
     return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
