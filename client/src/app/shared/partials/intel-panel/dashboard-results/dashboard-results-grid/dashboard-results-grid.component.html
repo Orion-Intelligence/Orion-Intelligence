@@ -23,7 +23,6 @@
         <h2 class="dashboard__search-title">Title not available</h2>
       </ng-template>
 
-      <ng-container *ngIf="item.m_important_content">
         <ng-container *ngIf="item?.m_important_content as content; else noDescription">
           <p class="dashboard__search-description" *ngIf="content.trim().length > 1; else noDescription"
              [innerHTML]="content.slice(0, 600)">
@@ -32,7 +31,6 @@
         <ng-template #noDescription>
           <p class="dashboard__search-description">Description not available</p>
         </ng-template>
-      </ng-container>
 
       <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
         <span class="search__result-detail-description-span highlight"><b>Search Tracker</b></span>
