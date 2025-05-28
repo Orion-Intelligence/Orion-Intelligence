@@ -7,26 +7,26 @@
           <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
         </div>
         <div class="dashboard__search-button" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams"
-          (click)="scrollService.saveSession(item.m_hash)">
+             (click)="scrollService.saveSession(item.m_hash)">
           <div class="dashboard__search-button-inner">
-            <img src="/assets/images/shared/redirect.svg" width="40" height="40" />
+            <img src="/assets/images/shared/redirect.svg" width="40" height="40"/>
           </div>
         </div>
       </div>
 
-      <ng-container *ngIf="item.m_important_content">
-        <ng-container *ngIf="item?.m_title as title; else noTitle">
-          <h2 class="dashboard__search-title" *ngIf="title.trim().length > 1; else noTitle">
-            {{ title }}
-          </h2>
-        </ng-container>
-        <ng-template #noTitle>
-          <h2 class="dashboard__search-title">Title not available</h2>
-        </ng-template>
+      <ng-container *ngIf="item?.m_title as title; else noTitle">
+        <h2 class="dashboard__search-title" *ngIf="title.trim().length > 1; else noTitle">
+          {{ title }}
+        </h2>
+      </ng-container>
+      <ng-template #noTitle>
+        <h2 class="dashboard__search-title">Title not available</h2>
+      </ng-template>
 
+      <ng-container *ngIf="item.m_important_content">
         <ng-container *ngIf="item?.m_important_content as content; else noDescription">
           <p class="dashboard__search-description" *ngIf="content.trim().length > 1; else noDescription"
-            [innerHTML]="content.slice(0, 600)">
+             [innerHTML]="content.slice(0, 600)">
           </p>
         </ng-container>
         <ng-template #noDescription>
@@ -34,11 +34,10 @@
         </ng-template>
       </ng-container>
 
-
       <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
         <span class="search__result-detail-description-span highlight"><b>Search Tracker</b></span>
         <p class="dashboard__search-description dashboard__search-description-light"
-          [innerHTML]="highlightWords(item.m_highlighted)"></p>
+           [innerHTML]="highlightWords(item.m_highlighted)"></p>
       </ng-container>
 
       <ng-container *ngIf="item?.m_url as url; else noUrl">
@@ -53,7 +52,8 @@
       <div class="dashboard__search-info">
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Published on:</span>
-          <span class="dashboard__info-value">{{ item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : 'Not found'
+          <span class="dashboard__info-value">{{
+              item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : 'Not found'
             }}</span>
         </div>
         <div class="dashboard__search-info-item">
