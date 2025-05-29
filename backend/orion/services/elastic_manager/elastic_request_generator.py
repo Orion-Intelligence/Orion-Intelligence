@@ -778,7 +778,7 @@ class elastic_request_generator:
                 }
             },
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
-            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+            "size": 50 if raw_query == "*" else CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
             "track_total_hits": True,
             "explain": True
         }
