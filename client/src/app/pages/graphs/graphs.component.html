@@ -11,18 +11,18 @@
 <div id="customContextMenu" class="context-menu">
   <div class="profile-dropdown-arrow"></div>
   <button class="dropdown-item" (click)="expandNode()">
-    <img src="../../../../../assets/images/shared/settings.svg" width="15" height="15">
+    <img src="../../../../../assets/images/shared/expand.svg" width="15" height="15" style="margin-right: 8px;">
     Expand</button>
 
   <hr class="dropdown-divider mx-3">
 
   <button class="dropdown-item" (click)="collapseNode()">
-    <img src="../../../../../assets/images/shared/logout.svg" width="15" height="15">
+    <img src="../../../../../assets/images/shared/collapse.svg" width="20" height="20" style="margin-right: 8px;">
     Collapse</button>
   <hr class="dropdown-divider mx-3">
 
   <button class="dropdown-item" (click)="share()">
-    <img src="../../../../../assets/images/shared/share.svg" width="15" height="15">
+    <img src="../../../../../assets/images/shared/share.svg" width="15" height="15" style="margin-right: 8px;">
     Share</button>
   <span *ngIf="copied" class="copied-label">Copied!</span>
 </div>
