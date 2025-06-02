@@ -2,21 +2,24 @@
 
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleAnimation()">
     <div class="analytics d-flex align-items-center gap-2">
-      <input type="checkbox" id="switch" [checked]="physicsEnabled" style="pointer-events: none;"> <label for="switch" class="mb-0" style="pointer-events: none;"></label> <span>&nbsp; Toggle Physics</span>
+      <input type="checkbox" id="switch" [checked]="physicsEnabled" style="pointer-events: none;"> <label for="switch"
+        class="mb-0" style="pointer-events: none;"></label> <span>&nbsp; Toggle Physics</span>
     </div>
   </div>
   <br>
 
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleExpand()">
     <div class="analytics d-flex align-items-center gap-2">
-      <input type="checkbox" id="switchExpand" [checked]="expandEnabled" style="pointer-events: none;"> <label for="switchExpand" class="mb-0" style="pointer-events: none;"></label> <span>&nbsp; Expand</span>
+      <input type="checkbox" id="switchExpand" [checked]="expandEnabled" style="pointer-events: none;"> <label
+        for="switchExpand" class="mb-0" style="pointer-events: none;"></label> <span>&nbsp; Expand</span>
     </div>
   </div>
   <br>
 
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleCollapse('details')">
     <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Details</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron" [class.rotate]="detailsOpen"/>
+      <span>Details</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron"
+        [class.rotate]="detailsOpen" />
     </div>
     <div id="detailsCollapse" class="collapse" [class.show]="detailsOpen">
       <br>
@@ -57,9 +60,11 @@
 
   <br>
 
-  <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleCollapse('indicators')">
+  <div class="graph-filters__details graph-pointer cursor-pointer user-select-none"
+    (click)="toggleCollapse('indicators')">
     <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Indicators</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron" [class.rotate]="indicatorsOpen"/>
+      <span>Indicators</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron"
+        [class.rotate]="indicatorsOpen" />
     </div>
     <div id="indicatorsCollapse" class="collapse" [class.show]="indicatorsOpen">
       <br>

@@ -39,8 +39,30 @@
   padding-left: 10px;
 }
 
-.graph-notification{
+.graph-notification {
   position: absolute;
-  top:0;
+  top: 0;
   left: 300px
+}
+
+
+
+
+
+.context-menu {
+  position: absolute;
+  display: none;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 160px;
+}
+
+.copied-label {
+  margin-left: 10px;
+  color: rgb(255, 255, 255);
+  background-color: #023c89;
 }

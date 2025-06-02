@@ -1,13 +1,14 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {HttpParams} from '@angular/common/http';
-import {ActivatedRoute} from '@angular/router';
-import {Network, DataSet, Node, Edge} from 'vis-network/standalone';
-import {FormsModule} from '@angular/forms';
-import {ApiService} from '../../shared/services/api.service';
-import {SidebarComponent} from './sidebar/sidebar.component';
-import {GraphInfoComponent} from './graph-info/graph-info.component';
-import {NgIf} from '@angular/common';
-import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { Network, DataSet, Node, Edge } from 'vis-network/standalone';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../shared/services/api.service';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { GraphInfoComponent } from './graph-info/graph-info.component';
+import { NgIf } from '@angular/common';
+import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -23,7 +24,7 @@ interface ExtendedNode extends Node {
   imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf]
 })
 export class GraphComponent implements OnInit {
-  @ViewChild('networkContainer', {static: true}) networkContainer!: ElementRef;
+  @ViewChild('networkContainer', { static: true }) networkContainer!: ElementRef;
   network!: Network;
   selectedType = 'cluster';
   singleInput = 'all';
@@ -42,8 +43,10 @@ export class GraphComponent implements OnInit {
   private groupInfo: Record<string, string[]> = {};
   private groupExpandedState: Record<string, boolean> = {};
   private highlightedNodeId: string | null = null;
+  private contextMenuNodeId: string | null = null;
+  copied = false;
 
-  constructor(private api: ApiService, private route: ActivatedRoute) {
+  constructor(private api: ApiService, private route: ActivatedRoute, private clipboard: Clipboard) {
   }
 
   ngOnInit(): void {
@@ -68,9 +71,9 @@ export class GraphComponent implements OnInit {
       .set('model_type', type)
       .set('query_value', value);
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
-        const {results, limit_reached} = response;
+        const { results, limit_reached } = response;
         this.result = results
         this.renderGraph(this.result);
         this.limitReached = limit_reached;
@@ -85,6 +88,7 @@ export class GraphComponent implements OnInit {
 
 
   private renderGraph(data: any[], reset = false): void {
+
     this.isEmpty = data.length === 0;
     this.rawNodes = [];
     this.rawEdges = [];
@@ -151,7 +155,7 @@ export class GraphComponent implements OnInit {
         from: e._from,
         to: e._to,
         arrows: 'to',
-        color: {color: '#FFFFFF'},
+        color: { color: '#FFFFFF' },
         width: 2
       });
 
@@ -232,12 +236,12 @@ export class GraphComponent implements OnInit {
     this.edgeSet = new DataSet(visibleEdges);
 
     const container = this.networkContainer.nativeElement;
-    this.network = new Network(container, {nodes: this.nodeSet, edges: this.edgeSet}, {
+    this.network = new Network(container, { nodes: this.nodeSet, edges: this.edgeSet }, {
       physics: {
         enabled: this.physicsEnabled,
         solver: 'forceAtlas2Based',
         timestep: 1,
-        stabilization: {iterations: 20, fit: true},
+        stabilization: { iterations: 20, fit: true },
         forceAtlas2Based: {
           gravitationalConstant: -170,
           centralGravity: 0.005,
@@ -247,17 +251,20 @@ export class GraphComponent implements OnInit {
         }
       },
       edges: {
-        arrows: {to: {enabled: true, scaleFactor: 1}},
-        color: {color: '#FFFFFF'},
+        arrows: { to: { enabled: true, scaleFactor: 1 } },
+        color: { color: '#FFFFFF' },
         width: 2
       },
       nodes: {
         shape: 'dot',
         size: 20,
-        font: {size: 20, color: '#FFFFFF'}
+        font: { size: 20, color: '#FFFFFF' }
       },
-      interaction: {selectConnectedEdges: false}
+      interaction: { selectConnectedEdges: false }
     });
+
+    container.addEventListener('contextmenu', (e: { preventDefault: () => any; }) => e.preventDefault());
+
 
     if (this.physicsTimeoutId !== null) {
       clearTimeout(this.physicsTimeoutId);
@@ -266,118 +273,250 @@ export class GraphComponent implements OnInit {
 
     if (!this.physicsEnabled) {
       if (this.network) {
-        this.network.setOptions({physics: {enabled: true}});
+        this.network.setOptions({ physics: { enabled: true } });
       }
 
       this.physicsTimeoutId = setTimeout(() => {
         this.physicsEnabled = false;
         if (this.network) {
-          this.network.setOptions({physics: {enabled: false}});
+          this.network.setOptions({ physics: { enabled: false } });
         }
         this.physicsTimeoutId = null;
       }, 1500);
     }
 
+
+    this.network.on('oncontext', params => {
+      const pointer = params.pointer.DOM;
+      const rawNodeId = this.network.getNodeAt(pointer);
+
+
+      if (!rawNodeId) {
+        this.hideContextMenu();
+        return;
+      }
+      const nodeId = String(rawNodeId)
+      this.showContextMenu(pointer.x, pointer.y, nodeId);
+
+
+
+
+    });
     this.network.on('click', params => {
-      const nodeId = params.nodes[0];
+      this.hideContextMenu();
+      const pointer = params.pointer.DOM;
+      const nodeId = this.network.getNodeAt(pointer);
 
       if (!nodeId) return;
 
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
 
       if (node?.isGroup && node.subNodes) {
-        const isExpanded = this.groupExpandedState[nodeId] || false;
-        if (!isExpanded) {
-          const centerPos = this.network.getPositions([nodeId])[nodeId];
-          const radius = 200;
+        // Trigger the same logic as your left-click expand
+        const nodeId = params.nodes[0];
 
-          const newEdges = this.rawEdges.filter(
-            e => e.from === nodeId && node.subNodes!.includes(e.to as string)
-          );
-          this.edgeSet.add(newEdges);
-          this.groupExpandedState[nodeId] = true;
+        if (!nodeId) return;
 
-          const newNodes: ExtendedNode[] = [];
+        const node = this.nodeSet.get(nodeId) as ExtendedNode;
 
-          node.subNodes.forEach((subId, index) => {
-            if (this.nodeSet.get(subId)) return;
+        if (node?.isGroup && node.subNodes) {
+          const isExpanded = this.groupExpandedState[nodeId] || false;
+          if (!isExpanded) {
+            const centerPos = this.network.getPositions([nodeId])[nodeId];
+            const radius = 200;
 
-            const rawNode = this.rawNodes.find(n => n.id === subId);
-            if (!rawNode) return;
+            const newEdges = this.rawEdges.filter(
+              e => e.from === nodeId && node.subNodes!.includes(e.to as string)
+            );
+            this.edgeSet.add(newEdges);
+            this.groupExpandedState[nodeId] = true;
 
-            // @ts-ignore
-            const angle = (2 * Math.PI * index) / node.subNodes.length;
-            const x = centerPos.x + radius * Math.cos(angle);
-            const y = centerPos.y + radius * Math.sin(angle);
+            const newNodes: ExtendedNode[] = [];
 
-            newNodes.push({
-              ...rawNode,
-              x,
-              y,
-              physics: true
+            node.subNodes.forEach((subId, index) => {
+              if (this.nodeSet.get(subId)) return;
+
+              const rawNode = this.rawNodes.find(n => n.id === subId);
+              if (!rawNode) return;
+
+              // @ts-ignore
+              const angle = (2 * Math.PI * index) / node.subNodes.length;
+              const x = centerPos.x + radius * Math.cos(angle);
+              const y = centerPos.y + radius * Math.sin(angle);
+
+              newNodes.push({
+                ...rawNode,
+                x,
+                y,
+                physics: true
+              });
             });
-          });
 
-          this.nodeSet.add(newNodes);
+            this.nodeSet.add(newNodes);
 
-          this.nodeSet.update({
-            id: nodeId,
-            color: {background: '#bf80ff', border: '#bf80ff'}
-          });
-          this.network.selectNodes([nodeId]);
-          this.network.unselectAll();
+            this.nodeSet.update({
+              id: nodeId,
+              color: { background: '#bf80ff', border: '#bf80ff' }
+            });
+            this.network.selectNodes([nodeId]);
+            this.network.unselectAll();
+          } else {
+            node.subNodes.forEach(subId => {
+              if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
+            });
+
+            const edgeIdsToRemove = this.rawEdges
+              .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
+              .map(e => e.id as string);
+
+            this.edgeSet.remove(edgeIdsToRemove);
+            this.groupExpandedState[nodeId] = false;
+
+            this.nodeSet.update({
+              id: nodeId,
+              color: { background: '#F2F3F4', border: '#F2F3F4' }
+            });
+          }
+
         } else {
-          node.subNodes.forEach(subId => {
-            if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
-          });
-
-          const edgeIdsToRemove = this.rawEdges
-            .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
-            .map(e => e.id as string);
-
-          this.edgeSet.remove(edgeIdsToRemove);
-          this.groupExpandedState[nodeId] = false;
-
-          this.nodeSet.update({
-            id: nodeId,
-            color: {background: '#F2F3F4', border: '#F2F3F4'}
-          });
-        }
-
-      } else {
-        const isSameNodeClicked = this.highlightedNodeId === nodeId;
-        const allEdges = this.edgeSet.get();
-        const resetEdges = allEdges
-          .filter(e => e.id)
-          .map(e => ({
-            id: e.id!,
-            color: {color: '#FFFFFF'},
-            width: 2
-          }));
-        this.edgeSet.update(resetEdges);
-
-
-        if (isSameNodeClicked) {
-          this.highlightedNodeId = null;
-        } else {
-          const connectedEdges = this.edgeSet.get({
-            filter: edge => edge.from === nodeId || edge.to === nodeId
-          });
-
-          const highlightEdges = connectedEdges
+          const isSameNodeClicked = this.highlightedNodeId === nodeId;
+          const allEdges = this.edgeSet.get();
+          const resetEdges = allEdges
             .filter(e => e.id)
             .map(e => ({
               id: e.id!,
-              color: {color: 'yellow'},
-              width: 3
+              color: { color: '#FFFFFF' },
+              width: 2
             }));
-          this.edgeSet.update(highlightEdges);
+          this.edgeSet.update(resetEdges);
 
-          this.highlightedNodeId = nodeId;
 
+          if (isSameNodeClicked) {
+            this.highlightedNodeId = null;
+          } else {
+            const connectedEdges = this.edgeSet.get({
+              filter: edge => edge.from === nodeId || edge.to === nodeId
+            });
+
+            const highlightEdges = connectedEdges
+              .filter(e => e.id)
+              .map(e => ({
+                id: e.id!,
+                color: { color: 'yellow' },
+                width: 3
+              }));
+            this.edgeSet.update(highlightEdges);
+
+            this.highlightedNodeId = nodeId;
+
+          }
         }
       }
     });
+
+
+    {
+      // this.network.on('click', params => {
+      //   const nodeId = params.nodes[0];
+
+      //   if (!nodeId) return;
+
+      //   const node = this.nodeSet.get(nodeId) as ExtendedNode;
+
+      //   if (node?.isGroup && node.subNodes) {
+      //     const isExpanded = this.groupExpandedState[nodeId] || false;
+      //     if (!isExpanded) {
+      //       const centerPos = this.network.getPositions([nodeId])[nodeId];
+      //       const radius = 200;
+
+      //       const newEdges = this.rawEdges.filter(
+      //         e => e.from === nodeId && node.subNodes!.includes(e.to as string)
+      //       );
+      //       this.edgeSet.add(newEdges);
+      //       this.groupExpandedState[nodeId] = true;
+
+      //       const newNodes: ExtendedNode[] = [];
+
+      //       node.subNodes.forEach((subId, index) => {
+      //         if (this.nodeSet.get(subId)) return;
+
+      //         const rawNode = this.rawNodes.find(n => n.id === subId);
+      //         if (!rawNode) return;
+
+      //         // @ts-ignore
+      //         const angle = (2 * Math.PI * index) / node.subNodes.length;
+      //         const x = centerPos.x + radius * Math.cos(angle);
+      //         const y = centerPos.y + radius * Math.sin(angle);
+
+      //         newNodes.push({
+      //           ...rawNode,
+      //           x,
+      //           y,
+      //           physics: true
+      //         });
+      //       });
+
+      //       this.nodeSet.add(newNodes);
+
+      //       this.nodeSet.update({
+      //         id: nodeId,
+      //         color: { background: '#bf80ff', border: '#bf80ff' }
+      //       });
+      //       this.network.selectNodes([nodeId]);
+      //       this.network.unselectAll();
+      //     } else {
+      //       node.subNodes.forEach(subId => {
+      //         if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
+      //       });
+
+      //       const edgeIdsToRemove = this.rawEdges
+      //         .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
+      //         .map(e => e.id as string);
+
+      //       this.edgeSet.remove(edgeIdsToRemove);
+      //       this.groupExpandedState[nodeId] = false;
+
+      //       this.nodeSet.update({
+      //         id: nodeId,
+      //         color: { background: '#F2F3F4', border: '#F2F3F4' }
+      //       });
+      //     }
+
+      //   } else {
+      //     const isSameNodeClicked = this.highlightedNodeId === nodeId;
+      //     const allEdges = this.edgeSet.get();
+      //     const resetEdges = allEdges
+      //       .filter(e => e.id)
+      //       .map(e => ({
+      //         id: e.id!,
+      //         color: { color: '#FFFFFF' },
+      //         width: 2
+      //       }));
+      //     this.edgeSet.update(resetEdges);
+
+
+      //     if (isSameNodeClicked) {
+      //       this.highlightedNodeId = null;
+      //     } else {
+      //       const connectedEdges = this.edgeSet.get({
+      //         filter: edge => edge.from === nodeId || edge.to === nodeId
+      //       });
+
+      //       const highlightEdges = connectedEdges
+      //         .filter(e => e.id)
+      //         .map(e => ({
+      //           id: e.id!,
+      //           color: { color: 'yellow' },
+      //           width: 3
+      //         }));
+      //       this.edgeSet.update(highlightEdges);
+
+      //       this.highlightedNodeId = nodeId;
+
+      //     }
+      //   }
+      // });
+    }
     const matchedNodeIds: string[] = [];
 
     this.nodeSet.get().forEach(node => {
@@ -400,18 +539,86 @@ export class GraphComponent implements OnInit {
     this.edgeSet.update(
       matchedEdges.map(edge => ({
         id: edge.id!,
-        color: {color: 'yellow'},
+        color: { color: 'yellow' },
         dashes: true,
         width: 3,
-        arrows: {to: {enabled: false}}
+        arrows: { to: { enabled: false } }
       }))
     );
   }
 
+
+  showContextMenu(x: number, y: number, nodeId: string) {
+    const menu = document.getElementById('customContextMenu');
+    if (!menu) return;
+
+    menu.style.display = 'block';
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+    this.contextMenuNodeId = nodeId; // Track current node
+  }
+
+  hideContextMenu() {
+    const menu = document.getElementById('customContextMenu');
+    if (menu) {
+      menu.style.display = 'none';
+    }
+  }
+
+  viewDetails() {
+    const baseUrl = `${window.location.origin}/document`;
+    const parts = window.location.pathname.split('/');
+
+
+    const fullUrl = `${baseUrl}`;
+
+    if (!this.contextMenuNodeId) return;
+
+    const node = this.nodeSet.get(this.contextMenuNodeId);
+    if (!node) return;
+
+    const detailWindow = window.open(fullUrl, '_blank');
+    if (!detailWindow) return;
+
+    detailWindow.document.write(`
+    <html>
+      <head><title>Node Details</title></head>
+      <body>
+        <h1>Node ID: ${node.id}</h1>
+        <p><strong>Label:</strong> ${node.label}</p>
+        <p><strong> Value:</strong> ${node.value || 'N/A'}</p>
+        <p><strong>Color:</strong> ${node.color}</p>
+        <!-- Add more fields as needed -->
+      </body>
+    </html>
+  `);
+    detailWindow.document.close();
+    this.hideContextMenu();
+  }
+  expandNode() {
+    this.onExpandToggled(true);
+    this.hideContextMenu();
+  }
+  collapseNode() {
+    this.onExpandToggled(false);
+    this.hideContextMenu();
+  }
+  share() {
+    const currentUrl = window.location.href;
+    this.clipboard.copy(currentUrl);
+    this.copied = true;
+
+    // Reset the copied label after 2 seconds
+    setTimeout(() => {
+      this.copied = false;
+    }, 2000);
+  }
+
+
   onPhysicsToggled(enabled: boolean): void {
     this.physicsEnabled = enabled;
     if (this.network) {
-      this.network.setOptions({physics: {enabled}});
+      this.network.setOptions({ physics: { enabled } });
     }
   }
 
@@ -425,13 +632,13 @@ export class GraphComponent implements OnInit {
 
     if (!this.physicsEnabled) {
       if (this.network) {
-        this.network.setOptions({physics: {enabled: true}});
+        this.network.setOptions({ physics: { enabled: true } });
       }
 
       this.physicsTimeoutId = setTimeout(() => {
         this.physicsEnabled = false;
         if (this.network) {
-          this.network.setOptions({physics: {enabled: false}});
+          this.network.setOptions({ physics: { enabled: false } });
         }
         this.physicsTimeoutId = null;
       }, 1500);
@@ -459,7 +666,7 @@ export class GraphComponent implements OnInit {
 
         this.nodeSet.update({
           id: extNode.id,
-          color: {background: '#bf80ff', border: '#bf80ff'}
+          color: { background: '#bf80ff', border: '#bf80ff' }
         });
 
       } else if (!enabled && isExpanded) {
@@ -476,7 +683,7 @@ export class GraphComponent implements OnInit {
 
         this.nodeSet.update({
           id: extNode.id,
-          color: {background: '#ffc966', border: '#ffc966'}
+          color: { background: '#ffc966', border: '#ffc966' }
         });
       }
     });
@@ -492,7 +699,6 @@ export class GraphComponent implements OnInit {
     this.singleInput = filters.singleInput;
     this.propertyType = filters.propertyType;
     this.propertyValue = filters.propertyValue;
-
 
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
       this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue);
