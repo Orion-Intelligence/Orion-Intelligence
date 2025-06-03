@@ -9,24 +9,38 @@
 
 
 <div id="customContextMenu" class="context-menu">
-  <div class="profile-dropdown-arrow"></div>
-  <button class="dropdown-item" (click)="expandNode()">
+  <!-- <div class="profile-dropdown-arrow"></div> -->
+  <button class="dropdown-item button-content" (click)="expandGroupNode()">
     <img src="../../../../../assets/images/shared/expand.svg" width="15" height="15" style="margin-right: 8px;">
     Expand</button>
 
   <hr class="dropdown-divider mx-3">
 
-  <button class="dropdown-item" (click)="collapseNode()">
-    <img src="../../../../../assets/images/shared/collapse.svg" width="20" height="20" style="margin-right: 8px;">
+  <button class="dropdown-item button-content" (click)="collapseGroupNode()">
+    <img src="../../../../../assets/images/shared/collapse.svg" width="15" height="15" style="margin-right: 8px;">
     Collapse</button>
   <hr class="dropdown-divider mx-3">
 
-  <button class="dropdown-item" (click)="share()">
-    <img src="../../../../../assets/images/shared/share.svg" width="15" height="15" style="margin-right: 8px;">
-    Share</button>
-  <span *ngIf="copied" class="copied-label">Copied!</span>
-</div>
+  <button class="dropdown-item button-content" (click)="share($event)">
+    <img src="../../../../../assets/images/shared/share-black.svg" width="15" height="15" style="margin-right: 8px;"
+      class="share-wrapper">
+    Share
+  </button>
+  <hr class="dropdown-divider mx-3">
+  <button class="dropdown-item button-content" (click)="copyNodeLabel($event)">
+    <img src="../../../../../assets/images/shared/label.svg" width="15" height="15" style="margin-right: 8px;"
+      class="share-wrapper">
+    Copy Label
+  </button>
+  <hr class="dropdown-divider mx-3">
+  <button class="dropdown-item button-content" (click)="viewDetails()">
+    <img src="../../../../../assets/images/shared/redirect-black.svg" width="15" height="15" style="margin-right: 8px;"
+      class="share-wrapper">
+    Open Report
+  </button>
 
+</div>
+<span *ngIf="copied" class="floating-copied " [style]="{ top: copiedY + 'px', left: copiedX + 'px' }">Copied!</span>
 
 <div class="graph-notification" *ngIf="limitReached">
   <div class="default-notification-banner default-notification-banner-cti">

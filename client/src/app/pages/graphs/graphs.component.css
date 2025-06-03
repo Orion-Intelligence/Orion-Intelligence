@@ -61,8 +61,37 @@
   width: 160px;
 }
 
-.copied-label {
-  margin-left: 10px;
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  width: 100%;
+  text-align: left;
+}
+
+.button-content:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.button-content:focus,
+.button-content:active {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.share-wrapper {
+  position: relative;
+}
+
+.floating-copied {
+  position: absolute;
+  background-color: #f0f0f0;
   color: rgb(0, 0, 0);
-  background-color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
