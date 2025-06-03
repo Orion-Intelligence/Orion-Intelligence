@@ -43,8 +43,12 @@ export class GraphComponent implements OnInit {
   private groupInfo: Record<string, string[]> = {};
   private groupExpandedState: Record<string, boolean> = {};
   private highlightedNodeId: string | null = null;
-  private contextMenuNodeId: string | null = null;
+  contextMenuNode: ExtendedNode | null = null;
+  private contextMenuNodeId!: string;
+  selectedNodeColors: { [id: string]: { background: string; border: string } } = {};
   copied = false;
+  copiedX = 0;
+  copiedY = 0;
 
   constructor(private api: ApiService, private route: ActivatedRoute, private clipboard: Clipboard) {
   }
@@ -290,17 +294,20 @@ export class GraphComponent implements OnInit {
       const pointer = params.pointer.DOM;
       const rawNodeId = this.network.getNodeAt(pointer);
 
-
       if (!rawNodeId) {
         this.hideContextMenu();
         return;
       }
-      const nodeId = String(rawNodeId)
-      this.showContextMenu(pointer.x, pointer.y, nodeId);
 
+      const nodeId = String(rawNodeId);
+      const node = this.nodeSet.get(nodeId) as ExtendedNode;
 
+      if (!node) {
+        this.hideContextMenu();
+        return;
+      }
 
-
+      this.showContextMenu(pointer.x, pointer.y, node);
     });
     this.network.on('click', params => {
       this.hideContextMenu();
@@ -548,20 +555,41 @@ export class GraphComponent implements OnInit {
   }
 
 
-  showContextMenu(x: number, y: number, nodeId: string) {
+  showContextMenu(x: number, y: number, node: ExtendedNode) {
     const menu = document.getElementById('customContextMenu');
     if (!menu) return;
+    const nodeId = node?.id;
+    if (node && typeof node.id === 'string') {
+      menu.style.display = 'block';
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+      this.contextMenuNodeId = node.id;
+      this.contextMenuNode = node;
+      if (typeof node.color === 'object' && node.color !== null) {
+        this.selectedNodeColors[node?.id] = {
+          background: node.color.background || "#F2F3F4",
+          border: node.color.border || "#F2F3F4"
+        };
+      }
 
-    menu.style.display = 'block';
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
-    this.contextMenuNodeId = nodeId; // Track current node
+      this.nodeSet.update({
+        id: nodeId,
+        color: { background: "#FFFFFF", border: "#000000" },
+      });
+    }
   }
 
   hideContextMenu() {
     const menu = document.getElementById('customContextMenu');
     if (menu) {
       menu.style.display = 'none';
+      this.nodeSet.update({
+        id: this.contextMenuNode?.id,
+        color: {
+          background: this.selectedNodeColors[this.contextMenuNodeId]?.background,
+          border: this.selectedNodeColors[this.contextMenuNodeId]?.border,
+        },
+      });
     }
   }
 
@@ -603,18 +631,131 @@ export class GraphComponent implements OnInit {
     this.onExpandToggled(false);
     this.hideContextMenu();
   }
-  share() {
-    const currentUrl = window.location.href;
-    this.clipboard.copy(currentUrl);
-    this.copied = true;
+  expandGroupNode(): void {
+    this.hideContextMenu();
 
-    // Reset the copied label after 2 seconds
-    setTimeout(() => {
-      this.copied = false;
-    }, 2000);
+    const node = this.contextMenuNode!;
+    const nodeId = node.id;
+
+    if (!nodeId || !node.subNodes) return;
+
+    const subNodes = node.subNodes;
+
+    const isExpanded = this.groupExpandedState[nodeId] || false;
+    if (isExpanded) return;
+
+    const centerPos = this.network.getPositions([nodeId])[nodeId];
+    const radius = 200;
+
+    const newEdges = this.rawEdges.filter(
+      e => e.from === nodeId && subNodes.includes(e.to as string)
+    );
+    this.edgeSet.add(newEdges);
+    this.groupExpandedState[nodeId] = true;
+
+    const newNodes: ExtendedNode[] = [];
+
+    subNodes.forEach((subId, index) => {
+      if (this.nodeSet.get(subId)) return;
+
+      const rawNode = this.rawNodes.find(n => n.id === subId);
+      if (!rawNode) return;
+
+      const angle = (2 * Math.PI * index) / subNodes.length;
+      const x = centerPos.x + radius * Math.cos(angle);
+      const y = centerPos.y + radius * Math.sin(angle);
+
+      newNodes.push({
+        ...rawNode,
+        x,
+        y,
+        physics: true
+      });
+    });
+
+    this.nodeSet.add(newNodes);
+
+    this.nodeSet.update({
+      id: nodeId,
+      color: { background: '#bf80ff', border: '#bf80ff' }
+    });
   }
 
+  collapseGroupNode(): void {
+    this.hideContextMenu();
 
+    const node = this.contextMenuNode!;
+    const nodeId = node.id;
+
+    if (!nodeId) return;
+
+    // 🧠 If it's a group node with sub-nodes
+    if (node.isGroup && node.subNodes && node.subNodes.length > 0) {
+      const isExpanded = this.groupExpandedState[nodeId] || false;
+      if (!isExpanded) return;
+
+      // Remove sub-nodes
+      node.subNodes.forEach(subId => {
+        if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
+      });
+
+      // Remove edges from group to sub-nodes
+      const edgeIdsToRemove = this.rawEdges
+        .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
+        .map(e => e.id as string);
+
+      this.edgeSet.remove(edgeIdsToRemove);
+
+      // Update group expansion state
+      this.groupExpandedState[nodeId] = false;
+
+      // Reset color of the collapsed group
+      this.nodeSet.update({
+        id: nodeId,
+        color: { background: '#F2F3F4', border: '#F2F3F4' }
+      });
+
+    } else {
+      // 🧠 If it's an end node (no sub-nodes), remove the node itself
+      this.nodeSet.remove(nodeId);
+
+      // Remove all edges connected to this node
+      const connectedEdgeIds = this.rawEdges
+        .filter(e => e.from === nodeId || e.to === nodeId)
+        .map(e => e.id as string);
+
+      this.edgeSet.remove(connectedEdgeIds);
+    }
+  }
+
+  share(event: MouseEvent) {
+    const currentUrl = window.location.href;
+    this.clipboard.copy(currentUrl);
+    this.showCopiedMessage(event);
+    this.hideContextMenu()
+
+  }
+  copyNodeLabel(event: MouseEvent) {
+    const _label = this.contextMenuNode?.label;
+    if (_label) {
+      this.clipboard.copy(_label);
+      this.showCopiedMessage(event);
+      this.hideContextMenu()
+    }
+  }
+
+  showCopiedMessage(event: MouseEvent) {
+    const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
+
+    this.copiedX = buttonRect.right + 10; // or use left/middle
+    this.copiedY = buttonRect.top + window.scrollY; // scroll offset
+
+    this.copied = true;
+
+    setTimeout(() => {
+      this.copied = false;
+    }, 1500);
+  }
   onPhysicsToggled(enabled: boolean): void {
     this.physicsEnabled = enabled;
     if (this.network) {
