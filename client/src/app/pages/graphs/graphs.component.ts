@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { Network, DataSet, Node, Edge } from 'vis-network/standalone';
+import { Network, DataSet, Node, Edge, Color } from 'vis-network/standalone';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../shared/services/api.service';
 import { SidebarComponent } from './sidebar/sidebar.component';
@@ -46,10 +46,10 @@ export class GraphComponent implements OnInit {
   private highlightedNodeId: string | null = null;
   private contextMenuNodeId!: string;
   contextMenuNode: ExtendedNode | null = null;
-  originalNodeColors: { [id: string]: { background: string; border: string } } = {};
   copied = false;
   copiedX = 0;
   copiedY = 0;
+  orignalColor: string | Color = '';
 
   constructor(private api: ApiService, private route: ActivatedRoute, private clipboard: Clipboard) {
   }
@@ -469,15 +469,13 @@ export class GraphComponent implements OnInit {
       menu.style.top = `${y}px`;
       this.contextMenuNodeId = node.id;
       this.contextMenuNode = node;
+
       if (typeof node.color === 'object') {
-        this.originalNodeColors[node?.id] = {
-          background: node.color?.background || "#000000",
-          border: node.color?.border || "#000000",
-        };
+        this.orignalColor = node.color;
       }
       this.nodeSet.update({
         id: nodeId,
-        color: { background: "#FFFFFF", border: "#000000" },
+        color: '#FFFFFF',
       });
     }
   }
@@ -487,13 +485,12 @@ export class GraphComponent implements OnInit {
     const menu = document.getElementById('customContextMenu');
     if (menu) {
       menu.style.display = 'none';
-      this.nodeSet.update({
-        id: this.contextMenuNodeId,
-        color: {
-          background: this.originalNodeColors[this.contextMenuNodeId].background,
-          border: this.originalNodeColors[this.contextMenuNodeId].border,
-        },
-      });
+      if (this.contextMenuNodeId) {
+        this.nodeSet.update({
+          id: this.contextMenuNodeId,
+          color: this.orignalColor
+        });
+      }
     }
   }
   expandGroupNode(): void {
