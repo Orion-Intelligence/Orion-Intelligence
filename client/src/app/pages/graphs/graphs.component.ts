@@ -59,7 +59,7 @@ export class GraphComponent implements OnInit {
       if (selectedType === 'property' && propertyType && propertyValue) {
         this.loadGraphByNode('property', propertyType, propertyValue);
       } else {
-        this.loadGraphByNode('cluster', 'cluster', singleInput);  // always treat general as cluster
+        this.loadGraphByNode('cluster', 'cluster', singleInput);
       }
     });
   }
@@ -87,7 +87,7 @@ export class GraphComponent implements OnInit {
   }
 
 
-  private renderGraph(data: any[], reset = false): void {
+  private renderGraph(data: any[], _ = false): void {
 
     this.isEmpty = data.length === 0;
     this.rawNodes = [];
@@ -191,13 +191,11 @@ export class GraphComponent implements OnInit {
         const subNodes = this.rawEdges
           .filter(e => e.from === node.id)
           .map(e => e.to as string);
-
         this.groupInfo[nodeId] = subNodes;
-
         this.rawNodes.push({
           id: node.id,
-          label: `Group: ${node.label}\nSub Nodes: ${subNodes.length}`,
-          color: '#ffc966',
+          label: `Group (${nodeType}) : ${node.label}\nSub Nodes: ${subNodes.length}`,
+          color: node.id === "cti_vertices/"+this.singleInput ? "#ffff00" : "#66ff66",
           shape: 'dot',
           isGroup: true,
           subNodes,
@@ -210,11 +208,18 @@ export class GraphComponent implements OnInit {
         });
       } else {
         if (isClusterNode) {
-          node.color = '#40bf40';
+          node.color = 'yellow';
         } else {
           const hasOutgoing = edgeMap[node.id as string];
           if (!hasOutgoing) {
-            node.color = '#1E90FF';
+            if (this.selectedType == "cluster"){
+              node.color = '#FF6666';
+            }else if (this.propertyValue && String(node.id).includes(this.propertyValue)) {
+              node.color = 'yellow';
+            }
+            else {
+              node.color = '#1E90FF';
+            }
           }
         }
 
@@ -312,211 +317,110 @@ export class GraphComponent implements OnInit {
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
 
       if (node?.isGroup && node.subNodes) {
-        // Trigger the same logic as your left-click expand
-        const nodeId = params.nodes[0];
+        const isExpanded = this.groupExpandedState[nodeId] || false;
 
-        if (!nodeId) return;
+        if (!isExpanded) {
+          const centerPos = this.network.getPositions([nodeId])[nodeId];
+          const radius = 200;
 
-        const node = this.nodeSet.get(nodeId) as ExtendedNode;
+          const newEdges = this.rawEdges.filter(
+            e => e.from === nodeId && node.subNodes!.includes(e.to as string)
+          ).filter(e => !this.edgeSet.get(e.id!)); // Prevent duplicate edge IDs
 
-        if (node?.isGroup && node.subNodes) {
-          const isExpanded = this.groupExpandedState[nodeId] || false;
-          if (!isExpanded) {
-            const centerPos = this.network.getPositions([nodeId])[nodeId];
-            const radius = 200;
+          const newNodes: ExtendedNode[] = [];
 
-            const newEdges = this.rawEdges.filter(
-              e => e.from === nodeId && node.subNodes!.includes(e.to as string)
-            );
-            this.edgeSet.add(newEdges);
-            this.groupExpandedState[nodeId] = true;
+          node.subNodes.forEach((subId, index) => {
+            if (this.nodeSet.get(subId)) return;
 
-            const newNodes: ExtendedNode[] = [];
+            const rawNode = this.rawNodes.find(n => n.id === subId);
+            if (!rawNode) return;
 
-            node.subNodes.forEach((subId, index) => {
-              if (this.nodeSet.get(subId)) return;
+            const angle = (2 * Math.PI * index) / (node.subNodes!.length || 1); // Prevent TS error
+            const x = centerPos.x + radius * Math.cos(angle);
+            const y = centerPos.y + radius * Math.sin(angle);
 
-              const rawNode = this.rawNodes.find(n => n.id === subId);
-              if (!rawNode) return;
-
-              // @ts-ignore
-              const angle = (2 * Math.PI * index) / node.subNodes.length;
-              const x = centerPos.x + radius * Math.cos(angle);
-              const y = centerPos.y + radius * Math.sin(angle);
-
-              newNodes.push({
-                ...rawNode,
-                x,
-                y,
-                physics: true
-              });
+            newNodes.push({
+              ...rawNode,
+              x,
+              y,
+              physics: true
             });
+          });
 
-            this.nodeSet.add(newNodes);
+          this.nodeSet.add(newNodes);
+          this.edgeSet.add(newEdges);
 
-            this.nodeSet.update({
-              id: nodeId,
-              color: { background: '#bf80ff', border: '#bf80ff' }
-            });
-            this.network.selectNodes([nodeId]);
-            this.network.unselectAll();
-          } else {
-            node.subNodes.forEach(subId => {
-              if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
-            });
-
-            const edgeIdsToRemove = this.rawEdges
-              .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
-              .map(e => e.id as string);
-
-            this.edgeSet.remove(edgeIdsToRemove);
-            this.groupExpandedState[nodeId] = false;
-
-            this.nodeSet.update({
-              id: nodeId,
-              color: { background: '#F2F3F4', border: '#F2F3F4' }
-            });
-          }
+          this.groupExpandedState[nodeId] = true;
+          this.nodeSet.update({
+            id: nodeId,
+            color: { background: '#bf80ff', border: '#bf80ff' }
+          });
+          this.network.selectNodes([nodeId]);
+          this.network.unselectAll();
 
         } else {
-          const isSameNodeClicked = this.highlightedNodeId === nodeId;
-          const allEdges = this.edgeSet.get();
-          const resetEdges = allEdges
+  // Remove edges only from this group to its subnodes
+  const edgeIdsToRemove = this.rawEdges
+    .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
+    .map(e => e.id as string);
+
+  this.edgeSet.remove(edgeIdsToRemove);
+
+  // Remove subnodes only if they are now orphaned
+  node.subNodes.forEach(subId => {
+    const remainingEdges = this.edgeSet.get({
+      filter: edge => edge.from === subId || edge.to === subId
+    });
+
+    if (remainingEdges.length === 0 && this.nodeSet.get(subId)) {
+      this.nodeSet.remove(subId);
+    }
+  });
+
+  this.groupExpandedState[nodeId] = false;
+
+  this.nodeSet.update({
+    id: nodeId,
+    color: { background: '#66ff66', border: '#66ff66' }
+  });
+}
+
+      } else {
+        const isSameNodeClicked = this.highlightedNodeId === nodeId;
+        const allEdges = this.edgeSet.get();
+        const resetEdges = allEdges
+          .filter(e => e.id)
+          .map(e => ({
+            id: e.id!,
+            color: { color: '#FFFFFF' },
+            width: 2
+          }));
+        this.edgeSet.update(resetEdges);
+
+        if (isSameNodeClicked) {
+          this.highlightedNodeId = null;
+        } else {
+          const connectedEdges = this.edgeSet.get({
+            filter: edge => edge.from === nodeId || edge.to === nodeId
+          });
+
+          const highlightEdges = connectedEdges
             .filter(e => e.id)
             .map(e => ({
               id: e.id!,
-              color: { color: '#FFFFFF' },
-              width: 2
+              color: { color: 'yellow' },
+              width: 3
             }));
-          this.edgeSet.update(resetEdges);
+          this.edgeSet.update(highlightEdges);
 
-
-          if (isSameNodeClicked) {
-            this.highlightedNodeId = null;
-          } else {
-            const connectedEdges = this.edgeSet.get({
-              filter: edge => edge.from === nodeId || edge.to === nodeId
-            });
-
-            const highlightEdges = connectedEdges
-              .filter(e => e.id)
-              .map(e => ({
-                id: e.id!,
-                color: { color: 'yellow' },
-                width: 3
-              }));
-            this.edgeSet.update(highlightEdges);
-
-            this.highlightedNodeId = nodeId;
-
-          }
+          this.highlightedNodeId = null;
         }
       }
     });
 
 
-    {
-      // this.network.on('click', params => {
-      //   const nodeId = params.nodes[0];
-
-      //   if (!nodeId) return;
-
-      //   const node = this.nodeSet.get(nodeId) as ExtendedNode;
-
-      //   if (node?.isGroup && node.subNodes) {
-      //     const isExpanded = this.groupExpandedState[nodeId] || false;
-      //     if (!isExpanded) {
-      //       const centerPos = this.network.getPositions([nodeId])[nodeId];
-      //       const radius = 200;
-
-      //       const newEdges = this.rawEdges.filter(
-      //         e => e.from === nodeId && node.subNodes!.includes(e.to as string)
-      //       );
-      //       this.edgeSet.add(newEdges);
-      //       this.groupExpandedState[nodeId] = true;
-
-      //       const newNodes: ExtendedNode[] = [];
-
-      //       node.subNodes.forEach((subId, index) => {
-      //         if (this.nodeSet.get(subId)) return;
-
-      //         const rawNode = this.rawNodes.find(n => n.id === subId);
-      //         if (!rawNode) return;
-
-      //         // @ts-ignore
-      //         const angle = (2 * Math.PI * index) / node.subNodes.length;
-      //         const x = centerPos.x + radius * Math.cos(angle);
-      //         const y = centerPos.y + radius * Math.sin(angle);
-
-      //         newNodes.push({
-      //           ...rawNode,
-      //           x,
-      //           y,
-      //           physics: true
-      //         });
-      //       });
-
-      //       this.nodeSet.add(newNodes);
-
-      //       this.nodeSet.update({
-      //         id: nodeId,
-      //         color: { background: '#bf80ff', border: '#bf80ff' }
-      //       });
-      //       this.network.selectNodes([nodeId]);
-      //       this.network.unselectAll();
-      //     } else {
-      //       node.subNodes.forEach(subId => {
-      //         if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
-      //       });
-
-      //       const edgeIdsToRemove = this.rawEdges
-      //         .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
-      //         .map(e => e.id as string);
-
-      //       this.edgeSet.remove(edgeIdsToRemove);
-      //       this.groupExpandedState[nodeId] = false;
-
-      //       this.nodeSet.update({
-      //         id: nodeId,
-      //         color: { background: '#F2F3F4', border: '#F2F3F4' }
-      //       });
-      //     }
-
-      //   } else {
-      //     const isSameNodeClicked = this.highlightedNodeId === nodeId;
-      //     const allEdges = this.edgeSet.get();
-      //     const resetEdges = allEdges
-      //       .filter(e => e.id)
-      //       .map(e => ({
-      //         id: e.id!,
-      //         color: { color: '#FFFFFF' },
-      //         width: 2
-      //       }));
-      //     this.edgeSet.update(resetEdges);
 
 
-      //     if (isSameNodeClicked) {
-      //       this.highlightedNodeId = null;
-      //     } else {
-      //       const connectedEdges = this.edgeSet.get({
-      //         filter: edge => edge.from === nodeId || edge.to === nodeId
-      //       });
-
-      //       const highlightEdges = connectedEdges
-      //         .filter(e => e.id)
-      //         .map(e => ({
-      //           id: e.id!,
-      //           color: { color: 'yellow' },
-      //           width: 3
-      //         }));
-      //       this.edgeSet.update(highlightEdges);
-
-      //       this.highlightedNodeId = nodeId;
-
-      //     }
-      //   }
-      // });
-    }
     const matchedNodeIds: string[] = [];
 
     this.nodeSet.get().forEach(node => {
@@ -564,37 +468,6 @@ export class GraphComponent implements OnInit {
       menu.style.display = 'none';
     }
   }
-
-  viewDetails() {
-    const baseUrl = `${window.location.origin}/document`;
-    const parts = window.location.pathname.split('/');
-
-
-    const fullUrl = `${baseUrl}`;
-
-    if (!this.contextMenuNodeId) return;
-
-    const node = this.nodeSet.get(this.contextMenuNodeId);
-    if (!node) return;
-
-    const detailWindow = window.open(fullUrl, '_blank');
-    if (!detailWindow) return;
-
-    detailWindow.document.write(`
-    <html>
-      <head><title>Node Details</title></head>
-      <body>
-        <h1>Node ID: ${node.id}</h1>
-        <p><strong>Label:</strong> ${node.label}</p>
-        <p><strong> Value:</strong> ${node.value || 'N/A'}</p>
-        <p><strong>Color:</strong> ${node.color}</p>
-        <!-- Add more fields as needed -->
-      </body>
-    </html>
-  `);
-    detailWindow.document.close();
-    this.hideContextMenu();
-  }
   expandNode() {
     this.onExpandToggled(true);
     this.hideContextMenu();
@@ -608,7 +481,6 @@ export class GraphComponent implements OnInit {
     this.clipboard.copy(currentUrl);
     this.copied = true;
 
-    // Reset the copied label after 2 seconds
     setTimeout(() => {
       this.copied = false;
     }, 2000);
@@ -664,10 +536,23 @@ export class GraphComponent implements OnInit {
         this.edgeSet.add(newEdges);
         this.groupExpandedState[extNode.id as string] = true;
 
-        this.nodeSet.update({
-          id: extNode.id,
-          color: { background: '#bf80ff', border: '#bf80ff' }
-        });
+this.nodeSet.update({
+  id: extNode.id,
+  color: (extNode.id === "cti_vertices/" + this.singleInput)
+    ? 'yellow'
+    : { background: '#bf80ff', border: '#bf80ff' }
+});
+
+if (extNode.id === "cti_vertices/" + this.singleInput) {
+  this.network.getConnectedEdges(extNode.id).forEach(id => {
+    this.edgeSet.update({
+      id,
+      color: { color: 'yellow', highlight: 'yellow', hover: 'yellow' },
+      dashes: true,
+      width: 3
+    });
+  });
+}
 
       } else if (!enabled && isExpanded) {
         extNode.subNodes.forEach(subId => {
@@ -683,7 +568,9 @@ export class GraphComponent implements OnInit {
 
         this.nodeSet.update({
           id: extNode.id,
-          color: { background: '#ffc966', border: '#ffc966' }
+          color: (node.id === "cti_vertices/"+this.singleInput)
+            ? 'yellow'
+            : { background: '#66ff66', border: '#66ff66' }
         });
       }
     });

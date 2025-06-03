@@ -373,6 +373,10 @@ table a:visited {
   .label-text {
     margin-left: 15px;
   }
+  .default-notification-banner-cti {
+    display: none;
+  }
+
 
   .default-notification-banner {
     margin-bottom: 0;

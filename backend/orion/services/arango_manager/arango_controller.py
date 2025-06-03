@@ -51,12 +51,24 @@ class arango_controller:
         self.__db.create_collection("cti_vertices")
 
       if not self.__db.has_graph("cti_graph"):
-        self.__graph = self.__db.create_graph(name="cti_graph", edge_definitions=[{"edge_collection": "cti_edges", "from_vertex_collections": ["cti_vertices"], "to_vertex_collections": ["cti_vertices"], }])
+        self.__graph = self.__db.create_graph(
+          name="cti_graph",
+          edge_definitions=[{
+            "edge_collection": "cti_edges",
+            "from_vertex_collections": ["cti_vertices"],
+            "to_vertex_collections": ["cti_vertices"],
+          }]
+        )
       else:
         self.__graph = self.__db.graph("cti_graph")
 
       vertex_collection = self.__graph.vertex_collection("cti_vertices")
-      default_nodes = [{"_key": "general", "type": "cluster", "label": "General"}, {"_key": "defacement", "type": "cluster", "label": "Defacement"}, {"_key": "leak", "type": "cluster", "label": "Leak"}]
+      default_nodes = [
+        {"_key": "general", "type": "cluster", "label": "General"},
+        {"_key": "defacement", "type": "cluster", "label": "Defacement"},
+        {"_key": "leak", "type": "cluster", "label": "Leak"},
+        {"_key": "telegram", "type": "cluster", "label": "Telegram"}
+      ]
 
       for node in default_nodes:
         if not vertex_collection.has(node["_key"]):

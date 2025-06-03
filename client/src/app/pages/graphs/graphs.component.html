@@ -26,26 +26,10 @@
     Share</button>
   <span *ngIf="copied" class="copied-label">Copied!</span>
 </div>
-<!-- <div id="customContextMenu" class="context-menu">
-  <button (click)="expandNode()" class="context-btn delete-btn">
-    Expand Node
-  </button>
-  <button (click)="collapseNode()" class="context-btn pin-btn">
-    Collapse Node
-  </button>
-  <button (click)="share()" class="context-btn pin-btn">
-    Collapse Node
-  </button>
-  <button (click)="viewDetails()" class="context-btn open-graph-btn">
-    <img src="../../../../../assets/images/shared/redirect.svg" alt="Go" height="20" width="20">
-    View Details
-  </button>
-</div> -->
-
 
 
 <div class="graph-notification" *ngIf="limitReached">
-  <div class="default-notification-banner">
+  <div class="default-notification-banner default-notification-banner-cti">
     <span>
       <img src="assets/images/shared/hint.svg" class="default-notification-banner-icon" alt="Info Icon">
       <span>

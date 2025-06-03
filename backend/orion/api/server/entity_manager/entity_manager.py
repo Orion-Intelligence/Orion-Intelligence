@@ -47,19 +47,39 @@ class entity_manager:
                 if normalized_value == "all":
                     queried_id = "all_clusters"
                     query_str = """
-                    LET clusters = (
-                      FOR cluster IN cti_vertices
-                        FILTER cluster.type == 'cluster' AND cluster._key IN ['general','leak','defacement','chat']
-                        RETURN cluster._id
+                    LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat", "cti_vertices/telegram"]
+
+                    LET cluster_data = (
+                      FOR cluster_id IN clusters
+                        LET docs = (
+                          FOR v, e, p IN 1..1 ANY cluster_id GRAPH 'cti_graph'
+                            OPTIONS { bfs: true, uniqueVertices: "global" }
+                            FILTER v.type == 'document'
+                            LIMIT 30
+                            RETURN {vertex: v, edge: e, path: p}
+                        )
+                        RETURN docs
                     )
-                    LET raw_depth1 = (
-                      FOR id IN clusters
-                        FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
-                        LIMIT 101
-                        RETURN {vertex: v, edge: e, path: p}
+
+                    LET raw_depth1 = FLATTEN(cluster_data)
+
+                    LET document_ids = UNIQUE(
+                      FOR item IN raw_depth1
+                        RETURN item.vertex._id
                     )
-                    LET depth1 = SLICE(raw_depth1, 0, 100)
-                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
+
+                    LET cluster_edges = (
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          FOR cluster IN cti_vertices
+                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                            RETURN {vertex: cluster, edge: e, path: null}
+                    )
+
+                    LET depth1 = APPEND(raw_depth1, cluster_edges)
+                    LET limit_hit_depth1 = false
+
                     RETURN {
                       depth1,
                       limit_hit_depth1,
@@ -69,13 +89,31 @@ class entity_manager:
                 else:
                     queried_id = f"cti_vertices/{normalized_value}"
                     query_str = """
-                    LET raw_depth1 = (
+                    LET doc_nodes = (
                       FOR v, e, p IN 1..1 ANY @cluster_id GRAPH 'cti_graph'
-                      LIMIT 101
-                      RETURN {vertex: v, edge: e, path: p}
+                        OPTIONS { bfs: true, uniqueVertices: "global" }
+                        FILTER v.type == 'document'
+                        LIMIT 50
+                        RETURN {vertex: v, edge: e, path: p}
                     )
-                    LET depth1 = SLICE(raw_depth1, 0, 100)
-                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
+
+                    LET document_ids = UNIQUE(
+                      FOR item IN doc_nodes
+                        RETURN item.vertex._id
+                    )
+
+                    LET cluster_edges = (
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          FOR cluster IN cti_vertices
+                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                            RETURN {vertex: cluster, edge: e, path: null}
+                    )
+
+                    LET depth1 = APPEND(doc_nodes, cluster_edges)
+                    LET limit_hit_depth1 = LENGTH(doc_nodes) >= 50
+
                     RETURN {
                       depth1,
                       limit_hit_depth1,
@@ -83,6 +121,7 @@ class entity_manager:
                     }
                     """
                     bind_vars = {"cluster_id": f"cti_vertices/{normalized_value}"}
+
 
             elif query.data_point_type == "property" and normalized_type == "all":
                 if normalized_value == "all":
@@ -95,11 +134,35 @@ class entity_manager:
                     LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
-                        LIMIT 101
                         RETURN {vertex: v, edge: e, path: p}
                     )
-                    LET depth1 = SLICE(raw_depth1, 0, 100)
-                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
+                    LET document_ids = UNIQUE(
+                      FOR item IN raw_depth1
+                        FILTER item.vertex.type == 'document'
+                        RETURN item.vertex._id
+                    )
+                    LET cluster_edges = (
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          FOR cluster IN cti_vertices
+                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                            RETURN {vertex: cluster, edge: e, path: null}
+                    )
+                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
+                    LET default_cluster_edges = (
+                      FOR cluster_key IN default_clusters
+                        LET cluster_id = CONCAT("cti_vertices/", cluster_key)
+                        LET e = {
+                          _from: cluster_id,
+                          _to: cluster_id,
+                          type: "default_cluster_edge"
+                        }
+                        LET cluster_vertex = DOCUMENT(cluster_id)
+                        RETURN {vertex: cluster_vertex, edge: e, path: null}
+                    )
+                    LET depth1 = APPEND(APPEND(raw_depth1, cluster_edges), default_cluster_edges)
+                    LET limit_hit_depth1 = false
                     RETURN {
                       depth1,
                       limit_hit_depth1,
@@ -117,11 +180,35 @@ class entity_manager:
                     LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN 1..1 ANY id GRAPH 'cti_graph'
-                        LIMIT 101
                         RETURN {vertex: v, edge: e, path: p}
                     )
-                    LET depth1 = SLICE(raw_depth1, 0, 100)
-                    LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
+                    LET document_ids = UNIQUE(
+                      FOR item IN raw_depth1
+                        FILTER item.vertex.type == 'document'
+                        RETURN item.vertex._id
+                    )
+                    LET cluster_edges = (
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          FOR cluster IN cti_vertices
+                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                            RETURN {vertex: cluster, edge: e, path: null}
+                    )
+                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
+                    LET default_cluster_edges = (
+                      FOR cluster_key IN default_clusters
+                        LET cluster_id = CONCAT("cti_vertices/", cluster_key)
+                        LET e = {
+                          _from: cluster_id,
+                          _to: cluster_id,
+                          type: "default_cluster_edge"
+                        }
+                        LET cluster_vertex = DOCUMENT(cluster_id)
+                        RETURN {vertex: cluster_vertex, edge: e, path: null}
+                    )
+                    LET depth1 = APPEND(APPEND(raw_depth1, cluster_edges), default_cluster_edges)
+                    LET limit_hit_depth1 = false
                     RETURN {
                       depth1,
                       limit_hit_depth1,
@@ -136,11 +223,46 @@ class entity_manager:
                 query_str = """
                 LET raw_depth1 = (
                   FOR v, e, p IN 1..1 ANY @start_vertex GRAPH 'cti_graph'
-                  LIMIT 101
                   RETURN {vertex: v, edge: e, path: p}
                 )
-                LET depth1 = SLICE(raw_depth1, 0, 100)
-                LET limit_hit_depth1 = LENGTH(raw_depth1) > 100
+
+                LET cluster_edge = FIRST(
+                  FOR e IN cti_edges
+                    FILTER e._to == @start_vertex AND e.type == 'cluster_to_doc'
+                    FOR cluster IN cti_vertices
+                      FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                      RETURN {vertex: cluster, edge: e, path: null}
+                )
+
+                LET property_ids = UNIQUE(
+                  FOR item IN raw_depth1
+                    FILTER item.vertex.type NOT IN ['document', 'cluster']
+                    RETURN item.vertex._id
+                )
+
+                LET doc_counts = (
+                  FOR pid IN property_ids
+                    FOR e IN cti_edges
+                      FILTER e._to == pid AND STARTS_WITH(e.type, "has_")
+                      FILTER e._from != @start_vertex
+                      COLLECT doc_id = e._from WITH COUNT INTO score
+                      SORT score DESC
+                      LIMIT 50
+                      RETURN doc_id
+                )
+
+                LET related_docs = (
+                  FOR doc_id IN doc_counts
+                    FOR e IN cti_edges
+                      FILTER e._from == doc_id AND STARTS_WITH(e.type, "has_")
+                      FOR doc IN cti_vertices
+                        FILTER doc._id == doc_id AND doc.type == "document"
+                        RETURN {vertex: doc, edge: e, path: null}
+                )
+
+                LET depth1 = APPEND(APPEND(raw_depth1, cluster_edge ? [cluster_edge] : []), related_docs)
+                LET limit_hit_depth1 = LENGTH(related_docs) >= 50
+
                 RETURN {
                   depth1,
                   limit_hit_depth1,
