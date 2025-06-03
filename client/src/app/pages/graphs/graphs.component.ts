@@ -50,6 +50,7 @@ export class GraphComponent implements OnInit {
   copiedX = 0;
   copiedY = 0;
   orignalColor: string | Color = '';
+  currentCategory: string = "";
 
   constructor(private api: ApiService, private route: ActivatedRoute, private clipboard: Clipboard) {
   }
@@ -213,6 +214,10 @@ export class GraphComponent implements OnInit {
         });
       } else {
         if (isClusterNode) {
+          if (this.currentCategory === "") {
+            this.currentCategory = node.label!;
+            this.currentCategory = this.cleanString(this.currentCategory)
+          }
           node.color = 'yellow';
         } else {
           const hasOutgoing = edgeMap[node.id as string];
@@ -296,7 +301,7 @@ export class GraphComponent implements OnInit {
     }
 
     this.network.on('oncontext', params => {
-
+      this.hideContextMenu();
       const pointer = params.pointer.DOM;
       const rawNodeId = this.network.getNodeAt(pointer);
 
@@ -307,7 +312,8 @@ export class GraphComponent implements OnInit {
 
       const nodeId = String(rawNodeId);
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
-
+      if (!node.label!.includes("Group (document)"))
+        return
       if (!node) {
         this.hideContextMenu();
         return;
@@ -469,7 +475,6 @@ export class GraphComponent implements OnInit {
       menu.style.top = `${y}px`;
       this.contextMenuNodeId = node.id;
       this.contextMenuNode = node;
-
       if (typeof node.color === 'object') {
         this.orignalColor = node.color;
       }
@@ -495,7 +500,6 @@ export class GraphComponent implements OnInit {
   }
   expandGroupNode(): void {
     this.hideContextMenu();
-
     const node = this.contextMenuNode!;
     const nodeId = node.id;
 
@@ -541,11 +545,11 @@ export class GraphComponent implements OnInit {
       id: nodeId,
       color: { background: '#bf80ff', border: '#bf80ff' }
     });
+    this.hideContextMenu();
   }
 
   collapseGroupNode(): void {
     this.hideContextMenu();
-
     const node = this.contextMenuNode!;
     const nodeId = node.id;
 
@@ -576,15 +580,22 @@ export class GraphComponent implements OnInit {
 
       this.edgeSet.remove(connectedEdgeIds);
     }
+    this.hideContextMenu();
+  }
+  openCTI() {
+    const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+    const parts = this.contextMenuNodeId.split('/');
+    const singleInput = parts[parts.length - 1];
+
+    const params = new URLSearchParams({
+      selectedType: 'document', singleInput: singleInput
+    });
+
+    const fullUrl = `${baseUrl}?${params.toString()}`;
+    window.open(fullUrl, '_blank');
+    this.hideContextMenu();
   }
 
-  share(event: MouseEvent) {
-    const currentUrl = window.location.href;
-    this.clipboard.copy(currentUrl);
-    this.showCopiedMessage(event);
-    this.hideContextMenu()
-
-  }
   copyNodeLabel(event: MouseEvent) {
     const _label = this.contextMenuNode?.label;
     if (_label) {
@@ -594,7 +605,33 @@ export class GraphComponent implements OnInit {
     }
   }
   viewReport() {
+    this.hideContextMenu();
+    if (this.currentCategory === 'leak') {
+      const parts = this.contextMenuNodeId.split('/');
+      const singleInput = parts[parts.length - 1];
 
+      const baseUrl = `${window.location.origin}/dashboard/breach/all/${singleInput}`;
+      const fullUrl = `${baseUrl}`;
+      window.open(fullUrl, '_blank');
+    }
+    else if (this.currentCategory === 'defacement') {
+      const parts = this.contextMenuNodeId.split('/');
+      const singleInput = parts[parts.length - 1];
+
+      const baseUrl = `${window.location.origin}/dashboard/defacement/archive/${singleInput}`;
+      const fullUrl = `${baseUrl}`;
+      window.open(fullUrl, '_blank');
+    }
+    else if (this.currentCategory === 'general') {
+      const parts = this.contextMenuNodeId.split('/');
+      const singleInput = parts[parts.length - 1];
+
+      const baseUrl = `${window.location.origin}/dashboard/strategic/all/${singleInput}`;
+      const fullUrl = `${baseUrl}`;
+      window.open(fullUrl, '_blank');
+    }
+
+    this.hideContextMenu();
   }
 
   showCopiedMessage(event: MouseEvent) {
@@ -716,5 +753,12 @@ export class GraphComponent implements OnInit {
     } else if ((filters.selectedType === 'cluster' || filters.selectedType === 'document') && filters.singleInput) {
       this.loadGraphByNode(this.selectedType, filters.selectedType, filters.singleInput);
     }
+  }
+  cleanString(input: string): string {
+    const parts = input.replace(/['"]/g, '').split(',');
+
+    const uniqueParts = Array.from(new Set(parts.map(part => part.trim())));
+
+    return uniqueParts[0];
   }
 }
