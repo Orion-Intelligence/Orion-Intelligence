@@ -9,6 +9,7 @@ import { GraphInfoComponent } from './graph-info/graph-info.component';
 import { NgIf } from '@angular/common';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { A } from '@angular/cdk/keycodes';
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -43,8 +44,12 @@ export class GraphComponent implements OnInit {
   private groupInfo: Record<string, string[]> = {};
   private groupExpandedState: Record<string, boolean> = {};
   private highlightedNodeId: string | null = null;
-  private contextMenuNodeId: string | null = null;
+  private contextMenuNodeId!: string;
+  contextMenuNode: ExtendedNode | null = null;
+  originalNodeColors: { [id: string]: { background: string; border: string } } = {};
   copied = false;
+  copiedX = 0;
+  copiedY = 0;
 
   constructor(private api: ApiService, private route: ActivatedRoute, private clipboard: Clipboard) {
   }
@@ -195,7 +200,7 @@ export class GraphComponent implements OnInit {
         this.rawNodes.push({
           id: node.id,
           label: `Group (${nodeType}) : ${node.label}\nSub Nodes: ${subNodes.length}`,
-          color: node.id === "cti_vertices/"+this.singleInput ? "#ffff00" : "#66ff66",
+          color: node.id === "cti_vertices/" + this.singleInput ? "#ffff00" : "#66ff66",
           shape: 'dot',
           isGroup: true,
           subNodes,
@@ -212,9 +217,9 @@ export class GraphComponent implements OnInit {
         } else {
           const hasOutgoing = edgeMap[node.id as string];
           if (!hasOutgoing) {
-            if (this.selectedType == "cluster"){
+            if (this.selectedType == "cluster") {
               node.color = '#FF6666';
-            }else if (this.propertyValue && String(node.id).includes(this.propertyValue)) {
+            } else if (this.propertyValue && String(node.id).includes(this.propertyValue)) {
               node.color = 'yellow';
             }
             else {
@@ -290,24 +295,28 @@ export class GraphComponent implements OnInit {
       }, 1500);
     }
 
-
     this.network.on('oncontext', params => {
+
       const pointer = params.pointer.DOM;
       const rawNodeId = this.network.getNodeAt(pointer);
-
 
       if (!rawNodeId) {
         this.hideContextMenu();
         return;
       }
-      const nodeId = String(rawNodeId)
-      this.showContextMenu(pointer.x, pointer.y, nodeId);
 
+      const nodeId = String(rawNodeId);
+      const node = this.nodeSet.get(nodeId) as ExtendedNode;
 
+      if (!node) {
+        this.hideContextMenu();
+        return;
+      }
 
-
+      this.showContextMenu(pointer.x, pointer.y, node);
     });
     this.network.on('click', params => {
+
       this.hideContextMenu();
       const pointer = params.pointer.DOM;
       const nodeId = this.network.getNodeAt(pointer);
@@ -325,7 +334,7 @@ export class GraphComponent implements OnInit {
 
           const newEdges = this.rawEdges.filter(
             e => e.from === nodeId && node.subNodes!.includes(e.to as string)
-          ).filter(e => !this.edgeSet.get(e.id!)); // Prevent duplicate edge IDs
+          ).filter(e => !this.edgeSet.get(e.id!));
 
           const newNodes: ExtendedNode[] = [];
 
@@ -335,7 +344,7 @@ export class GraphComponent implements OnInit {
             const rawNode = this.rawNodes.find(n => n.id === subId);
             if (!rawNode) return;
 
-            const angle = (2 * Math.PI * index) / (node.subNodes!.length || 1); // Prevent TS error
+            const angle = (2 * Math.PI * index) / (node.subNodes!.length || 1);
             const x = centerPos.x + radius * Math.cos(angle);
             const y = centerPos.y + radius * Math.sin(angle);
 
@@ -359,31 +368,29 @@ export class GraphComponent implements OnInit {
           this.network.unselectAll();
 
         } else {
-  // Remove edges only from this group to its subnodes
-  const edgeIdsToRemove = this.rawEdges
-    .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
-    .map(e => e.id as string);
+          const edgeIdsToRemove = this.rawEdges
+            .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
+            .map(e => e.id as string);
 
-  this.edgeSet.remove(edgeIdsToRemove);
+          this.edgeSet.remove(edgeIdsToRemove);
 
-  // Remove subnodes only if they are now orphaned
-  node.subNodes.forEach(subId => {
-    const remainingEdges = this.edgeSet.get({
-      filter: edge => edge.from === subId || edge.to === subId
-    });
+          node.subNodes.forEach(subId => {
+            const remainingEdges = this.edgeSet.get({
+              filter: edge => edge.from === subId || edge.to === subId
+            });
 
-    if (remainingEdges.length === 0 && this.nodeSet.get(subId)) {
-      this.nodeSet.remove(subId);
-    }
-  });
+            if (remainingEdges.length === 0 && this.nodeSet.get(subId)) {
+              this.nodeSet.remove(subId);
+            }
+          });
 
-  this.groupExpandedState[nodeId] = false;
+          this.groupExpandedState[nodeId] = false;
 
-  this.nodeSet.update({
-    id: nodeId,
-    color: { background: '#66ff66', border: '#66ff66' }
-  });
-}
+          this.nodeSet.update({
+            id: nodeId,
+            color: { background: '#66ff66', border: '#66ff66' }
+          });
+        }
 
       } else {
         const isSameNodeClicked = this.highlightedNodeId === nodeId;
@@ -452,38 +459,158 @@ export class GraphComponent implements OnInit {
   }
 
 
-  showContextMenu(x: number, y: number, nodeId: string) {
+  showContextMenu(x: number, y: number, node: ExtendedNode) {
     const menu = document.getElementById('customContextMenu');
     if (!menu) return;
-
-    menu.style.display = 'block';
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
-    this.contextMenuNodeId = nodeId; // Track current node
+    const nodeId = node?.id;
+    if (node && typeof node.id === 'string') {
+      menu.style.display = 'block';
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+      this.contextMenuNodeId = node.id;
+      this.contextMenuNode = node;
+      if (typeof node.color === 'object') {
+        this.originalNodeColors[node?.id] = {
+          background: node.color?.background || "#000000",
+          border: node.color?.border || "#000000",
+        };
+      }
+      this.nodeSet.update({
+        id: nodeId,
+        color: { background: "#FFFFFF", border: "#000000" },
+      });
+    }
   }
 
   hideContextMenu() {
+
     const menu = document.getElementById('customContextMenu');
     if (menu) {
       menu.style.display = 'none';
+      this.nodeSet.update({
+        id: this.contextMenuNodeId,
+        color: {
+          background: this.originalNodeColors[this.contextMenuNodeId].background,
+          border: this.originalNodeColors[this.contextMenuNodeId].border,
+        },
+      });
     }
   }
-  expandNode() {
-    this.onExpandToggled(true);
+  expandGroupNode(): void {
     this.hideContextMenu();
+
+    const node = this.contextMenuNode!;
+    const nodeId = node.id;
+
+    if (!nodeId || !node.subNodes) return;
+
+    const subNodes = node.subNodes;
+
+    const isExpanded = this.groupExpandedState[nodeId] || false;
+    if (isExpanded) return;
+
+    const centerPos = this.network.getPositions([nodeId])[nodeId];
+    const radius = 200;
+
+    const newEdges = this.rawEdges.filter(
+      e => e.from === nodeId && subNodes.includes(e.to as string)
+    );
+    this.edgeSet.add(newEdges);
+    this.groupExpandedState[nodeId] = true;
+
+    const newNodes: ExtendedNode[] = [];
+
+    subNodes.forEach((subId, index) => {
+      if (this.nodeSet.get(subId)) return;
+
+      const rawNode = this.rawNodes.find(n => n.id === subId);
+      if (!rawNode) return;
+
+      const angle = (2 * Math.PI * index) / subNodes.length;
+      const x = centerPos.x + radius * Math.cos(angle);
+      const y = centerPos.y + radius * Math.sin(angle);
+
+      newNodes.push({
+        ...rawNode,
+        x,
+        y,
+        physics: true
+      });
+    });
+
+    this.nodeSet.add(newNodes);
+
+    this.nodeSet.update({
+      id: nodeId,
+      color: { background: '#bf80ff', border: '#bf80ff' }
+    });
   }
-  collapseNode() {
-    this.onExpandToggled(false);
+
+  collapseGroupNode(): void {
     this.hideContextMenu();
+
+    const node = this.contextMenuNode!;
+    const nodeId = node.id;
+
+    if (!nodeId) return;
+    if (node.isGroup && node.subNodes && node.subNodes.length > 0) {
+      const isExpanded = this.groupExpandedState[nodeId] || false;
+      if (!isExpanded) return;
+      node.subNodes.forEach(subId => {
+        if (this.nodeSet.get(subId)) this.nodeSet.remove(subId);
+      });
+      const edgeIdsToRemove = this.rawEdges
+        .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
+        .map(e => e.id as string);
+
+      this.edgeSet.remove(edgeIdsToRemove);
+      this.groupExpandedState[nodeId] = false;
+      this.nodeSet.update({
+        id: nodeId,
+        color: { background: '#F2F3F4', border: '#F2F3F4' }
+      });
+
+    } else {
+      this.nodeSet.remove(nodeId);
+
+      const connectedEdgeIds = this.rawEdges
+        .filter(e => e.from === nodeId || e.to === nodeId)
+        .map(e => e.id as string);
+
+      this.edgeSet.remove(connectedEdgeIds);
+    }
   }
-  share() {
+
+  share(event: MouseEvent) {
     const currentUrl = window.location.href;
     this.clipboard.copy(currentUrl);
+    this.showCopiedMessage(event);
+    this.hideContextMenu()
+
+  }
+  copyNodeLabel(event: MouseEvent) {
+    const _label = this.contextMenuNode?.label;
+    if (_label) {
+      this.clipboard.copy(_label);
+      this.showCopiedMessage(event);
+      this.hideContextMenu()
+    }
+  }
+  viewReport() {
+
+  }
+
+  showCopiedMessage(event: MouseEvent) {
+    const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
+
+    this.copiedX = buttonRect.right + 10;
+    this.copiedY = buttonRect.top + window.scrollY;
+
     this.copied = true;
 
     setTimeout(() => {
       this.copied = false;
-    }, 2000);
+    }, 1500);
   }
 
 
@@ -536,23 +663,23 @@ export class GraphComponent implements OnInit {
         this.edgeSet.add(newEdges);
         this.groupExpandedState[extNode.id as string] = true;
 
-      this.nodeSet.update({
-        id: extNode.id,
-        color: (extNode.id === "cti_vertices/" + this.singleInput)
-          ? 'yellow'
-          : { background: '#bf80ff', border: '#bf80ff' }
-      });
-
-      if (extNode.id === "cti_vertices/" + this.singleInput) {
-        this.network.getConnectedEdges(extNode.id).forEach(id => {
-          this.edgeSet.update({
-            id,
-            color: { color: 'yellow', highlight: 'yellow', hover: 'yellow' },
-            dashes: true,
-            width: 3
-          });
+        this.nodeSet.update({
+          id: extNode.id,
+          color: (extNode.id === "cti_vertices/" + this.singleInput)
+            ? 'yellow'
+            : { background: '#bf80ff', border: '#bf80ff' }
         });
-      }
+
+        if (extNode.id === "cti_vertices/" + this.singleInput) {
+          this.network.getConnectedEdges(extNode.id).forEach(id => {
+            this.edgeSet.update({
+              id,
+              color: { color: 'yellow', highlight: 'yellow', hover: 'yellow' },
+              dashes: true,
+              width: 3
+            });
+          });
+        }
 
       } else if (!enabled && isExpanded) {
         extNode.subNodes.forEach(subId => {
@@ -568,7 +695,7 @@ export class GraphComponent implements OnInit {
 
         this.nodeSet.update({
           id: extNode.id,
-          color: (node.id === "cti_vertices/"+this.singleInput)
+          color: (node.id === "cti_vertices/" + this.singleInput)
             ? 'yellow'
             : { background: '#66ff66', border: '#66ff66' }
         });
