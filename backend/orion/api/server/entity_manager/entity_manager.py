@@ -141,28 +141,21 @@ class entity_manager:
                         FILTER item.vertex.type == 'document'
                         RETURN item.vertex._id
                     )
-                    LET cluster_edges = (
+
+                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
+                    LET filtered_cluster_edges = (
                       FOR doc_id IN document_ids
                         FOR e IN cti_edges
                           FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                          FOR cluster IN cti_vertices
-                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
-                            RETURN {vertex: cluster, edge: e, path: null}
+                          LET cluster_key = PARSE_IDENTIFIER(e._from).key
+                          FILTER cluster_key IN default_clusters
+                          LET cluster = DOCUMENT(e._from)
+                          RETURN {vertex: cluster, edge: e, path: null}
                     )
-                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
-                    LET default_cluster_edges = (
-                      FOR cluster_key IN default_clusters
-                        LET cluster_id = CONCAT("cti_vertices/", cluster_key)
-                        LET e = {
-                          _from: cluster_id,
-                          _to: cluster_id,
-                          type: "default_cluster_edge"
-                        }
-                        LET cluster_vertex = DOCUMENT(cluster_id)
-                        RETURN {vertex: cluster_vertex, edge: e, path: null}
-                    )
-                    LET depth1 = APPEND(APPEND(raw_depth1, cluster_edges), default_cluster_edges)
+
+                    LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
                     LET limit_hit_depth1 = false
+
                     RETURN {
                       depth1,
                       limit_hit_depth1,
@@ -187,28 +180,21 @@ class entity_manager:
                         FILTER item.vertex.type == 'document'
                         RETURN item.vertex._id
                     )
-                    LET cluster_edges = (
+
+                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
+                    LET filtered_cluster_edges = (
                       FOR doc_id IN document_ids
                         FOR e IN cti_edges
                           FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                          FOR cluster IN cti_vertices
-                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
-                            RETURN {vertex: cluster, edge: e, path: null}
+                          LET cluster_key = PARSE_IDENTIFIER(e._from).key
+                          FILTER cluster_key IN default_clusters
+                          LET cluster = DOCUMENT(e._from)
+                          RETURN {vertex: cluster, edge: e, path: null}
                     )
-                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
-                    LET default_cluster_edges = (
-                      FOR cluster_key IN default_clusters
-                        LET cluster_id = CONCAT("cti_vertices/", cluster_key)
-                        LET e = {
-                          _from: cluster_id,
-                          _to: cluster_id,
-                          type: "default_cluster_edge"
-                        }
-                        LET cluster_vertex = DOCUMENT(cluster_id)
-                        RETURN {vertex: cluster_vertex, edge: e, path: null}
-                    )
-                    LET depth1 = APPEND(APPEND(raw_depth1, cluster_edges), default_cluster_edges)
+
+                    LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
                     LET limit_hit_depth1 = false
+
                     RETURN {
                       depth1,
                       limit_hit_depth1,
@@ -220,19 +206,22 @@ class entity_manager:
             else:
                 start_vertex = f"cti_vertices/{normalized_value}" if query.data_point_type == "document" else f"cti_vertices/{normalized_type}:{normalized_value}"
                 queried_id = start_vertex
+
                 query_str = """
-                LET raw_depth1 = (
+                LET depth1_nodes = (
                   FOR v, e, p IN 1..1 ANY @start_vertex GRAPH 'cti_graph'
-                  RETURN {vertex: v, edge: e, path: p}
+                    OPTIONS { bfs: true, uniqueVertices: "global" }
+                    RETURN {vertex: v, edge: e, path: p}
                 )
 
-                LET cluster_edge = FIRST(
-                  FOR e IN cti_edges
-                    FILTER e._to == @start_vertex AND e.type == 'cluster_to_doc'
-                    FOR cluster IN cti_vertices
-                      FILTER cluster._id == e._from AND cluster.type == 'cluster'
-                      RETURN {vertex: cluster, edge: e, path: null}
+                LET depth2_nodes = (
+                  FOR v, e, p IN 2..2 ANY @start_vertex GRAPH 'cti_graph'
+                    OPTIONS { bfs: true, uniqueVertices: "global" }
+                    FILTER v.type == "cluster"
+                    RETURN {vertex: v, edge: e, path: p}
                 )
+
+                LET raw_depth1 = APPEND(depth1_nodes, depth2_nodes)
 
                 LET property_ids = UNIQUE(
                   FOR item IN raw_depth1
@@ -260,7 +249,41 @@ class entity_manager:
                         RETURN {vertex: doc, edge: e, path: null}
                 )
 
-                LET depth1 = APPEND(APPEND(raw_depth1, cluster_edge ? [cluster_edge] : []), related_docs)
+                LET related_doc_ids = (
+                  FOR doc_id IN doc_counts
+                    RETURN doc_id
+                )
+
+                LET document_ids = UNION(
+                  UNIQUE(
+                    FOR item IN raw_depth1
+                      FILTER item.vertex.type == 'document'
+                      RETURN item.vertex._id
+                  ),
+                  related_doc_ids
+                )
+
+                LET default_clusters = ["general", "defacement", "leak", "telegram"]
+
+                LET cluster_edges = (
+                  FOR doc_id IN document_ids
+                    FOR e IN cti_edges
+                      FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                      LET cluster_key = PARSE_IDENTIFIER(e._from).key
+                      FILTER cluster_key IN default_clusters
+                      LET cluster = DOCUMENT(e._from)
+                      RETURN {vertex: cluster, edge: e, path: null}
+                )
+
+                LET start_doc_properties = (
+                  FOR e IN cti_edges
+                    FILTER e._from == @start_vertex AND STARTS_WITH(e.type, "has_")
+                    FOR prop IN cti_vertices
+                      FILTER prop._id == e._to
+                      RETURN {vertex: prop, edge: e, path: null}
+                )
+
+                LET depth1 = APPEND(APPEND(APPEND(raw_depth1, cluster_edges), related_docs), start_doc_properties)
                 LET limit_hit_depth1 = LENGTH(related_docs) >= 50
 
                 RETURN {

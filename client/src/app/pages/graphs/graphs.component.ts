@@ -536,23 +536,23 @@ export class GraphComponent implements OnInit {
         this.edgeSet.add(newEdges);
         this.groupExpandedState[extNode.id as string] = true;
 
-this.nodeSet.update({
-  id: extNode.id,
-  color: (extNode.id === "cti_vertices/" + this.singleInput)
-    ? 'yellow'
-    : { background: '#bf80ff', border: '#bf80ff' }
-});
+      this.nodeSet.update({
+        id: extNode.id,
+        color: (extNode.id === "cti_vertices/" + this.singleInput)
+          ? 'yellow'
+          : { background: '#bf80ff', border: '#bf80ff' }
+      });
 
-if (extNode.id === "cti_vertices/" + this.singleInput) {
-  this.network.getConnectedEdges(extNode.id).forEach(id => {
-    this.edgeSet.update({
-      id,
-      color: { color: 'yellow', highlight: 'yellow', hover: 'yellow' },
-      dashes: true,
-      width: 3
-    });
-  });
-}
+      if (extNode.id === "cti_vertices/" + this.singleInput) {
+        this.network.getConnectedEdges(extNode.id).forEach(id => {
+          this.edgeSet.update({
+            id,
+            color: { color: 'yellow', highlight: 'yellow', hover: 'yellow' },
+            dashes: true,
+            width: 3
+          });
+        });
+      }
 
       } else if (!enabled && isExpanded) {
         extNode.subNodes.forEach(subId => {
