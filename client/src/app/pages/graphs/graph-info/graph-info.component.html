@@ -1,4 +1,4 @@
-<div class="graph-filters__container">
+<div class="graph-filters__container" style="max-height: 100vh; overflow-y: auto;">
 
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleAnimation()">
     <div class="analytics d-flex align-items-center gap-2">
@@ -100,5 +100,7 @@
 
     </div>
   </div>
+  <br>
+  <app-listings [nodeSet]="nodeSet" [rawEdges]="rawEdges" [result]="result"></app-listings>
 
 </div>

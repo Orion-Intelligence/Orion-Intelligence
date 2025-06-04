@@ -1,8 +1,12 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NgIf, TitleCasePipe} from '@angular/common';
+import { Component, EventEmitter, input, Input, Output } from '@angular/core';
+import { NgIf, TitleCasePipe } from '@angular/common';
+import { ListingsComponent } from "../listings/listings.component";
+import { Edge } from 'vis-network/standalone';
 
 @Component({
-  selector: 'app-graph-info', imports: [TitleCasePipe, NgIf], templateUrl: './graph-info.component.html'
+  selector: 'app-graph-info',
+  imports: [TitleCasePipe, NgIf, ListingsComponent],
+  templateUrl: './graph-info.component.html'
 })
 export class GraphInfoComponent {
   @Output() physicsToggled = new EventEmitter<boolean>();
@@ -13,6 +17,9 @@ export class GraphInfoComponent {
   @Input() propertyValue!: string;
   @Input() physicsEnabled!: boolean;
   @Input() expandEnabled!: boolean;
+  @Input() nodeSet!: any;
+  @Input() rawEdges: Edge[] = [];
+  @Input() result: any[] = []
 
   detailsOpen = true;
   indicatorsOpen = false;

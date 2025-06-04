@@ -1,0 +1,23 @@
+<div class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
+        <span>Listings</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron"
+            [class.rotate]="collapseToggle" (click)="toggleCollapse()" />
+    </div>
+    <div id="detailsCollapse" class="collapse" [class.show]="collapseToggle">
+        <br>
+        <ng-container *ngFor="let doc of result; let last = last">
+            <ng-container *ngIf="checkDocument(doc.edge._id)">
+                <div class="doc-item">
+                    <div class="left" (click)="openMenu(doc.edge._id)">
+                        <div class="doc-id-line">
+                            <span class="doc-id">{{ shortenId(extractId( doc.edge._id)) }}</span>
+                            <img src="/assets/images/shared/list.svg" alt="icon" class="doc-icon" />
+                        </div>
+                        <div class="doc-title">Location: {{ doc.edge.m_location|| 'N/A' }}</div>
+                        <div class="doc-cluster">{{ checkCluster(doc.edge._id) }}</div>
+                    </div>
+                </div>
+                <div class="divider" *ngIf="!last"></div>
+            </ng-container>
+        </ng-container>
+    </div>
