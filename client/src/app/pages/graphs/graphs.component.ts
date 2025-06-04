@@ -9,6 +9,7 @@ import { GraphInfoComponent } from './graph-info/graph-info.component';
 import { NgIf } from '@angular/common';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
+import {getDefaultRuleSet, RuleSet} from "../../shared/model/graph/ruleset_model";
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -35,6 +36,7 @@ export class GraphComponent implements OnInit {
   isEmpty = false;
   limitReached = false
   result: any[] = []
+  ruleSet: RuleSet = getDefaultRuleSet();
 
   private rawNodes: ExtendedNode[] = [];
   private rawEdges: Edge[] = [];
@@ -190,8 +192,8 @@ export class GraphComponent implements OnInit {
         id: e._id || `${e._from}->${e._to}`,
         from: e._from,
         to: e._to,
-        arrows: 'to',
-        color: { color: '#FFFFFF' },
+        arrows: this.ruleSet.edgePointers ? 'to' : '',
+        ...(!this.ruleSet.edgeColor ? { color: { color: '#FFFFFF' } } : {}),
         width: 2
       });
 
@@ -296,8 +298,7 @@ export class GraphComponent implements OnInit {
         }
       },
       edges: {
-        arrows: { to: { enabled: true, scaleFactor: 1 } },
-        color: { color: '#FFFFFF' },
+        arrows: { to: { enabled: false, scaleFactor: 1 } },
         width: 2
       },
       nodes: {
@@ -371,9 +372,12 @@ export class GraphComponent implements OnInit {
       if (!nodeId) return;
 
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
+      const isExpanded = this.groupExpandedState[nodeId] || false;
+      if(!this.ruleSet.expandTrigger && !isExpanded){
+        return;
+      }
 
       if (node?.isGroup && node.subNodes) {
-        const isExpanded = this.groupExpandedState[nodeId] || false;
 
         if (!isExpanded) {
           const centerPos = this.network.getPositions([nodeId])[nodeId];
@@ -409,7 +413,6 @@ export class GraphComponent implements OnInit {
           this.groupExpandedState[nodeId] = true;
           this.network.selectNodes([nodeId]);
           this.network.unselectAll();
-
         } else {
           const edgeIdsToRemove = this.rawEdges
             .filter(e => e.from === nodeId && node.subNodes!.includes(e.to as string))
@@ -429,14 +432,13 @@ export class GraphComponent implements OnInit {
 
           this.groupExpandedState[nodeId] = false;
 
-          if(this.orignalColor){
+          if (this.orignalColor) {
             this.nodeSet.update({
               id: nodeId,
               color: this.orignalColor
             });
           }
         }
-
       } else {
         const isSameNodeClicked = this.highlightedNodeId === nodeId;
         const allEdges = this.edgeSet.get();
@@ -456,16 +458,18 @@ export class GraphComponent implements OnInit {
             filter: edge => edge.from === nodeId || edge.to === nodeId
           });
 
-          const highlightEdges = connectedEdges
-            .filter(e => e.id)
-            .map(e => ({
-              id: e.id!,
-              color: { color: 'yellow' },
-              width: 3
-            }));
-          this.edgeSet.update(highlightEdges);
+          if (this.ruleSet.edgeHighlight){
+            const highlightEdges = connectedEdges
+              .filter(e => e.id)
+              .map(e => ({
+                id: e.id!,
+                color: { color: 'yellow' },
+                width: 3
+              }));
+            this.edgeSet.update(highlightEdges);
+          }
 
-          this.highlightedNodeId = null;
+          this.highlightedNodeId = String(nodeId);
         }
       }
     });
@@ -828,4 +832,23 @@ export class GraphComponent implements OnInit {
 
     return uniqueParts[0];
   }
+
+  toggleEdgeArrows(enable: boolean): void {
+    const allEdges = this.edgeSet.get();
+    const updatedEdges = allEdges.map(edge => ({
+      id: edge.id!,
+      arrows: enable ? 'to' : '',
+      ...(this.ruleSet.edgeColor ? { color: { color: '#FFFFFF' } } : {}),
+    }));
+    this.edgeSet.update(updatedEdges);
+  }
+
+  ruleSetChange(ruleSet: RuleSet) {
+    this.toggleEdgeArrows(ruleSet.edgePointers)
+  }
+
+  onResetAll(){
+    this.ngOnInit()
+  }
+
 }

@@ -2,40 +2,39 @@
 
 <graph-sidebar class="d-none d-md-block" (filtersApplied)="onSidebarApply($event)"></graph-sidebar>
 
-<app-graph-info class="d-none d-md-block" (physicsToggled)="onPhysicsToggled($event)"
+<app-graph-info class="d-none d-md-block" (physicsToggled)="onPhysicsToggled($event)" (onResetAll)="onResetAll()" (ruleSetChange)="ruleSetChange($event)" [(ruleSet)]="ruleSet"
   (expandToggled)="onExpandToggled($event)" [selectedType]="selectedType" [singleInput]="singleInput"
   [propertyType]="propertyType" [physicsEnabled]=physicsEnabled [propertyValue]="propertyValue">
 </app-graph-info>
 
 
 <div id="customContextMenu" class="context-menu">
-  <!-- <div class="profile-dropdown-arrow"></div> -->
   <button class="dropdown-item button-content" (click)="expandGroupNode()">
-    <img src="../../../../../assets/images/shared/expand.svg" width="15" height="15" style="margin-right: 8px;">
+    <img src="assets/images/shared/expand.svg" width="15" height="15" style="margin-right: 8px;" alt="">
     Expand</button>
 
   <hr class="dropdown-divider mx-3">
 
   <button class="dropdown-item button-content" (click)="collapseGroupNode()">
-    <img src="../../../../../assets/images/shared/collapse.svg" width="15" height="15" style="margin-right: 8px;">
+    <img src="assets/images/shared/collapse.svg" width="15" height="15" style="margin-right: 8px;" alt="">
     Collapse</button>
   <hr class="dropdown-divider mx-3">
 
   <button class="dropdown-item button-content" (click)="openCTI()">
-    <img src="../../../../../assets/images/shared/share-black.svg" width="15" height="15" style="margin-right: 8px;"
-      class="share-wrapper">
+    <img src="assets/images/shared/share-black.svg" width="15" height="15" style="margin-right: 8px;"
+      class="share-wrapper" alt="">
     Open CTI
   </button>
   <hr class="dropdown-divider mx-3">
   <button class="dropdown-item button-content" (click)="copyNodeLabel($event)">
-    <img src="../../../../../assets/images/shared/label.svg" width="15" height="15" style="margin-right: 8px;"
-      class="share-wrapper">
+    <img src="assets/images/shared/label.svg" width="15" height="15" style="margin-right: 8px;"
+      class="share-wrapper" alt="">
     Copy Label
   </button>
   <hr class="dropdown-divider mx-3">
   <button class="dropdown-item button-content" (click)="viewReport()">
-    <img src="../../../../../assets/images/shared/redirect-black.svg" width="15" height="15" style="margin-right: 8px;"
-      class="share-wrapper">
+    <img src="assets/images/shared/redirect-black.svg" width="15" height="15" style="margin-right: 8px;"
+      class="share-wrapper" alt="">
     Open Report
   </button>
 
