@@ -180,7 +180,10 @@ class elastic_request_generator:
             },
             "from": max(0, (m_page_number - 1) * 100),
             "size": 100,
-            "track_total_hits": True
+            "track_total_hits": True,
+            "sort": [
+                {"m_date_of_leak": {"order": "desc"}}
+            ]
         }
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
