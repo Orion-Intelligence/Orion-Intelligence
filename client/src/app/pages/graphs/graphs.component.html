@@ -4,7 +4,8 @@
 
 <app-graph-info class="d-none d-md-block" (physicsToggled)="onPhysicsToggled($event)" (onResetAll)="onResetAll()" (ruleSetChange)="ruleSetChange($event)" [(ruleSet)]="ruleSet"
   (expandToggled)="onExpandToggled($event)" [selectedType]="selectedType" [singleInput]="singleInput"
-  [propertyType]="propertyType" [physicsEnabled]=physicsEnabled [propertyValue]="propertyValue">
+  [propertyType]="propertyType" [physicsEnabled]=physicsEnabled [propertyValue]="propertyValue" [nodeSet]="nodeSet"
+  [rawEdges]="rawEdges" [result]="resultReference">
 </app-graph-info>
 
 
@@ -49,6 +50,7 @@
       <span>
         You can see 200 nodes at a time, results containing more than 200 nodes will scale down;
       </span>
+
     </span>
   </div>
 </div>

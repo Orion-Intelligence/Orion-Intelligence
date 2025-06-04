@@ -37,11 +37,12 @@ export class GraphComponent implements OnInit {
   limitReached = false
   result: any[] = []
   ruleSet: RuleSet = getDefaultRuleSet();
+  resultReference: any[] = []
 
-  private rawNodes: ExtendedNode[] = [];
-  private rawEdges: Edge[] = [];
-  private nodeSet!: DataSet<ExtendedNode>;
-  private edgeSet!: DataSet<Edge>;
+  public rawNodes: ExtendedNode[] = [];
+  public rawEdges: Edge[] = [];
+  public nodeSet!: DataSet<ExtendedNode>;
+  public edgeSet!: DataSet<Edge>;
   private groupInfo: Record<string, string[]> = {};
   private groupExpandedState: Record<string, boolean> = {};
   private highlightedNodeId: string | null = null;
@@ -114,6 +115,7 @@ export class GraphComponent implements OnInit {
       next: response => {
         const { results, limit_reached } = response;
         this.result = results
+        this.resultReference = results
         this.renderGraph(this.result);
         this.limitReached = limit_reached;
       },
@@ -123,6 +125,7 @@ export class GraphComponent implements OnInit {
         this.limitReached = false;
       },
     });
+
   }
 
 
@@ -332,7 +335,7 @@ export class GraphComponent implements OnInit {
     }
 
     this.network.on('oncontext', params => {
-    this.hideContextMenu();
+      this.hideContextMenu();
       const pointer = params.pointer.DOM;
       const rawNodeId = this.network.getNodeAt(pointer);
 
@@ -343,18 +346,19 @@ export class GraphComponent implements OnInit {
 
       const nodeId = String(rawNodeId);
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
+      if (!node.label!.includes("Group (document)"))
+        return
+
       const clusterNodeIds = new Set([
         'cti_vertices/general',
         'cti_vertices/defacement',
         'cti_vertices/leak',
         'cti_vertices/chat'
       ]);
-
       const hasClusterConnection = this.rawEdges.some(edge =>
         (edge.from === node.id && clusterNodeIds.has(edge.to as string)) ||
         (edge.to === node.id && clusterNodeIds.has(edge.from as string))
       );
-
       if (!hasClusterConnection) return;
 
       if (!node) {
@@ -362,7 +366,7 @@ export class GraphComponent implements OnInit {
         return;
       }
 
-      this.showContextMenu(pointer.x+85, pointer.y, node);
+      this.showContextMenu(pointer.x + 85, pointer.y, node);
     });
     this.network.on('click', params => {
       this.hideContextMenu();
@@ -512,7 +516,7 @@ export class GraphComponent implements OnInit {
     const menu = document.getElementById('customContextMenu');
     if (!menu) return;
     const nodeId = node?.id;
-    if (node){
+    if (node) {
       if (node.color) {
         this.orignalColor = node.color;
       }

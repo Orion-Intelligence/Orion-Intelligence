@@ -1,22 +1,14 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  OnInit
-} from '@angular/core';
+
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { NgIf, TitleCasePipe } from '@angular/common';
-import {
-  RuleSet,
-  loadRuleSetFromStorage,
-  saveRuleSetToStorage
-} from '../../../shared/model/graph/ruleset_model';
+import { ListingsComponent } from "../listings/listings.component";
+import { Edge } from 'vis-network/standalone';
+import {loadRuleSetFromStorage, RuleSet, saveRuleSetToStorage} from '../../../shared/model/graph/ruleset_model';
 
 @Component({
   selector: 'app-graph-info',
-  imports: [TitleCasePipe, NgIf],
-  templateUrl: './graph-info.component.html',
-  standalone: true
+  imports: [TitleCasePipe, NgIf, ListingsComponent],
+  templateUrl: './graph-info.component.html'
 })
 export class GraphInfoComponent implements OnInit {
   @Input() selectedType!: string;
@@ -25,6 +17,9 @@ export class GraphInfoComponent implements OnInit {
   @Input() propertyValue!: string;
   @Input() physicsEnabled!: boolean;
   @Input() expandEnabled!: boolean;
+  @Input() nodeSet!: any;
+  @Input() rawEdges: Edge[] = [];
+  @Input() result: any[] = []
 
   @Input() ruleSet!: RuleSet;
   @Output() ruleSetChange = new EventEmitter<RuleSet>();
