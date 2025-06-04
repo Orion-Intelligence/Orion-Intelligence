@@ -9,7 +9,6 @@ import { GraphInfoComponent } from './graph-info/graph-info.component';
 import { NgIf } from '@angular/common';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { A } from '@angular/cdk/keycodes';
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -70,6 +69,37 @@ export class GraphComponent implements OnInit {
     });
   }
 
+  resetGraph(): void {
+    if (this.network) {
+      this.network.destroy();
+      this.network = null!;
+    }
+
+    if (this.nodeSet) this.nodeSet.clear();
+    if (this.edgeSet) this.edgeSet.clear();
+
+    this.nodeSet = new DataSet<ExtendedNode>();
+    this.edgeSet = new DataSet<Edge>();
+
+    this.rawNodes = [];
+    this.rawEdges = [];
+    this.groupInfo = {};
+    this.groupExpandedState = {};
+    this.highlightedNodeId = null;
+    this.contextMenuNode = null;
+    this.contextMenuNodeId = '';
+    this.currentCategory = '';
+    this.result = [];
+
+    if ((this as any).originalNodeColors instanceof Map) {
+      (this as any).originalNodeColors.clear();
+    }
+
+    const container = this.networkContainer?.nativeElement;
+    if (container) {
+      container.innerHTML = '';
+    }
+  }
 
   loadGraphByNode(data_point_type: string, type: string, value: string): void {
     const params = new HttpParams()
@@ -77,6 +107,7 @@ export class GraphComponent implements OnInit {
       .set('model_type', type)
       .set('query_value', value);
 
+    this.resetGraph()
     this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
         const { results, limit_reached } = response;
@@ -94,7 +125,7 @@ export class GraphComponent implements OnInit {
 
 
   private renderGraph(data: any[], _ = false): void {
-
+    this.resetGraph()
     this.isEmpty = data.length === 0;
     this.rawNodes = [];
     this.rawEdges = [];
@@ -113,7 +144,6 @@ export class GraphComponent implements OnInit {
         label = `${v._key}`;
         label = label.replace(":", " :: ").replace("m_", "")
       }
-
       rawNodeMap.set(id, {
         id,
         label,
@@ -301,28 +331,39 @@ export class GraphComponent implements OnInit {
     }
 
     this.network.on('oncontext', params => {
-      this.hideContextMenu();
+    this.hideContextMenu();
       const pointer = params.pointer.DOM;
       const rawNodeId = this.network.getNodeAt(pointer);
 
       if (!rawNodeId) {
-        this.hideContextMenu();
+      this.hideContextMenu();
         return;
       }
 
       const nodeId = String(rawNodeId);
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
-      if (!node.label!.includes("Group (document)"))
-        return
+      const clusterNodeIds = new Set([
+        'cti_vertices/general',
+        'cti_vertices/defacement',
+        'cti_vertices/leak',
+        'cti_vertices/chat'
+      ]);
+
+      const hasClusterConnection = this.rawEdges.some(edge =>
+        (edge.from === node.id && clusterNodeIds.has(edge.to as string)) ||
+        (edge.to === node.id && clusterNodeIds.has(edge.from as string))
+      );
+
+      if (!hasClusterConnection) return;
+
       if (!node) {
         this.hideContextMenu();
         return;
       }
 
-      this.showContextMenu(pointer.x, pointer.y, node);
+      this.showContextMenu(pointer.x+85, pointer.y, node);
     });
     this.network.on('click', params => {
-
       this.hideContextMenu();
       const pointer = params.pointer.DOM;
       const nodeId = this.network.getNodeAt(pointer);
@@ -366,10 +407,6 @@ export class GraphComponent implements OnInit {
           this.edgeSet.add(newEdges);
 
           this.groupExpandedState[nodeId] = true;
-          this.nodeSet.update({
-            id: nodeId,
-            color: { background: '#bf80ff', border: '#bf80ff' }
-          });
           this.network.selectNodes([nodeId]);
           this.network.unselectAll();
 
@@ -392,10 +429,12 @@ export class GraphComponent implements OnInit {
 
           this.groupExpandedState[nodeId] = false;
 
-          this.nodeSet.update({
-            id: nodeId,
-            color: { background: '#66ff66', border: '#66ff66' }
-          });
+          if(this.orignalColor){
+            this.nodeSet.update({
+              id: nodeId,
+              color: this.orignalColor
+            });
+          }
         }
 
       } else {
@@ -469,13 +508,18 @@ export class GraphComponent implements OnInit {
     const menu = document.getElementById('customContextMenu');
     if (!menu) return;
     const nodeId = node?.id;
-    if (node && typeof node.id === 'string') {
+    if (node){
+      if (node.color) {
+        this.orignalColor = node.color;
+      }
+    }
+    if (node && (typeof node.id === 'string')) {
       menu.style.display = 'block';
       menu.style.left = `${x}px`;
       menu.style.top = `${y}px`;
       this.contextMenuNodeId = node.id;
       this.contextMenuNode = node;
-      if (typeof node.color === 'object') {
+      if (node.color) {
         this.orignalColor = node.color;
       }
       this.nodeSet.update({
@@ -486,18 +530,18 @@ export class GraphComponent implements OnInit {
   }
 
   hideContextMenu() {
-
     const menu = document.getElementById('customContextMenu');
     if (menu) {
       menu.style.display = 'none';
       if (this.contextMenuNodeId) {
-        this.nodeSet.update({
-          id: this.contextMenuNodeId,
-          color: this.orignalColor
-        });
+          this.nodeSet.update({
+            id: this.contextMenuNodeId,
+            color: this.orignalColor
+          });
       }
     }
   }
+
   expandGroupNode(): void {
     this.hideContextMenu();
     const node = this.contextMenuNode!;
@@ -604,29 +648,52 @@ export class GraphComponent implements OnInit {
       this.hideContextMenu()
     }
   }
+
   viewReport() {
     this.hideContextMenu();
-    if (this.currentCategory === 'leak') {
-      const parts = this.contextMenuNodeId.split('/');
-      const singleInput = parts[parts.length - 1];
 
+    const nodeId = this.contextMenuNodeId;
+    const parts = nodeId.split('/');
+    const singleInput = parts[parts.length - 1];
+
+    let category = '';
+
+    if (this.rawEdges.some(edge =>
+      (edge.from === nodeId && edge.to === 'cti_vertices/general') ||
+      (edge.to === nodeId && edge.from === 'cti_vertices/general')
+    )) {
+      category = 'general';
+    } else if (this.rawEdges.some(edge =>
+      (edge.from === nodeId && edge.to === 'cti_vertices/leak') ||
+      (edge.to === nodeId && edge.from === 'cti_vertices/leak')
+    )) {
+      category = 'leak';
+    } else if (this.rawEdges.some(edge =>
+      (edge.from === nodeId && edge.to === 'cti_vertices/defacement') ||
+      (edge.to === nodeId && edge.from === 'cti_vertices/defacement')
+    )) {
+      category = 'defacement';
+    } else if (this.rawEdges.some(edge =>
+      (edge.from === nodeId && edge.to === 'cti_vertices/chat') ||
+      (edge.to === nodeId && edge.from === 'cti_vertices/chat')
+    )) {
+      category = 'chat';
+    }
+
+    if (category === 'leak') {
       const baseUrl = `${window.location.origin}/dashboard/breach/all/${singleInput}`;
       const fullUrl = `${baseUrl}`;
       window.open(fullUrl, '_blank');
-    }
-    else if (this.currentCategory === 'defacement') {
-      const parts = this.contextMenuNodeId.split('/');
-      const singleInput = parts[parts.length - 1];
-
+    } else if (category === 'defacement') {
       const baseUrl = `${window.location.origin}/dashboard/defacement/archive/${singleInput}`;
       const fullUrl = `${baseUrl}`;
       window.open(fullUrl, '_blank');
-    }
-    else if (this.currentCategory === 'general') {
-      const parts = this.contextMenuNodeId.split('/');
-      const singleInput = parts[parts.length - 1];
-
+    } else if (category === 'general') {
       const baseUrl = `${window.location.origin}/dashboard/strategic/all/${singleInput}`;
+      const fullUrl = `${baseUrl}`;
+      window.open(fullUrl, '_blank');
+    } else if (category === 'chat') {
+      const baseUrl = `${window.location.origin}/dashboard/social/telegram/${singleInput}`;
       const fullUrl = `${baseUrl}`;
       window.open(fullUrl, '_blank');
     }
