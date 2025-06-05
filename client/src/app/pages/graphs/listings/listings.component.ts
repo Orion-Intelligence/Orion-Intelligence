@@ -1,15 +1,15 @@
-import { Component, Input } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
-import { Edge } from 'vis-network/standalone';
-import { FormsModule } from '@angular/forms';
-import { Clipboard } from '@angular/cdk/clipboard';
+import {Component, Input, OnInit} from '@angular/core';
+import {NgFor, NgIf} from '@angular/common';
+import {Edge} from 'vis-network/standalone';
+import {FormsModule} from '@angular/forms';
+import {Clipboard} from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-listings',
   imports: [NgFor, NgIf, FormsModule],
   templateUrl: './listings.component.html',
 })
-export class ListingsComponent {
+export class ListingsComponent implements OnInit{
   @Input() nodeSet!: any;
   @Input() rawEdges: Edge[] = [];
   @Input() result: any[] = []
@@ -82,12 +82,9 @@ export class ListingsComponent {
   }
   checkDocument(id: string): boolean {
     let category = this.checkCluster(id);
-    if (category === '')
-      return false;
-    else
-      return true;
+    return category !== '';
   }
-  checkCluster(id: string): string {
+  checkCluster(_: string): string {
     let category = '';
 
     if (this.rawEdges.some((edge) =>
@@ -136,7 +133,6 @@ export class ListingsComponent {
     const second = words[1] || '';
     const rest = words.slice(2).join(' ');
 
-    const isShort = first.length >= 2 && first.length <= 3;
     const isDateTime = first.toLowerCase() === 'date' && second.toLowerCase() === 'time';
 
     const formatWord = (word: string) =>
@@ -157,10 +153,8 @@ export class ListingsComponent {
     const id = this.extractId(this.selectedDocId)
     const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
 
-    const singleInput = id;
-
     const params = new URLSearchParams({
-      selectedType: 'document', singleInput: singleInput
+      selectedType: 'document', singleInput: id
     });
 
     const fullUrl = `${baseUrl}?${params.toString()}`;
@@ -180,8 +174,7 @@ export class ListingsComponent {
   viewReport() {
     this.hideMenu();
 
-    const id = this.extractId(this.selectedDocId)
-    const singleInput = id;
+    const singleInput = this.extractId(this.selectedDocId);
 
     let category = '';
 
@@ -228,8 +221,7 @@ export class ListingsComponent {
     this.hideMenu();
   }
 
-  showCopiedMessage(event: MouseEvent) {
-    const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
+  showCopiedMessage(_: MouseEvent) {
 
     this.copiedX = 10;
 

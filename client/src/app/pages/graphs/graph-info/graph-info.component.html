@@ -1,10 +1,8 @@
-<div class="graph-filters__container" style="max-height: 100vh; overflow-y: auto;">
+<div class="graph-filters__container">
 
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleAnimation()">
     <div class="analytics d-flex align-items-center gap-2">
-      <input type="checkbox" id="switch" [checked]="physicsEnabled" style="pointer-events: none;"> <label for="switch"
-                                                                                                          class="mb-0"
-                                                                                                          style="pointer-events: none;"></label>
+      <input type="checkbox" id="switch" [checked]="physicsEnabled " class="pe-none"> <label for="switch" class="mb-0 pe-none"></label>
       <span>&nbsp; Toggle Physics</span>
     </div>
   </div>
@@ -12,8 +10,8 @@
 
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleExpand()">
     <div class="analytics d-flex align-items-center gap-2">
-      <input type="checkbox" id="switchExpand" [checked]="expandEnabled" style="pointer-events: none;"> <label
-      for="switchExpand" class="mb-0" style="pointer-events: none;"></label> <span>&nbsp; Expand</span>
+      <input type="checkbox" id="switchExpand" [checked]="expandEnabled" class="pe-none"> <label
+      for="switchExpand" class="mb-0 pe-none"></label> <span>&nbsp; Expand</span>
     </div>
   </div>
   <br>
@@ -59,14 +57,11 @@
       </ng-container>
     </div>
   </div>
-
   <br>
-
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none"
        (click)="toggleCollapse('indicators')">
     <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Indicators</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron"
-                                   [class.rotate]="indicatorsOpen"/>
+      <span>Indicators</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron" [class.rotate]="indicatorsOpen" alt=""/>
     </div>
     <div id="indicatorsCollapse" class="collapse" [class.show]="indicatorsOpen">
       <br>
@@ -108,31 +103,32 @@
   <br>
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleCollapse('ruleset')">
     <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Preferences</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron" [class.rotate]="rulesetOpen" alt=""/>
+      <span>Preferences</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron"
+                                    [class.rotate]="rulesetOpen" alt=""/>
     </div>
     <div (click)="$event.stopPropagation()" id="rulesetCollapse" class="collapse" [class.show]="rulesetOpen">
       <br><br>
       <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('edgePointers', true)">
-        <input type="checkbox" [checked]="ruleSet.edgePointers" style="pointer-events: none;">
-        <label class="mb-0" style="pointer-events: none;"></label>
+        <input type="checkbox" [checked]="ruleSet.edgePointers" class="pe-none">
+        <label class="mb-0 pe-none"></label>
         <span>&nbsp; Edge Pointers</span>
       </div>
       <br>
       <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('edgeHighlight', true)">
-        <input type="checkbox" [checked]="ruleSet.edgeHighlight" style="pointer-events: none;">
-        <label class="mb-0" style="pointer-events: none;"></label>
+        <input type="checkbox" [checked]="ruleSet.edgeHighlight" class="pe-none">
+        <label class="mb-0 pe-none"></label>
         <span>&nbsp; Edge Highlight</span>
       </div>
       <br>
       <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('edgeColor', true)">
-        <input type="checkbox" [checked]="ruleSet.edgeColor" style="pointer-events: none;">
-        <label class="mb-0" style="pointer-events: none;"></label>
+        <input type="checkbox" [checked]="ruleSet.edgeColor" class="pe-none">
+        <label class="mb-0 pe-none"></label>
         <span>&nbsp; Edge Color</span>
       </div>
       <br>
       <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('expandTrigger', true)">
-        <input type="checkbox" [checked]="ruleSet.expandTrigger" style="pointer-events: none;">
-        <label class="mb-0" style="pointer-events: none;"></label>
+        <input type="checkbox" [checked]="ruleSet.expandTrigger" class="pe-none">
+        <label class="mb-0 pe-none"></label>
         <span>&nbsp; Expand Trigger</span>
       </div>
     </div>

@@ -51,7 +51,7 @@ class entity_manager:
                 if normalized_value == "all":
                     queried_id = "all_clusters"
                     query_str = f"""
-                    LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat", "cti_vertices/telegram"]
+                    LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat"]
 
                     LET cluster_data = (
                       FOR cluster_id IN clusters
@@ -145,7 +145,7 @@ class entity_manager:
                         RETURN item.vertex._id
                     )
 
-                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
+                    LET default_clusters = ["general", "defacement", "leak", "chat"]
                     LET filtered_cluster_edges = (
                       FOR doc_id IN document_ids
                         FOR e IN cti_edges
@@ -184,7 +184,7 @@ class entity_manager:
                         RETURN item.vertex._id
                     )
 
-                    LET default_clusters = ["general", "defacement", "leak", "telegram"]
+                    LET default_clusters = ["general", "defacement", "leak", "chat"]
                     LET filtered_cluster_edges = (
                       FOR doc_id IN document_ids
                         FOR e IN cti_edges
@@ -266,7 +266,7 @@ class entity_manager:
                   related_doc_ids
                 )
 
-                LET default_clusters = ["general", "defacement", "leak", "telegram"]
+                LET default_clusters = ["general", "defacement", "leak", "chat"]
 
                 LET cluster_edges = (
                   FOR doc_id IN document_ids

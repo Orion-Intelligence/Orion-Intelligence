@@ -1,6 +1,5 @@
 <ng-container *ngIf="showResults">
-    <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleCollapse()"
-        (click)="hideMenu()">
+    <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleCollapse();hideMenu()">
         <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
             <span>Listings</span> <img src="/assets/images/shared/search_side_dropdown_icon.svg" class="chevron"
                 [class.rotate]="collapseToggle" alt="" />
@@ -14,7 +13,7 @@
                             class="filter__input filter__input_date text-start justify-content-between align-items-center"
                             placeholder="Search..." [(ngModel)]="searchText" />
                         <button class="btn date_picker_button_bg ms-2 filter__input_date-button" type="button"
-                            (click)="onSearchClick()" style="height: 40px;">
+                            (click)="onSearchClick()">
                             <img src="assets/images/shared/magnifyingglasswhite.svg" alt="Calendar"
                                 class="date_picker_button_image" />
                         </button>
@@ -23,38 +22,45 @@
             </div>
             <br>
 
-            <ng-container *ngFor="let doc of onSearchClick(); let last = last">
-
-                <div class="doc-item">
-                    <div class="left" #myBtn (click)="openMenu(doc.edge._id,myBtn)">
-                        <div class="doc-id-line">
-                            <span class="doc-id">{{ shortenId(extractId(doc.edge._id),21) }}</span>
-                            <img src="/assets/images/shared/list.svg" alt="icon" class="doc-icon" />
+            <ng-container *ngIf="onSearchClick().length > 0; else noResults">
+                <ng-container *ngFor="let doc of onSearchClick(); let last = last">
+                    <div class="doc-item">
+                        <div class="left" #myBtn (click)="openMenu(doc.edge._id, myBtn)">
+                            <div class="doc-id-line">
+                                <span class="doc-id">{{ doc.edge._id }}</span>
+                            </div>
+                            <div class="doc-title">
+                                {{ formatProperty(shortenId(extractproperty(doc.edge._id), 30)) }}
+                            </div>
+                            <div class="doc-cluster">
+                                Type: {{ checkCluster(doc.edge._id) }}
+                            </div>
                         </div>
-                        <div class="doc-title">{{ formatProperty(shortenId(extractproperty(doc.edge._id),30))}}
-                        </div>
-                        <div class="doc-cluster">Type: {{ checkCluster(doc.edge._id) }}</div>
                     </div>
-                </div>
-                <div class="divider" *ngIf="!last"></div>
+                    <div class="divider" *ngIf="!last"></div>
+                </ng-container>
             </ng-container>
+
+            <ng-template #noResults>
+              <div class="text-muted opacity-70">No results found.</div>
+            </ng-template>
 
             <div id="contextMenu" class="context-menu">
                 <button class="dropdown-item button-content" (click)="openCTI()">
-                    <img src="assets/images/shared/share-black.svg" width="15" height="15" style="margin-right: 8px;"
-                        class="share-wrapper" alt="">
+                    <img src="assets/images/shared/share-black.svg" width="15" height="15"
+                        class="share-wrapper graph-filters__listing-margin" alt="">
                     Open CTI
                 </button>
                 <hr class="dropdown-divider mx-3">
                 <button class="dropdown-item button-content" (click)="copyNodeLabel($event)">
-                    <img src="assets/images/shared/label.svg" width="15" height="15" style="margin-right: 8px;"
-                        class="share-wrapper" alt="">
+                    <img src="assets/images/shared/label.svg" width="15" height="15"
+                        class="share-wrapper graph-filters__listing-margin" alt="">
                     Copy Label
                 </button>
                 <hr class="dropdown-divider mx-3">
                 <button class="dropdown-item button-content" (click)="viewReport()">
-                    <img src="assets/images/shared/redirect-black.svg" width="15" height="15" style="margin-right: 8px;"
-                        class="share-wrapper" alt="">
+                    <img src="assets/images/shared/redirect-black.svg" width="15" height="15"
+                        class="share-wrapper graph-filters__listing-margin" alt="">
                     Open Report
                 </button>
 
@@ -66,20 +72,20 @@
 </ng-container>
 <div id="contextMenu" class="context-menu">
     <button class="dropdown-item button-content" (click)="openCTI()">
-        <img src="assets/images/shared/share-black.svg" width="15" height="15" style="margin-right: 8px;"
-            class="share-wrapper" alt="">
+        <img src="assets/images/shared/share-black.svg" width="15" height="15"
+            class="share-wrapper graph-filters__listing-margin" alt="">
         Open CTI
     </button>
     <hr class="dropdown-divider mx-3">
     <button class="dropdown-item button-content" (click)="copyNodeLabel($event)">
-        <img src="assets/images/shared/label.svg" width="15" height="15" style="margin-right: 8px;"
-            class="share-wrapper" alt="">
+        <img src="assets/images/shared/label.svg" width="15" height="15"
+            class="share-wrapper graph-filters__listing-margin" alt="">
         Copy Label
     </button>
     <hr class="dropdown-divider mx-3">
     <button class="dropdown-item button-content" (click)="viewReport()">
-        <img src="assets/images/shared/redirect-black.svg" width="15" height="15" style="margin-right: 8px;"
-            class="share-wrapper" alt="">
+        <img src="assets/images/shared/redirect-black.svg" width="15" height="15"
+            class="share-wrapper graph-filters__listing-margin" alt="">
         Open Report
     </button>
 

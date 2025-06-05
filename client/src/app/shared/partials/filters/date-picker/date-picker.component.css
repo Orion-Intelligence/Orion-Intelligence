@@ -37,6 +37,7 @@
 }
 
 .date_picker_button_bg {
+  height: 30px;
   outline: none;
   box-shadow:none !important;
   background-color: white;
@@ -49,8 +50,8 @@
 }
 
 .date_picker_button_image {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
 }
 
 .form-check-input {

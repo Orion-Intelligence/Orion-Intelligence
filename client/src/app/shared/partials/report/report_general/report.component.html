@@ -76,8 +76,7 @@
   <ng-container *ngIf="resultItem?.m_url as url; else noUrl">
     <ng-container *ngIf="url.trim().length > 1; else noUrl">
       <p class="search__result-detail-url-p text-truncate">
-        <a [href]="url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate"
-          style="max-width: 100%;" target="_blank">
+        <a [href]="url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width" target="_blank">
           {{ url }}
         </a>
       </p>

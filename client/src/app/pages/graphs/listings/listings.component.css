@@ -2,7 +2,10 @@
     font-size: 14px;
     opacity: 0.7;
     margin-bottom: 4px;
-    min-width: 171px !important;
+    min-width: 185px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .doc-title {

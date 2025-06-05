@@ -5,10 +5,14 @@
   z-index: 10;
 }
 
+.graph-filters__listing-margin {
+  margin-right: 8px;
+}
+
 .graph-filters__details {
   width: 240px;
   color: #fff;
-  background: #17406959;
+  background: #08203a;
   padding: 20px;
   border-radius: 8px;
   border: 1px solid #ffffff15;
@@ -63,13 +67,33 @@
 }
 
 .graph-filters__container .btn {
-  height: 48px;
+  height: 40px;
 }
 
 .graph-filters__container .btn-danger-graph {
   color: #fff;
-  background-color: #dc3545;
-  border-color: #dc3545;
+}
+
+.graph-filters__container {
+  color: #fff;
+  max-height: 95vh !important;
+  overflow-y: auto !important;
+  scrollbar-width: auto;
+  scrollbar-color: #124b87 transparent;
+}
+
+.graph-filters__container::-webkit-scrollbar {
+  width: 3px;
+}
+
+.graph-filters__container::-webkit-scrollbar-thumb {
+  background-color: #124b87;
+  border-radius: 50px;
+}
+
+.graph-filters__container::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 50px;
 }
 
 @media (max-width: 799px) {

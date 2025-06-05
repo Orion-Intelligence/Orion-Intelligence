@@ -80,6 +80,12 @@
   border-radius: 4px;
 }
 
+.dropdown-item-custom{
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
 .filter__input {
   display: block;
   color: #3c3c43;

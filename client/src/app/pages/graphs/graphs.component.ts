@@ -20,7 +20,6 @@ interface ExtendedNode extends Node {
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
-  styleUrls: ['./graphs.component.css'],
   animations: [fadeInDashboardItem],
   imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf]
 })

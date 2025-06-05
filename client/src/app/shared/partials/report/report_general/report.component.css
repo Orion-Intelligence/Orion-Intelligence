@@ -101,6 +101,10 @@
   overflow: hidden;
 }
 
+.search__result-detail-url-width{
+  max-width: 100%;
+}
+
 .search__result-detail-url {
   text-decoration: none !important;
 }
