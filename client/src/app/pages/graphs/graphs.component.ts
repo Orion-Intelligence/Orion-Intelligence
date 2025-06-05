@@ -553,6 +553,8 @@ export class GraphComponent implements OnInit {
 
   hideContextMenu() {
     const menu = document.getElementById('customContextMenu');
+    const listingMenu = document.getElementById('contextMenu');
+    if (listingMenu) listingMenu.style.display = "none";
     if (menu) {
       menu.style.display = 'none';
       if (this.contextMenuNodeId) {
