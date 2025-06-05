@@ -131,7 +131,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   get currentResultCount(): number {
-    return this.chatCallbackModel?.Result?.length ?? 0;
+    return this.chatCallbackModel.Page_Count ?? 0;
   }
 
   resetFilters(_: void) {

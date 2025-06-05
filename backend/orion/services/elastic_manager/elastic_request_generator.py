@@ -440,6 +440,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_telegram_data(p_query_model):
+        raw_query = ""
         if p_query_model.q == "":
             raw_query = "*"
 
