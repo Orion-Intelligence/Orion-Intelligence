@@ -66,7 +66,7 @@ export class ListingsComponent implements OnInit{
       this.filteredResult = this.result.filter(doc =>
         this.checkDocument(doc.edge._id) && this.extractproperty(doc.edge._id)
       );
-      this.filteredResult = this.filteredResult.slice(0, 50);
+      this.filteredResult = this.filteredResult.slice(0, 25);
       return this.filteredResult;
     }
 
@@ -78,7 +78,7 @@ export class ListingsComponent implements OnInit{
       console.log(query + " " + id + " " + shorterId + " " + prop + " " + cluster)
       return id.includes(query) || shorterId.includes(query) || prop.includes(query) || cluster.includes(query);
     });
-    return this.filteredResult.slice(0, 50);
+    return this.filteredResult.slice(0, 25);
   }
   checkDocument(id: string): boolean {
     let category = this.checkCluster(id);
