@@ -33,7 +33,8 @@ export class ListingsComponent {
   }
   openMenu(id: any, button: HTMLElement) {
     this.selectedDocId = id;
-
+    const graphMenu = document.getElementById('customContextMenu');
+    if (graphMenu) graphMenu.style.display = 'none';
     const menu = document.getElementById('contextMenu');
     if (!menu) return;
 
@@ -53,7 +54,10 @@ export class ListingsComponent {
     const query = this.searchText.toLowerCase();
 
     if (!query) {
-      this.filteredResult = this.result;
+      this.filteredResult = this.result.filter(doc =>
+        this.checkDocument(doc.edge._id) && this.extractproperty(doc.edge._id)
+      );
+      this.filteredResult = this.filteredResult.slice(0, 50);
       return this.filteredResult;
     }
 
@@ -65,7 +69,7 @@ export class ListingsComponent {
       console.log(query + " " + id + " " + shorterId + " " + prop + " " + cluster)
       return id.includes(query) || shorterId.includes(query) || prop.includes(query) || cluster.includes(query);
     });
-    return this.filteredResult
+    return this.filteredResult.slice(0, 50);
   }
   checkDocument(id: string): boolean {
     let category = this.checkCluster(id);
