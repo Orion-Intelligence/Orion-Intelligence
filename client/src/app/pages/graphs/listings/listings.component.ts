@@ -38,16 +38,10 @@ export class ListingsComponent {
     if (!menu) return;
 
     const rect = button.getBoundingClientRect();
-
-    // Get the scroll offsets of the closest scrollable container
     const scrollContainer = this.findScrollParent(button);
 
     const scrollTop = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
-    //const scrollLeft = scrollContainer ? scrollContainer.scrollLeft : window.scrollX;
-
-    // Set menu position
     menu.style.display = 'block';
-    //menu.style.left = `${rect.left + scrollLeft}px`;
     menu.style.top = `${rect.bottom + scrollTop - 75}px`;
   }
   hideMenu() {
