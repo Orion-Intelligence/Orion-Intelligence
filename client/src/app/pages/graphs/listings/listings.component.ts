@@ -60,6 +60,13 @@ export class ListingsComponent {
     const match = path.match(/[a-f0-9]{64}/);
     return match ? match[0] : '';
   }
+  extractproperty(id: string): string {
+    let id_temp = this.extractId(id)
+    let location_point = id.indexOf(id_temp)+id_temp.length+3
+    let item = id.substring(location_point)
+    item = item.replaceAll("_"," ")
+    return item
+  }
   shortenId(id: string): string {
     return id.length > 15 ? id.slice(0, 21) + '...' : id;
   }

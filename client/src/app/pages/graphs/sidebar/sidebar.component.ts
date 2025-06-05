@@ -9,13 +9,15 @@ import {AppService} from '../../../services/core/app.service';
 })
 export class SidebarComponent implements OnInit {
   @Output() filtersApplied = new EventEmitter<{
-    selectedType: string; singleInput: string; propertyType: string; propertyValue: string;
+    selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number;
   }>();
 
   selectedType = 'cluster';
   singleInput = 'all';
   propertyType = 'all';
   propertyValue = '';
+  maxNodes: number = 50;
+  maxDepth: number = 1;
 
   typeOptions = ['cluster', 'document', 'property'];
   clusterOptions = ['all', 'general', 'leak', 'defacement', 'chat'];
@@ -96,7 +98,7 @@ export class SidebarComponent implements OnInit {
       this.propertyValue = params['propertyValue'] || '';
 
       this.filtersApplied.emit({
-        selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue
+        selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue, maxEdge: this.maxNodes, maxDepth:this.maxDepth
       });
     });
   }
@@ -104,12 +106,12 @@ export class SidebarComponent implements OnInit {
   applyFilters() {
     this.router.navigate([], {
       queryParams: {
-        selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue
+        selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue, maxEdge: this.maxNodes, maxDepth:this.maxDepth
       }
     }).then();
 
     this.filtersApplied.emit({
-      selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue
+      selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue, maxEdge: this.maxNodes, maxDepth:this.maxDepth
     });
   }
 
@@ -121,12 +123,12 @@ export class SidebarComponent implements OnInit {
 
     this.router.navigate([], {
       queryParams: {
-        selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue
+        selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue, maxEdge: this.maxNodes, maxDepth:this.maxDepth
       }
     }).then();
 
     this.filtersApplied.emit({
-      selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue
+      selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue, maxEdge: this.maxNodes, maxDepth:this.maxDepth
     });
   }
 
@@ -145,5 +147,15 @@ export class SidebarComponent implements OnInit {
       this.propertyValue = '';
     }
   }
+  validateMaxNodes() {
+    if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 500) {
+      this.maxNodes = 50;
+    }
+  }
 
+  validateMaxDepth() {
+    if (!this.maxDepth || this.maxDepth < 1 || this.maxDepth > 5) {
+      this.maxDepth = 2;
+    }
+  }
 }

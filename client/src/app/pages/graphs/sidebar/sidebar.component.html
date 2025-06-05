@@ -57,6 +57,28 @@
         <label class="filter__label mt-3">Document ID</label> <input type="text" class="form-control filter__input" [(ngModel)]="singleInput" name="singleInput" placeholder="Enter ID"/>
       </ng-container>
 
+      <label class="filter__label mt-3">Maximum Nodes</label>
+      <input type="number"
+             class="form-control filter__input"
+             [(ngModel)]="maxNodes"
+             name="maxNodes"
+             placeholder="Enter maximum nodes"
+             required
+             min="20"
+             max="500"
+             (blur)="validateMaxNodes()" />
+
+      <label class="filter__label mt-3">Maximum Depth</label>
+      <input type="number"
+             class="form-control filter__input"
+             [(ngModel)]="maxDepth"
+             name="maxDepth"
+             placeholder="Enter maximum depth"
+             required
+             min="1"
+             max="5"
+             (blur)="validateMaxDepth()" />
+
       <div class="filter__submit">
         <div class="filter__submit d-flex flex-column mt-4">
           <button type="button" class="btn btn-primary filter__submit-button" (click)="applyFilters()">Apply</button>
