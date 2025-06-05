@@ -21,10 +21,18 @@ export class ListingsComponent {
   copiedX = 0;
   copiedY = 0;
   selectedDocId: any;
+  showResults: boolean = false;
 
   constructor(private clipboard: Clipboard) {
   }
+  ngOnInit(): void {
+    setTimeout(() => {
+      const list = this.onSearchClick();
+      if (list.length > 0)
+        this.showResults = true;
+    }, 2000);
 
+  }
   toggleCollapse() {
     this.rawEdges.forEach(edge => {
       console.log(`From: ${edge.from}, To: ${edge.to}`);
@@ -44,6 +52,7 @@ export class ListingsComponent {
     const scrollTop = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
     menu.style.display = 'block';
     menu.style.top = `${rect.bottom + scrollTop - 75}px`;
+    this.copiedY = rect.bottom + scrollTop - 75;
   }
   hideMenu() {
     const menu = document.getElementById('contextMenu');
@@ -222,8 +231,7 @@ export class ListingsComponent {
   showCopiedMessage(event: MouseEvent) {
     const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
 
-    this.copiedX = buttonRect.right + 10;
-    this.copiedY = buttonRect.top + window.scrollY;
+    this.copiedX = 10;
 
     this.copied = true;
 
