@@ -114,7 +114,7 @@
       </div>
       <br>
       <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('edgeHighlight', true)">
-        <input type="checkbox" [checked]="ruleSet.edgeHighlight" class="pe-none">
+        <input type="checkbox" [checked]="ruleSet.edgeHighlight && ruleSet.expandTrigger" class="pe-none">
         <label class="mb-0 pe-none"></label>
         <span>&nbsp; Edge Highlight</span>
       </div>
@@ -125,7 +125,7 @@
         <span>&nbsp; Edge Color</span>
       </div>
       <br>
-      <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('expandTrigger', true)">
+      <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('expandTrigger', true);onRuleToggle('edgeHighlight', false)">
         <input type="checkbox" [checked]="ruleSet.expandTrigger" class="pe-none">
         <label class="mb-0 pe-none"></label>
         <span>&nbsp; Expand Trigger</span>

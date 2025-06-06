@@ -360,9 +360,6 @@ export class GraphComponent implements OnInit {
 
       const nodeId = String(rawNodeId);
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
-      if (!node.label!.includes("Group (document)"))
-        return
-
       const clusterNodeIds = new Set([
         'cti_vertices/general',
         'cti_vertices/defacement',

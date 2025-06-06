@@ -3,11 +3,13 @@ import {NgFor, NgIf} from '@angular/common';
 import {Edge} from 'vis-network/standalone';
 import {FormsModule} from '@angular/forms';
 import {Clipboard} from '@angular/cdk/clipboard';
+import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-listings',
   imports: [NgFor, NgIf, FormsModule],
   templateUrl: './listings.component.html',
+  animations: [fadeInDashboardItem]
 })
 export class ListingsComponent implements OnInit{
   @Input() nodeSet!: any;
