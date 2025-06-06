@@ -29,8 +29,8 @@
 .sidebar__items {
   list-style: none;
   overflow-y: auto;
-  height: calc(100vh - 250px);
-  min-height: 600px;
+  height: calc(100vh - 280px);
+  min-height: 500px;
   scrollbar-width: none;
   margin-left: -5px;
   padding: 20px;

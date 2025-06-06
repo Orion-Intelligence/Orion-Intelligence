@@ -2,10 +2,10 @@
 
 <graph-sidebar class="d-none d-md-block" (filtersApplied)="onSidebarApply($event)"></graph-sidebar>
 
-<app-graph-info class="d-none d-md-block" (physicsToggled)="onPhysicsToggled($event)" (onResetAll)="onResetAll()" (ruleSetChange)="ruleSetChange($event)" [(ruleSet)]="ruleSet"
+<app-graph-info class="d-none d-md-block" [expandEnabledTemp]="expandEnabled" (physicsToggled)="onPhysicsToggled($event)" (onResetAll)="onResetAll()" (ruleSetChange)="ruleSetChange($event)" [(ruleSet)]="ruleSet"
   (expandToggled)="onExpandToggled($event)" [selectedType]="selectedType" [singleInput]="singleInput"
-  [propertyType]="propertyType" [physicsEnabled]=physicsEnabled [propertyValue]="propertyValue" [nodeSet]="nodeSet"
-  [rawEdges]="rawEdges" [result]="resultReference">
+  [propertyType]="propertyType" [physicsEnabled]=physicsEnabled [propertyValue]="propertyValue"
+  [result]="flattenedDocuments">
 </app-graph-info>
 
 
@@ -54,7 +54,7 @@
   </div>
 </div>
 
-<div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
+<div *ngIf="this.isEmpty && !this.loading" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
   <img src="assets/images/shared/cti-empty.svg" alt="No Data" class="img-fluid w-auto" />
 </div>
 

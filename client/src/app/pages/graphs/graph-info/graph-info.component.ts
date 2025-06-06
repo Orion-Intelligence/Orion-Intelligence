@@ -2,7 +2,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { NgIf, TitleCasePipe } from '@angular/common';
 import { ListingsComponent } from "../listings/listings.component";
-import { Edge } from 'vis-network/standalone';
 import {loadRuleSetFromStorage, RuleSet, saveRuleSetToStorage} from '../../../shared/model/graph/ruleset_model';
 
 @Component({
@@ -17,8 +16,7 @@ export class GraphInfoComponent implements OnInit {
   @Input() propertyValue!: string;
   @Input() physicsEnabled!: boolean;
   @Input() expandEnabled!: boolean;
-  @Input() nodeSet!: any;
-  @Input() rawEdges: Edge[] = [];
+  @Input() expandEnabledTemp!: boolean;
   @Input() result: any[] = []
 
   @Input() ruleSet!: RuleSet;

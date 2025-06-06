@@ -1,5 +1,4 @@
 <div class="graph-filters__container">
-
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleAnimation()">
     <div class="analytics d-flex align-items-center gap-2">
       <input type="checkbox" id="switch" [checked]="physicsEnabled " class="pe-none"> <label for="switch" class="mb-0 pe-none"></label>
@@ -10,7 +9,7 @@
 
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleExpand()">
     <div class="analytics d-flex align-items-center gap-2">
-      <input type="checkbox" id="switchExpand" [checked]="expandEnabled" class="pe-none"> <label
+      <input type="checkbox" id="switchExpand" [checked]="expandEnabled && expandEnabledTemp" class="pe-none"> <label
       for="switchExpand" class="mb-0 pe-none"></label> <span>&nbsp; Expand</span>
     </div>
   </div>
@@ -97,7 +96,7 @@
 
     </div>
   </div>
-  <app-listings [nodeSet]="nodeSet" [rawEdges]="rawEdges" [result]="result"></app-listings>
+  <app-listings [result]="result"></app-listings>
 
   <br>
   <div class="graph-filters__details graph-pointer cursor-pointer user-select-none" (click)="toggleCollapse('ruleset')">
