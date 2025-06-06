@@ -47,8 +47,8 @@
   <div class="default-notification-banner default-notification-banner-cti">
     <span>
       <img src="assets/images/shared/hint.svg" class="default-notification-banner-icon" alt="Info Icon">
-      <span>
-        You can see {{ maxDepth }} nodes at a time, results containing more than 200 nodes will scale down;
+      <span *ngIf="maxDepth>50">
+        You can see {{ maxDepth }} nodes at a time, avoid using extreme values for better performance;
       </span>
 
     </span>
