@@ -90,6 +90,10 @@
   opacity: 0.6;
 }
 
+.sidebar__icon-lift {
+  margin-bottom: 6px;
+}
+
 .sidebar__subitems {
   list-style: none;
   margin-left: 15px;
