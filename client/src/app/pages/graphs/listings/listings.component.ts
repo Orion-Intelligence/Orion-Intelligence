@@ -28,12 +28,7 @@ export class ListingsComponent implements OnInit{
   constructor(private clipboard: Clipboard) {
   }
   ngOnInit(): void {
-    setTimeout(() => {
-      const list = this.onSearchClick();
-      if (list.length > 0)
-        this.showResults = true;
-    }, 2000);
-
+    this.showResults = true;
   }
   toggleCollapse() {
     this.rawEdges.forEach(edge => {
