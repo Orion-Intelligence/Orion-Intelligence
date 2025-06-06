@@ -43,14 +43,13 @@
 <span *ngIf="copied" class="floating-copied " [style]="{ top: copiedY + 'px', left: copiedX + 'px' }">Copied!</span>
 
 
-<div class="graph-notification" *ngIf="limitReached">
+<div class="graph-notification" *ngIf="maxDepth>50">
   <div class="default-notification-banner default-notification-banner-cti">
     <span>
       <img src="assets/images/shared/hint.svg" class="default-notification-banner-icon" alt="Info Icon">
-      <span *ngIf="maxDepth>50">
+      <span>
         You can see {{ maxDepth }} nodes at a time, avoid using extreme values for better performance;
       </span>
-
     </span>
   </div>
 </div>
