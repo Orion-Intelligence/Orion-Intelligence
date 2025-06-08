@@ -35,7 +35,6 @@ class CardExtractionModel(BaseModel):
     m_crypto_addresses: List[str] = []
     m_attacker: Optional[List[str]] = None
     m_ref_html: Optional[str] = None
-    m_password: Optional[str] = None
     m_team: Optional[str] = None
 
     class Config:
