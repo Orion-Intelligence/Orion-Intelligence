@@ -62,7 +62,7 @@
 .filter__input_date-button{
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
-  height: 40px;
+  height: 40px !important;
 }
 
 .filter__input_date-container .dropdown-menu{
