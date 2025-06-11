@@ -16,7 +16,7 @@ export class SidebarComponent implements OnInit {
   singleInput = 'all';
   propertyType = 'all';
   propertyValue = '';
-  maxNodes: number = 50;
+  maxNodes: number = 20;
   maxDepth: number = 1;
 
   typeOptions = ['cluster', 'document', 'property'];
@@ -151,7 +151,7 @@ export class SidebarComponent implements OnInit {
   }
   validateMaxNodes() {
     if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 500) {
-      this.maxNodes = 50;
+      this.maxNodes = 20;
     }
   }
 
