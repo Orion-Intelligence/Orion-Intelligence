@@ -96,7 +96,7 @@ export class SidebarComponent implements OnInit {
       this.singleInput = params['singleInput'] || 'all';
       this.propertyType = params['propertyType'] || 'all';
       this.propertyValue = params['propertyValue'] || '';
-      this.maxNodes = (+params['maxEdge'] > 500 || +params['maxEdge'] < 0) ? '50' : (params['maxEdge'] || '50');
+      this.maxNodes = (+params['maxEdge'] > 500 || +params['maxEdge'] < 0) ? '20' : (params['maxEdge'] || '20');
       this.maxDepth = (+params['maxDepth'] > 5 || +params['maxDepth'] < 0) ? '1' : (params['maxDepth'] || '1');
 
       this.filtersApplied.emit({

@@ -31,7 +31,7 @@ export class GraphComponent implements OnInit {
   propertyType = 'all';
   propertyValue = '';
   maxEdge = 1;
-  maxDepth = 50;
+  maxDepth = 25;
   loading = false
 
   physicsEnabled = true;
