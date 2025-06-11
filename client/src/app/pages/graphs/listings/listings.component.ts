@@ -77,7 +77,6 @@ export class ListingsComponent implements OnInit {
   viewReport(doc_id: string, path: string): void {
     if (!doc_id || !path) return;
     const url = `${window.location.origin}/dashboard/${path}/${doc_id}`;
-    alert(url)
     window.open(url, '_blank');
   }
 }
