@@ -143,8 +143,8 @@ export class GraphComponent implements OnInit {
       const edge = item.edge;
 
       let path = 'unknown';
-      const from = edge?._from || '';
-      const to = edge?._to || '';
+      const from = (edge?._from || '').toLowerCase().trim();
+      const to = (edge?._to || '').toLowerCase().trim();
 
       if (from.includes('general') || to.includes('general')) {
         path = 'strategic/all';
