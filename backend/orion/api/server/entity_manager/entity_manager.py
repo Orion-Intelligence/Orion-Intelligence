@@ -137,7 +137,9 @@ class entity_manager:
                     LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-                        RETURN {{vertex: v, edge: e, path: p}}
+                          FILTER v.type == 'document'
+                          LIMIT {document_limit}
+                          RETURN {{vertex: v, edge: e, path: p}}
                     )
                     LET document_ids = UNIQUE(
                       FOR item IN raw_depth1
@@ -176,7 +178,9 @@ class entity_manager:
                     LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-                        RETURN {{vertex: v, edge: e, path: p}}
+                          FILTER v.type == 'document'
+                          LIMIT {document_limit}
+                          RETURN {{vertex: v, edge: e, path: p}}
                     )
                     LET document_ids = UNIQUE(
                       FOR item IN raw_depth1
