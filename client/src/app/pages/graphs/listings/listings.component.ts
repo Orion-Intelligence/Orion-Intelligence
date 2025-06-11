@@ -18,7 +18,6 @@ export class ListingsComponent implements OnInit {
   copied = false;
   copiedX = 0;
   copiedY = 0;
-  selectedDoc: any;
   showResults: boolean = false;
 
   constructor(private clipboard: Clipboard) {
@@ -75,10 +74,10 @@ export class ListingsComponent implements OnInit {
     return name.replace(/^m_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
-  viewReport(doc_id:string) {
-    if (!doc_id) return;
-
-    const url = `${window.location.origin}/dashboard/strategic/all/${doc_id}`;
+  viewReport(doc_id: string, path: string): void {
+    if (!doc_id || !path) return;
+    const url = `${window.location.origin}/dashboard/${path}/${doc_id}`;
+    alert(url)
     window.open(url, '_blank');
   }
 }

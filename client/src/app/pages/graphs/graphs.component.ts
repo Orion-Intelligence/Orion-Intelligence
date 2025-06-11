@@ -96,7 +96,7 @@ export class GraphComponent implements OnInit {
   }
 
   loadGraphByNode(data_point_type: string, type: string, value: string, maxEdge: string, maxDepth: string): void {
-    this.expandEnabled = false
+    this.expandEnabled = false;
     let params = new HttpParams();
     this.loading = false;
 
@@ -118,36 +118,14 @@ export class GraphComponent implements OnInit {
 
     this.resetGraph();
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
-        const {results, limit_reached} = response;
+        const { results, limit_reached } = response;
         this.result = results;
         this.renderGraph(this.result);
         this.limitReached = limit_reached;
         this.loading = true;
-
-        this.flattenedDocuments = [];
-        results.forEach(item => {
-          const doc = item.vertex;
-          if (doc?.type === 'document') {
-            const docId = doc.m_document_id || doc._key;
-            const docType = doc.type;
-
-            Object.entries(doc).forEach(([key, value]) => {
-              if (key.startsWith('m_') && Array.isArray(value)) {
-                value.forEach(val => {
-                  this.flattenedDocuments.push({
-                    m_document_id: docId,
-                    type: docType,
-                    property: key,
-                    value: val
-                  });
-                });
-              }
-            });
-          }
-        });
-
+        this.initListings(results);
       },
       error: err => {
         this.isEmpty = true;
@@ -157,6 +135,47 @@ export class GraphComponent implements OnInit {
     });
   }
 
+  initListings(results: any[]): void {
+    this.flattenedDocuments = [];
+
+    results.forEach(item => {
+      const doc = item.vertex;
+      const edge = item.edge;
+
+      let path = 'unknown';
+      const from = edge?._from || '';
+      const to = edge?._to || '';
+
+      if (from.includes('general') || to.includes('general')) {
+        path = 'strategic/all';
+      } else if (from.includes('leak') || to.includes('leak')) {
+        path = 'breach/all';
+      } else if (from.includes('defacement') || to.includes('defacement')) {
+        path = 'defacement/archive';
+      } else if (from.includes('chat') || to.includes('chat')) {
+        path = 'social/telegram';
+      }
+
+      if (doc?.type === 'document') {
+        const docId = doc.m_document_id || doc._key;
+        const docType = doc.type;
+
+        Object.entries(doc).forEach(([key, value]) => {
+          if (key.startsWith('m_') && Array.isArray(value)) {
+            value.forEach(val => {
+              this.flattenedDocuments.push({
+                m_document_id: docId,
+                type: docType,
+                property: key,
+                value: val,
+                path: path
+              });
+            });
+          }
+        });
+      }
+    });
+  }
 
   private renderGraph(data: any[], _ = false): void {
     this.resetGraph()

@@ -22,7 +22,7 @@
       <ng-container *ngIf="onSearchClick().length > 0; else noResults">
         <ng-container *ngFor="let doc of onSearchClick(); let last = last">
           <div class="doc-item">
-            <div class="left" #myBtn (click)="viewReport(doc.m_document_id)">
+            <div class="left" #myBtn (click)="viewReport(doc.m_document_id, doc.path)">
               <div class="doc-id-line">
                 <span class="doc-id">{{ doc.m_document_id }}</span>
               </div>
