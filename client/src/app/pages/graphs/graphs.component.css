@@ -76,10 +76,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 8px 12px;
   width: 100%;
   text-align: left;
-  padding-left: 15px;
+  padding: 8px 12px 8px 15px;
+  color: #fff;
 }
 
 .button-content:focus {
