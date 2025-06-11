@@ -150,7 +150,7 @@ export class SidebarComponent implements OnInit {
     }
   }
   validateMaxNodes() {
-    if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 500) {
+    if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 800) {
       this.maxNodes = 25;
     }
   }
