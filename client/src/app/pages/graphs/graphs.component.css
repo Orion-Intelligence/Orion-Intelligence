@@ -79,7 +79,7 @@
   width: 100%;
   text-align: left;
   padding: 8px 12px 8px 15px;
-  color: #000;
+  color: #000 !important;
 }
 
 .button-content:focus {
