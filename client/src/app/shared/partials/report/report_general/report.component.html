@@ -76,7 +76,9 @@
   <ng-container *ngIf="resultItem?.m_url as url; else noUrl">
     <ng-container *ngIf="url.trim().length > 1; else noUrl">
       <p class="search__result-detail-url-p text-truncate">
-        <a [href]="url" class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width" target="_blank">
+        <a [href]="url"
+          class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width"
+          target="_blank">
           {{ url }}
         </a>
       </p>
@@ -139,17 +141,28 @@
       @fadeInDashboardItem></app-result-list>
   </div>
 
-  <div class="search__result-detail-preview" *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot!=''">
-    <h3 class="search__result-detail-preview-heading">Leak Screenshot</h3><br>
-    <div *ngIf="!isImageLoaded && !isImageError" class="text-left text-muted">
-      <b>Loading, please wait...</b>
-    </div>
-    <div *ngIf="isImageError" class="text-left text-muted">
-      <b>Screenshot not found</b>
-    </div>
-    <img *ngIf="imageSrc && !isImageError" [src]="imageSrc" alt="Screenshot Preview" class="search__result-preview"
-      (load)="onImageLoad()" (error)="onImageError()" />
-  </div>
 
+  <div class="search__result-detail-preview" *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot!=''">
+    <div class="d-flex justify-content-between align-items-center" (click)="toggleContent()">
+      <h3 class="search__result-detail-preview-heading">Leak Screenshot</h3>
+      <div class="toggle-btn screenshoot_expand_button" [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'">
+        <img src="/assets/images/shared/search_side_dropdown_icon.svg" [ngClass]="{ 'rotated': !isExpanded }"
+          alt="toggle icon">
+      </div>
+    </div>
+    <div *ngIf="isExpanded">
+      <br>
+      <div *ngIf="!isImageLoaded && !isImageError" class="text-left text-muted">
+        <b>Loading, please wait...</b>
+      </div>
+      <div *ngIf="isImageError" class="text-left text-muted">
+        <b>Screenshot not found</b>
+      </div>
+      <img *ngIf="imageSrc && !isImageError" [src]="imageSrc" alt="Screenshot Preview" class="search__result-preview"
+        (load)="onImageLoad()" (error)="onImageError()" />
+    </div>
+  </div>
+  <br>
+  <app-report-mapping-list> </app-report-mapping-list>
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 </div>

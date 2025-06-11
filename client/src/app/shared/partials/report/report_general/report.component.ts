@@ -15,10 +15,11 @@ import { HttpParams } from '@angular/common/http';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { JsonViewerComponent } from "../../json-api-viewer/json-viewer/json-viewer.component";
-import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
+import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
 
 @Component({
-  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent], animations: [fadeInDashboardItem],
+  selector: 'app-result-panel', templateUrl: './report.component.html', imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent], animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;
@@ -34,7 +35,7 @@ export class ReportComponent implements OnInit {
   imageSrc: string | null = null;
   aiSuggestStatus: boolean = false
   aiSuggestSummary = ""
-  isExpanded = false;
+  isExpanded = true;
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed

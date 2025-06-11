@@ -101,7 +101,7 @@
   overflow: hidden;
 }
 
-.search__result-detail-url-width{
+.search__result-detail-url-width {
   max-width: 100%;
 }
 
@@ -550,6 +550,10 @@
 
 .dashboard__search-container .dashboard__search-description-light {
   opacity: 0.6;
+}
+
+.screenshoot_expand_button {
+  margin-right: 0;
 }
 
 @media only screen and (max-width: 768px) {

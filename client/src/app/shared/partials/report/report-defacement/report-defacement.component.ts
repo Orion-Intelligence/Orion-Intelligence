@@ -6,12 +6,13 @@ import { HelperService } from '../../../services/helper.service';
 import { AppService } from '../../../../services/core/app.service';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { JsonViewerComponent } from "../../json-api-viewer/json-viewer/json-viewer.component";
-import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
+import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
 
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
-  imports: [CommonModule, NgOptimizedImage, DatePipe, TooltipDirective, JsonApiViewerComponent]
+  imports: [CommonModule, NgOptimizedImage, DatePipe, TooltipDirective, JsonApiViewerComponent, ReportMappingListComponent]
 })
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
