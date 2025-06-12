@@ -1,3 +1,17 @@
-<pre class="bg-light p-3 rounded overflow-auto">
-  <code class="text-dark" [innerText]="code"></code>
-</pre>
+<div class="collapsible-container">
+  <div class="file-header p-3" (click)="toggle()">
+    <span class="title">Code Snippet</span>
+    <div class="toggle-btn" [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'">
+      <img
+        src="/assets/images/shared/search_side_dropdown_icon.svg"
+        [ngClass]="{ 'rotated': !isExpanded }"
+        alt="toggle icon"
+      />
+    </div>
+  </div>
+  <div class="content p-3" *ngIf="isExpanded">
+    <pre class="p-3 rounded overflow-auto m-0">
+      <code class="text-white" [innerText]="code"></code>
+    </pre>
+  </div>
+</div>

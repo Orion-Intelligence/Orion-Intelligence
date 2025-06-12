@@ -18,6 +18,7 @@ import {ReportChatComponent} from './shared/partials/report/report-chat/report-c
 import {DumpComponent} from './pages/dump/dump.component';
 import {DumpResolver} from './shared/resolvers/dump.resolver';
 import {DashboardExploitComponent} from './shared/partials/intel-panel/dashboard-exploit/dashboard-exploit.component';
+import {ReportExploitComponent} from './shared/partials/report/report-exploit/report-exploit.component';
 
 export const routes: Routes = [
   {
@@ -190,7 +191,7 @@ export const routes: Routes = [
           },
           {
             path: ':category/:m_hash',
-            component: ReportComponent,
+            component: ReportExploitComponent,
             resolve: {reportdata: ReportResolver},
             data: {type: 'Exploit', animation: 'HashPage'}
           }

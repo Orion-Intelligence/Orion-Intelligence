@@ -1,10 +1,20 @@
 import { Component, Input } from '@angular/core';
+import {NgClass, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-code-block',
-  imports: [],
-  templateUrl: './code-block.component.html'
+  standalone: true,
+  templateUrl: './code-block.component.html',
+  imports: [
+    NgClass,
+    NgIf
+  ]
 })
 export class CodeBlockComponent {
-  @Input() code:string|undefined = '';
+  @Input() code: string | undefined = '';
+  isExpanded = false;
+
+  toggle(): void {
+    this.isExpanded = !this.isExpanded;
+  }
 }

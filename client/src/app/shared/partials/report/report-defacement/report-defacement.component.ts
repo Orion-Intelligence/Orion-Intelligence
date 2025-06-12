@@ -5,7 +5,6 @@ import { DatePipe, NgOptimizedImage, CommonModule } from '@angular/common';
 import { HelperService } from '../../../services/helper.service';
 import { AppService } from '../../../../services/core/app.service';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonViewerComponent } from "../../json-api-viewer/json-viewer/json-viewer.component";
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
 import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
 
@@ -17,23 +16,13 @@ import { ReportMappingListComponent } from "../report-mapping-list/report-mappin
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
   lang: string = "en";
-  isExpanded = false;
 
   constructor(private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
   }
-  toggleContent(): void {
-    this.isExpanded = !this.isExpanded;
-  }
 
   downloadCSV() {
     this.helperService.downloadAsCSV(this.defacementData);
-  }
-
-  langUpdate() {
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('lang', this.lang);
-    window.location.href = currentUrl.toString();
   }
 
   printPage() {
