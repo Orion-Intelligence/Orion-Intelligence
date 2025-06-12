@@ -17,6 +17,7 @@ import {DashboardChatsComponent} from './shared/partials/intel-panel/dashboard-c
 import {ReportChatComponent} from './shared/partials/report/report-chat/report-chat.component';
 import {DumpComponent} from './pages/dump/dump.component';
 import {DumpResolver} from './shared/resolvers/dump.resolver';
+import {DashboardExploitComponent} from './shared/partials/intel-panel/dashboard-exploit/dashboard-exploit.component';
 
 export const routes: Routes = [
   {
@@ -170,6 +171,28 @@ export const routes: Routes = [
             component: ReportChatComponent,
             resolve: {reportdata: ReportResolver},
             data: {type: 'Social', animation: 'HashPage'}
+          }
+        ]
+      },
+      {
+        path: 'exploit',
+        data: {animation: 'ExploitPage'},
+        children: [
+          {
+            path: '',
+            redirectTo: 'cve',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardExploitComponent,
+            data: {type: 'Social', animation: 'CategoryPage'}
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: {reportdata: ReportResolver},
+            data: {type: 'Exploit', animation: 'HashPage'}
           }
         ]
       }

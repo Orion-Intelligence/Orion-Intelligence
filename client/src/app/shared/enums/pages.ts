@@ -6,7 +6,8 @@ export enum Category {
   DUMP = 'Dumps',
   DEFACEMENT = 'Defacement',
   SOCIAL = 'Social',
-  API = 'Api'
+  API = 'Api',
+  EXPLOIT = 'Exploit'
 }
 
 export enum GeneralSubCategory {
@@ -38,4 +39,9 @@ export enum ApiSubCategory {
 
 export enum SocialSubCategory {
   TELEGRAM = 'Telegram',
+}
+
+export enum ExploitSubCategory {
+  CVE = 'CVE',
+  Mitre = 'Mitre',
 }

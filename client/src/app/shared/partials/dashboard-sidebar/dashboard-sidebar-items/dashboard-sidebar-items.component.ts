@@ -2,11 +2,12 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AsyncPipe, NgClass, NgForOf, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {LowerPipe} from '../../../model/pipes/lower.pipe';
 
 @Component({
   selector: 'app-dashboard-sidebar-items',
   standalone: true,
-  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective],
+  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective, LowerPipe],
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {

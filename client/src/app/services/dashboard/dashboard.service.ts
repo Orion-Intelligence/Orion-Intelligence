@@ -9,6 +9,7 @@ import {GeneralParamModel} from '../../shared/model/results/shared/general.param
 import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.model';
 import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.param.model';
 import {ActivatedRoute, Router} from '@angular/router';
+import {ExploitCallbackModel} from '../../shared/model/results/exploit/exploit.callback.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ export class DashboardService {
   generalParamModel: GeneralParamModel = new GeneralParamModel();
   generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
+  exploitCallbackModel: ExploitCallbackModel = new ExploitCallbackModel();
   leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
 

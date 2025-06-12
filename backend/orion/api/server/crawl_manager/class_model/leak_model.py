@@ -36,6 +36,8 @@ class CardExtractionModel(BaseModel):
     m_attacker: Optional[List[str]] = None
     m_ref_html: Optional[str] = None
     m_team: Optional[str] = None
+    m_cve: List[str] = []
+    m_cwe: List[str] = []
 
     class Config:
         extra = Extra.allow

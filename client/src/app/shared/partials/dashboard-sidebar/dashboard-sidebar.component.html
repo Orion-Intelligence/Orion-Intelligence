@@ -38,6 +38,11 @@
       [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API"
       [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
       (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items [title]="'Exploit'"
+      [icon]="'assets/images/sidebar/exploits.svg'" [items]="exploitCategories" [category]="category.EXPLOIT"
+      [routePrefix]="'exploit'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-items>
+
 
     <li class="sidebar__item">
       <div class="sidebar__item-dropdown"
@@ -120,6 +125,10 @@
     <app-dashboard-sidebar-collapsed *ngIf="appService.getConfig().api_allowed" [title]="'Live APIs'"
       [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [category]="category.API"
       [routePrefix]="'api'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
+      (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed [title]="'Exploit'"
+      [icon]="'assets/images/sidebar/exploits.svg'" [items]="exploitCategories" [category]="category.EXPLOIT"
+      [routePrefix]="'exploit'" [selectionStore]="selectionStore" (sectionSelected)="onSectionSelected($event)"
       (optionSelected)="onOptionSelected($event)"></app-dashboard-sidebar-collapsed>
 
     <li class="sidebar__item">

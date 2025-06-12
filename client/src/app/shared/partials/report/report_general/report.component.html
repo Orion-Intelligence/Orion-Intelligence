@@ -139,7 +139,7 @@
       @fadeInDashboardItem></app-result-list>
   </div>
 
-  <div class="search__result-detail-preview" *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot!=''">
+  <div class="search__result-detail-preview" *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!=''">
     <h3 class="search__result-detail-preview-heading">Leak Screenshot</h3><br>
     <div *ngIf="!isImageLoaded && !isImageError" class="text-left text-muted">
       <b>Loading, please wait...</b>

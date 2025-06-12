@@ -1,6 +1,14 @@
 import { Component, EventEmitter, OnInit, Output, OnDestroy } from '@angular/core';
 import { NgOptimizedImage, NgClass, NgIf, AsyncPipe } from '@angular/common';
-import { ApiSubCategory, Category, GeneralSubCategory, DefacementSubCategory, BreachSubCategory, SocialSubCategory } from '../../enums/pages';
+import {
+  ApiSubCategory,
+  Category,
+  GeneralSubCategory,
+  DefacementSubCategory,
+  BreachSubCategory,
+  SocialSubCategory,
+  ExploitSubCategory
+} from '../../enums/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -24,6 +32,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   min_detected = false;
 
   apiCategories = Object.values(ApiSubCategory);
+  exploitCategories = Object.values(ExploitSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);

@@ -1,5 +1,7 @@
 from typing import List, Optional, Union
 from pydantic import BaseModel
+from pydantic.v1 import Extra
+
 
 class suggestion(BaseModel):
     text: str
@@ -39,6 +41,9 @@ class result_item(BaseModel):
     m_contact_link: Optional[str] = None
     m_creation_date: Optional[str] = None
     m_highlighted: Optional[str] = ""
+
+    class Config:
+        extra = Extra.allow
 
 class search_leak_callback_model(BaseModel):
     Result: Optional[List[result_item]] = None

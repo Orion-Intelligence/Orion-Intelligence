@@ -10,7 +10,7 @@
     [ngClass]="{'sidebar__subitems-fast': items.length < 4, 'show': (selectionStore.selectedSection$ | async) === category}">
     <li *ngFor="let item of items">
       <div class="sidebar__subitem" (click)="selectOption(item)"
-        [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async) === item}"
+        [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
         [routerLink]="[routePrefix, item.toLowerCase()]" [queryParams]="{ mSearchParamPage: 1 }" queryParamsHandling="merge">
         <div class="sidebar__subitem-content"
           [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">

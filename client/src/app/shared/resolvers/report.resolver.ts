@@ -30,6 +30,9 @@ export class ReportResolver implements Resolve<any> {
       case 'social':
         apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
         break;
+      case 'exploit':
+        apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
+        break;
       default:
         this.router.navigate(['/']);
         return of(null);

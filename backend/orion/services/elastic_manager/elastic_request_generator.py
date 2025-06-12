@@ -265,7 +265,7 @@ class elastic_request_generator:
         if m_search_type == "databases":
             m_search_type = "leaks"
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-        if m_search_type == "tracking":
+        if m_search_type:
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
         if m_safe_search == "True":
             must_not_clause.append({"term": {"m_content_type": "adult"}})

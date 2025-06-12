@@ -48,6 +48,9 @@ async def search_telegram(param: search_chat_param_model = Depends()):
 async def search_leak(param: search_leak_param_model = Depends()):
   return await search_model.getInstance().search_leak_result(param)
 
+@api_routes.get("/api/exploit/cve", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
+async def search_leak(param: search_leak_param_model = Depends()):
+  return await search_model.getInstance().search_leak_result(param)
 
 @api_routes.get("/api/search/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Search defacement intelligence reports by keywords, group names, or affected domains.")
 async def search_defacement(param: search_defacement_param_model = Depends()):
