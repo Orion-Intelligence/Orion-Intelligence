@@ -2,6 +2,7 @@ from orion.api.server.crawl_manager.class_model.chat_model import chat_data_mode
 from orion.api.server.crawl_manager.class_model import entity_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
+from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -32,6 +33,9 @@ class crawl_controller:
 
   async def invoke_leak_index(self, leak_index: LeakDataModel):
     return await self.__crawl_model.init_leak(leak_index)
+
+  async def invoke_exploit_index(self, exploit_index: ExploitDataModel):
+    return await self.__crawl_model.init_exploit(exploit_index)
 
   async def invoke_generic_index(self, leak_index: GeneralDataModel):
     return await self.__crawl_model.init_general(leak_index)

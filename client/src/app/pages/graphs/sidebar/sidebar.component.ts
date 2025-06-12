@@ -20,7 +20,7 @@ export class SidebarComponent implements OnInit {
   maxDepth: number = 1;
 
   typeOptions = ['cluster', 'document', 'property'];
-  clusterOptions = ['all', 'general', 'leak', 'defacement', 'chat'];
+  clusterOptions = ['all', 'general', 'leak', 'defacement', 'chat', 'exploit'];
   allowedProperties = [
     { label: 'Emails', key: 'm_emails' },
     { label: 'Hashes', key: 'm_hashes' },

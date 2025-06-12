@@ -66,6 +66,7 @@ class arango_controller:
       default_nodes = [
         {"_key": "general", "type": "cluster", "label": "General"},
         {"_key": "defacement", "type": "cluster", "label": "Defacement"},
+        {"_key": "exploit", "type": "cluster", "label": "exploit"},
         {"_key": "leak", "type": "cluster", "label": "Leak"},
         {"_key": "telegram", "type": "cluster", "label": "Telegram"}
       ]

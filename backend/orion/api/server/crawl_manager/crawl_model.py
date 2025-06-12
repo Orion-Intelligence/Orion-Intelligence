@@ -5,6 +5,7 @@ from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
+from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
@@ -142,6 +143,17 @@ class crawl_model:
       new_index_type=['general'],
       network_type=general_index.m_network,
       is_leak_update=False
+    )
+
+  async def init_exploit(self, exploit_index: ExploitDataModel):
+    m_data = elastic_request_generator().index_query_exploit(exploit_index.model_dump())
+    await elastic_controller.get_instance().index_data(m_data)
+    return await self._update_or_create_model(
+      base_url=exploit_index.base_url,
+      new_content_type=['exploit'],
+      new_index_type=['exploit'],
+      network_type=exploit_index.m_network,
+      is_leak_update=True
     )
 
   async def init_leak(self, leak_index: LeakDataModel):

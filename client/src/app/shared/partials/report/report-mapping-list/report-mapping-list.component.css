@@ -1,0 +1,15 @@
+.report-mapping{
+  border-radius: 10px;
+  overflow: clip;
+  border: 1px solid #ffffff15;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.report-mapping .narrow-col{
+  width: 50px;
+}
+
+.report-mapping .mid-col{
+  width: 110px;
+}

@@ -1,83 +1,48 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
-import { ApiService } from '../../../services/api.service';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {HttpParams} from '@angular/common/http';
+import {ApiService} from '../../../services/api.service';
 
 @Component({
   selector: 'app-report-mapping-list',
   templateUrl: './report-mapping-list.component.html',
   imports: [CommonModule],
 })
-export class ReportMappingListComponent {
-  loading = false
-  result: any[] = []
+export class ReportMappingListComponent implements OnInit {
+  loading = false;
+  result: any[] = [];
   filteredItems: any[] = [];
-  loopCount = Array.from({ length: 10 }, (_, i) => i);
 
-  constructor(private api: ApiService, private route: ActivatedRoute,) {
+  constructor(private api: ApiService) {
   }
 
   ngOnInit(): void {
-    const parts = window.location.pathname.split('/');
-    const singleInput = parts[parts.length - 1];
-    this.loadGraph('document', 'document', singleInput, '10', '1');
-
+    this.loadGraph();
   }
 
-  loadGraph(data_point_type: string, type: string, value: string, maxEdge: string, maxDepth: string): void {
-    let params = new HttpParams();
-    this.loading = false;
+  loadGraph(): void {
+    const parts = window.location.pathname.split('/');
+    const value = parts[parts.length - 1];
 
-    if (data_point_type) {
-      params = params.set('data_point_type', data_point_type);
-    }
-    if (type) {
-      params = params.set('model_type', type);
-    }
-    if (value) {
-      params = params.set('query_value', value);
-    }
-    if (maxEdge) {
-      params = params.set('edge', maxEdge);
-    }
-    if (maxDepth) {
-      params = params.set('depth', maxDepth);
-    }
+    const params = new HttpParams()
+      .set('data_point_type', 'document')
+      .set('model_type', 'document')
+      .set('query_value', value)
+      .set('edge', '1000')
+      .set('depth', '2');
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
       next: response => {
-        const { results, limit_reached } = response;
+        const {results} = response;
         this.result = results;
         this.loading = true;
-
-        results.forEach(item => {
-          const doc = item.vertex;
-          if (doc?.type === 'document') {
-            const docId = doc.m_document_id || doc._key;
-            const docType = doc.type;
-
-            // Object.entries(doc).forEach(([key, value]) => {
-            //   if (key.startsWith('m_') && Array.isArray(value)) {
-            //     value.forEach(val => {
-            //       this.flattenedDocuments.push({
-            //         m_document_id: docId,
-            //         type: docType,
-            //         property: key,
-            //         value: val
-            //       });
-            //     });
-            //   }
-            // });
-          }
-        });
-        this.getUniqueSortedItems(this.result, 10)
+        this.getUniqueSortedItems(this.result, 1000);
       }
     });
   }
+
   getUniqueSortedItems(result: any[], length: number) {
     const seenIds = new Set<string>();
-    // const filteredItems: any[] = [];
 
     for (const item of result) {
       const id = this.extractId(item.edge?._id);
@@ -90,36 +55,38 @@ export class ReportMappingListComponent {
 
       if (this.filteredItems.length >= length) break;
     }
-
-    //return this.filteredItems;
   }
+
   viewReport(id: string) {
     const parts = window.location.pathname.split('/');
     const category = parts[parts.length - 3];
     const subCategory = parts[parts.length - 2];
-    const singleInput = id;
-
-
-    const baseUrl = `${window.location.origin}/dashboard/${category}/${subCategory}/${singleInput}`;
-    const fullUrl = `${baseUrl}`;
-    window.open(fullUrl, '_blank');
-
+    const baseUrl = `${window.location.origin}/dashboard/${category}/${subCategory}/${id}`;
+    window.open(baseUrl, '_blank');
   }
+
   extractId(path: string): string {
     const match = path.match(/[a-f0-9]{64}/);
     return match ? match[0] : '';
   }
-  extractProperty(id: string): string {
-    let id_temp = this.extractId(id)
-    let location_point = id.indexOf(id_temp) + id_temp.length + 1
-    let item = id.substring(location_point)
-    item = item.replace(/^m/, '');
-    item = item.replaceAll("_", " ")
-    return item
-  }
 
+  extractProperty(id: string, mode: 'key' | 'value' = 'value'): string {
+    const idTemp = this.extractId(id);
+    const locationPoint = id.indexOf(idTemp) + idTemp.length + 1;
 
-  formatPropertyName(name: string): string {
-    return name.replace(/^m_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    if (locationPoint >= id.length) return '';
+
+    const item = id.substring(locationPoint);
+    const disallowedPrefixes = ['leak_to_', 'defacement_to_', 'chat_to_', 'general_to_'];
+    if (disallowedPrefixes.some(prefix => item.startsWith(prefix))) return '';
+
+    const segments = item.split('_');
+    if (segments.length < 2 || !segments[0].startsWith('m')) return '';
+
+    const key = segments.slice(0, 2).join('_');
+    const value = segments.slice(2).join('_');
+
+    if (mode === 'key') return key.replace(/^m_/, '').replaceAll('_', '');
+    return value.replaceAll('_', ' ');
   }
 }

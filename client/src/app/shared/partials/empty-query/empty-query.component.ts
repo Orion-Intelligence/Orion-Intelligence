@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
 
 @Component({
-  selector: 'app-empty-query', imports: [NgOptimizedImage],
+  selector: 'app-empty-query', imports: [],
   templateUrl: './empty-query.component.html'
 })
 export class EmptyQueryComponent {

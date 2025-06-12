@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AppService} from '../../../services/core/app.service';
 import {max} from 'rxjs';
@@ -13,11 +13,12 @@ export class PaginationComponent implements OnInit {
 
   @Output() pageChange = new EventEmitter<number>();
 
-  constructor(private appService: AppService) {
+  constructor(private appService: AppService, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
     this.currentPage = this.appService.page();
+    this.cdr.detectChanges();
   }
 
   getPageRange(): number[] {

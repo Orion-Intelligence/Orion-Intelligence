@@ -85,7 +85,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
     Object.entries(this.defacementParamModel).forEach(([key, value]) => {
       const isDefault =
-        (key === 'mSearchParamPage' && value === 1) ||
         (key === 'mSearchParamSafeSearch' && value === false) ||
         (key === 'mNetwork' && value === 'all') ||
         (value == null || value === '');

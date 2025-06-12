@@ -13,7 +13,7 @@
         [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
         [routerLink]="[routePrefix, item.toLowerCase()]" [queryParams]="{ mSearchParamPage: 1 }" queryParamsHandling="merge">
         <div class="sidebar__subitem-content"
-          [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async) === item}">
+          [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}">
           {{ item }}
         </div>
       </div>

@@ -1,6 +1,7 @@
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
 from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
+from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
@@ -27,6 +28,11 @@ async def parser():
 async def index_leak_data(request: Request):
   body = await request.json()
   return await crawl_controller.getInstance().invoke_leak_index(LeakDataModel(**body))
+
+@crawl_routes.post("/api/index/exploit", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def index_leak_data(request: Request):
+  body = await request.json()
+  return await crawl_controller.getInstance().invoke_exploit_index(ExploitDataModel(**body))
 
 @crawl_routes.post("/api/index/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_defacement_data(request: Request):

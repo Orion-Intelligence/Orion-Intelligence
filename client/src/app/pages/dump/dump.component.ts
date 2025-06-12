@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
-import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
 import { PaginationComponent } from '../../shared/partials/pagination/pagination.component';
 import { FiltersComponent } from '../../shared/partials/filters/filters.component';
 import { DumpService } from '../../services/dump/dump.service';

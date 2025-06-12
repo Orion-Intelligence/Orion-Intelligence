@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   templateUrl: './result-section.component.html'
 })
-export class ResultSectionComponent {
+export class ResultSectionComponent implements OnInit{
   @Input() listItems: string[] = [];
 
   filteredListItems: string[] = [];
@@ -16,6 +16,5 @@ export class ResultSectionComponent {
       const cleaned = item?.trim();
       return cleaned && cleaned.length > 1;
     });
-
   }
 }

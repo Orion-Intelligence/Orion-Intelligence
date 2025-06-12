@@ -6,6 +6,7 @@ class ELASTIC_INDEX:
   S_LEAK_INDEX = "leak_model"
   S_DEFACEMENT_INDEX = "defacement_model"
   S_CHATS_INDEX = "chat_model"
+  S_EXPLOIT_INDEX = "exploit_model"
 
 
 class ELASTIC_CONNECTIONS:
@@ -196,3 +197,39 @@ class ELASTIC_ENUMS:
       }
     }
   }
+
+  class ELASTIC_ENUMS:
+    mapping_exploit_model = {
+      "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+        "max_result_window": 1000000
+      },
+      "mappings": {
+        "dynamic_templates": [
+          {
+            "strings_as_keywords": {
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "keyword"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "m_hash": {"type": "keyword"},
+          "m_title": {"type": "text"},
+          "m_url": {"type": "keyword"},
+          "m_base_url": {"type": "keyword"},
+          "m_content": {"type": "text"},
+          "m_important_content": {"type": "text"},
+          "m_network": {"type": "keyword"},
+          "m_section": {"type": "keyword"},
+          "m_content_type": {"type": "keyword"},
+          "m_weblink": {"type": "keyword"},
+          "m_websites": {"type": "keyword"},
+          "m_logo_or_images": {"type": "keyword"},
+          "m_leak_date": {"type": "date", "format": "yyyy-MM-dd"}
+        }
+      }
+    }

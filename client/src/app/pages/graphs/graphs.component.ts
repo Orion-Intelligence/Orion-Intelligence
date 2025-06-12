@@ -1,6 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
 import { Network, DataSet, Node, Edge, Color } from 'vis-network/standalone';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../shared/services/api.service';
@@ -57,7 +56,7 @@ export class GraphComponent implements OnInit {
   orignalColor: string | Color = '';
   currentCategory: string = "";
 
-  constructor(private api: ApiService, private route: ActivatedRoute, private clipboard: Clipboard) {
+  constructor(private api: ApiService, private clipboard: Clipboard) {
   }
 
   ngOnInit(): void {
@@ -126,7 +125,7 @@ export class GraphComponent implements OnInit {
         this.loading = true;
         this.initListings(results);
       },
-      error: err => {
+      error: _ => {
         this.isEmpty = true;
         this.limitReached = false;
         this.loading = true;
@@ -153,6 +152,8 @@ export class GraphComponent implements OnInit {
         path = 'defacement/archive';
       } else if (from.includes('chat') || to.includes('chat')) {
         path = 'social/telegram';
+      } else if (from.includes('exploit') || to.includes('exploit')) {
+        path = 'exploit/cve';
       }
 
       if (doc?.type === 'document') {
@@ -175,6 +176,7 @@ export class GraphComponent implements OnInit {
       }
     });
   }
+
 
   private renderGraph(data: any[], _ = false): void {
     this.resetGraph()
@@ -396,7 +398,8 @@ export class GraphComponent implements OnInit {
         'cti_vertices/general',
         'cti_vertices/defacement',
         'cti_vertices/leak',
-        'cti_vertices/chat'
+        'cti_vertices/chat',
+        'cti_vertices/exploit',
       ]);
       const hasClusterConnection = this.rawEdges.some(edge =>
         (edge.from === node.id && clusterNodeIds.has(edge.to as string)) ||
@@ -727,6 +730,11 @@ export class GraphComponent implements OnInit {
     )) {
       category = 'defacement';
     } else if (this.rawEdges.some(edge =>
+      (edge.from === nodeId && edge.to === 'cti_vertices/exploit') ||
+      (edge.to === nodeId && edge.from === 'cti_vertices/exploit')
+    )) {
+      category = 'exploit';
+    } else if (this.rawEdges.some(edge =>
       (edge.from === nodeId && edge.to === 'cti_vertices/chat') ||
       (edge.to === nodeId && edge.from === 'cti_vertices/chat')
     )) {
@@ -747,6 +755,10 @@ export class GraphComponent implements OnInit {
       window.open(fullUrl, '_blank');
     } else if (category === 'chat') {
       const baseUrl = `${window.location.origin}/dashboard/social/telegram/${singleInput}`;
+      const fullUrl = `${baseUrl}`;
+      window.open(fullUrl, '_blank');
+    } else if (category === 'exploit') {
+      const baseUrl = `${window.location.origin}/dashboard/exploit/cve/${singleInput}`;
       const fullUrl = `${baseUrl}`;
       window.open(fullUrl, '_blank');
     }

@@ -1,3 +1,7 @@
+exploit_listing = {
+  "m_content"
+}
+
 leak_listing = {
   "m_content"
 }

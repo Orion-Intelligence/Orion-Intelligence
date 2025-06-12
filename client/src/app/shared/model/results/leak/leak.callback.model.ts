@@ -13,6 +13,7 @@ export class LeakResultItem {
   m_highlighted: string = "";
   m_network?: string;
   m_content_type: string[] = [];
+  m_code_snippet: string[] = [];
   m_weblink: string[] = [];
   m_dumplink: string[] = [];
   m_email: string[] = [];

@@ -157,14 +157,17 @@
 .search__result-detail-preview {
   border: 1px solid #FCFCFC12;
   border-radius: 8px;
-  padding: 24px;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.1607843137);
   margin-top: 24px;
 }
 
 .search__result-detail-preview-heading {
-  font-weight: 500;
-  font-size: 20px;
+  font-weight: bold;
+  font-size: 15px;
   color: #fff;
+  cursor: pointer;
+  margin: 0;
 }
 
 .search__result-preview {
@@ -335,7 +338,7 @@
   font-weight: 500;
   margin-bottom: 16px;
   color: #fff;
-  max-width: 600px !important;
+  max-width: 700px !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -510,8 +513,8 @@
   border: 1px solid #ffffff15;
   border-radius: 8px;
   cursor: pointer;
-  margin: 20px auto;
   background-color: #00000029;
+  margin: 0 auto 20px;
 }
 
 .file-header {

@@ -26,8 +26,7 @@ class elastic_controller:
     await self.__link_connection()
 
   async def __link_connection(self):
-    self.__m_connection = AsyncElasticsearch(f"{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
-                                             http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
+    self.__m_connection = AsyncElasticsearch(f"{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}", http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
     await self.__initialize_mappings()
 
   def get_connection(self):
@@ -48,6 +47,9 @@ class elastic_controller:
 
       if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX):
         await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model)
+
+      if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_EXPLOIT_INDEX):
+        await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body=mapping_defacement_model)
 
       if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX):
         await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model)
