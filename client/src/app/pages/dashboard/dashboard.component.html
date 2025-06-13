@@ -9,6 +9,8 @@
 
     <div class="dashboard_container">
       <div id="dashboard-container" class="dashboard dashboard-content-scroll">
+        <app-graphs [graphModel]="pieGraphData"></app-graphs>
+        <app-graphs [graphModel]="barGraphData"></app-graphs>
         <app-dashboard-header></app-dashboard-header>
         <span class="dashboard-body" [@dashboard-global-animation]="prepareRoute(routerOutlet)">
           <router-outlet #routerOutlet="outlet"></router-outlet>
@@ -21,4 +23,3 @@
 <div *ngIf="isCtiGraph()">
   <router-outlet></router-outlet>
 </div>
-
