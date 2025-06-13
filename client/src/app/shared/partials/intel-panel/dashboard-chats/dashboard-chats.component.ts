@@ -80,7 +80,6 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
     Object.entries(this.chatParamModel).forEach(([key, value]) => {
       const isDefault =
-        (key === 'mSearchParamPage' && value === 1) ||
         (key === 'mContentType' && value === 'all') ||
         (key === 'mDateRange' && value === '') ||
         (key === 'mEntity' && value === '') ||
