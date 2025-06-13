@@ -9,6 +9,7 @@ import { NgIf } from '@angular/common';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { getDefaultRuleSet, RuleSet } from "../../shared/model/graph/ruleset_model";
+import {ActivatedRoute, Router} from '@angular/router';
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -56,12 +57,19 @@ export class GraphComponent implements OnInit {
   orignalColor: string | Color = '';
   currentCategory: string = "";
 
-  constructor(private api: ApiService, private clipboard: Clipboard) {
+  constructor(private api: ApiService, private clipboard: Clipboard, private router: Router, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      this.selectedType = params['selectedType'] || 'cluster';
+      this.singleInput = params['singleInput'] || 'all';
+      this.propertyType = params['propertyType'] || 'all';
+      this.propertyValue = params['propertyValue'] || '';
+      this.maxEdge = (+params['maxEdge'] > 800 || +params['maxEdge'] < 0) ? '25' : (params['maxEdge'] || '25');
+      this.maxDepth = (+params['maxDepth'] > 5 || +params['maxDepth'] < 0) ? '1' : (params['maxDepth'] || '1');
+    });
   }
-
   resetGraph(): void {
     if (this.network) {
       this.network.destroy();
@@ -423,9 +431,6 @@ export class GraphComponent implements OnInit {
 
       const node = this.nodeSet.get(nodeId) as ExtendedNode;
       const isExpanded = this.groupExpandedState[nodeId] || false;
-      if (!this.ruleSet.expandTrigger && !isExpanded) {
-        return;
-      }
 
       if (node?.isGroup && node.subNodes) {
 
@@ -908,7 +913,9 @@ export class GraphComponent implements OnInit {
   }
 
   onResetAll() {
-    this.ngOnInit()
+    this.onSidebarApply({
+      selectedType: this.selectedType, singleInput: this.singleInput, propertyType: this.propertyType, propertyValue: this.propertyValue, maxEdge: this.maxEdge, maxDepth:this.maxDepth
+    });
   }
 
 }

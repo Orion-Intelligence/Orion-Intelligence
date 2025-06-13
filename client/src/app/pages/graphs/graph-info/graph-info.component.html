@@ -105,15 +105,15 @@
                                     [class.rotate]="rulesetOpen" alt=""/>
     </div>
     <div (click)="$event.stopPropagation()" id="rulesetCollapse" class="collapse" [class.show]="rulesetOpen">
-      <br><br>
-      <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('edgePointers', true)">
+      <br>
+      <div class="analytics d-flex align-items-center gap-2 mt-2" (click)="onRuleToggle('edgePointers', true)">
         <input type="checkbox" [checked]="ruleSet.edgePointers" class="pe-none">
         <label class="mb-0 pe-none"></label>
         <span>&nbsp; Edge Pointers</span>
       </div>
       <br>
       <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('edgeHighlight', true)">
-        <input type="checkbox" [checked]="ruleSet.edgeHighlight && ruleSet.expandTrigger" class="pe-none">
+        <input type="checkbox" [checked]="ruleSet.edgeHighlight" class="pe-none">
         <label class="mb-0 pe-none"></label>
         <span>&nbsp; Edge Highlight</span>
       </div>
@@ -123,7 +123,6 @@
         <label class="mb-0 pe-none"></label>
         <span>&nbsp; Edge Color</span>
       </div>
-      <br>
 <!--      <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('expandTrigger', true);onRuleToggle('edgeHighlight', false)">-->
 <!--        <input type="checkbox" [checked]="ruleSet.expandTrigger" class="pe-none">-->
 <!--        <label class="mb-0 pe-none"></label>-->
