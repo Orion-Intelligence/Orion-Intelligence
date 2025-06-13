@@ -36,6 +36,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    alert(this.chatParamModel.mSearchParamPage)
     this.appService.updatePage(this.chatParamModel.mSearchParamPage)
   }
 
@@ -122,6 +123,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
   onPageChange(step: number) {
     this.chatParamModel.mSearchParamPage = step;
+    alert(this.chatParamModel.mSearchParamPage)
     this.fetchSearchResults();
   }
 
