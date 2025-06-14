@@ -1,0 +1,14 @@
+engines:
+  bandit:
+    enabled: true
+  pylint:
+    enabled: true
+  eslint:
+    enabled: true
+
+exclude_paths:
+  - client/node_modules/
+  - client/dist/
+  - client/coverage/
+  - client/docs/
+  - client/tests/

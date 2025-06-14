@@ -26,7 +26,7 @@ export class TokenRefreshService {
     }
   }
 
-  
+
   stopTokenRefresh(): void {
     if (this.refreshTokenSubscription) {
       this.refreshTokenSubscription.unsubscribe();
