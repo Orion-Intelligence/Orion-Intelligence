@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
@@ -13,7 +13,6 @@ def configure_swagger(app: FastAPI):
 
     @app.get("/docs", include_in_schema=False)
     async def custom_swagger_ui():
-
         swagger_ui_html = get_swagger_ui_html(
             openapi_url="/openapi.json",
             title="Orion Intelligence OpenAPI",

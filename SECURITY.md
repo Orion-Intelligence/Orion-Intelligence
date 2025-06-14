@@ -7,4 +7,5 @@ To report a vulnerability, please contact us privately via one of the following 
     Reporting form: Submit a security advisory
     Email: msmannan00@gmail.com
 
-We aim to acknowledge reports within 8 hours and address any critical issues with short-term fixes within 2 days, whenever possible.
+We aim to acknowledge reports within 8 hours and address any critical issues with short-term fixes within 2 days,
+whenever possible.

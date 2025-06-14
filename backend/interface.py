@@ -1,11 +1,13 @@
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from pathlib import Path
 
 interface = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
+
 
 @interface.get("/{full_path:path}", include_in_schema=False)
 async def serve_frontend(full_path: str):

@@ -1,8 +1,8 @@
 import datetime
 from abc import ABC
 from typing import List
-from playwright.sync_api import Page
 from urllib.parse import urljoin
+
 import requests
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
@@ -12,6 +12,8 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
+from playwright.sync_api import Page
+
 
 class _zone_xsec(leak_extractor_interface, ABC):
     _instance = None
@@ -42,7 +44,8 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.DEFACEMENT, m_resoource_block = False)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,
+                         m_threat_type=ThreatType.DEFACEMENT, m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -100,7 +103,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         response = requests.get(link, timeout=10)
                         response.raise_for_status()
 
-                        page.set_content(response.text.replace("iframe","safeframe"))
+                        page.set_content(response.text.replace("iframe", "safeframe"))
                         page.wait_for_selector(".panel.panel-danger", timeout=5000)
 
                         url_span = page.query_selector("span#url")
@@ -133,9 +136,9 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
                         entity_data = entity_model(
                             m_ip=[ip],
-                            m_location = [location],
-                            m_team = team,
-                            m_attacker = [defacer],
+                            m_location=[location],
+                            m_team=team,
+                            m_attacker=[defacer],
                         )
 
                         self.append_leak_data(card_data, entity_data)

@@ -1,5 +1,7 @@
 import asyncio
+
 from orion.management.managers.service_manager import service_manager
+
 
 async def main():
     manager = service_manager.get_instance()
@@ -8,6 +10,7 @@ async def main():
 
     while True:
         await asyncio.sleep(3600)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

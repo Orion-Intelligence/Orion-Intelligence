@@ -1,20 +1,23 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
+
 from configs.SimpleAuthProvider import setup_admin
-from configs.swagger_config import configure_swagger
-from orion.middleware.middleware_setup import setup_middlewares
-from orion.management.managers.service_manager import service_manager
-from orion.services.mongo_manager.mongo_controller import mongo_controller
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
+from configs.swagger_config import configure_swagger
+from interface import interface
+from orion.management.managers.service_manager import service_manager
+from orion.middleware.middleware_setup import setup_middlewares
+from orion.services.mongo_manager.mongo_controller import mongo_controller
+from routes.admin_routes import admin_routes
 from routes.api_micros import micro_routes
 from routes.api_routes import api_routes
-from routes.admin_routes import admin_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
-from interface import interface
-from fastapi.exceptions import RequestValidationError
+
 
 @asynccontextmanager
 async def lifespan(p_app: FastAPI):
@@ -23,6 +26,7 @@ async def lifespan(p_app: FastAPI):
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
     yield
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -44,4 +48,3 @@ app.add_exception_handler(Exception, global_exception_handler)
 
 # noinspection PyTypeChecker
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
-

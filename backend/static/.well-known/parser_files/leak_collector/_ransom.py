@@ -3,8 +3,6 @@ from abc import ABC
 from typing import List
 
 from bs4 import BeautifulSoup
-from playwright.sync_api import Page
-
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -13,6 +11,7 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
+from playwright.sync_api import Page
 
 
 class _ransom(leak_extractor_interface, ABC):
@@ -140,14 +139,18 @@ class _ransom(leak_extractor_interface, ABC):
                         break
                     continue
 
-                is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, 0, RAW_PATH_CONSTANTS.HREF_TIMEOUT))
+                is_crawled = int(
+                    self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, 0,
+                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT))
                 ref_html = None
                 if is_crawled != -1 and is_crawled < 5:
                     ref_html = helper_method.extract_refhtml(website)
                     if ref_html:
-                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website,
+                                       -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
                     else:
-                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website,
+                                       is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
 
                 card_data = leak_model(
                     m_ref_html=ref_html,

@@ -1,12 +1,14 @@
-import traceback
 import re
+import traceback
+
 from fastapi import Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import RedirectResponse, JSONResponse
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_422_UNPROCESSABLE_ENTITY
 
-from orion.shared_models.expection_handlers.expection_handlers_models import ErrorResponseModel, ValidationErrorDetail, ValidationErrorResponseModel
 from configs import config
+from orion.shared_models.expection_handlers.expection_handlers_models import ErrorResponseModel, ValidationErrorDetail, \
+    ValidationErrorResponseModel
 
 
 def clean_traceback(exc: Exception):

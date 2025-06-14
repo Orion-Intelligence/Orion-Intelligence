@@ -1,14 +1,14 @@
 from abc import ABC
 from typing import List
 
-from playwright.sync_api import Page
-
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
+from playwright.sync_api import Page
+
 
 class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_interface, ABC):
     _instance = None
@@ -75,9 +75,7 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                 print("No posts found! Exiting parser.")
                 return
 
-
             page.wait_for_selector(".post-more-link.f_left", timeout=15000)
-
 
             post_elements = page.query_selector_all(".post-more-link.f_left")
 
@@ -92,7 +90,6 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                 print("No post links extracted! Exiting parser.")
                 return
 
-
             for post_link in post_links:
                 if post_link in processed_urls:
                     continue
@@ -101,7 +98,6 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                 try:
 
                     page.goto(post_link, wait_until="domcontentloaded", timeout=15000)
-
 
                     def safe_get_text(selector):
                         element = page.query_selector(selector)
@@ -112,10 +108,8 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                     date_text = safe_get_text(".meta_full.noselect.f_left")
                     file_size_text = safe_get_text(".file-size")
 
-
                     profile_element = page.query_selector(".avatar.bg-transparent.shadow-none img")
                     profile_img = profile_element.get_attribute("src") if profile_element else "Unknown"
-
 
                     file_name = page.query_selector(".file-name")
                     download_link = None
@@ -148,7 +142,6 @@ class _threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad(leak_extractor_i
                 except Exception as e:
                     print(f"Error navigating to {post_link}: {e}")
                     continue
-
 
                 try:
                     page.go_back()
