@@ -53,7 +53,7 @@
   font-size: 14px;
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 15%);
   z-index: 1000;
   width: 160px;
 }
