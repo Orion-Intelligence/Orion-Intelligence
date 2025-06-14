@@ -44,7 +44,7 @@
 .directory-list__table-url {
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (width <= 943px) {
   .directory-list__content-category {
     padding-bottom: 0;
     padding-left: 15px;
@@ -95,7 +95,7 @@
   vertical-align: 0.255em;
   border: 0.5em solid transparent;
   border-top-color: #00000030;
-  border-bottom-color: #00000000;
+  border-bottom-color: #0000;
   position: absolute;
   left: 10px;
   top: 65%;
@@ -115,7 +115,7 @@
 }
 
 .directory-list__container-sort:hover::after {
-  border-bottom-color: #00000000;
+  border-bottom-color: #0000;
 }
 
 .list-container th {

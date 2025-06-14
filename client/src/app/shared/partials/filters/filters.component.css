@@ -8,10 +8,10 @@
 }
 
 .filter__heading {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 16px;
-  color: #ffffff;
+  color: #fff;
   margin-bottom: 0;
 }
 
@@ -39,10 +39,10 @@
 }
 
 .filter__label {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #ffffff;
+  color: #fff;
   margin-bottom: 10px;
   margin-top: 20px;
 }
@@ -90,15 +90,15 @@
   display: block;
   color: #3c3c43;
   font-size: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
-  background-color: #ffffff;
+  background-color: #fff;
   padding: 11px 11px 11px 15px;
   border-radius: 7px;
   height: 40px;
   text-align: left;
   box-shadow: 0 1px 2px 0 #1018280d;
-  border: 1px solid #ffffff;
+  border: 1px solid #fff;
   width: 100%;
 }
 
@@ -111,7 +111,7 @@
 
 .filter__submit-button {
   background: #2b90ee;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   color: white;
   border: 0;
   font-weight: 500;
@@ -190,7 +190,7 @@
   text-align: left;
   background-color: #fff;
   background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgb(0 0 0 / 15%);
   border-radius: 8px;
   max-height: 400px;
   overflow-y: auto !important;
@@ -227,6 +227,7 @@
 .filter__form .dropdown-menu {
   border-radius: 8px;
   overflow: hidden;
+
   /* margin-top: 100px; */
 }
 
@@ -238,7 +239,7 @@
   height: 95vh;
   border-bottom-left-radius: 0;
   border-top-left-radius: 15px;
-  box-shadow: rgba(0, 0, 0, 0.24) 0 3px 8px;
+  box-shadow: rgb(0 0 0 / 24%) 0 3px 8px;
   transition: right 0.2s ease;
 }
 
@@ -251,7 +252,7 @@
   position: fixed;
 }
 
-@media only screen and (max-width: 450px) {
+@media only screen and (width <= 450px) {
   .filter__submit {
     height: 50%;
   }

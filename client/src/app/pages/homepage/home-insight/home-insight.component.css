@@ -15,7 +15,7 @@
 .home_insight__text-primary {
   font-size: 32px;
   font-weight: 700;
-  color: #ffffff;
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   margin-top: 30px !important;
@@ -23,23 +23,22 @@
 }
 
 .home_insight__text-secondary {
-  font-family: 'Roboto', sans-serif;
+  font-family: Roboto, sans-serif;
   font-size: 16px;
-  color: #ffffff;
+  color: #fff;
   font-weight: 400;
   line-height: 1;
-  /* 35px */
-  word-break: break-word;
+  overflow-wrap: break-word;
   white-space: normal;
 }
 
-@media (max-width: 500px) {
+@media (width <= 500px) {
   .home_insight__text-secondary {
     font-size: 10px;
   }
 }
 
-@media (max-width: 420px) {
+@media (width <= 420px) {
   .home_insight__text-secondary {
     font-size: 8px;
   }
@@ -47,8 +46,8 @@
 
 .home_insight__header {
   font-size: 16px;
-  font-family: 'Roboto', sans-serif;
-  color: #ffffff;
+  font-family: Roboto, sans-serif;
+  color: #fff;
   opacity: 0.5;
   position: absolute;
   margin-left: -20px;
@@ -92,12 +91,12 @@
   width: 360px;
   height: 125px;
   box-sizing: border-box;
-  box-shadow: rgba(0, 0, 0, 0.1) 0 1px 3px, rgba(0, 0, 0, 0.1) 0 1px 3px;
+  box-shadow: rgb(0 0 0 / 10%) 0 1px 3px, rgb(0 0 0 / 10%) 0 1px 3px;
   transition: box-shadow 0.2s ease;
 }
 
 .home_insight__card:hover {
-  box-shadow: rgba(0, 0, 0, 0.11) 0 3px 6px, rgba(0, 0, 0, 0.16) 0 3px 6px;
+  box-shadow: rgb(0 0 0 / 11%) 0 3px 6px, rgb(0 0 0 / 16%) 0 3px 6px;
   cursor: pointer;
 }
 
@@ -114,7 +113,7 @@
 }
 
 
-@media only screen and (max-width: 943px) {
+@media only screen and (width <= 943px) {
   .home__form {
     margin-left: 21px !important;
   }

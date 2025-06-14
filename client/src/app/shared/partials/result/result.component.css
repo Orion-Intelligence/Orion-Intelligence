@@ -22,7 +22,7 @@
   transition: background 0.3s;
 }
 
-.analytics label:after {
+.analytics label::after {
   content: '';
   position: absolute;
   top: 2px;
@@ -38,11 +38,11 @@
   background: #1e6cb7;;
 }
 
-.analytics input:checked + label:after {
+.analytics input:checked + label::after {
   left: calc(100% - 2px);
   transform: translateX(-100%);
 }
 
-.analytics label:active:after {
+.analytics label:active::after {
   width: 18px;
 }

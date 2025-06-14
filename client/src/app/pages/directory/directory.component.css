@@ -9,7 +9,7 @@
 }
 
 .directory__header {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   background: none;
   color: #fff;
@@ -41,7 +41,7 @@
 }
 
 .directory__main-filter-label {
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: #fff;
@@ -70,7 +70,7 @@
   margin-top: -10px;
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (width <= 943px) {
   .directory__container {
     min-height: 100vh;
     padding: 40px 10px 100px;

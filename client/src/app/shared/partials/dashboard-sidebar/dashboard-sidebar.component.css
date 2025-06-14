@@ -35,10 +35,10 @@
   margin-left: -5px;
   padding: 20px;
   mask-image: linear-gradient(to bottom,
-  #00000000 0%,
-  #000000FF 15px,
-  #000000FF 93%,
-  #00000000 100%);
+  #0000 0%,
+  #000F 15px,
+  #000F 93%,
+  #0000 100%);
 }
 
 .sidebar-hotlinks {
@@ -68,10 +68,10 @@
 .sidebar__item .sidebar__item-dropdown {
   text-decoration: none;
   color: #A0B8D1;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   display: block;
   padding: 13px 10px;
-  border: 1px solid #ffffff00;
+  border: 1px solid #fff0;
   font-weight: 500;
   font-size: 14px;
   border-radius: 8px;
@@ -304,7 +304,7 @@
 }
 
 .sidebar-collapsed .sidebar__selected {
-  border-left: 1px solid #00000000;
+  border-left: 1px solid #0000;
 }
 
 .sidebar-collapsed .sidebar__item-dropdown {
@@ -348,13 +348,13 @@
   height: 40px !important;
 }
 
-@media only screen and (max-width: 700px) {
+@media only screen and (width <= 700px) {
   .sidebar__content-container {
     max-width: 350px;
   }
 }
 
-@media only screen and (max-width: 1050px) {
+@media only screen and (width <= 1050px) {
   .sidebar__logo-container p {
     margin-left: 40px;
   }
@@ -381,14 +381,14 @@
   }
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (width <= 943px) {
   .sidebar__background {
     width: 175% !important;
     height: 175% !important;
   }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (width <= 600px) {
   .sidebar__content-container {
     max-width: 100vw;
     height: 100vw;
@@ -400,7 +400,7 @@
   }
 }
 
-@media (max-height: 749px) {
+@media (height <= 749px) {
   .sidebar-hotlinks {
     display: none;
   }

@@ -10,7 +10,6 @@
 .search__pagination-navigation {
   font-size: 13px;
   text-align: center;
-  border: 0;
   border-radius: 10px;
   width: 35px;
   height: 35px;
@@ -60,7 +59,7 @@
   border-radius: 10px;
   margin-right: 2px;
   margin-top: -2px;
-  color: #ffffff;
+  color: #fff;
   background: #15345475;
   border: 0;
   font-weight: 500;

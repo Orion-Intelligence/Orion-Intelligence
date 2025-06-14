@@ -47,7 +47,7 @@
 
 .profile-header .profile-dropdown .dropdown-item:active {
   background: #cccccc80;
-  color: #000000;
+  color: #000;
 }
 
 .profile-header .user-active {

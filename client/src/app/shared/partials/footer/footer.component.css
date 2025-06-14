@@ -8,7 +8,7 @@
 .footer__scroll-top__text {
   font-size: 12px;
   font-weight: 400;
-  color: #FFFFFF;
+  color: #FFF;
   margin-right: 10px;
 }
 
@@ -19,14 +19,14 @@
   z-index: 10000;
   left: 0;
   margin-left: 0;
-  background: rgba(33, 75, 116, 0.81);
+  background: rgb(33 75 116 / 81%);
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   padding: 0;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgb(0 0 0 / 10%);
   transition: background 0.3s ease;
 }
 

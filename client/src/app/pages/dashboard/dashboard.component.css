@@ -4,9 +4,9 @@
   height: auto;
   overflow: hidden;
   background: linear-gradient(to bottom,
-  rgba(18, 52, 84, 1),
-  rgba(41, 87, 132, 1) 50vh,
-  rgba(41, 87, 132, 1) 100%) !important;
+  rgb(18 52 84 / 100%),
+  rgb(41 87 132 / 100%) 50vh,
+  rgb(41 87 132 / 100%) 100%) !important;
   max-height: 100%;
   z-index: 1;
 }
@@ -57,10 +57,9 @@
   margin-left: 0;
   margin-right: 0;
   height: 100vh;
-  overflow-y: visible;
+  overflow: hidden visible;
   min-height: 800px;
   background: #1C4D7D;
-  overflow-x: hidden;
 }
 
 .dashboard__sidebar-content {
@@ -87,8 +86,7 @@
   position: sticky;
   padding: 0;
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   background: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
 }
 
@@ -102,7 +100,7 @@
   display: none;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (width <= 600px) {
   .dashboard__sidebar {
     width: 100vw;
     overflow: hidden;
@@ -123,7 +121,7 @@
   z-index: 3;
 }
 
-@media only screen and (max-width: 460px) {
+@media only screen and (width <= 460px) {
   .filters-container {
     display: none !important;
   }

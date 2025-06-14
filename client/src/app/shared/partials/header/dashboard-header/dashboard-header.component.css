@@ -26,7 +26,7 @@
   color: #ffffff50;
   font-size: 15px;
   font-weight: 500;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   cursor: pointer;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .breadcrumb-active {
-  color: #ffffff;
+  color: #fff;
 }
 
 .header-bar__breadcrum {
@@ -45,10 +45,10 @@
 }
 
 .header-bar__title {
-  color: #ffffff;
+  color: #fff;
   font-weight: 500;
   font-size: 18px;
-  font-family: 'Roboto', sans-serif;
+  font-family: Roboto, sans-serif;
   margin-bottom: 0;
   margin-top: 0;
   margin-left: 30px;
@@ -80,7 +80,7 @@
   pointer-events: none;
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (width <= 943px) {
   .header-bar__title-container {
     margin-left: 0;
   }

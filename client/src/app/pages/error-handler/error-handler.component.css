@@ -33,7 +33,7 @@
   margin-right: 10px;
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (width <= 943px) {
   .notice {
     margin-top: 30px;
     padding: 40px 15px;

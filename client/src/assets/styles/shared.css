@@ -123,7 +123,7 @@ table td,
 table th {
   border: 0 !important;
   border-bottom: 1px solid #FCFCFC12 !important;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   padding: 8px;
   text-align: left;
 }
@@ -170,7 +170,7 @@ table tr:last-child {
   border-bottom: 1px solid #FCFCFC12 !important;
 }
 
-table tr:not(:first-child):not(:last-child) {
+table tr:not(:first-child, :last-child) {
   border: none !important;
 }
 
@@ -210,8 +210,8 @@ table a:visited {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Inter', sans-serif;
-  color: rgba(255, 255, 255, 1);
+  font-family: Inter, sans-serif;
+  color: rgb(255 255 255 / 100%);
   font-weight: 500;
   font-size: 15px;
 }
@@ -302,8 +302,8 @@ table a:visited {
 
 .custom-tooltip {
   position: absolute;
-  background: #000000;
-  color: #ffffff;
+  background: #000;
+  color: #fff;
   padding: 8px 12px;
   font-size: 13px;
   z-index: 1000;
@@ -319,13 +319,13 @@ table a:visited {
   display: none !important;
 }
 
-@media only screen and (max-width: 550px) {
+@media only screen and (width <= 550px) {
   .default-input-container {
     display: grid;
   }
 }
 
-@media only screen and (max-width: 1300px) {
+@media only screen and (width <= 1300px) {
   table thead {
     display: none;
   }
@@ -369,7 +369,7 @@ table a:visited {
 
 }
 
-@media only screen and (max-width: 943px) {
+@media only screen and (width <= 943px) {
   .label-text {
     margin-left: 15px;
   }
@@ -401,13 +401,13 @@ table a:visited {
   }
 }
 
-@media only screen and (max-width: 460px) {
+@media only screen and (width <= 460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (max-width: 700px) {
+@media only screen and (width <= 700px) {
   .dashboard-general-input {
     min-width: 100px;
   }

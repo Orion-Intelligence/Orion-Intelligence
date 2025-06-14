@@ -14,7 +14,7 @@
 .search__no-suggestion-header {
   float: left;
   font-size: 15px;
-  color: #FFFFFF;
+  color: #FFF;
   font-weight: 400;
 }
 
@@ -23,7 +23,7 @@
   margin-top: -10px;
   width: 100%;
   clear: left;
-  color: #FFFFFF;
+  color: #FFF;
   font-weight: 400;
 }
 
@@ -36,11 +36,11 @@
 .search__no-suggestion-item {
   font-size: 13px;
   margin-top: -2px;
-  color: #FFFFFF;
+  color: #FFF;
   font-weight: 400;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (width <= 1000px) {
   .search__no-suggestion {
     margin-left: 20px;
     margin-right: 15px;

@@ -32,6 +32,9 @@
     "@angular-builders/custom-webpack": "^19.0.1",
     "@angular/cli": "19.2.14",
     "@angular/compiler-cli": "19.2.14",
-    "@types/jasmine": "~5.1.0"
+    "@types/jasmine": "~5.1.0",
+    "stylelint": "^16.20.0",
+    "stylelint-config-standard": "^38.0.0",
+    "stylelint-scss": "^6.12.1"
   }
 }

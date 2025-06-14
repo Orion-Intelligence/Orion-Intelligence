@@ -2,7 +2,7 @@
   list-style: none;
   font-family: monospace;
   padding-left: 0;
-  color: rgb(211, 211, 211);
+  color: rgb(211 211 211);
 }
 
 .json-tree__node {
@@ -20,7 +20,7 @@
   content: "├── ";
   position: absolute;
   left: 0;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgb(255 255 255 / 30%);
 }
 
 .json-tree__node--last .json-tree__line::before {
@@ -44,7 +44,7 @@
 }
 
 .json-tree__value {
-  color: rgb(211, 211, 211);
+  color: rgb(211 211 211);
   font-size: 12px;
 }
 

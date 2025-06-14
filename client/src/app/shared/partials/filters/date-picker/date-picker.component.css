@@ -28,12 +28,12 @@
 
 .custom-day.range,
 .custom-day:hover {
-  background-color: rgb(2, 117, 216);
+  background-color: rgb(2 117 216);
   color: white;
 }
 
 .custom-day.faded {
-  background-color: rgba(2, 117, 216, 0.5);
+  background-color: rgb(2 117 216 / 50%);
 }
 
 .date_picker_button_bg {

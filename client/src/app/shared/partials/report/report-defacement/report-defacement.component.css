@@ -36,7 +36,7 @@
   color: #D0D0D0;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (width <= 1000px) {
   .dashboard__defacement-detail-header-row {
     display: grid;
   }
