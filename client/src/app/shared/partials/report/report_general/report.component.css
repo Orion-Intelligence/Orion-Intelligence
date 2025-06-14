@@ -375,8 +375,7 @@
 }
 
 .dashboard__search-link:not([href]):hover {
-  color: #D0D0D0;
-  ;
+  color: #D0D0D0;;
 }
 
 
@@ -506,7 +505,6 @@
 .dashboard__search-button-inner {
   padding: 0 10px 10px;
 }
-
 
 
 .collapsible-container {

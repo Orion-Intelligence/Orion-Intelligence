@@ -6,7 +6,7 @@
   margin-right: 32px;
 }
 
-.default-input-sub-container-padded{
+.default-input-sub-container-padded {
   margin-left: 31px !important;
 }
 
@@ -373,6 +373,7 @@ table a:visited {
   .label-text {
     margin-left: 15px;
   }
+
   .default-notification-banner-cti {
     display: none;
   }

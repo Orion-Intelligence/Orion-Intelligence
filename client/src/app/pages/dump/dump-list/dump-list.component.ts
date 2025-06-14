@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {AsyncPipe, NgForOf, DatePipe, NgIf} from '@angular/common';
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {Observable} from 'rxjs';
 import {DumpService} from '../../../services/dump/dump.service';
 import {DumpCallbackModel} from '../../../shared/model/dump/dump.mode';
@@ -22,6 +22,10 @@ export class DumpListComponent implements OnInit {
     this.dumpData$ = this.dumpService.dumpData$;
   }
 
+  get currentPage$() {
+    return this.dumpService.currentPage$;
+  }
+
   ngOnInit(): void {
     this.dumpData$ = this.dumpService.dumpData$;
   }
@@ -34,9 +38,5 @@ export class DumpListComponent implements OnInit {
     }).catch(err => {
       console.error('Failed to copy:', err);
     });
-  }
-
-  get currentPage$() {
-    return this.dumpService.currentPage$;
   }
 }

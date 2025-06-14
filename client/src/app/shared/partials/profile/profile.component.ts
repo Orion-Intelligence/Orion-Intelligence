@@ -1,7 +1,7 @@
-import { Component, HostListener } from '@angular/core';
-import { AsyncPipe, NgIf, NgOptimizedImage } from "@angular/common";
-import { AuthService } from '../../../services/authetication/auth.service';
-import { Observable } from 'rxjs';
+import {Component, HostListener} from '@angular/core';
+import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
+import {AuthService} from '../../../services/authetication/auth.service';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-profile',

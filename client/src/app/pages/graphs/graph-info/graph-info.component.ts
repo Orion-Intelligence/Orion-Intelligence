@@ -1,7 +1,6 @@
-
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import { NgIf, TitleCasePipe } from '@angular/common';
-import { ListingsComponent } from "../listings/listings.component";
+import {NgIf, TitleCasePipe} from '@angular/common';
+import {ListingsComponent} from "../listings/listings.component";
 import {loadRuleSetFromStorage, RuleSet, saveRuleSetToStorage} from '../../../shared/model/graph/ruleset_model';
 
 @Component({
@@ -55,16 +54,16 @@ export class GraphInfoComponent implements OnInit {
     return input.replace(/^m_/, '').replace(/_/g, ' ').trim();
   }
 
-  onRuleToggle(field: keyof RuleSet, trigger:boolean) {
+  onRuleToggle(field: keyof RuleSet, trigger: boolean) {
     this.ruleSet = {
       ...this.ruleSet,
       [field]: !this.ruleSet[field]
     };
     saveRuleSetToStorage(this.ruleSet);
-    if (trigger){
+    if (trigger) {
       this.ruleSetChange.emit(this.ruleSet);
     }
-    if(field == "edgeColor"){
+    if (field == "edgeColor") {
       this.onResetAll.emit()
     }
 

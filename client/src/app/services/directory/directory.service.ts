@@ -6,11 +6,10 @@ import {ApiService} from '../../shared/services/api.service';
 @Injectable({providedIn: 'root'})
 export class DirectoryService {
   private directoryDataSubject = new BehaviorSubject<DirectoryCallbackModel | null>(null);
-  private currentPageSubject = new BehaviorSubject<number>(1);
-  private filters: { [key: string]: string } = {};
-
   directoryData$ = this.directoryDataSubject.asObservable();
+  private currentPageSubject = new BehaviorSubject<number>(1);
   currentPage$ = this.currentPageSubject.asObservable();
+  private filters: { [key: string]: string } = {};
 
   constructor(private apiService: ApiService) {
   }

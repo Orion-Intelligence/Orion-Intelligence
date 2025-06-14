@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {LoginContainerComponent} from './login-container/login-container.component';
 
 @Component({

@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {EmptyResultComponent} from '../../empty-result/empty-result.component';
@@ -26,6 +26,8 @@ export class DashboardEmailApiComponent implements OnInit {
 
   emailParambackModel: searchDynamicEmailParamModel = new searchDynamicEmailParamModel();
   emailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
+  protected readonly Object = Object;
+  protected readonly Array = Array;
 
   constructor(public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute) {
   }
@@ -83,7 +85,4 @@ export class DashboardEmailApiComponent implements OnInit {
         }
       });
   }
-
-  protected readonly Object = Object;
-  protected readonly Array = Array;
 }

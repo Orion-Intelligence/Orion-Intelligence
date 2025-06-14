@@ -172,15 +172,19 @@
     width: calc(100% - 30px);
     margin-left: 15px;
   }
+
   .div-hide {
     visibility: hidden;
   }
+
   .frame {
     margin-right: 3px !important;
   }
+
   .frame .div-2 {
     overflow: hidden;
   }
+
   .div-expand-hide {
     visibility: visible !important;
   }

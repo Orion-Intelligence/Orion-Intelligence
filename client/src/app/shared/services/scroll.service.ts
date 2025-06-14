@@ -9,7 +9,7 @@ export class ScrollService {
     this.resetOnReload();
   }
 
-  public resetOnReload(ingore=false): void {
+  public resetOnReload(ingore = false): void {
     const navEntries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[];
     const isHardReload = navEntries?.[0]?.type === 'reload';
 

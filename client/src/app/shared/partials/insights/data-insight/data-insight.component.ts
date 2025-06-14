@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { DataAccordianComponent } from './data-accordian/data-accordian.component';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {DataAccordianComponent} from './data-accordian/data-accordian.component';
 
 @Component({
   selector: 'app-data-insight',

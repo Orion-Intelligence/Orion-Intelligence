@@ -3,40 +3,40 @@
   <div class="directory-list__container report-mapping">
     <table class="table table-striped directory-list__table clear-paddings mb-0">
       <thead>
-        <tr>
-          <th scope="col" class="narrow-col">ID</th>
-          <th scope="col">Mapping To</th>
-          <th scope="col" class="mid-col">Mapping On</th>
-          <th scope="col">Mapping Value</th>
-        </tr>
+      <tr>
+        <th class="narrow-col" scope="col">ID</th>
+        <th scope="col">Mapping To</th>
+        <th class="mid-col" scope="col">Mapping On</th>
+        <th scope="col">Mapping Value</th>
+      </tr>
       </thead>
       <tbody>
-        <ng-container *ngFor="let item of filteredItems; let i = index">
-          <tr class="cursor-pointer" (click)="viewReport(extractId(item.edge._id))">
-            <td data-label="ID">
-              {{ (i + 1) }}
-            </td>
-            <td data-label="Service URL">
-              <a class="directory-list__table-url text-decoration-none text-reset">
-                {{ extractId(item.edge._id) }}
-              </a>
-            </td>
-            <td data-label="Category">
-              <div class="d-flex flex-wrap">
-                <div class="directory-list__content-category px-2 py-1 text-truncate">
-                  {{ extractProperty(item.edge._id,"key") }}
-                </div>
+      <ng-container *ngFor="let item of filteredItems; let i = index">
+        <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer">
+          <td data-label="ID">
+            {{ (i + 1) }}
+          </td>
+          <td data-label="Service URL">
+            <a class="directory-list__table-url text-decoration-none text-reset">
+              {{ extractId(item.edge._id) }}
+            </a>
+          </td>
+          <td data-label="Category">
+            <div class="d-flex flex-wrap">
+              <div class="directory-list__content-category px-2 py-1 text-truncate">
+                {{ extractProperty(item.edge._id, "key") }}
               </div>
-            </td>
-            <td data-label="Category">
-              <div class="d-flex flex-wrap">
-                <div class="directory-list__content-category px-2 py-1 text-truncate">
-                  {{ extractProperty(item.edge._id,"value") }}
-                </div>
+            </div>
+          </td>
+          <td data-label="Category">
+            <div class="d-flex flex-wrap">
+              <div class="directory-list__content-category px-2 py-1 text-truncate">
+                {{ extractProperty(item.edge._id, "value") }}
               </div>
-            </td>
-          </tr>
-        </ng-container>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
       </tbody>
     </table>
   </div>

@@ -1,9 +1,9 @@
 <div *ngIf="analytics" class="insight-general__div">
   <div *ngFor="let section of sections" class="insight-general__container insight-general__container-background">
-    <input type="checkbox" [id]="section.title + '-toggle'" checked>
-    <label class="insight-general__header" [for]="section.title + '-toggle'" appTooltip="{{section.tooltip}}">
+    <input [id]="section.title + '-toggle'" checked type="checkbox">
+    <label [for]="section.title + '-toggle'" appTooltip="{{section.tooltip}}" class="insight-general__header">
       {{ section.title }}
-      <img ngSrc="../../../../../assets/images/shared/dropdown_left.svg" alt="" width="20" height="20">
+      <img alt="" height="20" ngSrc="../../../../../assets/images/shared/dropdown_left.svg" width="20">
     </label>
     <div class="insight-general__content">
       <div class="row">

@@ -1,14 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Observable, timer, interval, switchMap, tap, map } from 'rxjs';
-import { ApiService } from '../../shared/services/api.service';
+import {Injectable} from '@angular/core';
+import {interval, map, Observable, switchMap, tap, timer} from 'rxjs';
+import {ApiService} from '../../shared/services/api.service';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class TokenRefreshService {
   private refreshTokenSubscription: any;
   private readonly FIRST_REFRESH_DELAY = 5000;
   private readonly REFRESH_INTERVAL = 500000;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) {
+  }
 
   startTokenRefresh(refreshAction: () => Observable<string | null>): void {
     if (!this.refreshTokenSubscription || this.refreshTokenSubscription.closed) {

@@ -1,12 +1,13 @@
-from orion.api.interactive.dump_manager.dump_shared_model.dump_callback_model import dump_callback_model, dump_callback_link
+from datetime import datetime, timedelta
+
+from orion.api.interactive.dump_manager.dump_shared_model.dump_callback_model import dump_callback_model, \
+    dump_callback_link
 from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model import dump_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
-from datetime import datetime, timedelta
 
 
 class dump_model:
-
     # Private Variables
     __instance = None
 

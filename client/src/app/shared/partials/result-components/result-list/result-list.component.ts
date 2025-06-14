@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-result-list',

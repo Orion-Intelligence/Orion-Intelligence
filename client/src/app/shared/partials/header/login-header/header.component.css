@@ -12,7 +12,7 @@
   align-items: center;
 }
 
-.header-logout{
+.header-logout {
   position: absolute;
   right: 8px;
   top: 0;
@@ -60,8 +60,8 @@
 }
 
 .header .dropdown-item {
-  padding-top:6px !important;
-  padding-bottom:6px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
   align-content: start;
 }
 

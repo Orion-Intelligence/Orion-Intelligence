@@ -1,9 +1,9 @@
-<div class="search__result-detail-section-content" *ngIf="listItems.length > 0">
+<div *ngIf="listItems.length > 0" class="search__result-detail-section-content">
   <div class="row p-1 flex-wrap">
-    <li *ngFor="let item of listItems; let i = index" class="copy-item" (click)="copyText(item, i)">
+    <li (click)="copyText(item, i)" *ngFor="let item of listItems; let i = index" class="copy-item">
       <span class="tag-item-content">
         {{ item }}
-        <span class="tooltip" *ngIf="copiedIndex === i">Copied!</span>
+        <span *ngIf="copiedIndex === i" class="tooltip">Copied!</span>
       </span>
     </li>
   </div>

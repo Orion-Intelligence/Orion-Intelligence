@@ -58,16 +58,16 @@
   width: 160px;
 }
 
-.context-menu .dropdown-divider{
-  padding:0;
-  margin:0;
+.context-menu .dropdown-divider {
+  padding: 0;
+  margin: 0;
 }
 
-.context-menu .dropdown-item{
+.context-menu .dropdown-item {
   padding-left: 10px !important;
 }
 
-.context-menu .dropdown-item img{
+.context-menu .dropdown-item img {
   opacity: 0.4;
   margin-right: 15px !important;
 }

@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional
 import re
+from typing import Optional
+
+from pydantic import BaseModel, Field, field_validator
+
 
 class search_dynamic_param_model(BaseModel):
     email: Optional[str] = Field(None, max_length=150)

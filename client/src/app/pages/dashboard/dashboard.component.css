@@ -4,9 +4,9 @@
   height: auto;
   overflow: hidden;
   background: linear-gradient(to bottom,
-      rgba(18, 52, 84, 1),
-      rgba(41, 87, 132, 1) 50vh,
-      rgba(41, 87, 132, 1) 100%) !important;
+  rgba(18, 52, 84, 1),
+  rgba(41, 87, 132, 1) 50vh,
+  rgba(41, 87, 132, 1) 100%) !important;
   max-height: 100%;
   z-index: 1;
 }

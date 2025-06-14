@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { NgOptimizedImage } from "@angular/common";
+import {Component} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-home-search',
@@ -12,6 +11,7 @@ import { NgOptimizedImage } from "@angular/common";
 })
 export class HomeSearchComponent {
   searchQuery: string = '';
+
   constructor(private route: ActivatedRoute, private router: Router) {
   }
 

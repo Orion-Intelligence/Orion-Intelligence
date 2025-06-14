@@ -1,13 +1,7 @@
-import {
-  HttpInterceptorFn,
-  HttpErrorResponse,
-  HttpEvent,
-  HttpHandlerFn,
-  HttpRequest
-} from '@angular/common/http';
+import {HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest} from '@angular/common/http';
 import {inject} from '@angular/core';
 import {Router} from '@angular/router';
-import {throwError, Observable, TimeoutError} from 'rxjs';
+import {Observable, throwError, TimeoutError} from 'rxjs';
 import {catchError, finalize, timeout} from 'rxjs/operators';
 import {AuthService} from '../authetication/auth.service';
 import {LoadingService} from '../../shared/services/loading.service';
@@ -27,7 +21,7 @@ export const httpInterceptor: HttpInterceptorFn = (
   const token = authService.getToken();
 
   const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    ? req.clone({setHeaders: {Authorization: `Bearer ${token}`}})
     : req;
 
   if (activeRequests === 0) {
@@ -63,7 +57,7 @@ export const httpInterceptor: HttpInterceptorFn = (
 
       if (error instanceof HttpErrorResponse && error.status === 401) {
         if (authService.isAuthenticated()) {
-          router.navigate(['/login'], { queryParams: { sessionExpired: 'true' } }).then();
+          router.navigate(['/login'], {queryParams: {sessionExpired: 'true'}}).then();
           authService.logout();
           alert('Session timeout');
         }

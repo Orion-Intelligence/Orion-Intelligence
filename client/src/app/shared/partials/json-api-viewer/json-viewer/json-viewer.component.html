@@ -1,14 +1,14 @@
 <ul class="json-tree json-tree--depth-{{ level }}">
   <ng-container *ngFor="let key of keys(json); let last = last">
-    <li class="json-tree__node" [class.json-tree__node--last]="last">
-      <div class="json-tree__line" (click)="isCollapsible(json[key]) && toggle(pathKey(parentPath, key))">
-        <span class="json-tree__toggle" *ngIf="isCollapsible(json[key])">
+    <li [class.json-tree__node--last]="last" class="json-tree__node">
+      <div (click)="isCollapsible(json[key]) && toggle(pathKey(parentPath, key))" class="json-tree__line">
+        <span *ngIf="isCollapsible(json[key])" class="json-tree__toggle">
           {{ isExpanded(pathKey(parentPath, key)) ? '▼' : '▶' }}
         </span>
         <span class="json-tree__key json-tree__key--faded ms-1">{{ key }}</span>
       </div>
 
-      <div class="json-tree__children" *ngIf="isExpanded(pathKey(parentPath, key))">
+      <div *ngIf="isExpanded(pathKey(parentPath, key))" class="json-tree__children">
         <ng-container *ngIf="isObject(json[key]); else jsonLeaf">
           <app-json-viewer
             [json]="json[key]"

@@ -1,14 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { AsyncPipe, NgOptimizedImage } from '@angular/common';
-import { PaginationComponent } from '../../shared/partials/pagination/pagination.component';
-import { FiltersComponent } from '../../shared/partials/filters/filters.component';
-import { DumpService } from '../../services/dump/dump.service';
-import { FilterModel } from '../../shared/model/filter/filter.model';
-import { dump_filters } from '../../shared/constants/filters';
-import { DumpListComponent } from './dump-list/dump-list.component';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { DumpCallbackModel } from '../../shared/model/dump/dump.mode';
+import {Component, OnInit} from '@angular/core';
+import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import {PaginationComponent} from '../../shared/partials/pagination/pagination.component';
+import {FiltersComponent} from '../../shared/partials/filters/filters.component';
+import {DumpService} from '../../services/dump/dump.service';
+import {FilterModel} from '../../shared/model/filter/filter.model';
+import {dump_filters} from '../../shared/constants/filters';
+import {DumpListComponent} from './dump-list/dump-list.component';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Observable} from 'rxjs';
+import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
 
 @Component({
   selector: 'app-dump',
@@ -43,6 +43,10 @@ export class DumpComponent implements OnInit {
     });
   }
 
+  get isFilterOpen$() {
+    return this.dumpService.isFilterOpen$;
+  }
+
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       const baseFilters = this.filterModel.filters;
@@ -54,10 +58,10 @@ export class DumpComponent implements OnInit {
         const value = params[key];
 
         if (value && base.options.includes(value)) {
-          newFilters[key] = { ...base, selected: value };
+          newFilters[key] = {...base, selected: value};
           initialSelectedFilters[key] = value;
         } else {
-          newFilters[key] = { ...base };
+          newFilters[key] = {...base};
         }
       });
 
@@ -72,7 +76,7 @@ export class DumpComponent implements OnInit {
 
   onPageChange(currentPage: number): void {
     this.dumpService.setCurrentPage(currentPage);
-    this.dumpService.reloadDumpData({ ...this.selectedFilters, page: currentPage });
+    this.dumpService.reloadDumpData({...this.selectedFilters, page: currentPage});
   }
 
   openSidebar(): void {
@@ -96,7 +100,7 @@ export class DumpComponent implements OnInit {
     });
 
     const currentUrl = this.router.url.split('?')[0];
-    this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => {
+    this.router.navigateByUrl(currentUrl, {replaceUrl: true}).then(() => {
       this.reloadDump();
     });
   }
@@ -114,10 +118,6 @@ export class DumpComponent implements OnInit {
       queryParamsHandling: 'merge',
     }).then();
 
-    this.dumpService.reloadDumpData({ ...filteredParams, page: 1 });
-  }
-
-  get isFilterOpen$() {
-    return this.dumpService.isFilterOpen$;
+    this.dumpService.reloadDumpData({...filteredParams, page: 1});
   }
 }

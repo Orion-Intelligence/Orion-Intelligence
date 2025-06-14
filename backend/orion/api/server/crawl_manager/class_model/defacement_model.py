@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class CardExtractionModel(BaseModel):
     m_location: List[str]
@@ -13,6 +15,7 @@ class CardExtractionModel(BaseModel):
     m_web_url: List[str]
     m_screenshot: Optional[str] = None
     m_mirror_links: List[str] = Field(default_factory=list)
+
 
 class DefacementDataModel(BaseModel):
     cards_data: List[CardExtractionModel] = Field(default_factory=list)

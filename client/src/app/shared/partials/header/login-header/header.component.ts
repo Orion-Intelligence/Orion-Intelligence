@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
-import { ProfileComponent } from '../../profile/profile.component';
+import {ProfileComponent} from '../../profile/profile.component';
 
 @Component({
   selector: 'app-header',

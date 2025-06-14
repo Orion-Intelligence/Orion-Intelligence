@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+
 from pydantic import BaseModel
 from pydantic.v1 import Extra
 
@@ -8,6 +9,7 @@ class suggestion(BaseModel):
     offset: int
     length: int
     options: List[dict]
+
 
 class result_item(BaseModel):
     m_title: Optional[str] = None
@@ -36,8 +38,10 @@ class result_item(BaseModel):
     m_creation_date: Optional[str] = None
     m_contact_link: Optional[str] = None
     m_highlighted: Optional[str] = None
+
     class Config:
         extra = Extra.allow
+
 
 class search_general_callback_model(BaseModel):
     Result: Optional[List[result_item]] = None

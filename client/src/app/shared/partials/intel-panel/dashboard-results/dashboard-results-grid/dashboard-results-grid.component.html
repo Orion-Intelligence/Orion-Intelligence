@@ -6,16 +6,16 @@
         <div class="dashboard__search-tags">
           <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
         </div>
-        <div class="dashboard__search-button" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams"
-             (click)="scrollService.saveSession(item.m_hash)">
+        <div (click)="scrollService.saveSession(item.m_hash)" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]"
+             class="dashboard__search-button">
           <div class="dashboard__search-button-inner">
-            <img src="/assets/images/shared/redirect.svg" width="40" height="40"/>
+            <img height="40" src="/assets/images/shared/redirect.svg" width="40"/>
           </div>
         </div>
       </div>
 
       <ng-container *ngIf="item?.m_title as title; else noTitle">
-        <h2 class="dashboard__search-title" *ngIf="title.trim().length > 1; else noTitle">
+        <h2 *ngIf="title.trim().length > 1; else noTitle" class="dashboard__search-title">
           {{ title }}
         </h2>
       </ng-container>
@@ -23,23 +23,23 @@
         <h2 class="dashboard__search-title">Title not available</h2>
       </ng-template>
 
-        <ng-container *ngIf="item?.m_important_content as content; else noDescription">
-          <p class="dashboard__search-description" *ngIf="content.trim().length > 1; else noDescription"
-             [innerHTML]="content.slice(0, 600)">
-          </p>
-        </ng-container>
-        <ng-template #noDescription>
-          <p class="dashboard__search-description">Description not available</p>
-        </ng-template>
+      <ng-container *ngIf="item?.m_important_content as content; else noDescription">
+        <p *ngIf="content.trim().length > 1; else noDescription" [innerHTML]="content.slice(0, 600)"
+           class="dashboard__search-description">
+        </p>
+      </ng-container>
+      <ng-template #noDescription>
+        <p class="dashboard__search-description">Description not available</p>
+      </ng-template>
 
       <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
         <span class="search__result-detail-description-span highlight"><b>Search Tracker</b></span>
-        <p class="dashboard__search-description dashboard__search-description-light"
-           [innerHTML]="highlightWords(item.m_highlighted)"></p>
+        <p [innerHTML]="highlightWords(item.m_highlighted)"
+           class="dashboard__search-description dashboard__search-description-light"></p>
       </ng-container>
 
       <ng-container *ngIf="item?.m_url as url; else noUrl">
-        <div class="dashboard__search-link" *ngIf="url.trim().length > 1; else noUrl">
+        <div *ngIf="url.trim().length > 1; else noUrl" class="dashboard__search-link">
           {{ url }}
         </div>
       </ng-container>

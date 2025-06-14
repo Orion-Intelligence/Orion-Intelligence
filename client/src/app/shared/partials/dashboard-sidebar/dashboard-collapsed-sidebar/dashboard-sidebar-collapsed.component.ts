@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { AsyncPipe, NgClass, NgForOf, NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {AsyncPipe, NgClass, NgForOf, NgOptimizedImage} from '@angular/common';
+import {RouterLink} from '@angular/router';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 import {LowerPipe} from '../../../model/pipes/lower.pipe';
 
@@ -21,15 +21,6 @@ export class SidebarSectionComponent {
 
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
-
-  selectSection() {
-    this.sectionSelected.emit(this.category);
-  }
-
-  selectOption(item: string) {
-    this.optionSelected.emit(item);
-  }
-
   itemTooltips: { [key: string]: string } = {
     'All': 'Comprehensive Overview',
     'General': 'Broad Data Pool',
@@ -49,4 +40,12 @@ export class SidebarSectionComponent {
     'Telegram': 'telegram',
     'Archive': 'archive',
   };
+
+  selectSection() {
+    this.sectionSelected.emit(this.category);
+  }
+
+  selectOption(item: string) {
+    this.optionSelected.emit(item);
+  }
 }

@@ -1,16 +1,16 @@
 <div *ngIf="!isCtiGraph()">
   <div id="top"></div>
   <div class="row dashboard__sidebar-main" id="dashboard__sidebar-main">
-    <input type="radio" name="menu-input" class="dashboard__menu-toggle" id="dashboard__menu-toggle">
+    <input class="dashboard__menu-toggle" id="dashboard__menu-toggle" name="menu-input" type="radio">
 
-    <div class="dashboard__sidebar" [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }">
+    <div [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }" class="dashboard__sidebar">
       <app-dashboard-sidebar (menuToggle)="toggleNavigation()"></app-dashboard-sidebar>
     </div>
 
     <div class="dashboard_container">
-      <div id="dashboard-container" class="dashboard dashboard-content-scroll">
+      <div class="dashboard dashboard-content-scroll" id="dashboard-container">
         <app-dashboard-header></app-dashboard-header>
-        <span class="dashboard-body" [@dashboard-global-animation]="prepareRoute(routerOutlet)">
+        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard-body">
           <router-outlet #routerOutlet="outlet"></router-outlet>
         </span>
       </div>

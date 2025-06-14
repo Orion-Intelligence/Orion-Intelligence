@@ -1,7 +1,7 @@
 import {Component, signal} from '@angular/core';
-import {Router, NavigationEnd, RouterOutlet} from '@angular/router';
+import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {ErrorStoreService} from '../../shared/services/error-store.service';
-import {Observable, filter, map} from 'rxjs';
+import {filter, map, Observable} from 'rxjs';
 import {NgIf} from '@angular/common';
 import {LoaderComponent} from '../../shared/partials/loader/loader.component';
 import {AppService} from '../../services/core/app.service';

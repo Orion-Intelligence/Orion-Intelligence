@@ -10,7 +10,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
 import {DefacementParamModel} from '../../../model/results/defacement/defacement.callback.model';
 import {DefacementCallbackModel} from '../../../model/results/defacement/defacement.param.model';
 import {AppService} from '../../../../services/core/app.service';
-import {defacement_filters, general_filters} from '../../../constants/filters';
+import {defacement_filters} from '../../../constants/filters';
 import {Category} from '../../../enums/pages';
 
 @Component({
@@ -28,6 +28,8 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   query = '';
   isLoading = false;
   firstTrigger = true;
+  protected readonly Math = Math;
+  protected readonly defacement_filters = defacement_filters;
 
   constructor(public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
   }
@@ -148,7 +150,4 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     }
     this.fetchSearchResults();
   }
-
-  protected readonly Math = Math;
-  protected readonly defacement_filters = defacement_filters;
 }

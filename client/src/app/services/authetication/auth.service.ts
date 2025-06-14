@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap, map } from 'rxjs';
-import { ApiService } from '../../shared/services/api.service';
-import { Router } from '@angular/router';
-import { AuthModel } from '../../shared/model/auth/auth.model';
-import { TokenRefreshService } from './token-refresh.service';
-import { HttpHeaders } from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, map, Observable, tap} from 'rxjs';
+import {ApiService} from '../../shared/services/api.service';
+import {Router} from '@angular/router';
+import {AuthModel} from '../../shared/model/auth/auth.model';
+import {TokenRefreshService} from './token-refresh.service';
+import {HttpHeaders} from '@angular/common/http';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class AuthService {
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
@@ -33,13 +33,17 @@ export class AuthService {
     body.set('username', username);
     body.set('password', password);
 
-    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
 
-    return this.apiService.post<{ access_token: string; role: string }>('token', body.toString(), { headers }).pipe(tap({
+    return this.apiService.post<{ access_token: string; role: string }>('token', body.toString(), {headers}).pipe(tap({
       next: (response) => {
         if (response.role === 'crawler') {
           this.authState.next({
-            token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Not enough credentials'
+            token: null,
+            username: null,
+            role: null,
+            isAuthenticated: false,
+            error: 'Access denied! Not enough credentials'
           });
           return
         }
@@ -95,7 +99,11 @@ export class AuthService {
   private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
     return {
-      token, username: localStorage.getItem('username'), role: localStorage.getItem('role'), isAuthenticated: !!token, error: null
+      token,
+      username: localStorage.getItem('username'),
+      role: localStorage.getItem('role'),
+      isAuthenticated: !!token,
+      error: null
     };
   }
 
@@ -117,7 +125,7 @@ export class AuthService {
     return this.apiService.post<{
       access_token: string;
       role: string
-    }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ 'Authorization': `Bearer ${currentToken}` }) }).pipe(tap((response) => {
+    }>('token/refresh', {token: currentToken}, {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}).pipe(tap((response) => {
       if (response) {
         this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
       }

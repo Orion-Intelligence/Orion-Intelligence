@@ -1,6 +1,7 @@
 from datetime import datetime
-from pydantic import BaseModel
 from typing import List
+
+from pydantic import BaseModel
 
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 

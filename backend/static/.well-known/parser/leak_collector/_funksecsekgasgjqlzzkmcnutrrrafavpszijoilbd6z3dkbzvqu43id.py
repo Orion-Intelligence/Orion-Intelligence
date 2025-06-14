@@ -1,14 +1,15 @@
 from abc import ABC
 from typing import List
-from bs4 import BeautifulSoup
-from playwright.sync_api import Page
 from urllib.parse import urljoin
+
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
+from playwright.sync_api import Page
 
 
 class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_interface, ABC):
@@ -82,7 +83,6 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
             page_html = page.content()
             self.soup = BeautifulSoup(page_html, 'html.parser')
 
-
             product_links = []
             product_cards = self.soup.select("a.product-card")
 
@@ -91,7 +91,6 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                 if item_url and not item_url.startswith(('http://', 'https://')):
                     item_url = urljoin(self.base_url, item_url)
                 product_links.append(item_url)
-
 
             for product_url in product_links:
                 if product_url is not None:
@@ -103,25 +102,19 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                 product_html = page.content()
                 product_soup = BeautifulSoup(product_html, 'html.parser')
 
-
                 title_element = product_soup.find("h2")
                 title = title_element.get_text(strip=True) if title_element else "not found"
-
 
                 if title.lower().startswith("about "):
                     title = title[6:]
 
-
                 content_elements = product_soup.find_all(["h2", "p"])
                 content = "\n".join(elem.get_text(strip=True) for elem in content_elements if elem)
 
-
                 important_content = content[:500] if content else ""
-
 
                 image_elements = product_soup.find_all("img")
                 logos = [img.get("src") for img in image_elements if img.get("src")]
-
 
                 dump_link_element = product_soup.find("a", class_="download-button")
                 dumplink = dump_link_element["href"] if dump_link_element else "not found"

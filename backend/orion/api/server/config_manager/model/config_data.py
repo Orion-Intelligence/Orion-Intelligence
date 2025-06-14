@@ -4,4 +4,4 @@ from pydantic import BaseModel
 
 
 class config_data(BaseModel):
-  settings: Dict[str, str]
+    settings: Dict[str, str]

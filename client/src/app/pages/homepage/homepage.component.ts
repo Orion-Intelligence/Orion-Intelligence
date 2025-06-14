@@ -1,6 +1,6 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
+import {filter} from 'rxjs/operators';
 import {HomeSearchComponent} from './home-search/home-search.component';
 import {HomeInsightComponent} from './home-insight/home-insight.component';
 
@@ -11,7 +11,8 @@ import {HomeInsightComponent} from './home-insight/home-insight.component';
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+  }
 
   ngOnInit() {
     this.router.events
@@ -24,6 +25,6 @@ export class HomepageComponent implements OnInit, AfterViewInit {
   }
 
   scrollToElement() {
-    document.getElementById('analytics')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('analytics')?.scrollIntoView({behavior: 'smooth', block: 'start'});
   }
 }

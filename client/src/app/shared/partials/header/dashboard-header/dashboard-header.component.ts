@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ProfileComponent } from '../../profile/profile.component';
-import { NavigationEnd, Router, UrlTree } from '@angular/router';
-import { filter } from 'rxjs';
-import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common';
+import {Component, OnInit} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {ProfileComponent} from '../../profile/profile.component';
+import {NavigationEnd, Router, UrlTree} from '@angular/router';
+import {filter} from 'rxjs';
+import {NgForOf, NgIf, NgOptimizedImage, TitleCasePipe} from '@angular/common';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
@@ -15,7 +15,8 @@ import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 export class DashboardHeaderComponent implements OnInit {
   breadcrumb: { path: string; label: string }[] = [];
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {
+  }
 
   ngOnInit() {
     this.updateBreadcrumb(this.router.url);
@@ -32,8 +33,8 @@ export class DashboardHeaderComponent implements OnInit {
     const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) || [];
 
     this.breadcrumb = segments.length > 1
-      ? segments.slice(1).map((segment) => ({ path: segment, label: segment }))
-      : segments.map((segment) => ({ path: segment, label: segment }));
+      ? segments.slice(1).map((segment) => ({path: segment, label: segment}))
+      : segments.map((segment) => ({path: segment, label: segment}));
   }
 
   goBack() {
@@ -42,7 +43,7 @@ export class DashboardHeaderComponent implements OnInit {
       const queryParams = currentUrlTree.queryParams;
 
       const secondLastPath = '/dashboard/' + this.breadcrumb.slice(0, -1).map((crumb) => crumb.path).join('/');
-      const secondLastUrlTree = this.router.createUrlTree([secondLastPath], { queryParams });
+      const secondLastUrlTree = this.router.createUrlTree([secondLastPath], {queryParams});
       const secondLastUrl = this.router.serializeUrl(secondLastUrlTree);
       this.router.navigateByUrl(secondLastUrl).then();
     }
@@ -54,7 +55,7 @@ export class DashboardHeaderComponent implements OnInit {
       const queryParams = currentUrlTree.queryParams;
 
       const basePath = '/dashboard/' + this.breadcrumb.slice(0, index + 1).map((crumb) => crumb.path).join('/');
-      const fullPathTree: UrlTree = this.router.createUrlTree([basePath], { queryParams });
+      const fullPathTree: UrlTree = this.router.createUrlTree([basePath], {queryParams});
       const fullPath = this.router.serializeUrl(fullPathTree);
 
       this.router.navigateByUrl(fullPath).then();

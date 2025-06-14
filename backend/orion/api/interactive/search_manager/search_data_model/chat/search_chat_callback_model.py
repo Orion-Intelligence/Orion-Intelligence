@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 from pydantic.v1 import Extra
@@ -9,6 +9,7 @@ class suggestion(BaseModel):
     offset: int
     length: int
     options: List[dict]
+
 
 class result_item(BaseModel):
     m_content: Optional[str] = None
@@ -41,6 +42,7 @@ class result_item(BaseModel):
 
     class Config:
         extra = Extra.allow
+
 
 class search_chat_callback_model(BaseModel):
     Result: Optional[List[result_item]] = None

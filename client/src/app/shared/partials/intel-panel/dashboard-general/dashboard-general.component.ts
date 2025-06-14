@@ -1,23 +1,28 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NgIf } from '@angular/common';
-import { DashboardResultsGridComponent } from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
-import { PaginationComponent } from '../../pagination/pagination.component';
-import { InsightsComponent } from '../../insights/insights.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { Analytics } from '../../../model/analytics/analytics.model';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { GeneralCallbackModel, GeneralResultItem } from '../../../model/results/general/general.callback.model';
-import { LeakCallbackModel, LeakResultItem } from '../../../model/results/leak/leak.callback.model';
-import { GeneralParamModel } from '../../../model/results/shared/general.param.model';
-import { Category } from '../../../enums/pages';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
-import { ResultComponent } from '../../result/result.component';
-import { general_filters } from '../../../constants/filters';
-import { AppService } from '../../../../services/core/app.service';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NgIf} from '@angular/common';
+import {
+  DashboardResultsGridComponent
+} from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
+import {PaginationComponent} from '../../pagination/pagination.component';
+import {InsightsComponent} from '../../insights/insights.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {Analytics} from '../../../model/analytics/analytics.model';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {GeneralCallbackModel, GeneralResultItem} from '../../../model/results/general/general.callback.model';
+import {LeakCallbackModel, LeakResultItem} from '../../../model/results/leak/leak.callback.model';
+import {GeneralParamModel} from '../../../model/results/shared/general.param.model';
+import {Category} from '../../../enums/pages';
+import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
+import {ResultComponent} from '../../result/result.component';
+import {general_filters} from '../../../constants/filters';
+import {AppService} from '../../../../services/core/app.service';
 
 @Component({
-  selector: 'app-dashboard-general', imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent], templateUrl: './dashboard-general.component.html', animations: [fadeInDashboardItem],
+  selector: 'app-dashboard-general',
+  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent],
+  templateUrl: './dashboard-general.component.html',
+  animations: [fadeInDashboardItem],
 })
 export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
@@ -32,8 +37,30 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   onToggleAnalytics = false;
   isLoading = false;
   firstTrigger = true
+  protected readonly Math = Math;
+  protected readonly general_filters = general_filters;
 
   constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  }
+
+  get currentCallbackModel(): GeneralCallbackModel | LeakCallbackModel {
+    return this.type === Category.STRATEGIC ? this.generalCallbackModel : this.leakCallbackModel;
+  }
+
+  get currentParamModel(): GeneralParamModel {
+    return this.type === Category.STRATEGIC ? this.generalParamModel : this.generalParamModel;
+  }
+
+  get currentResultCount(): number {
+    return this.currentCallbackModel?.Result?.length ?? 0;
+  }
+
+  get currentSearchResults(): (GeneralResultItem | LeakResultItem)[] {
+    return this.currentCallbackModel?.Result ?? [];
+  }
+
+  get currentQuery(): string {
+    return this.currentParamModel?.q ?? '';
   }
 
   ngAfterViewInit(): void {
@@ -42,9 +69,9 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.type = this.route.snapshot.data['type'];
-    this.generalParamModel = { ...this.dashboardService.generalParamModel } as GeneralParamModel;
-    this.generalCallbackModel = { ...this.dashboardService.generalCallbackModel } as GeneralCallbackModel;
-    this.leakCallbackModel = { ...this.dashboardService.leakCallbackModel } as LeakCallbackModel;
+    this.generalParamModel = {...this.dashboardService.generalParamModel} as GeneralParamModel;
+    this.generalCallbackModel = {...this.dashboardService.generalCallbackModel} as GeneralCallbackModel;
+    this.leakCallbackModel = {...this.dashboardService.leakCallbackModel} as LeakCallbackModel;
 
     this.initAnalytics()
     combineLatest([this.route.queryParams, this.route.url])
@@ -136,7 +163,6 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
       });
   }
 
-
   onPageChange(step: number) {
     this.generalParamModel.mSearchParamPage = step;
     this.fetchSearchResults();
@@ -179,28 +205,4 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   onToggleAnalyticsTrigger() {
     this.onToggleAnalytics = !this.onToggleAnalytics
   }
-
-  get currentCallbackModel(): GeneralCallbackModel | LeakCallbackModel {
-    return this.type === Category.STRATEGIC ? this.generalCallbackModel : this.leakCallbackModel;
-  }
-
-  get currentParamModel(): GeneralParamModel {
-    return this.type === Category.STRATEGIC ? this.generalParamModel : this.generalParamModel;
-  }
-
-  get currentResultCount(): number {
-    return this.currentCallbackModel?.Result?.length ?? 0;
-  }
-
-  get currentSearchResults(): (GeneralResultItem | LeakResultItem)[] {
-    return this.currentCallbackModel?.Result ?? [];
-  }
-
-  get currentQuery(): string {
-    return this.currentParamModel?.q ?? '';
-  }
-
-
-  protected readonly Math = Math;
-  protected readonly general_filters = general_filters;
 }

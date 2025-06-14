@@ -1,20 +1,15 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
-import { HelperService } from '../../../services/helper.service';
-import {
-  CommonModule,
-  NgForOf,
-  NgIf,
-  NgOptimizedImage, SlicePipe,
-} from '@angular/common';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ApiService } from '../../../services/api.service';
-import { last } from 'rxjs';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {ChatResultItem} from '../../../model/results/chat/chat.callback.model';
+import {HelperService} from '../../../services/helper.service';
+import {CommonModule, NgForOf, NgIf, NgOptimizedImage, SlicePipe,} from '@angular/common';
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import {ApiService} from '../../../services/api.service';
+import {last} from 'rxjs';
 
 @Component({
   selector: 'app-report-chat',
@@ -40,6 +35,7 @@ export class ReportChatComponent implements OnInit {
   summary: string = '';
   aiSuggestStatus: boolean = false
   aiSuggestSummary = ""
+  protected readonly last = last;
 
   constructor(
     private helper: HelperService,
@@ -47,8 +43,16 @@ export class ReportChatComponent implements OnInit {
   ) {
   }
 
+  get filteredArrayKeys(): string[] {
+    console.log(this.arrayKeys)
+    return this.arrayKeys.filter(key => {
+      const val = (this.resultItem as any)?.[key];
+      return val != null && (!Array.isArray(val) || val.length > 0);
+    });
+  }
+
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata }) => {
+    this.route.data.subscribe(({reportdata}) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });
@@ -118,15 +122,15 @@ export class ReportChatComponent implements OnInit {
     this.api.post<{ result: string }>(apiUrl, {
       data: this.resultItem?.m_content
     }).subscribe({
-      next: (response) => {
-        this.aiSuggestStatus = true;
-        this.aiSuggestSummary = response.result || 'No summary available';
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Summarization failed', err);
+        next: (response) => {
+          this.aiSuggestStatus = true;
+          this.aiSuggestSummary = response.result || 'No summary available';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Summarization failed', err);
+        }
       }
-    }
     );
   }
 
@@ -157,19 +161,9 @@ export class ReportChatComponent implements OnInit {
     return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
   }
 
-  get filteredArrayKeys(): string[] {
-    console.log(this.arrayKeys)
-    return this.arrayKeys.filter(key => {
-      const val = (this.resultItem as any)?.[key];
-      return val != null && (!Array.isArray(val) || val.length > 0);
-    });
-  }
-
   redirectToUrl() {
     if (this.resultItem?.m_weblink?.length) {
       window.open(this.resultItem.m_message_sharable_link, '_blank');
     }
   }
-
-  protected readonly last = last;
 }

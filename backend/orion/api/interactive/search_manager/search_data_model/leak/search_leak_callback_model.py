@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+
 from pydantic import BaseModel
 from pydantic.v1 import Extra
 
@@ -8,6 +9,7 @@ class suggestion(BaseModel):
     offset: int
     length: int
     options: List[dict]
+
 
 class result_item(BaseModel):
     m_crypto_addresses: List[str] = []
@@ -44,6 +46,7 @@ class result_item(BaseModel):
 
     class Config:
         extra = Extra.allow
+
 
 class search_leak_callback_model(BaseModel):
     Result: Optional[List[result_item]] = None

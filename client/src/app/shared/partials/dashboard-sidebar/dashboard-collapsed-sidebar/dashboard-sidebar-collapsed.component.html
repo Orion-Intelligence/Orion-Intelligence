@@ -1,13 +1,20 @@
 <li class="sidebar__item">
-  <div class="sidebar__item-dropdown" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}" (click)="selectSection()" [routerLink]="routePrefix" queryParamsHandling="merge" appTooltip="{{tooltip}}">
-    <img [ngSrc]="icon" [alt]="title" height="20" width="20" class="sidebar__icon" appTooltip="{{title}}">
+  <div (click)="selectSection()" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}"
+       [routerLink]="routePrefix" appTooltip="{{tooltip}}" class="sidebar__item-dropdown" queryParamsHandling="merge">
+    <img [alt]="title" [ngSrc]="icon" appTooltip="{{title}}" class="sidebar__icon" height="20" width="20">
   </div>
 
-  <ul class="sidebar__subitems" [ngClass]="{'sidebar__subitems-fast': items.length < 4, 'show': (selectionStore.selectedSection$ | async) === category}">
+  <ul [ngClass]="{'sidebar__subitems-fast': items.length < 4, 'show': (selectionStore.selectedSection$ | async) === category}"
+      class="sidebar__subitems">
     <ng-container *ngFor="let item of items">
-      <div class="sidebar__subitem" (click)="selectOption(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}" [routerLink]="routePrefix + '/' + item.toLowerCase()" queryParamsHandling="merge">
-        <div class="sidebar__subitem-content" [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}" appTooltip="{{itemTooltips[item]}}">
-          <img ngSrc="assets/images/sidebar/sub_{{item.toLowerCase()}}.svg" [alt]="item" height="20" width="20" class="sidebar__icon-min">
+      <div (click)="selectOption(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
+           [routerLink]="routePrefix + '/' + item.toLowerCase()"
+           class="sidebar__subitem" queryParamsHandling="merge">
+        <div [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
+             appTooltip="{{itemTooltips[item]}}"
+             class="sidebar__subitem-content">
+          <img [alt]="item" class="sidebar__icon-min" height="20" ngSrc="assets/images/sidebar/sub_{{item.toLowerCase()}}.svg"
+               width="20">
         </div>
       </div>
     </ng-container>

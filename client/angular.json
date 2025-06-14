@@ -36,7 +36,9 @@
               "node_modules/vis-network/styles/vis-network.css",
               "src/styles.scss"
             ],
-            "scripts": ["src/assets/libs/bootstrap.min.js"]
+            "scripts": [
+              "src/assets/libs/bootstrap.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -75,10 +77,12 @@
                 "src/assets/fonts"
               ],
               "styles": [
-              "node_modules/vis-network/styles/vis-network.css",
-              "src/styles.scss"
+                "node_modules/vis-network/styles/vis-network.css",
+                "src/styles.scss"
               ],
-              "scripts": ["src/assets/libs/bootstrap.min.js"]
+              "scripts": [
+                "src/assets/libs/bootstrap.min.js"
+              ]
             },
             "development": {
               "aot": true,
@@ -135,7 +139,9 @@
               "node_modules/vis-network/styles/vis-network.css",
               "src/styles.scss"
             ],
-            "scripts": ["src/assets/libs/bootstrap.min.js"]
+            "scripts": [
+              "src/assets/libs/bootstrap.min.js"
+            ]
           }
         }
       }

@@ -4,23 +4,29 @@ from fastapi import HTTPException
 from starlette import status
 
 from orion.api.interactive.search_manager.search_callback_model import search_callback
-from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import search_chat_callback_model as SearchChatCallbackModel
+from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import \
+    search_chat_callback_model as SearchChatCallbackModel
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import search_defacement_callback_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import \
+    search_defacement_callback_model
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
+    search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_callback_model import breach_data
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import \
+    search_dynamic_param_model
 from orion.api.interactive.search_manager.search_data_model.enums import general_listing, leak_listing, chat_listing, \
-  exploit_listing
+    exploit_listing
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_callback_model import \
-  search_exploit_callback_model
+    search_exploit_callback_model
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import \
-  search_exploit_param_model
+    search_exploit_param_model
 from orion.api.interactive.search_manager.search_data_model.general import search_general_param_model
-from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import search_general_callback_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import search_leak_callback_model
-from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
+from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import \
+    search_general_callback_model
+from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import \
+    search_leak_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
+from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.api.server.external_request_manager.external_request_controller import external_request_controller
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -29,120 +35,123 @@ from orion.services.elastic_manager.elastic_request_generator import elastic_req
 
 
 class search_model:
-  # Private Variables
-  __instance = None
-  __search_callback = search_callback()
+    # Private Variables
+    __instance = None
+    __search_callback = search_callback()
 
-  # Initializations
-  @staticmethod
-  def getInstance():
-    if search_model.__instance is None:
-      search_model.__instance = search_model()
-    return search_model.__instance
+    # Initializations
+    @staticmethod
+    def getInstance():
+        if search_model.__instance is None:
+            search_model.__instance = search_model()
+        return search_model.__instance
 
-  def __init__(self):
-    if search_model.__instance is not None:
-      pass
-    else:
-      search_model.__instance = self
+    def __init__(self):
+        if search_model.__instance is not None:
+            pass
+        else:
+            search_model.__instance = self
 
-  @staticmethod
-  async def dynamic_search_email(param: search_dynamic_param_model):
-    result = await external_request_controller.getInstance().fetch_email_leak(param)
+    @staticmethod
+    async def dynamic_search_email(param: search_dynamic_param_model):
+        result = await external_request_controller.getInstance().fetch_email_leak(param)
 
-    if isinstance(result, list) and len(result)>0:
-      return breach_data(**(result[0]))
-    else:
-      return breach_data().model_dump()
+        if isinstance(result, list) and len(result) > 0:
+            return breach_data(**(result[0]))
+        else:
+            return breach_data().model_dump()
 
-  async def request_defacement_doc(self, doc_id) -> Optional[result_item]:
-    result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)
-    if not result:
-      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-    return await self.__search_callback.get_doc(result)
+    async def request_defacement_doc(self, doc_id) -> Optional[result_item]:
+        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        return await self.__search_callback.get_doc(result)
 
-  async def request_exploit_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-    result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_EXPLOIT_INDEX, doc_id)
-    if not result:
-      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+    async def request_exploit_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_EXPLOIT_INDEX, doc_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    if lang:
-      result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-      result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)
+        if lang:
+            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+            result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"],
+                                                                                      target_lang=lang)
 
-    return await self.__search_callback.get_doc(result)
+        return await self.__search_callback.get_doc(result)
 
-  async def request_leak_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-    result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id)
-    if not result:
-      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+    async def request_leak_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    if lang:
-      result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-      result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)
+        if lang:
+            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+            result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"],
+                                                                                      target_lang=lang)
 
-    return await self.__search_callback.get_doc(result)
+        return await self.__search_callback.get_doc(result)
 
-  async def request_chat_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-    result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_CHATS_INDEX, doc_id)
-    if not result:
-      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-    if lang:
-      result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-    return await self.__search_callback.get_doc(result)
+    async def request_chat_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_CHATS_INDEX, doc_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        if lang:
+            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+        return await self.__search_callback.get_doc(result)
 
-  async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-    result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id)
-    if not result:
-      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-    if lang:
-      result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
-      result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"], target_lang=lang)
-    return await self.__search_callback.get_doc(result)
+    async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        if lang:
+            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+            result[0]["m_important_content"] = helper_controller.detect_and_translate(result[0]["m_important_content"],
+                                                                                      target_lang=lang)
+        return await self.__search_callback.get_doc(result)
 
-  async def search_general_result(self, param: search_general_param_model):
-    document, data_filter = elastic_request_generator().on_search_general_data(param)
-    m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-    return await self.__search_callback.search_handler(
-      m_status, m_documents,
-      search_general_callback_model,
-      general_listing
-    )
+    async def search_general_result(self, param: search_general_param_model):
+        document, data_filter = elastic_request_generator().on_search_general_data(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+        return await self.__search_callback.search_handler(
+            m_status, m_documents,
+            search_general_callback_model,
+            general_listing
+        )
 
-  async def search_leak_result(self, param: search_leak_param_model):
-    document, data_filter = elastic_request_generator().on_search_leakdata(param)
-    m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-    return await self.__search_callback.search_handler(
-      m_status, m_documents,
-      search_leak_callback_model,
-      leak_listing
-    )
+    async def search_leak_result(self, param: search_leak_param_model):
+        document, data_filter = elastic_request_generator().on_search_leakdata(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+        return await self.__search_callback.search_handler(
+            m_status, m_documents,
+            search_leak_callback_model,
+            leak_listing
+        )
 
-  async def search_exploit_result(self, param: search_exploit_param_model):
-    document, data_filter = elastic_request_generator().on_search_exploitdata(param)
-    m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-    return await self.__search_callback.search_handler(
-      m_status, m_documents,
-      search_exploit_callback_model,
-      exploit_listing
-    )
+    async def search_exploit_result(self, param: search_exploit_param_model):
+        document, data_filter = elastic_request_generator().on_search_exploitdata(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+        return await self.__search_callback.search_handler(
+            m_status, m_documents,
+            search_exploit_callback_model,
+            exploit_listing
+        )
 
-  async def search_telegram_result(self, param: search_chat_param_model):
-    document, data_filter = elastic_request_generator().on_search_telegram_data(param)
-    m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+    async def search_telegram_result(self, param: search_chat_param_model):
+        document, data_filter = elastic_request_generator().on_search_telegram_data(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
-    return await self.__search_callback.search_handler(
-      m_status, m_documents,
-      SearchChatCallbackModel,
-      chat_listing
-    )
+        return await self.__search_callback.search_handler(
+            m_status, m_documents,
+            SearchChatCallbackModel,
+            chat_listing
+        )
 
-  async def search_defacement_result(self, param: search_defacement_param_model):
-    document, data_filter = elastic_request_generator().on_search_defacementdata(param)
-    m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+    async def search_defacement_result(self, param: search_defacement_param_model):
+        document, data_filter = elastic_request_generator().on_search_defacementdata(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
-    return await self.__search_callback.search_handler(
-      m_status, m_documents,
-      search_defacement_callback_model,
-      []
-    )
+        return await self.__search_callback.search_handler(
+            m_status, m_documents,
+            search_defacement_callback_model,
+            []
+        )

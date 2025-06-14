@@ -1,15 +1,14 @@
-import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { FilterModel } from '../../model/filter/filter.model';
-import { last } from 'rxjs';
-import { filterAnimation } from '../../animations/filter.animation';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { DatePickerComponent } from './date-picker/date-picker.component';
-import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
-import { ActivatedRoute } from '@angular/router';
-import { ALT } from '@angular/cdk/keycodes';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {FilterModel} from '../../model/filter/filter.model';
+import {last} from 'rxjs';
+import {filterAnimation} from '../../animations/filter.animation';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {DatePickerComponent} from './date-picker/date-picker.component';
+import {MultipleSelectionComponent} from './multiple-selection/multiple-selection.component';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-filters',
@@ -26,14 +25,48 @@ export class FiltersComponent implements OnInit {
   @Output() filterClose = new EventEmitter<void>();
 
   selectedFilters: { [key: string]: string | null } = {};
+  protected readonly Object = Object;
+  protected readonly last = last;
+  protected readonly JSON = JSON;
 
   constructor(private route: ActivatedRoute) {
   }
 
-
   ngOnInit() {
     this.initializeFilters();
     this.readFiltersFromUrl();
+  }
+
+  updateFilter(event: { key: string; value: string }) {
+    this.selectedFilters[event.key] = event.value;
+  }
+
+  onSelectionChange(key: string, value: string | null) {
+    this.selectedFilters[key] = value;
+  }
+
+  applyFilters() {
+    this.filterChanged.emit({...this.selectedFilters});
+    this.closeFilter();
+  }
+
+  closeFilter() {
+    this.filterClose.emit();
+  }
+
+  resetFilters() {
+    this.closeFilter();
+    this.initializeFilters();
+    this.filterReset.emit();
+  }
+
+  getOptionLabel(filterKey: string): string {
+    const selectedKey = this.selectedFilters[filterKey];
+    if (!selectedKey) return 'Select ' + this.filterModel.filters[filterKey].title;
+
+    const options = this.filterModel.filters[filterKey].options;
+    const option = options.find(opt => opt.key === selectedKey);
+    return option ? option.label : 'Select ' + this.filterModel.filters[filterKey].title;
   }
 
   private initializeFilters() {
@@ -56,38 +89,4 @@ export class FiltersComponent implements OnInit {
       });
     });
   }
-
-  updateFilter(event: { key: string; value: string }) {
-    this.selectedFilters[event.key] = event.value;
-  }
-
-  onSelectionChange(key: string, value: string | null) {
-    this.selectedFilters[key] = value;
-  }
-
-  applyFilters() {
-    this.filterChanged.emit({ ...this.selectedFilters });
-    this.closeFilter();
-  }
-
-  closeFilter() {
-    this.filterClose.emit();
-  }
-
-  resetFilters() {
-    this.closeFilter();
-    this.initializeFilters();
-    this.filterReset.emit();
-  }
-  getOptionLabel(filterKey: string): string {
-    const selectedKey = this.selectedFilters[filterKey];
-    if (!selectedKey) return 'Select ' + this.filterModel.filters[filterKey].title;
-
-    const options = this.filterModel.filters[filterKey].options;
-    const option = options.find(opt => opt.key === selectedKey);
-    return option ? option.label : 'Select ' + this.filterModel.filters[filterKey].title;
-  }
-  protected readonly Object = Object;
-  protected readonly last = last;
-  protected readonly JSON = JSON;
 }

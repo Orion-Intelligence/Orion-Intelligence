@@ -1,6 +1,7 @@
 import threading
-from orion.services.mongo_manager.mongo_controller import mongo_controller
+
 from orion.constants.constant import CONSTANTS
+from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 
 
@@ -24,7 +25,7 @@ class auth_manager:
         self._engine = mongo_controller.get_instance().get_engine()
 
     async def authenticate_user(self, username: str, password: str):
-      user = await self._engine.find_one(db_user_account, db_user_account.username == username)
-      if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
-        return None
-      return user
+        user = await self._engine.find_one(db_user_account, db_user_account.username == username)
+        if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
+            return None
+        return user

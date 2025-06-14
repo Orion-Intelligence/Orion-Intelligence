@@ -1,4 +1,4 @@
-import { Suggestion } from "../shared/common-result";
+import {Suggestion} from "../shared/common-result";
 
 export class DefacementResultItem {
   q: string = ""

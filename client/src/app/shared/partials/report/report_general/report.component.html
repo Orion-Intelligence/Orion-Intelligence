@@ -1,38 +1,38 @@
 <div class="d-flex justify-content-start">
   <div class="btn-group report-menu-option-container">
-    <button class="p-0 report-menu-option" (click)="downloadCSV()" appTooltip="Download">
-      <img ngSrc="../../../../../assets/images/shared/download.svg" alt="background" height="25" width="25">
+    <button (click)="downloadCSV()" appTooltip="Download" class="p-0 report-menu-option">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/download.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" *ngIf="lang!==lang_detected" (click)="langUpdate()" appTooltip="Translator">
-      <img ngSrc="../../../../../assets/images/shared/translate.svg" alt="background" height="25" width="25">
+    <button (click)="langUpdate()" *ngIf="lang!==lang_detected" appTooltip="Translator" class="p-0 report-menu-option">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/translate.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="printPage()" appTooltip="Print">
-      <img ngSrc="../../../../../assets/images/shared/print.svg" alt="background" height="25" width="25">
+    <button (click)="printPage()" appTooltip="Print" class="p-0 report-menu-option">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/print.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="aiSuggest()" appTooltip="AI Summary">
-      <img ngSrc="../../../../../assets/images/shared/ai.svg" alt="background" height="25" width="25">
+    <button (click)="aiSuggest()" appTooltip="AI Summary" class="p-0 report-menu-option">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/ai.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="shareResult()" appTooltip="Share">
-      <img ngSrc="../../../../../assets/images/shared/share.svg" alt="background" height="22" width="22">
+    <button (click)="shareResult()" appTooltip="Share" class="p-0 report-menu-option">
+      <img alt="background" height="22" ngSrc="../../../../../assets/images/shared/share.svg" width="22">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="redirectToUrl()" appTooltip="Open in new Tab">
-      <img ngSrc="../../../../../assets/images/shared/redirect.svg" alt="background" height="25" width="25">
+    <button (click)="redirectToUrl()" appTooltip="Open in new Tab" class="p-0 report-menu-option">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/redirect.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="open_graph()" appTooltip="Open CTI Graph">
-      <img ngSrc="../../../../../assets/images/sidebar/graph.svg" alt="background" height="17" width="17">
+    <button (click)="open_graph()" appTooltip="Open CTI Graph" class="p-0 report-menu-option">
+      <img alt="background" height="17" ngSrc="../../../../../assets/images/sidebar/graph.svg" width="17">
     </button>
   </div>
 </div>
-<div class="search__result-detail" *ngIf="aiSuggestStatus" @fadeInDashboardItem>
+<div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="search__result-detail">
   <div class="d-flex align-items-start">
-    <img class="report-icon-top" src="../../../../../assets/images/shared/ai.svg" alt="background" height="25"
-      width="25">
+    <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg"
+         width="25">
     <h2 class="search__result-detail-heading ms-2"> &nbsp; AI Report</h2>
   </div>
   <p class="search__result-detail-description">
@@ -64,12 +64,12 @@
     <p class="search__result-detail-description">Description not available</p>
   </ng-template>
 
-  <span class="search__result-detail-description-span" *ngIf="resultItem?.m_ref_html?.length">Web Reference</span>
+  <span *ngIf="resultItem?.m_ref_html?.length" class="search__result-detail-description-span">Web Reference</span>
   <p class="search__result-detail-description">
     {{
-    ((resultItem?.m_ref_html ?? '').length > 650)
-    ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
-    : resultItem?.m_ref_html
+      ((resultItem?.m_ref_html ?? '').length > 650)
+        ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
+        : resultItem?.m_ref_html
     }}
   </p>
 
@@ -77,8 +77,8 @@
     <ng-container *ngIf="url.trim().length > 1; else noUrl">
       <p class="search__result-detail-url-p text-truncate">
         <a [href]="url"
-          class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width"
-          target="_blank">
+           class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width"
+           target="_blank">
           {{ url }}
         </a>
       </p>
@@ -113,10 +113,10 @@
     <div class="search__result-detail-meta-divs">
       <p class="status">Status:</p>
       <div class="search__result-detail-meta-divs d-flex align-items-center">
-        <span class="rounded-circle d-inline-block me-2 search__result-detail-status-circle" [ngClass]="{
+        <span [ngClass]="{
         'bg-success': isWithinDays(resultItem!.m_creation_date, 5),
         'bg-warning': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5),
-        'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}">
+        'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}" class="rounded-circle d-inline-block me-2 search__result-detail-status-circle">
         </span>
         <p class="status mb-0">{{ getStatusText(resultItem?.m_creation_date) }} </p>
       </div>
@@ -126,28 +126,29 @@
   <div class="search__result-detail-tabs-div">
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button class="search__result-tabs" [class.active]
-          ="activeTab === key" (click)="setActiveTab(key)"
-          appTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}">
+        <button (click)="setActiveTab(key)" [class.active]
+          ="activeTab === key" appTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}"
+                class="search__result-tabs">
           {{ formatKeyLabel(key) }}
         </button>
         <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
       </ng-container>
     </div>
-    <app-result-section *ngIf="activeTab === 'm_content'" [listItems]="[content]"
-      @fadeInDashboardItem></app-result-section>
-    <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems"
-      @fadeInDashboardItem></app-result-section>
-    <app-result-list *ngIf="activeTab !== 'm_section'" [listItems]="listItems" [activeTab]="activeTab"
-      @fadeInDashboardItem></app-result-list>
+    <app-result-section *ngIf="activeTab === 'm_content'" @fadeInDashboardItem
+                        [listItems]="[content]"></app-result-section>
+    <app-result-section *ngIf="activeTab === 'm_section'" @fadeInDashboardItem
+                        [listItems]="listItems"></app-result-section>
+    <app-result-list *ngIf="activeTab !== 'm_section'" @fadeInDashboardItem [activeTab]="activeTab"
+                     [listItems]="listItems"></app-result-list>
   </div>
 
-  <div class="search__result-detail-preview cursor-pointer" *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot!=''">
-    <div class="d-flex justify-content-between align-items-center" (click)="toggleContent()">
+  <div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot!=''"
+       class="search__result-detail-preview cursor-pointer">
+    <div (click)="toggleContent()" class="d-flex justify-content-between align-items-center">
       <h3 class="search__result-detail-preview-heading cursor-pointer">Leak Screenshot</h3>
-      <div class="toggle-btn screenshoot_expand_button" [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'">
-        <img src="/assets/images/shared/search_side_dropdown_icon.svg" [ngClass]="{ 'rotated': !isExpanded }"
-          alt="toggle icon">
+      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn screenshoot_expand_button">
+        <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
+             src="/assets/images/shared/search_side_dropdown_icon.svg">
       </div>
     </div>
     <div *ngIf="isExpanded">
@@ -158,11 +159,11 @@
       <div *ngIf="isImageError" class="text-left text-muted">
         <b>Screenshot not found</b>
       </div>
-      <img *ngIf="imageSrc && !isImageError" [src]="imageSrc" alt="Screenshot Preview" class="search__result-preview"
-        (load)="onImageLoad()" (error)="onImageError()" />
+      <img (error)="onImageError()" (load)="onImageLoad()" *ngIf="imageSrc && !isImageError" [src]="imageSrc"
+           alt="Screenshot Preview" class="search__result-preview"/>
     </div>
   </div>
   <br>
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
-  <app-report-mapping-list> </app-report-mapping-list>
+  <app-report-mapping-list></app-report-mapping-list>
 </div>

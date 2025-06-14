@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
-import {Resolve, ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router';
+import {Injectable} from '@angular/core';
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardResolver implements Resolve<boolean> {
-  constructor() {}
+  constructor() {
+  }
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
 

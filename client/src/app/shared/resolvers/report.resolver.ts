@@ -1,14 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { ApiService } from '../services/api.service';
+import {Injectable} from '@angular/core';
+import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from '@angular/router';
+import {Observable, of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
+import {ApiService} from '../services/api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportResolver implements Resolve<any> {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router) {
+  }
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
     const category = route.parent?.url[0]?.path || '';

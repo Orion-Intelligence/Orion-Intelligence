@@ -1,33 +1,32 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { ApiService } from '../../shared/services/api.service';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
+import {ApiService} from '../../shared/services/api.service';
 import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class DumpService {
-  private dumpDataSubject = new BehaviorSubject<DumpCallbackModel | null>(null);
-  private currentPageSubject = new BehaviorSubject<number>(1);
-  private filters: { [key: string]: string } = {};
-  private filterOpenSubject = new BehaviorSubject<boolean>(false);
-
-  dumpData$ = this.dumpDataSubject.asObservable();
-  currentPage$ = this.currentPageSubject.asObservable();
-  isFilterOpen$ = this.filterOpenSubject.asObservable();
-
   filterModel = {
     source: 'all',
     group: 'all',
     parsed_status: 'all'
   };
+  private dumpDataSubject = new BehaviorSubject<DumpCallbackModel | null>(null);
+  dumpData$ = this.dumpDataSubject.asObservable();
+  private currentPageSubject = new BehaviorSubject<number>(1);
+  currentPage$ = this.currentPageSubject.asObservable();
+  private filters: { [key: string]: string } = {};
+  private filterOpenSubject = new BehaviorSubject<boolean>(false);
+  isFilterOpen$ = this.filterOpenSubject.asObservable();
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) {
+  }
 
   setDumpData(data: DumpCallbackModel): void {
     this.dumpDataSubject.next(data);
   }
 
   reloadDumpData(params?: any): void {
-    this.apiService.get<DumpCallbackModel>('dumps', { params }).subscribe((data) => {
+    this.apiService.get<DumpCallbackModel>('dumps', {params}).subscribe((data) => {
       this.dumpDataSubject.next(data);
     });
   }

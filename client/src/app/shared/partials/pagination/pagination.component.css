@@ -43,11 +43,11 @@
   outline: none;
 }
 
-.btn{
-  outline: none ;
+.btn {
+  outline: none;
 }
 
-.search__navigation:hover{
+.search__navigation:hover {
 }
 
 .search__navigation {
@@ -81,14 +81,14 @@
   box-shadow: none !important;
 }
 
-.search__navigation--focus{
+.search__navigation--focus {
   background: #102A4699;
   color: #fff;
   transition: background 0.2s ease-in-out;
 }
 
 .search__navigation:active {
-  background: #102A4685 ;
+  background: #102A4685;
 }
 
 .search__navigation:hover {

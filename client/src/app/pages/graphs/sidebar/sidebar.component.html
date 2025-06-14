@@ -1,16 +1,22 @@
 <div class="graph-sidebar__container">
-  <a href="#"><img class="graph-sidebar__container-logo img-fluid graph-sidebar__container-logo-padded" [src]="appService.getConfig().logo_url || 'assets/images/sidebar/search_nav_logo.png'" alt="Logo" width="197" height="35" /></a>
+  <a href="#"><img [src]="appService.getConfig().logo_url || 'assets/images/sidebar/search_nav_logo.png'"
+                   alt="Logo" class="graph-sidebar__container-logo img-fluid graph-sidebar__container-logo-padded"
+                   height="35" width="197"/></a>
   <form class="filter__form">
     <div class="filter__content">
 
       <label class="filter__label mt-3">Type</label>
       <div class="dropdown mb-3">
-        <button class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" type="button" id="dropdownType" data-bs-toggle="dropdown" aria-expanded="false">
+        <button
+          aria-expanded="false"
+          class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdownType" type="button">
           {{ selectedType | titlecase }}
         </button>
-        <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3" aria-labelledby="dropdownType">
+        <ul aria-labelledby="dropdownType"
+            class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3">
           <li *ngFor="let type of typeOptions">
-            <a class="dropdown-item py-0 d-flex align-items-center" (click)="onTypeChange(type)">{{ type | titlecase }}</a>
+            <a (click)="onTypeChange(type)"
+               class="dropdown-item py-0 d-flex align-items-center">{{ type | titlecase }}</a>
             <ng-container *ngIf="type !== typeOptions[typeOptions.length - 1]">
               <li class="dropdown-divider m-0 mx-3"></li>
             </ng-container>
@@ -21,12 +27,15 @@
       <ng-container *ngIf="selectedType === 'cluster'">
         <label class="filter__label mt-3">Cluster Type</label>
         <div class="dropdown">
-          <button class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" type="button" id="dropdownCluster" data-bs-toggle="dropdown" aria-expanded="false">
+          <button
+            aria-expanded="false"
+            class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdownCluster" type="button">
             {{ singleInput | titlecase }}
           </button>
-          <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3" aria-labelledby="dropdownCluster">
+          <ul aria-labelledby="dropdownCluster"
+              class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3">
             <li *ngFor="let option of clusterOptions">
-              <a class="dropdown-item py-0 d-flex align-items-center" (click)="singleInput = option">{{ option }}</a>
+              <a (click)="singleInput = option" class="dropdown-item py-0 d-flex align-items-center">{{ option }}</a>
               <ng-container *ngIf="option !== clusterOptions[clusterOptions.length - 1]">
                 <li class="dropdown-divider m-0 mx-3"></li>
               </ng-container>
@@ -38,52 +47,61 @@
       <ng-container *ngIf="selectedType === 'property'">
         <label class="filter__label mt-3">Property Type</label>
         <div class="dropdown">
-          <button class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" type="button" id="dropdownProperty" data-bs-toggle="dropdown" aria-expanded="false">
+          <button
+            aria-expanded="false"
+            class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdownProperty" type="button">
             {{ onFormatPropertyType(propertyType) | titlecase }}
           </button>
-          <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3" aria-labelledby="dropdownProperty">
+          <ul aria-labelledby="dropdownProperty"
+              class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3">
             <li *ngFor="let property of allowedProperties">
-              <a class="dropdown-item py-0 d-flex align-items-center" (click)="propertyType = property.key">{{ property.label }}</a>
+              <a (click)="propertyType = property.key"
+                 class="dropdown-item py-0 d-flex align-items-center">{{ property.label }}</a>
               <ng-container *ngIf="property !== allowedProperties[allowedProperties.length - 1]">
                 <li class="dropdown-divider m-0 mx-3"></li>
               </ng-container>
             </li>
           </ul>
         </div>
-        <label class="filter__label mt-3">Property Value</label> <input type="text" class="form-control filter__input filter__input-form" [(ngModel)]="propertyValue" name="propertyValue" placeholder="Enter value"/>
+        <label class="filter__label mt-3">Property Value</label> <input [(ngModel)]="propertyValue"
+                                                                        class="form-control filter__input filter__input-form"
+                                                                        name="propertyValue" placeholder="Enter value"
+                                                                        type="text"/>
       </ng-container>
 
       <ng-container *ngIf="selectedType === 'document'">
-        <label class="filter__label mt-3">Document ID</label> <input type="text" class="form-control filter__input" [(ngModel)]="singleInput" name="singleInput" placeholder="Enter ID"/>
+        <label class="filter__label mt-3">Document ID</label> <input [(ngModel)]="singleInput" class="form-control filter__input"
+                                                                     name="singleInput" placeholder="Enter ID"
+                                                                     type="text"/>
       </ng-container>
 
       <label class="filter__label mt-3">Maximum Nodes</label>
-      <input type="number"
-             class="form-control filter__input"
+      <input (blur)="validateMaxNodes()"
              [(ngModel)]="maxNodes"
+             class="form-control filter__input"
+             max="800"
+             min="20"
              name="maxNodes"
              placeholder="Enter maximum nodes"
              required
-             min="20"
-             max="800"
-             (blur)="validateMaxNodes()" />
+             type="number"/>
 
       <label class="filter__label mt-3">Maximum Depth</label>
-      <input type="number"
-             class="form-control filter__input"
+      <input (blur)="validateMaxDepth()"
              [(ngModel)]="maxDepth"
+             class="form-control filter__input"
+             max="5"
+             min="1"
              name="maxDepth"
              placeholder="Enter maximum depth"
              required
-             min="1"
-             max="5"
-             (blur)="validateMaxDepth()" />
+             type="number"/>
 
       <div class="filter__submit">
         <div class="filter__submit d-flex flex-column mt-4">
-          <button type="button" class="btn btn-primary filter__submit-button" (click)="applyFilters()">Apply</button>
+          <button (click)="applyFilters()" class="btn btn-primary filter__submit-button" type="button">Apply</button>
         </div>
-        <button type="button" class="btn btn-secondary mb-4 filter__submit-button" (click)="resetFilters()">
+        <button (click)="resetFilters()" class="btn btn-secondary mb-4 filter__submit-button" type="button">
           Reset
         </button>
       </div>

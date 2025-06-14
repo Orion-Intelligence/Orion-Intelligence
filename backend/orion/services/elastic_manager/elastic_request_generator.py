@@ -1,12 +1,13 @@
 import hashlib
 import re
-
 from datetime import datetime, timedelta, timezone
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
+from urllib.parse import urlparse
+
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
+    search_defacement_param_model
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
-from urllib.parse import urlparse
 
 
 class elastic_request_generator:
@@ -265,7 +266,7 @@ class elastic_request_generator:
         if m_search_type == "databases":
             m_search_type = "leaks"
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-        if m_search_type and m_search_type!="all":
+        if m_search_type and m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
         if m_safe_search == "True":
             must_not_clause.append({"term": {"m_content_type": "adult"}})
@@ -515,7 +516,7 @@ class elastic_request_generator:
         if m_search_type == "databases":
             m_search_type = "leaks"
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-        if m_search_type and m_search_type!="all":
+        if m_search_type and m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
         if m_safe_search == "True":
             must_not_clause.append({"term": {"m_content_type": "adult"}})

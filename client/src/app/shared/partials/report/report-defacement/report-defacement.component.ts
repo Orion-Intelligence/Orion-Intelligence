@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DefacementResultItem } from '../../../model/results/defacement/defacement.param.model';
-import { DatePipe, NgOptimizedImage, CommonModule } from '@angular/common';
-import { HelperService } from '../../../services/helper.service';
-import { AppService } from '../../../../services/core/app.service';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {DefacementResultItem} from '../../../model/results/defacement/defacement.param.model';
+import {CommonModule, DatePipe, NgOptimizedImage} from '@angular/common';
+import {HelperService} from '../../../services/helper.service';
+import {AppService} from '../../../../services/core/app.service';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import {ReportMappingListComponent} from "../report-mapping-list/report-mapping-list.component";
 
 @Component({
   selector: 'app-report-defacement',

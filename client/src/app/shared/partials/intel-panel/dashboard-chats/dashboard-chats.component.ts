@@ -31,8 +31,14 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   isLoading = false;
   firstTrigger = true
   result_count = 0;
+  protected readonly Math = Math;
+  protected readonly chat_filters = chat_filters;
 
   constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  }
+
+  get currentResultCount(): number {
+    return this.chatCallbackModel.Page_Count ?? 0;
   }
 
   ngAfterViewInit(): void {
@@ -119,7 +125,6 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
       });
   }
 
-
   onPageChange(step: number) {
     this.chatParamModel.mSearchParamPage = step;
     this.fetchSearchResults();
@@ -127,10 +132,6 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string) {
     this.chatParamModel.q = query
-  }
-
-  get currentResultCount(): number {
-    return this.chatCallbackModel.Page_Count ?? 0;
   }
 
   resetFilters(_: void) {
@@ -157,8 +158,5 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     }
     this.fetchSearchResults();
   }
-
-  protected readonly Math = Math;
-  protected readonly chat_filters = chat_filters;
 
 }

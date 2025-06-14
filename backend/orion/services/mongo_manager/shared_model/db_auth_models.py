@@ -1,18 +1,22 @@
+from enum import Enum
+
 from odmantic import Model, Field
 from passlib.context import CryptContext
-from enum import Enum
 from pydantic import field_validator
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class user_role(str, Enum):
     ADMIN = "admin"
     CRAWLER = "crawler"
     DEMO = "demo"
 
+
 def hash_password(password: str) -> str:
     """Helper function to hash the password before storing it."""
     return pwd_context.hash(password)
+
 
 class db_user_account(Model):
     username: str = Field(unique=True)

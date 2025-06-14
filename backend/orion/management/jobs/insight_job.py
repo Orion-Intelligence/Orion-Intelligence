@@ -1,6 +1,7 @@
 import asyncio
 import json
 from datetime import datetime
+
 from orion.constants.constant import CONSTANTS
 from orion.management.models.insight_model import (
     GENERIC_AGGREGATION_MAPPING,

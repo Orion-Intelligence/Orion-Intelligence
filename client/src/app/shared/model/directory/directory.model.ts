@@ -1,6 +1,6 @@
 export interface DirectoryCallbackModel {
   total_count: number;
-  page:number;
+  page: number;
   mDirectoryCallbackLinks: DocumentModel[];
 }
 

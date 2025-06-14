@@ -1,12 +1,12 @@
 <div class="collapsible-container">
-  <div class="file-header p-3"  (click)="toggleContent()">
+  <div (click)="toggleContent()" class="file-header p-3">
     <span class="title">JSON API</span>
-    <div class="toggle-btn" [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'">
-      <img src="/assets/images/shared/search_side_dropdown_icon.svg"
-           [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon">
+    <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ 'rotated': !isExpanded }"
+           alt="toggle icon" src="/assets/images/shared/search_side_dropdown_icon.svg">
     </div>
   </div>
-  <div class="content p-3" *ngIf="isExpanded">
+  <div *ngIf="isExpanded" class="content p-3">
     <app-json-viewer [json]="jsonData"></app-json-viewer>
   </div>
 </div>

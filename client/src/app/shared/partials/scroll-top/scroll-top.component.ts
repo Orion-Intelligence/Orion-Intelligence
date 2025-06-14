@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-scroll-top',
@@ -8,7 +8,7 @@ export class ScrollTopComponent {
   scrollToTop(): void {
     const container = document.getElementById('dashboard-container');
     if (container) {
-      container.scrollTo({ top: 0, behavior: 'smooth' });
+      container.scrollTo({top: 0, behavior: 'smooth'});
     }
   }
 }

@@ -1,25 +1,27 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { last } from 'rxjs';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { HelperService } from '../../../services/helper.service';
-import { LeakResultItem } from '../../../model/results/leak/leak.callback.model';
-import { GeneralResultItem } from '../../../model/results/general/general.callback.model';
-import { AppService } from '../../../../services/core/app.service';
-import { Category } from '../../../enums/pages';
-import { ApiService } from '../../../services/api.service';
-import { HttpParams } from '@angular/common/http';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {last} from 'rxjs';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {HelperService} from '../../../services/helper.service';
+import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
+import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
+import {AppService} from '../../../../services/core/app.service';
+import {Category} from '../../../enums/pages';
+import {ApiService} from '../../../services/api.service';
+import {HttpParams} from '@angular/common/http';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {NgbCollapseModule} from '@ng-bootstrap/ng-bootstrap';
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import {ReportMappingListComponent} from "../report-mapping-list/report-mapping-list.component";
 
 @Component({
-  selector: 'app-result-panel', templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent], animations: [fadeInDashboardItem],
+  selector: 'app-result-panel',
+  templateUrl: './report.component.html',
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent],
+  animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;
@@ -36,14 +38,27 @@ export class ReportComponent implements OnInit {
   aiSuggestStatus: boolean = false
   aiSuggestSummary = ""
   isExpanded = true;
+  protected readonly last = last;
+  protected readonly Category = Category;
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed
     this.lang_detected = appService.getConfig().language_allowed
   }
 
+  get filteredArrayKeys(): string[] {
+    return this.arrayKeys.filter(key => {
+      if (key === 'm_code_snippet' && 'm_code_snippet' in (this.resultItem as any)) {
+        return false;
+      }
+
+      const val = (this.resultItem as any)?.[key];
+      return val != null && (!Array.isArray(val) || val.length > 0);
+    });
+  }
+
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata, type }) => {
+    this.route.data.subscribe(({reportdata, type}) => {
       this.resultItem = reportdata;
       this.type = type;
       this.processResultItem();
@@ -57,6 +72,7 @@ export class ReportComponent implements OnInit {
       }
     });
   }
+
   toggleContent(): void {
     this.isExpanded = !this.isExpanded;
   }
@@ -80,17 +96,6 @@ export class ReportComponent implements OnInit {
         }
       });
     }
-  }
-
-  get filteredArrayKeys(): string[] {
-    return this.arrayKeys.filter(key => {
-      if (key === 'm_code_snippet' && 'm_code_snippet' in (this.resultItem as any)) {
-        return false;
-      }
-
-      const val = (this.resultItem as any)?.[key];
-      return val != null && (!Array.isArray(val) || val.length > 0);
-    });
   }
 
   setActiveTab(tab: string) {
@@ -241,7 +246,4 @@ export class ReportComponent implements OnInit {
     const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
     return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
   }
-
-  protected readonly last = last;
-  protected readonly Category = Category;
 }

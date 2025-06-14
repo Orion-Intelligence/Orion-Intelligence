@@ -24,10 +24,13 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService,   private router: Router, private route: ActivatedRoute) {
+  constructor(private apiService: ApiService, private router: Router, private route: ActivatedRoute) {
   }
 
-  fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{
+  fetchSearchResults<T extends {
+    Result?: any[];
+    cards_data?: any[]
+  }>(apiEndpoint: string, paramModel: any): Observable<{
     success: boolean; isEmpty: boolean; data: T | null
   }> {
     this.cancelOngoingRequest();
@@ -49,10 +52,6 @@ export class DashboardService {
       })),
       catchError(() => of({success: false, isEmpty: false, data: null}))
     );
-  }
-
-  private cancelOngoingRequest() {
-    this.cancelRequest$.next();
   }
 
   generateAnalytics<T extends { m_update_date: string }>(resultItems: T[]): any {
@@ -90,5 +89,9 @@ export class DashboardService {
         return consolidated;
       })()
     };
+  }
+
+  private cancelOngoingRequest() {
+    this.cancelRequest$.next();
   }
 }

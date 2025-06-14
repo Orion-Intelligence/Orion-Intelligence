@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {Router, NavigationEnd} from '@angular/router';
+import {NavigationEnd, Router} from '@angular/router';
 import {filter} from 'rxjs/operators';
 import {Location} from '@angular/common';
 import {ScrollService} from '../../shared/services/scroll.service';
@@ -9,15 +9,13 @@ import {ScrollService} from '../../shared/services/scroll.service';
   providedIn: 'root'
 })
 export class SelectionStoreService {
+  first_trigger = true
   private selectedSectionSubject = new BehaviorSubject<string | null>(null);
-  private selectedOptionSubject = new BehaviorSubject<string | null>(null);
-
   selectedSection$ = this.selectedSectionSubject.asObservable();
+  private selectedOptionSubject = new BehaviorSubject<string | null>(null);
   selectedOption$ = this.selectedOptionSubject.asObservable();
 
-  first_trigger = true
-
-  constructor(private router: Router, private location: Location, private scroll_service:ScrollService) {
+  constructor(private router: Router, private location: Location, private scroll_service: ScrollService) {
     this.setInitialSelectionFromUrl(this.router.url);
 
     this.router.events
@@ -30,49 +28,6 @@ export class SelectionStoreService {
         }
       });
   }
-
-private setInitialSelectionFromUrl(url: string) {
-  const pathOnly = url.split('?')[0].split('#')[0];
-  const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
-
-  if (match) {
-    const section = match[1];
-    const option = match[2];
-
-    const currentSection = this.getSelectedSection();
-    const currentOption = this.selectedOptionSubject.value;
-
-    const shouldRedirectToHome =
-      !this.first_trigger &&
-      (!currentSection && !currentOption);
-
-    this.first_trigger = false;
-
-    if ((!option && section !== 'home' && section !== 'directory' && section !== 'dumps') || (currentSection === section && currentOption === option)) {
-      return;
-    }
-
-    if (shouldRedirectToHome && this.router.url !== '/dashboard/home') {
-      this.router.navigate(['/dashboard', 'home'], {
-        replaceUrl: true,
-        queryParams: {},
-        queryParamsHandling: '',
-      }).then();
-      this.scroll_service.resetOnReload(true)
-      return;
-    }
-
-    const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
-    this.setSelectedSection(capitalizedSection);
-
-    if (option) {
-      const capitalizedOption = option.charAt(0).toUpperCase() + option.slice(1);
-      this.setSelectedOption(capitalizedOption);
-    } else {
-      this.setSelectedOption('');
-    }
-  }
-}
 
   setSelectedSection(section: string) {
     this.selectedSectionSubject.next(section);
@@ -87,6 +42,49 @@ private setInitialSelectionFromUrl(url: string) {
 
   getSelectedSection(): string | null {
     return this.selectedSectionSubject.value;
+  }
+
+  private setInitialSelectionFromUrl(url: string) {
+    const pathOnly = url.split('?')[0].split('#')[0];
+    const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
+
+    if (match) {
+      const section = match[1];
+      const option = match[2];
+
+      const currentSection = this.getSelectedSection();
+      const currentOption = this.selectedOptionSubject.value;
+
+      const shouldRedirectToHome =
+        !this.first_trigger &&
+        (!currentSection && !currentOption);
+
+      this.first_trigger = false;
+
+      if ((!option && section !== 'home' && section !== 'directory' && section !== 'dumps') || (currentSection === section && currentOption === option)) {
+        return;
+      }
+
+      if (shouldRedirectToHome && this.router.url !== '/dashboard/home') {
+        this.router.navigate(['/dashboard', 'home'], {
+          replaceUrl: true,
+          queryParams: {},
+          queryParamsHandling: '',
+        }).then();
+        this.scroll_service.resetOnReload(true)
+        return;
+      }
+
+      const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
+      this.setSelectedSection(capitalizedSection);
+
+      if (option) {
+        const capitalizedOption = option.charAt(0).toUpperCase() + option.slice(1);
+        this.setSelectedOption(capitalizedOption);
+      } else {
+        this.setSelectedOption('');
+      }
+    }
   }
 
   private resetSelection() {

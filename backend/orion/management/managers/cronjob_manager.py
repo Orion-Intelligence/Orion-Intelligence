@@ -4,26 +4,25 @@ from orion.management.jobs.insight_job import insight_job
 
 
 class cronjob_manager:
+    __instance = None
 
-  __instance = None
+    # Initializations
+    @staticmethod
+    def get_instance():
+        if cronjob_manager.__instance is None:
+            cronjob_manager()
+        return cronjob_manager.__instance
 
-  # Initializations
-  @staticmethod
-  def get_instance():
-    if cronjob_manager.__instance is None:
-      cronjob_manager()
-    return cronjob_manager.__instance
+    def __init__(self):
+        if cronjob_manager.__instance is not None:
+            pass
+        else:
+            cronjob_manager.__instance = self
 
-  def __init__(self):
-    if cronjob_manager.__instance is not None:
-      pass
-    else:
-      cronjob_manager.__instance = self
+    @staticmethod
+    async def __init_handles():
+        asyncio.create_task(insight_job.get_instance().update_insights())
 
-  @staticmethod
-  async def __init_handles():
-    asyncio.create_task(insight_job.get_instance().update_insights())
-
-  async def init(self):
-    await self.__init_handles()
-    # RepeatedTimer(CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT, elastic_controller.get_instance().purge_old_records, False)
+    async def init(self):
+        await self.__init_handles()
+        # RepeatedTimer(CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT, elastic_controller.get_instance().purge_old_records, False)

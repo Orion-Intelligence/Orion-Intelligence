@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-multiple-selection',
@@ -42,6 +42,7 @@ export class MultipleSelectionComponent {
       ? selected.join(', ')
       : 'Select ' + this.filterModel?.filters[this.key]?.title;
   }
+
   getOptionLabel(): string {
     const selectedValue = this.mSelectedFilters[this.key];
     if (!selectedValue) return 'Select ' + this.filterModel.filters[this.key].title;

@@ -1,5 +1,7 @@
 from typing import List, Optional
+
 from pydantic import BaseModel, Field
+
 
 class card_data(BaseModel):
     m_attacker: Optional[str] = None
@@ -28,6 +30,7 @@ class card_data(BaseModel):
     m_data_size: Optional[str] = None
     m_country_name: Optional[str] = None
     m_revenue: Optional[str] = None
+
 
 class breach_data(BaseModel):
     cards_data: List[card_data] = Field(default_factory=list)

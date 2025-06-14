@@ -1,21 +1,21 @@
 .dropdown-menu input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
-    border: 2px solid #2093ff;
-    background-color: rgb(255, 255, 255);
-    appearance: none;
-    -webkit-appearance: none;
-    cursor: pointer;
-    position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid #2093ff;
+  background-color: rgb(255, 255, 255);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  position: relative;
 }
 
 .dropdown-menu input[type="checkbox"]:checked::before {
-    content: "✔";
-    color: blue;
-    font-weight: bold;
-    position: absolute;
-    top: 1px;
-    left: 2px;
-    font-size: 9px;
+  content: "✔";
+  color: blue;
+  font-weight: bold;
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  font-size: 9px;
 }

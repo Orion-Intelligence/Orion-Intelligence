@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
 from typing import List, Optional
 
+from pydantic import BaseModel, Field
 from pydantic.v1 import Extra
 
 
@@ -41,6 +41,7 @@ class CardExtractionModel(BaseModel):
 
     class Config:
         extra = Extra.allow
+
 
 class LeakDataModel(BaseModel):
     cards_data: List[CardExtractionModel] = Field(default_factory=list)

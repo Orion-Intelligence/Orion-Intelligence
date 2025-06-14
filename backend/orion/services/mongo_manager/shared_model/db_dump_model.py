@@ -1,5 +1,7 @@
-from odmantic import Model, Field
 from datetime import datetime, timezone
+
+from odmantic import Model, Field
+
 
 class db_dump_record_model(Model):
     id: str = Field(primary_field=True)

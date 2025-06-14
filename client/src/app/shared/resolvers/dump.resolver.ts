@@ -1,17 +1,18 @@
-import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { HttpParams } from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from '@angular/router';
+import {Observable} from 'rxjs';
+import {tap} from 'rxjs/operators';
+import {HttpParams} from '@angular/common/http';
 
-import { ApiService } from '../services/api.service';
-import { DumpService } from '../../services/dump/dump.service';
+import {ApiService} from '../services/api.service';
+import {DumpService} from '../../services/dump/dump.service';
 import {DumpCallbackModel} from '../model/dump/dump.mode';
 import {dump_filters} from '../constants/filters';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class DumpResolver implements Resolve<DumpCallbackModel> {
-  constructor(private apiService: ApiService, private dumpService: DumpService) {}
+  constructor(private apiService: ApiService, private dumpService: DumpService) {
+  }
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<DumpCallbackModel> {
     const queryParams = route.queryParams;

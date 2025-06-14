@@ -1,16 +1,23 @@
 <form class="row filter__input_date-container">
   <div class="col-12">
     <div class="d-flex align-items-center">
-      <input ngbDatepicker #datepicker="ngbDatepicker" class="filter__input filter__input_date text-start justify-content-between align-items-center" [autoClose]="'outside'" (dateSelect)="onDateSelection($event)" [displayMonths]="1" [dayTemplate]="t"
-             outsideDays="hidden" [startDate]="fromDate!" tabindex="-1" [value]="mSelectedFilters[key] || ''" readonly [placeholder]="filterModel?.filters?.[key]?.placeholder || 'Select date range'" (click)="datepicker.toggle()"/>
+      <input #datepicker="ngbDatepicker" (click)="datepicker.toggle()"
+             (dateSelect)="onDateSelection($event)"
+             [autoClose]="'outside'" [dayTemplate]="t" [displayMonths]="1" [placeholder]="filterModel?.filters?.[key]?.placeholder || 'Select date range'"
+             [startDate]="fromDate!" [value]="mSelectedFilters[key] || ''" class="filter__input filter__input_date text-start justify-content-between align-items-center" ngbDatepicker outsideDays="hidden"
+             readonly
+             tabindex="-1"/>
 
-      <button class="btn date_picker_button_bg ms-2 filter__input_date-button" (click)="datepicker.toggle()" type="button">
-        <img src="assets/images/shared/calendar.png" alt="Calendar" class="date_picker_button_image"/>
+      <button (click)="datepicker.toggle()" class="btn date_picker_button_bg ms-2 filter__input_date-button"
+              type="button">
+        <img alt="Calendar" class="date_picker_button_image" src="assets/images/shared/calendar.png"/>
       </button>
     </div>
 
     <ng-template #t let-date let-focused="focused">
-      <span class="custom-day" [class.focused]="!!focused" [class.range]="isRange(date)" [class.faded]="isHovered(date) || isInside(date)" (mouseenter)="hoveredDate = date" (mouseleave)="hoveredDate = null">
+      <span (mouseenter)="hoveredDate = date" (mouseleave)="hoveredDate = null" [class.faded]="isHovered(date) || isInside(date)"
+            [class.focused]="!!focused" [class.range]="isRange(date)"
+            class="custom-day">
         {{ date.day }}
       </span>
     </ng-template>

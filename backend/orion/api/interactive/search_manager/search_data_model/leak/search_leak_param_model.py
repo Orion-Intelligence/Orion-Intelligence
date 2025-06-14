@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class search_leak_param_model(BaseModel):
     q: Optional[str] = Field("", max_length=150)
@@ -7,6 +9,6 @@ class search_leak_param_model(BaseModel):
     mSearchParamPage: Optional[int] = 1
     mSearchParamSafeSearch: bool = False
     mNetwork: str = "all"
-    mDateRange:Optional[str]=""
-    mContentType:Optional[str]="all"
-    mEntity:Optional[str]=""
+    mDateRange: Optional[str] = ""
+    mContentType: Optional[str] = "all"
+    mEntity: Optional[str] = ""

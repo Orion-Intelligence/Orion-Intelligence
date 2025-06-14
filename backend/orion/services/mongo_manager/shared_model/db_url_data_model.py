@@ -1,6 +1,7 @@
-from odmantic import Model, Field
 from datetime import datetime
 from typing import Optional, List
+
+from odmantic import Model, Field
 
 
 class db_url_data_model(Model):

@@ -10,8 +10,12 @@ import {DashboardComponent} from './pages/dashboard/dashboard.component';
 import {ReportResolver} from './shared/resolvers/report.resolver';
 import {DashboardGeneralComponent} from './shared/partials/intel-panel/dashboard-general/dashboard-general.component';
 import {ReportComponent} from './shared/partials/report/report_general/report.component';
-import {DashboardEmailApiComponent} from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
-import {DashboardDefacementComponent} from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
+import {
+  DashboardEmailApiComponent
+} from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
+import {
+  DashboardDefacementComponent
+} from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
 import {ReportDefacementComponent} from './shared/partials/report/report-defacement/report-defacement.component';
 import {DashboardChatsComponent} from './shared/partials/intel-panel/dashboard-chats/dashboard-chats.component';
 import {ReportChatComponent} from './shared/partials/report/report-chat/report-chat.component';

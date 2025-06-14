@@ -1,7 +1,7 @@
 <div class="dashboard__search-container dashboard__search-container-chat">
   <ng-container *ngFor="let item of searchResults" class="dashboard__search-card">
 
-    <div class="dashboard__search-main-div" [id]="'item-' + item.m_message_id">
+    <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
         <div class="dashboard__search-tags">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
@@ -11,18 +11,18 @@
             <span class="dashboard__tag">unknown</span>
           </ng-template>
         </div>
-        <div class="dashboard__search-button" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams"
-          (click)="scrollService.saveSession(item.m_message_id ?? '')">
+        <div (click)="scrollService.saveSession(item.m_message_id ?? '')" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]"
+             class="dashboard__search-button">
           <div class="dashboard__search-button-inner">
-            <img src="/assets/images/shared/redirect.svg" width="40" height="40" />
+            <img height="40" src="/assets/images/shared/redirect.svg" width="40"/>
           </div>
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <img src="/assets/images/shared/channel.svg" alt="Channel" width="20" height="20" />
+        <img alt="Channel" height="20" src="/assets/images/shared/channel.svg" width="20"/>
         <h2 class="dashboard__search-title mb-0 ml-2">{{ item.m_channel_name || 'Untitled' }}</h2>
       </div>
-      <div class="dashboard__search-link dashboard__search-link-chat" *ngIf="item.m_message_sharable_link">
+      <div *ngIf="item.m_message_sharable_link" class="dashboard__search-link dashboard__search-link-chat">
         {{ item.m_message_sharable_link }}
       </div>
 
@@ -36,7 +36,7 @@
 
       <ng-container *ngIf="item.m_file_name?.length">
         <h5 class="dashboard__search-title dashboard__search-title-secondary">Embedded Files</h5>
-        <div class="dashboard__search-link" *ngFor="let file of item.m_file_name | slice:0:3">
+        <div *ngFor="let file of item.m_file_name | slice:0:3" class="dashboard__search-link">
           <ng-container *ngFor="let part of file.split(' - ')">
             <div>{{ part }}</div>
           </ng-container>
@@ -57,7 +57,7 @@
             <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Raw Data Content</h5>
             <p class="dashboard__search-description highlight mt-2">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                {{ part }}<br *ngIf="!last" />...
+                {{ part }}<br *ngIf="!last"/>...
               </ng-container>
               <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
             </p>
@@ -73,7 +73,7 @@
               <p class="dashboard__search-description highlight mt-2">
                 <ng-container
                   *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                  {{ part }}<br *ngIf="!last" />...
+                  {{ part }}<br *ngIf="!last"/>...
                 </ng-container>
                 <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
               </p>
@@ -85,7 +85,7 @@
           <ng-container *ngIf="item.m_content; else noContent">
             <p class="dashboard__search-description highlight mt-2">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                {{ part }}<br *ngIf="!last" />...
+                {{ part }}<br *ngIf="!last"/>...
               </ng-container>
               <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
             </p>
@@ -100,7 +100,7 @@
 
       <ng-container *ngIf="item.m_weblink?.length">
         <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Embedded URL</h5>
-        <div class="dashboard__search-link" *ngFor="let link of item.m_weblink | slice:0:3">
+        <div *ngFor="let link of item.m_weblink | slice:0:3" class="dashboard__search-link">
           {{ link }}
         </div>
       </ng-container>
@@ -112,9 +112,10 @@
           </span>
         </div>
 
-        <div class="dashboard__search-info-item" *ngIf="item.m_views">
-          <span class="dashboard__info-label">Views:</span> <span class="dashboard__info-value">{{ item.m_views
-            }}</span>
+        <div *ngIf="item.m_views" class="dashboard__search-info-item">
+          <span class="dashboard__info-label">Views:</span> <span class="dashboard__info-value">{{
+            item.m_views
+          }}</span>
         </div>
 
       </div>

@@ -1,8 +1,10 @@
-from odmantic import Model, Field
-from enum import Enum
-from pydantic import field_validator
-from typing import Any
 import re
+from enum import Enum
+from typing import Any
+
+from odmantic import Model, Field
+from pydantic import field_validator
+
 
 class AllowedKeys(str, Enum):
     VERSION = "version"
@@ -11,12 +13,14 @@ class AllowedKeys(str, Enum):
     TELEGRAM_ALLOWED = "telegram_allowed"
     LOGO_URL = "logo_url"
 
+
 VALID_LANGUAGE_CODES = {
     "en", "fr", "es", "de", "it", "pt", "ru", "zh", "ja", "ko",
     "ar", "hi", "bn", "tr", "nl", "sv", "pl", "cs"
 }
 
 IMAGE_URL_REGEX = re.compile(r"^https?://.+\.(png|jpg|jpeg|svg|webp)$", re.IGNORECASE)
+
 
 class db_system_model(Model):
     key: AllowedKeys = Field(unique=True)

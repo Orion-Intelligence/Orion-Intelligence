@@ -1,26 +1,27 @@
-<form class="default-input-container default-input-sub-container-padded w-90" (submit)="onFormSubmit()"
-  @fadeInDashboardItem>
+<form (submit)="onFormSubmit()" @fadeInDashboardItem
+      class="default-input-container default-input-sub-container-padded w-90">
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
     <div class="col-md-10 col-sm-12 col-xs-12">
       <div class="input-group default-input-sub-container">
-        <input autocomplete="off" autocapitalize="none" type="search" placeholder="Search..."
-          class="form-control default-input dashboard-general-input" maxlength="150" name="q" [(ngModel)]="local_query">
+        <input [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" class="form-control default-input dashboard-general-input"
+               maxlength="150" name="q" placeholder="Search..."
+               type="search">
         <input type="hidden" value="1">
         <button class="btn btn-primary default-input-button" type="submit">
-          <img ngSrc="../../../../assets/images/shared/magnifyingglasswhite.svg" alt="Search" priority height="16"
-            width="16">
+          <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglasswhite.svg" priority
+               width="16">
         </button>
       </div>
       <ng-container *ngIf="type == Category.STRATEGIC">
         <div class="default-notification-banner">
           <span>
-            <img src="../../../../assets/images/shared/hint.svg" class="default-notification-banner-icon"
-              alt="Info Icon">
+            <img alt="Info Icon" class="default-notification-banner-icon"
+                 src="../../../../assets/images/shared/hint.svg">
             <span>
               Current results are general and may lack accuracy. For precise insights, open the &nbsp;
               <u><b>
-                  <a class="cursor-pointer text-reset text-decoration-none" routerLink="/dashboard/breach/databases"
-                    queryParamsHandling="preserve" appTooltip="Go to Breach Details">
+                  <a appTooltip="Go to Breach Details" class="cursor-pointer text-reset text-decoration-none"
+                     queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">
                     Data Breaches</a>
                 </b></u> &nbsp; section in sidebar.
             </span>
@@ -29,16 +30,16 @@
       </ng-container>
     </div>
 
-    <div class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3"
-      *ngIf="!shrinkmenu && filterModel">
-      <div class="analytics d-flex align-items-center gap-2" appTooltip="Insights Breakdown" *ngIf="showAnalytics">
-        <input type="checkbox" id="switch" (click)="onToggleAnalytics()" />
-        <label for="switch" class="mb-0"></label><span>&nbsp; Analytics</span>
+    <div *ngIf="!shrinkmenu && filterModel"
+         class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3">
+      <div *ngIf="showAnalytics" appTooltip="Insights Breakdown" class="analytics d-flex align-items-center gap-2">
+        <input (click)="onToggleAnalytics()" id="switch" type="checkbox"/>
+        <label class="mb-0" for="switch"></label><span>&nbsp; Analytics</span>
       </div>
 
-      <label class="filters-button d-flex align-items-center" appTooltip="Customize Results"
-        (click)="sidebarService.openSidebar()">
-        <img ngSrc="../../../../assets/images/shared/filter_icon.svg" alt="Filter Icon" width="24" height="24" priority>
+      <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results"
+             class="filters-button d-flex align-items-center">
+        <img alt="Filter Icon" height="24" ngSrc="../../../../assets/images/shared/filter_icon.svg" priority width="24">
         <span class="ms-2">Filter</span>
       </label>
     </div>
@@ -50,10 +51,11 @@
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
 
-<div *ngIf="filterModel && !shrinkmenu" class="filters-container"
-  [class.filter__container-enable]="isFilterOpen$ | async" [class.filter__container-disable]="!(isFilterOpen$ | async)">
-  <app-filters [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async" (filterChanged)="applyFilters($event)"
-    (filterReset)="resetFilters()" (filterClose)="sidebarService.closeSidebar()"></app-filters>
+<div *ngIf="filterModel && !shrinkmenu" [class.filter__container-disable]="!(isFilterOpen$ | async)"
+     [class.filter__container-enable]="isFilterOpen$ | async"
+     class="filters-container">
+  <app-filters (filterChanged)="applyFilters($event)" (filterClose)="sidebarService.closeSidebar()" (filterReset)="resetFilters()"
+               [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 <div *ngIf="isLoading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>

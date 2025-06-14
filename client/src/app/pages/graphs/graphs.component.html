@@ -1,52 +1,56 @@
 <div #networkContainer class="graph-container d-none d-md-block"></div>
 
-<graph-sidebar class="d-none d-md-block" (filtersApplied)="onSidebarApply($event)"></graph-sidebar>
+<graph-sidebar (filtersApplied)="onSidebarApply($event)" class="d-none d-md-block"></graph-sidebar>
 
-<app-graph-info class="d-none d-md-block" [expandEnabledTemp]="expandEnabled" (physicsToggled)="onPhysicsToggled($event)" (onResetAll)="onResetAll()" (ruleSetChange)="ruleSetChange($event)" [(ruleSet)]="ruleSet"
-  (expandToggled)="onExpandToggled($event)" [selectedType]="selectedType" [singleInput]="singleInput"
-  [propertyType]="propertyType" [physicsEnabled]=physicsEnabled [propertyValue]="propertyValue"
-  [result]="flattenedDocuments">
+<app-graph-info (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()"
+                (physicsToggled)="onPhysicsToggled($event)" (ruleSetChange)="ruleSetChange($event)"
+                [(ruleSet)]="ruleSet" [expandEnabledTemp]="expandEnabled"
+                [physicsEnabled]=physicsEnabled [propertyType]="propertyType" [propertyValue]="propertyValue"
+                [result]="flattenedDocuments" [selectedType]="selectedType" [singleInput]="singleInput"
+                class="d-none d-md-block">
 </app-graph-info>
 
 
-<div id="customContextMenu" class="context-menu">
-  <button class="dropdown-item button-content" (click)="expandGroupNode()">
-    <img src="assets/images/shared/expand.svg" width="15" height="15" class="graph-filters__listing-margin" alt="">
-    Expand</button>
+<div class="context-menu" id="customContextMenu">
+  <button (click)="expandGroupNode()" class="dropdown-item button-content">
+    <img alt="" class="graph-filters__listing-margin" height="15" src="assets/images/shared/expand.svg" width="15">
+    Expand
+  </button>
 
   <hr class="dropdown-divider mx-3">
 
-  <button class="dropdown-item button-content" (click)="collapseGroupNode()">
-    <img src="assets/images/shared/collapse.svg" width="15" height="15" class="graph-filters__listing-margin"  alt="">
-    Collapse</button>
+  <button (click)="collapseGroupNode()" class="dropdown-item button-content">
+    <img alt="" class="graph-filters__listing-margin" height="15" src="assets/images/shared/collapse.svg" width="15">
+    Collapse
+  </button>
   <hr class="dropdown-divider mx-3">
 
-  <button class="dropdown-item button-content" (click)="openCTI()">
-    <img src="assets/images/shared/share-black.svg" width="15" height="15"
-      class="share-wrapper graph-filters__listing-margin" alt="">
+  <button (click)="openCTI()" class="dropdown-item button-content">
+    <img alt="" class="share-wrapper graph-filters__listing-margin" height="15"
+         src="assets/images/shared/share-black.svg" width="15">
     Open CTI
   </button>
   <hr class="dropdown-divider mx-3">
-  <button class="dropdown-item button-content" (click)="copyNodeLabel($event)">
-    <img src="assets/images/shared/label.svg" width="15" height="15"
-      class="share-wrapper graph-filters__listing-margin" alt="">
+  <button (click)="copyNodeLabel($event)" class="dropdown-item button-content">
+    <img alt="" class="share-wrapper graph-filters__listing-margin" height="15"
+         src="assets/images/shared/label.svg" width="15">
     Copy Label
   </button>
   <hr class="dropdown-divider mx-3">
-  <button class="dropdown-item button-content" (click)="viewReport()">
-    <img src="assets/images/shared/redirect-black.svg" width="15" height="15"
-      class="share-wrapper graph-filters__listing-margin" alt="">
+  <button (click)="viewReport()" class="dropdown-item button-content">
+    <img alt="" class="share-wrapper graph-filters__listing-margin" height="15"
+         src="assets/images/shared/redirect-black.svg" width="15">
     Open Report
   </button>
 
 </div>
-<span *ngIf="copied" class="floating-copied " [style]="{ top: copiedY + 'px', left: copiedX + 'px' }">Copied!</span>
+<span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="floating-copied ">Copied!</span>
 
 
-<div class="graph-notification" *ngIf="maxEdge>50">
+<div *ngIf="maxEdge>50" class="graph-notification">
   <div class="default-notification-banner default-notification-banner-cti">
     <span>
-      <img src="assets/images/shared/hint.svg" class="default-notification-banner-icon" alt="Info Icon">
+      <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg">
       <span>
         You can see {{ maxEdge }} nodes at a time, avoid using extreme values for better performance
       </span>
@@ -55,7 +59,7 @@
 </div>
 
 <div *ngIf="this.isEmpty && !this.loading" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
-  <img src="assets/images/shared/cti-empty.svg" alt="No Data" class="img-fluid w-auto" />
+  <img alt="No Data" class="img-fluid w-auto" src="assets/images/shared/cti-empty.svg"/>
 </div>
 
 <div class="blocked-media d-block d-md-none text-center p-4">

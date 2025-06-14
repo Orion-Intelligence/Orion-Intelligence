@@ -51,7 +51,7 @@
   margin-bottom: 15px;
 }
 
-.filter__input_date{
+.filter__input_date {
   outline: none;
   height: 40px;
   border-radius: 8px !important;
@@ -59,28 +59,28 @@
   border-bottom-right-radius: 0 !important;
 }
 
-.filter__input_date-button{
+.filter__input_date-button {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   height: 40px !important;
 }
 
-.filter__input_date-container .dropdown-menu{
+.filter__input_date-container .dropdown-menu {
   width: 262px;
   margin-left: -15px !important;
   margin-top: 8px !important;
 }
 
-.filter__input_date-container .ngb-dp-month{
+.filter__input_date-container .ngb-dp-month {
   margin-left: 14px;
   margin-top: 15px;
 }
 
-.custom-day.range, .custom-day:hover{
+.custom-day.range, .custom-day:hover {
   border-radius: 4px;
 }
 
-.dropdown-item-custom{
+.dropdown-item-custom {
   cursor: pointer;
   padding: 0;
   margin: 0;
@@ -197,7 +197,7 @@
   overflow-x: hidden;
 }
 
-.dropdown-item{
+.dropdown-item {
   padding-left: 15px !important;
 }
 

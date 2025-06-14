@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" style="shape-rendering:geometricPrecision;text-rendering:geometricPrecision;image-rendering:optimizeQuality;fill-rule:evenodd;clip-rule:evenodd"><path d="M111.5 68.5h167v25q-79.502-.25-159 .5-21.237 5.236-26.5 26.5-1 135 0 270 5.263 21.264 26.5 26.5 79.498.75 159 .5v25q-83.502.25-167-.5-33.243-4.24-42.5-36.5-1-150 0-300 9.497-32.26 42.5-37" style="opacity:.949"/><path d="M366.5 161.5q6.931-.76 13 2.5l83.5 83.5q5.269 8.87-1 17L379.5 347q-16.098 8.196-21-9a42.7 42.7 0 0 1 2.5-7.5l62.5-62.5-231-1q-12.465-6.823-5.5-19.5a15.8 15.8 0 0 1 5.5-3.5l231-1-62.5-62.5q-5.834-12.184 5.5-19" style="opacity:.954"/></svg>
+<svg height="512" style="shape-rendering:geometricPrecision;text-rendering:geometricPrecision;image-rendering:optimizeQuality;fill-rule:evenodd;clip-rule:evenodd" width="512"
+     xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M111.5 68.5h167v25q-79.502-.25-159 .5-21.237 5.236-26.5 26.5-1 135 0 270 5.263 21.264 26.5 26.5 79.498.75 159 .5v25q-83.502.25-167-.5-33.243-4.24-42.5-36.5-1-150 0-300 9.497-32.26 42.5-37"
+    style="opacity:.949"/>
+  <path
+    d="M366.5 161.5q6.931-.76 13 2.5l83.5 83.5q5.269 8.87-1 17L379.5 347q-16.098 8.196-21-9a42.7 42.7 0 0 1 2.5-7.5l62.5-62.5-231-1q-12.465-6.823-5.5-19.5a15.8 15.8 0 0 1 5.5-3.5l231-1-62.5-62.5q-5.834-12.184 5.5-19"
+    style="opacity:.954"/>
+</svg>
