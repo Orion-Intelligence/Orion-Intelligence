@@ -1,17 +1,17 @@
 export class CardData {
   m_crypto_addresses: string[] = [];
   m_attacker: string[] = [];
-  m_ref_html: string = "";
-  m_title: string = "";
-  m_url: string = "";
-  m_base_url: string = "";
-  m_content: string = "";
-  m_important_content: string = "";
-  m_network: string = "";
+  m_ref_html = "";
+  m_title = "";
+  m_url = "";
+  m_base_url = "";
+  m_content = "";
+  m_important_content = "";
+  m_network = "";
   m_content_type: string[] = [];
   m_weblink: string[] = [];
   m_dumplink: string[] = [];
-  m_name: string = "";
+  m_name = "";
   m_email: string[] = [];
   m_industry?: string;
   m_phone_numbers: string[] = [];

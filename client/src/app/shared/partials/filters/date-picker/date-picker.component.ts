@@ -10,7 +10,7 @@ import {NgbDate, NgbDateParserFormatter, NgbModule} from '@ng-bootstrap/ng-boots
   templateUrl: './date-picker.component.html',
 })
 export class DatePickerComponent implements OnChanges {
-  @Input() key: string = '';
+  @Input() key = '';
   @Input() filterModel: any;
   @Input() mSelectedFilters: any;
   @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();

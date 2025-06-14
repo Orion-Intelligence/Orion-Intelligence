@@ -11,7 +11,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
 })
 export class ResultListComponent {
   @Input() listItems: string[] = [];
-  @Input() activeTab: string = '';
+  @Input() activeTab = '';
 
   copiedIndex: number | null = null;
 

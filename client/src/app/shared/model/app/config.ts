@@ -1,10 +1,10 @@
-type ConfigSettingsInput = {
+interface ConfigSettingsInput {
   api_allowed?: string | boolean;
   telegram_allowed?: string | boolean;
   version?: string;
   language_allowed?: string;
   logo_url?: string;
-};
+}
 
 export class ConfigSettings {
   api_allowed: boolean;
@@ -22,9 +22,9 @@ export class ConfigSettings {
   }
 }
 
-type ConfigDataInput = {
+interface ConfigDataInput {
   settings?: ConfigSettingsInput;
-};
+}
 
 export class ConfigData {
   settings: ConfigSettings;

@@ -7,8 +7,8 @@ import {max} from 'rxjs';
   selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgOptimizedImage]
 })
 export class PaginationComponent implements OnInit {
-  @Input() maxPages: number = 1;
-  @Input() currentPage: number = 1;
+  @Input() maxPages = 1;
+  @Input() currentPage = 1;
 
   @Output() pageChange = new EventEmitter<number>();
   protected readonly max = max;

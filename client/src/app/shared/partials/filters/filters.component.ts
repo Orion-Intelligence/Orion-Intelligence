@@ -20,11 +20,11 @@ import {ActivatedRoute} from '@angular/router';
 export class FiltersComponent implements OnInit {
   @Input() filterModel!: FilterModel;
   @Input() isFilterOpen!: boolean | null;
-  @Output() filterChanged = new EventEmitter<{ [key: string]: string | null }>();
+  @Output() filterChanged = new EventEmitter<Record<string, string | null>>();
   @Output() filterReset = new EventEmitter<void>();
   @Output() filterClose = new EventEmitter<void>();
 
-  selectedFilters: { [key: string]: string | null } = {};
+  selectedFilters: Record<string, string | null> = {};
   protected readonly Object = Object;
   protected readonly last = last;
   protected readonly JSON = JSON;

@@ -11,17 +11,17 @@ import {LowerPipe} from '../../../model/pipes/lower.pipe';
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {
-  @Input() title: string = '';
-  @Input() icon: string = '';
+  @Input() title = '';
+  @Input() icon = '';
   @Input() items: string[] = [];
   @Input() category: any;
-  @Input() routePrefix: string = '';
+  @Input() routePrefix = '';
   @Input() selectionStore: any;
-  @Input() tooltip: string = '';
+  @Input() tooltip = '';
 
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
-  itemTooltips: { [key: string]: string } = {
+  itemTooltips: Record<string, string> = {
     'All': 'Comprehensive Overview',
     'General': 'Broad Data Pool',
     'Forums': 'Forum Intelligence',

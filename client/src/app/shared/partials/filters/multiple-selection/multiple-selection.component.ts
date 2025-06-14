@@ -7,7 +7,7 @@ import {CommonModule} from '@angular/common';
   templateUrl: './multiple-selection.component.html',
 })
 export class MultipleSelectionComponent {
-  @Input() key: string = '';
+  @Input() key = '';
   @Input() filterModel: any;
   @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
   @Input() mSelectedFilters: any

@@ -17,7 +17,7 @@ import {ScrollService} from '../../../../services/scroll.service';
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   @Input() searchResults: ChatResultItem[] = [];
-  currentUrl: string = '';
+  currentUrl = '';
   queryParams: any = {};
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {

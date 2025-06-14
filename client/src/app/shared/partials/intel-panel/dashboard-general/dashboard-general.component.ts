@@ -30,7 +30,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   public generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   public leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
 
-  query: string = ""
+  query = ""
   analyticsData = {} as Analytics;
   type = Category.STRATEGIC
 
@@ -105,7 +105,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
-  fetchSearchResults(reset: boolean = false) {
+  fetchSearchResults(reset = false) {
     if (this.isLoading) return;
     if (reset)
       this.generalParamModel.mSearchParamPage = 1
@@ -180,7 +180,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults(true);
   }
 
-  reloadFilters(event: { [key: string]: string | null }) {
+  reloadFilters(event: Record<string, string | null>) {
     this.generalParamModel.mSearchParamPage = 1
     if (event['mNetwork'] != null) {
       this.generalParamModel.mNetwork = event['mNetwork'];

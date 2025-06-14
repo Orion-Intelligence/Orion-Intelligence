@@ -51,7 +51,7 @@ export class GraphComponent implements OnInit {
   copiedX = 0;
   copiedY = 0;
   orignalColor: string | Color = '';
-  currentCategory: string = "";
+  currentCategory = "";
   private groupInfo: Record<string, string[]> = {};
   private groupExpandedState: Record<string, boolean> = {};
   private highlightedNodeId: string | null = null;
@@ -555,7 +555,7 @@ export class GraphComponent implements OnInit {
     this.groupExpandedState = {};
 
     const edgeMap: Record<string, number> = {};
-    const rawNodeMap: Map<string, ExtendedNode> = new Map();
+    const rawNodeMap = new Map<string, ExtendedNode>();
 
     data.forEach(item => {
       const v = item.vertex;

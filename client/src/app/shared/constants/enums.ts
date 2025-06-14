@@ -1,4 +1,4 @@
-export const LANGUAGE_MAP: { [key: string]: { iso1: string, name: string } } = {
+export const LANGUAGE_MAP: Record<string, { iso1: string, name: string }> = {
   eng: {iso1: 'en', name: 'English'},
   fra: {iso1: 'fr', name: 'French'},
   spa: {iso1: 'es', name: 'Spanish'},

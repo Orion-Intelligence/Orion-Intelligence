@@ -4,7 +4,7 @@ import {Directive, ElementRef, HostListener, Input, OnDestroy, Renderer2} from '
   selector: '[appTooltip]'
 })
 export class TooltipDirective implements OnDestroy {
-  @Input('appTooltip') tooltipText: string = '';
+  @Input('appTooltip') tooltipText = '';
   private tooltip: HTMLElement | null = null;
   private showTimeout: any = null;
 

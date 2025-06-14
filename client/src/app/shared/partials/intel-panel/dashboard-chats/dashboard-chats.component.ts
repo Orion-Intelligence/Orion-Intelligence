@@ -66,7 +66,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
       });
   }
 
-  fetchSearchResults(reset: boolean = false): void {
+  fetchSearchResults(reset = false): void {
     if (reset)
       this.chatParamModel.mSearchParamPage = 1;
 
@@ -143,7 +143,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults(true);
   }
 
-  reloadFilters(event: { [key: string]: string | null }) {
+  reloadFilters(event: Record<string, string | null>) {
     if (event['mContentType'] != null) {
       this.chatParamModel.mContentType = event['mContentType'];
     }

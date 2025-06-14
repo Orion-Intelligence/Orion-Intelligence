@@ -67,7 +67,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
-  fetchSearchResults(reset: boolean = false) {
+  fetchSearchResults(reset = false) {
     if (reset)
       this.defacementParamModel.mSearchParamPage = 1
     if (!this.defacementParamModel.q) {
@@ -137,7 +137,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults(true);
   }
 
-  reloadFilters(event: { [key: string]: string | null }) {
+  reloadFilters(event: Record<string, string | null>) {
     this.defacementParamModel.mSearchParamPage = 1
     if (event['mDateRange']) {
       this.defacementParamModel.mDateRange = event['mDateRange']

@@ -72,7 +72,7 @@ export class DashboardService {
       }).length,
       inactive_links: resultItems.filter(item => (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24) > 10).length,
       consolidated_lists: (() => {
-        const consolidated: { [key: string]: string[] } = {};
+        const consolidated: Record<string, string[]> = {};
         resultItems.forEach(item => {
           const typedItem = item as any;
           Object.entries(typedItem).forEach(([key, value]) => {

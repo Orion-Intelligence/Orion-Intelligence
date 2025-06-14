@@ -14,11 +14,11 @@ export class ListingsComponent implements OnInit {
   @Input() result: any[] = [];
 
   collapseToggle = false;
-  searchText: string = '';
+  searchText = '';
   copied = false;
   copiedX = 0;
   copiedY = 0;
-  showResults: boolean = false;
+  showResults = false;
 
   constructor(private clipboard: Clipboard) {
   }

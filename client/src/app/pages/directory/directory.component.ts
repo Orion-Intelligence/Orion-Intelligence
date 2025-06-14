@@ -26,8 +26,8 @@ export class DirectoryComponent implements OnInit {
   directoryData$: Observable<DirectoryCallbackModel | null>;
   isFilterOpen$: Observable<boolean>;
   filterModel: FilterModel = directory_filters;
-  selectedFilters: { [key: string]: string | null } = {};
-  totalPages: number = 0;
+  selectedFilters: Record<string, string | null> = {};
+  totalPages = 0;
 
   constructor(
     private router: Router,
@@ -49,7 +49,7 @@ export class DirectoryComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const baseFilters = this.filterModel.filters;
       const newFilters: any = {};
-      const initialSelectedFilters: { [key: string]: string } = {};
+      const initialSelectedFilters: Record<string, string> = {};
 
       Object.keys(baseFilters).forEach(key => {
         const base = baseFilters[key];
@@ -81,7 +81,7 @@ export class DirectoryComponent implements OnInit {
     this.sidebarService.closeSidebar();
   }
 
-  applyFilters(filters: { [key: string]: string | null }) {
+  applyFilters(filters: Record<string, string | null>) {
     this.selectedFilters = filters;
     this.reloadDirectory();
   }

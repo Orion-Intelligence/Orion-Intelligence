@@ -27,15 +27,15 @@ export class ReportComponent implements OnInit {
   resultItem: GeneralResultItem | LeakResultItem | null = null;
   arrayKeys: string[] = [];
   listItems: any[] = [];
-  activeTab: string = '';
-  content: string = '';
+  activeTab = '';
+  content = '';
   lang = "en"
   lang_detected = "en"
   type = ""
-  isImageLoaded: boolean = false;
-  isImageError: boolean = false;
+  isImageLoaded = false;
+  isImageError = false;
   imageSrc: string | null = null;
-  aiSuggestStatus: boolean = false
+  aiSuggestStatus = false
   aiSuggestSummary = ""
   isExpanded = true;
   protected readonly last = last;
@@ -66,7 +66,7 @@ export class ReportComponent implements OnInit {
       if (this.resultItem?.m_screenshot) {
         this.loadImage(this.resultItem.m_screenshot);
       }
-      let content = this.resultItem?.m_content
+      const content = this.resultItem?.m_content
       if (content) {
         this.lang_detected = this.helperService.detectLanguageName(content);
       }
@@ -203,7 +203,7 @@ export class ReportComponent implements OnInit {
     }
   }
 
-  isWithinDays(dateString: string = '', days: number): boolean {
+  isWithinDays(dateString = '', days: number): boolean {
     if (!dateString) return false;
     const createdDate = new Date(dateString);
     const today = new Date();

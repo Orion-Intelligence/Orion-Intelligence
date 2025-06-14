@@ -14,7 +14,7 @@ import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 export class GeneralInsightsComponent implements OnChanges {
   @Input() analytics: any;
 
-  sections: Array<{ title: string; items: any[]; tooltip: string }> = [];
+  sections: { title: string; items: any[]; tooltip: string }[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['analytics'] && this.analytics) {

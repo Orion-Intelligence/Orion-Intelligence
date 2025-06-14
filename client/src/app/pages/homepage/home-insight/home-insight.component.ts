@@ -18,7 +18,7 @@ import {TooltipDirective} from '../../../shared/directive/tooltip-directive.dire
 export class HomeInsightComponent implements OnInit {
   insights!: InsightCallbackModel;
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
-  tooltipMap: { [key: string]: string } = {
+  tooltipMap: Record<string, string> = {
     document_count: 'Total Docs Fetched',
     most_recent: 'Latest Data Update',
     oldest_update: 'Oldest Fetch Date',

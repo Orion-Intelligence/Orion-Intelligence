@@ -15,7 +15,7 @@ import {ReportMappingListComponent} from "../report-mapping-list/report-mapping-
 })
 export class ReportDefacementComponent implements OnInit {
   defacementData: DefacementResultItem | null = null;
-  lang: string = "en";
+  lang = "en";
 
   constructor(private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
     this.lang = appService.getConfig().language_allowed

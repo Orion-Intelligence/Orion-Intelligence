@@ -1,14 +1,14 @@
 import {Suggestion} from '../shared/common-result';
 
 export class GeneralResultItem {
-  m_title: string = "";
+  m_title = "";
   m_url?: string;
   m_base_url?: string;
-  m_content: string = "";
+  m_content = "";
   m_screenshot = ""
   m_ref_html?: string | null;
-  m_important_content: string = "";
-  m_highlighted: string = "";
+  m_important_content = "";
+  m_highlighted = "";
   m_network?: string;
   m_meta_description?: string;
   m_images: string[] = [];
@@ -16,7 +16,7 @@ export class GeneralResultItem {
   m_document: string[] = [];
   m_video: string[] = [];
   m_archive_url: string[] = [];
-  m_validity_score: number = 0;
+  m_validity_score = 0;
   m_meta_keywords?: string;
   m_content_type: string[] = [];
   m_section: string[] = [];
@@ -29,7 +29,7 @@ export class GeneralResultItem {
   m_dumplink: string[] = [];
   m_contact_link?: string;
   m_update_date: string = new Date().toISOString();
-  m_hash: string = "";
+  m_hash = "";
   m_hash_content?: string;
   m_hash_url?: string;
   m_creation_date: string = new Date().toISOString();
@@ -42,7 +42,7 @@ export class GeneralResultItem {
 export class GeneralCallbackModel {
   Result: GeneralResultItem[] = [];
   Suggestions: Suggestion[] = [];
-  Page_Count: number = 0;
+  Page_Count = 0;
 
   constructor(init?: Partial<GeneralCallbackModel>) {
     if (init) {

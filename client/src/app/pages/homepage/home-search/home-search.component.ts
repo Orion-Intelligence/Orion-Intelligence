@@ -10,7 +10,7 @@ import {FormsModule} from '@angular/forms';
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent {
-  searchQuery: string = '';
+  searchQuery = '';
 
   constructor(private route: ActivatedRoute, private router: Router) {
   }

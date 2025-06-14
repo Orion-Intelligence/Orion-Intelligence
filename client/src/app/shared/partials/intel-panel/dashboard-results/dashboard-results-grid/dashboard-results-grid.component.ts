@@ -16,7 +16,7 @@ export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
   @Input() query!: string;
   @Input() type!: string;
   @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
-  currentUrl: string = '';
+  currentUrl = '';
   queryParams: any = {};
 
   constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
@@ -33,7 +33,7 @@ export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
     this.scrollService.scrollToSavedPosition();
   }
 
-  highlightWords(text: string, maxLength: number = 250): SafeHtml {
+  highlightWords(text: string, maxLength = 250): SafeHtml {
     return this.helperService.highlightWords(text);
   }
 }

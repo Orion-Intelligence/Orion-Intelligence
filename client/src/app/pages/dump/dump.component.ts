@@ -26,7 +26,7 @@ import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
 export class DumpComponent implements OnInit {
   dumpData$: Observable<DumpCallbackModel | null>;
   filterModel: FilterModel = dump_filters;
-  selectedFilters: { [key: string]: string | null } = {};
+  selectedFilters: Record<string, string | null> = {};
   totalPages = 0;
 
   constructor(
@@ -51,7 +51,7 @@ export class DumpComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const baseFilters = this.filterModel.filters;
       const newFilters: any = {};
-      const initialSelectedFilters: { [key: string]: string } = {};
+      const initialSelectedFilters: Record<string, string> = {};
 
       Object.keys(baseFilters).forEach(key => {
         const base = baseFilters[key];
@@ -87,7 +87,7 @@ export class DumpComponent implements OnInit {
     this.dumpService.toggleFilter(false);
   }
 
-  applyFilters(filters: { [key: string]: string | null }): void {
+  applyFilters(filters: Record<string, string | null>): void {
     this.selectedFilters = filters;
     this.reloadDump();
   }

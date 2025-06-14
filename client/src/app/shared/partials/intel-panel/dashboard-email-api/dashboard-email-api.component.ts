@@ -17,8 +17,8 @@ import {searchDynamicEmailParamModel} from '../../../model/api/email/search_dyna
   templateUrl: './dashboard-email-api.component.html'
 })
 export class DashboardEmailApiComponent implements OnInit {
-  username: string = '';
-  email: string = '';
+  username = '';
+  email = '';
   loading = false;
   error = false;
   breachData: CardData | null = null;

@@ -16,7 +16,7 @@ export class DirectoryResolver implements Resolve<DirectoryCallbackModel> {
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<DirectoryCallbackModel> {
     const queryParams = route.queryParams;
 
-    const validFilters: { [key: string]: string } = {};
+    const validFilters: Record<string, string> = {};
     const filterConfig = directory_filters.filters;
 
     for (const key of Object.keys(filterConfig)) {

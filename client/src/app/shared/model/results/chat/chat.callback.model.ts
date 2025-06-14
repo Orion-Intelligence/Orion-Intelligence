@@ -39,7 +39,7 @@ export class ChatResultItem {
 export class ChatCallbackModel {
   Result: ChatResultItem[] = [];
   Suggestions: Suggestion[] = [];
-  Page_Count: number = 0;
+  Page_Count = 0;
 
   constructor(init?: Partial<ChatCallbackModel>) {
     if (init) {

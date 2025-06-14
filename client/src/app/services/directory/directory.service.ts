@@ -9,7 +9,7 @@ export class DirectoryService {
   directoryData$ = this.directoryDataSubject.asObservable();
   private currentPageSubject = new BehaviorSubject<number>(1);
   currentPage$ = this.currentPageSubject.asObservable();
-  private filters: { [key: string]: string } = {};
+  private filters: Record<string, string> = {};
 
   constructor(private apiService: ApiService) {
   }
@@ -24,11 +24,11 @@ export class DirectoryService {
     });
   }
 
-  setSelectedFilters(filters: { [key: string]: string }) {
+  setSelectedFilters(filters: Record<string, string>) {
     this.filters = filters;
   }
 
-  getSelectedFilters(): { [key: string]: string } {
+  getSelectedFilters(): Record<string, string> {
     return this.filters;
   }
 

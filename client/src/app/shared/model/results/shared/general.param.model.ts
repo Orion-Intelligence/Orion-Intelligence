@@ -1,12 +1,12 @@
 export class GeneralParamModel {
-  q: string = "";
-  mSearchParamType: string = "all";
-  mSearchParamPage: number = 1;
-  mSearchParamSafeSearch: boolean = false;
-  mNetwork: string = "all";
-  mDateRange: string = ""
-  mContentType: string = "all"
-  mEntity: string = ""
+  q = "";
+  mSearchParamType = "all";
+  mSearchParamPage = 1;
+  mSearchParamSafeSearch = false;
+  mNetwork = "all";
+  mDateRange = ""
+  mContentType = "all"
+  mEntity = ""
 
   constructor(init?: Partial<GeneralParamModel>) {
     Object.assign(this, init);

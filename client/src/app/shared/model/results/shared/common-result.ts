@@ -1,7 +1,7 @@
 export class SuggestionOption {
-  text: string = "";
-  score: number = 0;
-  freq: number = 0;
+  text = "";
+  score = 0;
+  freq = 0;
 
   constructor(init?: Partial<SuggestionOption>) {
     Object.assign(this, init);
@@ -9,9 +9,9 @@ export class SuggestionOption {
 }
 
 export class Suggestion {
-  text: string = "";
-  offset: number = 0;
-  length: number = 0;
+  text = "";
+  offset = 0;
+  length = 0;
   options: SuggestionOption[] = [];
 
   constructor(init?: Partial<Suggestion>) {

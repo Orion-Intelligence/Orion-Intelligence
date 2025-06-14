@@ -8,9 +8,9 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 })
 export class DataAccordianComponent {
   @Input() analytics: any;
-  @Input() categories: { [key: string]: string[] } = {};
+  @Input() categories: Record<string, string[]> = {};
 
-  objectKeys(obj: { [key: string]: any }): string[] {
+  objectKeys(obj: Record<string, any>): string[] {
     return Object.keys(obj);
   }
 }

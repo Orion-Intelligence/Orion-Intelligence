@@ -63,7 +63,7 @@ export class HelperService {
 
       while (i < matches.length) {
         let merged = matches[i][1];
-        let start = matches[i].index!;
+        const start = matches[i].index!;
         let end = start + matches[i][0].length;
         let j = i + 1;
 

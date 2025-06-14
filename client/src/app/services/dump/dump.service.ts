@@ -14,7 +14,7 @@ export class DumpService {
   dumpData$ = this.dumpDataSubject.asObservable();
   private currentPageSubject = new BehaviorSubject<number>(1);
   currentPage$ = this.currentPageSubject.asObservable();
-  private filters: { [key: string]: string } = {};
+  private filters: Record<string, string> = {};
   private filterOpenSubject = new BehaviorSubject<boolean>(false);
   isFilterOpen$ = this.filterOpenSubject.asObservable();
 
@@ -31,7 +31,7 @@ export class DumpService {
     });
   }
 
-  setSelectedFilters(filters: { [key: string]: string }) {
+  setSelectedFilters(filters: Record<string, string>) {
     this.filters = filters;
   }
 

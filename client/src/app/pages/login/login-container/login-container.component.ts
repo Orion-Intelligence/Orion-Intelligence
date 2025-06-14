@@ -16,7 +16,7 @@ import {AppService} from '../../../services/core/app.service';
 export class LoginContainerComponent implements OnInit, OnDestroy {
   user = {username: '', password: ''};
   errorMessage: string | null = null;
-  authenticated: boolean = true;
+  authenticated = true;
   private authSubscription!: Subscription;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService) {

@@ -24,8 +24,8 @@ export class SidebarComponent implements OnInit {
   singleInput = 'all';
   propertyType = 'all';
   propertyValue = '';
-  maxNodes: number = 25;
-  maxDepth: number = 1;
+  maxNodes = 25;
+  maxDepth = 1;
 
   typeOptions = ['cluster', 'document', 'property'];
   clusterOptions = ['all', 'general', 'leak', 'defacement', 'chat', 'exploit'];

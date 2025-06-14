@@ -9,10 +9,10 @@ import {CommonModule} from '@angular/common';
 })
 export class JsonViewerComponent implements OnInit {
   @Input() json: any;
-  @Input() level: number = 0;
-  @Input() parentPath: string = '';
+  @Input() level = 0;
+  @Input() parentPath = '';
 
-  expandedMap: Map<string, boolean> = new Map();
+  expandedMap = new Map<string, boolean>();
 
   excludedPaths = new Set([
     '_title:trocador.app',

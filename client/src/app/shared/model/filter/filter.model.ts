@@ -7,5 +7,5 @@ export interface FilterOption {
 }
 
 export interface FilterModel {
-  filters: { [key: string]: FilterOption };
+  filters: Record<string, FilterOption>;
 }

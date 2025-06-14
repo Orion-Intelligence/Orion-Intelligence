@@ -29,20 +29,20 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
   @Input() suggestion!: Suggestion | undefined;
-  @Input() searchQuery: string = '';
-  @Input() analyticsToggle: boolean = false;
-  @Input() shrinkmenu: boolean = false;
+  @Input() searchQuery = '';
+  @Input() analyticsToggle = false;
+  @Input() shrinkmenu = false;
   @Input() type!: Category;
-  @Input() showAnalytics: boolean = true;
+  @Input() showAnalytics = true;
 
-  @Output() reloadFilters = new EventEmitter<{ [key: string]: string | null }>();
+  @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
   @Output() resetFilter = new EventEmitter<void>();
   @Output() reloadData = new EventEmitter<void>();
   @Output() updateQuery = new EventEmitter<string>();
   @Output() onToggleSwitch = new EventEmitter<void>();
   @Input() filterModel!: FilterModel
 
-  selectedFilters: { [key: string]: string | null } = {};
+  selectedFilters: Record<string, string | null> = {};
   isFilterOpen$: Observable<boolean>;
   result_triggered = false
   local_query = ""
@@ -60,7 +60,7 @@ export class ResultComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       const newFilters: any = {};
-      const updatedSelectedFilters: { [key: string]: string } = {};
+      const updatedSelectedFilters: Record<string, string> = {};
 
       if (this.filterModel)
         Object.keys(this.filterModel.filters).forEach(key => {
@@ -92,7 +92,7 @@ export class ResultComponent implements OnInit, OnChanges {
     }
   }
 
-  applyFilters(filters: { [key: string]: string | null }) {
+  applyFilters(filters: Record<string, string | null>) {
     this.selectedFilters = filters;
     this.reloadFilters.emit(this.selectedFilters);
   }

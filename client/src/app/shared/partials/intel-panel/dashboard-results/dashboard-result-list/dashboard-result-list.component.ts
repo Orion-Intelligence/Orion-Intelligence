@@ -11,8 +11,8 @@ import {ScrollService} from '../../../../services/scroll.service';
 })
 export class DashboardResultListComponent implements OnInit, AfterViewInit {
   @Input() searchResults: DefacementResultItem[] = [];
-  currentUrl: string = '';
-  sortColumn: string = '';
+  currentUrl = '';
+  sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {

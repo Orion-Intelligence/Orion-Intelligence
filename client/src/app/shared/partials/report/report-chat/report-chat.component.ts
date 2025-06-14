@@ -30,10 +30,10 @@ export class ReportChatComponent implements OnInit {
   resultItem: ChatResultItem | null = null;
   arrayKeys: string[] = [];
   listItems: any[] = [];
-  activeTab: string = '';
-  content: string = '';
-  summary: string = '';
-  aiSuggestStatus: boolean = false
+  activeTab = '';
+  content = '';
+  summary = '';
+  aiSuggestStatus = false
   aiSuggestSummary = ""
   protected readonly last = last;
 

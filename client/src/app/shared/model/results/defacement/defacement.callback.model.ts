@@ -1,9 +1,9 @@
 export class DefacementParamModel {
-  q: string = "";
-  mSearchParamPage: number = 1;
-  mDateRange: string = ""
-  mTeam: string = ""
-  mAttacker: string = "";
+  q = "";
+  mSearchParamPage = 1;
+  mDateRange = ""
+  mTeam = ""
+  mAttacker = "";
 
   constructor(init?: Partial<DefacementParamModel>) {
     Object.assign(this, init);
