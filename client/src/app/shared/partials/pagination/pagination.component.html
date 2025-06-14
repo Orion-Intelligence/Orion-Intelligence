@@ -14,7 +14,7 @@
     </button>
 
     <button (click)="onPageChange(page)"
-            *ngFor="let page of getPageRange(); let i = index"
+            *ngFor="let page of getPageRange()"
             [class.search__navigation--focus]="page === currentPage"
             class="search__navigation gc-clear-selection">
       {{ page }}

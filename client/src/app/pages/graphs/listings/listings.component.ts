@@ -1,7 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {NgFor, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {Clipboard} from '@angular/cdk/clipboard';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
@@ -19,9 +18,6 @@ export class ListingsComponent implements OnInit {
   copiedX = 0;
   copiedY = 0;
   showResults = false;
-
-  constructor(private clipboard: Clipboard) {
-  }
 
   ngOnInit(): void {
     this.showResults = true;

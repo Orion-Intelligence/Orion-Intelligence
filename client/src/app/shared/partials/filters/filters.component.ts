@@ -27,7 +27,6 @@ export class FiltersComponent implements OnInit {
   selectedFilters: Record<string, string | null> = {};
   protected readonly Object = Object;
   protected readonly last = last;
-  protected readonly JSON = JSON;
 
   constructor(private route: ActivatedRoute) {
   }

@@ -21,20 +21,6 @@ export class DashboardSidebarItemsComponent {
 
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
-  itemTooltips: Record<string, string> = {
-    'All': 'Comprehensive Overview',
-    'General': 'Broad Data Pool',
-    'Forums': 'Forum Intelligence',
-    'News': 'Trending Alerts',
-    'Stolen': 'Stolen Info Logs',
-    'Drugs': 'Narcotics Tracker',
-    'Hacking': 'Hacking Insights',
-    'Marketplaces': 'Trade Monitoring',
-    'Cryptocurrency': 'Crypto Transactions',
-    'Leaks': 'Data Leaks',
-    'Databases': 'Breach Records',
-    'Tracking': 'Breach Tracker',
-  };
 
   selectSection() {
     this.sectionSelected.emit(this.category);

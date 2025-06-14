@@ -43,14 +43,6 @@ export class ReportChatComponent implements OnInit {
   ) {
   }
 
-  get filteredArrayKeys(): string[] {
-    console.log(this.arrayKeys)
-    return this.arrayKeys.filter(key => {
-      const val = (this.resultItem as any)?.[key];
-      return val != null && (!Array.isArray(val) || val.length > 0);
-    });
-  }
-
   ngOnInit(): void {
     this.route.data.subscribe(({reportdata}) => {
       this.resultItem = reportdata;
@@ -154,11 +146,6 @@ export class ReportChatComponent implements OnInit {
 
     const fullUrl = `${baseUrl}?${params.toString()}`;
     window.open(fullUrl, '_blank');
-  }
-
-  formatKeyLabel(key: string): string {
-    const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
-    return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
   }
 
   redirectToUrl() {

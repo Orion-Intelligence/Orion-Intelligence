@@ -11,7 +11,7 @@ export class ReportResolver implements Resolve<any> {
   constructor(private apiService: ApiService, private router: Router) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
+  resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<any> {
     const category = route.parent?.url[0]?.path || '';
     const hash = route.paramMap.get('m_hash');
     const lang = route.queryParamMap.get('lang');
@@ -35,7 +35,7 @@ export class ReportResolver implements Resolve<any> {
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
       default:
-        this.router.navigate(['/']);
+        this.router.navigate(['/']).then();
         return of(null);
     }
 

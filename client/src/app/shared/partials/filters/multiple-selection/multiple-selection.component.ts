@@ -28,21 +28,6 @@ export class MultipleSelectionComponent {
     this.mSelectedFilters[this.key] = [...this.mSelectedFilters[this.key]];
   }
 
-  formatOptionLabel(value: string): string {
-    if (!value) return '';
-    return value
-      .replace(/[_-]/g, ' ')
-      .toLowerCase()
-      .replace(/\b\w/g, char => char.toUpperCase());
-  }
-
-  getMultiSelectedText(): string {
-    const selected = this.mSelectedFilters[this.key];
-    return selected && selected.length > 0
-      ? selected.join(', ')
-      : 'Select ' + this.filterModel?.filters[this.key]?.title;
-  }
-
   getOptionLabel(): string {
     const selectedValue = this.mSelectedFilters[this.key];
     if (!selectedValue) return 'Select ' + this.filterModel.filters[this.key].title;

@@ -9,7 +9,7 @@ export class InsightResolver implements Resolve<any> {
   constructor(private apiService: ApiService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<InsightCallbackModel> {
+  resolve(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<InsightCallbackModel> {
     return this.apiService.get<InsightCallbackModel>('insight');
   }
 }

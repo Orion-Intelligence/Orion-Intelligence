@@ -13,7 +13,7 @@ export class DirectoryResolver implements Resolve<DirectoryCallbackModel> {
   constructor(private apiService: ApiService, private directoryService: DirectoryService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<DirectoryCallbackModel> {
+  resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<DirectoryCallbackModel> {
     const queryParams = route.queryParams;
 
     const validFilters: Record<string, string> = {};

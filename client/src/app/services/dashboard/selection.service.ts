@@ -13,7 +13,6 @@ export class SelectionStoreService {
   private selectedSectionSubject = new BehaviorSubject<string | null>(null);
   selectedSection$ = this.selectedSectionSubject.asObservable();
   private selectedOptionSubject = new BehaviorSubject<string | null>(null);
-  selectedOption$ = this.selectedOptionSubject.asObservable();
 
   constructor(private router: Router, private location: Location, private scroll_service: ScrollService) {
     this.setInitialSelectionFromUrl(this.router.url);

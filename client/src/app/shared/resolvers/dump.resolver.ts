@@ -14,7 +14,7 @@ export class DumpResolver implements Resolve<DumpCallbackModel> {
   constructor(private apiService: ApiService, private dumpService: DumpService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<DumpCallbackModel> {
+  resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<DumpCallbackModel> {
     const queryParams = route.queryParams;
 
     const validFilters: Record<string, string> = {};

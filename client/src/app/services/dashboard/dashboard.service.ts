@@ -24,7 +24,7 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService, private router: Router, private route: ActivatedRoute) {
+  constructor(private apiService: ApiService, private _router: Router, private _route: ActivatedRoute) {
   }
 
   fetchSearchResults<T extends {
@@ -34,12 +34,6 @@ export class DashboardService {
     success: boolean; isEmpty: boolean; data: T | null
   }> {
     this.cancelOngoingRequest();
-
-    // this.router.navigate([], {
-    //   relativeTo: this.route,
-    //   queryParams: paramModel,
-    //   queryParamsHandling: 'merge'
-    // });
 
     const params = new HttpParams({fromObject: paramModel as any});
 

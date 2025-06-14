@@ -28,10 +28,6 @@ export class DirectoryService {
     this.filters = filters;
   }
 
-  getSelectedFilters(): Record<string, string> {
-    return this.filters;
-  }
-
   setCurrentPage(page: number): void {
     if (page > 0) {
       this.currentPageSubject.next(page);

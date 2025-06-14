@@ -8,9 +8,5 @@ export class DefacementParamModel {
   constructor(init?: Partial<DefacementParamModel>) {
     Object.assign(this, init);
   }
-
-  toJSON() {
-    return JSON.stringify(this);
-  }
 }
 

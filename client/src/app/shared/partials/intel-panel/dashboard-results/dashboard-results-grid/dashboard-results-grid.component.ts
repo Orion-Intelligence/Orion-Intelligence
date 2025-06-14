@@ -33,7 +33,7 @@ export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
     this.scrollService.scrollToSavedPosition();
   }
 
-  highlightWords(text: string, maxLength = 250): SafeHtml {
+  highlightWords(text: string): SafeHtml {
     return this.helperService.highlightWords(text);
   }
 }
