@@ -25,6 +25,17 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       '@angular-eslint/component-selector': 'off',
 
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          args: 'after-used',
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+
       '@angular-eslint/directive-selector': [
         'error',
         {
