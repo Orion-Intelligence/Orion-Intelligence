@@ -7,7 +7,7 @@
   <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3">
     <li (click)="$event.stopPropagation()" *ngFor="let option of filterModel.filters[key]?.options">
       <label class="dropdown-item py-0 d-flex align-items-center dropdown-item-custom">
-        <input (click)="onMultiSelectionToggle(option.key)" [checked]="(mSelectedFilters[key] || []).includes(option.key)"
+        <input (click)="onMultiSelectionToggle(option.key)" [checked]="(mSelectedFilters[key] ?? []).includes(option.key)"
                class="form-check-input me-2"
                type="checkbox">
         {{ option.label }}

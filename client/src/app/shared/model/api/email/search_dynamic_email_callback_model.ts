@@ -36,7 +36,7 @@ export class SearchDynamicEmailCallbackModel {
 
   constructor(init?: Partial<SearchDynamicEmailCallbackModel>) {
     if (init) {
-      this.cards_data = init.cards_data?.map(card => new CardData(card)) || [];
+      this.cards_data = init.cards_data?.map(card => new CardData(card)) ?? [];
       this.base_url = init.base_url;
       this.m_network = init.m_network;
     }

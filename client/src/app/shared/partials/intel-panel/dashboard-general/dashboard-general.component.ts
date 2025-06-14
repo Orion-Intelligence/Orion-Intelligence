@@ -99,9 +99,9 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   initAnalytics() {
     if (this.type === Category.STRATEGIC) {
-      this.analyticsData = this.dashboardService.generateAnalytics(this.generalCallbackModel?.Result || []);
+      this.analyticsData = this.dashboardService.generateAnalytics(this.generalCallbackModel?.Result ?? []);
     } else if (this.type === Category.BREACH) {
-      this.analyticsData = this.dashboardService.generateAnalytics(this.leakCallbackModel?.Result || []);
+      this.analyticsData = this.dashboardService.generateAnalytics(this.leakCallbackModel?.Result ?? []);
     }
   }
 

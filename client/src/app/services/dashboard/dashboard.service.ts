@@ -79,10 +79,10 @@ export class DashboardService {
             if (Array.isArray(value) && value.every(v => typeof v === 'string') && value.length > 0) {
               const filteredValue = value.filter(v => v !== "");
               if (filteredValue.length > 0) {
-                consolidated[key] = Array.from(new Set([...(consolidated[key] || []), ...filteredValue]));
+                consolidated[key] = Array.from(new Set([...(consolidated[key] ?? []), ...filteredValue]));
               }
             } else if (typeof value === 'string' && key !== 'm_update_date' && value !== "") {
-              consolidated[key] = Array.from(new Set([...(consolidated[key] || []), value]));
+              consolidated[key] = Array.from(new Set([...(consolidated[key] ?? []), value]));
             }
           });
         });

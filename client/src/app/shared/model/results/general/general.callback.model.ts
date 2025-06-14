@@ -46,8 +46,8 @@ export class GeneralCallbackModel {
 
   constructor(init?: Partial<GeneralCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new GeneralResultItem(r)) || [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) || [];
+      this.Result = init.Result?.map(r => new GeneralResultItem(r)) ?? [];
+      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
       this.Page_Count = init.Page_Count ?? 0;
     }
   }

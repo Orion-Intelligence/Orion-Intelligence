@@ -29,7 +29,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       } else {
         this.authenticated = false;
       }
-      this.errorMessage = authState.error || null;
+      this.errorMessage = authState.error ?? null;
     });
   }
 

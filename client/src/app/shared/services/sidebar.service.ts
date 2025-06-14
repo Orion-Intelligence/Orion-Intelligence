@@ -8,9 +8,6 @@ export class SidebarService {
   private sidebarStateSubject = new BehaviorSubject<boolean>(false);
   sidebarState$ = this.sidebarStateSubject.asObservable();
 
-  constructor() {
-  }
-
   openSidebar(): void {
     this.sidebarStateSubject.next(true);
   }

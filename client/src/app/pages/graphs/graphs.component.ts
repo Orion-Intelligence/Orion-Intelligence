@@ -578,7 +578,7 @@ export class GraphComponent implements OnInit {
         size: 20
       });
 
-      const pathVertices = item.path?.vertices || [];
+      const pathVertices = item.path?.vertices ?? [];
       pathVertices.forEach((pv: { _id: string; _key: any; value: any[]; }) => {
         if (!pv._id || rawNodeMap.has(pv._id)) return;
 
@@ -626,7 +626,7 @@ export class GraphComponent implements OnInit {
     data.forEach(item => {
       nodeTypeMap[item.vertex._id] = item.vertex.type || '';
       // @ts-ignore
-      (item.path?.vertices || []).forEach(pv => {
+      (item.path?.vertices ?? []).forEach(pv => {
         if (pv._id && pv.type) {
           nodeTypeMap[pv._id] = pv.type;
         }

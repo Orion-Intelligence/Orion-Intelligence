@@ -9,9 +9,6 @@ export class EmptyResultComponent {
   query = ""
   protected readonly category = Category;
 
-  constructor() {
-  }
-
   ngOnInit(_: SimpleChanges): void {
     this.query = this.searchQuery
   }

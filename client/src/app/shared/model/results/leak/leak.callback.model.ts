@@ -43,8 +43,8 @@ export class LeakCallbackModel {
 
   constructor(init?: Partial<LeakCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new LeakResultItem(r)) || [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) || [];
+      this.Result = init.Result?.map(r => new LeakResultItem(r)) ?? [];
+      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
       this.Page_Count = init.Page_Count ?? 0;
     }
   }

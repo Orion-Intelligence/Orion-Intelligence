@@ -43,8 +43,8 @@ export class ChatCallbackModel {
 
   constructor(init?: Partial<ChatCallbackModel>) {
     if (init) {
-      this.Result = init.Result?.map(r => new ChatResultItem(r)) || [];
-      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) || [];
+      this.Result = init.Result?.map(r => new ChatResultItem(r)) ?? [];
+      this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
       this.Page_Count = init.Page_Count ?? 0;
     }
   }

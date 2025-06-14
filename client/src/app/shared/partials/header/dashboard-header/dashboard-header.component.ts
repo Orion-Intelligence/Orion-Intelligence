@@ -30,7 +30,7 @@ export class DashboardHeaderComponent implements OnInit {
 
   updateBreadcrumb(url: string) {
     const urlTree: UrlTree = this.router.parseUrl(url);
-    const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) || [];
+    const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) ?? [];
 
     this.breadcrumb = segments.length > 1
       ? segments.slice(1).map((segment) => ({path: segment, label: segment}))

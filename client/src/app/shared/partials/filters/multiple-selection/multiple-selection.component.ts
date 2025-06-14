@@ -47,7 +47,7 @@ export class MultipleSelectionComponent {
     const selectedValue = this.mSelectedFilters[this.key];
     if (!selectedValue) return 'Select ' + this.filterModel.filters[this.key].title;
 
-    const options = this.filterModel.filters[this.key].options || [];
+    const options = this.filterModel.filters[this.key].options ?? [];
 
     const labels = options
       .filter((fpt: { key: string; }) => selectedValue.indexOf(fpt.key) !== -1)

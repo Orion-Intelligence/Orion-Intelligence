@@ -9,7 +9,5 @@ import {NgOptimizedImage} from '@angular/common';
   templateUrl: './error-handler.component.html',
 })
 export class ErrorHandlerComponent {
-  constructor() {
-  }
 
 }

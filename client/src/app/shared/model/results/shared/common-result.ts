@@ -19,7 +19,7 @@ export class Suggestion {
       this.text = init.text || "";
       this.offset = init.offset || 0;
       this.length = init.length || 0;
-      this.options = init.options?.map(opt => new SuggestionOption(opt)) || [];
+      this.options = init.options?.map(opt => new SuggestionOption(opt)) ?? [];
     }
   }
 }
