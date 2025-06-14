@@ -1,7 +1,5 @@
 export class SuggestionOption {
   text = "";
-  score = 0;
-  freq = 0;
 
   constructor(init?: Partial<SuggestionOption>) {
     Object.assign(this, init);

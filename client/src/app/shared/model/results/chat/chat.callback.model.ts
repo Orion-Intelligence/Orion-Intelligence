@@ -5,29 +5,16 @@ export class ChatResultItem {
   m_caption?: string;
   m_summary: string[] = [];
   m_message_date?: string;
-  m_time?: string;
   m_message_id?: string;
   m_message_sharable_link?: string;
-  m_channel_id?: string;
   m_views?: string;
   m_file_name: string[] = [];
-  m_file_size?: string;
-  m_forwarded_from?: string;
   m_sender_name?: string;
-  m_sender_username?: string;
-  m_channel_url?: string;
-  m_message_type?: string[];
-  m_media_url?: string;
   m_media_caption?: string;
-  m_reply_to_message_id?: string;
-  m_message_status?: string;
-  m_file_saved_as?: string;
   m_file_path?: string;
   m_channel_name?: string;
   m_weblink: string[] = [];
-  m_users?: string[];
   m_ref_html?: string;
-  m_hashtags?: string[];
   m_content_type?: string[];
   m_hash?: string;
 
@@ -47,10 +34,5 @@ export class ChatCallbackModel {
       this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
       this.Page_Count = init.Page_Count ?? 0;
     }
-  }
-
-  static fromJSON(json: string): ChatCallbackModel {
-    const data = JSON.parse(json);
-    return new ChatCallbackModel(data);
   }
 }

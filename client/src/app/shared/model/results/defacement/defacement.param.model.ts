@@ -12,7 +12,6 @@ export class DefacementResultItem {
   m_web_url: string[] = [];
   m_hash = "";
   m_screenshot?: string;
-  m_mirror_links: string[] = [];
   m_url = "";
 
   constructor(init?: Partial<DefacementResultItem>) {
@@ -31,10 +30,5 @@ export class DefacementCallbackModel {
       this.Suggestions = init.Suggestions?.map(s => new Suggestion(s)) ?? [];
       this.Page_Count = init.Page_Count ?? 0;
     }
-  }
-
-  static fromJSON(json: string): DefacementCallbackModel {
-    const data = JSON.parse(json);
-    return new DefacementCallbackModel(data);
   }
 }
