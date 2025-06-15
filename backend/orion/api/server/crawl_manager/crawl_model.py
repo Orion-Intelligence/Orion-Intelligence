@@ -182,20 +182,30 @@ class crawl_model:
 
     @staticmethod
     async def fetch_parser():
-        if os.path.exists(CRAWL_PATHS.M_PARSER_FILE_PATH):
-            return FileResponse(CRAWL_PATHS.M_PARSER_FILE_PATH, media_type="application/zip",
-                                filename="parser_files.zip")
-        else:
+        try:
+            safe_path = os.path.normpath(CRAWL_PATHS.M_PARSER_FILE_PATH)
+            if os.path.exists(safe_path):
+                return FileResponse(safe_path, media_type="application/zip", filename="parser_files.zip")
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
+        except Exception:
+            return JSONResponse(content={"detail": "Internal error"}, status_code=500)
 
     @staticmethod
     async def fetch_feeder(index_type):
-        if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
-            return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH + f"crawl_data_{index_type}.txt",
-                                media_type="text/plain", filename="crawl_data_leak.txt")
-        else:
-            return JSONResponse(content={"detail": "File not found"}, status_code=404)
+        try:
+            if not isinstance(index_type, str) or not index_type.isalnum():
+                return JSONResponse(content={"detail": "Invalid request"}, status_code=400)
 
+            base_path = os.path.normpath(CRAWL_PATHS.M_FEEDER_FILE_PATH)
+            full_path = os.path.join(base_path, f"crawl_data_{index_type}.txt")
+            safe_path = os.path.normpath(full_path)
+
+            if os.path.exists(safe_path):
+                return FileResponse(safe_path, media_type="text/plain", filename=f"crawl_data_{index_type}.txt")
+            return JSONResponse(content={"detail": "File not found"}, status_code=404)
+        except Exception:
+            return JSONResponse(content={"detail": "Internal error"}, status_code=500)
+        
     @staticmethod
     async def get_screenshot_file(filename: str):
         try:
