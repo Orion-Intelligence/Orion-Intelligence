@@ -204,7 +204,11 @@ class crawl_model:
                 return {"error": "File not found"}
             return FileResponse(path=file_path, filename=safe_filename, media_type="image/webp")
         except Exception as e:
-            return {"error": f"Failed to retrieve screenshot: {str(e)}"}
+            # Log the exception details for debugging purposes
+            import logging
+            logging.error(f"Error retrieving screenshot file '{filename}': {str(e)}", exc_info=True)
+            # Return a generic error message to the user
+            return {"error": "An internal error occurred while retrieving the screenshot."}
 
     @staticmethod
     async def invoke_file_upload(payload: ScreenshotPayload):
