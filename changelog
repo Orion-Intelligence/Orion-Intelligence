@@ -1,3 +1,71 @@
+Changelog [1.0.2.5] – 2025-06-15
+
+Overview:
+ • Major AI integration with lightweight and large model support for document summarization and entity classification.
+ • Advanced threat intelligence upgrades including expanded PII schemas, MITRE ATT&CK integration, and Telegram monitoring.
+ • Graph and data visualization improvements using ArangoDB.
+ • New filtering, UI enhancements, and branding capabilities.
+ • Expanded threat group coverage and detailed documentation updates.
+
+1. AI Integration
+
+ • LLaMA Tiny Integration
+   - Lightweight model added for fast entity extraction and classification tasks.
+
+ • LLaMA2 7B Integration
+   - Larger model for deep document summarization and contextual analysis.
+
+ • AI-Powered Report Summarization
+   - Automatically generates summaries for intelligence and threat reports.
+
+2. PII and Threat Intelligence Support
+
+Expanded and enhanced detection through a comprehensive classification schema.
+
+Supported Entities:
+ - General Identifiers: Email, Phone Numbers, Names, Titles, IPs, Locations, Companies, URLs, etc.
+ - Financial & Digital: Credit Cards, IBAN, Crypto Addresses, US Bank Numbers.
+ - Social Media Profiles
+ - Country-Specific: IDs for AU, IN, SG, UK, US (SSN, Medicare, Aadhaar, PAN, Passport, Driver Licenses, etc.)
+ - Medical & Legal: Medical Licenses, NRP Numbers
+
+3. MITRE ATT&CK Integration
+
+ • Full support for MITRE framework.
+ • Tagging, filtering, and detection now aligned with MITRE tactics and techniques.
+
+4. Filtering Capabilities
+
+ • Filters by entity type, date range, MITRE techniques.
+ • Available across dashboards and reports.
+
+5. Data and Graph Enhancements
+
+ • New "Data Dumps" page UI for managing large data sets.
+ • ArangoDB integration for relationship graph exploration.
+ • Document-level relationship graph generation.
+
+6. Telegram Integration and Visualization
+
+ • Telegram channel directory and tracking support.
+ • Improved analytics and visualization tools for Telegram data.
+
+7. UI and Usability Improvements
+
+ • Toggle added for Social Feed.
+ • Logo customization support for admin branding.
+ • Enhanced tooltip system and mobile optimization.
+ • Improved screenshot capture/exporting.
+
+8. Threat Group Expansion
+
+ • Expanded support for 50 ransomware groups.
+ • Broader detection rules and intelligence coverage.
+
+9. Documentation
+
+ • All user guides and this changelog are available as downloadable `.md` files.
+
 Changelog [1.0.2.3] – 2025-04-11
 
 Overview:
