@@ -205,7 +205,7 @@ class crawl_model:
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
         except Exception:
             return JSONResponse(content={"detail": "Internal error"}, status_code=500)
-        
+
     @staticmethod
     async def get_screenshot_file(filename: str):
         try:
