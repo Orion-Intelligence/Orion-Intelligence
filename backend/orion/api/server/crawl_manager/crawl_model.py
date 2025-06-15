@@ -239,7 +239,7 @@ class crawl_model:
             }
         except Exception as e:
             return {
-                "error": f"Failed to save screenshot: {str(e)}"
+                "error": f"Failed to save screenshot"
             }
 
     async def index_dump_record(self, dump_model: DumpModel):
