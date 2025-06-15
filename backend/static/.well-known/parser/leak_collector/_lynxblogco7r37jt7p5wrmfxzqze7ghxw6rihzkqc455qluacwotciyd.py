@@ -14,6 +14,8 @@ from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, C
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
 
+from orion.services.log_manager.log_controller import log
+
 
 class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_interface, ABC):
     _instance = None
@@ -110,7 +112,8 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
 
                                 try:
                                     detail_page.wait_for_selector('.detailed p', timeout=10000)
-                                except:
+                                except Exception as ex:
+                                    log.g().e(ex)
                                     detail_page.close()
                                     continue
 

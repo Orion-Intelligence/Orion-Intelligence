@@ -15,6 +15,8 @@ from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_RED
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
 
+from orion.services.log_manager.log_controller import log
+
 
 class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_interface, ABC):
     _instance = None
@@ -124,8 +126,8 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         try:
                             date_text = ' '.join(date_element.text.split(': ', 1)[1].split()[0:3])
                             leak_date = datetime.strptime(date_text, "%d %b, %Y").date()
-                        except:
-                            pass
+                        except Exception as ex:
+                            log.g().e(ex)
 
                     paper_container = leak_soup.select_one("div.papper-contaner")
                     dump_link = None

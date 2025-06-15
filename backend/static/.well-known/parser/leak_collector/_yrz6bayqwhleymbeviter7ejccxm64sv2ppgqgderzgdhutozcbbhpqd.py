@@ -13,6 +13,8 @@ from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, C
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
 
+from orion.services.log_manager.log_controller import log
+
 
 class _yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd(leak_extractor_interface, ABC):
     _instance = None
@@ -90,8 +92,8 @@ class _yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd(leak_extractor_i
                 try:
                     date_str = date_span.text.replace("Updated", "").strip()
                     leak_date = datetime.strptime(date_str, "%d-%b-%Y").date()
-                except:
-                    pass
+                except Exception as ex:
+                    log.g().e(ex)
 
             card_links.append((full_url, leak_date))
 
