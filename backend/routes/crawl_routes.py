@@ -15,7 +15,6 @@ from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
-from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 crawl_routes = APIRouter()
@@ -49,16 +48,15 @@ async def index_defacement_data(request: Request):
     body = await request.json()
     return await crawl_controller.getInstance().invoke_defacement_index(DefacementDataModel(**body))
 
-
 @crawl_routes.post("/api/screenshot", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))):
     try:
         return await crawl_model.getInstance().invoke_file_upload(payload)
-    except Exception as ex:
-        log.g().e(ex)
+    except Exception as _:
+        logger.exception("Screenshot upload error")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Internal server error"}
+            content={"detail": "Failed to process screenshot"}
         )
 
 @crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
