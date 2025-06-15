@@ -1,0 +1,26 @@
+name: Docker Health Scan
+
+on:
+  push:
+    branches: [trusted-main]
+  pull_request:
+    branches: [trusted-main]
+
+jobs:
+  docker-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build and Start Services
+        run: docker compose up -d --wait --wait-timeout 300
+
+      - name: Check Service Health
+        run: |
+          unhealthy=$(docker compose ps --services --filter "health!=healthy")
+          [ -z "$unhealthy" ] || exit 1
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v
