@@ -1,4 +1,4 @@
-name: Docker Health Scan
+name: Docker Health Check
 
 on:
   push:
@@ -13,10 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Write .env from GitHub secret
+        run: echo "${{ secrets.ENV_FILE }}" > .env
+
       - name: Build and Start Services
         run: docker compose up -d --wait --wait-timeout 300
 
-      - name: Check Service Health
+      - name: Check Health
         run: |
           unhealthy=$(docker compose ps --services --filter "health!=healthy")
           [ -z "$unhealthy" ] || exit 1
