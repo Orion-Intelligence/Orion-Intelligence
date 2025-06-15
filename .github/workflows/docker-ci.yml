@@ -1,4 +1,4 @@
-name: Docker Health Check
+name: CI: Docker + Angular Health Check
 
 on:
   push:
@@ -11,15 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Write .env from GitHub secret
+      - name: Set up Node.js (for Angular build)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Set up Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose zip
+
+      - name: Write .env from GitHub Secret
         run: echo "${{ secrets.ENV_FILE }}" > .env
 
-      - name: Build and Start Services
-        run: docker compose up -d --wait --wait-timeout 300
+      - name: Make run.sh executable
+        run: chmod +x ./run.sh
 
-      - name: Check Health
+      - name: Run build script
+        run: ./run.sh build -d
+
+      - name: Check health status
         run: |
           unhealthy=$(docker compose ps --services --filter "health!=healthy")
           [ -z "$unhealthy" ] || exit 1
