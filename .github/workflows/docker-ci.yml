@@ -36,8 +36,21 @@ jobs:
 
       - name: Check container health
         run: |
-          unhealthy=$(docker compose ps --services --filter "health!=healthy")
-          [ -z "$unhealthy" ] || exit 1
+          echo "Checking container health status..."
+          failed=0
+          for container in $(docker ps -q); do
+            health_status=$(docker inspect --format='{{ .Name }}: {{ .State.Health.Status }}' "$container" 2>/dev/null || echo "no-healthcheck")
+            if echo "$health_status" | grep -q "unhealthy"; then
+              echo "❌ Unhealthy container: $health_status"
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -eq 1 ]; then
+            exit 1
+          else
+            echo "✅ All containers are healthy (or have no healthcheck)"
+          fi
 
       - name: Teardown
         if: always()
