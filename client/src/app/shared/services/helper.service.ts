@@ -48,21 +48,28 @@ export class HelperService {
     }
   }
 
-    highlightWords(text: string): SafeHtml {
+  highlightWords(text: string): SafeHtml {
     if (!text) return '';
+
+    const escapeHtml = (unsafe: string) => {
+      return unsafe.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    };
 
     let highlighted: string;
 
     if (text.includes('<em>') && text.includes('</em>')) {
       const regex = /<em>(.*?)<\/em>/g;
       const matches = [...text.matchAll(regex)];
-
       let result = '';
       let lastIndex = 0;
       let i = 0;
 
       while (i < matches.length) {
-        let merged = matches[i][1];
+        let merged = escapeHtml(matches[i][1]);
         const start = matches[i].index!;
         let end = start + matches[i][0].length;
         let j = i + 1;
@@ -70,18 +77,16 @@ export class HelperService {
         while (j < matches.length) {
           const prevEnd = end;
           const nextStart = matches[j].index!;
-          const betweenText = text.slice(prevEnd, nextStart);
+          const betweenText = escapeHtml(text.slice(prevEnd, nextStart));
 
           const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = betweenText;
-          const plainBetween = (tempDiv.textContent || tempDiv.innerText || '').trim();
+          tempDiv.textContent = betweenText;
+          const plainBetween = (tempDiv.textContent || '').trim();
 
-          const wordGap = plainBetween
-            .split(/\s+/)
-            .filter(Boolean).length;
+          const wordGap = plainBetween.split(/\s+/).filter(Boolean).length;
 
           if (wordGap <= 2) {
-            merged += ` ${plainBetween} ${matches[j][1]}`;
+            merged += ` ${plainBetween} ${escapeHtml(matches[j][1])}`;
             end = matches[j].index! + matches[j][0].length;
             j++;
           } else {
@@ -89,24 +94,20 @@ export class HelperService {
           }
         }
 
-        result += text.slice(lastIndex, start);
-        result += `<em>${merged}</em>`;
+        result += escapeHtml(text.slice(lastIndex, start));
+        result += `<span class="dashboard__search-highlight">${merged}</span>`;
         lastIndex = end;
         i = j;
       }
 
-      result += text.slice(lastIndex);
-
-      highlighted = result
-        .replace(/<em>/g, '<span class="dashboard__search-highlight">')
-        .replace(/<\/em>/g, '</span>');
+      result += escapeHtml(text.slice(lastIndex));
+      highlighted = result;
     } else {
-      highlighted = text.length > 500 ? text.substring(0, 500) : text;
+      highlighted = escapeHtml(text.length > 500 ? text.substring(0, 500) : text);
     }
 
     return this.sanitizer.bypassSecurityTrustHtml(highlighted);
   }
-
 
   private convertToCSV(data: any): string {
     const keys = Object.keys(data);

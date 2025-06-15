@@ -245,7 +245,7 @@ class crawl_model:
             }
         except Exception:
             return {"error": "Failed to save screenshot"}
-        
+
     async def index_dump_record(self, dump_model: DumpModel):
         try:
             batch_id = dump_model.id
