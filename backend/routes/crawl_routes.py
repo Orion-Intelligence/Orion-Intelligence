@@ -49,8 +49,14 @@ async def index_defacement_data(request: Request):
 
 @crawl_routes.post("/api/screenshot", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))):
-    return await crawl_model.getInstance().invoke_file_upload(payload)
-
+    try:
+        return await crawl_model.getInstance().invoke_file_upload(payload)
+    except Exception as ex:
+        logger.exception("Error in /api/screenshot " + ex)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Internal server error."}
+        )
 
 @crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_generic(request: Request):

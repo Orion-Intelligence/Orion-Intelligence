@@ -48,7 +48,7 @@ export class HelperService {
     }
   }
 
-  highlightWords(text: string): SafeHtml {
+    highlightWords(text: string): SafeHtml {
     if (!text) return '';
 
     let highlighted: string;
@@ -72,15 +72,16 @@ export class HelperService {
           const nextStart = matches[j].index!;
           const betweenText = text.slice(prevEnd, nextStart);
 
-          const wordGap = betweenText
-            .replace(/<[^>]+>/g, '') // remove tags
-            .trim()
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = betweenText;
+          const plainBetween = (tempDiv.textContent || tempDiv.innerText || '').trim();
+
+          const wordGap = plainBetween
             .split(/\s+/)
             .filter(Boolean).length;
 
           if (wordGap <= 2) {
-            const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
-            merged += ` ${cleanBetween} ${matches[j][1]}`;
+            merged += ` ${plainBetween} ${matches[j][1]}`;
             end = matches[j].index! + matches[j][0].length;
             j++;
           } else {
@@ -105,6 +106,7 @@ export class HelperService {
 
     return this.sanitizer.bypassSecurityTrustHtml(highlighted);
   }
+
 
   private convertToCSV(data: any): string {
     const keys = Object.keys(data);

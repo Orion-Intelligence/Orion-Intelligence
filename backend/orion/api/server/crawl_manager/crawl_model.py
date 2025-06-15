@@ -198,10 +198,11 @@ class crawl_model:
     @staticmethod
     async def get_screenshot_file(filename: str):
         try:
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, filename)
+            safe_filename = os.path.basename(filename)
+            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename)
             if not os.path.exists(file_path):
                 return {"error": "File not found"}
-            return FileResponse(path=file_path, filename=filename, media_type="image/webp")
+            return FileResponse(path=file_path, filename=safe_filename, media_type="image/webp")
         except Exception as e:
             return {"error": f"Failed to retrieve screenshot: {str(e)}"}
 
@@ -209,12 +210,13 @@ class crawl_model:
     async def invoke_file_upload(payload: ScreenshotPayload):
         try:
             os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, payload.filename)
+            safe_filename = os.path.basename(payload.filename)
+            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename)
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
             return {
                 "message": f"Screenshot saved successfully at {file_path}",
-                "filename": payload.filename
+                "filename": safe_filename
             }
         except Exception as e:
             return {
