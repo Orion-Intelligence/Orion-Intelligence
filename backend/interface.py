@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
@@ -15,14 +14,17 @@ async def serve_frontend(full_path: str):
             raise HTTPException(status_code=404, detail="API route not found")
 
         requested_path = (ANGULAR_BUILD_DIR / full_path).resolve()
-        if not str(requested_path).startswith(str(ANGULAR_BUILD_DIR.resolve())):
+        base_path = ANGULAR_BUILD_DIR.resolve()
+
+        if not requested_path.is_relative_to(base_path):
             raise HTTPException(status_code=403, detail="Forbidden path access")
 
         if requested_path.exists() and requested_path.is_file():
             return FileResponse(requested_path)
 
         index_path = (ANGULAR_BUILD_DIR / "index.html").resolve()
-        if not str(index_path).startswith(str(ANGULAR_BUILD_DIR.resolve())):
+
+        if not index_path.is_relative_to(base_path):
             raise HTTPException(status_code=403, detail="Forbidden path access")
 
         if index_path.exists():
