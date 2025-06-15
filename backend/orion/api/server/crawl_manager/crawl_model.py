@@ -1,4 +1,5 @@
 import base64
+import logging
 import os
 from datetime import datetime, timezone
 
@@ -199,15 +200,19 @@ class crawl_model:
     async def get_screenshot_file(filename: str):
         try:
             safe_filename = os.path.basename(filename)
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename)
+            if not safe_filename.lower().endswith('.webp'):
+                return {"error": "Invalid file type"}
+
+            file_path = os.path.normpath(os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename))
+            if not file_path.startswith(os.path.abspath(CRAWL_PATHS.M_SCREENSHOT) + os.sep):
+                return {"error": "Invalid file path"}
+
             if not os.path.exists(file_path):
                 return {"error": "File not found"}
+
             return FileResponse(path=file_path, filename=safe_filename, media_type="image/webp")
         except Exception as e:
-            # Log the exception details for debugging purposes
-            import logging
             logging.error(f"Error retrieving screenshot file '{filename}': {str(e)}", exc_info=True)
-            # Return a generic error message to the user
             return {"error": "An internal error occurred while retrieving the screenshot."}
 
     @staticmethod
