@@ -1,14 +1,16 @@
 engines:
+  eslint:
+    enabled: true
   bandit:
     enabled: true
   pylint:
     enabled: true
-  eslint:
+  stylelint:
     enabled: true
 
 exclude_paths:
   - client/node_modules/
   - client/dist/
   - client/coverage/
-  - client/docs/
   - client/tests/
+  - backend/venv/
