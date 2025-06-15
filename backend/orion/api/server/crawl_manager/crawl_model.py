@@ -211,20 +211,26 @@ class crawl_model:
         try:
             safe_filename = os.path.basename(filename)
             if not safe_filename.lower().endswith('.webp'):
-                return {"error": "Invalid file type"}
+                return {"error": "Invalid file type"}, 400
 
-            file_path = os.path.normpath(os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename))
-            if not file_path.startswith(os.path.abspath(CRAWL_PATHS.M_SCREENSHOT) + os.sep):
-                return {"error": "Invalid file path"}
+            screenshot_dir = os.path.abspath(CRAWL_PATHS.M_SCREENSHOT)
+            file_path = os.path.normpath(os.path.join(screenshot_dir, safe_filename))
+
+            if not os.path.commonpath([screenshot_dir, file_path]) == screenshot_dir:
+                return {"error": "Invalid file path"}, 400
 
             if not os.path.exists(file_path):
-                return {"error": "File not found"}
+                return {"error": "File not found"}, 404
 
-            return FileResponse(path=file_path, filename=safe_filename, media_type="image/webp")
+            return FileResponse(
+                path=file_path,
+                filename=safe_filename,
+                media_type="image/webp"
+            )
         except Exception as e:
-            logging.error(f"Error retrieving screenshot file '{filename}': {str(e)}", exc_info=True)
-            return {"error": "An internal error occurred while retrieving the screenshot."}
-
+            logging.error(f"Error retrieving screenshot: {str(e)}", exc_info=True)
+            return {"error": "Internal server error"}, 500
+        
     @staticmethod
     async def invoke_file_upload(payload: ScreenshotPayload):
         try:
