@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
+from starlette import status
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from configs.app_dependency import role_required
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
@@ -13,6 +15,7 @@ from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 crawl_routes = APIRouter()
@@ -52,10 +55,10 @@ async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_r
     try:
         return await crawl_model.getInstance().invoke_file_upload(payload)
     except Exception as ex:
-        logger.exception("Error in /api/screenshot " + ex)
+        log.g().e(ex)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Internal server error."}
+            content={"detail": "Internal server error"}
         )
 
 @crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
