@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
@@ -7,29 +8,18 @@ interface = APIRouter()
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
 
+
 @interface.get("/{full_path:path}", include_in_schema=False)
 async def serve_frontend(full_path: str):
-    try:
-        if full_path.startswith("api") or full_path.startswith("auth") or full_path.startswith("crawl"):
-            raise HTTPException(status_code=404, detail="API route not found")
+    requested_path = ANGULAR_BUILD_DIR / full_path
+    if requested_path.exists() and requested_path.is_file():
+        return FileResponse(requested_path)
 
-        requested_path = (ANGULAR_BUILD_DIR / full_path).resolve()
-        base_path = ANGULAR_BUILD_DIR.resolve()
+    if full_path.startswith("api") or full_path.startswith("auth") or full_path.startswith("crawl"):
+        raise HTTPException(status_code=404, detail="API route not found")
 
-        if not requested_path.is_relative_to(base_path):
-            raise HTTPException(status_code=403, detail="Forbidden path access")
+    index_path = ANGULAR_BUILD_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
 
-        if requested_path.exists() and requested_path.is_file():
-            return FileResponse(requested_path)
-
-        index_path = (ANGULAR_BUILD_DIR / "index.html").resolve()
-
-        if not index_path.is_relative_to(base_path):
-            raise HTTPException(status_code=403, detail="Forbidden path access")
-
-        if index_path.exists():
-            return FileResponse(index_path)
-
-        raise HTTPException(status_code=404, detail="Frontend not found")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid path")
+    raise HTTPException(status_code=404, detail="Frontend not found")
