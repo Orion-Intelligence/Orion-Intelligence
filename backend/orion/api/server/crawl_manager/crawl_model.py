@@ -230,18 +230,22 @@ class crawl_model:
         try:
             os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
             safe_filename = os.path.basename(payload.filename)
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename)
+            if not safe_filename.lower().endswith('.webp'):
+                return {"error": "Invalid file type"}
+
+            file_path = os.path.normpath(os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename))
+            if not file_path.startswith(os.path.abspath(CRAWL_PATHS.M_SCREENSHOT) + os.sep):
+                return {"error": "Invalid file path"}
+
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
             return {
-                "message": f"Screenshot saved successfully at {file_path}",
+                "message": "Screenshot saved successfully",
                 "filename": safe_filename
             }
-        except Exception as e:
-            return {
-                "error": f"Failed to save screenshot"
-            }
-
+        except Exception:
+            return {"error": "Failed to save screenshot"}
+        
     async def index_dump_record(self, dump_model: DumpModel):
         try:
             batch_id = dump_model.id
