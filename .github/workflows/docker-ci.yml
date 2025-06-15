@@ -1,4 +1,4 @@
-name: CI: Docker + Angular Health Check
+name: "CI: Docker + Angular Health Check"
 
 on:
   push:
@@ -19,7 +19,10 @@ jobs:
         with:
           node-version: 18
 
-      - name: Set up Docker Compose
+      - name: Install Angular CLI globally
+        run: npm install -g @angular/cli
+
+      - name: Set up Docker Compose and Zip
         run: sudo apt-get update && sudo apt-get install -y docker-compose zip
 
       - name: Write .env from GitHub Secret
@@ -31,7 +34,7 @@ jobs:
       - name: Run build script
         run: ./run.sh build -d
 
-      - name: Check health status
+      - name: Check container health
         run: |
           unhealthy=$(docker compose ps --services --filter "health!=healthy")
           [ -z "$unhealthy" ] || exit 1
