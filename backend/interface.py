@@ -1,6 +1,7 @@
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
+import os
 
 interface = APIRouter()
 
@@ -14,10 +15,10 @@ async def serve_frontend(full_path: str):
         if not full_path or full_path != full_path.strip():
             raise HTTPException(status_code=400, detail="Invalid path")
 
-        clean_path = Path(full_path).name
-        requested_path = (ANGULAR_BUILD_DIR / clean_path).resolve()
+        normalized_path = os.path.normpath(full_path)
+        requested_path = (ANGULAR_BUILD_DIR / normalized_path).resolve()
 
-        if not requested_path.is_relative_to(ANGULAR_BUILD_DIR.resolve()):
+        if not str(requested_path).startswith(str(ANGULAR_BUILD_DIR.resolve())):
             raise HTTPException(status_code=400, detail="Invalid path")
 
         if requested_path.is_file() and requested_path.exists():
