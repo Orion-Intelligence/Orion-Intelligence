@@ -86,7 +86,7 @@ class _rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad(leak_extractor_i
 
                     if more_info_url:
                         more_info_page = page.context.new_page()
-                        more_info_page.goto(more_info_url)
+                        more_info_page.goto(more_info_url, timeout=300000)
 
                         description = more_info_page.query_selector(
                             'div.section > p').inner_text() if more_info_page.query_selector(
@@ -163,7 +163,7 @@ class _rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad(leak_extractor_i
 
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
                     error_count += 1
                     if error_count >= 3:
                         break

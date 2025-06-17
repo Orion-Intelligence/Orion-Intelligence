@@ -70,7 +70,6 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
             max_pages = 5
-            fetched_links = set()
 
             for page_num in range(1, max_pages + 1):
                 current_url = f"{self.base_url}?paged={page_num}" if page_num > 1 else self.base_url
@@ -145,21 +144,21 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
 
                         if not extracted_title or not description:
                             continue
-
-                        is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT,
-                                                        CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_urls[0], 0,
-                                                        RAW_PATH_CONSTANTS.HREF_TIMEOUT))
                         ref_html = None
-                        if is_crawled != -1 and is_crawled < 5:
-                            ref_html = helper_method.extract_refhtml(web_urls[0])
-                            if ref_html:
-                                self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                               CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_urls[0], -1,
-                                               RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                            else:
-                                self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                               CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_urls[0], is_crawled + 1,
-                                               RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                        if len(web_urls)>0:
+                            is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT,
+                                                            CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_urls[0], 0,
+                                                            RAW_PATH_CONSTANTS.HREF_TIMEOUT))
+                            if is_crawled != -1 and is_crawled < 5:
+                                ref_html = helper_method.extract_refhtml(web_urls[0])
+                                if ref_html:
+                                    self.invoke_db(REDIS_COMMANDS.S_SET_INT,
+                                                   CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_urls[0], -1,
+                                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                                else:
+                                    self.invoke_db(REDIS_COMMANDS.S_SET_INT,
+                                                   CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + web_urls[0], is_crawled + 1,
+                                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT)
 
                         card_data = leak_model(
                             m_ref_html=ref_html,

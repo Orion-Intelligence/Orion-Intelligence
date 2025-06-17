@@ -77,6 +77,8 @@ class _public_tableau(leak_extractor_interface, ABC):
             const cursor = document.createElement('div');
             cursor.id = 'fake-cursor';
             cursor.style.position = 'fixed';
+            cursor.style.left = '0px';
+            cursor.style.top = '0px';
             cursor.style.width = '10px';
             cursor.style.height = '10px';
             cursor.style.background = 'red';

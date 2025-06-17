@@ -9,6 +9,7 @@ from crawler.crawler_services.redis_manager.redis_controller import redis_contro
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 
 
 class _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd(leak_extractor_interface, ABC):
@@ -78,8 +79,6 @@ class _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
 
-            page.goto(self.seed_url)
-
             page.wait_for_selector('.card-body')
 
             card_elements = page.query_selector_all('.card-body')
@@ -148,7 +147,7 @@ class _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd(leak_extractor_i
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
                     error_count += 1
                     if error_count >= 3:
                         break

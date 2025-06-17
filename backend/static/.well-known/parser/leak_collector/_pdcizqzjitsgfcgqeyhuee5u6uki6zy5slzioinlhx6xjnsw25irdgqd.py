@@ -1,3 +1,4 @@
+import re
 from abc import ABC
 from typing import List
 
@@ -100,6 +101,8 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                     description = description_el.text_content().strip() if description_el else "No Description"
                     size = size_el.text_content().strip() if size_el else "No Size"
                     read_more_link = read_more_el.get_attribute("href") if read_more_el else None
+                    date = re.search(r'Update:(\d{4}-\d{2}-\d{2})', date_str).group(1)
+
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
@@ -111,7 +114,7 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=description[:500],
                         m_content_type=["leaks"],
-                        m_leak_date=date_str,
+                        m_leak_date=date,
                         m_data_size=size,
                         m_weblink=[read_more_link]
                     )
@@ -127,7 +130,7 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
                     error_count += 1
                     if error_count >= 3:
                         break

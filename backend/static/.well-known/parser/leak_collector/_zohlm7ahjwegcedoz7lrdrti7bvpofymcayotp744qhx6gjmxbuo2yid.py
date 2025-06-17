@@ -1,5 +1,4 @@
 from abc import ABC
-from time import sleep
 from typing import List
 from playwright.sync_api import Page
 
