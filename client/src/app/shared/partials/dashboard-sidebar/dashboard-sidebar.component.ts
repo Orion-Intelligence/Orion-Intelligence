@@ -30,6 +30,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   @Output() menuToggle = new EventEmitter<void>();
   sidebar_default = true;
   min_detected = false;
+  mobile_menu_status = false
 
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
@@ -57,10 +58,10 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   checkScreenWidth() {
-    if (window.innerWidth < 800 && !this.min_detected && this.sidebar_default) {
+    if (window.innerWidth < 600 && !this.min_detected && this.sidebar_default) {
       this.min_detected = true;
       this.onToggleSidebar();
-    } else if (window.innerWidth > 800) {
+    } else if (window.innerWidth > 600) {
       this.min_detected = false;
     }
   }
@@ -89,7 +90,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
       if (firstSubcategory) {
         this.selectionStore.setSelectedOption(firstSubcategory);
-        if (this.min_detected && this.sidebar_default) {
+        if (this.min_detected && this.sidebar_default && !this.mobile_menu_status) {
           this.onToggleSidebar();
         }
       }
@@ -109,8 +110,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  onToggleSidebar() {
+  onToggleSidebar(mobile_menu_status:boolean = false) {
     this.menuToggle.emit();
     this.sidebar_default = !this.sidebar_default;
+    this.mobile_menu_status = mobile_menu_status
   }
 }

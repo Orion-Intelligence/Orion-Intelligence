@@ -3,6 +3,7 @@ import {AsyncPipe, NgClass, NgForOf, NgOptimizedImage} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 import {LowerPipe} from '../../../model/pipes/lower.pipe';
+import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
 
 @Component({
   selector: 'app-dashboard-sidebar-items',
@@ -16,11 +17,13 @@ export class DashboardSidebarItemsComponent {
   @Input() items: string[] = [];
   @Input() category: any;
   @Input() routePrefix = '';
-  @Input() selectionStore: any;
   @Input() tooltip = '';
 
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
+
+  constructor(protected selectionStore: SelectionStoreService) {
+  }
 
   selectSection() {
     this.sectionSelected.emit(this.category);

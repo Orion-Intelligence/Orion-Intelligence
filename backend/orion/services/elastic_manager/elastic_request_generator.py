@@ -853,7 +853,7 @@ class elastic_request_generator:
         else:
             raw_query = "*"
         if raw_query == "":
-            raw_query = "*"
+            raw_query = "data"
 
         if not raw_query or raw_query == "":
             raw_query = "*"

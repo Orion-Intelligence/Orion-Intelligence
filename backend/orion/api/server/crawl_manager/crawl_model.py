@@ -1,5 +1,4 @@
 import base64
-import logging
 import os
 from datetime import datetime, timezone
 
@@ -182,69 +181,45 @@ class crawl_model:
 
     @staticmethod
     async def fetch_parser():
-        try:
-            safe_path = os.path.normpath(CRAWL_PATHS.M_PARSER_FILE_PATH)
-            if os.path.exists(safe_path):
-                return FileResponse(safe_path, media_type="application/zip", filename="parser_files.zip")
+        if os.path.exists(CRAWL_PATHS.M_PARSER_FILE_PATH):
+            return FileResponse(CRAWL_PATHS.M_PARSER_FILE_PATH, media_type="application/zip",
+                                filename="parser_files.zip")
+        else:
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
-        except Exception:
-            return JSONResponse(content={"detail": "Internal error"}, status_code=500)
 
     @staticmethod
     async def fetch_feeder(index_type):
-        try:
-            if not isinstance(index_type, str) or not index_type.isalnum():
-                return JSONResponse(content={"detail": "Invalid request"}, status_code=400)
-
-            base_path = os.path.normpath(CRAWL_PATHS.M_FEEDER_FILE_PATH)
-            full_path = os.path.join(base_path, f"crawl_data_{index_type}.txt")
-            safe_path = os.path.normpath(full_path)
-
-            if os.path.exists(safe_path):
-                return FileResponse(safe_path, media_type="text/plain", filename=f"crawl_data_{index_type}.txt")
+        if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
+            return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH + f"crawl_data_{index_type}.txt",
+                                media_type="text/plain", filename="crawl_data_leak.txt")
+        else:
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
-        except Exception:
-            return JSONResponse(content={"detail": "Internal error"}, status_code=500)
 
     @staticmethod
     async def get_screenshot_file(filename: str):
         try:
-            safe_filename = os.path.basename(filename)
-            if not safe_filename.lower().endswith('.webp'):
-                return {"error": "Invalid file type"}
-
-            file_path = os.path.normpath(os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename))
-            if not file_path.startswith(os.path.abspath(CRAWL_PATHS.M_SCREENSHOT) + os.sep):
-                return {"error": "Invalid file path"}
-
+            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, filename)
             if not os.path.exists(file_path):
                 return {"error": "File not found"}
-
-            return FileResponse(path=file_path, filename=safe_filename, media_type="image/webp")
+            return FileResponse(path=file_path, filename=filename, media_type="image/webp")
         except Exception as e:
-            logging.error(f"Error retrieving screenshot file '{filename}': {str(e)}", exc_info=True)
-            return {"error": "An internal error occurred while retrieving the screenshot."}
+            return {"error": f"Failed to retrieve screenshot: {str(e)}"}
 
     @staticmethod
     async def invoke_file_upload(payload: ScreenshotPayload):
         try:
             os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
-            safe_filename = os.path.basename(payload.filename)
-            if not safe_filename.lower().endswith('.webp'):
-                return {"error": "Invalid file type"}
-
-            file_path = os.path.normpath(os.path.join(CRAWL_PATHS.M_SCREENSHOT, safe_filename))
-            if not file_path.startswith(os.path.abspath(CRAWL_PATHS.M_SCREENSHOT) + os.sep):
-                return {"error": "Invalid file path"}
-
+            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, payload.filename)
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
             return {
-                "message": "Screenshot saved successfully",
-                "filename": safe_filename
+                "message": f"Screenshot saved successfully at {file_path}",
+                "filename": payload.filename
             }
-        except Exception:
-            return {"error": "Failed to save screenshot"}
+        except Exception as e:
+            return {
+                "error": f"Failed to save screenshot: {str(e)}"
+            }
 
     async def index_dump_record(self, dump_model: DumpModel):
         try:

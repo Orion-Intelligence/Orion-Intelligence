@@ -2,8 +2,6 @@ from typing import Optional
 
 from fastapi import APIRouter
 from fastapi import Depends, Query
-from starlette import status
-from starlette.responses import JSONResponse
 
 from configs.app_dependency import role_required
 from orion.api.interactive.directory_manager.directory_model import directory_model
@@ -24,7 +22,6 @@ from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
-from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 api_routes = APIRouter()
@@ -116,20 +113,11 @@ async def search_dynamic_email(param: search_dynamic_param_model = Depends()):
     return await search_model.getInstance().dynamic_search_email(param)
 
 
-@api_routes.get(
-    "/api/search/breach/screenshot/{filename}",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
-    description="Retrieve the screenshot associated with a breach document (image is in .webp format)."
-)
+@api_routes.get("/api/search/breach/screenshot/{filename}",
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+                description="Retrieve the screenshot associated with a breach document (image is in .webp format).")
 async def get_screenshot(filename: str):
-    try:
-        return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
-    except Exception as ex:
-        log.g().e(ex)
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Unable to retrieve screenshot."}
-        )
+    return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
 
 @api_routes.get("/api/graph",

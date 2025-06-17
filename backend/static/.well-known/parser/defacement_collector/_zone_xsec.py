@@ -44,8 +44,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,
-                         m_threat_type=ThreatType.DEFACEMENT, m_resoource_block=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.DEFACEMENT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -104,7 +103,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         response.raise_for_status()
 
                         page.set_content(response.text.replace("iframe", "safeframe"))
-                        page.wait_for_selector(".panel.panel-danger", timeout=5000)
+                        page.wait_for_selector(".panel.panel-danger", timeout=15000)
 
                         url_span = page.query_selector("span#url")
                         extracted_url = url_span.inner_text().strip() if url_span else link

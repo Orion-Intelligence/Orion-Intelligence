@@ -1,1 +1,1 @@
-https://zone-xsec.com
+{"file": "_zone_xsec", "url": "https://zone-xsec.com"}

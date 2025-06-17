@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {NavigationEnd, Router} from '@angular/router';
+import {Router, NavigationEnd} from '@angular/router';
 import {filter} from 'rxjs/operators';
 import {Location} from '@angular/common';
 import {ScrollService} from '../../shared/services/scroll.service';
@@ -9,10 +9,13 @@ import {ScrollService} from '../../shared/services/scroll.service';
   providedIn: 'root'
 })
 export class SelectionStoreService {
-  first_trigger = true
   private selectedSectionSubject = new BehaviorSubject<string | null>(null);
-  selectedSection$ = this.selectedSectionSubject.asObservable();
   private selectedOptionSubject = new BehaviorSubject<string | null>(null);
+
+  selectedSection$ = this.selectedSectionSubject.asObservable();
+  selectedOption$ = this.selectedOptionSubject.asObservable();
+
+  first_trigger = true
 
   constructor(private router: Router, private location: Location, private scroll_service: ScrollService) {
     this.setInitialSelectionFromUrl(this.router.url);
@@ -26,21 +29,6 @@ export class SelectionStoreService {
           this.resetSelection();
         }
       });
-  }
-
-  setSelectedSection(section: string) {
-    this.selectedSectionSubject.next(section);
-    this.selectedOptionSubject.next(null);
-    localStorage.setItem('selectedSection', section);
-  }
-
-  setSelectedOption(option: string) {
-    this.selectedOptionSubject.next(option);
-    localStorage.setItem('selectedOption', option);
-  }
-
-  getSelectedSection(): string | null {
-    return this.selectedSectionSubject.value;
   }
 
   private setInitialSelectionFromUrl(url: string) {
@@ -84,6 +72,21 @@ export class SelectionStoreService {
         this.setSelectedOption('');
       }
     }
+  }
+
+  setSelectedSection(section: string) {
+    this.selectedSectionSubject.next(section);
+    this.selectedOptionSubject.next(null);
+    localStorage.setItem('selectedSection', section);
+  }
+
+  setSelectedOption(option: string) {
+    this.selectedOptionSubject.next(option);
+    localStorage.setItem('selectedOption', option);
+  }
+
+  getSelectedSection(): string | null {
+    return this.selectedSectionSubject.value;
   }
 
   private resetSelection() {

@@ -12,7 +12,7 @@
 }
 
 .dashboard-content-scroll {
-  height: 10vh;
+  height: 1vh;
   overflow-y: auto;
   padding: 0;
 }

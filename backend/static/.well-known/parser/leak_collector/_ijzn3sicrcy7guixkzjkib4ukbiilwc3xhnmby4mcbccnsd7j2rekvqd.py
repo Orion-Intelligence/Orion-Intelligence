@@ -37,7 +37,6 @@ class _ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd(leak_extractor_i
 
     @property
     def seed_url(self) -> str:
-
         return "http://ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd.onion"
 
     @property

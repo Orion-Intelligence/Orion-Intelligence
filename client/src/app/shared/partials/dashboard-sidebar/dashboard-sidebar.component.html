@@ -3,7 +3,7 @@
     <a href="">
       <img alt="Logo" height="35" src="assets/images/sidebar/search_nav_logo.png" width="197"/>
     </a>
-    <button (click)="onToggleSidebar()" class="sidebar__header-menu">
+    <button (click)="onToggleSidebar(false)" class="sidebar__header-menu">
       <img alt="Menu" height="28" src="assets/images/sidebar/nav_menu.svg" width="24"/>
     </button>
   </div>
@@ -20,34 +20,30 @@
 
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)"
                                  [category]="category.STRATEGIC" [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories"
-                                 [routePrefix]="'strategic'" [selectionStore]="selectionStore"
+                                 [routePrefix]="'strategic'"
                                  [title]="'General Intelligence'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)"
                                  [category]="category.BREACH" [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories"
                                  [routePrefix]="'breach'"
-                                 [selectionStore]="selectionStore"
                                  [title]="'Data Breach'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)"
                                  [category]="category.DEFACEMENT" [icon]="'assets/images/sidebar/defacement.svg'"
                                  [items]="defacementCategories"
-                                 [routePrefix]="'defacement'" [selectionStore]="selectionStore"
+                                 [routePrefix]="'defacement'"
                                  [title]="'Defacement'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)"
                                  [category]="category.SOCIAL" [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories"
                                  [routePrefix]="'social'"
-                                 [selectionStore]="selectionStore"
                                  [title]="'Social'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)"
                                  *ngIf="appService.getConfig().api_allowed" [category]="category.API"
                                  [icon]="'assets/images/sidebar/live_api.svg'"
                                  [items]="apiCategories" [routePrefix]="'api'"
-                                 [selectionStore]="selectionStore"
                                  [title]="'Live APIs'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
                                  (sectionSelected)="onSectionSelected($event)" [category]="category.EXPLOIT"
                                  [icon]="'assets/images/sidebar/exploits.svg'"
                                  [items]="exploitCategories" [routePrefix]="'exploit'"
-                                 [selectionStore]="selectionStore"
                                  [title]="'Exploit'"></app-dashboard-sidebar-items>
 
 
@@ -69,7 +65,7 @@
   </ul>
 </nav>
 <div *ngIf="this.sidebar_default" class="sidebar-hotlinks">
-  <a href="http://zucui4cyyun2uok6x7mj3zyzgobcctcgugah33vrttbb7bxgj5quvjqd.onion" target="_blank">
+  <a href="http://zucui4cyyun2uok6x7mj3zyzgobcctcgugah33vrttbb7bxgj5quvjqd.onion" target="_blank" class="sidebar__item-dropdown-max">
     <div class="sidebar__item">
       <div class="sidebar__item-dropdown">
         <img alt="Documentation" class="sidebar__icon sidebar__icon-lift" height="20" ngSrc="../../../../assets/images/sidebar/tor.svg"
@@ -98,7 +94,7 @@
 </div>
 
 <nav *ngIf="!this.sidebar_default" class="sidebar sidebar-collapsed">
-  <button (click)="onToggleSidebar()" class="sidebar__header-menu">
+  <button (click)="onToggleSidebar(true)" class="sidebar__header-menu">
     <img alt="Menu" height="20" ngSrc="../../../../assets/images/sidebar/menu-mini.svg" width="20"/></button>
   <div class="sidebar__header sidebar__header-collapsed"><a href="">
     <img alt="Logo" height="30" ngSrc="../../../../assets/images/shared/logo-min.svg" priority width="30"/> </a>
@@ -163,7 +159,7 @@
   </ul>
 </nav>
 <div *ngIf="!this.sidebar_default" class="sidebar-hotlinks-collapsed">
-  <a href="http://zucui4cyyun2uok6x7mj3zyzgobcctcgugah33vrttbb7bxgj5quvjqd.onion" target="_blank">
+  <a href="http://zucui4cyyun2uok6x7mj3zyzgobcctcgugah33vrttbb7bxgj5quvjqd.onion" target="_blank" class="sidebar__item-dropdown-max">
     <div class="sidebar__item">
       <div appTooltip="Onion Link" class="sidebar__item-dropdown">
         <img alt="Documentation" class="sidebar__icon sidebar__icon-lift" height="20" ngSrc="../../../../assets/images/sidebar/tor.svg"

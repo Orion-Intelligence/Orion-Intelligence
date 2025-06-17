@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends
-from starlette import status
 from starlette.requests import Request
-from starlette.responses import JSONResponse
 
 from configs.app_dependency import role_required
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
@@ -48,16 +46,11 @@ async def index_defacement_data(request: Request):
     body = await request.json()
     return await crawl_controller.getInstance().invoke_defacement_index(DefacementDataModel(**body))
 
+
 @crawl_routes.post("/api/screenshot", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))):
-    try:
-        return await crawl_model.getInstance().invoke_file_upload(payload)
-    except Exception as _:
-        logger.exception("Screenshot upload error")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Failed to process screenshot"}
-        )
+    return await crawl_model.getInstance().invoke_file_upload(payload)
+
 
 @crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_generic(request: Request):
