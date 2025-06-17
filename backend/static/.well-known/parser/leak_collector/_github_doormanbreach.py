@@ -172,7 +172,7 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
             )
 
             entity_data = entity_model(
-                m_attacker=["doormanBreach"],
+                m_team="doormanBreach",
             )
 
             self.append_leak_data(card_data, entity_data)

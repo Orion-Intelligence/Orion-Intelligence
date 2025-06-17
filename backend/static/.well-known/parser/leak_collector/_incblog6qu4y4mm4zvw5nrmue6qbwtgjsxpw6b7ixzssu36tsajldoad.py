@@ -187,7 +187,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                         m_revenue=revenue,
                     )
                     entity_data = entity_model(
-                        m_attacker=["inc ransome"],
+                        m_team="inc ransome",
                         m_company_name=title,
                         m_industry=industry,
                     )

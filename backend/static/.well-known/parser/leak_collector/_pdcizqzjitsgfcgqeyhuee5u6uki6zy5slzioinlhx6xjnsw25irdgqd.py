@@ -120,6 +120,7 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                         m_email=helper_method.extract_emails(description),
                         m_ip=[weblink],
                         m_company_name=title,
+                        m_team="StormouS"
                     )
 
                     entity_data = helper_method.extract_entities(description, entity_data)

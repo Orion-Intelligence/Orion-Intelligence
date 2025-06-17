@@ -167,7 +167,7 @@ class _tp5cwh6d2b5hekcg6jlhoe6mawa7dlwiv47epvnfmzuaaur2dnaa3uid(leak_extractor_i
             )
 
             entity_data = entity_model(
-                m_attacker=["team xxx"],
+                m_team="team xxx",
                 m_country_name=country
             )
 

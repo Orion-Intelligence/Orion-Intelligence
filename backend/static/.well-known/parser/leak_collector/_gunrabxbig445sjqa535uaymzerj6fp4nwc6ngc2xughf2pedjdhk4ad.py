@@ -157,7 +157,8 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
                     m_location=[title_data["location"]] if title_data["location"] else [],
                     m_country_name=title_data["location"],
                     m_company_name=title_data["title"],
-                    m_industry=title_data["industry"]
+                    m_industry=title_data["industry"],
+                    m_team = "qtox"
                 )
 
                 self.append_leak_data(card_data, entity_data)

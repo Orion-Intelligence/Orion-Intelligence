@@ -135,7 +135,8 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                 entity_data = entity_model(
                     m_email=helper_method.extract_emails(content),
                     m_company_name=title,
-                    m_ip=product_url
+                    m_ip=product_url,
+                    m_team = "funsec"
                 )
                 entity_data = helper_method.extract_entities(content, entity_data)
 

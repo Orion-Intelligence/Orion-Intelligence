@@ -121,7 +121,7 @@ class _om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd(leak_extractor_i
                     )
                     entity_data = entity_model(
                         m_company_name=title,
-                        m_attacker=["anubis blog"]
+                        m_team="anubis blog"
                     )
                     self.append_leak_data(card_data, entity_data)
 

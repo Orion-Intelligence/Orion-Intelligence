@@ -123,6 +123,7 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
 
                         entity_data = entity_model(
                             m_email=helper_method.extract_emails(description),
+                            m_team="bian"
                         )
                         entity_data = helper_method.extract_entities(description, entity_data)
 

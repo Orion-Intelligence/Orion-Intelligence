@@ -161,7 +161,7 @@ class _bertblogsoqmm4ow7nqyh5ik7etsmefdbf25stauecytvwy7tkgizhad(leak_extractor_i
                 )
 
                 entity_data = entity_model(
-                    m_attacker=["bert"],
+                    m_team="bert",
                     m_company_name=title,
                     m_confidence=["high"],
                 )

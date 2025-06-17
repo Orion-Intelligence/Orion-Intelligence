@@ -137,6 +137,7 @@ class _xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd(leak_extractor_i
 
                             entity_data = entity_model(
                                 m_email=helper_method.extract_emails(m_content),
+                                m_team="unknown"
                             )
                             entity_data = helper_method.extract_entities(m_content, entity_data)
                             self.append_leak_data(card_data, entity_data)

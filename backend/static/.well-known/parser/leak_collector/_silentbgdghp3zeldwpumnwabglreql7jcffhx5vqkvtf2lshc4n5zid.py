@@ -137,7 +137,7 @@ class _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid(leak_extractor_i
             )
 
             entity_data = entity_model(
-                m_attacker=["Silent Blog"]
+                m_team="Silent Blog"
             )
 
             self.append_leak_data(card_data, entity_data)

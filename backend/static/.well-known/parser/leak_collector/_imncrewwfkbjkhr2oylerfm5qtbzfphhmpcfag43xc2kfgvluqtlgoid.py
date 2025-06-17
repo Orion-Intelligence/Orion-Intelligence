@@ -127,7 +127,7 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
             )
 
             entity_data = entity_model(
-                m_attacker=["imn crew"],
+                m_team="imn crew",
                 m_phone_numbers=helper_method.extract_phone_numbers(m_content),
             )
 

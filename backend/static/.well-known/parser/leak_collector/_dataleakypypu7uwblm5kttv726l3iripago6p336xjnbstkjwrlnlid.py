@@ -107,6 +107,7 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
 
                 entity_data = entity_model(
                     m_email=helper_method.extract_emails(content),
+                    m_team="unknown"
                 )
                 entity_data = helper_method.extract_entities(content, entity_data)
 

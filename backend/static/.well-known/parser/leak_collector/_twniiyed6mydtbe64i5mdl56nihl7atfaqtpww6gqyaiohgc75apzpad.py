@@ -166,7 +166,7 @@ class _twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad(leak_extractor_i
                 )
 
                 entity_data = entity_model(
-                    m_attacker=["J Group"]
+                    m_team="J Group"
                 )
 
                 self.append_leak_data(card_data, entity_data)
