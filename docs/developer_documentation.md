@@ -125,7 +125,7 @@ bash cronjobs.sh
 
 **Description**: Search engine and indexing service.  
 **Container Name**: `trusted-web-elastic`  
-**Image**: `elasticsearch:7.17.5`  
+**Image**: `elasticsearch:7.17.20`  
 **Ports**: Exposed on **9400**  
 **Environment**: Configured for single-node cluster.  
 **Volumes**: Persistent storage for Elasticsearch indices.  
