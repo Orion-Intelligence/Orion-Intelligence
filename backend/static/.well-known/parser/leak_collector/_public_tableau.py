@@ -50,7 +50,7 @@ class _public_tableau(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_resoource_block=False, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_timeout= 157200, m_resoource_block=False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -100,7 +100,7 @@ class _public_tableau(leak_extractor_interface, ABC):
             };
         """)
 
-        page.wait_for_selector("#tabZoneId8", state="visible", timeout=60000)
+        page.wait_for_selector("#tabZoneId8", state="visible", timeout=160000)
         sleep(10)
 
         viewport = page.viewport_size
