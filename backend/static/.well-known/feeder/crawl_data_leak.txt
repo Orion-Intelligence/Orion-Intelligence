@@ -40,7 +40,8 @@
 {"file": "_ddosecrets", "url": "https://ddosecrets.com"}
 {"file": "_ransomware_live", "url": "https://www.ransomware.live"}
 {"file": "_worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid", "url": "https://worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid.onion"}
-{"file": "_hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd", "url": "https://hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd.onion/companies/8871267732"}{"file": "_github_doormanbreach", "url": "https://github.com/doormanBreach"}
+{"file": "_hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd", "url": "https://hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd.onion/companies/8871267732"}
+{"file": "_github_doormanbreach", "url": "https://github.com/doormanBreach"}
 {"file": "_weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd", "url": "http://weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd.onion"}
 {"file": "_ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid", "url": "http://ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid.onion"}
 {"file": "_nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad", "url": "http://nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad.onion"}
