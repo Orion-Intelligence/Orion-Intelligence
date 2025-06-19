@@ -7,6 +7,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -23,6 +24,7 @@ class _ransomlook(leak_extractor_interface, ABC):
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -32,6 +34,10 @@ class _ransomlook(leak_extractor_interface, ABC):
             cls._instance = super(_ransomlook, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -73,93 +79,76 @@ class _ransomlook(leak_extractor_interface, ABC):
             processed_posts = set()
             error_count = 0
 
-            while True:
+            rows = page.query_selector_all('tr')
+            collected_links = []
+            for row in rows:
+                link_element = row.query_selector('td > a')
+                if link_element:
+                    href = link_element.get_attribute("href")
+                    if href:
+                        post_id = href.split('/leak/')[1]
+                        if post_id not in processed_posts:
+                            full_url = f"{self.base_url}{href}"
+                            collected_links.append(full_url)
+                            processed_posts.add(post_id)
+
+            if self.is_crawled:
+                collected_links = collected_links[0:50]
+
+            for link in collected_links:
                 try:
-                    rows = page.query_selector_all('tr')
-                    if not rows:
-                        break
+                    page.goto(link)
+                    page.wait_for_selector('article#main')
 
-                    collected_links = []
-                    for row in rows:
-                        link_element = row.query_selector('td > a')
-                        if link_element:
-                            href = link_element.get_attribute("href")
-                            if href:
-                                post_id = href.split('/leak/')[1]
-                                if post_id not in processed_posts:
-                                    full_url = f"{self.base_url}{href}"
-                                    collected_links.append(full_url)
-                                    processed_posts.add(post_id)
+                    title_element = page.query_selector("article#main > h1")
+                    m_title = title_element.inner_text().strip() if title_element else ""
 
-                    for link in collected_links:
-                        page.goto(link)
-                        page.wait_for_selector('article#main')
+                    size_element = page.query_selector("table#table tbody tr td:nth-child(1) center")
+                    m_data = size_element.inner_text().strip() if size_element else ""
 
-                        title_element = page.query_selector("article#main > h1")
-                        m_title = title_element.inner_text().strip() if title_element else ""
+                    records_element = page.query_selector("table#table tbody tr td:nth-child(2)")
+                    m_records = records_element.inner_text().strip() if records_element else ""
 
-                        size_element = page.query_selector("table#table tbody tr td:nth-child(1) center")
-                        m_data = size_element.inner_text().strip() if size_element else ""
+                    m_data_size = f"{m_data} - {m_records} records" if m_data and m_records else m_data
 
-                        records_element = page.query_selector("table#table tbody tr td:nth-child(2)")
-                        m_records = records_element.inner_text().strip() if records_element else ""
+                    date_element = page.query_selector("table#table tbody tr td:nth-child(3)")
+                    m_date = date_element.inner_text().strip() if date_element else ""
 
-                        m_data_size = f"{m_data} - {m_records} records" if m_data and m_records else m_data
+                    columns_element = page.query_selector("table#table tbody tr td:nth-child(4)")
+                    m_columns = columns_element.inner_text().strip() if columns_element else ""
 
-                        date_element = page.query_selector("table#table tbody tr td:nth-child(3)")
-                        m_date = date_element.inner_text().strip() if date_element else ""
+                    m_content = m_columns.replace("[", "").replace("]", "")
+                    ref_html = helper_method.extract_refhtml(m_title, self.invoke_db, REDIS_COMMANDS,
+                                                             CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
-                        columns_element = page.query_selector("table#table tbody tr td:nth-child(4)")
-                        m_columns = columns_element.inner_text().strip() if columns_element else ""
+                    card_data = leak_model(
+                        m_ref_html=ref_html,
+                        m_screenshot=helper_method.get_screenshot_base64(page, m_title, self.base_url),
+                        m_title=m_title,
+                        m_url=page.url,
+                        m_base_url=self.base_url,
+                        m_content=m_content + " " + self.base_url + " " + page.url,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=m_content,
+                        m_content_type=["leaks"],
+                        m_data_size=m_data_size,
+                        m_leak_date=datetime.datetime.strptime(m_date, '%Y-%m-%d').date()
+                    )
 
-                        m_content = m_columns.replace("[", "").replace("]", "")
-                        is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT,
-                                                        CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + m_title, 0,
-                                                        RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                        ref_html = None
-                        if is_crawled != -1 and is_crawled < 5:
-                            ref_html = helper_method.extract_refhtml(m_title)
-                            if ref_html:
-                                self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                               CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + m_title, -1,
-                                               RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                            else:
-                                self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                               CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + m_title, is_crawled + 1,
-                                               RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                    entity_data = entity_model(
+                        m_ip=[m_title],
+                        m_team="ransom look"
+                    )
 
-                        card_data = leak_model(
-                            m_ref_html=ref_html,
-                            m_screenshot=helper_method.get_screenshot_base64(page, m_title, self.base_url),
-                            m_title=m_title,
-                            m_url=page.url,
-                            m_base_url=self.base_url,
-                            m_content=m_content + " " + self.base_url + " " + page.url,
-                            m_network=helper_method.get_network_type(self.base_url),
-                            m_important_content=m_content,
-                            m_content_type=["leaks"],
-                            m_data_size=m_data_size,
-                            m_leak_date=datetime.datetime.strptime(m_date, '%Y-%m-%d').date()
-                        )
-
-                        entity_data = entity_model(
-                            m_email=helper_method.extract_emails(m_content),
-                            m_ip=[m_title],
-                            m_team="ransom look"
-                        )
-
-                        entity_data = helper_method.extract_entities(m_content, entity_data)
-                        self.append_leak_data(card_data, entity_data)
-
-                        error_count = 0
-
-                    break
-
-                except Exception:
+                    entity_data = helper_method.extract_entities(m_content, entity_data)
+                    self.append_leak_data(card_data, entity_data)
+                    error_count = 0
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     error_count += 1
                     if error_count >= 3:
                         break
 
-
-        except Exception as e:
-            print(f"Error parsing leak data: {str(e)}")
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

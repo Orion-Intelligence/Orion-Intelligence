@@ -6,6 +6,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -23,6 +24,7 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
 
@@ -34,6 +36,10 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
             cls._instance = super(_hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -71,13 +77,26 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-        page.wait_for_selector("a.break-words")
-        card_links = [
-            self.base_url + anchor.get_attribute("href")
-            for anchor in page.query_selector_all("a.break-words")
-            if anchor and anchor.get_attribute("href")
-        ]
         error_count = 0
+        max_page = 4
+        if self.is_crawled:
+            max_page = 2
+        page.wait_for_selector("a.break-words")
+        card_links = set()
+
+        for _ in range(max_page):
+            card_links.update(
+                self.base_url + a.get_attribute("href")
+                for a in page.query_selector_all("a.break-words")
+                if a and a.get_attribute("href")
+            )
+            btn = page.query_selector('button.bg-blue-600:has(svg use[href="#icon-arrow-right"])')
+            if not btn or btn.is_disabled():
+                break
+            btn.click()
+            page.wait_for_timeout(1000)
+
+        card_links = list(card_links)
 
         for card_link in card_links:
             try:
@@ -100,18 +119,7 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
 
                 m_content = page.inner_text("html")
 
-                is_crawled = int(
-                    self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink, 0,
-                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                ref_html = None
-                if is_crawled != -1 and is_crawled < 5:
-                    ref_html = helper_method.extract_refhtml(weblink)
-                    if ref_html:
-                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink,
-                                       -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                    else:
-                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + weblink,
-                                       is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                ref_html = helper_method.extract_refhtml(weblink, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
                 card_data = leak_model(
                     m_ref_html=ref_html,
@@ -129,7 +137,6 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
                 )
 
                 entity_data = entity_model(
-                    m_email=helper_method.extract_emails(description),
                     m_company_name=company_name,
                     m_ip=[weblink],
                     m_team="chaos"
@@ -139,7 +146,8 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 
-            except Exception:
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 error_count += 1
                 if error_count >= 3:
                     break

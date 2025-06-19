@@ -6,7 +6,6 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 from bs4 import BeautifulSoup
 import re
@@ -22,6 +21,7 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
 
@@ -33,6 +33,10 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
             cls._instance = super(_github_doormanbreach, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -70,8 +74,7 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
 
     def parse_leak_data(self, page: Page):
 
-        is_crawled = bool(self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + self.__class__.__name__, False, None))
-        if is_crawled:
+        if self.is_crawled:
             return
 
         hrefs = page.eval_on_selector_all(
@@ -176,4 +179,3 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
             )
 
             self.append_leak_data(card_data, entity_data)
-        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + self.__class__.__name__, True, None)

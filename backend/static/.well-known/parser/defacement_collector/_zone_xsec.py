@@ -1,16 +1,16 @@
 import datetime
+import requests
+
 from abc import ABC
 from typing import List
 from urllib.parse import urljoin
-
-import requests
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
 
@@ -25,6 +25,8 @@ class _zone_xsec(leak_extractor_interface, ABC):
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
+
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -33,6 +35,10 @@ class _zone_xsec(leak_extractor_interface, ABC):
         if cls._instance is None:
             cls._instance = super(_zone_xsec, cls).__new__(cls)
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -78,8 +84,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
             return ""
 
     def parse_leak_data(self, page: Page):
-        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value, False)
-        max_pages = 50 if is_crawled else 500
+        max_pages = 50 if self.is_crawled else 500
 
         current_page = 1
         consecutive_errors = 0
@@ -143,19 +148,16 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         self.append_leak_data(card_data, entity_data)
 
                     except Exception as ex:
-                        print(f"Error processing link {link}: {ex}")
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                         continue
 
                 current_page += 1
                 consecutive_errors = 0
 
             except Exception as ex:
-                print(f"An error occurred on page {current_page}: {ex}")
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 consecutive_errors += 1
                 if consecutive_errors >= 5:
-                    print(f"Stopping due to {consecutive_errors} consecutive errors")
                     break
                 current_page += 1
                 continue
-
-        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value, True)

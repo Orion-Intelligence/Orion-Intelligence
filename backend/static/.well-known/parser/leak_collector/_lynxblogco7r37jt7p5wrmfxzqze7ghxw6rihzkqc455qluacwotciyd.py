@@ -26,6 +26,7 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -35,6 +36,10 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
             cls._instance = super(_lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -66,115 +71,102 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
-            self.callback()
+            if self.callback():
+                self._card_data.clear()
+                self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
         try:
-            time.sleep(30)
-
-            processed_urls = set()
+            page.wait_for_load_state("networkidle")
+            page.click('a.button.button-blue', timeout=5000)
 
             error_count = 0
+            max_counter = 30
+            more_counter = 0
+            if self._is_crawled:
+                max_counter = 3
+
+            processed_titles = set()
+
+            while more_counter < max_counter:
+                try:
+                    page.mouse.wheel(0, 5000)
+                    page.wait_for_selector('button.button-blue', timeout=5000)
+                    button = page.query_selector('button.button-blue')
+                    if button and button.is_visible():
+                        button.click()
+                        more_counter=more_counter+1
+                    else:
+                        break
+                except Exception as ex:
+                    break
 
             while True:
                 try:
-                    cards = page.query_selector_all('.news__block.chat__block')
+                    cards = page.query_selector_all('div.chat__chats-el.chat__block-header')
                     new_cards_found = False
+                    skip_count = len(processed_titles)
+                    card_index = 0
 
                     for card in cards:
+                        if card_index < skip_count:
+                            card_index += 1
+                            continue
+
                         try:
-                            title = card.query_selector(
-                                '.chat__block-title').inner_text().strip() if card.query_selector(
-                                '.chat__block-title') else "No Title"
-                            date_text = card.query_selector(
-                                '.chat__block-date span').inner_text().strip() if card.query_selector(
-                                '.chat__block-date span') else "No Date"
-                            relative_url = card.query_selector('a.button-blue').get_attribute(
-                                'href') if card.query_selector('a.button-blue') else None
-                            full_url = self.base_url + relative_url if relative_url else None
+                            card.click()
 
-                            if full_url in processed_urls:
+                            page.wait_for_function(
+                                "el => el && el.innerText.trim().length > 0",
+                                arg=page.query_selector('.detailed p'),
+                                timeout=15000
+                            )
+                            page.wait_for_selector("div.chat__window")
+
+                            chat_window = page.query_selector("div.chat__window")
+                            title_el = chat_window.query_selector("div.chat__window-header-wrap .chat__block-title")
+                            title = title_el.inner_text().strip() if title_el else "No Title"
+
+                            if title in processed_titles:
+                                card_index += 1
                                 continue
+                            processed_titles.add(title)
 
-                            processed_urls.add(full_url)
-                            new_cards_found = True
+                            revenue_el = chat_window.query_selector("div.detailed span:has-text('Income') + p")
+                            revenue = revenue_el.inner_text().strip() if revenue_el else None
 
-                            date = datetime.strptime(date_text, "%d/%m/%Y").date() if date_text != "No Date" else None
-
-                            description = revenue = downloaded = industry = categories = publication_category = ""
-                            images = []
-                            income = employees = "No data available"
-
-                            if full_url:
-                                detail_page = page.context.new_page()
-                                detail_page.goto(full_url)
-
+                            date_el = chat_window.query_selector(
+                                "div.detailed span:has-text('Date of publication') + p")
+                            date_text = date_el.inner_text().strip() if date_el else None
+                            leak_date = None
+                            if date_text:
                                 try:
-                                    detail_page.wait_for_selector('.detailed p', timeout=10000)
-                                except Exception as ex:
-                                    log.g().e(ex)
-                                    detail_page.close()
-                                    continue
+                                    leak_date = datetime.strptime(date_text, "%d/%m/%Y").date()
+                                except ValueError:
+                                    pass
 
-                                description_element = detail_page.query_selector('.detailed p')
-                                if description_element:
-                                    description = description_element.inner_text().strip()
+                            description_element = page.query_selector('.detailed p')
+                            description = description_element.inner_text().strip() if description_element else ""
 
-                                    revenue_match = re.search(r"Revenue:\s*([\d\w\s.$]+)", description)
-                                    revenue = revenue_match.group(1) if revenue_match else "No revenue info"
+                            downloaded_match = re.search(r"(\d+\s?(GB|MB|TB))", description, re.IGNORECASE)
+                            downloaded = downloaded_match.group(1) if downloaded_match else None
 
-                                    employees_match = re.search(r"Employees:\s*(\d+)", description)
-                                    employees = employees_match.group(1) if employees_match else "No employee info"
+                            images = [
+                                self.base_url + img.get_attribute('src')
+                                for img in page.query_selector_all('.disclosured__images img')
+                                if img.get_attribute('src')
+                            ]
 
-                                    industry_match = re.search(r"Industry:\s*([\w\s]+)", description)
-                                    industry = industry_match.group(1) if industry_match else "No industry info"
-
-                                    downloaded_match = re.search(r"Downloaded:\s*([\w\d.]+)", description)
-                                    downloaded = downloaded_match.group(1) if downloaded_match else "No downloaded info"
-
-                                income_element = detail_page.query_selector('div.col-md-6 span:has-text("Income") + p')
-                                if income_element:
-                                    income = income_element.inner_text().strip()
-
-                                publication_category_element = detail_page.query_selector(
-                                    'div.col-md-6 span:has-text("Publication category") + p')
-                                if publication_category_element:
-                                    publication_category = publication_category_element.inner_text().strip()
-
-                                disclosure_categories_element = detail_page.query_selector(
-                                    'div.row p span:has-text("Categories") + p')
-                                if disclosure_categories_element:
-                                    categories = disclosure_categories_element.inner_text().strip()
-
-                                description += f"\nEmployees count: {employees}\nIncome: {income}\nPublication Category: {publication_category}\nDisclosure Categories: {categories}"
-
-                                images = [
-                                    self.base_url + img.get_attribute('src')
-                                    for img in detail_page.query_selector_all('.disclosured__images img')
-                                    if img.get_attribute('src')
-                                ]
-
-                                detail_page.close()
-
-                            ip = ""
-                            is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT,
-                                                            CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, 0,
-                                                            RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                            m_ref_html = None
-                            if is_crawled != -1 and is_crawled < 5:
-                                ref_html = helper_method.extract_refhtml(title)
-                                if ref_html:
-                                    self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                                   CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, -1,
-                                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                                    ip = title
-                                else:
-                                    self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                                   CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, is_crawled + 1,
-                                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                            ref_html = helper_method.extract_refhtml(
+                                title,
+                                self.invoke_db,
+                                REDIS_COMMANDS,
+                                CUSTOM_SCRIPT_REDIS_KEYS,
+                                RAW_PATH_CONSTANTS
+                            )
 
                             card_data = leak_model(
-                                m_ref_html=m_ref_html,
+                                m_ref_html=ref_html,
                                 m_title=title,
                                 m_url=page.url,
                                 m_base_url=self.base_url,
@@ -185,23 +177,23 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
                                 m_content_type=["leaks"],
                                 m_revenue=revenue,
                                 m_data_size=downloaded,
-                                m_leak_date=date,
+                                m_leak_date=leak_date,
                                 m_logo_or_images=images,
                             )
 
                             entity_data = entity_model(
-                                m_email=helper_method.extract_emails(description),
-                                m_industry=industry,
                                 m_company_name=title,
-                                m_ip=[ip],
                                 m_team="lynx"
                             )
 
                             entity_data = helper_method.extract_entities(description, entity_data)
                             self.append_leak_data(card_data, entity_data)
+                            new_cards_found = True
 
                         except Exception as ex:
-                            pass
+                            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+
+                        card_index += 1
 
                     if new_cards_found:
                         error_count = 0
@@ -210,17 +202,12 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
                         if error_count >= 3:
                             break
 
-                    show_more_button = page.query_selector('button.button-blue:has-text("Show more")')
-                    if new_cards_found and show_more_button:
-                        show_more_button.click()
-                        time.sleep(5)
-                    else:
-                        break
-
-                except Exception:
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     error_count += 1
                     if error_count >= 3:
                         break
 
-        except Exception as e:
-            print(f"An error occurred while parsing leak data: {e}")
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

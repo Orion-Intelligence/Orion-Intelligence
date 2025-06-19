@@ -6,6 +6,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -23,52 +24,48 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
-
         self.callback = callback
 
     def __new__(cls, callback=None):
-
         if cls._instance is None:
             cls._instance = super(_j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
     @property
-    def seed_url(self) -> str:
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
+    @property
+    def seed_url(self) -> str:
         return "http://j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad.onion"
 
     @property
     def base_url(self) -> str:
-
         return "http://j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad.onion"
 
     @property
     def rule_config(self) -> RuleModel:
-
         return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
-
         return self._card_data
 
     @property
     def entity_data(self) -> List[entity_model]:
-
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-
         return "http://j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad.onion"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
-
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
@@ -78,91 +75,104 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
         try:
-            page.goto(self.seed_url)
             processed_entries = set()
 
-            current_page = 1
-            has_more_pages = True
+            while True:
+                page.wait_for_selector('.ant-card-body')
+                cards = page.query_selector_all('.ant-card-body')
 
-            while has_more_pages:
-
-                page.wait_for_selector('tr.ant-table-row.ant-table-row-level-0')
-
-                rows = page.query_selector_all(
-                    'tr.ant-table-row.ant-table-row-level-0.odd-row, tr.ant-table-row.ant-table-row-level-0:not(.odd-row)')
-
-                for row in rows:
-                    cells = row.query_selector_all('td.ant-table-cell')
-
-                    if len(cells) < 6:
-                        continue
-
-                    country = cells[0].inner_text().strip()
-                    company_name = cells[1].inner_text().strip()
-                    domain = cells[2].inner_text().strip()
-                    data_size = cells[3].inner_text().strip()
-
-                    download_link_element = cells[4].query_selector('a')
-                    dump_link = download_link_element.get_attribute('href') if download_link_element else ""
-
-                    entry_id = f"{country}_{company_name}_{domain}"
-                    if entry_id in processed_entries:
-                        continue
-
-                    is_crawled = int(
-                        self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + domain, 0,
-                                       RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                    ref_html = None
-                    if is_crawled != -1 and is_crawled < 5:
-                        ref_html = helper_method.extract_refhtml(domain)
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + domain,
-                                           -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                for card in cards:
+                    try:
+                        view_button = card.query_selector('button.custom-button')
+                        if view_button and view_button.is_visible() and view_button.is_enabled():
+                            view_button.click()
                         else:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + domain,
-                                           is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                    comment = cells[5].get_attribute('title') or cells[5].inner_text().strip()
+                            continue
 
-                    card_data = leak_model(
-                        m_ref_html=ref_html,
-                        m_screenshot=helper_method.get_screenshot_base64(page, company_name, self.base_url),
-                        m_title=company_name,
-                        m_url=domain,
-                        m_base_url=self.base_url,
-                        m_content=comment,
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=comment,
-                        m_content_type=["leaks"],
-                        m_data_size=data_size,
-                        m_dumplink=[dump_link] if dump_link else [],
-                    )
+                        page.wait_for_selector('div.popup')
 
-                    entity_data = entity_model(
-                        m_email=helper_method.extract_emails(comment),
-                        m_company_name=company_name,
-                        m_ip=[domain],
-                        m_location=[country],
-                        m_country_name=country,
-                        m_team="crypto74"
-                    )
-                    entity_data = helper_method.extract_entities(comment, entity_data)
+                        popup = page.query_selector('div.popup')
+                        if not popup:
+                            continue
 
-                    self.append_leak_data(card_data, entity_data)
-                    processed_entries.add(entry_id)
+                        company = popup.query_selector('h2').inner_text().strip() if popup.query_selector('h2') else ""
+                        country = popup.query_selector('p img').get_attribute('alt') if popup.query_selector(
+                            'p img') else ""
+                        domain_el = popup.query_selector('a[href^="http"]')
+                        domain = domain_el.get_attribute('href') if domain_el else ""
+                        data_size_el = popup.query_selector('p:has-text("Data Size:")')
+                        data_size = data_size_el.inner_text().split(":")[-1].strip() if data_size_el else ""
+                        description_el = popup.query_selector_all('div[style*="min-height: 300px;"] p')
+                        description = "\n".join(p.inner_text().strip() for p in description_el[4:] if
+                                                p.inner_text().strip()) if description_el else ""
 
-                try:
-                    current_page += 1
-                    next_page_selector = f'.ant-pagination-item.ant-pagination-item-{current_page}'
-                    next_page_element = page.query_selector(next_page_selector)
+                        download_links = [
+                            self.base_url + href
+                            for a in popup.query_selector_all('a[download]')
+                            if (href := a.get_attribute("href")) is not None
+                        ]
 
-                    if next_page_element:
-                        next_page_element.click()
-                        page.wait_for_load_state('networkidle')
-                    else:
-                        has_more_pages = False
-                except Exception as e:
-                    print(f"Error navigating to next page: {str(e)}")
-                    has_more_pages = False
+                        entry_id = f"{country}_{company}_{domain}"
+                        if entry_id in processed_entries:
+                            close_button = popup.query_selector('button')
+                            if close_button:
+                                close_button.click()
+                                page.wait_for_timeout(500)
+                            continue
 
-        except Exception as e:
-            print(f"Error parsing leak data: {str(e)}")
+                        ref_html = helper_method.extract_refhtml(domain, self.invoke_db, REDIS_COMMANDS,
+                                                                 CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+
+                        card_data = leak_model(
+                            m_ref_html=ref_html,
+                            m_screenshot=helper_method.get_screenshot_base64(page, company, self.base_url),
+                            m_title=company,
+                            m_url=domain,
+                            m_base_url=self.base_url,
+                            m_content=description,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=description,
+                            m_content_type=["leaks"],
+                            m_data_size=data_size,
+                            m_dumplink=download_links,
+                        )
+
+                        entity_data = entity_model(
+                            m_company_name=company,
+                            m_ip=[domain],
+                            m_location=[country],
+                            m_country_name=country,
+                            m_team="crypto74"
+                        )
+                        button = page.query_selector('div.popup button')
+                        if button and button.is_visible():
+                            button.click()
+
+                        entity_data = helper_method.extract_entities(description, entity_data)
+
+                        self.append_leak_data(card_data, entity_data)
+                        processed_entries.add(entry_id)
+
+                    except Exception as ex:
+                        log.g().e(f"{ex} {self.__class__.__name__}")
+
+                next_button = None
+                pagination_buttons = page.query_selector_all('div.pagination button')
+                found_active = False
+                for btn in pagination_buttons:
+                    if "active" in btn.get_attribute("class"):
+                        found_active = True
+                        continue
+                    if found_active:
+                        next_button = btn
+                        break
+
+                if next_button:
+                    next_button.click()
+                    page.wait_for_load_state("networkidle")
+                    page.wait_for_selector('.ant-card-body')
+                else:
+                    break
+        except Exception as ex:
+            log.g().e(f"{ex} {self.__class__.__name__}")
+            raise

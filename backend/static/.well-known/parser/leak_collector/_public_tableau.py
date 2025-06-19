@@ -9,8 +9,8 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
 
@@ -25,6 +25,7 @@ class _public_tableau(leak_extractor_interface, ABC):
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -34,6 +35,10 @@ class _public_tableau(leak_extractor_interface, ABC):
             cls._instance = super(_public_tableau, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -70,8 +75,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-        is_crawled = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value, False)
-        max_pages = 500 if is_crawled else 100000
+        max_pages = 50 if self.is_crawled else 100000
 
         page.evaluate("""
             const cursor = document.createElement('div');
@@ -202,7 +206,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                     y_position = default_y_position
 
             except Exception as ex:
-                print(f"Error on hover {hover_count}: {ex}")
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 retry_count += 1
 
                 page.mouse.move(10, 10)
@@ -210,5 +214,3 @@ class _public_tableau(leak_extractor_interface, ABC):
 
                 y_position = default_y_position
                 page.evaluate(f'moveFakeCursor({x_position}, {y_position});')
-
-        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value, True)

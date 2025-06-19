@@ -147,3 +147,4 @@ class _bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad(leak_extractor_i
 
         except Exception as e:
             print(f"Error parsing leak data: {str(e)}")
+            raise

@@ -25,6 +25,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -36,6 +37,10 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
         return cls._instance
 
     @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
+
+    @property
     def seed_url(self) -> str:
         return "http://incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad.onion/blog/disclosures/6807d3b8fdcf1d7b27a78a07"
 
@@ -45,7 +50,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_resoource_block=False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -71,8 +76,6 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
         try:
-            is_parsed = bool(self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + self.__class__.__name__, False,RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-
             sleep(5)
             page.wait_for_selector("a.announcement__container")
 
@@ -97,18 +100,17 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                         if weblink.startswith("/"):
                             weblink = f"{self.base_url.rstrip('/')}{weblink}"
 
-                        titles_and_links.append({"title": title, "weblink": weblink})
+                        titles_and_links.append({"card":card, "title": title, "weblink": weblink})
 
                     limit = 4000
-                    if is_parsed:
-                        limit = 100
+                    if self.is_crawled:
+                        limit = 50
                     if len(titles_and_links)>limit:
                         break
 
                     load_more_button = page.query_selector("div.more__container")
                     if load_more_button:
                         load_more_button.click()
-                        sleep(3)
                     else:
                         break
                 except Exception as e:
@@ -118,14 +120,11 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
 
             for index, item in enumerate(titles_and_links, start=1):
                 try:
+                    item["card"].click()
                     title = item["title"]
                     weblink = item["weblink"]
 
-
-                    page.goto(weblink)
                     page.wait_for_selector("ul.new__el", timeout=15000)
-                    sleep(3)
-
 
                     try:
                         date_element = page.query_selector("div.text-muted span:nth-child(2)")
@@ -160,15 +159,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                             break
 
                     description += f"\n employee no {employees}"
-
-                    is_crawled = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, 0, RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                    ref_html = None
-                    if is_crawled != -1 and is_crawled < 5 and len(weblink) > 0:
-                        ref_html = helper_method.extract_refhtml(weblink[0])
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                        else:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                    ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
                     card_data = leak_model(
                         m_title=title,
@@ -196,6 +187,5 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
 
                 except Exception as e:
                     print(f"An error occurred while processing card {index}: {e}")
-            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + self.__class__.__name__, True, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
         except Exception as e:
             print(f"An error occurred while parsing leak data: {e}")

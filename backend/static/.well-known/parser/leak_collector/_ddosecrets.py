@@ -2,12 +2,12 @@ import re
 from abc import ABC
 from typing import List
 from urllib.parse import urljoin
-
 from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
@@ -23,6 +23,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -34,6 +35,10 @@ class _ddosecrets(leak_extractor_interface, ABC):
         return cls._instance
 
     @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
+
+    @property
     def seed_url(self) -> str:
         return "https://ddosecrets.com/all_articles/a-z"
 
@@ -43,7 +48,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_resoource_block=False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -68,7 +73,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-        page.goto(self.seed_url, wait_until="networkidle")
+        page.wait_for_load_state("networkidle")
         self.soup = BeautifulSoup(page.content(), 'html.parser')
 
         article_divs = self.soup.find_all("div", class_="article")
@@ -146,7 +151,6 @@ class _ddosecrets(leak_extractor_interface, ABC):
 
                 country = " - ".join(countries) if countries else None
                 entity_data = entity_model(
-                    m_email=helper_method.extract_emails(content_text),
                     m_attacker=[sources],
                     m_location=countries,
                     m_country_name=country,
@@ -157,7 +161,8 @@ class _ddosecrets(leak_extractor_interface, ABC):
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 
-            except Exception:
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 error_count += 1
                 if error_count >= 3:
                     break

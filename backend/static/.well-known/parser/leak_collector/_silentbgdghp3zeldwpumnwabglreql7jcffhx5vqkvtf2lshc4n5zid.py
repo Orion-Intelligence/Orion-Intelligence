@@ -24,6 +24,7 @@ class _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
 
@@ -35,6 +36,10 @@ class _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid(leak_extractor_i
             cls._instance = super(_silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -108,19 +113,7 @@ class _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid(leak_extractor_i
                         disclosures = value
 
             m_content = f"Title: {title}, Country: {country_name}, Revenue: {revenue}, Employees: {employees}, Disclosures: {disclosures}"
-            is_crawled = int(
-                self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, 0,
-                               RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-
-            ref_html = None
-            if is_crawled != -1 and is_crawled < 5:
-                ref_html = helper_method.extract_refhtml(custom_link)
-                if ref_html:
-                    self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + custom_link, -1,
-                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                else:
-                    self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + custom_link,
-                                   is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+            ref_html = helper_method.extract_refhtml(custom_link, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
             card_data = leak_model(
                 m_ref_html=ref_html,
