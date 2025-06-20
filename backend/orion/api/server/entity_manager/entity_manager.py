@@ -43,7 +43,7 @@ class entity_manager:
             normalized_type = self._sanitize(self._normalize_key(query.model_type)) if query.model_type else None
 
             depth_level = 1
-            secondary_depth_level = int(query.depth) + 1
+            secondary_depth_level = int(str(int(query.depth) + 1))
             document_limit = int(query.edge)
 
             query_str = ""
@@ -53,38 +53,45 @@ class entity_manager:
                 if normalized_value == "all":
                     queried_id = "all_clusters"
                     query_str = f"""
-                    LET clusters = [
-                        "cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement",
-                        "cti_vertices/chat", "cti_vertices/exploit"
-                    ]
+                    LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat", "cti_vertices/exploit"]
 
-                    LET raw_depth1 = (
+                    LET cluster_data = (
                       FOR cluster_id IN clusters
-                        FOR v, e, p IN {depth_level}..{depth_level} ANY cluster_id GRAPH 'cti_graph'
-                          OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                          FILTER v.type == 'document'
-                          LIMIT {document_limit // 5}
-                          RETURN {{vertex: v, edge: e, path: p}}
+                        LET docs = (
+                          FOR v, e, p IN {depth_level}..{depth_level} ANY cluster_id GRAPH 'cti_graph'
+                            OPTIONS {{ bfs: true, uniqueVertices: "global" }}
+                            FILTER v.type == 'document'
+                            LIMIT {document_limit - 20}
+                            RETURN {{vertex: v, edge: e, path: p}}
+                        )
+                        RETURN docs
                     )
 
-                    LET document_ids = UNIQUE(FOR item IN raw_depth1 RETURN item.vertex._id)
+                    LET raw_depth1 = FLATTEN(cluster_data)
+
+                    LET document_ids = UNIQUE(
+                      FOR item IN raw_depth1
+                        RETURN item.vertex._id
+                    )
 
                     LET cluster_edges = (
-                      FOR e IN cti_edges
-                        FILTER e._to IN document_ids AND e.type == 'cluster_to_doc'
-                        LET cluster = FIRST(FOR c IN cti_vertices FILTER c._id == e._from AND c.type == 'cluster' RETURN c)
-                        RETURN {{vertex: cluster, edge: e, path: null}}
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          FOR cluster IN cti_vertices
+                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                            RETURN {{vertex: cluster, edge: e, path: null}}
                     )
 
-                    LET depth1 = UNION(raw_depth1, cluster_edges)
+                    LET depth1 = APPEND(raw_depth1, cluster_edges)
+                    LET limit_hit_depth1 = false
 
                     RETURN {{
                       depth1,
-                      limit_hit_depth1: false,
+                      limit_hit_depth1,
                       matched_ids: clusters
                     }}
                     """
-
                 else:
                     queried_id = f"cti_vertices/{normalized_value}"
                     query_str = f"""
@@ -96,58 +103,72 @@ class entity_manager:
                         RETURN {{vertex: v, edge: e, path: p}}
                     )
 
-                    LET document_ids = UNIQUE(FOR d IN doc_nodes RETURN d.vertex._id)
-
-                    LET cluster_edges = (
-                      FOR e IN cti_edges
-                        FILTER e._to IN document_ids AND e.type == 'cluster_to_doc'
-                        LET cluster = FIRST(FOR c IN cti_vertices FILTER c._id == e._from AND c.type == 'cluster' RETURN c)
-                        RETURN {{vertex: cluster, edge: e, path: null}}
+                    LET document_ids = UNIQUE(
+                      FOR item IN doc_nodes
+                        RETURN item.vertex._id
                     )
 
-                    LET depth1 = UNION(doc_nodes, cluster_edges)
+                    LET cluster_edges = (
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          FOR cluster IN cti_vertices
+                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                            RETURN {{vertex: cluster, edge: e, path: null}}
+                    )
+
+                    LET depth1 = APPEND(doc_nodes, cluster_edges)
+                    LET limit_hit_depth1 = LENGTH(doc_nodes) >= {document_limit}
+
                     RETURN {{
                       depth1,
-                      limit_hit_depth1: LENGTH(doc_nodes) >= {document_limit},
+                      limit_hit_depth1,
                       matched_ids: [@cluster_id]
                     }}
                     """
-                    bind_vars = {"cluster_id": queried_id}
+                    bind_vars = {"cluster_id": f"cti_vertices/{normalized_value}"}
 
             elif query.data_point_type == "property" and normalized_type == "all":
                 if normalized_value == "all":
                     queried_id = "all_properties"
                     query_str = f"""
-                    LET props = (FOR property IN cti_vertices RETURN property._id)
-
+                    LET props = (
+                      FOR property IN cti_vertices
+                        RETURN property._id
+                    )
                     LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
                           FILTER v.type == 'document'
-                          LIMIT {document_limit // 10}
+                          LIMIT {document_limit}
                           RETURN {{vertex: v, edge: e, path: p}}
                     )
-
-                    LET document_ids = UNIQUE(FOR item IN raw_depth1 RETURN item.vertex._id)
-
-                    LET filtered_cluster_edges = (
-                      FOR e IN cti_edges
-                        FILTER e._to IN document_ids AND e.type == 'cluster_to_doc'
-                        LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                        FILTER cluster_key IN ["general", "defacement", "leak", "chat", "exploit"]
-                        LET cluster = DOCUMENT(e._from)
-                        RETURN {{vertex: cluster, edge: e, path: null}}
+                    LET document_ids = UNIQUE(
+                      FOR item IN raw_depth1
+                        FILTER item.vertex.type == 'document'
+                        RETURN item.vertex._id
                     )
 
-                    LET depth1 = UNION(raw_depth1, filtered_cluster_edges)
+                    LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
+                    LET filtered_cluster_edges = (
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          LET cluster_key = PARSE_IDENTIFIER(e._from).key
+                          FILTER cluster_key IN default_clusters
+                          LET cluster = DOCUMENT(e._from)
+                          RETURN {{vertex: cluster, edge: e, path: null}}
+                    )
+
+                    LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
+                    LET limit_hit_depth1 = false
 
                     RETURN {{
                       depth1,
-                      limit_hit_depth1: false,
+                      limit_hit_depth1,
                       matched_ids: props
                     }}
                     """
-
                 else:
                     queried_id = normalized_value
                     query_str = f"""
@@ -156,31 +177,36 @@ class entity_manager:
                         FILTER CONTAINS(LOWER(property.value), @search_value)
                         RETURN property._id
                     )
-
                     LET raw_depth1 = (
                       FOR id IN props
                         FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
                           FILTER v.type == 'document'
-                          LIMIT {document_limit // 10}
+                          LIMIT {document_limit}
                           RETURN {{vertex: v, edge: e, path: p}}
                     )
-
-                    LET document_ids = UNIQUE(FOR item IN raw_depth1 RETURN item.vertex._id)
-
-                    LET filtered_cluster_edges = (
-                      FOR e IN cti_edges
-                        FILTER e._to IN document_ids AND e.type == 'cluster_to_doc'
-                        LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                        FILTER cluster_key IN ["general", "defacement", "leak", "chat", "exploit"]
-                        LET cluster = DOCUMENT(e._from)
-                        RETURN {{vertex: cluster, edge: e, path: null}}
+                    LET document_ids = UNIQUE(
+                      FOR item IN raw_depth1
+                        FILTER item.vertex.type == 'document'
+                        RETURN item.vertex._id
                     )
 
-                    LET depth1 = UNION(raw_depth1, filtered_cluster_edges)
+                    LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
+                    LET filtered_cluster_edges = (
+                      FOR doc_id IN document_ids
+                        FOR e IN cti_edges
+                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                          LET cluster_key = PARSE_IDENTIFIER(e._from).key
+                          FILTER cluster_key IN default_clusters
+                          LET cluster = DOCUMENT(e._from)
+                          RETURN {{vertex: cluster, edge: e, path: null}}
+                    )
+
+                    LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
+                    LET limit_hit_depth1 = false
 
                     RETURN {{
                       depth1,
-                      limit_hit_depth1: false,
+                      limit_hit_depth1,
                       matched_ids: props
                     }}
                     """
@@ -204,16 +230,22 @@ class entity_manager:
                     RETURN {{vertex: v, edge: e, path: p}}
                 )
 
-                LET raw_depth1 = UNION(depth1_nodes, depth2_nodes)
+                LET raw_depth1 = APPEND(depth1_nodes, depth2_nodes)
 
-                LET property_ids = UNIQUE(FOR item IN raw_depth1 FILTER item.vertex.type NOT IN ['document', 'cluster'] RETURN item.vertex._id)
+                LET property_ids = UNIQUE(
+                  FOR item IN raw_depth1
+                    FILTER item.vertex.type NOT IN ['document', 'cluster']
+                    RETURN item.vertex._id
+                )
 
                 LET doc_counts = (
                   FOR pid IN property_ids
                     FOR e IN cti_edges
-                      FILTER e._to == pid AND STARTS_WITH(e.type, "has_") AND e._from != @start_vertex
+                      FILTER e._to == pid AND STARTS_WITH(e.type, "has_")
+                      FILTER e._from != @start_vertex
                       COLLECT doc_id = e._from WITH COUNT INTO score
-                      SORT score DESC LIMIT {document_limit}
+                      SORT score DESC
+                      LIMIT {document_limit}
                       RETURN doc_id
                 )
 
@@ -226,18 +258,30 @@ class entity_manager:
                         RETURN {{vertex: doc, edge: e, path: null}}
                 )
 
-                LET document_ids = UNION(
-                  UNIQUE(FOR item IN raw_depth1 FILTER item.vertex.type == 'document' RETURN item.vertex._id),
-                  doc_counts
+                LET related_doc_ids = (
+                  FOR doc_id IN doc_counts
+                    RETURN doc_id
                 )
 
+                LET document_ids = UNION(
+                  UNIQUE(
+                    FOR item IN raw_depth1
+                      FILTER item.vertex.type == 'document'
+                      RETURN item.vertex._id
+                  ),
+                  related_doc_ids
+                )
+
+                LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
+
                 LET cluster_edges = (
-                  FOR e IN cti_edges
-                    FILTER e._to IN document_ids AND e.type == 'cluster_to_doc'
-                    LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                    FILTER cluster_key IN ["general", "defacement", "leak", "chat", "exploit"]
-                    LET cluster = DOCUMENT(e._from)
-                    RETURN {{vertex: cluster, edge: e, path: null}}
+                  FOR doc_id IN document_ids
+                    FOR e IN cti_edges
+                      FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+                      LET cluster_key = PARSE_IDENTIFIER(e._from).key
+                      FILTER cluster_key IN default_clusters
+                      LET cluster = DOCUMENT(e._from)
+                      RETURN {{vertex: cluster, edge: e, path: null}}
                 )
 
                 LET start_doc_properties = (
@@ -248,11 +292,12 @@ class entity_manager:
                       RETURN {{vertex: prop, edge: e, path: null}}
                 )
 
-                LET depth1 = UNION([raw_depth1, cluster_edges, related_docs, start_doc_properties])
+                LET depth1 = APPEND(APPEND(APPEND(raw_depth1, cluster_edges), related_docs), start_doc_properties)
+                LET limit_hit_depth1 = LENGTH(related_docs) >= {document_limit}
 
                 RETURN {{
                   depth1,
-                  limit_hit_depth1: LENGTH(related_docs) >= {document_limit},
+                  limit_hit_depth1,
                   matched_ids: [@start_vertex]
                 }}
                 """
