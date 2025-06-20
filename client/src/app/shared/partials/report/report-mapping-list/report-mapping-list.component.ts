@@ -28,7 +28,7 @@ export class ReportMappingListComponent implements OnInit {
       .set('data_point_type', 'document')
       .set('model_type', 'document')
       .set('query_value', value)
-      .set('edge', '100')
+      .set('edge', '25')
       .set('depth', '2');
 
     this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
@@ -36,7 +36,7 @@ export class ReportMappingListComponent implements OnInit {
         const {results} = response;
         this.result = results;
         this.loading = true;
-        this.getUniqueSortedItems(this.result, 500);
+        this.getUniqueSortedItems(this.result, 25);
       }
     });
   }
