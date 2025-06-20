@@ -66,8 +66,8 @@
 }
 
 .filter__input_date-container .dropdown-menu {
-  width: 262px;
-  margin-left: -15px !important;
+  width: 275px;
+  margin-left: -22px !important;
   margin-top: 8px !important;
 }
 
@@ -84,6 +84,24 @@
   cursor: pointer;
   padding: 0;
   margin: 0;
+}
+
+.ngb-dp-month {
+  pointer-events: auto !important;
+}
+
+.ngb-dp-navigation-select select {
+  margin-right: 8px;
+}
+
+.ngb-dp-navigation-select select:last-child {
+  margin-right: 0;
+}
+
+.ngb-dp-week {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 2px
 }
 
 .filter__input {
