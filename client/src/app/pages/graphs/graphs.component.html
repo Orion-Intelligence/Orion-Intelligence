@@ -3,7 +3,7 @@
 
   <graph-sidebar (filtersApplied)="onSidebarApply($event)" class="d-none d-md-block"></graph-sidebar>
 
-  <app-graph-info (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()"
+  <app-graph-info *ngIf="loading" (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()"
                   (physicsToggled)="onPhysicsToggled($event)" (ruleSetChange)="ruleSetChange($event)"
                   [(ruleSet)]="ruleSet" [expandEnabledTemp]="expandEnabled"
                   [physicsEnabled]=physicsEnabled [propertyType]="propertyType" [propertyValue]="propertyValue"
