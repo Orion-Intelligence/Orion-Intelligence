@@ -1,6 +1,7 @@
 services:
   web:
     container_name: trusted-web-main
+    restart: unless-stopped
     build:
       context: .
       dockerfile: dockerFiles/api_docker
