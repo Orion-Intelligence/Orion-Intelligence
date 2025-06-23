@@ -1,5 +1,4 @@
-<form (submit)="onFormSubmit()" @fadeInDashboardItem
-      class="default-input-container default-input-sub-container-padded w-90">
+<form (submit)="onFormSubmit()" @fadeInDashboardItem class="default-input-container default-input-sub-container-padded w-90">
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
     <div class="col-md-10 col-sm-12 col-xs-12">
       <div class="input-group default-input-sub-container">
@@ -75,6 +74,6 @@
   </div>
 </div>
 
-<div *ngIf="!isLoading && result_count>0">
+<div *ngIf="!isLoading && result_count>0 && !disableScroll">
   <app-scroll-top></app-scroll-top>
 </div>

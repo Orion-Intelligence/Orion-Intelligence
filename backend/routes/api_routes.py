@@ -12,6 +12,8 @@ from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
     search_defacement_param_model
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import \
+    search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import \
     search_dynamic_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import \
@@ -50,6 +52,9 @@ async def get_insight():
 async def search_general(param: search_general_param_model = Depends()):
     return await search_model.getInstance().search_general_result(param)
 
+@api_routes.get("/api/search/credential", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def search_telegram(param: search_credential_param_model = Depends()):
+    return await search_model.getInstance().search_credential_result(param)
 
 @api_routes.get("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_chat_param_model = Depends()):

@@ -3,7 +3,7 @@
 
   <graph-sidebar (filtersApplied)="onSidebarApply($event)" class="d-none d-md-block"></graph-sidebar>
 
-  <app-graph-info *ngIf="loading" (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()"
+  <app-graph-info (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()"
                   (physicsToggled)="onPhysicsToggled($event)" (ruleSetChange)="ruleSetChange($event)"
                   [(ruleSet)]="ruleSet" [expandEnabledTemp]="expandEnabled"
                   [physicsEnabled]=physicsEnabled [propertyType]="propertyType" [propertyValue]="propertyValue"
@@ -59,8 +59,9 @@
     </div>
   </div>
 
-  <div *ngIf="this.isEmpty && !this.loading" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
-    <img alt="No Data" class="img-fluid w-auto" src="assets/images/shared/cti-empty.svg"/>
+  <div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
+    <img *ngIf="loading" alt="No Data" class="img-fluid w-auto" src="assets/images/shared/cti-empty.svg"/>
+    <img *ngIf="!loading" alt="No Data" class="magnify-animation img-fluid w-auto" src="assets/images/shared/magnifying_search.svg"/>
   </div>
 
   <div class="blocked-media d-block d-md-none text-center p-4">

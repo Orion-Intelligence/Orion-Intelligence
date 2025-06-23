@@ -45,16 +45,12 @@
                                  [icon]="'assets/images/sidebar/exploits.svg'"
                                  [items]="exploitCategories" [routePrefix]="'exploit'"
                                  [title]="'Exploit'"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+                                 (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
+                                 [icon]="'assets/images/sidebar/dump.svg'"
+                                 [items]="dumpCategories" [routePrefix]="'dump'"
+                                 [title]="'Dump'"></app-dashboard-sidebar-items>
 
-
-    <li class="sidebar__item">
-      <div (click)="onSectionSelected(category.DUMP)"
-           [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DUMP}"
-           [queryParamsHandling]="'merge'" [routerLink]="'dumps'" class="sidebar__item-dropdown">
-        <img alt="Dump" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/cloud-storage.svg" width="20">
-        Data Dumps
-      </div>
-    </li>
 
     <div class="sidebar__item">
       <a class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph" target="_blank"> <img
@@ -141,14 +137,12 @@
                                      [items]="exploitCategories" [routePrefix]="'exploit'"
                                      [selectionStore]="selectionStore"
                                      [title]="'Exploit'"></app-dashboard-sidebar-collapsed>
-
-    <li class="sidebar__item">
-      <div (click)="onSectionSelected(category.DUMP)" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.DUMP}"
-           [queryParamsHandling]="'merge'"
-           [routerLink]="'dumps'" appTooltip="Breach Dumps" class="sidebar__item-dropdown">
-        <img alt="Dump" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/cloud-storage.svg" width="20">
-      </div>
-    </li>
+    <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+                                     (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
+                                     [icon]="'assets/images/sidebar/dump.svg'"
+                                     [items]="dumpCategories" [routePrefix]="'dump'"
+                                     [selectionStore]="selectionStore"
+                                     [title]="'Dump'"></app-dashboard-sidebar-collapsed>
 
     <div class="sidebar__item">
       <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph"
@@ -162,7 +156,7 @@
   <a href="http://zucui4cyyun2uok6x7mj3zyzgobcctcgugah33vrttbb7bxgj5quvjqd.onion" target="_blank" class="sidebar__item-dropdown-max">
     <div class="sidebar__item">
       <div appTooltip="Onion Link" class="sidebar__item-dropdown">
-        <img alt="Documentation" class="sidebar__icon sidebar__icon-lift" height="20" ngSrc="../../../../assets/images/sidebar/tor.svg"
+        <img alt="Documentation" class="sidebar__icon sidebar__icon-collapse-lift" height="20" ngSrc="../../../../assets/images/sidebar/tor.svg"
              width="20">
       </div>
     </div>

@@ -17,6 +17,7 @@
 @use 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
 @use 'app/shared/partials/pagination/pagination.component.css';
 @use 'app/pages/dashboard/dashboard.component.css';
+@use 'app/pages/dump/credential/credential.component.css';
 @use 'app/shared/partials/suggestion/suggestion.component.css';
 @use 'app/shared/partials/loading-form/loading-form.component.css';
 @use 'app/shared/partials/report/report_general/report.component.css';
@@ -89,7 +90,7 @@ html::-webkit-scrollbar {
   position: absolute;
   right: 0;
   top: 0;
-  opacity: 7%;
+  opacity: 5%;
   object-fit: contain;
   object-position: top right;
   pointer-events: none;

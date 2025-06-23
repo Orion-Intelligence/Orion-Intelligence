@@ -1,28 +1,9 @@
 import {Routes} from '@angular/router';
-import {LoginComponent} from './pages/login/login.component';
-import {HomepageComponent} from './pages/homepage/homepage.component';
-import {ErrorHandlerComponent} from './pages/error-handler/error-handler.component';
 import {AuthGuard} from './shared/guards/auth-guard.guard';
-import {DirectoryComponent} from './pages/directory/directory.component';
 import {InsightResolver} from './shared/resolvers/insight.resolver';
 import {DirectoryResolver} from './shared/resolvers/directory.resolver';
-import {DashboardComponent} from './pages/dashboard/dashboard.component';
 import {ReportResolver} from './shared/resolvers/report.resolver';
-import {DashboardGeneralComponent} from './shared/partials/intel-panel/dashboard-general/dashboard-general.component';
-import {ReportComponent} from './shared/partials/report/report_general/report.component';
-import {
-  DashboardEmailApiComponent
-} from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
-import {
-  DashboardDefacementComponent
-} from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
-import {ReportDefacementComponent} from './shared/partials/report/report-defacement/report-defacement.component';
-import {DashboardChatsComponent} from './shared/partials/intel-panel/dashboard-chats/dashboard-chats.component';
-import {ReportChatComponent} from './shared/partials/report/report-chat/report-chat.component';
-import {DumpComponent} from './pages/dump/dump.component';
 import {DumpResolver} from './shared/resolvers/dump.resolver';
-import {DashboardExploitComponent} from './shared/partials/intel-panel/dashboard-exploit/dashboard-exploit.component';
-import {ReportExploitComponent} from './shared/partials/report/report-exploit/report-exploit.component';
 
 export const routes: Routes = [
   {
@@ -33,17 +14,17 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
     data: {animation: 'LoginPage'}
   },
   {
     path: 'loginx',
-    component: LoginComponent,
+    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
     data: {animation: 'LoginPage'}
   },
   {
     path: 'dashboard',
-    component: DashboardComponent,
+    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [AuthGuard],
     data: {animation: 'DashboardPage'},
     children: [
@@ -54,7 +35,7 @@ export const routes: Routes = [
       },
       {
         path: 'home',
-        component: HomepageComponent,
+        loadComponent: () => import('./pages/homepage/homepage.component').then(m => m.HomepageComponent),
         resolve: {insights: InsightResolver},
         data: {animation: 'HomePage'}
       },
@@ -65,15 +46,9 @@ export const routes: Routes = [
       },
       {
         path: 'directory',
-        component: DirectoryComponent,
+        loadComponent: () => import('./pages/directory/directory.component').then(m => m.DirectoryComponent),
         resolve: {directory: DirectoryResolver},
         data: {animation: 'DirectoryPage'}
-      },
-      {
-        path: 'dumps',
-        component: DumpComponent,
-        resolve: {dump: DumpResolver},
-        data: {animation: 'DumpsPage'}
       },
       {
         path: 'api',
@@ -86,7 +61,7 @@ export const routes: Routes = [
           },
           {
             path: 'email',
-            component: DashboardEmailApiComponent,
+            loadComponent: () => import('./shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component').then(m => m.DashboardEmailApiComponent),
             data: {animation: 'EmailAPI'}
           }
         ]
@@ -102,12 +77,12 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardGeneralComponent,
+            loadComponent: () => import('./shared/partials/intel-panel/dashboard-general/dashboard-general.component').then(m => m.DashboardGeneralComponent),
             data: {type: 'Breach', animation: 'DataBreach'}
           },
           {
             path: ':category/:m_hash',
-            component: ReportComponent,
+            loadComponent: () => import('./shared/partials/report/report_general/report.component').then(m => m.ReportComponent),
             resolve: {reportdata: ReportResolver},
             data: {type: 'Breach', animation: 'HashPage'}
           }
@@ -124,12 +99,12 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardGeneralComponent,
+            loadComponent: () => import('./shared/partials/intel-panel/dashboard-general/dashboard-general.component').then(m => m.DashboardGeneralComponent),
             data: {type: 'Strategic', animation: 'CategoryPage'}
           },
           {
             path: ':category/:m_hash',
-            component: ReportComponent,
+            loadComponent: () => import('./shared/partials/report/report_general/report.component').then(m => m.ReportComponent),
             resolve: {reportdata: ReportResolver},
             data: {type: 'Strategic', animation: 'HashPage'}
           }
@@ -146,12 +121,12 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardDefacementComponent,
+            loadComponent: () => import('./shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component').then(m => m.DashboardDefacementComponent),
             data: {type: 'Defacement', animation: 'CategoryPage'}
           },
           {
             path: ':category/:m_hash',
-            component: ReportDefacementComponent,
+            loadComponent: () => import('./shared/partials/report/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent),
             resolve: {reportdata: ReportResolver},
             data: {type: 'Defacement', animation: 'HashPage'}
           }
@@ -168,12 +143,12 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardChatsComponent,
+            loadComponent: () => import('./shared/partials/intel-panel/dashboard-chats/dashboard-chats.component').then(m => m.DashboardChatsComponent),
             data: {type: 'Social', animation: 'CategoryPage'}
           },
           {
             path: ':category/:m_hash',
-            component: ReportChatComponent,
+            loadComponent: () => import('./shared/partials/report/report-chat/report-chat.component').then(m => m.ReportChatComponent),
             resolve: {reportdata: ReportResolver},
             data: {type: 'Social', animation: 'HashPage'}
           }
@@ -190,14 +165,36 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            component: DashboardExploitComponent,
+            loadComponent: () => import('./shared/partials/intel-panel/dashboard-exploit/dashboard-exploit.component').then(m => m.DashboardExploitComponent),
             data: {type: 'Social', animation: 'CategoryPage'}
           },
           {
             path: ':category/:m_hash',
-            component: ReportExploitComponent,
+            loadComponent: () => import('./shared/partials/report/report-exploit/report-exploit.component').then(m => m.ReportExploitComponent),
             resolve: {reportdata: ReportResolver},
             data: {type: 'Exploit', animation: 'HashPage'}
+          }
+        ]
+      },
+      {
+        path: 'dump',
+        data: {animation: 'DumpPage'},
+        children: [
+          {
+            path: '',
+            redirectTo: 'listing',
+            pathMatch: 'full'
+          },
+          {
+            path: 'listing',
+            loadComponent: () => import('./pages/dump/dump.component').then(m => m.DumpComponent),
+            resolve: {reportdata: DumpResolver},
+            data: {type: 'listing', animation: 'CategoryPage'}
+          },
+          {
+            path: 'credential',
+            loadComponent: () => import('./pages/dump/credential/credential.component').then(m => m.CredentialComponent),
+            data: {type: 'credential', animation: 'CategoryPage'}
           }
         ]
       }
@@ -205,7 +202,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    component: ErrorHandlerComponent,
+    loadComponent: () => import('./pages/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent),
     data: {animation: 'ErrorPage'}
   }
 ];

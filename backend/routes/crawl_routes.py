@@ -3,6 +3,7 @@ from starlette.requests import Request
 
 from configs.app_dependency import role_required
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
+from orion.api.server.crawl_manager.class_model.credential_model import credential_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
@@ -78,12 +79,18 @@ async def index_chat_data(request: Request):
     body = await request.json()
     return await crawl_controller.getInstance().invoke_chat_index(chat_data_model(**body))
 
+@crawl_routes.post("/api/index/credential", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def index_credential_data(request: Request):
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_credential_index(credential_data_model(**body))
 
 @crawl_routes.post("/api/index/entity", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_entity(request: Request):
     body = await request.json()
     await crawl_controller.getInstance().invoke_entity_index(entity_model(**body))
 
+
+from fastapi import Request
 
 @crawl_routes.post("/api/index/dump")
 async def index_dump(request: Request):

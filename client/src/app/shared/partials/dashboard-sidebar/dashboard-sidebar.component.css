@@ -56,6 +56,7 @@
   border-top: 1px solid #ffffff10;
   position: absolute;
   bottom: 21px !important;
+  width: 55px;
 }
 
 .sidebar-hotlinks-collapsed .sidebar__icon {
@@ -92,7 +93,7 @@
 }
 
 .sidebar__icon-lift {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .sidebar__subitems {
@@ -191,7 +192,7 @@
 
 .sidebar__item-dropdown {
   cursor: pointer;
-  width: 100vw;
+  width: 265px;
   position: relative;
 }
 
@@ -269,6 +270,10 @@
   margin-top: -10px;
 }
 
+.sidebar__icon-collapse-lift{
+  margin-bottom: 4px !important;
+}
+
 .sidebar-collapsed .sidebar__items{
   height: calc(100vh - 330px);
 }
@@ -318,10 +323,10 @@
 }
 
 .sidebar-collapsed .sidebar__icon-min {
-  margin: 0 0 0 3px;
+  margin: 0 0 0 0;
   padding: 0;
-  width: 14px;
-  height: 14px;
+  width: 17px;
+  height: 17px;
 }
 
 .sidebar-collapsed .sidebar__items {

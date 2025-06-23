@@ -29,24 +29,25 @@ class dump_model:
         if params.group != "all":
             query["group"] = params.group
 
-        if params.parsed_status != "all":
-            query["parsed_status"] = params.parsed_status
+        if params.status != "all":
+            if isinstance(params.status, str):
+                parsed = params.status.strip().lower()
+                if parsed == "true":
+                    query["parsed_status"] = True
+                elif parsed == "false":
+                    query["parsed_status"] = False
+            elif isinstance(params.status, bool):
+                query["parsed_status"] = params.status
 
         if params.mDateRange:
-            try:
-                start_str, end_str = [s.strip() for s in params.mDateRange.split(",")]
-                start_date = datetime.strptime(start_str, "%Y-%m-%d")
-                end_date = datetime.strptime(end_str, "%Y-%m-%d") + timedelta(days=1)
+            start_str, end_str = [s.strip() for s in params.mDateRange.split(",")]
+            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_str, "%Y-%m-%d") + timedelta(days=1)
 
-                query["created_at"] = {
-                    "$gte": start_date,
-                    "$lt": end_date
-                }
-
-                print(">>> Date range filter:", query["created_at"], flush=True)
-
-            except Exception as e:
-                print(">>> Date parsing error:", e, flush=True)
+            query["created_at"] = {
+                "$gte": start_date,
+                "$lt": end_date
+            }
 
         total_count = await self._engine.count(db_dump_record_model, query)
         data = await self._engine.find(

@@ -3,6 +3,7 @@ import re
 from fastapi.concurrency import run_in_threadpool
 
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
+from orion.api.server.entity_manager.entity_request_generator import EntityRequestGenerator
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.log_manager.log_controller import log
@@ -33,6 +34,7 @@ class entity_manager:
             text = str(text)
         return text.lower().replace(" ", "_")
 
+
     @staticmethod
     def _sanitize(value: str) -> str:
         return re.sub(r'[^a-zA-Z0-9_\-\.@()+,=;\$!\*\'%:]', '', value.replace(' ', '_')).lower()
@@ -45,263 +47,35 @@ class entity_manager:
             depth_level = 1
             secondary_depth_level = int(str(int(query.depth) + 1))
             document_limit = int(query.edge)
+            if document_limit < 25:
+                document_limit = 25
+            if document_limit > 350:
+                document_limit = 350
 
             query_str = ""
             bind_vars = {}
 
             if query.data_point_type == "cluster" and normalized_type == "cluster":
-                if normalized_value == "all":
-                    queried_id = "all_clusters"
-                    query_str = f"""
-                    LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat", "cti_vertices/exploit"]
-
-                    LET cluster_data = (
-                      FOR cluster_id IN clusters
-                        LET docs = (
-                          FOR v, e, p IN {depth_level}..{depth_level} ANY cluster_id GRAPH 'cti_graph'
-                            OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                            FILTER v.type == 'document'
-                            LIMIT {document_limit - 20}
-                            RETURN {{vertex: v, edge: e, path: p}}
-                        )
-                        RETURN docs
-                    )
-
-                    LET raw_depth1 = FLATTEN(cluster_data)
-
-                    LET document_ids = UNIQUE(
-                      FOR item IN raw_depth1
-                        RETURN item.vertex._id
-                    )
-
-                    LET cluster_edges = (
-                      FOR doc_id IN document_ids
-                        FOR e IN cti_edges
-                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                          FOR cluster IN cti_vertices
-                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
-                            RETURN {{vertex: cluster, edge: e, path: null}}
-                    )
-
-                    LET depth1 = APPEND(raw_depth1, cluster_edges)
-                    LET limit_hit_depth1 = false
-
-                    RETURN {{
-                      depth1,
-                      limit_hit_depth1,
-                      matched_ids: clusters
-                    }}
-                    """
-                else:
-                    queried_id = f"cti_vertices/{normalized_value}"
-                    query_str = f"""
-                    LET doc_nodes = (
-                      FOR v, e, p IN {depth_level}..{depth_level} ANY @cluster_id GRAPH 'cti_graph'
-                        OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                        FILTER v.type == 'document'
-                        LIMIT {document_limit}
-                        RETURN {{vertex: v, edge: e, path: p}}
-                    )
-
-                    LET document_ids = UNIQUE(
-                      FOR item IN doc_nodes
-                        RETURN item.vertex._id
-                    )
-
-                    LET cluster_edges = (
-                      FOR doc_id IN document_ids
-                        FOR e IN cti_edges
-                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                          FOR cluster IN cti_vertices
-                            FILTER cluster._id == e._from AND cluster.type == 'cluster'
-                            RETURN {{vertex: cluster, edge: e, path: null}}
-                    )
-
-                    LET depth1 = APPEND(doc_nodes, cluster_edges)
-                    LET limit_hit_depth1 = LENGTH(doc_nodes) >= {document_limit}
-
-                    RETURN {{
-                      depth1,
-                      limit_hit_depth1,
-                      matched_ids: [@cluster_id]
-                    }}
-                    """
-                    bind_vars = {"cluster_id": f"cti_vertices/{normalized_value}"}
-
+                queried_id, query_str, bind_vars = EntityRequestGenerator.get_cluster_documents_query(
+                    normalized_value=normalized_value,
+                    depth_level=depth_level,
+                    document_limit=document_limit
+                )
             elif query.data_point_type == "property" and normalized_type == "all":
-                if normalized_value == "all":
-                    queried_id = "all_properties"
-                    query_str = f"""
-                    LET props = (
-                      FOR property IN cti_vertices
-                        RETURN property._id
-                    )
-                    LET raw_depth1 = (
-                      FOR id IN props
-                        FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-                          FILTER v.type == 'document'
-                          LIMIT {document_limit}
-                          RETURN {{vertex: v, edge: e, path: p}}
-                    )
-                    LET document_ids = UNIQUE(
-                      FOR item IN raw_depth1
-                        FILTER item.vertex.type == 'document'
-                        RETURN item.vertex._id
-                    )
-
-                    LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
-                    LET filtered_cluster_edges = (
-                      FOR doc_id IN document_ids
-                        FOR e IN cti_edges
-                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                          LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                          FILTER cluster_key IN default_clusters
-                          LET cluster = DOCUMENT(e._from)
-                          RETURN {{vertex: cluster, edge: e, path: null}}
-                    )
-
-                    LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
-                    LET limit_hit_depth1 = false
-
-                    RETURN {{
-                      depth1,
-                      limit_hit_depth1,
-                      matched_ids: props
-                    }}
-                    """
-                else:
-                    queried_id = normalized_value
-                    query_str = f"""
-                    LET props = (
-                      FOR property IN cti_vertices
-                        FILTER CONTAINS(LOWER(property.value), @search_value)
-                        RETURN property._id
-                    )
-                    LET raw_depth1 = (
-                      FOR id IN props
-                        FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-                          FILTER v.type == 'document'
-                          LIMIT {document_limit}
-                          RETURN {{vertex: v, edge: e, path: p}}
-                    )
-                    LET document_ids = UNIQUE(
-                      FOR item IN raw_depth1
-                        FILTER item.vertex.type == 'document'
-                        RETURN item.vertex._id
-                    )
-
-                    LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
-                    LET filtered_cluster_edges = (
-                      FOR doc_id IN document_ids
-                        FOR e IN cti_edges
-                          FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                          LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                          FILTER cluster_key IN default_clusters
-                          LET cluster = DOCUMENT(e._from)
-                          RETURN {{vertex: cluster, edge: e, path: null}}
-                    )
-
-                    LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
-                    LET limit_hit_depth1 = false
-
-                    RETURN {{
-                      depth1,
-                      limit_hit_depth1,
-                      matched_ids: props
-                    }}
-                    """
-                    bind_vars = {"search_value": normalized_value}
-
+                queried_id, query_str, bind_vars = EntityRequestGenerator.build_property_search_query(
+                    normalized_value,
+                    depth_level,
+                    document_limit
+                )
             else:
-                start_vertex = f"cti_vertices/{normalized_value}" if query.data_point_type == "document" else f"cti_vertices/{normalized_type}:{normalized_value}"
-                queried_id = start_vertex
-
-                query_str = f"""
-                LET depth1_nodes = (
-                  FOR v, e, p IN {depth_level}..{depth_level} ANY @start_vertex GRAPH 'cti_graph'
-                    OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                    RETURN {{vertex: v, edge: e, path: p}}
+                queried_id, query_str, bind_vars = EntityRequestGenerator.get_document_or_property_query(
+                    normalized_value=normalized_value,
+                    normalized_type=normalized_type,
+                    depth_level=depth_level,
+                    secondary_depth_level=secondary_depth_level,
+                    document_limit=document_limit,
+                    data_point_type=query.data_point_type
                 )
-
-                LET depth2_nodes = (
-                  FOR v, e, p IN {secondary_depth_level}..{secondary_depth_level} ANY @start_vertex GRAPH 'cti_graph'
-                    OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                    FILTER v.type == "cluster"
-                    RETURN {{vertex: v, edge: e, path: p}}
-                )
-
-                LET raw_depth1 = APPEND(depth1_nodes, depth2_nodes)
-
-                LET property_ids = UNIQUE(
-                  FOR item IN raw_depth1
-                    FILTER item.vertex.type NOT IN ['document', 'cluster']
-                    RETURN item.vertex._id
-                )
-
-                LET doc_counts = (
-                  FOR pid IN property_ids
-                    FOR e IN cti_edges
-                      FILTER e._to == pid AND STARTS_WITH(e.type, "has_")
-                      FILTER e._from != @start_vertex
-                      COLLECT doc_id = e._from WITH COUNT INTO score
-                      SORT score DESC
-                      LIMIT {document_limit}
-                      RETURN doc_id
-                )
-
-                LET related_docs = (
-                  FOR doc_id IN doc_counts
-                    FOR e IN cti_edges
-                      FILTER e._from == doc_id AND STARTS_WITH(e.type, "has_")
-                      FOR doc IN cti_vertices
-                        FILTER doc._id == doc_id AND doc.type == "document"
-                        RETURN {{vertex: doc, edge: e, path: null}}
-                )
-
-                LET related_doc_ids = (
-                  FOR doc_id IN doc_counts
-                    RETURN doc_id
-                )
-
-                LET document_ids = UNION(
-                  UNIQUE(
-                    FOR item IN raw_depth1
-                      FILTER item.vertex.type == 'document'
-                      RETURN item.vertex._id
-                  ),
-                  related_doc_ids
-                )
-
-                LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
-
-                LET cluster_edges = (
-                  FOR doc_id IN document_ids
-                    FOR e IN cti_edges
-                      FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                      LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                      FILTER cluster_key IN default_clusters
-                      LET cluster = DOCUMENT(e._from)
-                      RETURN {{vertex: cluster, edge: e, path: null}}
-                )
-
-                LET start_doc_properties = (
-                  FOR e IN cti_edges
-                    FILTER e._from == @start_vertex AND STARTS_WITH(e.type, "has_")
-                    FOR prop IN cti_vertices
-                      FILTER prop._id == e._to
-                      RETURN {{vertex: prop, edge: e, path: null}}
-                )
-
-                LET depth1 = APPEND(APPEND(APPEND(raw_depth1, cluster_edges), related_docs), start_doc_properties)
-                LET limit_hit_depth1 = LENGTH(related_docs) >= {document_limit}
-
-                RETURN {{
-                  depth1,
-                  limit_hit_depth1,
-                  matched_ids: [@start_vertex]
-                }}
-                """
-                bind_vars = {"start_vertex": start_vertex}
 
             result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
             result_obj = result_obj[0] if result_obj else {}
@@ -344,13 +118,13 @@ class entity_manager:
             doc_vertex = f"cti_vertices/{normalized_doc_id}"
             cluster_vertex = f"cti_vertices/{normalized_cluster_id}"
 
-            doc_data = entity.model_dump(exclude={"m_cluster_id"})
-            properties = entity.model_dump(exclude={"m_cluster_id", "m_document_id"})
+            raw_doc_data = entity.model_dump(exclude={"m_cluster_id"})
+            raw_properties = entity.model_dump(exclude={"m_cluster_id", "m_document_id"})
 
-            has_valid_property = any(
-                v not in (None, "", [], {}) for v in properties.values()
-            )
+            doc_data = {EntityRequestGenerator.deduplicate_key(k): v for k, v in raw_doc_data.items() if EntityRequestGenerator.deduplicate_key(k)}
+            properties = {EntityRequestGenerator.deduplicate_key(k): v for k, v in raw_properties.items() if EntityRequestGenerator.deduplicate_key(k)}
 
+            has_valid_property = any(v not in (None, "", [], {}) for v in properties.values())
             if not has_valid_property:
                 return {"status": "skipped", "message": f"Entity {normalized_doc_id} has no valid properties."}
 
@@ -385,34 +159,28 @@ class entity_manager:
             for key, value in properties.items():
                 try:
                     values = value if isinstance(value, list) else [value]
-
                     for item in values:
                         if item in (None, "", [], {}):
                             continue
-
                         normalized_item = self._sanitize(self._normalize_key(item))
                         prop_key = f"{key}:{normalized_item}"
                         prop_vertex = f"cti_vertices/{prop_key}"
                         edge_key = f"{normalized_doc_id}_{key}_{normalized_item}"
                         if len(prop_key) > 100 or len(edge_key) > 100:
                             continue
-
                         await run_in_threadpool(lambda: self.__db.collection("cti_vertices").insert({
                             "_key": prop_key,
                             "value": normalized_item,
                             "type": key
                         }, overwrite=True))
-
                         await run_in_threadpool(lambda: self.__db.collection("cti_edges").insert({
                             "_key": edge_key,
                             "_from": doc_vertex,
                             "_to": prop_vertex,
                             "type": f"has_{key}"
                         }, overwrite=True))
-                except Exception as _:
+                except Exception:
                     pass
-                if value in (None, "", [], {}):
-                    continue
 
             return {"status": "success", "message": f"Entity {normalized_doc_id} processed."}
 

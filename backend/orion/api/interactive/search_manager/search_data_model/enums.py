@@ -12,3 +12,4 @@ general_listing = {
 }
 
 chat_listing = {}
+credential_listing = {}

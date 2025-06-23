@@ -36,6 +36,8 @@ export class SidebarSectionComponent {
     'Tracking': 'Breach Tracker',
     'CVE': 'CVE',
     'Mitre': 'Mitre',
+    'Listing': 'Listing',
+    'Credential': 'Credential',
     'Email': 'Email',
     'Telegram': 'telegram',
     'Archive': 'archive',

@@ -43,7 +43,7 @@ class service_manager:
                 await asyncio.sleep(5)
                 await migration_manager.get_instance().init_migration()
 
-                await asyncio.sleep(15)
+                await asyncio.sleep(5)
                 arango_controller.get_instance().link_connection()
                 arango_controller.get_instance().initialize()
 

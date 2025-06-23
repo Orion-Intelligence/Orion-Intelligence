@@ -1,5 +1,6 @@
 from orion.api.server.crawl_manager.class_model import entity_model
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
+from orion.api.server.crawl_manager.class_model.credential_model import credential_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
 from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
@@ -51,6 +52,9 @@ class crawl_controller:
 
     async def invoke_chat_index(self, leak_index: chat_data_model):
         return await self.__crawl_model.invoke_chat_index(leak_index)
+
+    async def invoke_credential_index(self, leak_index: credential_data_model):
+        return await self.__crawl_model.invoke_credential_index(leak_index)
 
     @staticmethod
     async def invoke_entity_index(entity: entity_model):

@@ -6,11 +6,12 @@ import {NgIf} from '@angular/common';
 import {LoaderComponent} from '../../shared/partials/loader/loader.component';
 import {AppService} from '../../services/core/app.service';
 import {appAnimation} from '../../shared/animations/app.animations';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NgIf, LoaderComponent,],
+  imports: [RouterOutlet, NgIf, LoaderComponent, FormsModule, ReactiveFormsModule,],
   templateUrl: './app.component.html',
   animations: [appAnimation],
 })

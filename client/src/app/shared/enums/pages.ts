@@ -3,7 +3,7 @@ export enum Category {
   BREACH = 'Breach',
   HOMEPAGE = 'Home',
   DIRECTORY = 'Directory',
-  DUMP = 'Dumps',
+  DUMP = 'Dump',
   DEFACEMENT = 'Defacement',
   SOCIAL = 'Social',
   API = 'Api',
@@ -44,4 +44,9 @@ export enum SocialSubCategory {
 export enum ExploitSubCategory {
   CVE = 'CVE',
   Mitre = 'Mitre',
+}
+
+export enum DumpSubCategory {
+  LISTING = 'Listing',
+  CREDENTIAL = 'Credential',
 }

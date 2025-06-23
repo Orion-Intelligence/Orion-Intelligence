@@ -10,6 +10,7 @@ import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.m
 import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.param.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExploitCallbackModel} from '../../shared/model/results/exploit/exploit.callback.model';
+import {CredentialCallbackModel} from '../../shared/model/results/credentials/credential.callback.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,7 @@ export class DashboardService {
   exploitCallbackModel: ExploitCallbackModel = new ExploitCallbackModel();
   leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
+  credentialCallbackModel: CredentialCallbackModel = new CredentialCallbackModel();
 
   private cancelRequest$ = new Subject<void>();
 

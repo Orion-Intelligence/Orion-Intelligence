@@ -73,11 +73,11 @@ class search_callback:
                     m_service["m_highlighted"] = ""
 
                 if isinstance(dedup_key, list):
-                    if any(item in mDescription for item in dedup_key):
+                    if any(item in mDescription for item in dedup_key) and m_hash:
                         continue
                     for item in dedup_key:
                         mDescription.add(item)
-                else:
+                elif m_hash:
                     if dedup_key in mDescription:
                         continue
                     mDescription.add(dedup_key)

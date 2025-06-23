@@ -32,6 +32,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() searchQuery = '';
   @Input() analyticsToggle = false;
   @Input() shrinkmenu = false;
+  @Input() disableScroll = false;
   @Input() type!: Category;
   @Input() showAnalytics = true;
 

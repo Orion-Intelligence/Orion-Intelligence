@@ -7,6 +7,7 @@ class ELASTIC_INDEX:
     S_DEFACEMENT_INDEX = "defacement_model"
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
+    S_CREDENTIAL_INDEX = "credential_model"
 
 
 class ELASTIC_CONNECTIONS:
@@ -197,39 +198,55 @@ class ELASTIC_ENUMS:
             }
         }
     }
-
-    class ELASTIC_ENUMS:
-        mapping_exploit_model = {
-            "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
-                "max_result_window": 1000000
-            },
-            "mappings": {
-                "dynamic_templates": [
-                    {
-                        "strings_as_keywords": {
-                            "match_mapping_type": "string",
-                            "mapping": {
-                                "type": "keyword"
-                            }
-                        }
+    mapping_credential_model = {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1000000,
+            "codec": "best_compression",
+            "analysis": {
+                "filter": {
+                    "autocomplete_filter": {
+                        "type": "edge_ngram",
+                        "min_gram": 1,
+                        "max_gram": 20
                     }
-                ],
-                "properties": {
-                    "m_hash": {"type": "keyword"},
-                    "m_title": {"type": "text"},
-                    "m_url": {"type": "keyword"},
-                    "m_base_url": {"type": "keyword"},
-                    "m_content": {"type": "text"},
-                    "m_important_content": {"type": "text"},
-                    "m_network": {"type": "keyword"},
-                    "m_section": {"type": "keyword"},
-                    "m_content_type": {"type": "keyword"},
-                    "m_weblink": {"type": "keyword"},
-                    "m_websites": {"type": "keyword"},
-                    "m_logo_or_images": {"type": "keyword"},
-                    "m_leak_date": {"type": "date", "format": "yyyy-MM-dd"}
+                },
+                "analyzer": {
+                    "autocomplete": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": ["lowercase", "autocomplete_filter"]
+                    }
+                }
+            }
+        },
+        "mappings": {
+            "_source": {
+                "enabled": True
+            },
+            "properties": {
+                "u": {
+                    "type": "text",
+                    "analyzer": "autocomplete",
+                    "search_analyzer": "standard"
+                },
+                "l": {
+                    "type": "keyword",
+                    "index": False,
+                    "doc_values": False
+                },
+                "s": {
+                    "type": "byte",
+                    "index": False,
+                    "doc_values": False
+                },
+                "g": {
+                    "type": "byte",
+                    "index": False,
+                    "doc_values": False
                 }
             }
         }
+    }
+

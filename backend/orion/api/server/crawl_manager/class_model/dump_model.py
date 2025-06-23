@@ -9,3 +9,5 @@ class DumpModel(BaseModel):
     source: str
     group: str
     link: str
+    status: bool = False
+

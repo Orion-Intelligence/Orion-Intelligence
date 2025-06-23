@@ -1,12 +1,8 @@
 from datetime import datetime, timezone
 from string import capwords
-
 from elasticsearch import AsyncElasticsearch
-
-from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, \
-    DEFACEMENT_AGGREGATION_MAPPING
-from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS,
-                                                          ELASTIC_INDEX, ELASTIC_ENUMS)
+from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
+from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.log_manager.log_controller import log
 
@@ -44,6 +40,7 @@ class elastic_controller:
             mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
             mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
+            mapping_credential_model = ELASTIC_ENUMS.mapping_credential_model
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
@@ -62,6 +59,9 @@ class elastic_controller:
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model)
+
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CREDENTIAL_INDEX):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CREDENTIAL_INDEX, body=mapping_credential_model)
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
@@ -169,3 +169,10 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
             return False, str(ex)
+
+    async def index_bulk_data(self, p_data):
+        try:
+            response = await self.__m_connection.bulk(body=p_data)
+            return response
+        except Exception:
+            pass

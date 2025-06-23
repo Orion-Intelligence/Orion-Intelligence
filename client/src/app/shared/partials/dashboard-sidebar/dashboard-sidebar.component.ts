@@ -4,7 +4,7 @@ import {
   ApiSubCategory,
   BreachSubCategory,
   Category,
-  DefacementSubCategory,
+  DefacementSubCategory, DumpSubCategory,
   ExploitSubCategory,
   GeneralSubCategory,
   SocialSubCategory
@@ -34,6 +34,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
+  dumpCategories = Object.values(DumpSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
@@ -85,6 +86,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           break;
         case Category.DEFACEMENT:
           firstSubcategory = this.defacementCategories[0];
+          break;
+        case Category.DUMP:
+          firstSubcategory = this.dumpCategories[0];
           break;
       }
 

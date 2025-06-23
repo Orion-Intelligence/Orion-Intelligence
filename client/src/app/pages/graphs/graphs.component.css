@@ -1,6 +1,5 @@
 .graph-container {
-  overflow: hidden;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   padding-left: 251px;
   background-color: #051320;
@@ -107,4 +106,48 @@
   border-radius: 4px;
   box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
   z-index: 1000;
+}
+
+@keyframes searchMotion {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  12.5% {
+    transform: translate(7px, -7px) rotate(4deg);
+  }
+
+  25% {
+    transform: translate(10px, -14px) rotate(6deg);
+  }
+
+  37.5% {
+    transform: translate(7px, -21px) rotate(2deg);
+  }
+
+  50% {
+    transform: translate(0px, -25px) rotate(-2deg);
+  }
+
+  62.5% {
+    transform: translate(-7px, -21px) rotate(-4deg);
+  }
+
+  75% {
+    transform: translate(-10px, -14px) rotate(-6deg);
+  }
+
+  87.5% {
+    transform: translate(-7px, -7px) rotate(-2deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+.magnify-animation {
+  animation: searchMotion 3s linear infinite;
+  transform-origin: center center;
+  display: inline-block;
 }

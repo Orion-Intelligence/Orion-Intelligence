@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
+from orion.api.server.crawl_manager.class_model.credential_model import credential_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
 from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
@@ -122,6 +123,13 @@ class crawl_model:
         except Exception as ex:
             return {"error": str(ex)}
 
+    @staticmethod
+    async def invoke_credential_index(credential_index: credential_data_model):
+        m_data = elastic_request_generator().index_query_credential(credential_index.model_dump())
+
+        await elastic_controller.get_instance().index_bulk_data(m_data)
+        return {"parsed":"true"}
+
     async def invoke_chat_index(self, chat_index: chat_data_model):
         m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
@@ -230,7 +238,7 @@ class crawl_model:
 
                 dump_record = db_dump_record_model(
                     id=record_id,
-                    parsed_status=False,
+                    parsed_status=dump_model.status,
                     leak_url=url,
                     source=dump_model.source,
                     group=dump_model.group,

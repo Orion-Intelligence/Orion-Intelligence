@@ -5,9 +5,9 @@ export const dump_filters: FilterModel = {
     source: {
       title: "Source",
       options: [
-        {key: "all", label: "All"},
-        {key: "telegram", label: "Telegram"},
-        {key: "websites", label: "Websites"}
+        { key: "all", label: "All" },
+        { key: "telegram", label: "Telegram" },
+        { key: "websites", label: "Websites" }
       ],
       type: "dropdown",
       tooltip: "Leak origin sources",
@@ -19,6 +19,17 @@ export const dump_filters: FilterModel = {
       type: "daterange",
       tooltip: "Select Range",
       selected: ""
+    },
+    status: {
+      title: "Status",
+      options: [
+        { key: "all", label: "All" },
+        { key: "true", label: "True" },
+        { key: "false", label: "False" }
+      ],
+      type: "dropdown",
+      tooltip: "Status filter (True/False)",
+      selected: "all"
     }
   }
 };
