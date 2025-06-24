@@ -83,6 +83,7 @@
 
 .dashboard__sidebar {
   width: 300px;
+  border-right: 1px solid #ffffff15;
   position: sticky;
   padding: 0;
   height: 100%;

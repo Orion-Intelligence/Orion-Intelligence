@@ -18,3 +18,11 @@ export const LANGUAGE_MAP: Record<string, { iso1: string, name: string }> = {
   pol: {iso1: 'pl', name: 'Polish'},
   ces: {iso1: 'cs', name: 'Czech'}
 };
+
+export const DUMP_SOURCE_MAP: Record<number, { name: string }> = {
+  1: { name: 'Telegram' },
+};
+
+export const DUMP_GROUP_MAP: Record<number, { name: string }> = {
+  1: { name: 'Dataleak 2025' },
+};

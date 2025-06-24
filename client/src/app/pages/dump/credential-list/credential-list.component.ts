@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DatePipe, NgForOf, NgIf } from '@angular/common';
 import {CredentialCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {DUMP_GROUP_MAP, DUMP_SOURCE_MAP} from '../../../shared/constants/enums';
 
 @Component({
   selector: 'app-credential-list',
@@ -15,6 +16,8 @@ import {DashboardService} from '../../../services/dashboard/dashboard.service';
 })
 export class CredentialListComponent implements OnInit {
   credentialData$: CredentialCallbackModel;
+  dumpSourceMap = DUMP_SOURCE_MAP;
+  dumpGroupMap = DUMP_GROUP_MAP;
 
   constructor(public dashboardService: DashboardService) {
     this.credentialData$ = this.dashboardService.credentialCallbackModel;

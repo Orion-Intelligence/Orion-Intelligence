@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 class credential_model(BaseModel):
     username: Optional[str] = None
+    file: Optional[str] = None
     password: Optional[str] = None
     link: Optional[List[str]] = None
     source: Optional[int] = None

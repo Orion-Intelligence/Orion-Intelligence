@@ -236,6 +236,11 @@ class ELASTIC_ENUMS:
                     "index": False,
                     "doc_values": False
                 },
+                "fn": {
+                    "type": "keyword",
+                    "index": False,
+                    "doc_values": False
+                },
                 "s": {
                     "type": "byte",
                     "index": False,

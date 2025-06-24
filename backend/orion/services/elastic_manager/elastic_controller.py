@@ -1,3 +1,4 @@
+import pprint
 from datetime import datetime, timezone
 from string import capwords
 from elasticsearch import AsyncElasticsearch
@@ -173,6 +174,9 @@ class elastic_controller:
     async def index_bulk_data(self, p_data):
         try:
             response = await self.__m_connection.bulk(body=p_data)
+            pprint.pprint(response)
+
             return response
-        except Exception:
-            pass
+
+        except Exception as ex:
+            log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
