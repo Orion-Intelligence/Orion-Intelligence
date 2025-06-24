@@ -50,7 +50,7 @@ class crawl_model:
 
         general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)
         if not new_content_type:
-            new_content_type = "general"
+            new_content_type = ["general"]
 
         if general_model:
             general_model.content_type = list(set((general_model.content_type or []) + new_content_type))
