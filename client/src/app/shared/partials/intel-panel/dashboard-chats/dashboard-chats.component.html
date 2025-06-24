@@ -1,4 +1,3 @@
-<img alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" src="/assets/images/shared/Bg.webp">
 <app-result (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)"
             (updateQuery)="onUpdateQuery($event)" [filterModel]="chat_filters" [isLoading]="isLoading"
             [result_count]="Math.ceil(chatCallbackModel.Result.length)" [searchQuery]="query"
