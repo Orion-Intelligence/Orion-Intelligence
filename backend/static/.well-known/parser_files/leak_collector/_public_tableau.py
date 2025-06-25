@@ -77,6 +77,7 @@ class _public_tableau(leak_extractor_interface, ABC):
     def parse_leak_data(self, page: Page):
         max_pages = 50 if self.is_crawled else 100000
 
+        sleep(320)
         page.evaluate("""
             const cursor = document.createElement('div');
             cursor.id = 'fake-cursor';
@@ -100,7 +101,6 @@ class _public_tableau(leak_extractor_interface, ABC):
             };
         """)
 
-        sleep(120)
         page.wait_for_selector("#tabZoneId8", state="visible", timeout=160000)
         viewport = page.viewport_size
         x_position = int(viewport["width"] * 0.8)
