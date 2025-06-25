@@ -6,6 +6,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
@@ -22,17 +23,20 @@ class _mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
-
         self.callback = callback
 
     def __new__(cls, callback=None):
-
         if cls._instance is None:
             cls._instance = super(_mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -124,14 +128,15 @@ class _mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id(leak_extractor_i
                 )
 
                 entity_data = entity_model(
-                    m_email=helper_method.extract_emails(description)
+                    m_team="mydata"
                 )
 
                 entity_data = helper_method.extract_entities(description, entity_data)
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 
-            except Exception:
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 error_count += 1
                 if error_count >= 3:
                     break

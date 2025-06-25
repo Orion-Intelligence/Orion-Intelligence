@@ -9,6 +9,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -25,6 +26,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -33,6 +35,10 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
         if cls._instance is None:
             cls._instance = super(_cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd, cls).__new__(cls)
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -82,8 +88,11 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
         try:
             sleep(50)
             all_hrefs = []
+            max_pages = 3
+            if self._is_crawled:
+                max_pages = 1
 
-            for page_num in range(0, 3):
+            for page_num in range(1, max_pages):
 
                 page_url = f"{self.base_url}?page={page_num}"
 
@@ -112,8 +121,10 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
 
             for index, url in enumerate(all_hrefs):
                 try:
-                    page.goto(url)
-                    page.wait_for_load_state('load')
+                    try:
+                        page.goto(url, timeout=10000)
+                    except Exception:
+                        pass
 
                     company_name_element = page.query_selector(
                         "h2.font-bold.text-yellow-500.mb-4.break-words.uppercase")
@@ -133,20 +144,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
 
                     m_leak_date = datetime.strptime(created_date, '%B %d, %Y').date()
 
-                    is_crawled = int(
-                        self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, 0,
-                                       RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                    ref_html = None
-                    if is_crawled != -1 and is_crawled < 5:
-                        ref_html = helper_method.extract_refhtml(website)
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                           CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, -1,
-                                           RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                        else:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT,
-                                           CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + website, is_crawled + 1,
-                                           RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                    ref_html = helper_method.extract_refhtml(website, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
@@ -164,7 +162,6 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_email=helper_method.extract_emails(description),
                         m_company_name=company_name,
                         m_ip=[website],
                         m_team="cicada"
@@ -174,10 +171,12 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     error_count += 1
                     if error_count >= 3:
                         break
 
         except Exception as ex:
-            print(f"An error occurred in parse_leak_data: {ex}")
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

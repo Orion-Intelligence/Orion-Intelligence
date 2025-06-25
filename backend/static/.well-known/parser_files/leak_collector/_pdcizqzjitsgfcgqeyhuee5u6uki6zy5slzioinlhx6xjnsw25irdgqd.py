@@ -1,3 +1,4 @@
+import re
 from abc import ABC
 from typing import List
 
@@ -6,6 +7,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -22,6 +24,7 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -31,6 +34,10 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
             cls._instance = super(_pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -83,23 +90,18 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                     title = title_el.text_content().strip() if title_el else "No Title"
                     weblink = next((t.strip('",;()[]<>') for t in title.split() if '.' in t), "")
 
-                    is_crawled = int(
-                        self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, 0,
-                                       RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                    ref_html = None
-                    if is_crawled != -1 and is_crawled < 5:
-                        ref_html = helper_method.extract_refhtml(title)
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title,
-                                           -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                        else:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title,
-                                           is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                    ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
                     date_str = date_el.text_content().strip() if date_el else None
                     description = description_el.text_content().strip() if description_el else "No Description"
                     size = size_el.text_content().strip() if size_el else "No Size"
                     read_more_link = read_more_el.get_attribute("href") if read_more_el else None
+
+                    m_date_temp = re.search(r'Update:(\d{4}-\d{2}-\d{2})', date_str)
+                    if m_date_temp:
+                        date = re.search(r'Update:(\d{4}-\d{2}-\d{2})', date_str).group(1)
+                    else:
+                        date = date_str
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
@@ -111,25 +113,27 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=description[:500],
                         m_content_type=["leaks"],
-                        m_leak_date=date_str,
+                        m_leak_date=date,
                         m_data_size=size,
                         m_weblink=[read_more_link]
                     )
 
                     entity_data = entity_model(
-                        m_email=helper_method.extract_emails(description),
                         m_ip=[weblink],
                         m_company_name=title,
+                        m_team="StormouS"
                     )
 
                     entity_data = helper_method.extract_entities(description, entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     error_count += 1
                     if error_count >= 3:
                         break
 
-        except Exception as e:
-            print(f"An error occurred while parsing leak data: {e}")
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

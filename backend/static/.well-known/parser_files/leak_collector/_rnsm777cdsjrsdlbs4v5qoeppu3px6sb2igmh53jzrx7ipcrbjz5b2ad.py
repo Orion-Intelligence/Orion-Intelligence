@@ -9,6 +9,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
@@ -24,6 +25,7 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -33,6 +35,10 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
             cls._instance = super(_rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -81,8 +87,11 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
         try:
             all_leak_urls = []
             base_domain = "http://rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad.onion"
+            pages = 8
+            if self._is_crawled:
+                pages = 2
 
-            for page_num in range(1, 8):
+            for page_num in range(1, pages):
 
                 if page_num == 1:
                     current_url = f"{base_domain}/index.html"
@@ -146,12 +155,10 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
                                 m_logo_or_images=[],
                                 m_content_type=["leaks"],
                                 m_data_size=leak_size,
-                                m_leak_date=datetime.datetime.strptime(' '.join(date_text.split()[1:]),
-                                                                       '%d %B %Y').date() if date_text else None,
+                                m_leak_date=datetime.datetime.strptime(' '.join(date_text.split()[1:]), '%d %B %Y').date() if date_text else None,
                             )
 
                             entity_data = entity_model(
-                                m_email=helper_method.extract_emails(description),
                                 m_company_name=title,
                                 m_team="ransomexx"
                             )
@@ -160,11 +167,12 @@ class _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad(leak_extractor_i
                             self.append_leak_data(card_data, entity_data)
                             error_count = 0
 
-                    except Exception:
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                         error_count += 1
                         if error_count >= 3:
                             break
 
         except Exception as ex:
-            print(f"An error occurred: {ex}")
-            return []
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

@@ -1,7 +1,5 @@
-from typing import List
-
+from typing import List, Optional
 from pydantic import BaseModel
-
 
 class DumpModel(BaseModel):
     id: str
@@ -9,5 +7,4 @@ class DumpModel(BaseModel):
     source: str
     group: str
     link: str
-    status: bool = False
-
+    status: Optional[bool] = False

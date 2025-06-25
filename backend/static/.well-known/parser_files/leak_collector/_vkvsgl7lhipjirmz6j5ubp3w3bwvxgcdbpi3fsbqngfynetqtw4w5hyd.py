@@ -10,6 +10,8 @@ from crawler.crawler_services.redis_manager.redis_controller import redis_contro
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
+from crawler.constants.constant import RAW_PATH_CONSTANTS
+from crawler.crawler_services.log_manager.log_controller import log
 
 
 class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_interface, ABC):
@@ -22,6 +24,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -32,6 +35,10 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
             cls._instance = super(_vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -46,7 +53,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
     @property
     def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_timeout=47200, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -72,6 +79,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
+        page.wait_for_load_state("networkidle")
         title_elements = page.query_selector_all('div.card-body.p-3.pt-2 a.h5')
         title_urls_list = [element.get_attribute('href') for element in title_elements]
 
@@ -107,19 +115,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
                 )
                 download_link = download_button['href'] if download_button and 'href' in download_button.attrs else ""
 
-                is_crawled = int(
-                    self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title_text, 0,
-                                   RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                ref_html = None
-                if is_crawled != -1 and is_crawled < 5:
-                    ref_html = helper_method.extract_refhtml(title_text)
-                    ref_html = ref_html[:500]
-                    if ref_html:
-                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title_text,
-                                       -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                    else:
-                        self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title_text,
-                                       is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                ref_html = helper_method.extract_refhtml(title_text, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
                 card_data = leak_model(
                     m_ref_html=ref_html,
@@ -136,7 +132,6 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
 
                 entity_data = entity_model(
                     m_company_name=title_text,
-                    m_email=helper_method.extract_emails(m_content),
                     m_team="brain cipher"
                 )
 
@@ -144,7 +139,8 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 
-            except Exception:
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 error_count += 1
                 if error_count >= 3:
                     break

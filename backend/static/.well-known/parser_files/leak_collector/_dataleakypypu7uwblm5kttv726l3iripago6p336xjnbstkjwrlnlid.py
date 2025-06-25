@@ -5,6 +5,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
@@ -20,6 +21,7 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -30,6 +32,10 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
             cls._instance = super(_dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -106,7 +112,7 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
                 )
 
                 entity_data = entity_model(
-                    m_email=helper_method.extract_emails(content),
+                    m_team="unknown"
                 )
                 entity_data = helper_method.extract_entities(content, entity_data)
 
@@ -118,7 +124,8 @@ class _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid(leak_extractor_i
 
                 error_count = 0
 
-            except Exception:
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 error_count += 1
                 if error_count >= 3:
                     break

@@ -8,6 +8,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
@@ -23,6 +24,7 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -32,6 +34,10 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
             cls._instance = super(_orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -78,7 +84,6 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
         try:
-            page.goto(self.seed_url)
             page.wait_for_load_state('load')
 
             card_links = page.query_selector_all("a.blog__card-btn.--button")
@@ -157,8 +162,6 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_email=helper_method.extract_emails(description) if description else [],
-                        m_phone_numbers=helper_method.extract_phone_numbers(description) if description else [],
                         m_company_name=card_title,
                         m_ip=[company_url],
                         m_team="public ocra"
@@ -168,10 +171,12 @@ class _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id(leak_extractor_i
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     error_count += 1
                     if error_count >= 3:
                         break
 
         except Exception as ex:
-            print(f"An error occurred: {ex}")
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

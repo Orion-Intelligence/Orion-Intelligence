@@ -10,13 +10,11 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
-
-from orion.services.log_manager.log_controller import log
-
 
 class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_interface, ABC):
     _instance = None
@@ -28,6 +26,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -36,6 +35,10 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
         if cls._instance is None:
             cls._instance = super(_black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd, cls).__new__(cls)
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -84,7 +87,6 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
             all_leak_urls = []
-            dump_links = []
             sleep(50)
 
             page.goto(self.seed_url)
@@ -136,18 +138,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         if link and link.get('href'):
                             dump_link = urljoin(self.base_url, link['href'])
 
-                    is_crawled = int(
-                        self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title, 0,
-                                       RAW_PATH_CONSTANTS.HREF_TIMEOUT))
-                    ref_html = None
-                    if is_crawled != -1 and is_crawled < 5:
-                        ref_html = helper_method.extract_refhtml(title)
-                        if ref_html:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title,
-                                           -1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
-                        else:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + title,
-                                           is_crawled + 1, RAW_PATH_CONSTANTS.HREF_TIMEOUT)
+                    ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
@@ -165,7 +156,6 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_email=helper_method.extract_emails(description),
                         m_ip=[title],
                         m_team="blackout"
                     )
@@ -174,7 +164,8 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     error_count += 1
                     if error_count >= 3:
                         break
@@ -183,7 +174,5 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
 
 
         except Exception as ex:
-            print(f"An error occurred in parse_leak_data: {ex}")
-            import traceback
-            traceback.print_exc()
-            return []
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise

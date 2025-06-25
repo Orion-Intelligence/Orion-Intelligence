@@ -8,8 +8,8 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
 
@@ -24,6 +24,7 @@ class _b1nd(leak_extractor_interface, ABC):
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -32,6 +33,10 @@ class _b1nd(leak_extractor_interface, ABC):
         if cls._instance is None:
             cls._instance = super(_b1nd, cls).__new__(cls)
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -98,6 +103,8 @@ class _b1nd(leak_extractor_interface, ABC):
 
             current_page = 1
             max_pages = 13
+            if self.is_crawled:
+                max_pages = 2
 
             while current_page <= max_pages:
                 page.wait_for_selector('div.structItem-title a')
@@ -230,8 +237,6 @@ class _b1nd(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(
-                        m_email=helper_method.extract_emails(content) if content else [],
-                        m_phone_numbers=helper_method.extract_phone_numbers(content) if content else [],
                         m_company_name=title,
                         m_password=password,
                         m_team="b1nd"
@@ -241,13 +246,15 @@ class _b1nd(leak_extractor_interface, ABC):
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 
-                except Exception:
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     error_count += 1
                     if error_count >= 3:
                         break
 
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            raise
         finally:
             pass

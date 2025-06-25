@@ -22,6 +22,7 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
         self.soup = None
         self._initialized = None
         self._redis_instance = redis_controller()
+        self._is_crawled = False
 
     def init_callback(self, callback=None):
         self.callback = callback
@@ -30,6 +31,10 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
         if cls._instance is None:
             cls._instance = super(_funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id, cls).__new__(cls)
         return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
 
     @property
     def seed_url(self) -> str:
@@ -133,9 +138,9 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
                 )
 
                 entity_data = entity_model(
-                    m_email=helper_method.extract_emails(content),
                     m_company_name=title,
-                    m_ip=product_url
+                    m_ip=product_url,
+                    m_team = "funsec"
                 )
                 entity_data = helper_method.extract_entities(content, entity_data)
 
@@ -143,3 +148,4 @@ class _funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id(leak_extractor_i
 
         except Exception as ex:
             print(f"An error occurred: {ex}")
+            raise

@@ -232,6 +232,8 @@ class crawl_model:
     async def index_dump_record(self, dump_model: DumpModel):
         try:
             batch_id = dump_model.id
+            if not dump_model.status:
+                dump_model.status = False
 
             for index, url in enumerate(dump_model.leak_url):
                 record_id = f"{batch_id}_{index}"
