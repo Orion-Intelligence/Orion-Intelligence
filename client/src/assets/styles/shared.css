@@ -101,6 +101,10 @@
   font-weight: 500;
 }
 
+.header-label-text {
+  font-size: 16px;
+}
+
 table {
   background: #12335450;
   table-layout: fixed;
@@ -247,7 +251,11 @@ table a:visited {
   border-radius: 10px;
   margin-top: 20px;
   color: #fff;
+}
 
+.default-notification-banner-credential{
+  max-width: 540px;
+  margin-left: 30px;
 }
 
 .dashboard-general-input {

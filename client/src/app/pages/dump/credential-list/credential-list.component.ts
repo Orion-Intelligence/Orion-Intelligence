@@ -3,6 +3,8 @@ import { DatePipe, NgForOf, NgIf } from '@angular/common';
 import {CredentialCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {DUMP_GROUP_MAP, DUMP_SOURCE_MAP} from '../../../shared/constants/enums';
+import {RouterLink} from "@angular/router";
+import {TooltipDirective} from "../../../shared/directive/tooltip-directive.directive";
 
 @Component({
   selector: 'app-credential-list',

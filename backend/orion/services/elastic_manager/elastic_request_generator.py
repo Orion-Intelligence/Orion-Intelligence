@@ -1126,7 +1126,7 @@ class elastic_request_generator:
         bulk_entries = []
 
         for credential in p_index_data.get("m_credential_data", []):
-            m_hash = helper_controller.generate_data_hash(credential.get("username"))
+            m_hash = helper_controller.generate_data_hash(credential.get("username") + "_" + str(credential.get("file")))
             doc = {
                 "u": credential.get("username"),
                 "l": credential.get("link"),
