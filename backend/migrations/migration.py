@@ -57,7 +57,7 @@ class migration_manager:
                     if hasattr(migration_module, migration_script_name):
                         print(migration_script_name, flush=True)
                         migration_class = getattr(migration_module, migration_script_name)
-                        if hasattr(migration_class, "migrate"):
+                        if True or hasattr(migration_class, "migrate"):
                             await migration_class.migrate(version_str.replace(".", "_"))
                             print("::::::::::::::::::::::::::::::::::::::::", flush=True)
                             time.sleep(10000000)
