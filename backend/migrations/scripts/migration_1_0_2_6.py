@@ -24,6 +24,7 @@ class migration_1_0_2_6:
 
         for original_index, hash_func in index_hash_map.items():
             print(f"[migrate] Processing index: {original_index}", flush=True)
+
             if not await es.indices.exists(index=original_index):
                 print(f"[migrate] Skipping missing index: {original_index}", flush=True)
                 continue
@@ -39,7 +40,6 @@ class migration_1_0_2_6:
             await es.indices.put_settings(index=temp_index, body={"index": {"blocks.write": False}})
 
             reindexed = await migration_1_0_2_6.reindex_with_hash(original_index, temp_index, hash_func)
-
             print(f"[migrate] Reindexed {reindexed} documents from {original_index} to {temp_index}", flush=True)
 
             if reindexed == 0:
@@ -78,7 +78,8 @@ class migration_1_0_2_6:
 
         await es.indices.create(index=index_name, body=body)
 
-        for _ in range(10):
+        for i in range(10):
+            print(f"[create_new_index] Waiting for index creation attempt {i+1}/10...", flush=True)
             if await es.indices.exists(index=index_name):
                 print(f"[create_new_index] Index {index_name} is ready.", flush=True)
                 return
@@ -103,10 +104,15 @@ class migration_1_0_2_6:
         docs = result["hits"]["hits"]
 
         while docs:
-            for doc in docs:
+            print(f"[reindex_with_hash] Retrieved {len(docs)} documents from scroll", flush=True)
+
+            for i, doc in enumerate(docs):
+                print(f"[reindex_with_hash] Processing doc {i+1}/{len(docs)}", flush=True)
+
                 src = doc["_source"]
                 m_hash = hash_func(src)
                 if not m_hash:
+                    print(f"[reindex_with_hash] Skipping doc with no hash", flush=True)
                     continue
 
                 src["m_hash"] = m_hash
@@ -130,11 +136,13 @@ class migration_1_0_2_6:
         await es.indices.put_settings(index=new_index, body={"settings": {"index.blocks.write": True}})
 
         if await es.indices.exists(index=old_index):
+            print(f"[replace_index] Deleting old index: {old_index}", flush=True)
             await es.indices.delete(index=old_index)
 
         await es.indices.clone(index=new_index, target=old_index)
 
-        for _ in range(10):
+        for i in range(10):
+            print(f"[replace_index] Waiting for cloned index availability attempt {i+1}/10", flush=True)
             if await es.indices.exists(index=old_index):
                 break
             await asyncio.sleep(0.5)
@@ -149,30 +157,33 @@ class migration_1_0_2_6:
 
     @staticmethod
     def generate_hash_for_leak(doc):
+        print(f"[generate_hash_for_leak] Called", flush=True)
         return helper_controller.generate_data_hash(f"{doc['m_url']}_{doc['m_important_content']}") \
             if doc.get("m_url") and doc.get("m_important_content") else None
 
     @staticmethod
     def generate_hash_for_generic(doc):
-        return helper_controller.generate_data_hash(doc["m_url"]) \
-            if doc.get("m_url") else None
+        print(f"[generate_hash_for_generic] Called", flush=True)
+        return helper_controller.generate_data_hash(doc["m_url"]) if doc.get("m_url") else None
 
     @staticmethod
     def generate_hash_for_defacement(doc):
-        return helper_controller.generate_data_hash(doc["m_url"]) \
-            if doc.get("m_url") else None
+        print(f"[generate_hash_for_defacement] Called", flush=True)
+        return helper_controller.generate_data_hash(doc["m_url"]) if doc.get("m_url") else None
 
     @staticmethod
     def generate_hash_for_chats(doc):
-        return helper_controller.generate_data_hash(doc["m_message_id"]) \
-            if doc.get("m_message_id") else None
+        print(f"[generate_hash_for_chats] Called", flush=True)
+        return helper_controller.generate_data_hash(doc["m_message_id"]) if doc.get("m_message_id") else None
 
     @staticmethod
     def generate_hash_for_exploit(doc):
+        print(f"[generate_hash_for_exploit] Called", flush=True)
         return helper_controller.generate_data_hash(f"{doc['m_url']}_{doc['m_important_content']}") \
             if doc.get("m_url") and doc.get("m_important_content") else None
 
     @staticmethod
     def generate_hash_for_credential(doc):
+        print(f"[generate_hash_for_credential] Called", flush=True)
         return helper_controller.generate_data_hash(f"{doc['u']}_{str(doc['fn'])}") \
             if doc.get("u") and doc.get("fn") else None
