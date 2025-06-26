@@ -22,7 +22,7 @@ class migration_1_0_2_6:
 
         index_hash_map = {
             # ELASTIC_INDEX.S_LEAK_INDEX: migration_1_0_2_6.generate_hash_for_leak,
-            ELASTIC_INDEX.S_GENERIC_INDEX: migration_1_0_2_6.generate_hash_for_generic,
+            # ELASTIC_INDEX.S_GENERIC_INDEX: migration_1_0_2_6.generate_hash_for_generic,
             ELASTIC_INDEX.S_DEFACEMENT_INDEX: migration_1_0_2_6.generate_hash_for_defacement,
             ELASTIC_INDEX.S_CHATS_INDEX: migration_1_0_2_6.generate_hash_for_chats,
             ELASTIC_INDEX.S_EXPLOIT_INDEX: migration_1_0_2_6.generate_hash_for_exploit,
