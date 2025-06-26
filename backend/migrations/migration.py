@@ -1,6 +1,7 @@
 import importlib
 import os
 import sys
+import time
 
 import toml
 
@@ -54,9 +55,12 @@ class migration_manager:
                     migration_script_name = file.replace(".py", "")
                     migration_module = importlib.import_module(migration_script_name)
                     if hasattr(migration_module, migration_script_name):
+                        print(migration_script_name, flush=True)
                         migration_class = getattr(migration_module, migration_script_name)
                         if hasattr(migration_class, "migrate"):
                             await migration_class.migrate(version_str.replace(".", "_"))
+                            print("::::::::::::::::::::::::::::::::::::::::", flush=True)
+                            time.sleep(10000000)
                         else:
                             log.g().w(f"No 'migrate' method in {migration_script_name}")
                     else:
