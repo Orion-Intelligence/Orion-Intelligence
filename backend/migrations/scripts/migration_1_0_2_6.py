@@ -21,7 +21,7 @@ class migration_1_0_2_6:
         print(f"[migrate] Starting migration for version: {version}", flush=True)
 
         index_hash_map = {
-            ELASTIC_INDEX.S_LEAK_INDEX: migration_1_0_2_6.generate_hash_for_leak,
+            # ELASTIC_INDEX.S_LEAK_INDEX: migration_1_0_2_6.generate_hash_for_leak,
             ELASTIC_INDEX.S_GENERIC_INDEX: migration_1_0_2_6.generate_hash_for_generic,
             ELASTIC_INDEX.S_DEFACEMENT_INDEX: migration_1_0_2_6.generate_hash_for_defacement,
             ELASTIC_INDEX.S_CHATS_INDEX: migration_1_0_2_6.generate_hash_for_chats,
@@ -103,8 +103,8 @@ class migration_1_0_2_6:
         elastic = elastic_controller.get_instance()
         es = elastic.get_connection()
 
-        scroll = "2m"
-        size = 10000
+        scroll = "22m"
+        size = 5000
         total_reindexed = 0
         total_seen = 0
 
