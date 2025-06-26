@@ -1,12 +1,20 @@
 import asyncio
 import json
-
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
 class migration_1_0_2_6:
+
+    _hash_function_counters = {
+        "leak": 0,
+        "generic": 0,
+        "defacement": 0,
+        "chats": 0,
+        "exploit": 0,
+        "credential": 0,
+    }
 
     @staticmethod
     async def migrate(version):
@@ -81,7 +89,7 @@ class migration_1_0_2_6:
         await es.indices.create(index=index_name, body=body)
 
         for i in range(10):
-            print(f"[create_new_index] Waiting for index creation attempt {i+1}/10...", flush=True)
+            print(f"[create_new_index] Waiting for index creation attempt {i + 1}/10...", flush=True)
             if await es.indices.exists(index=index_name):
                 print(f"[create_new_index] Index {index_name} is ready.", flush=True)
                 return
@@ -95,55 +103,65 @@ class migration_1_0_2_6:
         elastic = elastic_controller.get_instance()
         es = elastic.get_connection()
 
-        await es.indices.put_settings(index=dest_index, body={"index": {"blocks.write": False}})
-
-        scroll = "1m"
-        size = 1000
+        scroll = "2m"
+        size = 10000
         total_reindexed = 0
         total_seen = 0
 
-        result = await es.search(index=source_index, scroll=scroll, size=size, _source=True, body={"query": {"match_all": {}}})
+        try:
+            result = await es.search(index=source_index, scroll=scroll, size=size, _source=True, body={"query": {"match_all": {}}})
+        except Exception as e:
+            print(f"[reindex_with_hash] Initial search failed: {str(e)}", flush=True)
+            return 0
+
         scroll_id = result.get("_scroll_id")
         docs = result["hits"]["hits"]
 
         while docs:
             print(f"[reindex_with_hash] Retrieved {len(docs)} documents from scroll", flush=True)
-
             bulk_lines = []
 
             for doc in docs:
                 total_seen += 1
                 src = doc["_source"]
                 m_hash = hash_func(src)
+
                 if not m_hash:
                     print(f"[reindex_with_hash] Skipping doc #{total_seen} with no hash", flush=True)
                     continue
 
                 src["m_hash"] = m_hash
-
-                action_meta = {
-                    "index": {
-                        "_index": dest_index,
-                        "_id": m_hash
-                    }
-                }
-                bulk_lines.append(json.dumps(action_meta))
+                bulk_lines.append(json.dumps({"index": {"_index": dest_index, "_id": m_hash}}))
                 bulk_lines.append(json.dumps(src))
 
             if bulk_lines:
                 bulk_body = "\n".join(bulk_lines) + "\n"
                 response = await es.bulk(body=bulk_body)
+
                 if response.get("errors"):
                     print("[reindex_with_hash] ⚠️ Bulk operation had errors", flush=True)
-                successful = len([item for item in response["items"] if "index" in item and item["index"].get("status", 500) < 300])
+
+                successful = len([
+                    item for item in response["items"]
+                    if "index" in item and item["index"].get("status", 500) < 300
+                ])
                 total_reindexed += successful
                 print(f"[reindex_with_hash] Indexed batch: {successful} documents (Total so far: {total_reindexed})", flush=True)
 
-            result = await es.scroll(scroll_id=scroll_id, scroll=scroll)
-            scroll_id = result.get("_scroll_id")
-            docs = result["hits"]["hits"]
+            try:
+                result = await es.scroll(scroll_id=scroll_id, scroll=scroll)
+                scroll_id = result.get("_scroll_id")
+                docs = result["hits"]["hits"]
+            except Exception as e:
+                print(f"[reindex_with_hash] Scroll failed: {str(e)}", flush=True)
+                break
 
-        await es.clear_scroll(scroll_id=scroll_id)
+        if scroll_id:
+            try:
+                await es.clear_scroll(scroll_id=scroll_id)
+            except Exception as e:
+                print(f"[reindex_with_hash] Failed to clear scroll: {str(e)}", flush=True)
+
         print(f"[reindex_with_hash] Done reindexing {total_reindexed} documents (from {total_seen} total seen)", flush=True)
         return total_reindexed
 
@@ -162,7 +180,7 @@ class migration_1_0_2_6:
         await es.indices.clone(index=new_index, target=old_index)
 
         for i in range(10):
-            print(f"[replace_index] Waiting for cloned index availability attempt {i+1}/10", flush=True)
+            print(f"[replace_index] Waiting for cloned index availability attempt {i + 1}/10", flush=True)
             if await es.indices.exists(index=old_index):
                 break
             await asyncio.sleep(0.5)
@@ -177,33 +195,45 @@ class migration_1_0_2_6:
 
     @staticmethod
     def generate_hash_for_leak(doc):
-        print(f"[generate_hash_for_leak] Called", flush=True)
+        migration_1_0_2_6._hash_function_counters["leak"] += 1
+        count = migration_1_0_2_6._hash_function_counters["leak"]
+        print(f"[generate_hash_for_leak] Called for doc #{count}", flush=True)
         return helper_controller.generate_data_hash(f"{doc['m_url']}_{doc['m_important_content']}") \
             if doc.get("m_url") and doc.get("m_important_content") else None
 
     @staticmethod
     def generate_hash_for_generic(doc):
-        print(f"[generate_hash_for_generic] Called", flush=True)
+        migration_1_0_2_6._hash_function_counters["generic"] += 1
+        count = migration_1_0_2_6._hash_function_counters["generic"]
+        print(f"[generate_hash_for_generic] Called for doc #{count}", flush=True)
         return helper_controller.generate_data_hash(doc["m_url"]) if doc.get("m_url") else None
 
     @staticmethod
     def generate_hash_for_defacement(doc):
-        print(f"[generate_hash_for_defacement] Called", flush=True)
+        migration_1_0_2_6._hash_function_counters["defacement"] += 1
+        count = migration_1_0_2_6._hash_function_counters["defacement"]
+        print(f"[generate_hash_for_defacement] Called for doc #{count}", flush=True)
         return helper_controller.generate_data_hash(doc["m_url"]) if doc.get("m_url") else None
 
     @staticmethod
     def generate_hash_for_chats(doc):
-        print(f"[generate_hash_for_chats] Called", flush=True)
+        migration_1_0_2_6._hash_function_counters["chats"] += 1
+        count = migration_1_0_2_6._hash_function_counters["chats"]
+        print(f"[generate_hash_for_chats] Called for doc #{count}", flush=True)
         return helper_controller.generate_data_hash(doc["m_message_id"]) if doc.get("m_message_id") else None
 
     @staticmethod
     def generate_hash_for_exploit(doc):
-        print(f"[generate_hash_for_exploit] Called", flush=True)
+        migration_1_0_2_6._hash_function_counters["exploit"] += 1
+        count = migration_1_0_2_6._hash_function_counters["exploit"]
+        print(f"[generate_hash_for_exploit] Called for doc #{count}", flush=True)
         return helper_controller.generate_data_hash(f"{doc['m_url']}_{doc['m_important_content']}") \
             if doc.get("m_url") and doc.get("m_important_content") else None
 
     @staticmethod
     def generate_hash_for_credential(doc):
-        print(f"[generate_hash_for_credential] Called", flush=True)
+        migration_1_0_2_6._hash_function_counters["credential"] += 1
+        count = migration_1_0_2_6._hash_function_counters["credential"]
+        print(f"[generate_hash_for_credential] Called for doc #{count}", flush=True)
         return helper_controller.generate_data_hash(f"{doc['u']}_{str(doc['fn'])}") \
             if doc.get("u") and doc.get("fn") else None
