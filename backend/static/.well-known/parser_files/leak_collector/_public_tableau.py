@@ -101,7 +101,7 @@ class _public_tableau(leak_extractor_interface, ABC):
             };
         """)
 
-        page.wait_for_selector("#tabZoneId8", state="visible", timeout=160000)
+        page.wait_for_selector("#tabZoneId8", state="visible", timeout=360000)
         viewport = page.viewport_size
         x_position = int(viewport["width"] * 0.8)
         default_y_position = 98
