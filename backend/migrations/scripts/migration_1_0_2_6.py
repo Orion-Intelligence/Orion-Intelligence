@@ -104,7 +104,7 @@ class migration_1_0_2_6:
         es = elastic.get_connection()
 
         scroll = "22m"
-        size = 5000
+        size = 1000
         total_reindexed = 0
         total_seen = 0
 
