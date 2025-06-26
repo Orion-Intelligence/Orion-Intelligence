@@ -1429,7 +1429,7 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
                     "aggs": {
-                        "Common Server": {"terms": {"field": "m_web_server", "size": 1}}
+                        "Common Server": {"terms": {"field": "m_web_server.keyword", "size": 1}}
                     }
                 }
             }
