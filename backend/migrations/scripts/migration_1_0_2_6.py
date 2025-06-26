@@ -1,4 +1,6 @@
 import asyncio
+import json
+
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
@@ -107,19 +109,35 @@ class migration_1_0_2_6:
         while docs:
             print(f"[reindex_with_hash] Retrieved {len(docs)} documents from scroll", flush=True)
 
+            bulk_lines = []
+
             for doc in docs:
                 total_seen += 1
-                print(f"[reindex_with_hash] Processing total document #{total_seen}", flush=True)
-
                 src = doc["_source"]
                 m_hash = hash_func(src)
                 if not m_hash:
-                    print(f"[reindex_with_hash] Skipping doc with no hash", flush=True)
+                    print(f"[reindex_with_hash] Skipping doc #{total_seen} with no hash", flush=True)
                     continue
 
                 src["m_hash"] = m_hash
-                await es.index(index=dest_index, id=m_hash, body=src)
-                total_reindexed += 1
+
+                action_meta = {
+                    "index": {
+                        "_index": dest_index,
+                        "_id": m_hash
+                    }
+                }
+                bulk_lines.append(json.dumps(action_meta))
+                bulk_lines.append(json.dumps(src))
+
+            if bulk_lines:
+                bulk_body = "\n".join(bulk_lines) + "\n"
+                response = await es.bulk(body=bulk_body)
+                if response.get("errors"):
+                    print("[reindex_with_hash] ⚠️ Bulk operation had errors", flush=True)
+                successful = len([item for item in response["items"] if "index" in item and item["index"].get("status", 500) < 300])
+                total_reindexed += successful
+                print(f"[reindex_with_hash] Indexed batch: {successful} documents (Total so far: {total_reindexed})", flush=True)
 
             result = await es.scroll(scroll_id=scroll_id, scroll=scroll)
             scroll_id = result.get("_scroll_id")
