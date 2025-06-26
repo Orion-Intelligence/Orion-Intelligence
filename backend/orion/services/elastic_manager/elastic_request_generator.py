@@ -1420,7 +1420,7 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
                     "aggs": {
-                        "Top Team": {"terms": {"field": "m_team", "size": 1}}
+                        "Top Team": {"terms": {"field": "m_team.keyword", "size": 1}}
                     }
                 }
             },
