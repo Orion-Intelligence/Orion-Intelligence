@@ -124,7 +124,7 @@ class _lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd(leak_extractor_i
                         m_title=title,
                         m_url=new_page.url,
                         m_base_url=self.base_url,
-                        m_screenshot=helper_method.get_screenshot_base64(new_page, title, self.base_url),
+                        m_screenshot=helper_method.get_screenshot_base64(new_page, "", self.base_url),
                         m_content=leak_content,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=leak_content,
