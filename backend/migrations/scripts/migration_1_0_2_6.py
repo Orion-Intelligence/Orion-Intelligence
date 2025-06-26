@@ -98,6 +98,7 @@ class migration_1_0_2_6:
         scroll = "1m"
         size = 1000
         total_reindexed = 0
+        total_seen = 0
 
         result = await es.search(index=source_index, scroll=scroll, size=size, _source=True, body={"query": {"match_all": {}}})
         scroll_id = result.get("_scroll_id")
@@ -106,8 +107,9 @@ class migration_1_0_2_6:
         while docs:
             print(f"[reindex_with_hash] Retrieved {len(docs)} documents from scroll", flush=True)
 
-            for i, doc in enumerate(docs):
-                print(f"[reindex_with_hash] Processing doc {i+1}/{len(docs)}", flush=True)
+            for doc in docs:
+                total_seen += 1
+                print(f"[reindex_with_hash] Processing total document #{total_seen}", flush=True)
 
                 src = doc["_source"]
                 m_hash = hash_func(src)
@@ -124,7 +126,7 @@ class migration_1_0_2_6:
             docs = result["hits"]["hits"]
 
         await es.clear_scroll(scroll_id=scroll_id)
-        print(f"[reindex_with_hash] Done reindexing {total_reindexed} documents", flush=True)
+        print(f"[reindex_with_hash] Done reindexing {total_reindexed} documents (from {total_seen} total seen)", flush=True)
         return total_reindexed
 
     @staticmethod
