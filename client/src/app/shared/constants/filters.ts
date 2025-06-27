@@ -56,7 +56,7 @@ export const directory_filters: FilterModel = {
         {key: "general", label: "General"},
         {key: "leak", label: "Leak"},
         {key: "defacement", label: "Defacement"},
-        {key: "telegram", label: "Telegram"},
+        {key: "chat", label: "Chat"},
         {key: "exploit", label: "Exploit"}
       ],
       type: "dropdown",
