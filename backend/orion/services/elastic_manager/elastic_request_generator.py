@@ -1089,6 +1089,9 @@ class elastic_request_generator:
         if isinstance(p_index_data, list):
             pass
         else:
+            if not p_index_data["m_important_content"] or not p_index_data["m_title"]:
+                return index_entries
+
             p_index_data["m_update_date"] = current_timestamp
             p_index_data["m_hash_content"] = hashlib.sha256(
                 (p_index_data["m_important_content"] + p_index_data["m_title"]).encode()
@@ -1112,6 +1115,9 @@ class elastic_request_generator:
     def index_query_chat(p_index_data):
         index_entries = []
         for chat in p_index_data.get("m_chat_data", []):
+            if not chat.get("m_message_id"):
+                continue
+
             chat["m_hash"] = helper_controller.generate_data_hash(chat.get("m_message_id"))
             index_entries.append({
                 ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_CHATS_INDEX,
@@ -1126,6 +1132,9 @@ class elastic_request_generator:
         bulk_entries = []
 
         for credential in p_index_data.get("m_credential_data", []):
+            if not credential.get("username") or not credential.get("file"):
+                continue
+
             m_hash = helper_controller.generate_data_hash(credential.get("username") + "_" + str(credential.get("file")))
             doc = {
                 "u": credential.get("username"),
@@ -1162,6 +1171,9 @@ class elastic_request_generator:
         current_timestamp = utc_now.isoformat()
 
         for record in p_index_data.get("cards_data", []):
+            if not record["m_url"]:
+                continue
+
             data_hash = helper_controller.generate_data_hash(record["m_url"])
             record["m_hash"] = data_hash
             record["m_update_date"] = current_timestamp
@@ -1180,6 +1192,9 @@ class elastic_request_generator:
         current_timestamp = datetime.now(timezone.utc).isoformat()
 
         for card in p_index_data.get("cards_data", []):
+            if not card["m_url"] or not card["m_important_content"]:
+                continue
+
             card["m_hash"] = helper_controller.generate_data_hash(card["m_url"] + "_" + card["m_important_content"])
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
@@ -1200,6 +1215,9 @@ class elastic_request_generator:
         current_timestamp = datetime.now(timezone.utc).isoformat()
 
         for card in p_index_data.get("cards_data", []):
+            if not card["m_url"] or not card["m_important_content"]:
+                continue
+
             card["m_hash"] = helper_controller.generate_data_hash(card["m_url"] + "_" + card["m_important_content"])
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
