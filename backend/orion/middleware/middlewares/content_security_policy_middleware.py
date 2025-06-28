@@ -44,7 +44,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "default-src 'self'; "
                 "script-src 'self'; "
                 "style-src 'self'; "
-                "img-src 'self' data: https://orion.genesistechnologies.org; "
+                "img-src 'self' data: https://try.orionintelligence.org; "
                 "font-src 'self'; "
                 "connect-src 'self'; "
                 "media-src 'self'; "
@@ -59,7 +59,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         response.headers["Report-To"] = (
             '{"group":"csp-endpoint",'
             '"max_age":10886400,'
-            '"endpoints":[{"url":"https://yourdomain.com/csp-report-endpoint/"}]}'
+            '"endpoints":[{"url":"https://try.orionintelligence.org/csp-report-endpoint/"}]}'
         )
 
         if not self.DEBUG:

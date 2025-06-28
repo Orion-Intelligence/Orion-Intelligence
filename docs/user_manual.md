@@ -688,7 +688,7 @@ InsightResponse, GenericModel, LeakModel, SearchResponse, SearchResult, and Erro
 
 To run Swagger, we have been provided with its link. Below, the keys for it are mentioned.
 
-https://swagger.orion.genesistechnologies.org:9443/
+https://swagger.try.orionintelligence.org:9443/
 
 ### Flower
 

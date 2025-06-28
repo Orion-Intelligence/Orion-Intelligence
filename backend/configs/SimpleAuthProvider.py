@@ -76,7 +76,7 @@ class TokenAuthProvider(AuthProvider):
     def get_admin_config(self, request: Request) -> AdminConfig:
         return AdminConfig(
             app_title="Admin Panel",
-            logo_url="https://orion.genesistechnologies.org/assets/images/sidebar/search_nav_logo.png"
+            logo_url="https://try.orionintelligence.org/assets/images/sidebar/search_nav_logo.png"
         )
 
     def get_admin_user(self, request: Request) -> AdminUser:
