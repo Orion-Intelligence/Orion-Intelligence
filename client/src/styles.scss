@@ -96,6 +96,10 @@ html::-webkit-scrollbar {
   pointer-events: none;
 }
 
+.app-background-dark {
+  opacity: 5%;
+}
+
 img::before {
   color: white;
   font-size: 12px;
