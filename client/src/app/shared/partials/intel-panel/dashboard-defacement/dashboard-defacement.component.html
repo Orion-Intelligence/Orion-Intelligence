@@ -1,6 +1,6 @@
 <app-result (reloadData)="fetchSearchResults(true)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)"
             [filterModel]="defacement_filters" [isLoading]="isLoading" [result_count]="Math.ceil(result_count)"
-            [searchQuery]="query" [showAnalytics]=false
+            [searchQuery]="query" [showTabs]=false
             [type]="type"></app-result>
 
 <div *ngIf="!isLoading && this.defacementCallbackModel.Result.length" @fadeInDashboardItem>
