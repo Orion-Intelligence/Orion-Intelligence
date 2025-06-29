@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
     search_defacement_param_model
 from orion.constants.constant import CONSTANTS
+from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 
@@ -704,11 +705,22 @@ class elastic_request_generator:
         m_message_date = p_query_model.mDateRange
         m_entity = p_query_model.mEntity
         m_mitryTtp = p_query_model.mMitreTtp
+        m_ctype = getattr(p_query_model, 'ctype', 'all')
 
         must_clauses = []
         must_not_clause = []
+
         if m_search_type != "all":
             must_clauses.append({"term": {"m_content_type": [m_search_type]}})
+
+        if m_ctype != "all":
+            channel_enum = ChannelTypeEnum.__members__.get(m_ctype.upper())
+            channel_ids = channel_enum.value if channel_enum else [""]
+            must_clauses.append({
+                "terms": {
+                    "m_channel_id": channel_ids
+                }
+            })
 
         if m_message_date:
             parts = m_message_date.split(',')

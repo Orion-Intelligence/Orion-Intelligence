@@ -34,13 +34,14 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() shrinkmenu = false;
   @Input() disableScroll = false;
   @Input() type!: Category;
+  @Input() discussion = false;
   @Input() showAnalytics = true;
 
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
   @Output() resetFilter = new EventEmitter<void>();
   @Output() reloadData = new EventEmitter<void>();
   @Output() updateQuery = new EventEmitter<string>();
-  @Output() onToggleSwitch = new EventEmitter<void>();
+  @Output() onToggleSwitch = new EventEmitter<string>();
   @Input() filterModel!: FilterModel
 
   selectedFilters: Record<string, string | null> = {};
@@ -128,8 +129,20 @@ export class ResultComponent implements OnInit, OnChanges {
     this.result_triggered = true
   }
 
-  onToggleAnalytics() {
-    this.onToggleSwitch.emit()
+  onTabClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (!target.classList.contains('nav-link') || target.classList.contains('active')) return;
+
+    const parent = target.closest('.nav-tabs');
+    if (!parent) return;
+
+    parent.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    target.classList.add('active');
+
+    this.onToggleAnalytics(target.textContent?.trim() || '');
   }
 
+  onToggleAnalytics(tab: string) {
+    this.onToggleSwitch.emit(tab);
+  }
 }

@@ -1,21 +1,19 @@
-<app-result (onToggleSwitch)="onToggleAnalyticsTrigger()" (reloadData)="fetchSearchResults(true)"
-            (reloadFilters)="reloadFilters($event)"
-            (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)"
-            [analyticsToggle]="onToggleAnalytics" [filterModel]="general_filters"
-            [isLoading]="isLoading" [result_count]="Math.ceil(currentCallbackModel.Result.length)"
-            [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]"
-            [type]="type"></app-result>
+<app-result [discussion]="this.type === Category.BREACH" (onToggleSwitch)="onToggleAnalyticsTrigger($event)" (reloadData)="fetchSearchResults(true)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)"
+            [analyticsToggle]="onToggleAnalytics" [filterModel]="general_filters" [isLoading]="isLoading" [result_count]="Math.ceil((onToggleDiscussion ? discussionCallbackModel.Result.length : currentCallbackModel.Result.length))" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [type]="type"></app-result>
 
 <div *ngIf="onToggleAnalytics && !isLoading" @fadeInDashboardItem>
   <app-insights [analytics]="analyticsData"></app-insights>
 </div>
 
-<div *ngIf="!isLoading && !onToggleAnalytics" @fadeInDashboardItem>
-  <app-dashboard-results-grid @fadeInDashboardItem [query]="currentQuery" [searchResults]="currentSearchResults"
-                              [type]="type"></app-dashboard-results-grid>
+<div *ngIf="!isLoading && !onToggleAnalytics && !onToggleDiscussion" @fadeInDashboardItem>
+  <app-dashboard-results-grid @fadeInDashboardItem [query]="currentQuery" [searchResults]="currentSearchResults" [type]="type"></app-dashboard-results-grid>
 </div>
 
-<div *ngIf="!onToggleAnalytics && !isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)"
-                  [maxPages]="Math.floor(currentCallbackModel.Page_Count)"></app-pagination>
+<div *ngIf="!isLoading && onToggleDiscussion" @fadeInDashboardItem >
+  <app-dashboard-result-chat @fadeInDashboardItem [searchResults]="discussionCallbackModel.Result"></app-dashboard-result-chat>
+</div>
+
+
+<div *ngIf="!onToggleDiscussion && !onToggleAnalytics && !isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
+  <app-pagination (pageChange)="onPageChange($event)" [maxPages]="Math.floor(currentCallbackModel.Page_Count)"></app-pagination>
 </div>

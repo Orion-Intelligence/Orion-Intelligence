@@ -17,10 +17,13 @@ import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
 import {ResultComponent} from '../../result/result.component';
 import {general_filters} from '../../../constants/filters';
 import {AppService} from '../../../../services/core/app.service';
+import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import {ChatCallbackModel} from '../../../model/results/chat/chat.callback.model';
+import {DiscussionService} from '../../../services/discussion.service';
 
 @Component({
   selector: 'app-dashboard-general',
-  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent],
+  imports: [NgIf, PaginationComponent, InsightsComponent, DashboardResultsGridComponent, ResultComponent, DashboardResultChatComponent],
   templateUrl: './dashboard-general.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -29,18 +32,22 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   public generalParamModel: GeneralParamModel = new GeneralParamModel();
   public generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   public leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
+  public discussionCallbackModel: ChatCallbackModel = new ChatCallbackModel();
+
 
   query = ""
   analyticsData = {} as Analytics;
   type = Category.STRATEGIC
+  discussionLoaded = false
 
   onToggleAnalytics = false;
+  onToggleDiscussion = false;
   isLoading = false;
   firstTrigger = true
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
 
-  constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(protected discussionService: DiscussionService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
 
   get currentCallbackModel(): GeneralCallbackModel | LeakCallbackModel {
@@ -163,6 +170,23 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
       });
   }
 
+  fetchSuggestion() {
+    if (this.discussionCallbackModel.Result.length > 0) {
+      return;
+    }
+    this.isLoading = true;
+    this.discussionService.fetchSuggestions(this.query, "breach")
+      .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
+      .subscribe(response => {
+        if (response.success && response.data) {
+          this.discussionCallbackModel = response.data as ChatCallbackModel;
+        }
+
+        this.isLoading = false;
+        this.discussionLoaded = true;
+      });
+  }
+
   onPageChange(step: number) {
     this.generalParamModel.mSearchParamPage = step;
     this.fetchSearchResults();
@@ -202,7 +226,19 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.generalParamModel.q = query
   }
 
-  onToggleAnalyticsTrigger() {
-    this.onToggleAnalytics = !this.onToggleAnalytics
+  onToggleAnalyticsTrigger(tab: string): void {
+    if (tab == "Analytics") {
+      this.onToggleAnalytics = true
+      this.onToggleDiscussion = false
+    } else if (tab == "Discussion") {
+      this.onToggleAnalytics = false
+      this.onToggleDiscussion = true
+      this.fetchSuggestion()
+    } else {
+      this.onToggleAnalytics = false
+      this.onToggleDiscussion = false
+    }
   }
+
+  protected readonly Category = Category;
 }

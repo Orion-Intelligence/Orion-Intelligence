@@ -29,13 +29,7 @@
       </ng-container>
     </div>
 
-    <div *ngIf="!shrinkmenu && filterModel"
-         class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3">
-      <div *ngIf="showAnalytics" appTooltip="Insights Breakdown" class="analytics d-flex align-items-center gap-2">
-        <input (click)="onToggleAnalytics()" id="switch" type="checkbox"/>
-        <label class="mb-0" for="switch"></label><span>&nbsp; Analytics</span>
-      </div>
-
+    <div *ngIf="!shrinkmenu && filterModel" class="side-menu-container d-flex align-items-center justify-content-center mt-2 gap-3">
       <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results"
              class="filters-button d-flex align-items-center">
         <img alt="Filter Icon" height="24" ngSrc="../../../../assets/images/shared/filter_icon.svg" priority width="24">
@@ -45,6 +39,18 @@
 
   </div>
 </form>
+
+<ul *ngIf="showAnalytics" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
+  <li class="nav-item">
+    <a class="nav-link cursor-pointer active">Results</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link cursor-pointer">Analytics</a>
+  </li>
+  <li class="nav-item" *ngIf="discussion">
+    <a class="nav-link cursor-pointer">Discussion</a>
+  </li>
+</ul>
 
 <ng-container *ngIf="suggestion && suggestion.options.length > 0">
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
@@ -77,3 +83,5 @@
 <div *ngIf="!isLoading && result_count>0 && !disableScroll">
   <app-scroll-top></app-scroll-top>
 </div>
+
+
