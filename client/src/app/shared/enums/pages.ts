@@ -49,7 +49,6 @@ export enum ExploitSubCategory {
   CVE = 'CVE',
   TOOLS = 'Tools',
   ZERODAY = 'ZeroDay',
-  Mitre = 'Mitre',
 }
 
 export enum DumpSubCategory {
