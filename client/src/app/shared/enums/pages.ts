@@ -27,6 +27,10 @@ export enum BreachSubCategory {
   ALL = 'All',
   DATABASES = 'Databases',
   TRACKING = 'Tracking',
+  EMAIL = 'Email',
+  Logs = 'Logs',
+  WARFARE = 'Warfare',
+  CLOUD = 'Cloud',
 }
 
 export enum DefacementSubCategory {
@@ -43,6 +47,8 @@ export enum SocialSubCategory {
 
 export enum ExploitSubCategory {
   CVE = 'CVE',
+  TOOLS = 'Tools',
+  ZERODAY = 'ZeroDay',
   Mitre = 'Mitre',
 }
 

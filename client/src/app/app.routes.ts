@@ -1,32 +1,49 @@
-import {Routes} from '@angular/router';
-import {AuthGuard} from './shared/guards/auth-guard.guard';
-import {InsightResolver} from './shared/resolvers/insight.resolver';
-import {DirectoryResolver} from './shared/resolvers/directory.resolver';
-import {ReportResolver} from './shared/resolvers/report.resolver';
-import {DumpResolver} from './shared/resolvers/dump.resolver';
+import { Routes } from '@angular/router';
+import { AuthGuard } from './shared/guards/auth-guard.guard';
+import { InsightResolver } from './shared/resolvers/insight.resolver';
+import { DirectoryResolver } from './shared/resolvers/directory.resolver';
+import { ReportResolver } from './shared/resolvers/report.resolver';
+import { DumpResolver } from './shared/resolvers/dump.resolver';
+import { LoginComponent } from './pages/login/login.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { HomepageComponent } from './pages/homepage/homepage.component';
+import { GraphComponent } from './pages/graphs/graphs.component';
+import { DirectoryComponent } from './pages/directory/directory.component';
+import { DashboardEmailApiComponent } from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
+import { DashboardChatsComponent } from './shared/partials/intel-panel/dashboard-chats/dashboard-chats.component';
+import { DashboardGeneralComponent } from './shared/partials/intel-panel/dashboard-general/dashboard-general.component';
+import { ReportComponent } from './shared/partials/report/report_general/report.component';
+import { DashboardDefacementComponent } from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
+import { ReportDefacementComponent } from './shared/partials/report/report-defacement/report-defacement.component';
+import { ReportChatComponent } from './shared/partials/report/report-chat/report-chat.component';
+import { DashboardExploitComponent } from './shared/partials/intel-panel/dashboard-exploit/dashboard-exploit.component';
+import { ReportExploitComponent } from './shared/partials/report/report-exploit/report-exploit.component';
+import { DumpComponent } from './pages/dump/dump.component';
+import { CredentialComponent } from './pages/dump/credential/credential.component';
+import { ErrorHandlerComponent } from './pages/error-handler/error-handler.component';
 
 export const routes: Routes = [
   {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',
-    data: {animation: 'RootPage'}
+    data: { animation: 'RootPage' }
   },
   {
     path: 'login',
-    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
-    data: {animation: 'LoginPage'}
+    component: LoginComponent,
+    data: { animation: 'LoginPage' }
   },
   {
     path: 'loginx',
-    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent),
-    data: {animation: 'LoginPage'}
+    component: LoginComponent,
+    data: { animation: 'LoginPage' }
   },
   {
     path: 'dashboard',
-    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    component: DashboardComponent,
     canActivate: [AuthGuard],
-    data: {animation: 'DashboardPage'},
+    data: { animation: 'DashboardPage' },
     children: [
       {
         path: '',
@@ -35,24 +52,24 @@ export const routes: Routes = [
       },
       {
         path: 'home',
-        loadComponent: () => import('./pages/homepage/homepage.component').then(m => m.HomepageComponent),
-        resolve: {insights: InsightResolver},
-        data: {animation: 'HomePage'}
+        component: HomepageComponent,
+        resolve: { insights: InsightResolver },
+        data: { animation: 'HomePage' }
       },
       {
         path: 'ctigraph',
-        loadComponent: () => import('./pages/graphs/graphs.component').then(m => m.GraphComponent),
-        data: {animation: 'ctigraph'}
+        component: GraphComponent,
+        data: { animation: 'ctigraph' }
       },
       {
         path: 'directory',
-        loadComponent: () => import('./pages/directory/directory.component').then(m => m.DirectoryComponent),
-        resolve: {directory: DirectoryResolver},
-        data: {animation: 'DirectoryPage'}
+        component: DirectoryComponent,
+        resolve: { directory: DirectoryResolver },
+        data: { animation: 'DirectoryPage' }
       },
       {
         path: 'api',
-        data: {animation: 'APIPage'},
+        data: { animation: 'APIPage' },
         children: [
           {
             path: '',
@@ -61,14 +78,14 @@ export const routes: Routes = [
           },
           {
             path: 'email',
-            loadComponent: () => import('./shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component').then(m => m.DashboardEmailApiComponent),
-            data: {animation: 'EmailAPI'}
+            component: DashboardEmailApiComponent,
+            data: { animation: 'EmailAPI' }
           }
         ]
       },
       {
         path: 'breach',
-        data: {animation: 'DataBreach'},
+        data: { animation: 'DataBreach' },
         children: [
           {
             path: '',
@@ -76,21 +93,36 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'email',
+            component: DashboardChatsComponent,
+            data: { type: 'Breach', animation: 'DataBreach' }
+          },
+          {
+            path: 'logs',
+            component: DashboardChatsComponent,
+            data: { type: 'Breach', animation: 'DataBreach' }
+          },
+          {
+            path: 'cloud',
+            component: DashboardChatsComponent,
+            data: { type: 'Breach', animation: 'DataBreach' }
+          },
+          {
             path: ':category',
-            loadComponent: () => import('./shared/partials/intel-panel/dashboard-general/dashboard-general.component').then(m => m.DashboardGeneralComponent),
-            data: {type: 'Breach', animation: 'DataBreach'}
+            component: DashboardGeneralComponent,
+            data: { type: 'Breach', animation: 'DataBreach' }
           },
           {
             path: ':category/:m_hash',
-            loadComponent: () => import('./shared/partials/report/report_general/report.component').then(m => m.ReportComponent),
-            resolve: {reportdata: ReportResolver},
-            data: {type: 'Breach', animation: 'HashPage'}
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Breach', animation: 'HashPage' }
           }
         ]
       },
       {
         path: 'strategic',
-        data: {animation: 'StrategicPage'},
+        data: { animation: 'StrategicPage' },
         children: [
           {
             path: '',
@@ -99,20 +131,20 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            loadComponent: () => import('./shared/partials/intel-panel/dashboard-general/dashboard-general.component').then(m => m.DashboardGeneralComponent),
-            data: {type: 'Strategic', animation: 'CategoryPage'}
+            component: DashboardGeneralComponent,
+            data: { type: 'Strategic', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            loadComponent: () => import('./shared/partials/report/report_general/report.component').then(m => m.ReportComponent),
-            resolve: {reportdata: ReportResolver},
-            data: {type: 'Strategic', animation: 'HashPage'}
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Strategic', animation: 'HashPage' }
           }
         ]
       },
       {
         path: 'defacement',
-        data: {animation: 'DefacementPage'},
+        data: { animation: 'DefacementPage' },
         children: [
           {
             path: '',
@@ -121,20 +153,20 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            loadComponent: () => import('./shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component').then(m => m.DashboardDefacementComponent),
-            data: {type: 'Defacement', animation: 'CategoryPage'}
+            component: DashboardDefacementComponent,
+            data: { type: 'Defacement', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            loadComponent: () => import('./shared/partials/report/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent),
-            resolve: {reportdata: ReportResolver},
-            data: {type: 'Defacement', animation: 'HashPage'}
+            component: ReportDefacementComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Defacement', animation: 'HashPage' }
           }
         ]
       },
       {
         path: 'social',
-        data: {animation: 'SocialPage'},
+        data: { animation: 'SocialPage' },
         children: [
           {
             path: '',
@@ -143,20 +175,20 @@ export const routes: Routes = [
           },
           {
             path: ':category',
-            loadComponent: () => import('./shared/partials/intel-panel/dashboard-chats/dashboard-chats.component').then(m => m.DashboardChatsComponent),
-            data: {type: 'Social', animation: 'CategoryPage'}
+            component: DashboardChatsComponent,
+            data: { type: 'Social', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            loadComponent: () => import('./shared/partials/report/report-chat/report-chat.component').then(m => m.ReportChatComponent),
-            resolve: {reportdata: ReportResolver},
-            data: {type: 'Social', animation: 'HashPage'}
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Social', animation: 'HashPage' }
           }
         ]
       },
       {
         path: 'exploit',
-        data: {animation: 'ExploitPage'},
+        data: { animation: 'ExploitPage' },
         children: [
           {
             path: '',
@@ -164,21 +196,31 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'tools',
+            component: DashboardChatsComponent,
+            data: { type: 'exploit', animation: 'DataBreach' }
+          },
+          {
+            path: 'zeroday',
+            component: DashboardChatsComponent,
+            data: { type: 'exploit', animation: 'DataBreach' }
+          },
+          {
             path: ':category',
-            loadComponent: () => import('./shared/partials/intel-panel/dashboard-exploit/dashboard-exploit.component').then(m => m.DashboardExploitComponent),
-            data: {type: 'Social', animation: 'CategoryPage'}
+            component: DashboardExploitComponent,
+            data: { type: 'Social', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
-            loadComponent: () => import('./shared/partials/report/report-exploit/report-exploit.component').then(m => m.ReportExploitComponent),
-            resolve: {reportdata: ReportResolver},
-            data: {type: 'Exploit', animation: 'HashPage'}
+            component: ReportExploitComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Exploit', animation: 'HashPage' }
           }
         ]
       },
       {
         path: 'dump',
-        data: {animation: 'DumpPage'},
+        data: { animation: 'DumpPage' },
         children: [
           {
             path: '',
@@ -187,14 +229,14 @@ export const routes: Routes = [
           },
           {
             path: 'listing',
-            loadComponent: () => import('./pages/dump/dump.component').then(m => m.DumpComponent),
-            resolve: {reportdata: DumpResolver},
-            data: {type: 'listing', animation: 'CategoryPage'}
+            component: DumpComponent,
+            resolve: { reportdata: DumpResolver },
+            data: { type: 'listing', animation: 'CategoryPage' }
           },
           {
             path: 'credential',
-            loadComponent: () => import('./pages/dump/credential/credential.component').then(m => m.CredentialComponent),
-            data: {type: 'credential', animation: 'CategoryPage'}
+            component: CredentialComponent,
+            data: { type: 'credential', animation: 'CategoryPage' }
           }
         ]
       }
@@ -202,7 +244,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    loadComponent: () => import('./pages/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent),
-    data: {animation: 'ErrorPage'}
+    component: ErrorHandlerComponent,
+    data: { animation: 'ErrorPage' }
   }
 ];

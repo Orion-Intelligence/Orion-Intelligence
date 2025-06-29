@@ -5,4 +5,5 @@ export class ChatParamModel {
   mDateRange = "";
   mEntity = "";
   mMitreTtp = "";
+  ctype = "";
 }

@@ -26,3 +26,15 @@ export const DUMP_SOURCE_MAP: Record<number, { name: string }> = {
 export const DUMP_GROUP_MAP: Record<number, { name: string }> = {
   1: { name: 'Dataleak 2025' },
 };
+
+export const ChannelTypeKeys = [
+  'BREACH',
+  'CVE',
+  'ZERODAY',
+  'TOOLS',
+  'WARFARE',
+  'EMAIL',
+  'LOGS',
+  'CLOUD',
+  'NEWS'
+];

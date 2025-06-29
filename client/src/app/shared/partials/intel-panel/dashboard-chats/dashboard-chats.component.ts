@@ -11,6 +11,7 @@ import {ResultComponent} from '../../result/result.component';
 import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 import {chat_filters} from '../../../constants/filters';
+import {ChannelTypeKeys} from '../../../constants/enums';
 
 @Component({
   selector: 'app-dashboard-chats',
@@ -48,6 +49,15 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.chatCallbackModel = {...this.dashboardService.chatCallbackModel} as ChatCallbackModel;
     this.result_count = this.chatCallbackModel.Result.length
+    const category = this.route.snapshot.routeConfig?.path;
+    let isDiscussion = false
+    if(category && ChannelTypeKeys.includes(category.toUpperCase())){
+      this.chatParamModel.ctype = category
+      isDiscussion = true
+    }else {
+      this.chatParamModel.ctype = "all"
+    }
+
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
@@ -55,7 +65,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
         this.chatParamModel.q = params['q'] || '';
         this.chatParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
 
-        if (this.firstTrigger && ((this.chatCallbackModel.Result.length > 0))) {
+        if (!isDiscussion && this.firstTrigger && ((this.chatCallbackModel.Result.length > 0))) {
           this.isLoading = false;
           this.query = this.chatParamModel.q
         } else {
