@@ -108,6 +108,11 @@ export const routes: Routes = [
             data: { type: 'Breach', animation: 'DataBreach' }
           },
           {
+            path: 'warfare',
+            component: DashboardChatsComponent,
+            data: { type: 'Breach', animation: 'DataBreach' }
+          },
+          {
             path: ':category',
             component: DashboardGeneralComponent,
             data: { type: 'Breach', animation: 'DataBreach' }
