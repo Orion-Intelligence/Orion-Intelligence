@@ -41,6 +41,11 @@ export class SidebarSectionComponent {
     'Email': 'Email',
     'Telegram': 'telegram',
     'Archive': 'archive',
+    'Logs': 'Logs',
+    'Warfare': 'Warfare',
+    'Cloud': 'Cloud',
+    'Tools': 'Tools',
+    'ZeroDay': 'Zero Day',
   };
 
   selectSection() {
