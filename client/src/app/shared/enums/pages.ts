@@ -7,7 +7,8 @@ export enum Category {
   DEFACEMENT = 'Defacement',
   SOCIAL = 'Social',
   API = 'Api',
-  EXPLOIT = 'Exploit'
+  EXPLOIT = 'Exploit',
+  FEED = 'Feed'
 }
 
 export enum GeneralSubCategory {
@@ -51,6 +52,9 @@ export enum ExploitSubCategory {
   ZERODAY = 'ZeroDay',
 }
 
+export enum FeedSubCategory {
+  NEWS = 'News',
+}
 export enum DumpSubCategory {
   LISTING = 'Listing',
   CREDENTIAL = 'Credential',

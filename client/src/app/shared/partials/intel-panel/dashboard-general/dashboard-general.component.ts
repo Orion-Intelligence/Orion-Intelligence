@@ -92,7 +92,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         this.generalParamModel.mNetwork = params['mNetwork'] || 'all';
 
         this.generalParamModel.mSearchParamType = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
-        if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && this.type == Category.BREACH))) {
+        if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && (this.type == Category.BREACH || this.type == Category.FEED)))) {
           this.isLoading = false;
           if (this.generalParamModel.q)
             this.query = this.generalParamModel.q
@@ -125,7 +125,6 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         queryParamsHandling: ''
       }).then();
     }
-
     this.isLoading = true;
 
     const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';

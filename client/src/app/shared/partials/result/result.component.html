@@ -40,7 +40,7 @@
   </div>
 </form>
 
-<ul *ngIf="showTabs" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
+<ul *ngIf="showTabs && (analyticsToggle || discussion)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
   <li class="nav-item">
     <a class="nav-link cursor-pointer active">Results</a>
   </li>

@@ -35,6 +35,9 @@ class crawl_controller:
     async def invoke_leak_index(self, leak_index: LeakDataModel):
         return await self.__crawl_model.init_leak(leak_index)
 
+    async def invoke_news_index(self, leak_index: LeakDataModel):
+        return await self.__crawl_model.init_news(leak_index)
+
     async def invoke_exploit_index(self, exploit_index: ExploitDataModel):
         return await self.__crawl_model.init_exploit(exploit_index)
 

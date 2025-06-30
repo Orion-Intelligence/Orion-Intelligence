@@ -1,0 +1,2 @@
+{"file": "_hackread", "url": "https://hackread.com/category/hacking-news/leaks-affairs/"}
+{"file": "_infosecuritymagazine", "url": "https://www.infosecurity-magazine.com/data-breaches/"}

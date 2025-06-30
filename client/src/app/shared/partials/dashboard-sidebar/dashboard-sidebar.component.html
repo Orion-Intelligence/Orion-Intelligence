@@ -46,6 +46,11 @@
                                  [items]="exploitCategories" [routePrefix]="'exploit'"
                                  [title]="'Exploit'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+                                 (sectionSelected)="onSectionSelected($event)" [category]="category.FEED"
+                                 [icon]="'assets/images/sidebar/news.svg'"
+                                 [items]="newsCategories" [routePrefix]="'feed'"
+                                 [title]="'Feed'"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
                                  (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
                                  [icon]="'assets/images/sidebar/dump.svg'"
                                  [items]="dumpCategories" [routePrefix]="'dump'"
@@ -137,6 +142,12 @@
                                      [items]="exploitCategories" [routePrefix]="'exploit'"
                                      [selectionStore]="selectionStore"
                                      [title]="'Exploit'"></app-dashboard-sidebar-collapsed>
+    <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+                                     (sectionSelected)="onSectionSelected($event)" [category]="category.FEED"
+                                     [icon]="'assets/images/sidebar/news.svg'"
+                                     [items]="newsCategories" [routePrefix]="'feed'"
+                                     [selectionStore]="selectionStore"
+                                     [title]="'feed'"></app-dashboard-sidebar-collapsed>
     <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
                                      (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
                                      [icon]="'assets/images/sidebar/dump.svg'"

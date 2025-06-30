@@ -6,7 +6,7 @@ import {
   Category,
   DefacementSubCategory, DumpSubCategory,
   ExploitSubCategory,
-  GeneralSubCategory,
+  GeneralSubCategory, FeedSubCategory,
   SocialSubCategory
 } from '../../enums/pages';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
@@ -35,6 +35,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
+  newsCategories = Object.values(FeedSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
@@ -88,6 +89,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           firstSubcategory = this.defacementCategories[0];
           break;
         case Category.DUMP:
+          firstSubcategory = this.dumpCategories[0];
+          break;
+        case Category.FEED:
           firstSubcategory = this.dumpCategories[0];
           break;
       }

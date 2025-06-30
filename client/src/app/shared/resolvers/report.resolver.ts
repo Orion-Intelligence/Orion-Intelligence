@@ -17,7 +17,6 @@ export class ReportResolver implements Resolve<any> {
     const lang = route.queryParamMap.get('lang');
 
     let apiUrl = '';
-
     switch (category) {
       case 'breach':
         apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
@@ -34,6 +33,9 @@ export class ReportResolver implements Resolve<any> {
       case 'exploit':
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
+      case 'feed':
+        apiUrl = hash ? `search/news/${hash}` : `search/news`;
+        break;
       default:
         this.router.navigate(['/']).then();
         return of(null);
@@ -45,6 +47,7 @@ export class ReportResolver implements Resolve<any> {
 
     return this.apiService.get<any>(apiUrl).pipe(
       catchError((_) => {
+        alert(_?.message || 'Unknown error');
         this.router.navigate(['/']).then();
         return of(null);
       })

@@ -66,6 +66,11 @@ async def search_telegram(param: search_chat_param_model = Depends()):
 async def search_leak(param: search_leak_param_model = Depends()):
     return await search_model.getInstance().search_leak_result(param)
 
+@api_routes.get("/api/search/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Search breach news (leak) intelligence reports using parameters such as company, country, or hash.")
+async def search_news(param: search_leak_param_model = Depends()):
+    param.mContentType = "news"
+    return await search_model.getInstance().search_leak_result(param)
+
 
 @api_routes.get("/api/search/exploit", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
@@ -91,6 +96,10 @@ async def get_defacement_document(doc_id: str):
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
+@api_routes.get("/api/search/news/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+                description="Get a specific breach (leak) document by its document ID and optional language.")
+async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
+    return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
 @api_routes.get("/api/search/exploit/{doc_id}",
                 dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],

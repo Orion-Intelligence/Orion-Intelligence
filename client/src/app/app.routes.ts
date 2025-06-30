@@ -192,6 +192,28 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'feed',
+        data: { animation: 'FeedPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'news',
+            pathMatch: 'full'
+          },
+          {
+            path: ':category',
+            component: DashboardGeneralComponent,
+            data: { type: 'Feed', animation: 'CategoryPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Feed', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
         path: 'exploit',
         data: { animation: 'ExploitPage' },
         children: [
@@ -244,7 +266,7 @@ export const routes: Routes = [
             data: { type: 'credential', animation: 'CategoryPage' }
           }
         ]
-      }
+      },
     ]
   },
   {
