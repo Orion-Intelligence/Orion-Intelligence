@@ -171,92 +171,48 @@ class EntityRequestGenerator:
 
     @staticmethod
     def build_property_search_query(normalized_value: str, depth_level: int, document_limit: int):
-        if normalized_value!="all":
-            normalized_value = EntityRequestGenerator.deduplicate_key(normalized_value)
+        queried_id = "all_properties"
+        query_str = f"""
+        LET props = (
+          FOR property IN cti_vertices
+            FILTER CONTAINS(LOWER(property.label), @search_value) || CONTAINS(LOWER(property.value), @search_value)
+            RETURN property._id
+        )
+        LET raw_depth1 = (
+          FOR id IN props
+            FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
+              FILTER v.type == 'document'
+              LIMIT {document_limit}
+              RETURN {{vertex: v, edge: e, path: p}}
+        )
+        LET document_ids = UNIQUE(
+          FOR item IN raw_depth1
+            FILTER item.vertex.type == 'document'
+            RETURN item.vertex._id
+        )
 
-        bind_vars = {}
-        if normalized_value == "all":
-            queried_id = "all_properties"
-            query_str = f"""
-            LET props = (
-              FOR property IN cti_vertices
-                RETURN property._id
-            )
-            LET raw_depth1 = (
-              FOR id IN props
-                FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-                  FILTER v.type == 'document'
-                  LIMIT {document_limit}
-                  RETURN {{vertex: v, edge: e, path: p}}
-            )
-            LET document_ids = UNIQUE(
-              FOR item IN raw_depth1
-                FILTER item.vertex.type == 'document'
-                RETURN item.vertex._id
-            )
+        LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
+        LET filtered_cluster_edges = (
+          FOR doc_id IN document_ids
+            FOR e IN cti_edges
+              FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+              LET cluster_key = PARSE_IDENTIFIER(e._from).key
+              FILTER cluster_key IN default_clusters
+              LET cluster = DOCUMENT(e._from)
+              RETURN {{vertex: cluster, edge: e, path: null}}
+        )
 
-            LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
-            LET filtered_cluster_edges = (
-              FOR doc_id IN document_ids
-                FOR e IN cti_edges
-                  FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                  FILTER cluster_key IN default_clusters
-                  LET cluster = DOCUMENT(e._from)
-                  RETURN {{vertex: cluster, edge: e, path: null}}
-            )
+        LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
+        LET limit_hit_depth1 = false
 
-            LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
-            LET limit_hit_depth1 = false
+        RETURN {{
+          depth1,
+          limit_hit_depth1,
+          matched_ids: props
+        }}
+        """
 
-            RETURN {{
-              depth1,
-              limit_hit_depth1,
-              matched_ids: props
-            }}
-            """
-        else:
-            queried_id = normalized_value
-            query_str = f"""
-            LET props = (
-              FOR property IN cti_vertices
-                FILTER CONTAINS(LOWER(property.value), @search_value)
-                RETURN property._id
-            )
-            LET raw_depth1 = (
-              FOR id IN props
-                FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-                  FILTER v.type == 'document'
-                  LIMIT {document_limit}
-                  RETURN {{vertex: v, edge: e, path: p}}
-            )
-            LET document_ids = UNIQUE(
-              FOR item IN raw_depth1
-                FILTER item.vertex.type == 'document'
-                RETURN item.vertex._id
-            )
-
-            LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
-            LET filtered_cluster_edges = (
-              FOR doc_id IN document_ids
-                FOR e IN cti_edges
-                  FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  LET cluster_key = PARSE_IDENTIFIER(e._from).key
-                  FILTER cluster_key IN default_clusters
-                  LET cluster = DOCUMENT(e._from)
-                  RETURN {{vertex: cluster, edge: e, path: null}}
-            )
-
-            LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
-            LET limit_hit_depth1 = false
-
-            RETURN {{
-              depth1,
-              limit_hit_depth1,
-              matched_ids: props
-            }}
-            """
-            bind_vars = {"search_value": normalized_value}
+        bind_vars = {"search_value": normalized_value.lower()}
 
         return queried_id, query_str, bind_vars
 

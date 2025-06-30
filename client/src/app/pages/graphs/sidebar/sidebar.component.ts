@@ -30,6 +30,7 @@ export class SidebarComponent implements OnInit {
   typeOptions = ['cluster', 'document', 'property'];
   clusterOptions = ['all', 'general', 'leak', 'defacement', 'chat', 'exploit'];
   allowedProperties = [
+    { label: 'All', key: 'all' },
     { label: 'Email', key: 'm_email' },
     { label: 'Bitcoin Addresses', key: 'm_bitcoin_addresses' },
     { label: 'Telephone Number', key: 'm_phone_number' },
