@@ -166,8 +166,8 @@
 <div *ngIf="!this.sidebar_default" class="sidebar-hotlinks-collapsed">
   <a href="http://zucui4cyyun2uok6x7mj3zyzgobcctcgugah33vrttbb7bxgj5quvjqd.onion" target="_blank" class="sidebar__item-dropdown-max">
     <div class="sidebar__item">
-      <div appTooltip="Onion Link" class="sidebar__item-dropdown">
-        <img alt="Documentation" class="sidebar__icon sidebar__icon-collapse-lift" height="20" ngSrc="../../../../assets/images/sidebar/tor.svg"
+      <div class="sidebar__item-dropdown">
+        <img appTooltip="Onion Link" alt="Documentation" class="sidebar__icon sidebar__icon-collapse-lift" height="20" ngSrc="../../../../assets/images/sidebar/tor.svg"
              width="20">
       </div>
     </div>
@@ -176,16 +176,16 @@
   <div class="sidebar__item">
     <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{'sidebar__item-dropdown-hotlink-active': (selectionStore.selectedSection$ | async) === category.DIRECTORY}"
          [routerLink]="'directory'"
-         appTooltip="Documentation" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink">
-      <img alt="Links" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/directory.svg"
+         class="sidebar__item-dropdown sidebar__item-dropdown-hotlink">
+      <img appTooltip="Active Links" alt="Links" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/directory.svg"
            width="20">
     </div>
   </div>
 
   <a href="https://orion-search.readthedocs.io/en/latest/" target="_blank">
     <div class="sidebar__item">
-      <div appTooltip="documentation" class="sidebar__item-dropdown">
-        <img alt="Documentation" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/documentation.svg"
+      <div class="sidebar__item-dropdown">
+        <img appTooltip="documentation" alt="Documentation" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/documentation.svg"
              width="20">
       </div>
     </div>
