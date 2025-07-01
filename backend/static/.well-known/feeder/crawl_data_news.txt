@@ -1,2 +1,6 @@
 {"file": "_hackread", "url": "https://hackread.com/category/hacking-news/leaks-affairs/"}
 {"file": "_infosecuritymagazine", "url": "https://www.infosecurity-magazine.com/data-breaches/"}
+{"file": "_thehackernews", "url": "https://thehackernews.com/"}
+{"file": "_scworld", "url": "https://www.scworld.com/"}
+{"file": "_postswigger", "url": "https://portswigger.net/"}
+{"file": "_csocybercrime", "url": "https://www.csoonline.com/"}
