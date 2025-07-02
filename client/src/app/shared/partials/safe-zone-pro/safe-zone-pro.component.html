@@ -1,0 +1,76 @@
+<div class="popup-overlay">
+    <div class="safe-zone-pro-container">
+        <div class="left-section">
+            <h2>Safe Zone Pro</h2>
+
+            <div class="feature-item">
+                <h3>Live Firewall</h3>
+                <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
+                    threats effortlessly</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>Malware Scanner</h3>
+                <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
+                    threats effortlessly</p>
+            </div>
+
+            <div class="feature-item">
+                <h3>Anti-Spam Engine</h3>
+                <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
+                    threats effortlessly</p>
+            </div>
+
+            <div class="total-due">
+                <h3>Total Due</h3>
+                <p>$59.99 <span class="per-year">/year</span></p>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <h2>Upgrade to Safe Zone Pro</h2>
+            <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
+                threats effortlessly</p>
+
+            <div class="subscription-options">
+                <label class="subscription-option">
+                    <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription" />
+                    <div class="option-content">
+                        <h4>Monthly ($8.99/month)</h4>
+                        <p>Pay $130 per year</p>
+                    </div>
+                </label>
+
+                <label class="subscription-option">
+                    <input type="radio" name="subscription" value="monthly-highlighted"
+                        [(ngModel)]="selectedSubscription" checked />
+                    <div class="option-content">
+                        <h4>Monthly ($8.99/month)</h4>
+                        <p>Pay $130 per year</p>
+                    </div>
+                </label>
+            </div>
+
+            <form class="payment-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" [(ngModel)]="userName" name="userName" />
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" [(ngModel)]="userPhone" name="userPhone" />
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" [(ngModel)]="userEmail" name="userEmail" />
+                </div>
+
+                <button type="submit" class="btn-proceed">Proceed to Payment</button>
+                <button type="button" class="btn-close" (click)="closePopup()">Close</button>
+            </form>
+        </div>
+    </div>
+</div>
