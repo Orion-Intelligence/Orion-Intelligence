@@ -33,13 +33,13 @@
   white-space: normal;
 }
 
-@media (width <= 500px) {
+@media (width <=500px) {
   .home_insight__text-secondary {
     font-size: 10px;
   }
 }
 
-@media (width <= 420px) {
+@media (width <=420px) {
   .home_insight__text-secondary {
     font-size: 8px;
   }
@@ -82,7 +82,7 @@
 }
 
 .home_insight__card {
-  background-color: #0f335750;
+  background-color: var(--home-insight-card-bg);
   color: white;
   padding: 24px;
   border-radius: 8px;
@@ -114,7 +114,7 @@
 }
 
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .home__form {
     margin-left: 21px !important;
   }

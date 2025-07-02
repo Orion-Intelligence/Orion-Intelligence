@@ -1,6 +1,6 @@
 .filter__header {
   cursor: pointer;
-  background: #153454;
+  background: var(--filter-header);
   padding: 13px 20px;
   border-bottom: 1px solid #092137;
   border-top-left-radius: 15px;
@@ -31,7 +31,7 @@
   height: 100%;
   padding: 0 20px;
   overflow-y: auto;
-  background: linear-gradient(to bottom, #174069, #2A5784);
+  background: var(--filter-form-bg);
 }
 
 .filter__content {
@@ -76,7 +76,8 @@
   margin-top: 15px;
 }
 
-.custom-day.range, .custom-day:hover {
+.custom-day.range,
+.custom-day:hover {
   border-radius: 4px;
 }
 
@@ -128,7 +129,7 @@
 }
 
 .filter__submit-button {
-  background: #2b90ee;
+  background: var(--filter-submit-button);
   font-family: Inter, sans-serif;
   color: white;
   border: 0;
@@ -145,25 +146,25 @@
 
 .filter__submit .btn-secondary {
   background: #4EA2F100;
-  border: 2px solid #359AFF;
+  border: 2px solid var(--filter-submit-button);
 }
 
 .filter__submit .btn-secondary:hover {
-  background: #4EA2F140;
-  border: 2px solid #359AFF;
+  background: var(--filter-submit-button-hover);
+  /* border: 2px solid #359AFF; */
 }
 
 .filter__submit .btn-secondary:focus,
 .filter__submit .btn-secondary:active {
-  background: #4EA2F160 !important;
-  border: 2px solid #359AFF !important;
+  background: var(--filter-submit-button-hover) !important;
+  /* border: 2px solid #359AFF !important; */
   outline: none !important;
   box-shadow: none !important;
 }
 
 
 .filter__submit-button:hover {
-  background: #1176d4;
+  background: var(--filter-submit-button-hover);
 }
 
 .filter__container-disable {
@@ -220,7 +221,7 @@
 }
 
 .filter__form .dropdown-item:hover {
-  background: linear-gradient(92.32deg, #4EA2F1 2.58%, #2C7AC5 66.77%, #2C7AC5 130.97%) !important;
+  background: var(--filter__form-dropdown-item-hover) !important;
   color: white !important;
 }
 
@@ -230,7 +231,7 @@
 }
 
 .filter__form .dropdown-select:focus {
-  background: #4EA2F1 !important;
+  background: var(--filter-submit-button) !important;
   color: #fff;
 }
 
@@ -270,7 +271,7 @@
   position: fixed;
 }
 
-@media only screen and (width <= 450px) {
+@media only screen and (width <=450px) {
   .filter__submit {
     height: 50%;
   }

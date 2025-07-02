@@ -3,10 +3,7 @@
   flex: 1;
   height: auto;
   overflow: hidden;
-  background: linear-gradient(to bottom,
-  rgb(18 52 84 / 100%),
-  rgb(41 87 132 / 100%) 50vh,
-  rgb(41 87 132 / 100%) 100%) !important;
+  background: var(--dashboard-bg);
   max-height: 100%;
   z-index: 1;
 }
@@ -33,7 +30,7 @@
 .dashboard {
   min-height: 100%;
   padding-bottom: 100px;
-  background-image: linear-gradient(to bottom, #102F4E 0%, #102F4E00 15%);
+  background-image: var(--dashboard-header);
 }
 
 .dashboard-body {
@@ -88,7 +85,7 @@
   padding: 0;
   height: 100%;
   overflow: hidden auto;
-  background: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
+  background: var(--dasshboard-sidebar-bg);
 }
 
 .dashboard__sidebar.collapsed {
@@ -101,7 +98,7 @@
   display: none;
 }
 
-@media only screen and (width <= 600px) {
+@media only screen and (width <=600px) {
   .dashboard__sidebar {
     width: 100vw;
     overflow: hidden;
@@ -122,7 +119,7 @@
   z-index: 3;
 }
 
-@media only screen and (width <= 460px) {
+@media only screen and (width <=460px) {
   .filters-container {
     display: none !important;
   }
