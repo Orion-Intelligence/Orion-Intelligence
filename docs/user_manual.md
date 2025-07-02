@@ -20,7 +20,8 @@ capabilities, Orion empowers users to uncover patterns, trends, and correlations
 ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility
 and performance ensure it meets the needs of various industries and use cases.
 
-![homepage](https://github.com/user-attachments/assets/4f44383c-5d39-41a3-bf33-f9eab2ba17e8)
+![homepage](https://github.com/user-attachments/assets/668c206d-8b62-4456-9ac7-2f74d865a698)
+
 
 ## Directory Page
 
@@ -85,7 +86,7 @@ workflow. It consists of the following main menu items:
     technical users through integration, API usage, and system architecture. This module ensures that both end-users and
     developers can easily understand and utilize the platform's full capabilities.
 
-![nav](https://github.com/user-attachments/assets/a61f3546-413b-47f9-8dd5-9a468564a36f)
+![navigation](https://github.com/user-attachments/assets/025ab902-7de7-4c71-9bfe-ee46390534b7)
 
 ## Homepage
 
