@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-start">
+<div class="d-flex justify-content-end">
   <div class="btn-group report-menu-option-container">
     <button (click)="downloadCSV()" appTooltip="Download" class="p-0 report-menu-option">
       <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/download.svg" width="25">
@@ -32,7 +32,7 @@
 <div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="search__result-detail">
   <div class="d-flex align-items-start">
     <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg"
-         width="25">
+      width="25">
     <h2 class="search__result-detail-heading ms-2"> &nbsp; AI Report</h2>
   </div>
   <p class="search__result-detail-description">
@@ -67,18 +67,19 @@
   <span *ngIf="resultItem?.m_ref_html?.length" class="search__result-detail-description-span">Web Reference</span>
   <p class="search__result-detail-description">
     {{
-      ((resultItem?.m_ref_html ?? '').length > 650)
-        ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
-        : resultItem?.m_ref_html
+    ((resultItem?.m_ref_html ?? '').length > 650)
+    ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
+    : resultItem?.m_ref_html
     }}
   </p>
 
+  <span class="search__result-detail-description-span">URL</span>
   <ng-container *ngIf="resultItem?.m_url as url; else noUrl">
     <ng-container *ngIf="url.trim().length > 1; else noUrl">
       <p class="search__result-detail-url-p text-truncate">
         <a [href]="url"
-           class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width"
-           target="_blank">
+          class="gc-clear-selection search__result-detail-url d-inline-block text-truncate search__result-detail-url-width"
+          target="_blank">
           {{ url }}
         </a>
       </p>
@@ -116,54 +117,71 @@
         <span [ngClass]="{
         'bg-success': isWithinDays(resultItem!.m_creation_date, 5),
         'bg-warning': isWithinDays(resultItem!.m_creation_date, 10) && !isWithinDays(resultItem!.m_creation_date, 5),
-        'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}" class="rounded-circle d-inline-block me-2 search__result-detail-status-circle">
+        'bg-danger': !isWithinDays(resultItem!.m_creation_date, 10)}"
+          class="rounded-circle d-inline-block me-2 search__result-detail-status-circle">
         </span>
         <p class="status mb-0">{{ getStatusText(resultItem?.m_creation_date) }} </p>
       </div>
     </div>
   </div>
-
-  <div class="search__result-detail-tabs-div">
+</div>
+<div class="search__result-detail">
+  <div (click)="metaadataToggleContent()" class="search__result__section__heading">
+    <div class="left-content">
+      Metadata
+      <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Metadata">
+    </div>
+    <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
+        src="/assets/images/shared/search_side_dropdown_icon.svg">
+    </div>
+  </div>
+  <!-- <div class="search__result-detail-tabs-div"> -->
+  <div *ngIf="isExpandedMetadata">
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [class.active]
-          ="activeTab === key" appTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}"
-                class="search__result-tabs">
+        <button (click)="setActiveTab(key)" [class.active]="activeTab === key"
+          appTooltip="Info about {{ key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
           {{ formatKeyLabel(key) }}
         </button>
         <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
       </ng-container>
-    </div>
-    <app-result-section *ngIf="activeTab === 'm_content'" @fadeInDashboardItem
-                        [listItems]="[content]"></app-result-section>
-    <app-result-section *ngIf="activeTab === 'm_section'" @fadeInDashboardItem
-                        [listItems]="listItems"></app-result-section>
-    <app-result-list *ngIf="activeTab !== 'm_section'" @fadeInDashboardItem [activeTab]="activeTab"
-                     [listItems]="listItems"></app-result-list>
-  </div>
 
-  <div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot!=''"
-       class="search__result-detail-preview cursor-pointer">
-    <div (click)="toggleContent()" class="d-flex justify-content-between align-items-center">
-      <h3 class="search__result-detail-preview-heading cursor-pointer">Leak Screenshot</h3>
-      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn screenshoot_expand_button">
-        <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
-             src="/assets/images/shared/search_side_dropdown_icon.svg">
-      </div>
     </div>
-    <div *ngIf="isExpanded">
-      <br>
-      <div *ngIf="!isImageLoaded && !isImageError" class="text-left text-muted">
-        <b>Loading, please wait...</b>
-      </div>
-      <div *ngIf="isImageError" class="text-left text-muted">
-        <b>Screenshot not found</b>
-      </div>
-      <img (error)="onImageError()" (load)="onImageLoad()" *ngIf="imageSrc && !isImageError" [src]="imageSrc"
-           alt="Screenshot Preview" class="search__result-preview"/>
+    <div class="search__result-tabs-line"></div>
+    <app-result-section *ngIf="activeTab === 'm_content'" @fadeInDashboardItem
+      [listItems]="[content]"></app-result-section>
+    <app-result-section *ngIf="activeTab === 'm_section'" @fadeInDashboardItem
+      [listItems]="listItems"></app-result-section>
+    <app-result-list *ngIf="activeTab !== 'm_section'" @fadeInDashboardItem [activeTab]="activeTab"
+      [listItems]="listItems"></app-result-list>
+    <!-- </div> -->
+  </div>
+</div>
+
+<div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot!=''" class="search__result-detail">
+  <div (click)="screenshootToggleContent()" class="search__result__section__heading">
+    <div class="left-content">Leak Screenshot
+      <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Leak Screenshot">
+    </div>
+    <div [attr.aria-label]="isExpandedScreenshoot ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ 'rotated': !isExpandedScreenshoot }" alt="toggle icon"
+        src="/assets/images/shared/search_side_dropdown_icon.svg">
     </div>
   </div>
-  <br>
-  <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
-  <app-report-mapping-list></app-report-mapping-list>
+  <div *ngIf="isExpandedScreenshoot">
+    <br>
+    <div *ngIf="!isImageLoaded && !isImageError" class="text-left text-muted">
+      <b>Loading, please wait...</b>
+    </div>
+    <div *ngIf="isImageError" class="text-left text-muted">
+      <b>Screenshot not found</b>
+    </div>
+    <img (error)="onImageError()" (load)="onImageLoad()" *ngIf="imageSrc && !isImageError" [src]="imageSrc"
+      alt="Screenshot Preview" class="search__result-preview" />
+  </div>
 </div>
+
+<app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
+<app-report-mapping-list></app-report-mapping-list>
+<!-- </div> -->

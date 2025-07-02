@@ -1,23 +1,28 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {HttpParams} from '@angular/common/http';
-import {ApiService} from '../../../services/api.service';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
+import { ApiService } from '../../../services/api.service';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-report-mapping-list',
   templateUrl: './report-mapping-list.component.html',
-  imports: [CommonModule],
+  imports: [CommonModule, TooltipDirective],
 })
 export class ReportMappingListComponent implements OnInit {
   loading = false;
   result: any[] = [];
   filteredItems: any[] = [];
+  isExpanded = true;
 
   constructor(private api: ApiService) {
   }
 
   ngOnInit(): void {
     this.loadGraph();
+  }
+  toggleContent(): void {
+    this.isExpanded = !this.isExpanded;
   }
 
   loadGraph(): void {
@@ -31,9 +36,9 @@ export class ReportMappingListComponent implements OnInit {
       .set('edge', '25')
       .set('depth', '2');
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
-        const {results} = response;
+        const { results } = response;
         this.result = results;
         this.loading = true;
         this.getUniqueSortedItems(this.result, 25);
