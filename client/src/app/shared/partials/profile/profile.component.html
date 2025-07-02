@@ -8,8 +8,8 @@
   <ul [class.show]="dropdownOpen" class="profile-dropdown">
     <div class="profile-dropdown-arrow"></div>
     <li><a class="dropdown-item disabled">
-      <img alt="Settings" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15"/>
-      {{ username$ | async }}</a></li>
+        <img alt="Settings" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15" />
+        {{ username$ | async }}</a></li>
     <li class="dropdown-item dropdown-item-inline d-flex align-items-center disabled">
       <span class="bg-success rounded-circle d-inline-block me-2 user-active"></span> &nbsp;&nbsp;active
     </li>
@@ -17,12 +17,27 @@
       <hr class="dropdown-divider mx-3">
     </li>
     <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank">
-      <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp; Settings</a>
+        <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp;
+        Settings</a>
     </li>
     <li *ngIf="isAdmin()">
       <hr class="dropdown-divider mx-3">
     </li>
     <li><a (click)="logout()" class="dropdown-item" id="logout-button">
-      <img alt="Logout" height="15" ngSrc="assets/images/shared/logout.svg" priority width="15"> &nbsp; Logout</a></li>
+        <img alt="Logout" height="15" ngSrc="assets/images/shared/logout.svg" priority width="15"> &nbsp; Logout</a>
+    </li>
+    <li *ngIf="isAdmin()">
+      <hr class="dropdown-divider mx-3">
+    </li>
+    <li>
+      <div class="dropdown-item theme-toggle">
+        <label class="small-switch">
+          <input type="checkbox" [checked]="isDarkTheme" (change)="toggleTheme($event)">
+          <span class="small-slider round"></span>
+        </label>
+        &nbsp; Theme
+      </div>
+    </li>
+
   </ul>
 </div>

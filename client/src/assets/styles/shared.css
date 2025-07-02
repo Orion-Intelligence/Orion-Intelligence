@@ -6,14 +6,14 @@
   margin-right: 32px;
 }
 
-.default-input-container-tab{
+.default-input-container-tab {
   margin-top: 32px;
   margin-left: 32px;
   margin-right: 132px;
   border-bottom: 1px solid #ffffff40;
 }
 
-.default-input-container-tab .nav-link{
+.default-input-container-tab .nav-link {
   font-family: Inter, sans-serif;
   font-size: 14px;
   cursor: pointer;
@@ -21,7 +21,7 @@
   margin-right: 10px;
 }
 
-.nav-tabs .nav-link.active{
+.nav-tabs .nav-link.active {
   background-color: #ffffff20;
   border-color: #ffffff30;
   border-bottom: #0000;
@@ -139,7 +139,7 @@
 }
 
 table {
-  background: #12335450;
+  background: var(--table-header-bg);
   table-layout: fixed;
   margin-bottom: 0;
   border-bottom-left-radius: 8px;
@@ -188,11 +188,11 @@ table tr:not(:first-child) {
 }
 
 table tr:nth-child(even) {
-  background-color: #214b75 !important;
+  background-color: var(--table-tr-nth-child-even) !important;
 }
 
 table tbody tr:nth-child(odd) {
-  background-color: #1e456c !important;
+  background-color: var(--table-tr-nth-child-odd) !important;
 }
 
 table tr:first-child {
@@ -212,7 +212,7 @@ table tr:not(:first-child, :last-child) {
 }
 
 table tbody tr:hover {
-  background-color: #3A6A9A !important;
+  background-color: var(--table-tbody-tr-hover) !important;
   transition: background-color 0.3s ease-in-out;
 }
 
@@ -241,7 +241,7 @@ table a:visited {
 
 .side-menu-container .filters-button {
   border-radius: 4px;
-  background: #0E2D4D;
+  background: var(--filters-button);
   border: none;
   padding: 7px 12px;
   display: flex;
@@ -265,7 +265,7 @@ table a:visited {
 }
 
 .filters-button:hover {
-  background: #14335299 !important;
+  background: var(--filters-button-hover) !important;
 }
 
 .default-notification-banner-icon {
@@ -286,7 +286,7 @@ table a:visited {
   color: #fff;
 }
 
-.default-notification-banner-credential{
+.default-notification-banner-credential {
   max-width: 540px;
   margin-left: 30px;
 }
@@ -297,16 +297,16 @@ table a:visited {
 }
 
 .report-menu-option {
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   padding: 5px;
-  background: #143352;
+  background: var(--report-menu-option);
   border: none !important;
   transition: background-color 0.3s ease-in-out;
 }
 
 .report-menu-option:hover {
-  background: #0f263e;
+  background: var(--report-menu-option-hover);
 }
 
 .report-menu-divider {
@@ -321,11 +321,11 @@ table a:visited {
 }
 
 .report-menu-option-container {
-  border-radius: 12px;
-  margin-left: 30px;
-  background: #143352;
+  border-radius: 8px;
+  margin-right: 35px;
+  background: var(--report-menu-option);
   margin-top: 20px;
-  border: 1px solid #ffffff10;
+  /* border: 1px solid #ffffff10; */
   overflow: hidden;
 }
 
@@ -360,13 +360,13 @@ table a:visited {
   display: none !important;
 }
 
-@media only screen and (width <= 550px) {
+@media only screen and (width <=550px) {
   .default-input-container {
     display: grid;
   }
 }
 
-@media only screen and (width <= 1300px) {
+@media only screen and (width <=1300px) {
   table thead {
     display: none;
   }
@@ -399,7 +399,7 @@ table a:visited {
   }
 
   table tbody tr:hover {
-    background-color: #3A6A9A !important;
+    background-color: var(--table-tbody-tr-hover) !important;
     cursor: pointer;
   }
 
@@ -410,7 +410,7 @@ table a:visited {
 
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .label-text {
     margin-left: 15px;
   }
@@ -442,18 +442,18 @@ table a:visited {
   }
 }
 
-@media only screen and (width <= 460px) {
+@media only screen and (width <=460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (width <= 700px) {
+@media only screen and (width <=700px) {
   .dashboard-general-input {
     min-width: 100px;
   }
 
-  .default-input-container-tab{
+  .default-input-container-tab {
     margin-left: 17px;
     margin-right: 17px;
   }

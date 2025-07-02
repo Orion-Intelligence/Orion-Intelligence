@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-start">
+<div class="d-flex justify-content-end">
   <div class="btn-group report-menu-option-container">
     <button (click)="downloadCSV()" class="p-0 report-menu-option">
       <img alt="download" height="25" ngSrc="../../../../../assets/images/shared/download.svg" width="25">
@@ -16,7 +16,7 @@
       <img alt="share" height="22" ngSrc="../../../../../assets/images/shared/share.svg" width="22">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button (click)="redirectToUrl()" class="p-0 report-menu-option" >
+    <button (click)="redirectToUrl()" class="p-0 report-menu-option">
       <img alt="redirect" height="25" ngSrc="../../../../../assets/images/shared/redirect.svg" width="25">
     </button>
     <button (click)="open_graph()" appTooltip="Open CTI Graph" class="p-0 report-menu-option">
@@ -27,7 +27,7 @@
 <div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="search__result-detail">
   <div class="d-flex align-items-start">
     <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg"
-         width="25">
+      width="25">
     <h2 class="search__result-detail-heading ms-2"> &nbsp; AI Report</h2>
   </div>
   <p class="search__result-detail-description">
@@ -76,12 +76,12 @@
       </ng-container>
     </div>
 
-    <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'"
-                        @fadeInDashboardItem [listItems]="[activeTab === 'm_content' ? content : summary]">
+    <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem
+      [listItems]="[activeTab === 'm_content' ? content : summary]">
     </app-result-section>
 
     <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem
-                     [activeTab]="activeTab" [listItems]="listItems">
+      [activeTab]="activeTab" [listItems]="listItems">
     </app-result-list>
   </div>
 

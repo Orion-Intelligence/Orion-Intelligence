@@ -1,21 +1,21 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
-import {ResultListComponent} from '../../result-components/result-list/result-list.component';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {last} from 'rxjs';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {HelperService} from '../../../services/helper.service';
-import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
-import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
-import {AppService} from '../../../../services/core/app.service';
-import {Category} from '../../../enums/pages';
-import {ApiService} from '../../../services/api.service';
-import {HttpParams} from '@angular/common/http';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
-import {NgbCollapseModule} from '@ng-bootstrap/ng-bootstrap';
-import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
-import {ReportMappingListComponent} from "../report-mapping-list/report-mapping-list.component";
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
+import { ResultListComponent } from '../../result-components/result-list/result-list.component';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { last } from 'rxjs';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { HelperService } from '../../../services/helper.service';
+import { LeakResultItem } from '../../../model/results/leak/leak.callback.model';
+import { GeneralResultItem } from '../../../model/results/general/general.callback.model';
+import { AppService } from '../../../../services/core/app.service';
+import { Category } from '../../../enums/pages';
+import { ApiService } from '../../../services/api.service';
+import { HttpParams } from '@angular/common/http';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
+import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
 
 @Component({
   selector: 'app-result-panel',
@@ -37,7 +37,8 @@ export class ReportComponent implements OnInit {
   imageSrc: string | null = null;
   aiSuggestStatus = false
   aiSuggestSummary = ""
-  isExpanded = true;
+  isExpandedScreenshoot = true;
+  isExpandedMetadata = true
   protected readonly last = last;
   protected readonly Category = Category;
 
@@ -58,7 +59,7 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({reportdata, type}) => {
+    this.route.data.subscribe(({ reportdata, type }) => {
       this.resultItem = reportdata;
       this.type = type;
       this.processResultItem();
@@ -73,8 +74,11 @@ export class ReportComponent implements OnInit {
     });
   }
 
-  toggleContent(): void {
-    this.isExpanded = !this.isExpanded;
+  screenshootToggleContent(): void {
+    this.isExpandedScreenshoot = !this.isExpandedScreenshoot;
+  }
+  metaadataToggleContent(): void {
+    this.isExpandedMetadata = !this.isExpandedMetadata;
   }
 
   processResultItem() {

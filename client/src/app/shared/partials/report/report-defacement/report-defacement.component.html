@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-start">
+<div class="d-flex justify-content-end">
   <div class="btn-group report-menu-option-container">
     <button (click)="downloadCSV()" appTooltip="Download" class="p-0 report-menu-option">
       <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/download.svg" width="25">
@@ -13,7 +13,7 @@
     </button>
     <div class="vr report-menu-divider"></div>
     <button (click)="redirectToUrl()" appTooltip="Open in new Tab" class="p-0 report-menu-option"
-            matTooltipClass="mat-tooltip">
+      matTooltipClass="mat-tooltip">
       <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/redirect.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
@@ -27,14 +27,14 @@
     <div class="dashboard__defacement-detail-header-url">{{ defacementData?.m_web_url }}</div>
     <div class="dashboard__defacement-detail-header-row">
       <div class="dashboard__defacement-detail-header-items"><strong>Saved on:</strong> {{
-          defacementData?.m_date_of_leak ? (defacementData?.m_date_of_leak | date: 'MMM d, y') : 'Not found'
+        defacementData?.m_date_of_leak ? (defacementData?.m_date_of_leak | date: 'MMM d, y') : 'Not found'
         }}
       </div>
       <div class="dashboard__defacement-detail-header-items"><strong>Defacer:</strong> {{ defacementData?.m_attacker }}
       </div>
       <div class="dashboard__defacement-detail-header-items"><strong>Team:</strong> {{ defacementData?.m_team }}</div>
       <div class="dashboard__defacement-detail-header-items"><strong>Web Server:</strong> {{
-          defacementData?.m_web_server
+        defacementData?.m_web_server
         }}
       </div>
       <div class="dashboard__defacement-detail-header-items"><strong>Breach:</strong> {{ defacementData?.m_url }}</div>

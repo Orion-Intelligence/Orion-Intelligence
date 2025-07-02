@@ -1,5 +1,5 @@
 .no-result-container {
-  background: #17406999;
+  background: var(--no-result-container-bg);
   width: calc(100% - 66px);
   height: calc(100vh - 66px);
   max-width: 100%;
@@ -34,7 +34,7 @@
   color: #A0B8D1;
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .no-result-container {
     padding: 15px;
     margin: 15px;
