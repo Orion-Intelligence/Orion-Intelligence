@@ -9,7 +9,8 @@ let's take a look at the admin panel, designed exclusively for administrative us
 
 The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined access to its wide range of features. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
-![homepage](https://github.com/user-attachments/assets/4f44383c-5d39-41a3-bf33-f9eab2ba17e8)
+![homepage](https://github.com/user-attachments/assets/668c206d-8b62-4456-9ac7-2f74d865a698)
+
 
 ## Directory Page
 Here’s an overview of the interface components
@@ -54,7 +55,7 @@ These data dumps often include leaked databases, user credentials, email lists, 
 
 10. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
 
-![nav](https://github.com/user-attachments/assets/a61f3546-413b-47f9-8dd5-9a468564a36f)
+![navigation](https://github.com/user-attachments/assets/025ab902-7de7-4c71-9bfe-ee46390534b7)
 
 ## Homepage
 
