@@ -1,5 +1,5 @@
-<div class="popup-overlay">
-    <div class="safe-zone-pro-container">
+<div class="popup-overlay" (click)="closePopup()">
+    <div class="safe-zone-pro-container" (click)="$event.stopPropagation()">
         <div class="left-section">
             <h2>Safe Zone Pro</h2>
 
@@ -51,24 +51,24 @@
                 </label>
             </div>
 
-            <form class="payment-form">
+            <form class="payment-form" (ngSubmit)="submitForm()" #formRef="ngForm">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="name">Your Name</label>
-                        <input type="text" id="name" [(ngModel)]="userName" name="userName" />
+                        <input type="text" id="name" [(ngModel)]="userName" name="userName" required />
                     </div>
                     <div class="form-group">
                         <label for="phone">Phone</label>
-                        <input type="tel" id="phone" [(ngModel)]="userPhone" name="userPhone" />
+                        <input type="tel" id="phone" [(ngModel)]="userPhone" name="userPhone" required />
                     </div>
                 </div>
 
                 <div class="form-group full-width">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" [(ngModel)]="userEmail" name="userEmail" />
+                    <input type="email" id="email" [(ngModel)]="userEmail" name="userEmail" required />
                 </div>
 
-                <button type="submit" class="btn-proceed">Proceed to Payment</button>
+                <button type="submit" class="btn-proceed" [disabled]="formRef.invalid">Proceed to Payment</button>
                 <button type="button" class="btn-close" (click)="closePopup()">Close</button>
             </form>
         </div>

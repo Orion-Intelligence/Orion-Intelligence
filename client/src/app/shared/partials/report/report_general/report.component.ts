@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { last } from 'rxjs';
+import { last, Observable } from 'rxjs';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { HelperService } from '../../../services/helper.service';
 import { LeakResultItem } from '../../../model/results/leak/leak.callback.model';
@@ -16,11 +16,13 @@ import { TooltipDirective } from '../../../directive/tooltip-directive.directive
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
 import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { SafeZoneProComponent } from "../../safe-zone-pro/safe-zone-pro.component";
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent, SafeZoneProComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
@@ -41,10 +43,15 @@ export class ReportComponent implements OnInit {
   isExpandedMetadata = true
   protected readonly last = last;
   protected readonly Category = Category;
+  username$!: Observable<string | null>;
+  role$!: Observable<string | null>;
+  showSubscriptionPopup = false;
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService, protected authService: AuthService) {
     this.lang = appService.getConfig().language_allowed
     this.lang_detected = appService.getConfig().language_allowed
+    this.username$ = this.authService.getUsername$();
+    this.role$ = this.authService.getRole$();
   }
 
   get filteredArrayKeys(): string[] {
@@ -128,8 +135,15 @@ export class ReportComponent implements OnInit {
   printPage() {
     this.helperService.printPage();
   }
-
+  isAdmin(): boolean {
+    const currentRole = this.authService.getRole();
+    return currentRole === 'admin';
+  }
   aiSuggest() {
+    if (!this.isAdmin()) {
+      this.showSubscriptionPopup = true;
+      return;
+    }
     const apiUrl = 'nlp/summarize/ai';
 
     this.api.post<{ result: string }>(apiUrl, {
@@ -182,7 +196,9 @@ export class ReportComponent implements OnInit {
       window.open(this.resultItem.m_url, '_blank');
     }
   }
-
+  onSubscriptionPopupClose() {
+    this.showSubscriptionPopup = false;
+  }
   open_graph() {
     const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
     const parts = window.location.pathname.split('/');

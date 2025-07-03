@@ -25,4 +25,15 @@ export class SafeZoneProComponent {
   closePopup() {
     this.close.emit();
   }
+  submitForm() {
+    const subject = encodeURIComponent('Safe Zone Pro Request');
+    const body = encodeURIComponent(
+      `Name: ${this.userName}\nPhone: ${this.userPhone}\nEmail: ${this.userEmail}`
+    );
+    const mailtoLink = `mailto:support@genesistechnologies.org?subject=${subject}&body=${body}`;
+
+    window.location.href = mailtoLink;
+
+    this.closePopup();
+  }
 }

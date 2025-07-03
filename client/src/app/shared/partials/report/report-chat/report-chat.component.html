@@ -24,6 +24,7 @@
     </button>
   </div>
 </div>
+<app-safe-zone-pro *ngIf="showSubscriptionPopup" (close)="onSubscriptionPopupClose()"></app-safe-zone-pro>
 <div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="search__result-detail">
   <div class="d-flex align-items-start">
     <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg"
@@ -35,54 +36,69 @@
   </p>
 </div>
 
-<div *ngIf="resultItem" class="search__result-detail">
-  <p class="search__result-detail-heading">
-    {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:150 }}
-    {{ (resultItem.m_channel_name?.length || 'Untitled Channel'.length) > 150 ? '...' : '' }}
-  </p>
+<div *ngIf="resultItem">
+  <div class="search__result-detail">
+    <p class="search__result-detail-heading">
+      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:150 }}
+      {{ (resultItem.m_channel_name?.length || 'Untitled Channel'.length) > 150 ? '...' : '' }}
+    </p>
 
-  <p class="search__result-detail-description">
-    {{ resultItem.m_content || 'No content available' }}
-  </p>
+    <p class="search__result-detail-description">
+      {{ resultItem.m_content || 'No content available' }}
+    </p>
 
-  <p *ngIf="resultItem.m_message_sharable_link" class="search__result-detail-url-p text-truncate">
-    <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank">
-      {{ resultItem.m_message_sharable_link }}
-    </a>
-  </p>
+    <p *ngIf="resultItem.m_message_sharable_link" class="search__result-detail-url-p text-truncate">
+      <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank">
+        {{ resultItem.m_message_sharable_link }}
+      </a>
+    </p>
 
-  <div class="search__result-detail-meta search__result-detail-meta-chat">
-    <div class="search__result-detail-meta-divs">
-      <p>Message Date:</p>
-      <span>{{ resultItem.m_message_date }}</span>
-    </div>
-    <div *ngIf="resultItem.m_views" class="search__result-detail-meta-divs">
-      <p>Views:</p>
-      <span>{{ resultItem.m_views }}</span>
-    </div>
-    <div *ngIf="resultItem.m_sender_name" class="search__result-detail-meta-divs">
-      <p>Sender:</p>
-      <span>{{ resultItem.m_sender_name }}</span>
+    <div class="search__result-detail-meta search__result-detail-meta-chat">
+      <div class="search__result-detail-meta-divs">
+        <p>Message Date:</p>
+        <span>{{ resultItem.m_message_date }}</span>
+      </div>
+      <div *ngIf="resultItem.m_views" class="search__result-detail-meta-divs">
+        <p>Views:</p>
+        <span>{{ resultItem.m_views }}</span>
+      </div>
+      <div *ngIf="resultItem.m_sender_name" class="search__result-detail-meta-divs">
+        <p>Sender:</p>
+        <span>{{ resultItem.m_sender_name }}</span>
+      </div>
     </div>
   </div>
 
-  <div *ngIf="arrayKeys.length" class="search__result-detail-tabs-div">
-    <div class="tabs d-flex align-items-center search__result-detail-container">
-      <ng-container *ngFor="let key of arrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [class.active]="activeTab === key" class="search__result-tabs">
-          {{ formatKeyTitle(key) }}
-        </button>
-        <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
-      </ng-container>
+  <div *ngIf="arrayKeys.length">
+    <div class="search__result-detail">
+      <div (click)="metaadataToggleContent()" class="search__result__section__heading">
+        <div class="left-content">
+          Metadata
+          <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Metadata">
+        </div>
+        <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
+          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
+            src="/assets/images/shared/search_side_dropdown_icon.svg">
+        </div>
+      </div>
+      <div class="tabs d-flex align-items-center search__result-detail-container">
+        <ng-container *ngFor="let key of arrayKeys; let last = last">
+          <button (click)="setActiveTab(key)" [class.active]="activeTab === key" class="search__result-tabs">
+            {{ formatKeyTitle(key) }}
+          </button>
+          <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
+        </ng-container>
+
+      </div>
+
+      <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem
+        [listItems]="[activeTab === 'm_content' ? content : summary]">
+      </app-result-section>
+
+      <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem
+        [activeTab]="activeTab" [listItems]="listItems">
+      </app-result-list>
     </div>
-
-    <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem
-      [listItems]="[activeTab === 'm_content' ? content : summary]">
-    </app-result-section>
-
-    <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem
-      [activeTab]="activeTab" [listItems]="listItems">
-    </app-result-list>
   </div>
 
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>

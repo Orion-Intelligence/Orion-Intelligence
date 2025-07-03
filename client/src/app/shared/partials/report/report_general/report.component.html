@@ -29,6 +29,7 @@
     </button>
   </div>
 </div>
+<app-safe-zone-pro *ngIf="showSubscriptionPopup" (close)="onSubscriptionPopupClose()"></app-safe-zone-pro>
 <div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="search__result-detail">
   <div class="d-flex align-items-start">
     <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg"
@@ -128,7 +129,8 @@
   <div (click)="metaadataToggleContent()" class="search__result__section__heading">
     <div class="left-content">
       Metadata
-      <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
+      <img src="/assets/images/shared/info.svg" alt="Icon"
+        appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
     </div>
     <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
       <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"

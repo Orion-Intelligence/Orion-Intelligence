@@ -4,7 +4,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: linear-gradient(to bottom, #0E2D4D, #144170);
+  background: var(--cti-sidebar-bg);
 }
 
 .graph-sidebar__container .filter__input {

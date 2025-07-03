@@ -5,7 +5,6 @@ import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.glob
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { SafeZoneProComponent } from "../../shared/partials/safe-zone-pro/safe-zone-pro.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -16,8 +15,7 @@ import { SafeZoneProComponent } from "../../shared/partials/safe-zone-pro/safe-z
     NgClass,
     RouterOutlet,
     ScrollingModule,
-    NgIf,
-    SafeZoneProComponent
+    NgIf
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
@@ -27,9 +25,6 @@ export class DashboardComponent implements AfterViewInit {
   animationState: any;
 
   constructor(private cdr: ChangeDetectorRef, public router: Router, private renderer: Renderer2) {
-  }
-  ngOnInit(): void {
-    this.renderer.addClass(document.body, 'dark-theme');
   }
   toggleNavigation() {
     this.isMenuOpen = !this.isMenuOpen;

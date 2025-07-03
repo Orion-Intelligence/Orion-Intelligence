@@ -9,6 +9,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    overflow: auto;
 }
 
 .safe-zone-pro-container {
@@ -20,6 +21,7 @@
     border-radius: 8px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     animation: fadeInScale 0.3s ease-out forwards;
+    transform: translateY(-20%) !important;
 }
 
 @keyframes fadeInScale {

@@ -1,14 +1,17 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {HttpParams} from '@angular/common/http';
-import {ApiService} from '../../../services/api.service';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
+import { ApiService } from '../../../services/api.service';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { SafeZoneProComponent } from "../../safe-zone-pro/safe-zone-pro.component";
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-report-mapping-list',
   templateUrl: './report-mapping-list.component.html',
-  imports: [CommonModule, TooltipDirective],
+  imports: [CommonModule, TooltipDirective, SafeZoneProComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingListComponent implements OnInit {
@@ -16,18 +19,33 @@ export class ReportMappingListComponent implements OnInit {
   result: any[] = [];
   filteredItems: any[] = [];
   isExpanded = false;
+  username$!: Observable<string | null>;
+  role$!: Observable<string | null>;
+  showSubscriptionPopup = false;
 
-  constructor(private api: ApiService) {
+  constructor(private api: ApiService, protected authService: AuthService) {
+    this.username$ = this.authService.getUsername$();
+    this.role$ = this.authService.getRole$();
   }
 
   ngOnInit(): void {
   }
-
+  isAdmin(): boolean {
+    const currentRole = this.authService.getRole();
+    return currentRole === 'admin';
+  }
   toggleContent(): void {
+    if (!this.isAdmin()) {
+      this.showSubscriptionPopup = true;
+      return;
+    }
     this.isExpanded = !this.isExpanded;
-    if (this.isExpanded && this.filteredItems.length==0) {
+    if (this.isExpanded && this.filteredItems.length == 0) {
       this.loadGraph();
     }
+  }
+  onSubscriptionPopupClose() {
+    this.showSubscriptionPopup = false;
   }
 
   loadGraph(): void {
@@ -41,9 +59,9 @@ export class ReportMappingListComponent implements OnInit {
       .set('edge', '25')
       .set('depth', '2');
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
-        const {results} = response;
+        const { results } = response;
         this.result = results;
         this.loading = true;
         this.getUniqueSortedItems(this.result, 25);
