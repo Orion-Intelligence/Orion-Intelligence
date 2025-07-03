@@ -1,7 +1,7 @@
-import { Component, HostListener } from '@angular/core';
-import { AsyncPipe, NgIf, NgOptimizedImage } from "@angular/common";
-import { AuthService } from '../../../services/authetication/auth.service';
-import { Observable } from 'rxjs';
+import {Component, HostListener} from '@angular/core';
+import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
+import {AuthService} from '../../../services/authetication/auth.service';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -23,12 +23,14 @@ export class ProfileComponent {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
+
   ngOnInit() {
     this.isDarkTheme = localStorage.getItem('theme') === 'dark-theme';
     this.applyTheme();
   }
-  toggleTheme(event: any) {
-    this.isDarkTheme = event.target.checked;
+
+  toggleThemeByClick() {
+    this.isDarkTheme = !this.isDarkTheme;
     const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';
     localStorage.setItem('theme', theme);
     this.applyTheme();
@@ -39,6 +41,7 @@ export class ProfileComponent {
     body.classList.remove('light-theme', 'dark-theme');
     body.classList.add(this.isDarkTheme ? 'dark-theme' : 'light-theme');
   }
+
   isAdmin(): boolean {
     const currentRole = this.authService.getRole();
     return currentRole === 'admin';

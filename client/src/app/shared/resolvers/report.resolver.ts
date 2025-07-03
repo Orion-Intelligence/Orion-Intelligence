@@ -1,23 +1,30 @@
-import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot} from '@angular/router';
-import {Observable, of} from 'rxjs';
-import {catchError} from 'rxjs/operators';
-import {ApiService} from '../services/api.service';
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { ApiService } from '../services/api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportResolver implements Resolve<any> {
-  constructor(private apiService: ApiService, private router: Router) {
+  constructor(private apiService: ApiService, private router: Router) {}
+
+  private adjustCategory(category_1: string, category_2: string): string {
+    const specialCategories = ['warfare', 'cloud', 'email', 'logs', 'tools', 'zeroday'];
+    return specialCategories.includes(category_2) ? 'social' : category_1.toLowerCase();
   }
 
   resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<any> {
-    const category = route.parent?.url[0]?.path || '';
+    let category_1 = route.parent?.url[0]?.path || '';
+    const category_2 = route.url[0]?.path || '';
     const hash = route.paramMap.get('m_hash');
     const lang = route.queryParamMap.get('lang');
 
+    category_1 = this.adjustCategory(category_1, category_2);
+
     let apiUrl = '';
-    switch (category) {
+    switch (category_1) {
       case 'breach':
         apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
         break;

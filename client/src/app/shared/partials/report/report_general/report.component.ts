@@ -63,6 +63,10 @@ export class ReportComponent implements OnInit {
       this.resultItem = reportdata;
       this.type = type;
       this.processResultItem();
+      const keys = this.filteredArrayKeys;
+      if (keys.length > 0) {
+        this.setActiveTab(keys[0]);
+      }
 
       if (this.resultItem?.m_screenshot) {
         this.loadImage(this.resultItem.m_screenshot);

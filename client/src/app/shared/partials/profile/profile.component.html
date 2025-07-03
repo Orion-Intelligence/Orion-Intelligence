@@ -16,6 +16,16 @@
     <li>
       <hr class="dropdown-divider mx-3">
     </li>
+    <li (click)="toggleThemeByClick()">
+      <div class="dropdown-item theme-toggle">
+      <img alt="Settings" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp;
+        Theme &nbsp;
+        <label class="small-switch">
+          <input type="checkbox" [checked]="isDarkTheme" (click)="$event.stopPropagation()" />
+          <span class="small-slider round"></span>
+        </label>
+      </div>
+    </li>
     <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank">
         <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp;
         Settings</a>
@@ -26,18 +36,5 @@
     <li><a (click)="logout()" class="dropdown-item" id="logout-button">
         <img alt="Logout" height="15" ngSrc="assets/images/shared/logout.svg" priority width="15"> &nbsp; Logout</a>
     </li>
-    <li *ngIf="isAdmin()">
-      <hr class="dropdown-divider mx-3">
-    </li>
-    <li>
-      <div class="dropdown-item theme-toggle">
-        <label class="small-switch">
-          <input type="checkbox" [checked]="isDarkTheme" (change)="toggleTheme($event)">
-          <span class="small-slider round"></span>
-        </label>
-        &nbsp; Theme
-      </div>
-    </li>
-
   </ul>
 </div>

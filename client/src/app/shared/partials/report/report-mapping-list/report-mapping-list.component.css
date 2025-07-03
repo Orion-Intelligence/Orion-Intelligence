@@ -13,3 +13,41 @@
 .report-mapping .mid-col {
   width: 110px;
 }
+
+.shimmer {
+  position: relative;
+  background-color: #e0e0e0;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 60%), transparent);
+  animation: shimmer 1.2s infinite;
+}
+
+.shimmer-line {
+  height: 20px;
+  border-radius: 4px;
+}
+
+.report-mapping {
+  border-radius: 10px;
+  overflow: clip;
+  border: 1px solid #ffffff15;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.report-mapping .narrow-col {
+  width: 50px;
+}
+
+.report-mapping .mid-col {
+  width: 110px;
+}

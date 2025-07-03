@@ -1,17 +1,17 @@
-<ng-container *ngIf="filteredItems.length>0">
+<ng-container>
   <div class="search__result-detail">
     <div (click)="toggleContent()" class="search__result__section__heading">
       <div class="left-content">
-        Related Documents
-        <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Related Documents">
+        Related reports
+        <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="list of reports that are either directly or indirectly linked to this document ">
       </div>
       <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
         <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
-          src="/assets/images/shared/search_side_dropdown_icon.svg">
+          src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
       </div>
     </div>
-    <div *ngIf="isExpanded" class="content p-3">
-      <div class="directory-list__container report-mapping">
+    <div *ngIf="isExpanded" class="content pt-3">
+      <div class="directory-list__container report-mapping" >
         <table class="table table-striped directory-list__table clear-paddings mb-0">
           <thead>
             <tr>
@@ -21,7 +21,7 @@
               <th scope="col">Mapping Value</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody *ngIf="filteredItems.length>0" @fadeInDashboardItem>
             <ng-container *ngFor="let item of filteredItems; let i = index">
               <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer">
                 <td data-label="ID">
@@ -48,6 +48,36 @@
                 </td>
               </tr>
             </ng-container>
+          </tbody>
+          <tbody *ngIf="filteredItems.length==0" @fadeInDashboardItem>
+            <tr>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-100"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-100"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

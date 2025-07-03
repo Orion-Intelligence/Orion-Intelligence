@@ -1,12 +1,12 @@
 <div class="search__result-detail">
   <div (click)="toggleContent()" class="search__result__section__heading">
     <div class="left-content">
-      JSON API
-      <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="JSON API">
+      Json response
+      <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="The JSON response contains the complete data that would be returned in an actual API call">
     </div>
     <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
       <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
-        src="/assets/images/shared/search_side_dropdown_icon.svg">
+        src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
   <div *ngIf="isExpanded" class="content p-3">

@@ -321,11 +321,11 @@ table a:visited {
 }
 
 .report-menu-option-container {
-  border-radius: 8px;
+  border: 1px solid #ffffff15;
+  border-radius: 7px;
   margin-right: 35px;
   background: var(--report-menu-option);
   margin-top: 20px;
-  /* border: 1px solid #ffffff10; */
   overflow: hidden;
 }
 

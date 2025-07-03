@@ -66,17 +66,12 @@
   border-bottom: 10px solid white;
 }
 
-
-
-
-
-
-
 .small-switch {
   position: relative;
   display: inline-block;
-  width: 24px;
-  height: 12px;
+  width: 30px;
+  height: 18px;
+  top:3px
 }
 
 .small-switch input {
@@ -88,20 +83,17 @@
 .small-slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: #1b60a5;
   transition: 0.3s;
   border-radius: 12px;
 }
 
-.small-slider:before {
+.small-slider::before {
   content: "";
   position: absolute;
-  height: 8px;
-  width: 8px;
+  height: 14px;
+  width: 13px;
   left: 2px;
   bottom: 2px;
   background-color: white;
@@ -109,11 +101,15 @@
   border-radius: 50%;
 }
 
-input:checked+.small-slider {
-  background-color: #000000;
+.theme-toggle{
+  font-size: 15px;
 }
 
-input:checked+.small-slider:before {
+input:checked+.small-slider {
+  background-color: #000;
+}
+
+input:checked+.small-slider::before {
   transform: translateX(12px);
 }
 

@@ -1,28 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
-import { ApiService } from '../../../services/api.service';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {HttpParams} from '@angular/common/http';
+import {ApiService} from '../../../services/api.service';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-report-mapping-list',
   templateUrl: './report-mapping-list.component.html',
   imports: [CommonModule, TooltipDirective],
+  animations: [fadeInDashboardItem],
 })
 export class ReportMappingListComponent implements OnInit {
   loading = false;
   result: any[] = [];
   filteredItems: any[] = [];
-  isExpanded = true;
+  isExpanded = false;
 
   constructor(private api: ApiService) {
   }
 
   ngOnInit(): void {
-    this.loadGraph();
   }
+
   toggleContent(): void {
     this.isExpanded = !this.isExpanded;
+    if (this.isExpanded && this.filteredItems.length==0) {
+      this.loadGraph();
+    }
   }
 
   loadGraph(): void {
@@ -36,9 +41,9 @@ export class ReportMappingListComponent implements OnInit {
       .set('edge', '25')
       .set('depth', '2');
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
       next: response => {
-        const { results } = response;
+        const {results} = response;
         this.result = results;
         this.loading = true;
         this.getUniqueSortedItems(this.result, 25);

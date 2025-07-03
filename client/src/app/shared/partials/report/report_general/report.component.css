@@ -1,8 +1,7 @@
 .search__result-detail {
-  background-color: var(--search__result-detail);
-  padding: 20px;
-  /* border: 1px solid #ffffff20; */
-  border-radius: 16px;
+  background-color: var(--search-result-detail);
+  padding: 15px 19px;
+  border-radius: 12px;
   box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
   margin: 15px 32px;
   min-height: auto;
@@ -21,9 +20,11 @@
 }
 
 .search__result-detail .tag-item {
-  background: #ffffff15;
+  background: #FCFCFC0D;
   border-radius: 25px;
   padding: 5px 10px;
+  font-weight: 400;
+  color: #D4D4D4;
 }
 
 .tag-item-content {
@@ -75,9 +76,10 @@
 }
 
 .search__result-detail-heading {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 500;
-  max-lines: 1;
+  font-family: Roboto, sans-serif;
+  font-style: normal;
   color: #fff;
   margin-bottom: 24px;
 }
@@ -87,7 +89,7 @@
 .search__result-detail-meta-divs p {
   font-size: 12px;
   font-weight: 400;
-  color: #D0D0D0;
+  color: #A0B8D1;
   margin-bottom: 8px;
 }
 
@@ -95,6 +97,7 @@
 .search__result-detail-url,
 .search__result-detail-meta-divs span {
   font-size: 14px;
+  font-weight: 400;
   color: #fff;
   overflow: hidden;
 }
@@ -112,15 +115,15 @@
 }
 
 .search__result-detail-url-p {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .search__result-detail-meta {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 32px;
+  justify-content: flex-start;
   margin-right: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 100px;
 }
 
 @media (width <=991px) {
@@ -130,7 +133,7 @@
   }
 
   .search__result-detail-meta-divs {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 }
 
@@ -138,12 +141,16 @@
   display: grid;
 }
 
+.search__result-detail-meta-divs p {
+  margin-bottom: 3px;
+}
+
 .search__result-detail-meta-divs span {
   font-weight: 500;
 }
 
 .search__result-detail-container {
-  margin: 0 0 0 0px !important;
+  margin: 0 !important;
 }
 
 .search__result-detail-tabs-div {
@@ -155,7 +162,7 @@
 .search__result-detail-preview {
   border: 1px solid #FCFCFC12;
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
   background-color: rgb(0 0 0 / 16.1%);
   margin-top: 24px;
 }
@@ -181,8 +188,8 @@
 .search__result-detail-preview iframe {
   width: 100%;
   height: 400px;
-  border-top-right-radius: 16px;
-  border-top-left-radius: 16px;
+  border-top-right-radius: 12px;
+  border-top-left-radius: 12px;
 }
 
 .search__result-tabs {
@@ -193,13 +200,13 @@
   padding-right: 5px !important;
   margin-top: 1px !important;
   outline: none !important;
-  color: #D0D0D0 !important;
+  color: #A0B8D1 !important;
   transition: border-bottom 0.2s ease-in-out, color 0.2s ease-in-out !important;
   border-bottom: 3px solid #fff0 !important;
 }
 
 .search__result-tabs-border {
-  background: #ffffff00 !important;
+  background: #fff0 !important;
   width: 2px !important;
   height: 17px !important;
   margin-left: 8px;
@@ -207,7 +214,6 @@
 }
 
 .search__result-tabs-line {
-  margin-top: -2px;
   background-color: #1f3043b6;
   height: 1px;
   width: 100%;
@@ -219,9 +225,8 @@
   font-weight: 500;
   display: flex;
   align-items: center;
+  font-family: Roboto, sans-serif;
   gap: 8px;
-
-
   justify-content: space-between;
   cursor: pointer;
 }
@@ -229,13 +234,13 @@
 .left-content {
   display: flex;
   align-items: center;
+  font-size: 19px;
   gap: 8px;
-  /* space between text and first icon */
 }
 
 .search__result__section__heading img {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 .search__result-tabs:hover,
@@ -364,7 +369,7 @@
 .dashboard__search-title {
   font-size: 24px;
   font-weight: 500;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   color: #fff;
   max-width: 700px !important;
   white-space: nowrap;
@@ -378,7 +383,7 @@
   font-size: 14px;
   font-weight: 400;
   color: #D0D0D0;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   overflow: hidden;
   margin-top: 10px;
   word-break: break-all
@@ -493,7 +498,7 @@
 }
 
 .dashboard__search-main-div {
-  background-color: var(--dashboard__search-main-div);
+  background-color: var(--dashboard-search-main-div);
   padding: 20px;
   border-radius: 15px;
   width: 100%;
@@ -505,7 +510,7 @@
 }
 
 .dashboard__search-main-div:hover {
-  background-color: var(--dashboard__search-main-div-hover);
+  background-color: var(--dashboard-search-main-div-hover);
   cursor: pointer;
 }
 

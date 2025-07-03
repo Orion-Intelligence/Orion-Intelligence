@@ -33,7 +33,7 @@
   <div class="d-flex align-items-start">
     <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg"
       width="25">
-    <h2 class="search__result-detail-heading ms-2"> &nbsp; AI Report</h2>
+    <p class="search__result-detail-heading ms-2"> &nbsp; AI Report</p>
   </div>
   <p class="search__result-detail-description">
     {{ aiSuggestSummary }}
@@ -43,13 +43,13 @@
 <div class="search__result-detail">
   <ng-container *ngIf="resultItem?.m_title as title; else noTitle">
     <ng-container *ngIf="title.trim().length > 1; else noTitle">
-      <h2 class="search__result-detail-heading">
+      <p class="search__result-detail-heading mt-2">
         {{ title.length > 150 ? (title.slice(0, 150) + '...') : title }}
-      </h2>
+      </p>
     </ng-container>
   </ng-container>
   <ng-template #noTitle>
-    <h2 class="search__result-detail-heading">Title not available</h2>
+    <p class="search__result-detail-heading">Title not available</p>
   </ng-template>
 
   <span class="search__result-detail-description-span">Description</span>
@@ -61,11 +61,10 @@
     </ng-container>
   </ng-container>
   <ng-template #noDescription>
-    <p class="search__result-detail-description">Description not available</p>
   </ng-template>
 
   <span *ngIf="resultItem?.m_ref_html?.length" class="search__result-detail-description-span">Web Reference</span>
-  <p class="search__result-detail-description">
+  <p class="search__result-detail-description" *ngIf="resultItem?.m_ref_html?.length">
     {{
     ((resultItem?.m_ref_html ?? '').length > 650)
     ? (resultItem?.m_ref_html | slice:0:650) + ' ...'
@@ -129,14 +128,13 @@
   <div (click)="metaadataToggleContent()" class="search__result__section__heading">
     <div class="left-content">
       Metadata
-      <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Metadata">
+      <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
     </div>
     <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
       <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
-        src="/assets/images/shared/search_side_dropdown_icon.svg">
+        src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
-  <!-- <div class="search__result-detail-tabs-div"> -->
   <div *ngIf="isExpandedMetadata">
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
@@ -155,7 +153,6 @@
       [listItems]="listItems"></app-result-section>
     <app-result-list *ngIf="activeTab !== 'm_section'" @fadeInDashboardItem [activeTab]="activeTab"
       [listItems]="listItems"></app-result-list>
-    <!-- </div> -->
   </div>
 </div>
 
@@ -166,7 +163,7 @@
     </div>
     <div [attr.aria-label]="isExpandedScreenshoot ? 'Collapse' : 'Expand'" class="toggle-btn">
       <img [ngClass]="{ 'rotated': !isExpandedScreenshoot }" alt="toggle icon"
-        src="/assets/images/shared/search_side_dropdown_icon.svg">
+        src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
   <div *ngIf="isExpandedScreenshoot">
@@ -184,4 +181,3 @@
 
 <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 <app-report-mapping-list></app-report-mapping-list>
-<!-- </div> -->
