@@ -5,6 +5,7 @@ import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.glob
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { SafeZoneProComponent } from "../../shared/partials/safe-zone-pro/safe-zone-pro.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +17,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     RouterOutlet,
     ScrollingModule,
     NgIf,
+    SafeZoneProComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
