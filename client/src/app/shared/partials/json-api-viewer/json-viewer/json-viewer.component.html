@@ -10,10 +10,7 @@
 
       <div *ngIf="isExpanded(pathKey(parentPath, key))" class="json-tree__children">
         <ng-container *ngIf="isObject(json[key]); else jsonLeaf">
-          <app-json-viewer
-            [json]="json[key]"
-            [level]="level + 1"
-            [parentPath]="pathKey(parentPath, key)">
+          <app-json-viewer [json]="json[key]" [level]="level + 1" [parentPath]="pathKey(parentPath, key)">
           </app-json-viewer>
         </ng-container>
 

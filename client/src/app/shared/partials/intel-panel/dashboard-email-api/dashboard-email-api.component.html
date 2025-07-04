@@ -29,7 +29,7 @@
   </div>
 </form>
 
-<app-safe-zone-pro *ngIf="showSubscriptionPopup" (close)="onSubscriptionPopupClose()"></app-safe-zone-pro>
+<app-pro-subscription *ngIf="showSubscriptionPopup" (close)="onSubscriptionPopupClose()"></app-pro-subscription>
 
 <div
   *ngIf="!loading && !error && this.emailCallbackbackModel.cards_data.length > 0 && breachData && Object.keys(breachData).length > 0"

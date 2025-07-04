@@ -5,13 +5,13 @@ import { ApiService } from '../../../services/api.service';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { SafeZoneProComponent } from "../../safe-zone-pro/safe-zone-pro.component";
+import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscription.component";
 import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-report-mapping-list',
   templateUrl: './report-mapping-list.component.html',
-  imports: [CommonModule, TooltipDirective, SafeZoneProComponent],
+  imports: [CommonModule, TooltipDirective, ProSubscriptionComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingListComponent implements OnInit {

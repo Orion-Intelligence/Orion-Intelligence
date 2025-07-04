@@ -71,13 +71,16 @@
 	--table-tr-nth-child-even: #214b75;
 	--table-tr-nth-child-odd: #1e456c;
 	--table-tbody-tr-hover: #3A6A9A;
-	--filters-button: #0E2D4D;
-	--filters-button-hover: #14335299;
+	--filter-dashboard-button: #0E2D4D;
+	--filter-dashboard-button-hover: #14335299;
 	--filter-form-bg: linear-gradient(to bottom, #174069, #2A5784);
 	--filter-header: #153454;
 	--filter-submit-button: #2b90ee;
 	--filter-submit-button-hover: #1176d4;
 	--filter__form-dropdown-item-hover: linear-gradient(92.32deg, #4EA2F1 2.58%, #2C7AC5 66.77%, #2C7AC5 130.97%);
+	--login-footer: #295785;
+	--filter-input: white;
+	--filter-input-text: #3c3c43;
 }
 
 .dark-theme {
@@ -105,13 +108,16 @@
 	--table-tr-nth-child-even: #16171750;
 	--table-tr-nth-child-odd: #0e1216;
 	--table-tbody-tr-hover: #7a8b9b;
-	--filters-button: #1f2e47;
-	--filters-button-hover: #172235;
-	--filter-form-bg: #172235;
+	--filter-dashboard-button: #1f2e47;
+	--filter-dashboard-button-hover: #172235;
+	--filter-form-bg: #0e1626;
 	--filter-header: #1f2e47;
-	--filter-submit-button: #1D2D47;
-	--filter-submit-button-hover: #253a5b;
-	--filter__form-dropdown-item-hover: linear-gradient(92.32deg, #9ab0c4 2.58%, #6c7782 66.77%, #23282c 130.97%);
+	--filter-submit-button: #57A5EB;
+	--filter-submit-button-hover: #0E1626;
+	--filter__form-dropdown-item-hover: #0E1626;
+	--login-footer: #0E1626;
+	--filter-input: #172235;
+	--filter-input-text: #A0B8D1;
 }
 
 
@@ -308,4 +314,3 @@ ngb-datepicker-month {
 		}
 	}
 }
-

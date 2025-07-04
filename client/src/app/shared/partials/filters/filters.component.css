@@ -107,19 +107,27 @@
 
 .filter__input {
   display: block;
-  color: #3c3c43;
+  color: var(--filter-input-text);
   font-size: 12px;
   font-family: Inter, sans-serif;
   font-weight: 500;
-  background-color: #fff;
+  background-color: var(--filter-input);
   padding: 11px 11px 11px 15px;
   border-radius: 7px;
   height: 40px;
   text-align: left;
   box-shadow: 0 1px 2px 0 #1018280d;
-  border: 1px solid #fff;
+  border: 1px solid var(--filter-input);
   width: 100%;
+  caret-color: var(--filter-input-text);
 }
+
+.filter__input:hover {
+  color: var(--filter-input-text);
+  background-color: var(--filter-input);
+  border-color: var(--filter-input);
+}
+
 
 .filter__submit {
   position: relative;
@@ -205,9 +213,9 @@
   padding: 0.5rem 0;
   margin: 0.125rem 0 0;
   font-size: 1rem;
-  color: #212529;
+  color: var(--filter-input-text);
   text-align: left;
-  background-color: #fff;
+  background-color: var(--filter-input);
   background-clip: padding-box;
   border: 1px solid rgb(0 0 0 / 15%);
   border-radius: 8px;
@@ -231,7 +239,7 @@
 }
 
 .filter__form .dropdown-select:focus {
-  background: var(--filter-submit-button) !important;
+  background: var(--filter-submit-button-hover) !important;
   color: #fff;
 }
 

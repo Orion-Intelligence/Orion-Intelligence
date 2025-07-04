@@ -17,12 +17,12 @@ import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
 import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { SafeZoneProComponent } from "../../safe-zone-pro/safe-zone-pro.component";
+import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscription.component";
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent, SafeZoneProComponent],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent, ProSubscriptionComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {

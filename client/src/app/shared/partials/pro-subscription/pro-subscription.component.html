@@ -1,5 +1,5 @@
-<div class="popup-overlay" (click)="closePopup()">
-  <div class="safe-zone-pro-container" (click)="$event.stopPropagation()">
+<div class="pro-subscription-overlay" (click)="closePopup()">
+  <div class="pro-subscription-container" (click)="$event.stopPropagation()">
     <div class="left-section">
       <div class="feature-item">
         <h3>Dark Web Scanning</h3>
@@ -24,7 +24,8 @@
 
     <div class="right-section">
       <h2>Upgrade to Dark Web Shield Pro</h2>
-      <p>Gain continuous protection by monitoring the dark web for your compromised information and security breaches.</p>
+      <p>Gain continuous protection by monitoring the dark web for your compromised information and security breaches.
+      </p>
 
       <div class="subscription-options">
         <label class="subscription-option">
@@ -38,7 +39,8 @@
         </label>
 
         <label class="subscription-option">
-          <input type="radio" name="subscription" value="monthly-highlighted" [(ngModel)]="selectedSubscription" checked />
+          <input type="radio" name="subscription" value="monthly-highlighted" [(ngModel)]="selectedSubscription"
+            checked />
           <div class="option-content">
             <div class="radio-label">
               <h4>($8.99/month)</h4>

@@ -3,16 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-safe-zone-pro',
+  selector: 'app-pro-subscription',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule
   ],
-  templateUrl: './safe-zone-pro.component.html',
-  styleUrl: './safe-zone-pro.component.css'
+  templateUrl: './pro-subscription.component.html',
+  styleUrl: './pro-subscription.component.css'
 })
-export class SafeZoneProComponent {
+export class ProSubscriptionComponent {
   @Output() close = new EventEmitter<void>();
 
   selectedSubscription: string = 'monthly-highlighted';
