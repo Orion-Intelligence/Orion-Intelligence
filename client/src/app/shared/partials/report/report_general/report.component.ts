@@ -245,7 +245,6 @@ export class ReportComponent implements OnInit {
 
   loadImage(fileName: string) {
     const endpoint = `search/breach/screenshot/${fileName}`;
-
     this.api.get<Blob>(endpoint, {
       responseType: 'blob'
     } as any).subscribe({

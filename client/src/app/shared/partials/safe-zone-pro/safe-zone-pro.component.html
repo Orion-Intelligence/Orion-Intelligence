@@ -1,76 +1,73 @@
 <div class="popup-overlay" (click)="closePopup()">
-    <div class="safe-zone-pro-container" (click)="$event.stopPropagation()">
-        <div class="left-section">
-            <h2>Safe Zone Pro</h2>
+  <div class="safe-zone-pro-container" (click)="$event.stopPropagation()">
+    <div class="left-section">
+      <div class="feature-item">
+        <h3>Dark Web Scanning</h3>
+        <p>Continuously monitor the dark web for leaked data tied to your identity, accounts, and sensitive assets.</p>
+      </div>
 
-            <div class="feature-item">
-                <h3>Live Firewall</h3>
-                <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
-                    threats effortlessly</p>
-            </div>
+      <div class="feature-item">
+        <h3>Identity Theft Alerts</h3>
+        <p>Receive real-time alerts when your personal or business information is found on underground marketplaces.</p>
+      </div>
 
-            <div class="feature-item">
-                <h3>Malware Scanner</h3>
-                <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
-                    threats effortlessly</p>
-            </div>
+      <div class="feature-item">
+        <h3>Credential Monitoring</h3>
+        <p>Track exposure of usernames, passwords, and other credentials before they're used maliciously.</p>
+      </div>
 
-            <div class="feature-item">
-                <h3>Anti-Spam Engine</h3>
-                <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
-                    threats effortlessly</p>
-            </div>
-
-            <div class="total-due">
-                <h3>Total Due</h3>
-                <p>$59.99 <span class="per-year">/year</span></p>
-            </div>
-        </div>
-
-        <div class="right-section">
-            <h2>Upgrade to Safe Zone Pro</h2>
-            <p>Enjoy advanced protection and peace of mind with WP Safe Zone PRO. Keep your website safe from all
-                threats effortlessly</p>
-
-            <div class="subscription-options">
-                <label class="subscription-option">
-                    <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription" />
-                    <div class="option-content">
-                        <h4>Monthly ($8.99/month)</h4>
-                        <p>Pay $130 per year</p>
-                    </div>
-                </label>
-
-                <label class="subscription-option">
-                    <input type="radio" name="subscription" value="monthly-highlighted"
-                        [(ngModel)]="selectedSubscription" checked />
-                    <div class="option-content">
-                        <h4>Monthly ($8.99/month)</h4>
-                        <p>Pay $130 per year</p>
-                    </div>
-                </label>
-            </div>
-
-            <form class="payment-form" (ngSubmit)="submitForm()" #formRef="ngForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="name">Your Name</label>
-                        <input type="text" id="name" [(ngModel)]="userName" name="userName" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="tel" id="phone" [(ngModel)]="userPhone" name="userPhone" required />
-                    </div>
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" [(ngModel)]="userEmail" name="userEmail" required />
-                </div>
-
-                <button type="submit" class="btn-proceed" [disabled]="formRef.invalid">Proceed to Payment</button>
-                <button type="button" class="btn-close" (click)="closePopup()">Close</button>
-            </form>
-        </div>
+      <div class="total-due">
+        <h3>Total Due</h3>
+        <p>$59.99 <span class="per-year">/year</span></p>
+      </div>
     </div>
+
+    <div class="right-section">
+      <h2>Upgrade to Dark Web Shield Pro</h2>
+      <p>Gain continuous protection by monitoring the dark web for your compromised information and security breaches.</p>
+
+      <div class="subscription-options">
+        <label class="subscription-option">
+          <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription" />
+          <div class="option-content">
+            <div class="radio-label">
+              <h4>($8.99/month)</h4>
+              <p>Billed annually at $130</p>
+            </div>
+          </div>
+        </label>
+
+        <label class="subscription-option">
+          <input type="radio" name="subscription" value="monthly-highlighted" [(ngModel)]="selectedSubscription" checked />
+          <div class="option-content">
+            <div class="radio-label">
+              <h4>($8.99/month)</h4>
+              <p>Billed annually at $130</p>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <form class="payment-form" (ngSubmit)="submitForm()" #formRef="ngForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" [(ngModel)]="userName" name="userName" required />
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" [(ngModel)]="userPhone" name="userPhone" required />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" [(ngModel)]="userEmail" name="userEmail" required />
+        </div>
+
+        <button type="submit" class="btn-proceed" [disabled]="formRef.invalid">Proceed to Payment</button>
+        <button type="button" class="btn-close" (click)="closePopup()">Close</button>
+      </form>
+    </div>
+  </div>
 </div>

@@ -15,7 +15,7 @@ import { Observable } from 'rxjs';
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingListComponent implements OnInit {
-  loading = false;
+  loading = true;
   result: any[] = [];
   filteredItems: any[] = [];
   isExpanded = false;
@@ -58,12 +58,12 @@ export class ReportMappingListComponent implements OnInit {
       .set('query_value', value)
       .set('edge', '25')
       .set('depth', '2');
-
+    this.loading = true;
     this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
         const { results } = response;
         this.result = results;
-        this.loading = true;
+        this.loading = false;
         this.getUniqueSortedItems(this.result, 25);
       }
     });

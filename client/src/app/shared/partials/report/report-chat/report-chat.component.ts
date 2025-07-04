@@ -1,17 +1,17 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
-import { HelperService } from '../../../services/helper.service';
-import { CommonModule, NgForOf, NgIf, NgOptimizedImage, SlicePipe, } from '@angular/common';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ApiService } from '../../../services/api.service';
-import { last, Observable } from 'rxjs';
-import { AuthService } from '../../../../services/authetication/auth.service';
-import { SafeZoneProComponent } from "../../safe-zone-pro/safe-zone-pro.component";
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {ChatResultItem} from '../../../model/results/chat/chat.callback.model';
+import {HelperService} from '../../../services/helper.service';
+import {CommonModule, NgForOf, NgIf, NgOptimizedImage, SlicePipe,} from '@angular/common';
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import {ApiService} from '../../../services/api.service';
+import {last, Observable} from 'rxjs';
+import {AuthService} from '../../../../services/authetication/auth.service';
+import {SafeZoneProComponent} from "../../safe-zone-pro/safe-zone-pro.component";
 
 @Component({
   selector: 'app-report-chat',
@@ -52,14 +52,16 @@ export class ReportChatComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata }) => {
+    this.route.data.subscribe(({reportdata}) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });
   }
+
   metaadataToggleContent(): void {
     this.isExpandedMetadata = !this.isExpandedMetadata;
   }
+
   processResultItem() {
     if (this.resultItem) {
       this.content = this.resultItem.m_content || '';
@@ -89,8 +91,12 @@ export class ReportChatComponent implements OnInit {
           addedKeys.add(key);
         }
       });
+      if (this.arrayKeys.length > 0 && !this.activeTab) {
+        this.setActiveTab(this.arrayKeys[0]);
+      }
     }
   }
+
 
   setActiveTab(tab: string) {
     if (this.activeTab === tab) {
@@ -117,10 +123,12 @@ export class ReportChatComponent implements OnInit {
   printPage() {
     this.helper.printPage();
   }
+
   isAdmin(): boolean {
     const currentRole = this.authService.getRole();
     return currentRole === 'admin';
   }
+
   aiSuggest() {
     if (!this.isAdmin()) {
       this.showSubscriptionPopup = true;
@@ -131,15 +139,15 @@ export class ReportChatComponent implements OnInit {
     this.api.post<{ result: string }>(apiUrl, {
       data: this.resultItem?.m_content
     }).subscribe({
-      next: (response) => {
-        this.aiSuggestStatus = true;
-        this.aiSuggestSummary = response.result || 'No summary available';
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Summarization failed', err);
+        next: (response) => {
+          this.aiSuggestStatus = true;
+          this.aiSuggestSummary = response.result || 'No summary available';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Summarization failed', err);
+        }
       }
-    }
     );
   }
 
@@ -164,9 +172,11 @@ export class ReportChatComponent implements OnInit {
     const fullUrl = `${baseUrl}?${params.toString()}`;
     window.open(fullUrl, '_blank');
   }
+
   onSubscriptionPopupClose() {
     this.showSubscriptionPopup = false;
   }
+
   redirectToUrl() {
     if (this.resultItem?.m_weblink?.length) {
       window.open(this.resultItem.m_message_sharable_link, '_blank');

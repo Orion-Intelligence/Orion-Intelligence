@@ -9,31 +9,38 @@
 .default-input-container-tab {
   margin-top: 32px;
   margin-left: 32px;
-  margin-right: 132px;
-  border-bottom: 1px solid #ffffff40;
+  margin-right: 32px;
+  border-bottom: 1px solid #fcfcfc15;
 }
 
 .default-input-container-tab .nav-link {
   font-family: Inter, sans-serif;
   font-size: 14px;
   cursor: pointer;
-  color: #ffffff90;
+  color: #A0B8D1;
   margin-right: 10px;
 }
 
+.nav-tabs .nav-link{
+  padding: 10px 24px;
+  font-family: Inter, sans-serif;
+}
+
 .nav-tabs .nav-link.active {
-  background-color: #ffffff20;
-  border-color: #ffffff30;
-  border-bottom: #0000;
+  background-color: #172235;
+  border: 1px solid #ffffff08;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 2px solid #fff;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   color: #fff;
 }
 
 .nav-tabs .nav-link:not(.active):hover {
-  background-color: #ffffff10;
-  border-color: #ffffff20;
-  border-bottom: 1px solid #0000;
+  background-color: #17223560;
+  border: 1px solid #ffffff08;
+  border-bottom: 2px solid #ffffff60;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   color: #fff;

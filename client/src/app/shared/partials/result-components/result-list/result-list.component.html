@@ -1,10 +1,14 @@
-<div *ngIf="listItems.length > 0" class="search__result-detail-section-content">
+<div *ngIf="filteredItems.length > 0; else noData" class="search__result-detail-section-content">
   <div class="row p-1 flex-wrap">
-    <li (click)="copyText(item, i)" *ngFor="let item of listItems; let i = index" class="copy-item">
+    <li *ngFor="let item of filteredItems; let i = index" (click)="copyText(item, i)" class="copy-item">
       <span class="tag-item-content">
-        {{ item }}
-        <span *ngIf="copiedIndex === i" class="tooltip">Copied!</span>
+        {{ item }}<span *ngIf="copiedIndex === i" class="tooltip">Copied!</span>
       </span>
     </li>
   </div>
 </div>
+
+<ng-template #noData>
+  <div class="report-mapping-empty-header">No structured records found!</div>
+  <div class="report-mapping-empty-body">We’re watching this source — new breach or tracking data will appear here once detected.</div>
+</ng-template>

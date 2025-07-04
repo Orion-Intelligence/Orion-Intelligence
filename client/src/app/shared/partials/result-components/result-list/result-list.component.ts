@@ -10,9 +10,13 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
   animations: [fadeInDashboardItem]
 })
 export class ResultListComponent {
-  @Input() listItems: string[] = [];
+  @Input() set listItems(items: string[]) {
+    this.filteredItems = items.filter(item => item.length >= 2);
+  }
+
   @Input() activeTab = '';
 
+  filteredItems: string[] = [];
   copiedIndex: number | null = null;
 
   copyText(text: string, index: number): void {

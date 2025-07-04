@@ -23,7 +23,7 @@
               <th scope="col">Mapping Value</th>
             </tr>
           </thead>
-          <tbody *ngIf="filteredItems.length>0" @fadeInDashboardItem>
+          <tbody *ngIf="filteredItems.length>0" @fadeInDashboardItem >
             <ng-container *ngFor="let item of filteredItems; let i = index">
               <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer">
                 <td data-label="ID">
@@ -51,7 +51,7 @@
               </tr>
             </ng-container>
           </tbody>
-          <tbody *ngIf="filteredItems.length==0" @fadeInDashboardItem>
+          <tbody *ngIf="loading" @fadeInDashboardItem>
             <tr>
               <td>
                 <div class="shimmer shimmer-line w-75"></div>
@@ -82,6 +82,10 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div *ngIf="!loading && filteredItems.length==0">
+        <div class="report-mapping-empty-header">No structured records found!</div>
+        <div class="report-mapping-empty-body">We’re watching this source — new breach or tracking data will appear here once detected.</div>
       </div>
     </div>
   </div>

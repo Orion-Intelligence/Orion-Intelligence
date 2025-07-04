@@ -24,7 +24,7 @@
 }
 
 .search__result-detail-section-content li {
-  padding: 8px;
+  padding: 8px 8px 0;
   font-size: 12px;
   font-weight: 400;
   color: #fff;

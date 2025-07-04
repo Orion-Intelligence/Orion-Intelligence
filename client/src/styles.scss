@@ -92,12 +92,12 @@
 	--dashboard-search-main-div-hover: #1f2e47;
 	--home-insight-card-bg: #172235;
 	--no-result-container-bg: #172235;
-	--loading-form-bg: #1f2e47;
+	--loading-form-bg: #172235;
 	--loading-form-divs-bg: #101A2B;
 	--loading-form-shimmer: linear-gradient(to right,
-			#1a2435 0%,
-			#131b2a 50%,
-			#1a2435 100%);
+			#FCFCFC20 0%,
+			#FCFCFC30 50%,
+			#FCFCFC20 100%);
 	--report-menu-option: #172235;
 	--report-menu-option-hover: #4d5155;
 	--search-result-detail: #172235;
@@ -308,3 +308,4 @@ ngb-datepicker-month {
 		}
 	}
 }
+
