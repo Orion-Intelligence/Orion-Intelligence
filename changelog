@@ -1,3 +1,187 @@
+Changelog [1.0.2.7] – 2025-07-05
+
+Overview:
+ • Elasticsearch performance upgrade with migration to dedicated KVM VPS.
+ • UI and experience uplift with light/dark themes, visual improvements, and mobile optimization.
+ • Expanded intelligence coverage: new crawl sources, breach categories, and credential visibility.
+ • Enhanced report and result panels with JSON, code snippets, and discussion integrations.
+ • Added CVE/Zero-Day tracking tools, automated code quality checks, and subscription model.
+ • Official domain and landing page launch for Orion Intelligence.
+
+1. Infrastructure
+
+ • Elasticsearch Server Migration
+   - Moved to dedicated KVM VPS for better performance and stability.
+
+2. Crawl Base Expansion
+
+ • New Sources Added
+   - Telegram: Track public channels and threat actor chatter.
+   - News: Pull headlines and threat intel from cyber news media.
+   - Exploit: Index exploits and related technical disclosures.
+
+3. UI and UX Enhancements
+
+ • Light/Dark Theme Support
+   - Toggleable themes for better user experience.
+
+ • General UI Improvements
+   - Enhanced responsiveness, layout refinements, and tooltips.
+
+4. Breach Intelligence Expansion
+
+ • New Breach Categories
+   - Email, Logs, Warfare, and Cloud data types added.
+
+ • Credentials Visibility
+   - Exposed credentials now viewable in dump entries.
+
+5. CVE and Vulnerability Intelligence
+
+ • CVE and Zero-Day Support
+   - Tools and feeds added to identify and monitor vulnerabilities.
+
+6. Result and Report Panel Features
+
+ • Discussion Panel
+   - Displays context and forum discussions for each result.
+
+ • Raw JSON Output
+   - Full JSON data available for every report.
+
+ • Code Snippet Section
+   - Embed and display technical code blocks within reports.
+
+ • Document Relation View
+   - Graph-linked related reports to show investigative relationships.
+
+7. News Intelligence
+
+ • Live Cybersecurity News Feed
+   - Aggregates updates from trusted security news sources.
+
+8. Documentation
+
+ • Updated Docs and Links
+   - Guides and platform references updated and downloadable.
+
+9. DevOps and Code Quality
+
+ • GitHub Actions for Quality Checks
+   - Codacy and CI tools integrated to monitor code health.
+
+10. Subscription Management
+
+ • Feature-Based Access Control
+   - Premium features gated behind subscriptions. Contact team for access.
+
+11. Web Presence
+
+ • Official Domain and Landing Page
+   - Website now live at:
+     - https://orionintelligence.org
+     - https://try.orionintelligence.org
+
+12. exploit scripts added below
+
+_0dayfans.py
+_cxsecurity.py
+_exploitdb.py
+_github_trickest_cve.py
+_inthewild.py
+_rapid7.py
+_sploitus.py
+
+13. news scripts added below
+
+_bleepingcomputer.py
+_csocybercrime.py
+_hackread.py
+_infosecuritymagazine.py
+_krebsonsecurity.py
+_postswigger.py
+_scworld.py
+_securityweek.py
+_thehackernews.py
+
+14. ransomware coverage list
+
+_34o4m3f26ucyeddzpf53bksy76wd737nf2fytslovwd3viac3by5chad.py
+_hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd.py
+_3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.py
+_ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd.py
+_ransomlook.py
+_47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd.py
+_imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid.py
+_ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.py
+_5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid.py
+_incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad.py
+_ransom.py
+_7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.py
+_intelrepository.py
+_ransomware_live.py
+_akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad.py
+_j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.py
+_rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad.py
+_arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd.py
+_j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad.py
+_rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad.py
+_b1nd.py
+_k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd.py
+_rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad.py
+_basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd.py
+_krakenccj3wr23452a4ibkbkuph4d6soyx2xgjoogtuamc3m7u7wemad.py
+_sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.py
+_bertblogsoqmm4ow7nqyh5ik7etsmefdbf25stauecytvwy7tkgizhad.py
+_ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.py
+_schneier.py
+_bianlianlbc5an4kgnay3opdemgcryg2kpfcbgczopmm3dnbz3uaunad.py
+_leak_lookup.py
+_silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid.py
+_black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd.py
+_leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.py
+_tp5cwh6d2b5hekcg6jlhoe6mawa7dlwiv47epvnfmzuaaur2dnaa3uid.py
+_blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd.py
+_lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd.py
+_twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad.py
+_cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd.py
+_lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd.py
+_txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.py
+_csidb.py
+_mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid.py
+_vg6xwkmfyirv3l6qtqus7jykcuvgx6imegb73hqny2avxccnmqt5m2id.py
+_darkfeed.py
+_monitor_mozilla.py
+_vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd.py
+_darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd.py
+_mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id.py
+_weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd.py
+_dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid.py
+_nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad.py
+_weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd.py
+_ddosecrets.py
+_netleaks.py
+_worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid.py
+_ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid.py
+_nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd.py
+_xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd.py
+_flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.py
+_nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd.py
+_yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd.py
+_funksecsekgasgjqlzzkmcnutrrrafavpszijoilbd6z3dkbzvqu43id.py
+_om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.py
+_z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid.py
+_github_doormanbreach.py
+_omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd.py
+_z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad.py
+_gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad.py
+_orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id.py
+_zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid.py
+_handala_hack.py
+_pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd.py
+_hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd.py
+_public_tableau.py
+
 Changelog [1.0.2.5] – 2025-06-15
 
 Overview:
