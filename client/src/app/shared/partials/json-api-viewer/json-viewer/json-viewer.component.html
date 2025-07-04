@@ -4,10 +4,10 @@
       <div (click)="isCollapsible(json[key]) && toggle(pathKey(parentPath, key))" class="json-tree__line">
         <span *ngIf="isCollapsible(json[key])" class="json-tree__toggle">
           <img *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedIcon"
-            src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="Expanded" width="12" height="12" />
+            src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="Expanded" width="20" height="20" />
           <ng-template #collapsedIcon>
             <img [ngClass]="{ 'rotated': !isExpanded(pathKey(parentPath, key)) }"
-              src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="Collapsed" width="12" height="12" />
+              src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="Collapsed" width="20" height="20" />
           </ng-template>
         </span>
         <span class="json-tree__key json-tree__key--faded ms-1">{{ key }}</span>

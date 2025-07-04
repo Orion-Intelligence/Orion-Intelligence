@@ -11,32 +11,24 @@
 
 .json-tree__line {
   position: relative;
-  padding-left: 20px;
   margin-bottom: 4px;
   cursor: pointer;
-
 }
 
 .json-tree__line::before {
-  /* content: "├── "; */
   position: absolute;
   left: 0;
   color: rgb(255 255 255 / 30%);
-
-
-  /* content: "→";
-  color: green; */
 }
 
 .json-tree__node--last .json-tree__line::before {
-  /* content: "└── "; */
   content: '';
   display: inline-block;
   width: 1px;
   height: 100%;
   border-left: 1px dotted #888;
   margin-right: 6px;
-  margin-left: 11px;
+  margin-left: -9px;
   vertical-align: top;
 }
 
@@ -50,21 +42,40 @@
 
 .json-tree__toggle img {
   width: 24px !important;
-  height: 12px !important;
+  height: 18px !important;
 }
 
 .json-tree__key {
+  margin-left: 13px;
   cursor: pointer;
 }
 
 .json-tree__key--faded {
   opacity: 0.6;
+  font-family: Inter, sans-serif;
+  color: #57A5EB;
 }
 
 .json-tree__value {
+  font-family: Inter, sans-serif;
   color: rgb(211 211 211);
   font-size: 12px;
+  margin-left: 17px;
+  display: flex;
+  align-items: center;
 }
+
+.json-tree__value::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-image: url('/assets/images/shared/arrow-right.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 6px;
+}
+
 
 .json-tree__line--leaf {
   font-weight: normal;

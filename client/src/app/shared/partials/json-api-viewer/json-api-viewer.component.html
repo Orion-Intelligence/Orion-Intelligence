@@ -10,7 +10,8 @@
         src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
-  <div *ngIf="isExpanded" class="content p-3">
+  <div *ngIf="isExpanded" class="report-mapping-empty-body">The JSON response contains the complete data that would be returned in an actual API call.</div>
+  <div *ngIf="isExpanded" class="content pt-3">
     <app-json-viewer [json]="jsonData"></app-json-viewer>
   </div>
 </div>
