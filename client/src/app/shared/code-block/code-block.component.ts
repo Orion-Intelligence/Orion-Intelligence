@@ -1,5 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {NgClass, NgIf} from '@angular/common';
+import {TooltipDirective} from '../directive/tooltip-directive.directive';
+import {JsonViewerComponent} from '../partials/json-api-viewer/json-viewer/json-viewer.component';
 
 @Component({
   selector: 'app-code-block',
@@ -7,7 +9,9 @@ import {NgClass, NgIf} from '@angular/common';
   templateUrl: './code-block.component.html',
   imports: [
     NgClass,
-    NgIf
+    NgIf,
+    TooltipDirective,
+    JsonViewerComponent
   ]
 })
 export class CodeBlockComponent {

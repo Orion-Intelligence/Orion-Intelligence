@@ -1,16 +1,16 @@
 <div class="search__result-detail">
-  <div class="collapsible-container">
-    <div (click)="toggle()" class="file-header p-3">
-      <span class="title">Code Snippet</span>
-      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
-        <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
-          src="/assets/images/shared/search_side_dropdown_icon.svg" />
-      </div>
+  <div (click)="toggle()" class="search__result__section__heading">
+    <div class="left-content">
+    Code snippet <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Shows the original exploit code associated with this report.">
     </div>
-    <div *ngIf="isExpanded" class="content p-3">
-      <pre class="p-3 rounded overflow-auto m-0">
+    <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
+      <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
+        src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+    </div>
+  </div>
+
+  <div *ngIf="isExpanded" class="report-mapping-empty-body">Shows the original exploit code associated with this report.</div>
+  <div *ngIf="isExpanded" class="content collapsible-container p-3 mt-4">
       <code [innerText]="code" class="text-white"></code>
-    </pre>
-    </div>
   </div>
 </div>

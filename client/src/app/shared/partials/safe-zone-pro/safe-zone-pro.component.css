@@ -223,7 +223,7 @@
   font-size: 0.9em;
 }
 
-.form-group input[type="email"] {
+.popup-overlay .form-group input[type="email"] {
   max-width: 478px;
   max-height: 35px;
   padding: 10px 12px;
