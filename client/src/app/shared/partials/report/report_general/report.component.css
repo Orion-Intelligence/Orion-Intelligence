@@ -440,7 +440,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 10px 10px 0;
+  padding: 10px 10px 0 0;
   border-radius: 5px;
   font-size: 12px;
   flex-wrap: wrap;
@@ -452,11 +452,10 @@
 .dashboard__search-status {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 2px;
 }
 
 .dashboard__info-label {
-  margin-bottom: 5px;
   color: #9fb3c8;
 }
 
@@ -555,7 +554,7 @@
 }
 
 .dashboard__search-button-inner {
-  padding: 0 10px 10px;
+  padding: 0 0 10px 10px;
 }
 
 
