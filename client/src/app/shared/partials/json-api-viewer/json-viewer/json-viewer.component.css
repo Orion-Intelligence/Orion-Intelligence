@@ -14,17 +14,30 @@
   padding-left: 20px;
   margin-bottom: 4px;
   cursor: pointer;
+
 }
 
 .json-tree__line::before {
-  content: "├── ";
+  /* content: "├── "; */
   position: absolute;
   left: 0;
   color: rgb(255 255 255 / 30%);
+
+
+  /* content: "→";
+  color: green; */
 }
 
 .json-tree__node--last .json-tree__line::before {
-  content: "└── ";
+  /* content: "└── "; */
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 100%;
+  border-left: 1px dotted #888;
+  margin-right: 6px;
+  margin-left: 11px;
+  vertical-align: top;
 }
 
 .json-tree__toggle {
@@ -33,6 +46,11 @@
   text-align: center;
   user-select: none;
   margin-right: 4px;
+}
+
+.json-tree__toggle img {
+  width: 24px !important;
+  height: 12px !important;
 }
 
 .json-tree__key {
@@ -50,6 +68,7 @@
 
 .json-tree__line--leaf {
   font-weight: normal;
+
 }
 
 .json-tree__children {

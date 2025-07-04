@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-json-viewer',
@@ -7,7 +7,7 @@ import {CommonModule} from '@angular/common';
   imports: [CommonModule],
   templateUrl: './json-viewer.component.html'
 })
-export class JsonViewerComponent implements OnInit {
+export class JsonViewerComponent {
   @Input() json: any;
   @Input() level = 0;
   @Input() parentPath = '';
@@ -49,7 +49,7 @@ export class JsonViewerComponent implements OnInit {
   }
 
   isCollapsible(value: any): boolean {
-    return this.isObject(value) || (typeof value === 'string' && value.length > 60);
+    return this.isObject(value) || (typeof value === 'string' && value.length > 1);
   }
 
   toggle(path: string): void {
