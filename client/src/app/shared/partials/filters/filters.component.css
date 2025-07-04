@@ -117,7 +117,7 @@
   height: 40px;
   text-align: left;
   box-shadow: 0 1px 2px 0 #1018280d;
-  border: 1px solid var(--filter-input);
+  border: 1px solid #ffffff12 !important;
   width: 100%;
   caret-color: var(--filter-input-text);
 }
@@ -159,12 +159,14 @@
 
 .filter__submit .btn-secondary:hover {
   background: var(--filter-submit-button-hover);
+
   /* border: 2px solid #359AFF; */
 }
 
 .filter__submit .btn-secondary:focus,
 .filter__submit .btn-secondary:active {
   background: var(--filter-submit-button-hover) !important;
+
   /* border: 2px solid #359AFF !important; */
   outline: none !important;
   box-shadow: none !important;
@@ -213,9 +215,8 @@
   padding: 0.5rem 0;
   margin: 0.125rem 0 0;
   font-size: 1rem;
-  color: var(--filter-input-text);
   text-align: left;
-  background-color: var(--filter-input);
+  background-color: #fff;
   background-clip: padding-box;
   border: 1px solid rgb(0 0 0 / 15%);
   border-radius: 8px;
@@ -229,8 +230,7 @@
 }
 
 .filter__form .dropdown-item:hover {
-  background: var(--filter__form-dropdown-item-hover) !important;
-  color: white !important;
+  background: var(--filter-form-dropdown-item-hover) !important;
 }
 
 .filter__form .dropdown-select {
@@ -248,7 +248,7 @@
 }
 
 .filter__form .dropdown-menu .dropdown-item:hover {
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .filter__form .dropdown-menu {
