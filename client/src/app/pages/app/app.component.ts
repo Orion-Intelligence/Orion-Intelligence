@@ -21,6 +21,9 @@ export class AppComponent {
   currentRoute = signal('');
 
   constructor(private router: Router, private errorStore: ErrorStoreService, appService: AppService) {
+    const theme = localStorage.getItem('theme') || 'dark-theme';
+    document.body.classList.add(theme);
+
     appService.loadConfig();
     this.error$ = this.errorStore.error$;
 

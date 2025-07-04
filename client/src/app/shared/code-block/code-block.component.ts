@@ -10,8 +10,7 @@ import {JsonViewerComponent} from '../partials/json-api-viewer/json-viewer/json-
   imports: [
     NgClass,
     NgIf,
-    TooltipDirective,
-    JsonViewerComponent
+    TooltipDirective
   ]
 })
 export class CodeBlockComponent {
