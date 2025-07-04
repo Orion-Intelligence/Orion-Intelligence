@@ -1,4 +1,4 @@
-.popup-overlay {
+.pro-subscription-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   overflow: auto;
 }
 
-.safe-zone-pro-container {
+.pro-subscription-container {
   display: flex;
   font-family: Arial, sans-serif;
   max-width: 892px;
@@ -153,7 +153,7 @@
   height: 0;
 }
 
-.subscription-option input[type="radio"] + .option-content::before {
+.subscription-option input[type="radio"]+.option-content::before {
   content: '';
   width: 16px;
   height: 16px;
@@ -163,7 +163,7 @@
   display: inline-block;
 }
 
-.subscription-option input[type="radio"]:checked + .option-content::before {
+.subscription-option input[type="radio"]:checked+.option-content::before {
   border-color: #007bff;
   background-color: #007bff;
   box-shadow: inset 0 0 0 3px #fff;
@@ -194,27 +194,27 @@
   gap: 30px;
 }
 
-.form-group {
+.pro-subscription-overlay .form-group {
   flex: 1;
   display: flex;
   flex-direction: column;
   margin-bottom: 0;
 }
 
-.form-group.full-width {
+.pro-subscription-overlay .form-group.full-width {
   flex: none;
   width: 100%;
 }
 
-.form-group label {
+.pro-subscription-overlay .form-group label {
   margin-bottom: 6px;
   font-weight: 500;
   color: #10182B;
   font-size: 12px;
 }
 
-.form-group input[type="text"],
-.form-group input[type="tel"] {
+.pro-subscription-overlay .form-group input[type="text"],
+.pro-subscription-overlay .form-group input[type="tel"] {
   max-width: 224px;
   max-height: 35px;
   padding: 10px 12px;
@@ -223,7 +223,7 @@
   font-size: 0.9em;
 }
 
-.popup-overlay .form-group input[type="email"] {
+.pro-subscription-overlay .form-group input[type="email"] {
   max-width: 478px;
   max-height: 35px;
   padding: 10px 12px;
@@ -232,7 +232,7 @@
   font-size: 0.9em;
 }
 
-.form-group input:focus {
+.pro-subscription-overlay .form-group input:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgb(0 123 255 / 25%);
@@ -267,9 +267,11 @@
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-@media (width <= 768px) {
-  .form-group input[type="text"],
-  .form-group input[type="tel"] {
+@media (width <=768px) {
+
+  .pro-subscription-overlay .form-group input[type="text"],
+  .pro-subscription-overlay .form-group input[type="tel"],
+  .pro-subscription-overlay .form-group input[type="email"] {
     max-width: none;
   }
 
@@ -277,7 +279,7 @@
     max-width: none;
   }
 
-  .safe-zone-pro-container {
+  .pro-subscription-container {
     flex-direction: column;
     left: 90px;
     right: 20px;
@@ -287,10 +289,9 @@
     position: absolute;
   }
 
-  .righ-section{
-  }
+  .righ-section {}
 
-  .left-section{
+  .left-section {
     display: none;
   }
 
@@ -333,11 +334,11 @@
     font-size: 0.75em;
   }
 
-  .form-group label {
+  .pro-subscription-overlay .form-group label {
     font-size: 0.8em;
   }
 
-  .form-group input {
+  .pro-subscription-overlay .form-group input {
     font-size: 0.85em;
     padding: 8px 10px;
   }

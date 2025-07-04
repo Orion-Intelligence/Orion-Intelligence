@@ -10,12 +10,12 @@ import { CardData, SearchDynamicEmailCallbackModel } from '../../../model/api/em
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { searchDynamicEmailParamModel } from '../../../model/api/email/search_dynamic_email_param_model';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { SafeZoneProComponent } from "../../safe-zone-pro/safe-zone-pro.component";
+import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscription.component";
 import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-email-api',
-  imports: [FormsModule, NgForOf, NgOptimizedImage, ReactiveFormsModule, NgIf, EmptyResultComponent, LoadingFormComponent, EmptyQueryComponent, SafeZoneProComponent],
+  imports: [FormsModule, NgForOf, NgOptimizedImage, ReactiveFormsModule, NgIf, EmptyResultComponent, LoadingFormComponent, EmptyQueryComponent, ProSubscriptionComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-email-api.component.html'
 })
