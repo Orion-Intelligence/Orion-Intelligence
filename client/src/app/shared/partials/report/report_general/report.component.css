@@ -7,6 +7,23 @@
   min-height: auto;
   height: auto !important;
   display: block;
+  max-height: 80vh;
+  overflow: auto;
+  scrollbar-width: auto;
+  scrollbar-color: var(--sidebar-item-bg) transparent;
+}
+
+.search__result-detail::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search__result-detail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search__result-detail::-webkit-scrollbar-thumb {
+  background-color: var(--sidebar-item-bg);
+  border-radius: 10px;
 }
 
 .search__result-actions button {

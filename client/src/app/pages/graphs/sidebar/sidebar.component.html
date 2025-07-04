@@ -5,7 +5,7 @@
   <form class="filter__form">
     <div class="filter__content">
 
-      <label class="filter__label mt-3">Type</label>
+      <label class="filter__label mt-1">Type</label>
       <div class="dropdown mb-3">
         <button aria-expanded="false"
           class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
@@ -25,7 +25,7 @@
       </div>
 
       <ng-container *ngIf="selectedType === 'cluster'">
-        <label class="filter__label mt-3">Cluster Type</label>
+        <label class="filter__label mt-1">Cluster Type</label>
         <div class="dropdown">
           <button aria-expanded="false"
             class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
@@ -45,7 +45,7 @@
     </ng-container>
 
     <ng-container *ngIf="selectedType === 'property'">
-      <label class="filter__label mt-3">Property Type</label>
+      <label class="filter__label mt-1">Property Type</label>
       <div class="dropdown">
         <button aria-expanded="false"
           class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
@@ -63,16 +63,16 @@
     </li>
     </ul>
 </div>
-<label class="filter__label mt-3">Property Value</label> <input [(ngModel)]="propertyValue"
+<label class="filter__label mt-1">Property Value</label> <input [(ngModel)]="propertyValue"
   class="form-control filter__input filter__input-form" name="propertyValue" placeholder="Enter value" type="text" />
 </ng-container>
 
 <ng-container *ngIf="selectedType === 'document'">
-  <label class="filter__label mt-3">Document ID</label> <input [(ngModel)]="singleInput"
+  <label class="filter__label mt-1">Document ID</label> <input [(ngModel)]="singleInput"
     class="form-control filter__input" name="singleInput" placeholder="Enter ID" type="text" />
 </ng-container>
 
-<label class="filter__label mt-3">Maximum Nodes</label>
+<label class="filter__label mt-1">Maximum Nodes</label>
 <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" class="form-control filter__input" max="800" min="20"
   name="maxNodes" placeholder="Enter maximum nodes" required type="number" />
 

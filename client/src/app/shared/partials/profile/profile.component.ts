@@ -24,11 +24,6 @@ export class ProfileComponent {
     this.role$ = this.authService.getRole$();
   }
 
-  ngOnInit() {
-    this.isDarkTheme = localStorage.getItem('theme') === 'dark-theme';
-    this.applyTheme();
-  }
-
   toggleThemeByClick() {
     this.isDarkTheme = !this.isDarkTheme;
     const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';
