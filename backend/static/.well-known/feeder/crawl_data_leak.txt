@@ -67,3 +67,6 @@
 {"file": "_sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad", "url": "http://sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.onion"}
 {"file": "_intelrepository", "url": "https://intelrepository.com"}
 {"file": "_schneier", "url": "https://www.schneier.com"}
+{"file": "_netleaks", "url": "https://netleaks.net"}
+{"file": "_akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad", "url": "https://akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad.onion"}
+{"file": "_arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd", "url": "http://arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd.onion"}

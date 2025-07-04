@@ -4,3 +4,6 @@
 {"file": "_scworld", "url": "https://www.scworld.com/"}
 {"file": "_postswigger", "url": "https://portswigger.net/"}
 {"file": "_csocybercrime", "url": "https://www.csoonline.com/"}
+{"file": "_securityweek", "url": "https://www.securityweek.com"}
+{"file": "_krebsonsecurity", "url": "https://krebsonsecurity.com"}
+{"file": "_bleepingcomputer", "url": "https://www.bleepingcomputer.com"}
