@@ -9,8 +9,7 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     FormsModule
   ],
-  templateUrl: './pro-subscription.component.html',
-  styleUrl: './pro-subscription.component.css'
+  templateUrl: './pro-subscription.component.html'
 })
 export class ProSubscriptionComponent {
   @Output() close = new EventEmitter<void>();
