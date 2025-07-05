@@ -175,9 +175,10 @@ Analyzes cryptocurrency-related intelligence including illicit transactions, wal
 Focuses on leaked documents, databases, or credentials published online. These could include government files, internal company data, or proprietary tools that have been exposed.
 
 ## DataBreach
-The Data Breach section in the navigation bar includes two subcategories:
+The Data Breach section in the navigation bar includes six categories:
 
-![Databreach-modified](https://github.com/user-attachments/assets/26878091-cb9f-4839-bd47-51c045920748)
+![breach](https://github.com/user-attachments/assets/da68c499-5701-464e-bee4-3d205a10f7e2)
+
 
 1. ### Databases
 This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
