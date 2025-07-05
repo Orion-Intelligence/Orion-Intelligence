@@ -190,6 +190,17 @@ This section contains detailed records of actual data breaches, offering in-dept
 This section provides breach-related information tracked from forums. It is primarily used for monitoring discussions and mentions of potential breaches across underground communities. Note: This section does not contain actual breached data — it only displays references or claims gathered from forum sources.
 ![tracking-modified](https://github.com/user-attachments/assets/657279c5-e9e3-441e-9dd0-c691dc535d86)
 
+3. ### Email
+This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
+
+4. ### Logs
+The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
+
+5. ### Warfare
+This section provides curated intelligence on cyber warfare activities, including attacks on critical infrastructure, state-sponsored campaigns, and geopolitical cyber threats. Orion continuously monitors sources for warfare-related incidents, offering organizations timely insights into high-level threats with global implications.
+
+6. ### Cloud
+The Cloud module focuses on identifying misconfigurations, leaked credentials, and potential vulnerabilities in cloud environments. Orion scans for exposed cloud assets, such as open buckets, API keys, or improperly secured services, helping teams secure their cloud infrastructure proactively.
 
 ## Defacement
 The Defacement section provides access to an archive list of websites that have been compromised or defaced. This section maintains a structured table that records detailed information about each hacked website, including:
