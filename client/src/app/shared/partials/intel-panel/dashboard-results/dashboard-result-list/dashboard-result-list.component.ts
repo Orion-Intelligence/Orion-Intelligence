@@ -14,13 +14,19 @@ export class DashboardResultListComponent implements OnInit, AfterViewInit {
   currentUrl = '';
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  queryParams: { ci: string; } | undefined;
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
+    if (this.currentUrl.includes('consolidated')) {
+      this.currentUrl = this.currentUrl.replace("/all","/defacement");
+    }
+
     this.route.queryParams.subscribe(_ => {
+      this.queryParams = {ci: 'defacement'};
     });
   }
 

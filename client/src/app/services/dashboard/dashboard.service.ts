@@ -1,16 +1,17 @@
-import {Injectable} from '@angular/core';
-import {Observable, of, Subject} from 'rxjs';
-import {HttpParams} from '@angular/common/http';
-import {catchError, map, takeUntil} from 'rxjs/operators';
-import {ApiService} from '../../shared/services/api.service';
-import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
-import {GeneralCallbackModel} from '../../shared/model/results/general/general.callback.model';
-import {GeneralParamModel} from '../../shared/model/results/shared/general.param.model';
-import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.model';
+import { Injectable } from '@angular/core';
+import { Observable, of, Subject } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
+import { catchError, map, takeUntil } from 'rxjs/operators';
+import { ApiService } from '../../shared/services/api.service';
+import { LeakCallbackModel } from '../../shared/model/results/leak/leak.callback.model';
+import { GeneralCallbackModel } from '../../shared/model/results/general/general.callback.model';
+import { GeneralParamModel } from '../../shared/model/results/shared/general.param.model';
+import { ChatCallbackModel } from '../../shared/model/results/chat/chat.callback.model';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ExploitCallbackModel } from '../../shared/model/results/exploit/exploit.callback.model';
+import { CredentialCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
 import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.param.model';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ExploitCallbackModel} from '../../shared/model/results/exploit/exploit.callback.model';
-import {CredentialCallbackModel} from '../../shared/model/results/credentials/credential.callback.model';
+import {ConsolidatedCallbackModel} from '../../shared/model/results/consolidated/consolidated.callback.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,11 +24,11 @@ export class DashboardService {
   leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
   credentialCallbackModel: CredentialCallbackModel = new CredentialCallbackModel();
+  consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService, private _router: Router, private _route: ActivatedRoute) {
-  }
+  constructor(private apiService: ApiService, private _router: Router, private _route: ActivatedRoute) {}
 
   fetchSearchResults<T extends {
     Result?: any[];
@@ -37,16 +38,47 @@ export class DashboardService {
   }> {
     this.cancelOngoingRequest();
 
-    const params = new HttpParams({fromObject: paramModel as any});
+    const params = new HttpParams({ fromObject: paramModel as any });
 
-    return this.apiService.get<T>(apiEndpoint, {params}).pipe(
+    return this.apiService.get<T>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),
       map((response: T) => ({
         success: true,
         isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
         data: response
       })),
-      catchError(() => of({success: false, isEmpty: false, data: null}))
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
+    );
+  }
+
+  fetchConsolidatedGroupedResults(
+    apiEndpoint: string,
+    paramModel: any
+  ): Observable<{
+    success: boolean; isEmpty: boolean; data: ConsolidatedCallbackModel | null
+  }> {
+    this.cancelOngoingRequest();
+
+    const params = new HttpParams({ fromObject: paramModel as any });
+
+    return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, { params }).pipe(
+      takeUntil(this.cancelRequest$),
+      map((response: ConsolidatedCallbackModel) => {
+        const hasAnyResults = !!(
+          response?.leak_model?.Result?.length ||
+          response?.exploit_model?.Result?.length ||
+          response?.chat_model?.Result?.length ||
+          response?.generic_model?.Result?.length ||
+          response?.defacement_model?.Result?.length
+        );
+
+        return {
+          success: true,
+          isEmpty: !hasAnyResults,
+          data: response
+        };
+      }),
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
     );
   }
 

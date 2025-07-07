@@ -1,31 +1,37 @@
 from typing import Optional
-
 from pydantic import ValidationError
-
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.constants.constant import CONSTANTS
-
 
 class search_callback:
     __instance = None
 
     @staticmethod
-    async def __parse_filtered_documents(p_paged_documents):
+    async def __parse_filtered_documents(p_paged_documents, p_consolidated=False):
         mRelevanceListData = []
         mDescription = set()
         total_pages = 0
+        index_count = {}
 
         try:
             total_hits = p_paged_documents.get('hits', {}).get('total', {}).get('value', 0)
-            if total_hits > 0:
-                total_pages = total_hits / CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE
-
             m_result_final = p_paged_documents.get('hits', {}).get('hits', [])
 
             for m_document in m_result_final:
                 m_service = m_document.get('_source', None)
                 if not m_service:
                     continue
+
+                m_index = m_document.get("_index")
+                if not m_index:
+                    continue
+
+                if index_count.get(m_index, 0) >= 2 and p_consolidated:
+                    total_hits=total_hits-1
+                    continue
+                index_count[m_index] = index_count.get(m_index, 0) + 1
+
+                m_service["m_index"] = m_index
 
                 highlight_text = ""
                 if "highlight" in m_document:
@@ -84,6 +90,12 @@ class search_callback:
 
                 mRelevanceListData.append(m_service)
 
+            if total_hits > 0:
+                if p_consolidated:
+                    total_pages = total_hits / CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_CONSOLIDATED
+                else:
+                    total_pages = total_hits / CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE
+
             content_suggestions = p_paged_documents.get('suggest', {}).get('content_suggestion', [])
             return mRelevanceListData, content_suggestions, total_pages
 
@@ -91,11 +103,11 @@ class search_callback:
             print("Error parsing filtered documents:", e)
             return mRelevanceListData, [], total_pages
 
-    async def search_handler(self, m_status, m_documents, callback_model, listing_filter=None):
+    async def search_handler(self, m_status, m_documents, callback_model, listing_filter=None, p_consolidated=False):
         if not m_status:
             return callback_model(Result=[], Suggestions=[], Page_Count=0)
 
-        parsed_result = await self.__parse_filtered_documents(m_documents)
+        parsed_result = await self.__parse_filtered_documents(m_documents, p_consolidated)
         m_parsed_documents, m_suggestions_content, total_pages = parsed_result
 
         def clean_document(doc):
@@ -116,7 +128,7 @@ class search_callback:
                 if v not in (None, '', []) and (not isinstance(v, dict) or v)
             }
 
-        filtered_results = [clean_document(doc) for doc in m_parsed_documents]
+        filtered_results = [clean_document(doc) for doc in m_parsed_documents if doc.get('m_index')]
 
         return callback_model(
             Result=filtered_results,

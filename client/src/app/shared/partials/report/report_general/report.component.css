@@ -614,6 +614,22 @@
   color: #fff;
 }
 
+.category-heading{
+  margin-left: 35px;
+  margin-bottom: 25px;
+  margin-top: 50px;
+  font-size: 15px;
+}
+
+.category-heading-enforced{
+  font-weight: 500;
+  font-size: 15px;
+  border-bottom: 1px solid #ffffff15;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  margin-right: 100px;
+}
+
 .report-mapping-empty-body{
   font-size: 12px;
   margin-top: 6px;

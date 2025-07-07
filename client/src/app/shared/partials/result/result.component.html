@@ -65,7 +65,7 @@
 <div *ngIf="isLoading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
-<div *ngIf="!this.result_triggered && !isLoading && !result_count" @fadeInDashboardItem>
+<div *ngIf="result_count && !this.result_triggered && !isLoading && !result_count" @fadeInDashboardItem>
   <app-empty-query></app-empty-query>
 </div>
 
@@ -73,7 +73,7 @@
   <app-empty-result [searchQuery]="local_query"></app-empty-result>
 </div>
 
-<div *ngIf="!isLoading && !(result_count==0)" @fadeInDashboardItem>
+<div *ngIf="result_count && !isLoading && !(result_count==0)" @fadeInDashboardItem>
   <div class="right-text label-text">
     <span> {{ result_count }}
       Results Found</span>

@@ -5,8 +5,12 @@ from starlette import status
 
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import \
-    search_chat_callback_model as SearchChatCallbackModel
+    search_chat_callback_model as SearchChatCallbackModel, search_chat_callback_model
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_callback_model import \
+    grouped_consolidated_search_callback_model
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import \
+    search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_callback_model import \
     search_defacement_callback_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
@@ -130,6 +134,40 @@ class search_model:
             leak_listing
         )
 
+    @staticmethod
+    async def search_consolidated_result(param: search_consolidated_param_model):
+        indices, queries = elastic_request_generator().on_search_consolidated_data(param)
+        responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
+
+        leak_data = {}
+        general_data = {}
+        exploit_data = {}
+        chat_data = {}
+        defacement_data = {}
+
+        for index, res in zip(indices, responses):
+            hits = res.get("hits", {}).get("hits", []) if res else []
+            data = {"Result": [hit["_source"] for hit in hits], "Suggestions": [], "Page_Count": len(hits)}
+
+            if index == "leak_model":
+                leak_data = data
+            elif index == "generic_model":
+                general_data = data
+            elif index == "exploit_model":
+                exploit_data = data
+            elif index == "chat_model":
+                chat_data = data
+            elif index == "defacement_model":
+                defacement_data = data
+
+        return grouped_consolidated_search_callback_model(
+            leak_model=search_leak_callback_model(**leak_data),
+            exploit_model=search_exploit_callback_model(**exploit_data),
+            chat_model=search_chat_callback_model(**chat_data),
+            generic_model=search_general_callback_model(**general_data),
+            defacement_model=search_defacement_callback_model(**defacement_data)
+        )
+
     async def search_exploit_result(self, param: search_exploit_param_model):
         document, data_filter = elastic_request_generator().on_search_exploitdata(param)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
@@ -160,7 +198,7 @@ class search_model:
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
-        document, data_filter = elastic_request_generator().on_search_defacementdata(param)
+        document, data_filter = elastic_request_generator().on_search_defacement_data(param)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(

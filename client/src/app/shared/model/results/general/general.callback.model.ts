@@ -13,7 +13,6 @@ export class GeneralResultItem {
   m_meta_description?: string;
   m_content_type: string[] = [];
   m_section: string[] = [];
-  m_emails: string[] = [];
   m_phone_numbers: string[] = [];
   m_clearnet_links: string[] = [];
   m_weblink: string[] = [];
@@ -22,6 +21,7 @@ export class GeneralResultItem {
   m_update_date: string = new Date().toISOString();
   m_hash = "";
   m_creation_date: string = new Date().toISOString();
+  m_index?: string;
 
   constructor(init?: Partial<GeneralResultItem>) {
     Object.assign(this, init);

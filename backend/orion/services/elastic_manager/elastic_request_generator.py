@@ -14,7 +14,7 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_I
 class elastic_request_generator:
 
     @staticmethod
-    def on_search_defacementdata(p_query_model: search_defacement_param_model):
+    def on_search_defacement_data(p_query_model: search_defacement_param_model):
         raw_query = p_query_model.q.strip().lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
@@ -189,6 +189,59 @@ class elastic_request_generator:
         }
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
+
+    @staticmethod
+    def _strip_query(query, size=4):
+        query["size"] = size
+        query.pop("highlight", None)
+        query.pop("suggest", None)
+        return query
+
+    @staticmethod
+    def on_search_consolidated_data(p_query_model):
+        if p_query_model.q != "*":
+            raw_query = p_query_model.q.strip()
+            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+        else:
+            raw_query = "*"
+        if raw_query == "":
+            raw_query = "*"
+        if not raw_query:
+            return [], []
+
+        import copy
+        def clone_model(model):
+            return copy.deepcopy(model)
+
+        queries = []
+        indices = []
+
+        m1 = clone_model(p_query_model)
+        i1, q1 = elastic_request_generator.on_search_leakdata(m1)
+        queries.append(elastic_request_generator._strip_query(q1))
+        indices.append(i1)
+
+        m2 = clone_model(p_query_model)
+        i2, q2 = elastic_request_generator.on_search_general_data(m2)
+        queries.append(elastic_request_generator._strip_query(q2))
+        indices.append(i2)
+
+        m3 = clone_model(p_query_model)
+        i3, q3 = elastic_request_generator.on_search_exploitdata(m3)
+        queries.append(elastic_request_generator._strip_query(q3))
+        indices.append(i3)
+
+        m4 = clone_model(p_query_model)
+        i4, q4 = elastic_request_generator.on_search_telegram_data(m4)
+        queries.append(elastic_request_generator._strip_query(q4))
+        indices.append(i4)
+
+        m5 = clone_model(p_query_model)
+        i5, q5 = elastic_request_generator.on_search_defacement_data(m5)
+        queries.append(elastic_request_generator._strip_query(q5))
+        indices.append(i5)
+
+        return indices, queries
 
     @staticmethod
     def on_search_leakdata(p_query_model):
@@ -1159,7 +1212,8 @@ class elastic_request_generator:
             if not credential.get("username") or not credential.get("file"):
                 continue
 
-            m_hash = helper_controller.generate_data_hash(credential.get("username") + "_" + str(credential.get("file")))
+            m_hash = helper_controller.generate_data_hash(
+                credential.get("username") + "_" + str(credential.get("file")))
             doc = {
                 "u": credential.get("username"),
                 "l": credential.get("link"),

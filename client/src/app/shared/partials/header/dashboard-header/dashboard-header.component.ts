@@ -38,11 +38,16 @@ export class DashboardHeaderComponent implements OnInit {
   }
 
   goBack() {
-    if (this.breadcrumb.length > 2) {
-      const currentUrlTree: UrlTree = this.router.parseUrl(this.router.url);
-      const queryParams = currentUrlTree.queryParams;
+    const currentUrlTree: UrlTree = this.router.parseUrl(this.router.url);
+    const queryParams = currentUrlTree.queryParams;
 
-      const secondLastPath = '/dashboard/' + this.breadcrumb.slice(0, -1).map((crumb) => crumb.path).join('/');
+    if (this.router.url.includes('/consolidated')) {
+      this.router.navigate(['/dashboard/consolidated/all'], {queryParams}).then();
+      return;
+    }
+
+    if (this.breadcrumb.length > 2) {
+      const secondLastPath = '/dashboard/' + this.breadcrumb.slice(0, -1).map(crumb => crumb.path).join('/');
       const secondLastUrlTree = this.router.createUrlTree([secondLastPath], {queryParams});
       const secondLastUrl = this.router.serializeUrl(secondLastUrlTree);
       this.router.navigateByUrl(secondLastUrl).then();

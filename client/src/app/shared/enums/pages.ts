@@ -8,7 +8,8 @@ export enum Category {
   SOCIAL = 'Social',
   API = 'Api',
   EXPLOIT = 'Exploit',
-  FEED = 'Feed'
+  FEED = 'Feed',
+  CONSOLIDATED = 'Consolidated',
 }
 
 export enum GeneralSubCategory {

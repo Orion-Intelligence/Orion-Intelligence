@@ -26,8 +26,18 @@ export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
+
+    const ci = this.type === 'leak' ? 'leak' : 'general';
+
+    if (this.currentUrl.includes('/consolidated/all')) {
+      this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);
+    }
+
     this.route.queryParams.subscribe(params => {
-      this.queryParams = params;
+      this.queryParams = {
+        ...params,
+        ci
+      };
     });
   }
 

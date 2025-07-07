@@ -1,0 +1,17 @@
+<app-result [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" [isLoading]="isLoading" [searchQuery]="query" [result_count]="getTotalResultCount()"></app-result>
+
+<div *ngIf="!isLoading" @fadeInDashboardItem>
+  <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
+    <div class="report-mapping-empty-header category-heading category-heading-enforced">
+      {{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}
+    </div>
+
+    <app-dashboard-results-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'" @fadeInDashboardItem [query]="query" [searchResults]="index.value" [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
+
+    <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [searchResults]="index.value"></app-dashboard-result-exploit>
+
+    <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [searchResults]="index.value"></app-dashboard-result-list>
+
+    <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [searchResults]="index.value"></app-dashboard-result-chat>
+  </ng-container>
+</div>

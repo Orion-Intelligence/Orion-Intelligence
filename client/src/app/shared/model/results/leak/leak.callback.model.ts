@@ -27,6 +27,7 @@ export class LeakResultItem {
   m_update_date: string = new Date().toISOString();
   m_hash = "";
   m_creation_date: string = new Date().toISOString();
+  m_index?: string;
 
   constructor(init?: Partial<LeakResultItem>) {
     Object.assign(this, init);

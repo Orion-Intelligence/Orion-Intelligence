@@ -25,6 +25,10 @@ import {ReportExploitComponent} from './shared/partials/report/report-exploit/re
 import {DumpComponent} from './pages/dump/dump.component';
 import {CredentialComponent} from './pages/dump/credential/credential.component';
 import {ErrorHandlerComponent} from './pages/error-handler/error-handler.component';
+import {
+  DashboardConsolidatedComponent
+} from './shared/partials/intel-panel/dashboard-consolidated/dashboard-consolidated.component';
+import {ReportConsolidatedResolver} from './shared/resolvers/consolidated.resolver';
 
 export const routes: Routes = [
   {
@@ -270,6 +274,47 @@ export const routes: Routes = [
             component: ReportExploitComponent,
             resolve: {reportdata: ReportResolver},
             data: {type: 'Exploit', animation: 'HashPage'}
+          }
+        ]
+      },
+      {
+        path: 'consolidated',
+        data: {animation: 'ConsolidatedPage'},
+        children: [
+          {
+            path: 'all',
+            component: DashboardConsolidatedComponent,
+            data: {type: 'consolidated', animation: 'DataBreach'}
+          },
+          {
+            path: 'chat/:m_hash',
+            component: ReportChatComponent,
+            resolve: {reportdata: ReportConsolidatedResolver},
+            data: {type: 'consolidated', animation: 'HashPage'}
+          },
+          {
+            path: 'general/:m_hash',
+            component: ReportComponent,
+            resolve: {reportdata: ReportConsolidatedResolver},
+            data: {type: 'consolidated', animation: 'HashPage'}
+          },
+          {
+            path: 'leak/:m_hash',
+            component: ReportComponent,
+            resolve: {reportdata: ReportConsolidatedResolver},
+            data: {type: 'consolidated', animation: 'HashPage'}
+          },
+          {
+            path: 'exploit/:m_hash',
+            component: ReportExploitComponent,
+            resolve: {reportdata: ReportConsolidatedResolver},
+            data: {type: 'consolidated', animation: 'HashPage'}
+          },
+          {
+            path: 'defacement/:m_hash',
+            component: ReportDefacementComponent,
+            resolve: {reportdata: ReportConsolidatedResolver},
+            data: {type: 'consolidated', animation: 'HashPage'}
           }
         ]
       },

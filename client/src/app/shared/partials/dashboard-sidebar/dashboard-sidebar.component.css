@@ -30,7 +30,6 @@
 .sidebar__items {
   list-style: none;
   overflow-y: auto;
-  height: calc(100vh - 290px);
   min-height: 500px;
   scrollbar-width: none;
   margin-left: -5px;
@@ -79,6 +78,13 @@
   border-radius: 8px;
   transition: background 0.3s, max-height 0.3s ease-out;
   cursor: pointer;
+}
+
+.sidebar__item_break {
+  border: none;
+  height: 1px;
+  background-color: #ffffff10;
+  margin: 20px 0;
 }
 
 .sidebar__item {
@@ -270,12 +276,16 @@
   margin-top: -10px;
 }
 
+.sidebar-collapsed .sidebar__item_break{
+  width: 50px;
+}
+
 .sidebar__icon-collapse-lift {
   margin-bottom: 4px !important;
 }
 
 .sidebar-collapsed .sidebar__items {
-  height: calc(100vh - 330px);
+  height: 100vh;
 }
 
 .sidebar-collapsed .sidebar__subitems {
@@ -401,11 +411,11 @@
   .sidebar__items {
     list-style: none;
     overflow-y: auto;
-    height: calc(100vh - 230px);
+    height: 100vh;
   }
 
   .sidebar-collapsed .sidebar__items {
-    height: calc(100vh - 230px);
+    height: 100vh;
   }
 
 }

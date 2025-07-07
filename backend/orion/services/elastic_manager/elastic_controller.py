@@ -91,6 +91,18 @@ class elastic_controller:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
+    async def search_consolidated_queries(self, indices, queries):
+        results = []
+        for index, query in zip(indices, queries):
+            try:
+                res = await self.__m_connection.search(index=index, body=query)
+                results.append(res)
+            except Exception as ex:
+                log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+                results.append(None)
+        return results
+
+
     async def get_insight(self):
         try:
             queries = self.__m_elastic_request_generator.generate_insight_queries()
