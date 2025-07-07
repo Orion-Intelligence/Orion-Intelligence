@@ -9,7 +9,6 @@
 
   <ul class="sidebar__items">
     <li class="sidebar__item">
-      {{selectionStore.selectedSection$ | async}}
       <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === null || (selectionStore.selectedSection$ | async) === category.HOMEPAGE || (selectionStore.selectedSection$ | async) === category.CONSOLIDATED}" [queryParamsHandling]="'merge'" [routerLink]="'home'" class="sidebar__item-dropdown">
         <img alt="Home" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/home.svg" width="20">Homepage
       </div>
