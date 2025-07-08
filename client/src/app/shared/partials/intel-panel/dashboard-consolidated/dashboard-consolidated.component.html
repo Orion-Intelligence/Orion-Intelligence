@@ -14,16 +14,16 @@
 
 
     <app-dashboard-results-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'" @fadeInDashboardItem
-      [query]="query" [searchResults]="index.value" [isExpandAble]="true"
+      [query]="query" [searchResults]="index.value" [isExpandAble]="false"
       [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
 
-    <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="true"
+    <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="false"
       [searchResults]="index.value"></app-dashboard-result-exploit>
 
-    <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="true"
+    <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="false"
       [searchResults]="index.value"></app-dashboard-result-list>
 
-    <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="true"
+    <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="false"
       [searchResults]="index.value"></app-dashboard-result-chat>
   </ng-container>
 </div>
