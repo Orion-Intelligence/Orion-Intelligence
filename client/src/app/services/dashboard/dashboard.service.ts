@@ -10,8 +10,8 @@ import { ChatCallbackModel } from '../../shared/model/results/chat/chat.callback
 import { ActivatedRoute, Router } from '@angular/router';
 import { ExploitCallbackModel } from '../../shared/model/results/exploit/exploit.callback.model';
 import { CredentialCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
-import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.param.model';
-import {ConsolidatedCallbackModel} from '../../shared/model/results/consolidated/consolidated.callback.model';
+import { DefacementCallbackModel } from '../../shared/model/results/defacement/defacement.param.model';
+import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +28,7 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService, private _router: Router, private _route: ActivatedRoute) {}
+  constructor(private apiService: ApiService, private _router: Router, private _route: ActivatedRoute) { }
 
   fetchSearchResults<T extends {
     Result?: any[];

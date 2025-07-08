@@ -1,20 +1,22 @@
-import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
-import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
-import {DefacementResultItem} from '../../../../model/results/defacement/defacement.param.model';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {ScrollService} from '../../../../services/scroll.service';
+import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { CommonModule, DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import { DefacementResultItem } from '../../../../model/results/defacement/defacement.param.model';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ScrollService } from '../../../../services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-result-list',
-  standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe],
+  standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe, CommonModule],
   templateUrl: './dashboard-result-list.component.html'
 })
 export class DashboardResultListComponent implements OnInit, AfterViewInit {
   @Input() searchResults: DefacementResultItem[] = [];
+  @Input() isExpandAble: boolean = false;
   currentUrl = '';
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   queryParams: { ci: string; } | undefined;
+  isCollapsed = true;
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
@@ -22,11 +24,11 @@ export class DashboardResultListComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
     if (this.currentUrl.includes('consolidated')) {
-      this.currentUrl = this.currentUrl.replace("/all","/defacement");
+      this.currentUrl = this.currentUrl.replace("/all", "/defacement");
     }
 
     this.route.queryParams.subscribe(_ => {
-      this.queryParams = {ci: 'defacement'};
+      this.queryParams = { ci: 'defacement' };
     });
   }
 

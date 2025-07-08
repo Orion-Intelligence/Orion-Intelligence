@@ -4,9 +4,9 @@ import {
   Component,
   OnInit
 } from '@angular/core';
-import {AppService} from '../../../../services/core/app.service';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {ActivatedRoute, Router} from '@angular/router';
+import { AppService } from '../../../../services/core/app.service';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -14,24 +14,26 @@ import {
   switchMap,
   timer
 } from 'rxjs';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {ConsolidatedParamModel} from '../../../model/results/consolidated/consolidated.param.model';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { ConsolidatedParamModel } from '../../../model/results/consolidated/consolidated.param.model';
 import {
   NgForOf,
   NgIf,
   TitleCasePipe
 } from '@angular/common';
-import {ResultComponent} from '../../result/result.component';
+import { ResultComponent } from '../../result/result.component';
 import {
   DashboardResultsGridComponent
 } from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
-import {ConsolidatedCallbackModel} from '../../../model/results/consolidated/consolidated.callback.model';
+import { ConsolidatedCallbackModel } from '../../../model/results/consolidated/consolidated.callback.model';
 import {
   DashboardResultExploitComponent
 } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
-import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {SortGroupedResultsPipe} from '../../../model/pipes/sort-grouped-results.pipe';
+import { DashboardResultListComponent } from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
+import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { SortGroupedResultsPipe } from '../../../model/pipes/sort-grouped-results.pipe';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../enums/pages';
+import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -59,13 +61,22 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   firstTrigger = true;
   result_count = 0;
   protected readonly Math = Math;
+  apiCategories = Object.values(ApiSubCategory);
+  exploitCategories = Object.values(ExploitSubCategory);
+  dumpCategories = Object.values(DumpSubCategory);
+  newsCategories = Object.values(FeedSubCategory);
+  generalCategories = Object.values(GeneralSubCategory);
+  leakCategories = Object.values(BreachSubCategory);
+  defacementCategories = Object.values(DefacementSubCategory);
+  socialCategories = Object.values(SocialSubCategory);
 
   constructor(
     public appService: AppService,
     public dashboardService: DashboardService,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    protected selectionStore: SelectionStoreService
   ) {
   }
 
@@ -105,7 +116,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!this.consolidatedParamModel.q) {
       this.isLoading = false;
       this.consolidatedParamModel.q = '';
-      this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
+      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
     }
 
     this.isLoading = true;
@@ -144,19 +155,19 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   populateGroupedResults(): void {
     this.groupedResults = {
       ...(this.consolidatedCallbackModel.leak_model?.Result?.length
-        ? {leak_model: this.consolidatedCallbackModel.leak_model.Result}
+        ? { leak_model: this.consolidatedCallbackModel.leak_model.Result }
         : {}),
       ...(this.consolidatedCallbackModel.chat_model?.Result?.length
-        ? {chat_model: this.consolidatedCallbackModel.chat_model.Result}
+        ? { chat_model: this.consolidatedCallbackModel.chat_model.Result }
         : {}),
       ...(this.consolidatedCallbackModel.defacement_model?.Result?.length
-        ? {defacement_model: this.consolidatedCallbackModel.defacement_model.Result}
+        ? { defacement_model: this.consolidatedCallbackModel.defacement_model.Result }
         : {}),
       ...(this.consolidatedCallbackModel.generic_model?.Result?.length
-        ? {generic_model: this.consolidatedCallbackModel.generic_model.Result}
+        ? { generic_model: this.consolidatedCallbackModel.generic_model.Result }
         : {}),
       ...(this.consolidatedCallbackModel.exploit_model?.Result?.length
-        ? {exploit_model: this.consolidatedCallbackModel.exploit_model.Result}
+        ? { exploit_model: this.consolidatedCallbackModel.exploit_model.Result }
         : {})
     };
 
@@ -171,6 +182,55 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   getTotalResultCount(): number {
     return Object.values(this.groupedResults)
       .reduce((sum, list) => sum + list.length, 0);
+  }
+  onSectionSelected(section: Category) {
+    this.selectionStore.setSelectedSection(section);
+    let firstSubcategory: string | undefined;
+    switch (section) {
+      case Category.STRATEGIC:
+        firstSubcategory = this.generalCategories[0];
+        break;
+      case Category.BREACH:
+        firstSubcategory = this.leakCategories[0];
+        break;
+      case Category.API:
+        firstSubcategory = this.apiCategories[0];
+        break;
+      case Category.DEFACEMENT:
+        firstSubcategory = this.defacementCategories[0];
+        break;
+      case Category.DUMP:
+        firstSubcategory = this.dumpCategories[0];
+        break;
+      case Category.FEED:
+        firstSubcategory = this.newsCategories[0];
+        break;
+    }
+
+    if (firstSubcategory) {
+      this.selectionStore.setSelectedOption(firstSubcategory);
+    }
+    const routePrefix = '/dashboard/' + section.toLowerCase() + '/all';
+    this.router.navigate([routePrefix], {
+      queryParams: { mSearchParamPage: 1 },
+      queryParamsHandling: 'merge'
+    });
+  }
+  getCategoryFromKey(key: string): Category {
+    switch (key) {
+      case 'leak_model':
+        return Category.BREACH;
+      case 'exploit_model':
+        return Category.EXPLOIT;
+      case 'defacement_model':
+        return Category.DEFACEMENT;
+      case 'chat_model':
+        return Category.SOCIAL;
+      case 'generic_model':
+        return Category.STRATEGIC;
+      default:
+        return Category.BREACH;
+    }
   }
 
 }

@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +31,19 @@ export class ScrollService {
       sessionStorage.setItem('scrollPosition', scrollPosition.toString());
     }
   }
+  openCTI(itemId: string): void {
+    if (itemId) {
+      const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+      const singleInput = itemId;
+
+      const params = new URLSearchParams({
+        selectedType: 'document', singleInput: singleInput
+      });
+
+      const fullUrl = `${baseUrl}?${params.toString()}`;
+      window.open(fullUrl, '_blank');
+    }
+  }
 
   scrollToSavedPosition(): void {
     const savedPosition = sessionStorage.getItem('scrollPosition');
@@ -45,7 +58,7 @@ export class ScrollService {
       if (scrollableContainer) {
         scrollableContainer.scrollTop = position;
       } else {
-        window.scrollTo({top: position, behavior: 'auto'});
+        window.scrollTo({ top: position, behavior: 'auto' });
       }
     }
   }

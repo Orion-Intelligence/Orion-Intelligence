@@ -364,6 +364,11 @@
   background-color: #d1e7dd;
 }
 
+.dashboard__buttons {
+  display: flex;
+  gap: 20px;
+}
+
 .dashboard__search-main-buttons-outer {
   width: 30%;
 }
@@ -371,6 +376,9 @@
 .dashboard__search-tags {
   display: flex;
   gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .dashboard__tag {
@@ -551,6 +559,12 @@
 .dashboard__search-button {
   margin-left: auto;
   cursor: pointer;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
 }
 
 .dashboard__search-button-inner {
@@ -605,23 +619,28 @@
   opacity: 0.6;
 }
 
+.dashboard__search-container .toggle-btn img {
+  width: 40px;
+  height: 40px;
+}
+
 .screenshoot_expand_button {
   margin-right: 0;
 }
 
-.report-mapping-empty-header{
+.report-mapping-empty-header {
   font-size: 14px;
   color: #fff;
 }
 
-.category-heading{
+.category-heading {
   margin-left: 35px;
   margin-bottom: 25px;
   margin-top: 50px;
   font-size: 15px;
 }
 
-.category-heading-enforced{
+.category-heading-enforced {
   font-weight: 500;
   font-size: 15px;
   border-bottom: 1px solid #ffffff15;
@@ -630,17 +649,28 @@
   margin-right: 100px;
 }
 
-.report-mapping-empty-body{
+.report-mapping-empty-body {
   font-size: 12px;
   margin-top: 6px;
   margin-bottom: 10px;
   color: #A0B8D1;
 }
 
-.report-mapping-empty-body-nopadding{
+.report-mapping-empty-body-nopadding {
   margin-bottom: 0;
   margin-top: 15px;
 }
+
+.expand-toggle-btn {
+  margin: 5px 0 15px;
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 
 @media only screen and (width <=768px) {
   .dashboard__search-card {
