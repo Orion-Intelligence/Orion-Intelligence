@@ -150,6 +150,85 @@ class ELASTIC_ENUMS:
             }
         }
     }
+    mapping_exploit_model = {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1000000
+        },
+        "mappings": {
+            "dynamic_templates": [
+                {
+                    "strings_as_keywords": {
+                        "match_mapping_type": "string",
+                        "mapping": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            ],
+            "properties": {
+                "m_attacker": {"type": "keyword"},
+                "m_base_url": {"type": "keyword"},
+                "m_code_snippet": {"type": "keyword"},
+                "m_confidence": {"type": "keyword"},
+                "m_content_type": {"type": "keyword"},
+                "m_creation_date": {"type": "date"},
+                "m_cve": {"type": "keyword"},
+                "m_cve_source": {"type": "keyword"},
+                "m_cvss": {"type": "keyword"},
+                "m_cwe": {"type": "keyword"},
+                "m_date_of_leak": {"type": "date", "format": "yyyy-MM-dd"},
+                "m_exploit_year": {"type": "keyword"},
+                "m_github_links": {"type": "keyword"},
+                "m_hash": {"type": "keyword"},
+                "m_ip": {"type": "ip"},
+                "m_leak_date": {"type": "date"},
+                "m_location": {"type": "keyword"},
+                "m_mirror_links": {"type": "keyword"},
+                "m_name": {"type": "keyword"},
+                "m_network": {"type": "keyword"},
+                "m_org": {"type": "keyword"},
+                "m_product": {"type": "keyword"},
+                "m_remote_type": {"type": "keyword"},
+                "m_risk": {"type": "keyword"},
+                "m_screenshot": {"type": "keyword"},
+                "m_severity": {"type": "keyword"},
+                "m_solution": {"type": "keyword"},
+                "m_team": {"type": "keyword"},
+                "m_version": {"type": "keyword"},
+                "m_vulnerability": {"type": "keyword"},
+                "m_web_server": {"type": "keyword"},
+                "m_web_url": {"type": "keyword"},
+                "m_weblink": {"type": "keyword"},
+                "m_websites": {"type": "keyword"},
+                "m_update_date": {"type": "date"},
+                "m_url": {
+                    "type": "keyword"
+                },
+                "m_title": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword"}
+                    }
+                },
+                "m_content": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword"}
+                    }
+                },
+                "m_important_content": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword"}
+                    }
+                },
+                "m_mitre_ttp_type": {"type": "keyword"}
+            }
+        }
+    }
+
     mapping_chat_model = {
         "settings": {
             "number_of_shards": 1,

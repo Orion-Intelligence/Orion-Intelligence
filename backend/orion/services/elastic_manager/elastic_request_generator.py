@@ -508,8 +508,7 @@ class elastic_request_generator:
     @staticmethod
     def on_search_exploitdata(p_query_model):
         if p_query_model.q != "*":
-            raw_query = p_query_model.q.strip()
-            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
             raw_query = "*"
         if raw_query == "":
@@ -629,8 +628,6 @@ class elastic_request_generator:
                             {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
                             {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
                             {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-                            {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}},
-                            {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
                         ],
                         "minimum_should_match": 1
                     }
@@ -762,8 +759,7 @@ class elastic_request_generator:
             raw_query = "*"
 
         if p_query_model.q != "*":
-            raw_query = p_query_model.q.strip()
-            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
 
         m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
         m_search_type = p_query_model.mContentType
@@ -832,6 +828,29 @@ class elastic_request_generator:
             "m_users^1.1"
         ]
 
+        if '"' in raw_query:
+            query_string_query = {
+                "query_string": {
+                    "query": raw_query,
+                    "fields": search_fields,
+                    "default_operator": "OR",
+                    "analyze_wildcard": False,
+                    "auto_generate_synonyms_phrase_query": False,
+                    "lenient": True
+                }
+            }
+        else:
+            query_string_query = {
+                "query_string": {
+                    "query": raw_query + "*",
+                    "fields": search_fields,
+                    "default_operator": "OR",
+                    "analyze_wildcard": True,
+                    "auto_generate_synonyms_phrase_query": False,
+                    "lenient": True
+                }
+            }
+
         query = {
             "min_score": 0,
             "query": {
@@ -841,15 +860,8 @@ class elastic_request_generator:
                             "filter": must_clauses,
                             "must_not": must_not_clause,
                             "should": [
-                                {
-                                    "query_string": {
-                                        "query": raw_query + "*",
-                                        "fields": search_fields,
-                                        "default_operator": "OR",
-                                        "analyze_wildcard": True,
-                                        "lenient": True
-                                    }
-                                },
+                                query_string_query
+                                ,
                                 {
                                     "wildcard": {
                                         "m_content.keyword": {
@@ -958,8 +970,7 @@ class elastic_request_generator:
     @staticmethod
     def on_search_general_data(p_query_model):
         if p_query_model.q != "*":
-            raw_query = p_query_model.q.strip()
-            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
             raw_query = "*"
         if raw_query == "":
@@ -1061,22 +1072,40 @@ class elastic_request_generator:
             }
         }
 
-        content_query = {
-            "query_string": {
-                "query": m_user_query,
-                "fields": [
-                    "m_title^6",
-                    "m_meta_description^2",
-                    "m_content^1.5",
-                    "m_important_content^1.5",
-                    "m_meta_keywords^1.8"
-                ],
-                "default_operator": "OR",
-                "lenient": True,
-                "analyze_wildcard": True,
-                "boost": 2
+        if '"' in raw_query:
+            content_query = {
+                "query_string": {
+                    "query": raw_query,
+                    "fields": [
+                        "m_title^6",
+                        "m_meta_description^2",
+                        "m_content^1.5",
+                        "m_important_content^1.5",
+                        "m_meta_keywords^1.8"
+                    ],
+                    "default_operator": "OR",
+                    "analyze_wildcard": True,
+                    "boost": 2,
+                    "auto_generate_synonyms_phrase_query": False
+                }
             }
-        }
+        else:
+            content_query = {
+                "query_string": {
+                    "query": raw_query + "*",
+                    "fields": [
+                        "m_title^6",
+                        "m_meta_description^2",
+                        "m_content^1.5",
+                        "m_important_content^1.5",
+                        "m_meta_keywords^1.8"
+                    ],
+                    "default_operator": "OR",
+                    "analyze_wildcard": True,
+                    "boost": 2,
+                    "auto_generate_synonyms_phrase_query": False
+                }
+            }
 
         query_statement = {
             "min_score": 0,

@@ -40,6 +40,7 @@ class elastic_controller:
             mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
             mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
             mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
+            mapping_exploit_model = ELASTIC_ENUMS.mapping_exploit_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
             mapping_credential_model = ELASTIC_ENUMS.mapping_credential_model
 
@@ -56,7 +57,7 @@ class elastic_controller:
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_EXPLOIT_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
-                                                         body=mapping_defacement_model)
+                                                         body=mapping_exploit_model)
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model)

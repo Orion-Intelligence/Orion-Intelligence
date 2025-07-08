@@ -62,10 +62,8 @@ class helper_controller:
 
     @staticmethod
     def remove_stopwords_from_string(text: str) -> str:
-        # Start with default English stopwords
         stopword_set = set(get_stopwords("en"))
 
-        # Extend with more common stopwords
         additional_stopwords = {
             "was", "by", "were", "been", "being", "have", "has", "had", "do", "does", "did",
             "will", "would", "shall", "should", "may", "might", "can", "could", "must",
@@ -83,10 +81,13 @@ class helper_controller:
             "thing", "things", "something", "anything", "everything", "nothing"
         }
 
-        # Merge both
         stopword_set.update(additional_stopwords)
 
-        # Tokenize and filter
-        tokens = re.findall(r'\b\w+\b', text)
+        quoted_phrases = re.findall(r'"([^"]+)"', text)
+        unquoted_part = re.sub(r'"[^"]+"', '', text)
+
+        tokens = re.findall(r'\b\w+\b', unquoted_part)
         filtered_tokens = [word for word in tokens if word.lower() not in stopword_set]
-        return ' '.join(filtered_tokens)
+
+        result_parts = ['"{}"'.format(p) for p in quoted_phrases] + filtered_tokens
+        return ' '.join(result_parts)
