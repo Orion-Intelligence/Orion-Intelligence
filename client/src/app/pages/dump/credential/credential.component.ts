@@ -4,10 +4,10 @@ import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs
 import {ResultComponent} from '../../../shared/partials/result/result.component';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 import {CredentialParamModel} from '../../../shared/model/results/credentials/credential.param.model';
-import {CredentialCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {NgIf} from '@angular/common';
 import {CredentialListComponent} from '../credential-list/credential-list.component';
+import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 
 @Component({
   selector: 'app-credential',
@@ -22,7 +22,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   firstTrigger: boolean = true;
 
   credentialParamModel: CredentialParamModel = new CredentialParamModel();
-  credentialCallbackModel: CredentialCallbackModel = new CredentialCallbackModel();
+  stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   protected readonly Math = Math;
 
   constructor(
@@ -33,11 +33,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   ) {}
 
   get currentResultCount(): number {
-    return this.credentialCallbackModel?.Result?.length ?? 0;
+    return this.stealerlogCallbackModel?.Result?.length ?? 0;
   }
 
   ngOnInit(): void {
-    this.credentialCallbackModel = { ...this.dashboardService.credentialCallbackModel };
+    this.stealerlogCallbackModel = { ...this.dashboardService.stealerlogCallbackModel };
 
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
@@ -45,7 +45,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         this.query = params['q'];
         this.credentialParamModel.q = params['q'] || '';
 
-        if (this.firstTrigger && this.credentialCallbackModel.Result.length > 0) {
+        if (this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
           this.isLoading = false;
           if (this.credentialParamModel.q)
             this.query = this.credentialParamModel.q;
@@ -77,12 +77,12 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: 'merge'
     }).then();
 
-    this.dashboardService.fetchSearchResults<CredentialCallbackModel>('search/credential', this.credentialParamModel)
+    this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.credentialParamModel)
       .pipe(switchMap(response => timer(300).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
-          this.credentialCallbackModel = response.data;
-          this.dashboardService.credentialCallbackModel = response.data;
+          this.stealerlogCallbackModel = response.data;
+          this.dashboardService.stealerlogCallbackModel = response.data;
         }
         this.isLoading = false;
       });

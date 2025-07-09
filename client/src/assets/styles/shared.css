@@ -293,7 +293,7 @@ table a:visited {
   color: #fff;
 }
 
-.default-notification-banner-credential {
+.default-notification-banner-stealer {
   max-width: 540px;
   margin-left: 30px;
 }
@@ -363,17 +363,22 @@ table a:visited {
   pointer-events: none;
 }
 
+.default-notification-banner-stealer {
+  margin-left: 0;
+  margin-bottom: 30px;
+}
+
 .cdk-describedby-message-container {
   display: none !important;
 }
 
-@media only screen and (width <=550px) {
+@media only screen and (width <= 550px) {
   .default-input-container {
     display: grid;
   }
 }
 
-@media only screen and (width <=1300px) {
+@media only screen and (width <= 1300px) {
   table thead {
     display: none;
   }
@@ -414,10 +419,9 @@ table a:visited {
     margin-bottom: 0;
   }
 
-
 }
 
-@media only screen and (width <=943px) {
+@media only screen and (width <= 943px) {
   .label-text {
     margin-left: 15px;
   }
@@ -449,13 +453,13 @@ table a:visited {
   }
 }
 
-@media only screen and (width <=460px) {
+@media only screen and (width <= 460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (width <=700px) {
+@media only screen and (width <= 700px) {
   .dashboard-general-input {
     min-width: 100px;
   }

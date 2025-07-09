@@ -8,6 +8,7 @@ class ELASTIC_INDEX:
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
     S_CREDENTIAL_INDEX = "credential_model"
+    S_STEALERLOGS_INDEX = "stealer_model"
 
 
 class ELASTIC_CONNECTIONS:
@@ -333,4 +334,28 @@ class ELASTIC_ENUMS:
             }
         }
     }
+    mapping_sealerlogs_model = {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1_000_000,
+            "codec": "best_compression"
+        },
+        "mappings": {
+            "dynamic": True,
+            "properties": {
+                "log": {
+                    "type": "text"
+                },
+                "log_hash": {
+                    "type": "keyword"
+                },
+                "timestamp": {
+                    "type": "date"
+                }
+            }
+        }
+    }
+
+
 

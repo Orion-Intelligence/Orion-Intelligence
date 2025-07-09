@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import os
 from datetime import datetime, timezone
 
@@ -15,10 +16,12 @@ from orion.api.server.crawl_manager.class_model.exploit_model import ExploitData
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
+from orion.api.server.crawl_manager.class_model.log_model import LogModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
@@ -130,6 +133,13 @@ class crawl_model:
         await elastic_controller.get_instance().index_bulk_data(m_data)
         return {"parsed":"true"}
 
+    @staticmethod
+    async def invoke_stealerlogs_index(credential_index: LogModel):
+        m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
+
+        await elastic_controller.get_instance().index_bulk_data(m_data)
+        return {"parsed":"true"}
+
     async def invoke_chat_index(self, chat_index: chat_data_model):
         m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
@@ -162,6 +172,17 @@ class crawl_model:
             new_content_type=['exploit'],
             new_index_type=['exploit'],
             network_type=exploit_index.m_network,
+            is_leak_update=True
+        )
+
+    async def init_stealerlogs(self, leak_index: LeakDataModel):
+        m_data = elastic_request_generator().index_query_sealer_log(leak_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=leak_index.base_url,
+            new_content_type=['leaks'],
+            new_index_type=['leak'],
+            network_type=leak_index.m_network,
             is_leak_update=True
         )
 
@@ -239,6 +260,25 @@ class crawl_model:
             return {
                 "error": f"Failed to save screenshot: {str(e)}"
             }
+
+    async def index_log_record(self, log_model: LogModel):
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        for log in log_model.logs:
+            log_hash = hashlib.sha256(log.encode("utf-8")).hexdigest()
+
+            doc = {
+                "log": log,
+                "log_hash": log_hash,
+                "timestamp": timestamp
+            }
+
+            await self._engine.save({
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_STEALERLOGS_INDEX,
+                ELASTIC_KEYS.S_VALUE: doc
+            })
+
+        return JSONResponse(content={"message": "Logs indexed successfully"}, status_code=200)
 
     async def index_dump_record(self, dump_model: DumpModel):
         try:

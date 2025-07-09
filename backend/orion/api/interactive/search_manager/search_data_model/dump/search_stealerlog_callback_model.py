@@ -10,18 +10,19 @@ class suggestion(BaseModel):
     options: List[dict]
 
 
-class credential_result_item(BaseModel):
-    u: str
-    l: List[str]
-    s: int
-    g: int
-    c: Optional[str] = None
+class stealerlog_result_item(BaseModel):
+    log: str
+    log_hash: str
+    timestamp: Optional[str] = None
 
     class Config:
         extra = Extra.allow
 
 
-class search_credential_callback_model(BaseModel):
-    Result: Optional[List[credential_result_item]] = None
+class search_stealerlog_callback_model(BaseModel):
+    Result: Optional[List[stealerlog_result_item]] = None
     Suggestions: Optional[List[suggestion]] = None
     Page_Count: Optional[float] = None
+
+    class Config:
+        extra = Extra.allow

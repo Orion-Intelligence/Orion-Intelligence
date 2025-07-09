@@ -340,6 +340,22 @@ export const routes: Routes = [
           }
         ]
       },
+      {
+        path: 'stealerlogs',
+        data: {animation: 'StealerlogsPage'},
+        children: [
+          {
+            path: '',
+            redirectTo: 'credential',
+            pathMatch: 'full'
+          },
+          {
+            path: 'credential',
+            component: CredentialComponent,
+            data: {type: 'credential', animation: 'CategoryPage'}
+          }
+        ]
+      },
     ]
   },
   {

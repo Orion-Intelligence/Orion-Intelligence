@@ -21,7 +21,7 @@
   margin-right: 10px;
 }
 
-.directory-list__container .directory-list__column-id-min{
+.directory-list__container .directory-list__column-id-min {
   width: 100px;
 }
 
@@ -48,6 +48,16 @@
 .directory-list__table-url {
 }
 
+.stealer-log-table {
+  border: 1px solid #ffffff20;
+  border-radius: 15px !important;
+  overflow: clip;
+}
+
+.stealer-log-table-padding {
+  margin: 30px;
+}
+
 @media only screen and (width <= 943px) {
   .directory-list__content-category {
     padding-bottom: 0;
@@ -55,6 +65,10 @@
     padding-right: 15px;
     height: 26px;
     margin-top: 5px;
+  }
+
+  .stealer-log-table-padding {
+    margin: 15px;
   }
 
   .directory-list__container-result {

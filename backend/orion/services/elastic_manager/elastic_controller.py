@@ -43,6 +43,7 @@ class elastic_controller:
             mapping_exploit_model = ELASTIC_ENUMS.mapping_exploit_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
             mapping_credential_model = ELASTIC_ENUMS.mapping_credential_model
+            mapping_stealer_model = ELASTIC_ENUMS.mapping_sealerlogs_model
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
@@ -64,6 +65,9 @@ class elastic_controller:
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CREDENTIAL_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CREDENTIAL_INDEX, body=mapping_credential_model)
+
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body=mapping_stealer_model)
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")

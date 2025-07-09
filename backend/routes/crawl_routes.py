@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
-from starlette.requests import Request
+from fastapi import Request
+from pydantic import ValidationError
+from starlette.responses import JSONResponse
 
 from configs.app_dependency import role_required
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
@@ -11,6 +13,7 @@ from orion.api.server.crawl_manager.class_model.exploit_model import ExploitData
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
+from orion.api.server.crawl_manager.class_model.log_model import LogModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -95,9 +98,14 @@ async def index_entity(request: Request):
     await crawl_controller.getInstance().invoke_entity_index(entity_model(**body))
 
 
-from fastapi import Request
-
 @crawl_routes.post("/api/index/dump")
 async def index_dump(request: Request):
     body = await request.json()
     return await crawl_controller.getInstance().invoke_dump_index(DumpModel(**body))
+
+@crawl_routes.post("/api/index/stealerlog")
+async def index_stealerlog(request: Request):
+    body = await request.json()
+    model = LogModel(**body)
+    return await crawl_controller.getInstance().invoke_stealerlog_index(model)
+

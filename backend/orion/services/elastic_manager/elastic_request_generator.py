@@ -968,6 +968,35 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
+    def on_search_stealerlogs_data(p_query_model):
+        raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
+        if raw_query:
+            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+
+        query = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {
+                            "match": {
+                                "log": {
+                                    "query": raw_query,
+                                    "boost": 1.5
+                                }
+                            }
+                        }
+                    ],
+                    "minimum_should_match": 1
+                }
+            },
+            "from": 0,
+            "size": 5,
+            "track_total_hits": True
+        }
+
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
+    @staticmethod
     def on_search_general_data(p_query_model):
         if p_query_model.q != "*":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
@@ -1264,6 +1293,32 @@ class elastic_request_generator:
             bulk_entries.append({
                 "create": {
                     "_index": ELASTIC_INDEX.S_CREDENTIAL_INDEX,
+                    "_id": m_hash
+                }
+            })
+            bulk_entries.append(doc)
+
+        return bulk_entries
+
+    @staticmethod
+    def index_query_stealerlog(p_index_data):
+        now = datetime.now(timezone.utc).isoformat()
+        bulk_entries = []
+
+        for log in p_index_data.get("logs", []):
+            if not log:
+                continue
+
+            m_hash = hashlib.sha256(log.encode()).hexdigest()
+            doc = {
+                "log": log,
+                "log_hash": m_hash,
+                "timestamp": now
+            }
+
+            bulk_entries.append({
+                "create": {
+                    "_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX,
                     "_id": m_hash
                 }
             })

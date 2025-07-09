@@ -65,7 +65,7 @@
 <div *ngIf="isLoading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
-<div *ngIf="result_count && !this.result_triggered && !isLoading && !result_count" @fadeInDashboardItem>
+<div *ngIf="!this.result_triggered && !isLoading && !result_count" @fadeInDashboardItem>
   <app-empty-query></app-empty-query>
 </div>
 

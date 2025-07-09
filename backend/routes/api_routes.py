@@ -58,6 +58,15 @@ async def search_general(param: search_general_param_model = Depends()):
 async def search_telegram(param: search_credential_param_model = Depends()):
     return await search_model.getInstance().search_credential_result(param)
 
+@api_routes.get("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def search_telegram(param: search_credential_param_model = Depends()):
+    return await search_model.getInstance().search_stealerlogs_result(param)
+
+@api_routes.get("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+                description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
+async def search_consolidated(param: search_consolidated_param_model = Depends()):
+    return await search_model.getInstance().search_consolidated_result(param)
+
 @api_routes.get("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Depends()):

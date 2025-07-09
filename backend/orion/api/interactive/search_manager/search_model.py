@@ -15,9 +15,10 @@ from orion.api.interactive.search_manager.search_data_model.defacement.search_de
     search_defacement_callback_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
     search_defacement_param_model
-from orion.api.interactive.search_manager.search_data_model.dump import search_credential_param_model
-from orion.api.interactive.search_manager.search_data_model.dump.search_credential_callback_model import \
-    search_credential_callback_model
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import \
+    search_credential_param_model
+from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import \
+    search_stealerlog_callback_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_callback_model import breach_data
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import \
     search_dynamic_param_model
@@ -187,13 +188,23 @@ class search_model:
             {}
         )
 
-    async def search_credential_result(self, param: search_credential_param_model):
+    async def search_credential_result(self, param: search_credential_param_model, search_credential_callback_model=None):
         document, data_filter = elastic_request_generator().on_search_credentials_data(param)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(
             m_status, m_documents,
             search_credential_callback_model,
+            {}
+        )
+
+    async def search_stealerlogs_result(self, param: search_credential_param_model):
+        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        return await self.__search_callback.search_handler(
+            m_status, m_documents,
+            search_stealerlog_callback_model,
             {}
         )
 

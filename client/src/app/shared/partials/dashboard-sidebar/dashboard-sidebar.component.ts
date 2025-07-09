@@ -7,7 +7,7 @@ import {
   DefacementSubCategory, DumpSubCategory,
   ExploitSubCategory,
   GeneralSubCategory, FeedSubCategory,
-  SocialSubCategory
+  SocialSubCategory, StealerlogsSubCategory
 } from '../../enums/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
@@ -40,6 +40,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
+  stealerlogsCategories = Object.values(StealerlogsSubCategory);
   category = Category;
 
   constructor(protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
