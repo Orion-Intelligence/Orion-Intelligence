@@ -339,7 +339,10 @@ class ELASTIC_ENUMS:
             "number_of_shards": 1,
             "number_of_replicas": 0,
             "max_result_window": 1_000_000,
-            "codec": "best_compression"
+            "codec": "best_compression",
+            "blocks": {
+                "read_only_allow_delete": False
+            }
         },
         "mappings": {
             "dynamic": True,
@@ -356,6 +359,3 @@ class ELASTIC_ENUMS:
             }
         }
     }
-
-
-

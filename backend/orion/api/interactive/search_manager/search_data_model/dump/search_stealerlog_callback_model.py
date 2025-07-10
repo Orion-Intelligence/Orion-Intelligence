@@ -26,3 +26,4 @@ class search_stealerlog_callback_model(BaseModel):
 
     class Config:
         extra = Extra.allow
+

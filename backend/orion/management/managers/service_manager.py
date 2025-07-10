@@ -54,7 +54,7 @@ class service_manager:
     async def init_cronjobs(self):
         while not self._is_available:
             await sleep(5)
-        await cronjob_manager.get_instance().init()
+        await cronjob_manager.get_instance().init_jobs()
 
     def check_status(self):
         return self._is_available
