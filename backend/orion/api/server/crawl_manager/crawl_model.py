@@ -176,7 +176,7 @@ class crawl_model:
         )
 
     async def init_stealerlogs(self, leak_index: LeakDataModel):
-        m_data = elastic_request_generator().index_query_sealer_log(leak_index.model_dump())
+        m_data = elastic_request_generator().index_query_stealerlog(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,

@@ -1,8 +1,5 @@
 from fastapi import APIRouter, Depends
 from fastapi import Request
-from pydantic import ValidationError
-from starlette.responses import JSONResponse
-
 from configs.app_dependency import role_required
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.credential_model import credential_data_model
