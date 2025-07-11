@@ -1,7 +1,7 @@
-import {Component, OnInit} from '@angular/core';
-import {NgForOf, NgIf} from '@angular/common';
-import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import { Component, OnInit } from '@angular/core';
+import { NgForOf, NgIf } from '@angular/common';
+import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-credential-list',

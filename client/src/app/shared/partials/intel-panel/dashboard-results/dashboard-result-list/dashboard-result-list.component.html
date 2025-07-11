@@ -31,7 +31,7 @@
       </thead>
       <tbody>
         <ng-container
-          *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 1) : searchResults); let i = index">
+          *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults); let i = index">
           <tr (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash"
             [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
             <td>{{ i + 1 }}</td>
@@ -53,10 +53,10 @@
         </ng-container>
       </tbody>
     </table>
-    <div (click)="isCollapsed = !isCollapsed" class="toggle-btn" *ngIf="isExpandAble && searchResults.length > 1">
-      <img [ngClass]="{ 'rotated': isCollapsed }" alt="toggle icon"
-        src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+    <div class="see-more-wrapper see-more-button" *ngIf="isExpandAble && searchResults.length > 2">
+      <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
     </div>
+
   </div>
 
 </div>

@@ -1,4 +1,6 @@
-<app-result [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" [isLoading]="isLoading" [searchQuery]="query" [result_count]="getTotalResultCount()"></app-result>
+<app-result [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)"
+  (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" [isLoading]="isLoading" [searchQuery]="query"
+  [result_count]="getTotalResultCount()"></app-result>
 
 <div *ngIf="!isLoading" @fadeInDashboardItem>
   <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
@@ -16,13 +18,18 @@
           </button>
         </span>
       </div>
-      <app-dashboard-results-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'" @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="false" [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
+      <app-dashboard-results-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'"
+        @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
+        [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
 
-      <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="index.value"></app-dashboard-result-exploit>
+      <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="true"
+        [searchResults]="index.value"></app-dashboard-result-exploit>
 
-      <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="index.value"></app-dashboard-result-list>
+      <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="true"
+        [searchResults]="index.value"></app-dashboard-result-list>
 
-      <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="index.value"></app-dashboard-result-chat>
+      <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="true"
+        [searchResults]="index.value"></app-dashboard-result-chat>
     </div>
   </ng-container>
 </div>

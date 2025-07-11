@@ -1,5 +1,5 @@
 <div class="dashboard__search-container dashboard__search-container-chat">
-  <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 1) : searchResults)"
+  <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults)"
     class="dashboard__search-card">
     <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
@@ -122,8 +122,7 @@
     </div>
 
   </ng-container>
-  <div (click)="isCollapsed = !isCollapsed" class="toggle-btn" *ngIf="isExpandAble && searchResults.length > 1">
-    <img [ngClass]="{ 'rotated': isCollapsed }" alt="toggle icon"
-      src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+  <div class="see-more-wrapper" *ngIf="isExpandAble && searchResults.length > 2">
+    <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
   </div>
 </div>
