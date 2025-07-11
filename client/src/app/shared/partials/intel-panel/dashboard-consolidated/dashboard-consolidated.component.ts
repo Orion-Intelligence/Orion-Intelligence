@@ -4,9 +4,9 @@ import {
   Component,
   OnInit
 } from '@angular/core';
-import { AppService } from '../../../../services/core/app.service';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import {AppService} from '../../../../services/core/app.service';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {ActivatedRoute, Router} from '@angular/router';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -14,26 +14,35 @@ import {
   switchMap,
   timer
 } from 'rxjs';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { ConsolidatedParamModel } from '../../../model/results/consolidated/consolidated.param.model';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {ConsolidatedParamModel} from '../../../model/results/consolidated/consolidated.param.model';
 import {
   NgForOf,
   NgIf,
   TitleCasePipe
 } from '@angular/common';
-import { ResultComponent } from '../../result/result.component';
+import {ResultComponent} from '../../result/result.component';
 import {
   DashboardResultsGridComponent
 } from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
-import { ConsolidatedCallbackModel } from '../../../model/results/consolidated/consolidated.callback.model';
+import {ConsolidatedCallbackModel} from '../../../model/results/consolidated/consolidated.callback.model';
 import {
   DashboardResultExploitComponent
 } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import { DashboardResultListComponent } from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
-import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import { SortGroupedResultsPipe } from '../../../model/pipes/sort-grouped-results.pipe';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../enums/pages';
-import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
+import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
+import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import {SortGroupedResultsPipe} from '../../../model/pipes/sort-grouped-results.pipe';
+import {
+  ApiSubCategory,
+  BreachSubCategory,
+  Category,
+  DefacementSubCategory,
+  DumpSubCategory,
+  FeedSubCategory,
+  GeneralSubCategory
+} from '../../../enums/pages';
+import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -47,28 +56,29 @@ import { SelectionStoreService } from '../../../../services/dashboard/selection.
     DashboardResultExploitComponent,
     DashboardResultListComponent,
     DashboardResultChatComponent,
-    SortGroupedResultsPipe
+    SortGroupedResultsPipe,
+    TooltipDirective
   ],
   templateUrl: './dashboard-consolidated.component.html',
+  styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   public consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public groupedResults: { [index: string]: any[] } = {};
+  public pageCounts: { [key: string]: number } = {};
   query = '';
   isLoading = false;
   firstTrigger = true;
   result_count = 0;
   protected readonly Math = Math;
   apiCategories = Object.values(ApiSubCategory);
-  exploitCategories = Object.values(ExploitSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
-  socialCategories = Object.values(SocialSubCategory);
 
   constructor(
     public appService: AppService,
@@ -78,6 +88,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef,
     protected selectionStore: SelectionStoreService
   ) {
+      this.pageCounts = {};
   }
 
   ngAfterViewInit(): void {
@@ -116,7 +127,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!this.consolidatedParamModel.q) {
       this.isLoading = false;
       this.consolidatedParamModel.q = '';
-      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
+      this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
     }
 
     this.isLoading = true;
@@ -153,24 +164,33 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   populateGroupedResults(): void {
-    this.groupedResults = {
-      ...(this.consolidatedCallbackModel.leak_model?.Result?.length
-        ? { leak_model: this.consolidatedCallbackModel.leak_model.Result }
-        : {}),
-      ...(this.consolidatedCallbackModel.chat_model?.Result?.length
-        ? { chat_model: this.consolidatedCallbackModel.chat_model.Result }
-        : {}),
-      ...(this.consolidatedCallbackModel.defacement_model?.Result?.length
-        ? { defacement_model: this.consolidatedCallbackModel.defacement_model.Result }
-        : {}),
-      ...(this.consolidatedCallbackModel.generic_model?.Result?.length
-        ? { generic_model: this.consolidatedCallbackModel.generic_model.Result }
-        : {}),
-      ...(this.consolidatedCallbackModel.exploit_model?.Result?.length
-        ? { exploit_model: this.consolidatedCallbackModel.exploit_model.Result }
-        : {})
-    };
+    this.groupedResults = {};
+    this.pageCounts = {};
 
+    if (this.consolidatedCallbackModel['leak_model']?.Result?.length) {
+      this.groupedResults['leak_model'] = this.consolidatedCallbackModel['leak_model'].Result;
+      this.pageCounts['leak_model'] = this.consolidatedCallbackModel['leak_model'].Page_Count ?? 0;
+    }
+
+    if (this.consolidatedCallbackModel['chat_model']?.Result?.length) {
+      this.groupedResults['chat_model'] = this.consolidatedCallbackModel['chat_model'].Result;
+      this.pageCounts['chat_model'] = this.consolidatedCallbackModel['chat_model'].Page_Count ?? 0;
+    }
+
+    if (this.consolidatedCallbackModel['defacement_model']?.Result?.length) {
+      this.groupedResults['defacement_model'] = this.consolidatedCallbackModel['defacement_model'].Result;
+      this.pageCounts['defacement_model'] = this.consolidatedCallbackModel['defacement_model'].Page_Count ?? 0;
+    }
+
+    if (this.consolidatedCallbackModel['generic_model']?.Result?.length) {
+      this.groupedResults['generic_model'] = this.consolidatedCallbackModel['generic_model'].Result;
+      this.pageCounts['generic_model'] = this.consolidatedCallbackModel['generic_model'].Page_Count ?? 0;
+    }
+
+    if (this.consolidatedCallbackModel['exploit_model']?.Result?.length) {
+      this.groupedResults['exploit_model'] = this.consolidatedCallbackModel['exploit_model'].Result;
+      this.pageCounts['exploit_model'] = this.consolidatedCallbackModel['exploit_model'].Page_Count ?? 0;
+    }
     this.result_count = Object.values(this.groupedResults)
       .reduce((sum, list) => sum + list.length, 0);
   }
@@ -183,6 +203,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return Object.values(this.groupedResults)
       .reduce((sum, list) => sum + list.length, 0);
   }
+
   onSectionSelected(section: Category) {
     this.selectionStore.setSelectedSection(section);
     let firstSubcategory: string | undefined;
@@ -212,10 +233,11 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     const routePrefix = '/dashboard/' + section.toLowerCase() + '/all';
     this.router.navigate([routePrefix], {
-      queryParams: { mSearchParamPage: 1 },
+      queryParams: {mSearchParamPage: 1},
       queryParamsHandling: 'merge'
-    });
+    }).then();
   }
+
   getCategoryFromKey(key: string): Category {
     switch (key) {
       case 'leak_model':
@@ -232,5 +254,4 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         return Category.BREACH;
     }
   }
-
 }

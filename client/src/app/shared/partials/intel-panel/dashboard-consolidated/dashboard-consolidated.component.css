@@ -1,0 +1,18 @@
+.consolidated_container {
+  background-color: var(--dasshboard-sidebar-bg-light);
+  max-width: 800px;
+  min-width: 150px;
+  border-radius: 15px;
+  border: 1px solid #ffffff07;
+  margin:35px;
+  padding: 0 20px 5px;
+}
+
+.consolidated_container .dashboard__search-container{
+  margin: 0 !important;
+}
+
+.consolidated_container .left-text-small{
+  font-size: 12px;
+  color: #A0B8D1;
+}
