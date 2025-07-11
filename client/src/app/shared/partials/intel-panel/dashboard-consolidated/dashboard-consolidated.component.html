@@ -1,4 +1,4 @@
-<app-result [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)"
+<app-result [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)" class="consolidated_container-main"
   (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" [isLoading]="isLoading" [searchQuery]="query"
   [result_count]="getTotalResultCount()"></app-result>
 
@@ -25,8 +25,8 @@
       <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="true"
         [searchResults]="index.value"></app-dashboard-result-exploit>
 
-      <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="true"
-        [searchResults]="index.value"></app-dashboard-result-list>
+<!--      <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="true"-->
+<!--        [searchResults]="index.value"></app-dashboard-result-list>-->
 
       <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="true"
         [searchResults]="index.value"></app-dashboard-result-chat>
