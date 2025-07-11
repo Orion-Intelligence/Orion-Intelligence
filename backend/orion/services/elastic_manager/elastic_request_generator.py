@@ -933,7 +933,7 @@ class elastic_request_generator:
         }
 
         return ELASTIC_INDEX.S_CHATS_INDEX, query
-
+    
     @staticmethod
     def on_search_credentials_data(p_query_model):
         raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""

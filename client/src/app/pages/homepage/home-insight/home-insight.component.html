@@ -1,59 +1,47 @@
 <div id="analytics">
-  <div *ngFor="let model of models">
+  <div *ngFor="let modelKey of consolidatedModelKeys">
     <div class="home_insight__container">
-      <div *ngFor="let key of getKeys(insights[model]); let first = first" class="home_insight__card">
-        <div class="home_insight__content">
-          <div
-            *ngIf="first"
-            [appTooltip]="
-              model === 'general'
-                ? 'Track Data States/Crawl Insights Panel'
-                : model === 'leak'
-                ? 'This is the Leaked Data'
-                : 'This is the Defacement'
-            "
-            class="home_insight__header"
-          >
-            {{
-              model === 'general'
-                ? 'Generic Index'
-                : model === 'leak'
-                  ? 'Leaked Index'
-                  : 'Defacement Index'
-            }}
+      <div *ngFor="let item of getResultItems(modelKey) let first = first" class="card-container">
+        <div *ngIf="first" class="home_insight__header">
+          {{ formatModelKey(modelKey) }} Index
+        </div>
+        <div class="header-section">
+          <div class="company-info">
+            <div class="label">Company Name</div>
+            <div class="value">{{ getDisplayTitle(item) }}</div>
           </div>
-          <div class="home_insight__icon">
-            <img alt="{{ key }}" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
+          <div class="attacker-info">
+            <div class="label">Source</div>
+            <div class="value">{{ getSource(modelKey, item) }}</div>
           </div>
+        </div>
 
-          <div class="home_insight__text">
-            <div class="home_insight__text-primary">
-              {{ insights[model][key].value || '-' }}
-            </div>
-            <div class="home_insight__text-secondary">
-              {{ insights[model][key].key || key }}
-            </div>
+        <div class="detail-row">
+          <div class="country-info">
+            <div class="label">Location</div>
+            <div class="value"> {{ getLocationSummary(modelKey, item) }}</div>
           </div>
+        </div>
 
-          <div class="home_insight__percentage">
-            <div [ngClass]="{
-                'text-success': insights[model][key].change_daily?.startsWith('+'),
-                'text-warning': insights[model][key].change_daily?.startsWith('-'),
-                'home_insight__percentage-default': !insights[model][key].change_daily
-              }" appTooltip="stat changes daily">
-              {{ insights[model][key].change_daily || '-' }}
-            </div>
-            <div [ngClass]="{
-                'text-success': insights[model][key].change_weekly?.startsWith('+'),
-                'text-warning': insights[model][key].change_weekly?.startsWith('-'),
-                'home_insight__percentage-default': !insights[model][key].change_weekly
-              }" appTooltip="stat changes weekly">
-              {{ insights[model][key].change_weekly || '-' }}
-            </div>
+        <div class="detail-row">
+          <div class="date-time-info">
+            <div class="label">Date</div>
+            <div class="value">{{ getDisplayDate(item) || '-' }}</div>
           </div>
+        </div>
+
+        <div class="home_insight__divider"></div>
+
+        <div class="footer-section">
+          <button (click)="scrollService.saveSession(item.m_hash??item.m_message_id??'')" appTooltip="Open Report"
+            [queryParams]="getQueryParams(modelKey)"
+            [routerLink]="[getModelRoute(modelKey), item.m_hash??item.m_message_id??'']"
+            class="view-details-button">View
+            Details</button>
         </div>
       </div>
     </div>
-    <br><br>
+    <br><br><br>
   </div>
+
 </div>

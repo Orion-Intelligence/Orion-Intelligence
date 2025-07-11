@@ -5,6 +5,9 @@ import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.glob
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { GraphsComponent } from "../../shared/partials/charts/charts.component";
+import { GraphModel } from '../../shared/model/charts/charts.model'
+import { CustomizeBarChartComponent } from "../../shared/partials/customize-bar-chart/customize-bar-chart.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -15,7 +18,9 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     NgClass,
     RouterOutlet,
     ScrollingModule,
-    NgIf
+    NgIf,
+    GraphsComponent,
+    CustomizeBarChartComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
@@ -24,8 +29,40 @@ export class DashboardComponent implements AfterViewInit {
   isMenuOpen = true;
   animationState: any;
 
+
   constructor(private cdr: ChangeDetectorRef, public router: Router, private renderer: Renderer2) {
   }
+  barGraphData: GraphModel = {
+    type: 'bar',
+    title: 'Bar Sales Breakdown',
+    data: [
+      { name: 'Mon', value: 14000, target: 40000 },
+      { name: 'Tue', value: 32000, target: 40000 },
+      { name: 'Wed', value: 33567, target: 40000 },
+      { name: 'Thu', value: 22000, target: 40000 },
+      { name: 'Fri', value: 38000, target: 40000 },
+    ]
+  };
+  // pieGraphData: GraphModel = {
+  //   type: 'pie',
+  //   title: 'Pie Sales Breakdown',
+  //   data: [
+  //     { name: 'Total Sales', value: 900 },
+  //     { name: 'In Store Sales', value: 500 },
+  //     { name: 'Download Sales', value: 300 },
+  //     { name: 'Mail Sales', value: 100 },
+  //   ]
+  // };
+  // barGraphData: GraphModel = {
+  //   type: 'bar',
+  //   title: 'Bar Sales Breakdown',
+  //   data: [
+  //     { name: 'Total Sales', value: 900 },
+  //     { name: 'In Store Sales', value: 500 },
+  //     { name: 'Download Sales', value: 300 },
+  //     { name: 'Mail Sales', value: 100 },
+  //   ]
+  // };
   toggleNavigation() {
     this.isMenuOpen = !this.isMenuOpen;
   }
