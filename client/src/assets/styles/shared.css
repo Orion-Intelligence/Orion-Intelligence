@@ -211,7 +211,7 @@ table tr:last-child {
 }
 
 table tr:last-child {
-  border-bottom: 1px solid #FCFCFC12 !important;
+  border-bottom: none !important;
 }
 
 table tr:not(:first-child, :last-child) {

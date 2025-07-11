@@ -86,6 +86,20 @@
   height: 100%;
   overflow: hidden auto;
   background: var(--dasshboard-sidebar-bg);
+  scrollbar-color: var(--sidebar-item-bg) transparent;
+}
+
+.search__result-detail::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search__result-detail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search__result-detail::-webkit-scrollbar-thumb {
+  background-color: var(--sidebar-item-bg);
+  border-radius: 10px;
 }
 
 .dashboard__sidebar.collapsed {
