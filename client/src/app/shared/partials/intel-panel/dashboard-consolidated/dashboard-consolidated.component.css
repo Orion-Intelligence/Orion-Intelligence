@@ -16,3 +16,9 @@
   font-size: 12px;
   color: #A0B8D1;
 }
+
+@media only screen and (width <=768px) {
+  .consolidated_container {
+    margin: 25px 10px;
+  }
+}

@@ -17,7 +17,7 @@ export class ProfileComponent {
   username$: Observable<string | null>;
   role$: Observable<string | null>;
   dropdownOpen = false;
-  isDarkTheme = false;
+  isDarkTheme = true;
 
   constructor(protected authService: AuthService) {
     this.username$ = this.authService.getUsername$();
