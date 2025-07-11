@@ -389,7 +389,6 @@
   font-weight: 400;
   color: #D4D4D4;
   height: 31px;
-  margin-bottom: 13px;
 }
 
 .dashboard__search-title {
@@ -568,6 +567,10 @@
 
 .dashboard__search-button-inner {
   padding: 0 0 10px 10px;
+}
+
+.dashboard__search-button-inner img {
+  margin-top: 9px;
 }
 
 .collapsible-container {
