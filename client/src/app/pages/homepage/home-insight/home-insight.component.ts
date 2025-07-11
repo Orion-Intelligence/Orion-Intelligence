@@ -11,11 +11,13 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { ScrollService } from '../../../shared/services/scroll.service';
+import { GraphModel } from '../../../shared/model/charts/charts.model';
+import { CustomizeBarChartComponent } from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
 
 @Component({
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
-  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, TooltipDirective, RouterLink],
+  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, TooltipDirective, RouterLink, CustomizeBarChartComponent],
   standalone: true
 })
 export class HomeInsightComponent implements OnInit {
@@ -25,6 +27,10 @@ export class HomeInsightComponent implements OnInit {
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
   consolidatedModelKeys: string[] = [];
   queryParams: any = {};
+
+
+  sourceGraphData!: GraphModel;
+  leakeDateGraphData!: GraphModel;
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) { }
 
   ngAfterViewInit() {
@@ -43,6 +49,28 @@ export class HomeInsightComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.queryParams = { ...params };
     });
+
+    const topSources = this.getTopSources(this.consolidatedCallbackModel);
+    this.sourceGraphData = {
+      type: 'bar',
+      title: 'Top sources',
+      data: topSources.map(item => ({
+        name: item.source,
+        value: item.count,
+        target: 0
+      }))
+    };
+
+    const topLeakedDates = this.getTopLeakDates(this.consolidatedCallbackModel);
+    this.leakeDateGraphData = {
+      type: 'bar',
+      title: 'Top Leaked Dates',
+      data: topLeakedDates.map(item => ({
+        name: item.date,
+        value: item.count,
+        target: 0
+      }))
+    };
   }
 
   getKeys(obj: GenericModel | LeakModel | DefacementModel): string[] {
@@ -170,5 +198,93 @@ export class HomeInsightComponent implements OnInit {
 
     return `${newBase}/consolidated/${this.formatModelKey(modelKey).toLowerCase()}`;
 
+  }
+
+
+  getTopSources(consolidated: ConsolidatedCallbackModel): { source: string, count: number }[] {
+    const sourceMap = new Map<string, number>();
+
+    const addSource = (src?: string | string[]) => {
+      if (!src) return;
+
+      if (Array.isArray(src)) {
+        src.forEach(s => addSource(s));
+      } else {
+        const key = src.trim().toLowerCase();
+        if (!key) return;
+        sourceMap.set(key, (sourceMap.get(key) || 0) + 1);
+      }
+    };
+
+    consolidated.defacement_model?.Result.forEach(item => {
+      addSource(item.m_attacker);
+      if (!item.m_attacker?.length) addSource(item.m_team);
+    });
+
+    consolidated.exploit_model?.Result.forEach(item => {
+      addSource(item.m_sender_name);
+    });
+
+    consolidated.chat_model?.Result.forEach(item => {
+      addSource(item.m_sender_name);
+    });
+
+    consolidated.leak_model?.Result.forEach(item => {
+      if (!item.m_company_name) addSource(item.m_network);
+      else addSource(item.m_company_name);
+    });
+
+    consolidated.generic_model?.Result.forEach(item => {
+      addSource(item.m_network);
+    });
+
+    return Array.from(sourceMap.entries())
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }
+
+  getTopLeakDates(consolidated: ConsolidatedCallbackModel): { date: string, count: number }[] {
+    const dateMap = new Map<string, number>();
+
+    const extractAndCount = (rawDate?: string | null) => {
+      if (!rawDate) return;
+      const date = new Date(rawDate);
+      if (isNaN(date.getTime())) return;
+
+      const day = date.getDate();
+      const month = date.toLocaleString('default', { month: 'long' }); // "May", "June"
+      const key = `${day} ${month}`;
+
+      dateMap.set(key, (dateMap.get(key) || 0) + 1);
+    };
+
+    consolidated.leak_model?.Result.forEach(item => {
+      extractAndCount(item.m_update_date);
+      extractAndCount(item.m_leak_date);
+    });
+
+    consolidated.generic_model?.Result?.forEach(item => {
+      extractAndCount(item.m_update_date);
+      extractAndCount(item.m_leak_date);
+    });
+
+    consolidated.exploit_model?.Result.forEach(item => {
+      if ('m_update_date' in item) extractAndCount((item as any).m_update_date);
+      extractAndCount(item.m_leak_date);
+    });
+
+    consolidated.chat_model?.Result.forEach(item => {
+      if ('m_leak_date' in item) extractAndCount((item as any).m_leak_date);
+    });
+
+    consolidated.defacement_model?.Result.forEach(item => {
+      extractAndCount(item.m_date_of_leak);
+    });
+
+    return Array.from(dateMap.entries())
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
   }
 }

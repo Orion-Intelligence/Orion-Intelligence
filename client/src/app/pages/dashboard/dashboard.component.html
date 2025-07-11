@@ -8,7 +8,10 @@
     </div>
 
     <div class="dashboard_container">
-      <div class="dashboard dashboard-content-scroll" id="dashboard-container">
+      <div id="dashboard-container" class="dashboard dashboard-content-scroll">
+        <!-- <app-graphs [graphModel]="pieGraphData"></app-graphs> -->
+        <!-- <app-graphs [graphModel]="barGraphData"></app-graphs> -->
+        <!-- <app-customize-bar-chart [graphModel]="barGraphData"></app-customize-bar-chart> -->
         <app-dashboard-header></app-dashboard-header>
         <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard-body">
           <router-outlet #routerOutlet="outlet"></router-outlet>
