@@ -29,6 +29,7 @@ import {
   DashboardConsolidatedComponent
 } from './shared/partials/intel-panel/dashboard-consolidated/dashboard-consolidated.component';
 import {ReportConsolidatedResolver} from './shared/resolvers/consolidated.resolver';
+import {DashboardSocialsComponent} from './shared/partials/intel-panel/dashboard-social/dashboard-social.component';
 
 export const routes: Routes = [
   {
@@ -211,6 +212,11 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'twitter',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
             path: ':category',
             component: DashboardChatsComponent,
             data: {type: 'Social', animation: 'CategoryPage'}
@@ -288,6 +294,12 @@ export const routes: Routes = [
           },
           {
             path: 'chat/:m_hash',
+            component: ReportChatComponent,
+            resolve: {reportdata: ReportConsolidatedResolver},
+            data: {type: 'consolidated', animation: 'HashPage'}
+          },
+          {
+            path: 'social/:m_hash',
             component: ReportChatComponent,
             resolve: {reportdata: ReportConsolidatedResolver},
             data: {type: 'consolidated', animation: 'HashPage'}

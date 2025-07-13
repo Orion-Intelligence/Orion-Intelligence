@@ -46,6 +46,7 @@ export enum ApiSubCategory {
 
 export enum SocialSubCategory {
   TELEGRAM = 'Telegram',
+  TWITTER = 'Twitter',
 }
 
 export enum ExploitSubCategory {

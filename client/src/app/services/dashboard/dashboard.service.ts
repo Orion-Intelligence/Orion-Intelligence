@@ -14,6 +14,7 @@ import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidat
 import {
   StealerLogCallbackModel,
 } from '../../shared/model/results/credentials/credential.callback.model';
+import {SocialCallbackModel} from '../../shared/model/results/social/social.callback.model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,7 @@ export class DashboardService {
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
+  socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
 
   private cancelRequest$ = new Subject<void>();
 

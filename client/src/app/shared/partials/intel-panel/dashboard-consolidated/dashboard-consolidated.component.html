@@ -25,6 +25,9 @@
       <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="true"
         [searchResults]="index.value"></app-dashboard-result-exploit>
 
+      <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem [isExpandAble]="true"
+        [searchResults]="index.value"></app-dashboard-result-social>
+
 <!--      <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="true"-->
 <!--        [searchResults]="index.value"></app-dashboard-result-list>-->
 

@@ -1,0 +1,9 @@
+<app-result [shrinkmenu]="true" (reloadData)="fetchSearchResults()" (updateQuery)="onUpdateQuery($event)" [isLoading]="isLoading" [result_count]="Math.ceil(socialCallbackModel.Result.length)" [searchQuery]="query" [showTabs]="false" [suggestion]="socialCallbackModel.Suggestions[0]"></app-result>
+
+<div *ngIf="!isLoading" @fadeInDashboardItem>
+  <app-dashboard-result-social [searchResults]="socialCallbackModel.Result"></app-dashboard-result-social>
+</div>
+
+<div *ngIf="!isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
+  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="socialParamModel.mSearchParamPage" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
+</div>

@@ -43,7 +43,7 @@ export const directory_filters: FilterModel = {
         {key: "onion", label: "Onion"},
         {key: "i2p", label: "I2P"},
         {key: "clearnet", label: "Clearnet"},
-        {key: "telegram", label: "Telegram"}
+        {key: "telegram", label: "Telegram"},
       ],
       type: "dropdown",
       tooltip: "Web Layers",
@@ -57,7 +57,8 @@ export const directory_filters: FilterModel = {
         {key: "leak", label: "Leak"},
         {key: "defacement", label: "Defacement"},
         {key: "chat", label: "Chat"},
-        {key: "exploit", label: "Exploit"}
+        {key: "exploit", label: "Exploit"},
+        {key: "twitter", label: "Twitter"},
       ],
       type: "dropdown",
       tooltip: "",
@@ -77,7 +78,8 @@ export const directory_filters: FilterModel = {
         {key: "cryptocurrency", label: "Cryptocurrency"},
         {key: "leaks", label: "Leaks"},
         {key: "adult", label: "Adult"},
-        {key: "chat", label: "Chat"}
+        {key: "chat", label: "Chat"},
+        {key: "social", label: "Social"}
       ],
       type: "dropdown",
       tooltip: "",

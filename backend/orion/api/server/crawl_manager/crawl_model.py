@@ -18,6 +18,7 @@ from orion.api.server.crawl_manager.class_model.general_model import GeneralData
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.class_model.log_model import LogModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
+from orion.api.server.crawl_manager.class_model.social_model import social_data_model
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -50,6 +51,9 @@ class crawl_model:
         normalized_url = base_url
         if network_type != "telegram":
             normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
+
+        if base_url.__contains__("twitter"):
+            normalized_url = base_url
 
         general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)
         if not new_content_type:
@@ -139,6 +143,19 @@ class crawl_model:
 
         await elastic_controller.get_instance().index_bulk_data(m_data)
         return {"parsed":"true"}
+
+    async def invoke_social_index(self, social_index: social_data_model):
+        m_data = elastic_request_generator().index_query_social(social_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+
+        return await self._update_or_create_model(
+            base_url=social_index.seed_url,
+            new_content_type=["social"],
+            name=social_index.seed_url,
+            new_index_type=[helper_controller.get_base_url(social_index.seed_url).replace("https://","").replace(".com","").rstrip('/')],
+            network_type=social_index.m_network,
+            is_leak_update=False
+        )
 
     async def invoke_chat_index(self, chat_index: chat_data_model):
         m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())

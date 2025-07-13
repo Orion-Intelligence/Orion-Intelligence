@@ -12,6 +12,7 @@ import { ApiService } from '../../../services/api.service';
 import { last, Observable } from 'rxjs';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscription.component";
+import {SocialResultItem} from '../../../model/results/social/social.callback.model';
 
 @Component({
   selector: 'app-report-chat',
@@ -29,7 +30,7 @@ import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscriptio
   animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit {
-  resultItem: ChatResultItem | null = null;
+  resultItem: ChatResultItem | SocialResultItem | null = null;
   arrayKeys: string[] = [];
   listItems: any[] = [];
   activeTab = '';

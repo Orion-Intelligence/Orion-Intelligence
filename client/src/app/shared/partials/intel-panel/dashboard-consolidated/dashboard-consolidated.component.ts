@@ -29,7 +29,6 @@ import {ConsolidatedCallbackModel} from '../../../model/results/consolidated/con
 import {
   DashboardResultExploitComponent
 } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
 import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {SortGroupedResultsPipe} from '../../../model/pipes/sort-grouped-results.pipe';
 import {
@@ -39,10 +38,13 @@ import {
   DefacementSubCategory,
   DumpSubCategory,
   FeedSubCategory,
-  GeneralSubCategory
+  GeneralSubCategory, SocialSubCategory
 } from '../../../enums/pages';
 import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {
+  DashboardResultSocialComponent
+} from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -54,10 +56,10 @@ import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
     NgForOf,
     TitleCasePipe,
     DashboardResultExploitComponent,
-    DashboardResultListComponent,
     DashboardResultChatComponent,
     SortGroupedResultsPipe,
-    TooltipDirective
+    TooltipDirective,
+    DashboardResultSocialComponent
   ],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
@@ -76,6 +78,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   apiCategories = Object.values(ApiSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
   newsCategories = Object.values(FeedSubCategory);
+  socialCategories = Object.values(SocialSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
@@ -88,7 +91,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef,
     protected selectionStore: SelectionStoreService
   ) {
-      this.pageCounts = {};
+    this.pageCounts = {};
   }
 
   ngAfterViewInit(): void {
@@ -191,6 +194,11 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.groupedResults['exploit_model'] = this.consolidatedCallbackModel['exploit_model'].Result;
       this.pageCounts['exploit_model'] = this.consolidatedCallbackModel['exploit_model'].Page_Count ?? 0;
     }
+
+    if (this.consolidatedCallbackModel['social_model']?.Result?.length) {
+      this.groupedResults['social_model'] = this.consolidatedCallbackModel['social_model'].Result;
+      this.pageCounts['social_model'] = this.consolidatedCallbackModel['social_model'].Page_Count ?? 0;
+    }
     this.result_count = Object.values(this.groupedResults)
       .reduce((sum, list) => sum + list.length, 0);
   }
@@ -207,6 +215,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   onSectionSelected(section: Category) {
     this.selectionStore.setSelectedSection(section);
     let firstSubcategory: string | undefined;
+    let second_category = "all"
     switch (section) {
       case Category.STRATEGIC:
         firstSubcategory = this.generalCategories[0];
@@ -226,12 +235,16 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       case Category.FEED:
         firstSubcategory = this.newsCategories[0];
         break;
+      case Category.SOCIAL:
+        firstSubcategory = this.socialCategories[1];
+        second_category = this.socialCategories[1].toLowerCase()
+        break;
     }
 
     if (firstSubcategory) {
       this.selectionStore.setSelectedOption(firstSubcategory);
     }
-    const routePrefix = '/dashboard/' + section.toLowerCase() + '/all';
+    const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
     this.router.navigate([routePrefix], {
       queryParams: {mSearchParamPage: 1},
       queryParamsHandling: 'merge'
@@ -250,6 +263,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         return Category.SOCIAL;
       case 'generic_model':
         return Category.STRATEGIC;
+      case 'social_model':
+        return Category.SOCIAL;
       default:
         return Category.BREACH;
     }

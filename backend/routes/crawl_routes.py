@@ -12,6 +12,7 @@ from orion.api.server.crawl_manager.class_model.general_model import GeneralData
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.class_model.log_model import LogModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
+from orion.api.server.crawl_manager.class_model.social_model import social_data_model
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
@@ -83,6 +84,11 @@ async def parse_text(payload: nlp_data_model):
 async def index_chat_data(request: Request):
     body = await request.json()
     return await crawl_controller.getInstance().invoke_chat_index(chat_data_model(**body))
+
+@crawl_routes.post("/api/index/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+async def index_social_data(request: Request):
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_social_index(social_data_model(**body))
 
 @crawl_routes.post("/api/index/credential", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_credential_data(request: Request):

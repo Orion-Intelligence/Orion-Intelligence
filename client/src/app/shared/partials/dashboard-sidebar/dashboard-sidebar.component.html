@@ -9,7 +9,8 @@
 
   <ul class="sidebar__items">
     <li class="sidebar__item">
-      <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === null || (selectionStore.selectedSection$ | async) === category.HOMEPAGE || (selectionStore.selectedSection$ | async) === category.CONSOLIDATED}" [queryParamsHandling]="'merge'" [routerLink]="'home'" class="sidebar__item-dropdown">
+      <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === null || (selectionStore.selectedSection$ | async) === category.HOMEPAGE || (selectionStore.selectedSection$ | async) === category.CONSOLIDATED}"
+           [queryParamsHandling]="'merge'" [routerLink]="'home'" class="sidebar__item-dropdown">
         <img alt="Home" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/home.svg" width="20">Homepage
       </div>
     </li>
@@ -27,7 +28,8 @@
                                  [title]="'Exploit'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)" [category]="category.FEED" [icon]="'assets/images/sidebar/news.svg'" [items]="newsCategories" [routePrefix]="'feed'" [title]="'Feed'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP" [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'" [title]="'Dump'"></app-dashboard-sidebar-items>
-    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS" [icon]="'assets/images/sidebar/dump.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'" [title]="'Stealerlogs'"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS" [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'"
+                                 [title]="'Stealerlogs'"></app-dashboard-sidebar-items>
 
 
     <div class="sidebar__item">
@@ -89,7 +91,7 @@
                                      [title]="'feed'"></app-dashboard-sidebar-collapsed>
     <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP" [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'" [selectionStore]="selectionStore"
                                      [title]="'Dump'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS" [icon]="'assets/images/sidebar/dump.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'" [selectionStore]="selectionStore"
+    <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)" (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS" [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'" [selectionStore]="selectionStore"
                                      [title]="'Stealerlogs'"></app-dashboard-sidebar-collapsed>
 
     <div class="sidebar__item">
@@ -117,6 +119,5 @@
         </div>
       </div>
     </a>
-
   </ul>
 </nav>

@@ -31,6 +31,9 @@ export class ReportConsolidatedResolver implements Resolve<any> {
       case 'exploit':
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
+      case 'social':
+        apiUrl = hash ? `search/social/${hash}` : `search/chat`;
+        break;
       case 'chat':
         apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
         break;

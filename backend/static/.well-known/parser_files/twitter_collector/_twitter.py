@@ -1,0 +1,122 @@
+from datetime import datetime
+from abc import ABC
+from typing import List
+
+from crawler.crawler_instance.genbot_service.helpers.twitter.tweet_helper_methods import TweetHelperMethods
+from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
+from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
+from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, REDIS_KEYS
+
+
+class _twitter(leak_extractor_interface, ABC):
+    _instance = None
+
+    def __init__(self, callback=None):
+        self.callback = callback
+        self._card_data = []
+        self._entity_data = []
+        self.soup = None
+        self._initialized = None
+        self.m_seed_url = ""
+        self._redis_instance = redis_controller()
+        self._is_crawled = False
+        self._helper_methods = TweetHelperMethods()
+
+    def init_callback(self, callback=None):
+        self.callback = callback
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(_twitter, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    @property
+    def is_crawled(self) -> bool:
+        return self._is_crawled
+
+    @property
+    def seed_url(self) -> str:
+        return self.m_seed_url
+
+    @property
+    def base_url(self) -> str:
+        return "https://www.x.com"
+
+    @property
+    def rule_config(self) -> RuleModel:
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,
+                         m_threat_type=ThreatType.TWITTER)
+
+    @property
+    def card_data(self) -> List[leak_model]:
+        return self._card_data
+
+    @property
+    def entity_data(self) -> List[entity_model]:
+        return self._entity_data
+
+    def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
+
+    def contact_page(self) -> str:
+        return "https://x.com/contact"
+
+    def append_leak_data(self, leak: social_model, entity: entity_model):
+        self._card_data.append(leak)
+        self._entity_data.append(entity)
+        if self.callback:
+            if self.callback():
+                self._card_data.clear()
+                self._entity_data.clear()
+
+    @staticmethod
+    def safe_find(page, selector, attr=None):
+        try:
+            element = page.query_selector(selector)
+            if element:
+                return element.get_attribute(attr) if attr else element.inner_text().strip()
+        except Exception:
+            return None
+
+    def parse_leak_data(self, page):
+        account_url = self.seed_url
+        try:
+            username = self._helper_methods.extract_username(account_url)
+        except ValueError:
+            return
+
+        existing_ids = set()
+
+        page.wait_for_timeout(3000)
+
+        desired_count = 10 if self.is_crawled else 100
+        last_seen_index = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + account_url + CUSTOM_SCRIPT_REDIS_KEYS.S_TWITTER_CHANNEL.value, 0))
+        tweets = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
+        new_tweets = [t for t in tweets if int(t["id"]) > last_seen_index]
+
+        for tweet in new_tweets:
+            parsed_date = datetime.fromisoformat(tweet['date']).date() if tweet['date'] else None
+            card_data = social_model(
+                m_channel_url=self.seed_url,
+                m_sender_name=f"@{username}",
+                m_message_sharable_link=tweet['url'],
+                m_weblink=tweet.get('weblink', []),
+                m_content=tweet['content'][:500],
+                m_content_type=["social"],
+                m_network="clearnet",
+                m_message_date=parsed_date,
+                m_message_id=tweet['id'],
+                m_platform="twitter",
+            )
+            entity_data = entity_model(
+                m_name=username,
+            )
+            if new_tweets:
+                self.append_leak_data(card_data, entity_data)
+                max_seen_id = max(int(t["id"]) for t in new_tweets)
+                self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + account_url + CUSTOM_SCRIPT_REDIS_KEYS.S_TWITTER_CHANNEL.value, max_seen_id)

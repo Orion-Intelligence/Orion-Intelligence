@@ -46,6 +46,7 @@ class elastic_controller:
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
             mapping_credential_model = ELASTIC_ENUMS.mapping_credential_model
             mapping_stealer_model = ELASTIC_ENUMS.mapping_sealerlogs_model
+            mapping_social_model = ELASTIC_ENUMS.mapping_social_model
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
@@ -70,6 +71,9 @@ class elastic_controller:
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body=mapping_stealer_model)
+
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_SOCIAL_INDEX):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_SOCIAL_INDEX, body=mapping_social_model)
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
@@ -159,10 +163,14 @@ class elastic_controller:
 
     async def index_data(self, p_data):
         try:
+            log.g().i("Starting index_data operation")
+
             def ensure_creation_date(p_entry):
                 data = p_entry[ELASTIC_KEYS.S_VALUE]
                 if "m_creation_date" not in data:
                     data["m_creation_date"] = datetime.now(timezone.utc).isoformat()
+                    log.g().i(f"Added m_creation_date to entry: {data['m_creation_date']}")
+
                 for key in list(data.keys()):
                     value = data[key]
                     if isinstance(value, list):
@@ -171,27 +179,40 @@ class elastic_controller:
                             data[key] = filtered
                         else:
                             del data[key]
+                            log.g().i(f"Removed empty list field: {key}")
                     elif value is None or value == "" or (isinstance(value, str) and value.lower() == "null"):
                         del data[key]
+                        log.g().i(f"Removed null/empty field: {key}")
+
                 return p_entry
 
             if isinstance(p_data, list):
+                log.g().i(f"Indexing list of {len(p_data)} entries")
                 for entry in p_data:
                     entry = ensure_creation_date(entry)
+                    doc_id = entry[ELASTIC_KEYS.S_VALUE]["m_hash"]
+                    log.g().i(f"Indexing document with ID: {doc_id}")
+
                     await self.__m_connection.update(
                         index=entry[ELASTIC_KEYS.S_DOCUMENT],
-                        id=entry[ELASTIC_KEYS.S_VALUE]["m_hash"],
+                        id=doc_id,
                         body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
                     )
             else:
+                log.g().i("Indexing single entry")
                 p_data = ensure_creation_date(p_data)
+                doc_id = p_data[ELASTIC_KEYS.S_VALUE]["m_hash"]
+                log.g().i(f"Indexing document with ID: {doc_id}")
+
                 await self.__m_connection.update(
                     index=p_data[ELASTIC_KEYS.S_DOCUMENT],
-                    id=p_data[ELASTIC_KEYS.S_VALUE]["m_hash"],
+                    id=doc_id,
                     body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
                 )
 
+            log.g().i("Indexing operation completed successfully")
             return True, None
+
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
             return False, str(ex)

@@ -217,29 +217,14 @@ class elastic_request_generator:
         indices = []
 
         m1 = clone_model(p_query_model)
-        i1, q1 = elastic_request_generator.on_search_leakdata(m1)
+        i1, q1 = elastic_request_generator.on_search_telegram_data(m1)
         queries.append(elastic_request_generator._strip_query(q1))
         indices.append(i1)
 
         m2 = clone_model(p_query_model)
-        i2, q2 = elastic_request_generator.on_search_general_data(m2)
+        i2, q2 = elastic_request_generator.on_search_social_data(m2)
         queries.append(elastic_request_generator._strip_query(q2))
         indices.append(i2)
-
-        m3 = clone_model(p_query_model)
-        i3, q3 = elastic_request_generator.on_search_exploitdata(m3)
-        queries.append(elastic_request_generator._strip_query(q3))
-        indices.append(i3)
-
-        m4 = clone_model(p_query_model)
-        i4, q4 = elastic_request_generator.on_search_telegram_data(m4)
-        queries.append(elastic_request_generator._strip_query(q4))
-        indices.append(i4)
-
-        m5 = clone_model(p_query_model)
-        i5, q5 = elastic_request_generator.on_search_defacement_data(m5)
-        queries.append(elastic_request_generator._strip_query(q5))
-        indices.append(i5)
 
         return indices, queries
 
@@ -753,6 +738,117 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_EXPLOIT_INDEX, query_statement
 
     @staticmethod
+    def on_search_social_data(p_query_model):
+        raw_query = "*"
+        if p_query_model.q != "":
+            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
+
+        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
+
+        must_clauses = []
+        must_not_clause = []
+
+        search_fields = [
+            "m_content^3",
+            "m_sender_name^2.5",
+            "m_platform^2",
+            "m_network^1.5"
+        ]
+
+        if '"' in raw_query:
+            query_string_query = {
+                "query_string": {
+                    "query": raw_query,
+                    "fields": search_fields,
+                    "default_operator": "OR",
+                    "analyze_wildcard": False,
+                    "auto_generate_synonyms_phrase_query": False,
+                    "lenient": True
+                }
+            }
+        else:
+            query_string_query = {
+                "query_string": {
+                    "query": raw_query + "*",
+                    "fields": search_fields,
+                    "default_operator": "OR",
+                    "analyze_wildcard": True,
+                    "auto_generate_synonyms_phrase_query": False,
+                    "lenient": True
+                }
+            }
+
+        query = {
+            "min_score": 0,
+            "query": {
+                "function_score": {
+                    "query": {
+                        "bool": {
+                            "filter": must_clauses,
+                            "must_not": must_not_clause,
+                            "should": [
+                                query_string_query,
+                                {
+                                    "wildcard": {
+                                        "m_content.keyword": {
+                                            "value": f"*{raw_query}*",
+                                            "boost": 1.5,
+                                            "case_insensitive": True
+                                        }
+                                    }
+                                }
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    },
+                    "functions": [
+                        {
+                            "gauss": {
+                                "m_message_date": {
+                                    "origin": "now",
+                                    "scale": "30d",
+                                    "offset": "10d",
+                                    "decay": 0.5
+                                }
+                            },
+                            "weight": 1.5
+                        }
+                    ],
+                    "score_mode": "sum",
+                    "boost_mode": "multiply"
+                }
+            },
+            "highlight": {} if raw_query == "*" else {
+                "fields": {
+                    "m_content": {
+                        "fragment_size": 250,
+                        "number_of_fragments": 3,
+                        "pre_tags": ["<em>"],
+                        "post_tags": ["</em>"]
+                    }
+                }
+            },
+            "suggest": {
+                "social_suggestion": {
+                    "text": raw_query,
+                    "term": {
+                        "field": "m_content",
+                        "min_word_length": 3,
+                        "max_term_freq": 0.05,
+                        "sort": "score",
+                        "string_distance": "levenshtein"
+                    }
+                }
+            },
+            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
+            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+            "track_total_hits": True,
+            "explain": True
+        }
+
+        return ELASTIC_INDEX.S_SOCIAL_INDEX, query
+
+    @staticmethod
     def on_search_telegram_data(p_query_model):
         raw_query = ""
         if p_query_model.q == "":
@@ -1259,6 +1355,20 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_VALUE: chat
             })
 
+        return index_entries
+
+    @staticmethod
+    def index_query_social(p_index_data):
+        index_entries = []
+        for post in p_index_data.get("cards_data", []):
+            if not post.get("m_message_id"):
+                continue
+
+            post["m_hash"] = helper_controller.generate_data_hash(post.get("m_message_id"))
+            index_entries.append({
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SOCIAL_INDEX,
+                ELASTIC_KEYS.S_VALUE: post
+            })
         return index_entries
 
     @staticmethod

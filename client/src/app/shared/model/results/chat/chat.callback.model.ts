@@ -6,6 +6,7 @@ export class ChatResultItem {
   m_summary: string[] = [];
   m_message_date?: string;
   m_message_id?: string;
+  m_channel_url?: string;
   m_message_sharable_link?: string;
   m_views?: string;
   m_file_name: string[] = [];

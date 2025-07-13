@@ -21,6 +21,8 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import \
     search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
+from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import \
+    search_social_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -54,27 +56,34 @@ async def get_insight():
 async def search_general(param: search_general_param_model = Depends()):
     return await search_model.getInstance().search_general_result(param)
 
+
 @api_routes.get("/api/search/credential", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_credential_param_model = Depends()):
     return await search_model.getInstance().search_credential_result(param)
+
 
 @api_routes.get("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_credential_param_model = Depends()):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
-@api_routes.get("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
-                description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
-async def search_consolidated(param: search_consolidated_param_model = Depends()):
-    return await search_model.getInstance().search_consolidated_result(param)
 
 @api_routes.get("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Depends()):
     return await search_model.getInstance().search_consolidated_result(param)
+
 
 @api_routes.get("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_chat_param_model = Depends()):
     return await search_model.getInstance().search_telegram_result(param)
+
+@api_routes.get("/api/social/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def search_discussion(param: search_general_param_model = Depends()):
+    return await search_model.getInstance().search_discussion_result(param)
+
+@api_routes.get("/api/social/twitter", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def search_twitter(param: search_social_param_model = Depends()):
+    return await search_model.getInstance().search_social_result(param)
 
 
 @api_routes.get("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
@@ -82,7 +91,9 @@ async def search_telegram(param: search_chat_param_model = Depends()):
 async def search_leak(param: search_leak_param_model = Depends()):
     return await search_model.getInstance().search_leak_result(param)
 
-@api_routes.get("/api/search/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Search breach news (leak) intelligence reports using parameters such as company, country, or hash.")
+
+@api_routes.get("/api/search/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+                description="Search breach news (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_news(param: search_leak_param_model = Depends()):
     param.mContentType = "news"
     return await search_model.getInstance().search_leak_result(param)
@@ -112,10 +123,12 @@ async def get_defacement_document(doc_id: str):
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
+
 @api_routes.get("/api/search/news/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Get a specific breach (leak) document by its document ID and optional language.")
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
+
 
 @api_routes.get("/api/search/exploit/{doc_id}",
                 dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
@@ -136,6 +149,10 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, al
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
+@api_routes.get("/api/search/social/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+                description="Get a specific strategic report document by its document ID and optional language.")
+async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
+    return await search_model.getInstance().request_social_doc(doc_id, lang)
 
 @api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Perform a dynamic search for emails found in breach and defacement data.")

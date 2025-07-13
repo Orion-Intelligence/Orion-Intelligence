@@ -1,14 +1,10 @@
-<app-result (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)"
-            (updateQuery)="onUpdateQuery($event)" [filterModel]="chat_filters" [isLoading]="isLoading"
-            [result_count]="Math.ceil(chatCallbackModel.Result.length)" [searchQuery]="query"
-            [showTabs]=false
-            [suggestion]="chatCallbackModel.Suggestions[0]"></app-result>
+<app-result (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [filterModel]="chat_filters" [isLoading]="isLoading" [result_count]="Math.ceil(chatCallbackModel.Result.length)" [searchQuery]="query"
+            [showTabs]=false [suggestion]="chatCallbackModel.Suggestions[0]"></app-result>
 
 <div *ngIf="!isLoading" @fadeInDashboardItem>
   <app-dashboard-result-chat [searchResults]="chatCallbackModel.Result"></app-dashboard-result-chat>
 </div>
 
 <div *ngIf="!isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="this.chatParamModel.mSearchParamPage"
-                  [maxPages]="Math.floor(currentResultCount)"></app-pagination>
+  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="this.chatParamModel.mSearchParamPage" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
 </div>

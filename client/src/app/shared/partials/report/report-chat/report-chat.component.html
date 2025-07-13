@@ -17,7 +17,7 @@
     </button>
     <div class="vr report-menu-divider"></div>
     <button (click)="redirectToUrl()" class="p-0 report-menu-option">
-      <img alt="redirect" height="25" ngSrc="../../../../../assets/images/shared/redirect.svg" width="25">
+      <img alt="redirect" height="17" ngSrc="../../../../../assets/images/shared/redirect.svg" width="17">
     </button>
     <button (click)="open_graph()" appTooltip="Open CTI Graph" class="p-0 report-menu-option">
       <img alt="background" height="17" ngSrc="../../../../../assets/images/sidebar/graph.svg" width="17">
@@ -27,30 +27,26 @@
 <app-pro-subscription *ngIf="showSubscriptionPopup" (close)="onSubscriptionPopupClose()"></app-pro-subscription>
 <div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="search__result-detail">
   <div class="d-flex align-items-start">
-    <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg"
-      width="25">
+    <img alt="background" class="report-icon-top" height="25" src="../../../../../assets/images/shared/ai.svg" width="25">
     <p class="search__result-detail-heading ms-2"> &nbsp; AI Report</p>
   </div>
   <p class="search__result-detail-description">
-    {{ aiSuggestSummary }}
-  </p>
+    {{ aiSuggestSummary }} </p>
 </div>
 
 <div *ngIf="resultItem">
   <div class="search__result-detail">
-    <p class="search__result-detail-heading">
-      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:150 }}
-      {{ (resultItem.m_channel_name?.length || 'Untitled Channel'.length) > 150 ? '...' : '' }}
-    </p>
+    <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_name">
+      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:150 }}{{ (resultItem.m_channel_name.length || 'Untitled Channel'.length) > 150 ? '...' : '' }} </p>
+
+    <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_url">
+      {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:150 }}{{ (resultItem.m_channel_url.length || 'Untitled Channel'.length) > 150 ? '...' : '' }} </p>
 
     <p class="search__result-detail-description">
-      {{ resultItem.m_content || 'No content available' }}
-    </p>
+      {{ resultItem.m_content || 'No content available' }} </p>
 
     <p *ngIf="resultItem.m_message_sharable_link" class="search__result-detail-url-p text-truncate">
-      <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank">
-        {{ resultItem.m_message_sharable_link }}
-      </a>
+      <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank"> {{ resultItem.m_message_sharable_link }} </a>
     </p>
 
     <div class="search__result-detail-meta search__result-detail-meta-chat">
@@ -73,12 +69,10 @@
     <div class="search__result-detail">
       <div (click)="metaadataToggleContent()" class="search__result__section__heading">
         <div class="left-content">
-          Metadata
-          <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Metadata">
+          Metadata <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Metadata">
         </div>
         <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
-            src="/assets/images/shared/search_side_dropdown_icon.svg">
+          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/search_side_dropdown_icon.svg">
         </div>
       </div>
       <div class="tabs d-flex align-items-center search__result-detail-container">
@@ -92,13 +86,9 @@
       </div>
 
       <div class="search__result-tabs-line"></div>
-      <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem
-        [listItems]="[activeTab === 'm_content' ? content : summary]">
-      </app-result-section>
+      <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
 
-      <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem
-        [activeTab]="activeTab" [listItems]="listItems">
-      </app-result-list>
+      <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
     </div>
   </div>
 

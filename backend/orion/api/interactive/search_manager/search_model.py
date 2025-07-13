@@ -35,6 +35,10 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_cal
     search_leak_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
+from orion.api.interactive.search_manager.search_data_model.social.search_social_callback_model import \
+    search_social_callback_model
+from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import \
+    search_social_param_model
 from orion.api.server.external_request_manager.external_request_controller import external_request_controller
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -107,6 +111,14 @@ class search_model:
             result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
         return await self.__search_callback.get_doc(result)
 
+    async def request_social_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_SOCIAL_INDEX, doc_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        if lang:
+            result[0]["m_content"] = helper_controller.detect_and_translate(result[0]["m_content"], target_lang=lang)
+        return await self.__search_callback.get_doc(result)
+
     async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
         result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id)
         if not result:
@@ -145,6 +157,7 @@ class search_model:
         exploit_data = {}
         chat_data = {}
         defacement_data = {}
+        social_data = {}
 
         for index, res in zip(indices, responses):
             hits = res.get("hits", {}).get("hits", []) if res else []
@@ -158,6 +171,8 @@ class search_model:
                 exploit_data = data
             elif index == "chat_model":
                 chat_data = data
+            elif index == "social_model":
+                social_data = data
             elif index == "defacement_model":
                 defacement_data = data
 
@@ -166,7 +181,8 @@ class search_model:
             exploit_model=search_exploit_callback_model(**exploit_data),
             chat_model=search_chat_callback_model(**chat_data),
             generic_model=search_general_callback_model(**general_data),
-            defacement_model=search_defacement_callback_model(**defacement_data)
+            defacement_model=search_defacement_callback_model(**defacement_data),
+            social_model=search_social_callback_model(**social_data)
         )
 
     async def search_exploit_result(self, param: search_exploit_param_model):
@@ -185,6 +201,38 @@ class search_model:
         return await self.__search_callback.search_handler(
             m_status, m_documents,
             SearchChatCallbackModel,
+            {}
+        )
+
+    @staticmethod
+    async def search_discussion_result(param: search_general_param_model):
+        indices, queries = elastic_request_generator().on_search_consolidated_data(param)
+        responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
+
+        chat_data = {}
+        social_data = {}
+
+        for index, res in zip(indices, responses):
+            hits = res.get("hits", {}).get("hits", []) if res else []
+            data = {"Result": [hit["_source"] for hit in hits], "Suggestions": [], "Page_Count": len(hits)}
+
+            if index == "chat_model":
+                chat_data = data
+            elif index == "social_model":
+                social_data = data
+
+        return grouped_consolidated_search_callback_model(
+            chat_model=search_chat_callback_model(**chat_data),
+            social_model=search_social_callback_model(**social_data)
+        )
+    
+    async def search_social_result(self, param: search_social_param_model):
+        document, data_filter = elastic_request_generator().on_search_social_data(param)
+        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        return await self.__search_callback.search_handler(
+            m_status, m_documents,
+            search_social_callback_model,
             {}
         )
 

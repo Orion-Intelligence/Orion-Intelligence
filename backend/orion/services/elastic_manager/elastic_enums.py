@@ -9,6 +9,7 @@ class ELASTIC_INDEX:
     S_EXPLOIT_INDEX = "exploit_model"
     S_CREDENTIAL_INDEX = "credential_model"
     S_STEALERLOGS_INDEX = "stealer_model"
+    S_SOCIAL_INDEX = "social_model"
 
 
 class ELASTIC_CONNECTIONS:
@@ -355,6 +356,49 @@ class ELASTIC_ENUMS:
                 },
                 "timestamp": {
                     "type": "date"
+                }
+            }
+        }
+    }
+    mapping_social_model = {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1_000_000,
+            "codec": "best_compression",
+            "blocks": {
+                "read_only_allow_delete": False
+            }
+        },
+        "mappings": {
+            "dynamic": True,
+            "properties": {
+                "m_sender_name": {
+                    "type": "keyword"
+                },
+                "m_message_sharable_link": {
+                    "type": "keyword"
+                },
+                "m_weblink": {
+                    "type": "keyword"
+                },
+                "m_content": {
+                    "type": "text"
+                },
+                "m_content_type": {
+                    "type": "keyword"
+                },
+                "m_message_date": {
+                    "type": "date"
+                },
+                "m_network": {
+                    "type": "keyword"
+                },
+                "m_message_id": {
+                    "type": "keyword"
+                },
+                "m_platform": {
+                    "type": "keyword"
                 }
             }
         }
