@@ -253,7 +253,6 @@ class elastic_request_generator:
                                     "m_network"
                                 ],
                                 "operator": "or",
-                                "analyze_wildcard": True,
                                 "lenient": True
                             }
                         },
@@ -262,7 +261,7 @@ class elastic_request_generator:
                                 "query": raw_query,
                                 "type": "phrase_prefix",
                                 "fields": [
-                                    "m_title.keyword^4",
+                                    "m_title^4",
                                     "m_url.keyword^3",
                                     "m_sender_name.keyword^2"
                                 ],
@@ -299,17 +298,7 @@ class elastic_request_generator:
                     "boost_mode": "multiply"
                 }
             },
-            "highlight": {} if raw_query == "*" else {
-                "fields": {
-                    "*": {
-                        "fragment_size": 250,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    }
-                }
-            },
-            "from": max(0, (m_page_number - 1) * 10),
+            "from": 0,
             "size": 10,
             "track_total_hits": True,
             "explain": True

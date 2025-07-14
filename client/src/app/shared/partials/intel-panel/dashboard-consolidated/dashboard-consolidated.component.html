@@ -7,9 +7,8 @@
         <div class="category-heading-enforced">
           <span class="left-text">
             <div>{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
-            <div class="left-text-small">Result count {{pageCounts[index.key]}}</div>
-          </span>
-          <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content">
+            <div class="left-text-small">Result count {{ pageCounts[index.key] }}</div>
+          </span> <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content">
             Explore
             <button appTooltip="Open Page" class="p-0 expand-toggle-btn">
               <img alt="background" height="20" src="/assets/images/shared/explore_icon.svg" width="20">
@@ -25,11 +24,11 @@
   </ng-container>
 
   <ng-template #rankedMode>
-    <div>
-      <app-dashboard-results-grid *ngIf="rankedResult?.length && (rankedResult[0].rank_index === 'leak_model' || rankedResult[0].rank_index === 'generic_model')" @fadeInDashboardItem [query]="query" [searchResults]="rankedResult" [isExpandAble]="false" [type]="rankedResult[0].rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
-      <app-dashboard-result-exploit *ngIf="rankedResult?.length && rankedResult[0].rank_index === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="rankedResult"></app-dashboard-result-exploit>
-      <app-dashboard-result-social *ngIf="rankedResult?.length && rankedResult[0].rank_index === 'social_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="rankedResult"></app-dashboard-result-social>
-      <app-dashboard-result-chat *ngIf="rankedResult?.length && rankedResult[0].rank_index === 'chat_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="rankedResult"></app-dashboard-result-chat>
+    <div *ngFor="let item of rankedResult">
+      <app-dashboard-results-grid *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query" [searchResults]="[item]" [isExpandAble]="false" [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
+      <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-exploit>
+      <app-dashboard-result-social *ngIf="item.rank_index === 'social_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-social>
+      <app-dashboard-result-chat *ngIf="item.rank_index === 'chat_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-chat>
     </div>
   </ng-template>
 </div>

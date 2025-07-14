@@ -129,6 +129,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(_ = false): void {
+    if(!this.isGrouped){
+      this.fetchRanked()
+      return
+    }
     if (!this.consolidatedParamModel.q) {
       this.isLoading = false;
       this.consolidatedParamModel.q = '';
@@ -170,7 +174,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   fetchRanked() {
     this.isLoading = true;
-
+    this.rankedResult = []
     this.dashboardService
       .fetchConsolidatedRankededResults('search/consolidated/ranked', this.consolidatedParamModel)
       .pipe(switchMap(response => timer(500).pipe(map(() => response))))
