@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { NgChartsModule } from 'ng2-charts';
+import { ChartConfiguration, ChartOptions, ChartType, ChartDataset } from 'chart.js';
 import { GraphModel } from '../../model/charts/charts.model'
 @Component({
   selector: 'app-customize-bar-chart',
@@ -92,7 +93,7 @@ export class CustomizeBarChartComponent {
 
     const barCount = this.graphModel.data.length;
     const barSpacing = chartWidth / barCount;
-    // const actualBarWidth = barSpacing * this.barWidthRatio;
+    // const actualBarWidth = barSpacing * this.barWidthRatio; 
     const actualBarWidth = 30;
     const barOffset = (barSpacing - actualBarWidth) / 2;
 
@@ -137,7 +138,7 @@ export class CustomizeBarChartComponent {
     }
 
     this.maxChartValue = Math.max(...this.graphModel.data.map(item => item.value));
-    // this.maxChartValue = dynamicMaxChartValue;
+    // this.maxChartValue = dynamicMaxChartValue; 
 
     const gridLines: number[] = [];
     for (let i = 0; i <= this.maxChartValue; i += stepSize) {
