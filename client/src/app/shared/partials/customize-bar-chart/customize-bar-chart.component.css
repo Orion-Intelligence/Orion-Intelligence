@@ -3,7 +3,6 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    /* max-width: 350px; */
     height: 240px;
     background-color: var(--home-insight-card-bg);
     border-radius: 10px;
