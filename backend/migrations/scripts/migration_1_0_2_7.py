@@ -16,7 +16,7 @@ class migration_1_0_2_7:
         print(":::::::::::::::: Starting migration to version", version, flush=True)
 
         index_hash_map = {
-            ELASTIC_INDEX.S_LEAK_INDEX: migration_1_0_2_7.generate_hash_for_leak(),
+            ELASTIC_INDEX.S_LEAK_INDEX: migration_1_0_2_7.generate_hash_for_leak,
             ELASTIC_INDEX.S_EXPLOIT_INDEX: migration_1_0_2_7.generate_hash_for_exploit,
         }
 
