@@ -1,0 +1,7 @@
+<div class="chart-container">
+    <h3 *ngIf="graphModel?.title">{{ graphModel.title }}</h3>
+
+    <canvas baseChart [type]="chartType" [data]="{ labels: chartLabels, datasets: chartDatasets }"
+        [options]="chartOptions" [plugins]="chartPlugins" [legend]="chartLegend">
+    </canvas>
+</div>
