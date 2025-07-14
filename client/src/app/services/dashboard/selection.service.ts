@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {Router, NavigationEnd} from '@angular/router';
-import {filter} from 'rxjs/operators';
-import {Location} from '@angular/common';
-import {ScrollService} from '../../shared/services/scroll.service';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Location } from '@angular/common';
+import { ScrollService } from '../../shared/services/scroll.service';
 
 @Injectable({
   providedIn: 'root'
