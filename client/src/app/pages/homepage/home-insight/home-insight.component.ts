@@ -29,4 +29,6 @@ export class HomeInsightComponent implements OnInit {
   getKeys(obj: GenericModel | LeakModel | DefacementModel): string[] {
     return obj ? Object.keys(obj) : [];
   }
+
+  protected readonly String = String;
 }

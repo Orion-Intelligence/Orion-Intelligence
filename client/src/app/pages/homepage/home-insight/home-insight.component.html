@@ -3,17 +3,16 @@
     <div class="home_insight__container">
       <div *ngFor="let key of getKeys(insights[model]); let first = first" class="home_insight__card">
         <div class="home_insight__content">
-          <div
-            *ngIf="first"
-            [appTooltip]="
-              model === 'general'
-                ? 'Track Data States/Crawl Insights Panel'
-                : model === 'leak'
-                ? 'This is the Leaked Data'
-                : 'This is the Defacement'
-            "
-            class="home_insight__header"
-          >
+
+          <div *ngIf="first"
+               [appTooltip]="
+                 model === 'general'
+                   ? 'Track Data States/Crawl Insights Panel'
+                   : model === 'leak'
+                   ? 'This is the Leaked Data'
+                   : 'This is the Defacement'
+               "
+               class="home_insight__header">
             {{
               model === 'general'
                 ? 'Generic Index'
@@ -22,8 +21,13 @@
                   : 'Defacement Index'
             }}
           </div>
+
           <div class="home_insight__icon">
-            <img alt="{{ key }}" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
+            <img
+              alt="{{ key }}"
+              height="32"
+              ngSrc="/assets/images/statistics/{{ key }}.svg"
+              width="32">
           </div>
 
           <div class="home_insight__text">
@@ -37,20 +41,24 @@
 
           <div class="home_insight__percentage">
             <div [ngClass]="{
-                'text-success': insights[model][key].change_daily?.startsWith('+'),
-                'text-warning': insights[model][key].change_daily?.startsWith('-'),
-                'home_insight__percentage-default': !insights[model][key].change_daily
-              }" appTooltip="stat changes daily">
+                  'text-success': String(insights[model][key].change_daily).startsWith('+'),
+                  'text-warning': String(insights[model][key].change_daily).startsWith('-'),
+                  'home_insight__percentage-default': !insights[model][key].change_daily
+                }"
+                appTooltip="stat changes daily">
               {{ insights[model][key].change_daily || '-' }}
             </div>
+
             <div [ngClass]="{
-                'text-success': insights[model][key].change_weekly?.startsWith('+'),
-                'text-warning': insights[model][key].change_weekly?.startsWith('-'),
-                'home_insight__percentage-default': !insights[model][key].change_weekly
-              }" appTooltip="stat changes weekly">
+                  'text-success': String(insights[model][key].change_weekly).startsWith('+'),
+                  'text-warning': String(insights[model][key].change_weekly).startsWith('-'),
+                  'home_insight__percentage-default': !insights[model][key].change_weekly
+                }"
+                appTooltip="stat changes weekly">
               {{ insights[model][key].change_weekly || '-' }}
             </div>
           </div>
+
         </div>
       </div>
     </div>
