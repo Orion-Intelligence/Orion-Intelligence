@@ -1,13 +1,13 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
-import {ResultComponent} from '../../../shared/partials/result/result.component';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
-import {CredentialParamModel} from '../../../shared/model/results/credentials/credential.param.model';
-import {CredentialCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {NgIf} from '@angular/common';
-import {CredentialListComponent} from '../credential-list/credential-list.component';
+import { ResultComponent } from '../../../shared/partials/result/result.component';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { CredentialParamModel } from '../../../shared/model/results/credentials/credential.param.model';
+import { CredentialCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { NgIf } from '@angular/common';
+import { CredentialListComponent } from '../credential-list/credential-list.component';
 
 @Component({
   selector: 'app-credential',
@@ -30,7 +30,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private dashboardService: DashboardService
-  ) {}
+  ) { }
 
   get currentResultCount(): number {
     return this.credentialCallbackModel?.Result?.length ?? 0;
@@ -58,7 +58,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       });
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
 
   fetchSearchResults(): void {
     if (this.isLoading) return;

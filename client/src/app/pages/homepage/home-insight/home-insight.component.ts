@@ -181,22 +181,27 @@ export class HomeInsightComponent implements OnInit {
   }
   getResultItems(modelKey: string): any[] {
     const model = (this.consolidatedCallbackModel as any)[modelKey];
-    return model?.Result.slice(0, 3) ?? [];
+    return model?.Result.slice(0, 4) ?? [];
   }
   getQueryParams(modelKey: string): any {
+    let model = this.formatModelKey(modelKey).toLowerCase();
+    if (model === 'generic')
+      model = 'general'
     return {
       ...this.queryParams,
-      ci: this.formatModelKey(modelKey).toLowerCase() || 'general'
+      ci: model || 'general'
     };
   }
 
   getModelRoute(modelKey: string): string {
+    let model = this.formatModelKey(modelKey).toLowerCase();
+    if (model === 'generic')
+      model = 'general'
     const base = this.router.url.split('?')[0];
     const segments = base.split('/');
     segments.pop();
     const newBase = segments.join('/');
-
-    return `${newBase}/consolidated/${this.formatModelKey(modelKey).toLowerCase()}`;
+    return `${newBase}/consolidated/${model}`;
 
   }
 
