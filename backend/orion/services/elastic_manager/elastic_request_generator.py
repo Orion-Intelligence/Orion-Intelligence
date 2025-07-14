@@ -307,7 +307,7 @@ class elastic_request_generator:
         return [
             ELASTIC_INDEX.S_LEAK_INDEX,
             ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-            ELASTIC_INDEX.S_GENERIC_INDEX,
+            # ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_EXPLOIT_INDEX,
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX
