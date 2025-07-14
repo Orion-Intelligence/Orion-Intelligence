@@ -89,7 +89,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 360px;
+  width: 100%;
   height: 125px;
   box-sizing: border-box;
   box-shadow: rgb(0 0 0 / 10%) 0 1px 3px, rgb(0 0 0 / 10%) 0 1px 3px;
@@ -102,31 +102,16 @@
 }
 
 .home_insight__container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 20px;
-  justify-content: flex-start;
-  margin-left: 30px;
-  flex: 1;
-  max-width: 100%;
-  margin-right: 20px;
-  margin-top: 30px;
+  margin: 30px 20px 0 30px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
 
 @media only screen and (width <=943px) {
   .home__form {
     margin-left: 21px !important;
-  }
-
-  .home_insight__card {
-    width: 100%;
-  }
-
-  .home_insight__container {
-    padding: 20px;
-    padding-right: 0;
-    margin-left: 0;
   }
 
   #analytics {
