@@ -108,8 +108,10 @@ class elastic_controller:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
-    async def search_consolidated_ranked_query(self, indices, query):
+    async def search_consolidated_ranked_query(self, indices, query, indices_boost=None):
         try:
+            if indices_boost:
+                query["indices_boost"] = indices_boost
             res = await self.__m_connection.search(index=",".join(indices), body=query)
             return res
         except Exception as ex:

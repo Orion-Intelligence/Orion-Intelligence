@@ -149,8 +149,8 @@ class search_model:
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model):
-        indices, query = elastic_request_generator.on_search_consolidated_ranked_data(param)
-        response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query)
+        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param)
+        response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
 
         ranked_results = []
 

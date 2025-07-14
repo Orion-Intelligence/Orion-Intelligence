@@ -15,7 +15,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_defacement_data(p_query_model: search_defacement_param_model):
-        raw_query = p_query_model.q.strip().lower()
+        raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
 
@@ -199,13 +199,12 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_consolidated_ranked_data(p_query_model):
-        raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else "*"
+        raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else "*"
         raw_query = helper_controller.remove_stopwords_from_string(raw_query) if raw_query != "*" else "*"
 
         if raw_query == "":
             raw_query = "*"
 
-        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
         m_date_range = p_query_model.mDateRange
         m_network = p_query_model.mNetwork
 
@@ -307,16 +306,23 @@ class elastic_request_generator:
         return [
             ELASTIC_INDEX.S_LEAK_INDEX,
             ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-            # ELASTIC_INDEX.S_GENERIC_INDEX,
+            ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_EXPLOIT_INDEX,
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX
-        ], unified_query
+        ], unified_query, [
+            {ELASTIC_INDEX.S_LEAK_INDEX: 3},
+            {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 2.8},
+            {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
+            {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4},
+            {ELASTIC_INDEX.S_CHATS_INDEX: 1.2},
+            {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.0}
+        ]
 
     @staticmethod
     def on_search_consolidated_data(p_query_model):
         if p_query_model.q != "*":
-            raw_query = p_query_model.q.strip()
+            raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
         else:
             raw_query = "*"
@@ -369,7 +375,7 @@ class elastic_request_generator:
     @staticmethod
     def on_search_leakdata(p_query_model):
         if p_query_model.q != "*":
-            raw_query = p_query_model.q.strip()
+            raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
         else:
             raw_query = "*"
@@ -1182,7 +1188,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_credentials_data(p_query_model):
-        raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
+        raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else ""
         if raw_query:
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
 
@@ -1215,7 +1221,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model):
-        raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
+        raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else ""
         if raw_query:
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
 
