@@ -145,6 +145,7 @@ class crawl_model:
         return {"parsed":"true"}
 
     async def invoke_social_index(self, social_index: social_data_model):
+
         m_data = elastic_request_generator().index_query_social(social_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
 

@@ -35,6 +35,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() disableScroll = false;
   @Input() type!: Category;
   @Input() discussion = false;
+  @Input() consolidated = false;
   @Input() showTabs = true;
 
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();

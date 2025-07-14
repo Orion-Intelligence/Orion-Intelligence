@@ -198,14 +198,102 @@ class elastic_request_generator:
         return query
 
     @staticmethod
+    def on_search_consolidated_ranked_data(p_query_model):
+        raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else "*"
+        raw_query = helper_controller.remove_stopwords_from_string(raw_query) if raw_query != "*" else "*"
+
+        if raw_query == "":
+            raw_query = "*"
+
+        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
+        m_date_range = p_query_model.mDateRange
+        m_network = p_query_model.mNetwork
+
+        must_clauses = []
+
+        if m_date_range:
+            try:
+                parts = m_date_range.split(",")
+                if len(parts) == 2:
+                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
+                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+                    must_clauses.append({
+                        "range": {
+                            "m_update_date": {
+                                "gte": from_date,
+                                "lte": to_date
+                            }
+                        }
+                    })
+            except ValueError:
+                pass
+
+        if m_network and m_network.lower() not in ("", "all"):
+            must_clauses.append({"term": {"m_network": m_network.lower()}})
+
+        if raw_query == "*":
+            query_block = {"match_all": {}}
+        else:
+            query_block = {
+                "query_string": {
+                    "query": raw_query,
+                    "fields": ["*"],
+                    "default_operator": "OR",
+                    "analyze_wildcard": True,
+                    "lenient": True
+                }
+            }
+
+        unified_query = {
+            "min_score": 0,
+            "query": {
+                "function_score": {
+                    "query": {
+                        "bool": {
+                            "filter": must_clauses,
+                            "must": query_block
+                        }
+                    },
+                    "score_mode": "sum",
+                    "boost_mode": "multiply"
+                }
+            },
+            "highlight": {} if raw_query == "*" else {
+                "fields": {
+                    "*": {
+                        "fragment_size": 250,
+                        "number_of_fragments": 3,
+                        "pre_tags": ["<em>"],
+                        "post_tags": ["</em>"]
+                    }
+                }
+            },
+            "from": max(0, (m_page_number - 1) * 50),
+            "size": 50,
+            "track_total_hits": True,
+            "explain": True
+        }
+
+        return [
+            ELASTIC_INDEX.S_LEAK_INDEX,
+            ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+            ELASTIC_INDEX.S_GENERIC_INDEX,
+            ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            ELASTIC_INDEX.S_CHATS_INDEX,
+            ELASTIC_INDEX.S_SOCIAL_INDEX
+        ], unified_query
+
+    @staticmethod
     def on_search_consolidated_data(p_query_model):
         if p_query_model.q != "*":
             raw_query = p_query_model.q.strip()
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
         else:
             raw_query = "*"
+
         if raw_query == "":
             raw_query = "*"
+
         if not raw_query:
             return [], []
 
@@ -217,14 +305,34 @@ class elastic_request_generator:
         indices = []
 
         m1 = clone_model(p_query_model)
-        i1, q1 = elastic_request_generator.on_search_telegram_data(m1)
+        i1, q1 = elastic_request_generator.on_search_leakdata(m1)
         queries.append(elastic_request_generator._strip_query(q1))
         indices.append(i1)
 
         m2 = clone_model(p_query_model)
-        i2, q2 = elastic_request_generator.on_search_social_data(m2)
+        i2, q2 = elastic_request_generator.on_search_general_data(m2)
         queries.append(elastic_request_generator._strip_query(q2))
         indices.append(i2)
+
+        m3 = clone_model(p_query_model)
+        i3, q3 = elastic_request_generator.on_search_exploitdata(m3)
+        queries.append(elastic_request_generator._strip_query(q3))
+        indices.append(i3)
+
+        m4 = clone_model(p_query_model)
+        i4, q4 = elastic_request_generator.on_search_telegram_data(m4)
+        queries.append(elastic_request_generator._strip_query(q4))
+        indices.append(i4)
+
+        m5 = clone_model(p_query_model)
+        i5, q5 = elastic_request_generator.on_search_defacement_data(m5)
+        queries.append(elastic_request_generator._strip_query(q5))
+        indices.append(i5)
+
+        m6 = clone_model(p_query_model)
+        i6, q6 = elastic_request_generator.on_search_social_data(m6)
+        queries.append(elastic_request_generator._strip_query(q6))
+        indices.append(i6)
 
         return indices, queries
 
@@ -747,8 +855,11 @@ class elastic_request_generator:
 
         must_clauses = []
         must_not_clause = []
+        if p_query_model.mPlatform:
+            must_clauses.append({"term": {"m_platform": p_query_model.mPlatform}})
 
         search_fields = [
+            "m_title^4",
             "m_content^3",
             "m_sender_name^2.5",
             "m_platform^2",
@@ -793,6 +904,15 @@ class elastic_request_generator:
                                         "m_content.keyword": {
                                             "value": f"*{raw_query}*",
                                             "boost": 1.5,
+                                            "case_insensitive": True
+                                        }
+                                    }
+                                },
+                                {
+                                    "wildcard": {
+                                        "m_sender_name": {
+                                            "value": f"*{raw_query.lower()}*",
+                                            "boost": 1.0,
                                             "case_insensitive": True
                                         }
                                     }
@@ -1361,10 +1481,15 @@ class elastic_request_generator:
     def index_query_social(p_index_data):
         index_entries = []
         for post in p_index_data.get("cards_data", []):
-            if not post.get("m_message_id"):
+            m_hash = ""
+            if post.get("m_message_id"):
+                m_hash = post.get("m_message_id")
+            if not m_hash:
+                m_hash = post.get("m_title")
+            if not m_hash:
                 continue
 
-            post["m_hash"] = helper_controller.generate_data_hash(post.get("m_message_id"))
+            post["m_hash"] = helper_controller.generate_data_hash(m_hash)
             index_entries.append({
                 ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SOCIAL_INDEX,
                 ELASTIC_KEYS.S_VALUE: post

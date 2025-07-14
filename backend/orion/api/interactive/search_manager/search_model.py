@@ -148,6 +148,24 @@ class search_model:
         )
 
     @staticmethod
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model):
+        indices, query = elastic_request_generator.on_search_consolidated_ranked_data(param)
+        response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query)
+
+        ranked_results = []
+
+        if response and "hits" in response and "hits" in response["hits"]:
+            hits = response["hits"]["hits"]
+            for rank, hit in enumerate(hits):
+                source = hit.get("_source", {})
+                source["rank_index"] = hit.get("_index")
+                source["_score"] = hit.get("_score", 0)
+                source["_rank"] = rank + 1
+                ranked_results.append(source)
+
+        return ranked_results
+
+    @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
         indices, queries = elastic_request_generator().on_search_consolidated_data(param)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)

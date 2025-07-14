@@ -2,6 +2,8 @@ import { Suggestion } from '../shared/common-result';
 
 export class SocialResultItem {
   m_content?: string;
+  m_platform?: string;
+  m_title?: string;
   m_summary: string[] = [];
   m_message_id?: string;
   m_message_sharable_link?: string;
@@ -13,7 +15,6 @@ export class SocialResultItem {
   m_channel_url?: string;
   m_sender_name?: string;
   m_message_date?: string;
-  m_platform?: string;
   m_network?: string;
 
   constructor(init?: Partial<SocialResultItem>) {

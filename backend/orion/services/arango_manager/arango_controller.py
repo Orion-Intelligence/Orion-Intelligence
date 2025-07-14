@@ -1,5 +1,4 @@
 from arango import ArangoClient
-
 from orion.services.arango_manager.arango_enums import ARANGO_CONNECTIONS
 from orion.services.log_manager.log_controller import log
 
@@ -72,7 +71,8 @@ class arango_controller:
                 {"_key": "defacement", "type": "cluster", "label": "Defacement"},
                 {"_key": "exploit", "type": "cluster", "label": "exploit"},
                 {"_key": "leak", "type": "cluster", "label": "Leak"},
-                {"_key": "telegram", "type": "cluster", "label": "Telegram"}
+                {"_key": "telegram", "type": "cluster", "label": "Telegram"},
+                {"_key": "social", "type": "cluster", "label": "Social"}
             ]
 
             for node in default_nodes:

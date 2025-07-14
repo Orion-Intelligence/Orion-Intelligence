@@ -1,38 +1,35 @@
-<app-result [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)" class="consolidated_container-main"
-  (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" [isLoading]="isLoading" [searchQuery]="query"
-  [result_count]="getTotalResultCount()"></app-result>
+<app-result [consolidated]="true" [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query" [result_count]="getTotalResultCount()"></app-result>
 
 <div *ngIf="!isLoading" @fadeInDashboardItem>
-  <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
-    <div class="consolidated_container">
-      <div class="category-heading-enforced">
-        <span class="left-text">
-          <div>{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
-          <div class="left-text-small">Result count {{pageCounts[index.key]}}</div>
-        </span>
-
-        <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content">
-          Explore
-          <button appTooltip="Open Page" class="p-0 expand-toggle-btn">
-            <img alt="background" height="20" src="/assets/images/shared/explore_icon.svg" width="20">
-          </button>
-        </span>
+  <ng-container *ngIf="isGrouped; else rankedMode">
+    <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
+      <div class="consolidated_container">
+        <div class="category-heading-enforced">
+          <span class="left-text">
+            <div>{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
+            <div class="left-text-small">Result count {{pageCounts[index.key]}}</div>
+          </span>
+          <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content">
+            Explore
+            <button appTooltip="Open Page" class="p-0 expand-toggle-btn">
+              <img alt="background" height="20" src="/assets/images/shared/explore_icon.svg" width="20">
+            </button>
+          </span>
+        </div>
+        <app-dashboard-results-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'" @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true" [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
+        <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-exploit>
+        <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-social>
+        <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-chat>
       </div>
-      <app-dashboard-results-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'"
-        @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
-        [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
-
-      <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="true"
-        [searchResults]="index.value"></app-dashboard-result-exploit>
-
-      <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem [isExpandAble]="true"
-        [searchResults]="index.value"></app-dashboard-result-social>
-
-<!--      <app-dashboard-result-list *ngIf="index.key === 'defacement_model'" @fadeInDashboardItem [isExpandAble]="true"-->
-<!--        [searchResults]="index.value"></app-dashboard-result-list>-->
-
-      <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="true"
-        [searchResults]="index.value"></app-dashboard-result-chat>
-    </div>
+    </ng-container>
   </ng-container>
+
+  <ng-template #rankedMode>
+    <div>
+      <app-dashboard-results-grid *ngIf="rankedResult?.length && (rankedResult[0].rank_index === 'leak_model' || rankedResult[0].rank_index === 'generic_model')" @fadeInDashboardItem [query]="query" [searchResults]="rankedResult" [isExpandAble]="false" [type]="rankedResult[0].rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-grid>
+      <app-dashboard-result-exploit *ngIf="rankedResult?.length && rankedResult[0].rank_index === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="rankedResult"></app-dashboard-result-exploit>
+      <app-dashboard-result-social *ngIf="rankedResult?.length && rankedResult[0].rank_index === 'social_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="rankedResult"></app-dashboard-result-social>
+      <app-dashboard-result-chat *ngIf="rankedResult?.length && rankedResult[0].rank_index === 'chat_model'" @fadeInDashboardItem [isExpandAble]="false" [searchResults]="rankedResult"></app-dashboard-result-chat>
+    </div>
+  </ng-template>
 </div>

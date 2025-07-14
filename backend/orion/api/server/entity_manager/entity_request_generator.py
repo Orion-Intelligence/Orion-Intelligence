@@ -4,7 +4,7 @@ class EntityRequestGenerator:
         if normalized_value == "all":
             queried_id = "all_clusters"
             query_str = f"""
-            LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat", "cti_vertices/exploit"]
+            LET clusters = ["cti_vertices/general", "cti_vertices/leak", "cti_vertices/defacement", "cti_vertices/chat", "cti_vertices/exploit", "cti_vertices/social"]
 
             LET cluster_data = (
               FOR cluster_id IN clusters
@@ -191,7 +191,7 @@ class EntityRequestGenerator:
             RETURN item.vertex._id
         )
 
-        LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
+        LET default_clusters = ["general", "defacement", "leak", "chat", "exploit", "social"]
         LET filtered_cluster_edges = (
           FOR doc_id IN document_ids
             FOR e IN cti_edges
@@ -294,7 +294,7 @@ class EntityRequestGenerator:
           related_doc_ids
         )
 
-        LET default_clusters = ["general", "defacement", "leak", "chat", "exploit"]
+        LET default_clusters = ["general", "defacement", "leak", "chat", "exploit", "social"]
 
         LET cluster_edges = (
           FOR doc_id IN document_ids
@@ -353,10 +353,10 @@ class EntityRequestGenerator:
         }
 
         allowed_keys = {
-            'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret',
-            'm_bitcoin_addresses', 'm_code_snippet', 'm_company_name', 'm_country', 'm_country_name',
+            'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
+            'm_bitcoin_addresses', 'm_code_snippet', 'm_company_name', 'm_country', 'm_country_name', 'm_platform'
             'm_credit_card', 'm_cve', 'm_cwe', 'm_document_id', 'm_dumplink', 'm_email', 'm_employee_count',
-            'm_encoded_urls', 'm_event', 'm_fac', 'm_file_path', 'm_file_paths', 'm_gpe', 'm_hashtag',
+            'm_encoded_urls', 'm_event', 'm_fac', 'm_file_path', 'm_file_paths', 'm_gpe', 'm_hashtag', 'm_author',
             'm_in_aadhaar', 'm_in_pan', 'm_in_passport', 'm_in_vehicle_registration', 'm_in_voter',
             'm_industry', 'm_ip', 'm_language', 'm_law', 'm_location', 'm_medical_license', 'm_mention',
             'm_mitre_ttp_name', 'm_mitre_ttp_type', 'm_monero_addresses', 'm_name', 'm_norp', 'm_org',

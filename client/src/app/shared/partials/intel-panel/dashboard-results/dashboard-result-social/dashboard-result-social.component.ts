@@ -4,6 +4,7 @@ import { DatePipe, NgForOf, NgIf, SlicePipe, CommonModule } from '@angular/commo
 import { ScrollService } from '../../../../services/scroll.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
 import {SocialResultItem} from '../../../../model/results/social/social.callback.model';
+import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
 
 @Component({
   selector: 'app-dashboard-result-social',
@@ -17,7 +18,8 @@ import {SocialResultItem} from '../../../../model/results/social/social.callback
     TooltipDirective,
     CommonModule
   ],
-  templateUrl: './dashboard-result-social.component.html'
+  templateUrl: './dashboard-result-social.component.html',
+  animations: [fadeInDashboardItem]
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   @Input() searchResults: SocialResultItem[] = [];

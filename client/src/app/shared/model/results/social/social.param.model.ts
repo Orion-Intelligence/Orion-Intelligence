@@ -5,5 +5,6 @@ export class SocialParamModel {
   mDateRange = "";
   mEntity = "";
   mMitreTtp = "";
+  mPlatform="";
   ctype = "";
 }

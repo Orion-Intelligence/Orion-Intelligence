@@ -377,12 +377,17 @@ table a:visited {
   padding-bottom: 12px;
 }
 
+.see-more:hover{
+  color: #fff;
+}
+
 .see-more {
   color: #A0B8D1;
   font-weight: 400;
   font-size: 16px;
   cursor: pointer;
   display: inline-block;
+  transition: color 0.2s ease;
 }
 
 @media only screen and (width <=550px) {

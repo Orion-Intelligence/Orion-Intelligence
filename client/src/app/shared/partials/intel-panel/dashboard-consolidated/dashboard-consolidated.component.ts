@@ -70,11 +70,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public groupedResults: { [index: string]: any[] } = {};
   public pageCounts: { [key: string]: number } = {};
+  protected readonly Math = Math;
+  isGrouped = true
   query = '';
   isLoading = false;
   firstTrigger = true;
   result_count = 0;
-  protected readonly Math = Math;
   apiCategories = Object.values(ApiSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
   newsCategories = Object.values(FeedSubCategory);
@@ -82,6 +83,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
+  rankedResult: any[] = [];
 
   constructor(
     public appService: AppService,
@@ -162,6 +164,20 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
           this.groupedResults = {};
         }
 
+        this.isLoading = false;
+      });
+  }
+
+  fetchRanked() {
+    this.isLoading = true;
+
+    this.dashboardService
+      .fetchConsolidatedRankededResults('search/consolidated/ranked', this.consolidatedParamModel)
+      .pipe(switchMap(response => timer(500).pipe(map(() => response))))
+      .subscribe(response => {
+        if (response.success && response.data) {
+          this.rankedResult = response.data;
+        }
         this.isLoading = false;
       });
   }
@@ -269,4 +285,16 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         return Category.BREACH;
     }
   }
+
+  onToggleMenu(tab: string): void {
+    if (tab == "Group") {
+      this.isGrouped = true
+      this.fetchSearchResults();
+    } else if (tab == "Ranked") {
+      this.isGrouped = false
+      this.fetchRanked()
+    }
+  }
+
+  protected readonly fadeInDashboardItem = fadeInDashboardItem;
 }

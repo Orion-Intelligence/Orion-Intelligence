@@ -33,6 +33,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   isLoading = false;
   firstTrigger = true;
   result_count = 0;
+  m_platform = ""
   protected readonly Math = Math;
 
   constructor(
@@ -55,12 +56,20 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     this.socialCallbackModel = { ...this.dashboardService.socialCallbackModel } as SocialCallbackModel;
     this.result_count = this.socialCallbackModel.Result.length;
 
+    const lastSegment = this.route.snapshot.url.at(-1)?.path;
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
         this.query = params['q'];
         this.socialParamModel.q = params['q'] || '';
-        this.socialParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
+        this.socialParamModel.mSearchParamPage = params['mSearchParamPage'] || '1'
+        if (lastSegment)
+          this.socialParamModel.mPlatform = lastSegment
+          this.m_platform = this.socialParamModel.mPlatform
+          if (this.dashboardService.socialParamModel.mPlatform != lastSegment){
+            this.dashboardService.socialCallbackModel.Result = []
+            this.firstTrigger = false
+          }
 
         if (this.firstTrigger && this.socialCallbackModel.Result.length > 0) {
           this.isLoading = false;
@@ -106,8 +115,9 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    this.dashboardService.socialParamModel = this.socialParamModel
     this.dashboardService
-      .fetchSearchResults<SocialCallbackModel>('social/twitter', this.socialParamModel)
+      .fetchSearchResults<SocialCallbackModel>('social', this.socialParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {

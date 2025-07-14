@@ -10,4 +10,5 @@ class search_social_param_model(BaseModel):
     ctype: Optional[str] = "all"
     mDateRange: Optional[str] = ""
     mEntity: Optional[str] = ""
+    mPlatform: Optional[str] = ""
     mMitreTtp: Optional[str] = ""

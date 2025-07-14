@@ -217,6 +217,11 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'forum',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
             path: ':category',
             component: DashboardChatsComponent,
             data: {type: 'Social', animation: 'CategoryPage'}

@@ -40,8 +40,8 @@
   </div>
 </form>
 
-<ul *ngIf="showTabs && (analyticsToggle || discussion)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
-  <li class="nav-item">
+<ul *ngIf="showTabs && (analyticsToggle || discussion || consolidated)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
+  <li class="nav-item" *ngIf="!consolidated">
     <a class="nav-link cursor-pointer active">Results</a>
   </li>
   <li class="nav-item" *ngIf="analyticsToggle">
@@ -49,6 +49,12 @@
   </li>
   <li class="nav-item" *ngIf="discussion">
     <a class="nav-link cursor-pointer">Discussion</a>
+  </li>
+  <li class="nav-item" *ngIf="consolidated">
+    <a class="nav-link cursor-pointer active">Group</a>
+  </li>
+  <li class="nav-item" *ngIf="consolidated">
+    <a class="nav-link cursor-pointer">Ranked</a>
   </li>
 </ul>
 

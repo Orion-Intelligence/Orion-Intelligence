@@ -382,6 +382,9 @@ class ELASTIC_ENUMS:
                 "m_weblink": {
                     "type": "keyword"
                 },
+                "m_title": {
+                    "type": "text"
+                },
                 "m_content": {
                     "type": "text"
                 },

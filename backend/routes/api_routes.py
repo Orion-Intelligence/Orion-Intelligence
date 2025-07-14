@@ -72,6 +72,10 @@ async def search_telegram(param: search_credential_param_model = Depends()):
 async def search_consolidated(param: search_consolidated_param_model = Depends()):
     return await search_model.getInstance().search_consolidated_result(param)
 
+@api_routes.get("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+                description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
+async def search_consolidated(param: search_consolidated_param_model = Depends()):
+    return await search_model.getInstance().search_consolidated_ranked_result(param)
 
 @api_routes.get("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_chat_param_model = Depends()):
@@ -81,10 +85,9 @@ async def search_telegram(param: search_chat_param_model = Depends()):
 async def search_discussion(param: search_general_param_model = Depends()):
     return await search_model.getInstance().search_discussion_result(param)
 
-@api_routes.get("/api/social/twitter", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+@api_routes.get("/api/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_twitter(param: search_social_param_model = Depends()):
     return await search_model.getInstance().search_social_result(param)
-
 
 @api_routes.get("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")

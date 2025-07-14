@@ -27,7 +27,6 @@ export enum GeneralSubCategory {
 }
 
 export enum BreachSubCategory {
-  ALL = 'All',
   DATABASES = 'Databases',
   TRACKING = 'Tracking',
   EMAIL = 'Email',
@@ -47,6 +46,7 @@ export enum ApiSubCategory {
 export enum SocialSubCategory {
   TELEGRAM = 'Telegram',
   TWITTER = 'Twitter',
+  FORUM = 'Forum',
 }
 
 export enum ExploitSubCategory {

@@ -15,3 +15,4 @@ class search_consolidated_param_model(BaseModel):
     mMitreTtp: Optional[str] = ""
     mAttacker: Optional[str] = ""
     mTeam: Optional[str] = ""
+    mPlatform: Optional[str] = ""

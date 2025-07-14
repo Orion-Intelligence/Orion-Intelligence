@@ -12,6 +12,7 @@ class suggestion(BaseModel):
 
 
 class result_item(BaseModel):
+    m_title: Optional[str] = None
     m_sender_name: Optional[str] = None
     m_message_sharable_link: str
     m_weblink: List[str] = Field(default_factory=list)
@@ -20,7 +21,7 @@ class result_item(BaseModel):
     m_content_type: List[str] = Field(default_factory=list)
     m_message_date: Optional[date] = None
     m_channel_url: Optional[str] = None
-    m_message_id: str
+    m_message_id: Optional[str] = None
     m_platform: str
 
     class Config:
