@@ -235,12 +235,53 @@ class elastic_request_generator:
             query_block = {"match_all": {}}
         else:
             query_block = {
-                "query_string": {
-                    "query": raw_query,
-                    "fields": ["*"],
-                    "default_operator": "OR",
-                    "analyze_wildcard": True,
-                    "lenient": True
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": raw_query,
+                                "type": "best_fields",
+                                "fields": [
+                                    "m_title^5",
+                                    "m_content^3",
+                                    "m_url^2",
+                                    "m_sender_name^2",
+                                    "m_base_url",
+                                    "m_team",
+                                    "m_attacker",
+                                    "m_users",
+                                    "m_network"
+                                ],
+                                "operator": "or",
+                                "analyze_wildcard": True,
+                                "lenient": True
+                            }
+                        },
+                        {
+                            "multi_match": {
+                                "query": raw_query,
+                                "type": "phrase_prefix",
+                                "fields": [
+                                    "m_title.keyword^4",
+                                    "m_url.keyword^3",
+                                    "m_sender_name.keyword^2"
+                                ],
+                                "operator": "or",
+                                "lenient": True
+                            }
+                        },
+                        {
+                            "query_string": {
+                                "query": raw_query,
+                                "fields": ["*"],
+                                "default_operator": "OR",
+                                "analyze_wildcard": True,
+                                "lenient": True,
+                                "boost": 0.5
+                            }
+                        }
+                    ],
+                    "minimum_should_match": 1
                 }
             }
 
@@ -268,8 +309,8 @@ class elastic_request_generator:
                     }
                 }
             },
-            "from": max(0, (m_page_number - 1) * 50),
-            "size": 50,
+            "from": max(0, (m_page_number - 1) * 10),
+            "size": 10,
             "track_total_hits": True,
             "explain": True
         }
