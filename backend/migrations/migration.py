@@ -53,32 +53,22 @@ class migration_manager:
                 if target_version_parts >= script_version_parts > stored_version_parts:
                     migration_script_name = file.replace(".py", "")
                     migration_module = importlib.import_module(migration_script_name)
-                    print(":::::::::::::::::::::::::::::", flush=True)
-                    print(":::::::::::::::::::::::::::::", flush=True)
                     if hasattr(migration_module, migration_script_name):
                         migration_class = getattr(migration_module, migration_script_name)
                         if hasattr(migration_class, "migrate"):
-                            print(":::::::::::::::::::::::::::::2", flush=True)
-                            print(":::::::::::::::::::::::::::::2", flush=True)
                             await migration_class.migrate(version_str.replace(".", "_"))
                         else:
-                            print(":::::::::::::::::::::::::::::3", flush=True)
-                            print(":::::::::::::::::::::::::::::3", flush=True)
                             log.g().w(f"No 'migrate' method in {migration_script_name}")
-                            print(":::::::::::::::::::::::::::::4", flush=True)
-                            print(":::::::::::::::::::::::::::::4", flush=True)
                     else:
                         log.g().w(f"No class {migration_script_name} in module")
             existing_version_entry = await engine.find_one(db_system_model, db_system_model.key == AllowedKeys.VERSION)
-            # if existing_version_entry:
-            #     existing_version_entry.value = version
-            #     await engine.save(existing_version_entry)
-            # else:
-            #     new_entry = db_system_model(key=AllowedKeys.VERSION, value=version)
-            #     await engine.save(new_entry)
+            if existing_version_entry:
+                existing_version_entry.value = version
+                await engine.save(existing_version_entry)
+            else:
+                new_entry = db_system_model(key=AllowedKeys.VERSION, value=version)
+                await engine.save(new_entry)
         except Exception as ex:
-            print(":::::::::::::::::::::::::::::5", flush=True)
-            print(":::::::::::::::::::::::::::::5", flush=True)
             log.g().e(f"Migration failed: {str(ex)}")
             raise Exception(f"Migration failed: {str(ex)}")
 
