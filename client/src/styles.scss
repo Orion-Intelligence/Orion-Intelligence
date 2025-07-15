@@ -17,6 +17,7 @@
 @use 'app/shared/partials/header/dashboard-header/dashboard-header.component.css';
 @use 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
 @use 'app/shared/partials/pagination/pagination.component.css';
+@use 'app/shared/partials/customize-bar-chart/customize-bar-chart.component.css';
 @use 'app/pages/dashboard/dashboard.component.css';
 @use 'app/pages/dump/credential/credential.component.css';
 @use 'app/shared/partials/suggestion/suggestion.component.css';
@@ -54,7 +55,7 @@
 :root {
 	--dasshboard-sidebar-bg: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
 	--dasshboard-sidebar-bg-light: #17223560;
-  --sidebar-item-bg: #2A578459;
+	--sidebar-item-bg: #2A578459;
 	--sidebar-item-bg-hover: #2A578435;
 	--sidebar-subitem: #2A578459;
 	--cti-sidebar-bg: linear-gradient(to bottom, #0E2D4D, #144170);
