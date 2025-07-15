@@ -1,1 +1,3 @@
 {"file": "_zone_xsec", "url": "https://zone-xsec.com"}
+{"file": "_github_openfish", "url": "https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt"}
+{"file": "_tweetfeed", "url": "https://tweetfeed.live"}

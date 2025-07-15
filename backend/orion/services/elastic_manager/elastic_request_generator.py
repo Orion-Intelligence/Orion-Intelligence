@@ -57,6 +57,15 @@ class elastic_request_generator:
         if m_attacker:
             must_clauses.append({"term": {"m_attacker": m_attacker}})
 
+        m_content_type = p_query_model.mContentType
+
+        if m_content_type == "phishing":
+            must_clauses.append({"terms": {"m_ioc_type": ["phishing"]}})
+        elif m_content_type == "hacked":
+            must_clauses.append({"terms": {"m_ioc_type": ["hacked"]}})
+        elif m_content_type == "databases":
+            must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
+
         if m_team:
             must_clauses.append({"term": {"m_team": m_team}})
 

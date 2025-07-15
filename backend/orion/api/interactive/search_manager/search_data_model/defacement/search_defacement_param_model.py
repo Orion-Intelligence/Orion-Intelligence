@@ -11,3 +11,4 @@ class search_defacement_param_model(BaseModel):
     mDateRange: Optional[str] = ""
     mAttacker: Optional[str] = ""
     mTeam: Optional[str] = ""
+    mContentType: Optional[str] = ""

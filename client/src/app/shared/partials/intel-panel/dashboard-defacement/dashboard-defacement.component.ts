@@ -68,6 +68,10 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(reset = false) {
+    let segment = this.route.snapshot.url.at(-1)?.path
+    if (segment)
+      this.defacementParamModel.mContentType = segment
+
     if (reset)
       this.defacementParamModel.mSearchParamPage = 1
     if (!this.defacementParamModel.q) {

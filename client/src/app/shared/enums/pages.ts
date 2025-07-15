@@ -36,7 +36,9 @@ export enum BreachSubCategory {
 }
 
 export enum DefacementSubCategory {
-  DATABASES = 'Archive',
+  HACKED = 'Hacked',
+  PHISHING = 'Phishing',
+  DATABASES = 'Databases',
 }
 
 export enum ApiSubCategory {

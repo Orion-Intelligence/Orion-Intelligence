@@ -4,6 +4,7 @@ export class DefacementParamModel {
   mDateRange = ""
   mTeam = ""
   mAttacker = "";
+  mContentType = ""
 
   constructor(init?: Partial<DefacementParamModel>) {
     Object.assign(this, init);

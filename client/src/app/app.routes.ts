@@ -98,7 +98,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'all',
+            redirectTo: 'databases',
             pathMatch: 'full'
           },
           {

@@ -70,3 +70,4 @@
 {"file": "_netleaks", "url": "https://netleaks.net"}
 {"file": "_akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad", "url": "https://akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad.onion"}
 {"file": "_arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd", "url": "http://arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd.onion"}
+{"file": "_ransomed", "url": "https://ransomed.biz"}

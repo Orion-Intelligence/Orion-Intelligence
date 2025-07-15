@@ -34,7 +34,7 @@ export class ReportDefacementComponent implements OnInit {
   }
 
   redirectToUrl() {
-    if (this.defacementData && this.defacementData.m_web_url) {
+    if (this.defacementData && this.defacementData.m_source_url) {
       window.open(this.defacementData.m_url, '_blank');
     }
   }
