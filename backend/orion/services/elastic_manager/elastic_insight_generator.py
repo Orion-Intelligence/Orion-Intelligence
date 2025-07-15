@@ -1,17 +1,8 @@
-import hashlib
-import re
-from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
-
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
-    search_defacement_param_model
 from orion.constants.constant import CONSTANTS
-from orion.constants.enum import ChannelTypeEnum
-from orion.helper_manager.helper_controller import helper_controller
-from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
-class elastic_latest_document:
+class elastic_insight_generator:
     @staticmethod
     def _strip_query(query, size=4):
         query["size"] = size
@@ -20,8 +11,8 @@ class elastic_latest_document:
         return query
     
     @staticmethod
-    def on_insight_leakdata(p_query_model):
-        from_ = max(0, (p_query_model.mSearchParamPage - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC)
+    def on_insight_leakdata():
+        from_ = 0
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {
@@ -43,8 +34,8 @@ class elastic_latest_document:
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod
-    def on_insight_general_data(p_query_model):
-        from_ = max(0, (p_query_model.mSearchParamPage - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC)
+    def on_insight_general_data():
+        from_ = 0
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {
@@ -66,11 +57,9 @@ class elastic_latest_document:
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
     @staticmethod
-    def on_insight_defacement_data(p_query_model: search_defacement_param_model):
-        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
-
-        from_ = max(0, (m_page_number - 1) * 100)
-        size = 100
+    def on_insight_defacement_data():
+        from_ = 0
+        size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {
             "query": {
@@ -87,10 +76,8 @@ class elastic_latest_document:
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     @staticmethod
-    def on_insight_exploitdata(p_query_model):
-        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
-
-        from_ = max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC)
+    def on_insight_exploitdata():
+        from_ = 0
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {
@@ -110,11 +97,10 @@ class elastic_latest_document:
         }
 
         return ELASTIC_INDEX.S_EXPLOIT_INDEX, query_statement
-    @staticmethod
-    def on_insight_telegram_data(p_query_model):
-        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
 
-        from_ = max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC)
+    @staticmethod
+    def on_insight_telegram_data():
+        from_ = 0
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {
@@ -136,37 +122,28 @@ class elastic_latest_document:
         return ELASTIC_INDEX.S_CHATS_INDEX, query_statement
 
     @staticmethod
-    def on_insight_consolidated_data(p_query_model):
-        import copy
-        def clone_model(model):
-            return copy.deepcopy(model)
-
+    def on_insight_consolidated_data():
         queries = []
         indices = []
 
-        m1 = clone_model(p_query_model)
-        i1, q1 = elastic_latest_document.on_insight_leakdata(m1)
-        queries.append(elastic_latest_document._strip_query(q1))
+        i1, q1 = elastic_insight_generator.on_insight_leakdata()
+        queries.append(elastic_insight_generator._strip_query(q1))
         indices.append(i1)
 
-        m2 = clone_model(p_query_model)
-        i2, q2 = elastic_latest_document.on_insight_general_data(m2)
-        queries.append(elastic_latest_document._strip_query(q2))
+        i2, q2 = elastic_insight_generator.on_insight_general_data()
+        queries.append(elastic_insight_generator._strip_query(q2))
         indices.append(i2)
 
-        m3 = clone_model(p_query_model)
-        i3, q3 = elastic_latest_document.on_insight_exploitdata(m3)
-        queries.append(elastic_latest_document._strip_query(q3))
+        i3, q3 = elastic_insight_generator.on_insight_exploitdata()
+        queries.append(elastic_insight_generator._strip_query(q3))
         indices.append(i3)
 
-        m4 = clone_model(p_query_model)
-        i4, q4 = elastic_latest_document.on_insight_telegram_data(m4)
-        queries.append(elastic_latest_document._strip_query(q4))
+        i4, q4 = elastic_insight_generator.on_insight_telegram_data()
+        queries.append(elastic_insight_generator._strip_query(q4))
         indices.append(i4)
 
-        m5 = clone_model(p_query_model)
-        i5, q5 = elastic_latest_document.on_insight_defacement_data(m5)
-        queries.append(elastic_latest_document._strip_query(q5))
+        i5, q5 = elastic_insight_generator.on_insight_defacement_data()
+        queries.append(elastic_insight_generator._strip_query(q5))
         indices.append(i5)
 
         return indices, queries

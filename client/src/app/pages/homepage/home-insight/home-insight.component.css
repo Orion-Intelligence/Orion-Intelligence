@@ -108,10 +108,16 @@
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
+.home_insight__container-top {
+  margin: 0 20px 0 30px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .graph_insight_container {
   display: grid;
   gap: 20px;
-  margin: 30px 20px 0px 30px;
+  margin: 30px 20px 0 30px;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
@@ -165,7 +171,7 @@
   font-family: Roboto, sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: #ffffff;
+  color: #fff;
 }
 
 .attacker-info {

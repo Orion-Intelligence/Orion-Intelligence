@@ -5,14 +5,9 @@
     <app-customize-bar-chart [graphModel]="GraphData"></app-customize-bar-chart>
     <app-customize-bar-chart [graphModel]="GraphData"></app-customize-bar-chart>
   </div>
-  <br><br>
   <div *ngFor="let modelKey of latestDocumentModelKeys">
-    <div class="home_insight__container">
+    <div class="home_insight__container home_insight__container-top mt-4">
       <div *ngFor="let item of getResultItems(modelKey); let first = first" class="card-container">
-
-        <div *ngIf="first" class="home_insight__header">
-          {{ formatModelKey(modelKey) }} Index
-        </div>
 
         <div class="header-section">
           <div class="company-info">
@@ -50,8 +45,8 @@
 
       </div>
     </div>
-    <br><br><br>
   </div>
+  <br><br>
 
   <div *ngFor="let model of models">
     <div class="home_insight__container">

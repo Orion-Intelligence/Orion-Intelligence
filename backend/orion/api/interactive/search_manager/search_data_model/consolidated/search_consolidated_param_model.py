@@ -1,10 +1,10 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class search_consolidated_param_model(BaseModel):
-    q: Optional[str] = Field("", max_length=150)
+    q: Optional[str] = ""
     mSearchParamType: Optional[str] = "all"
     mSearchParamPage: Optional[int] = 1
     mSearchParamSafeSearch: bool = False

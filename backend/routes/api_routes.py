@@ -50,8 +50,7 @@ async def get_directory(param: dump_param_model = Depends()):
                 description="Retrieve analytics and strategic insights for dashboard overview.")
 async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
-    consolidated_param = search_consolidated_param_model() 
-    latestDocument_task = homepage_model.getInstance().insight_consolidated_result(consolidated_param)
+    latestDocument_task = homepage_model.getInstance().insight_consolidated_result()
     insights, latestDocument = await asyncio.gather(insights_task, latestDocument_task)
     return {
         "insights": insights,
