@@ -5,7 +5,7 @@
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
     <ng-container *ngIf="i < 1 || last">
       <div class="home_insight__container home_insight__container-top mt-4">
-        <div *ngFor="let item of getResultItems(modelKey); let i = index; let last = last" class="card-container">
+        <div *ngFor="let item of getResultItems(modelKey);" class="card-container">
           <div class="header-section">
             <div class="company-info">
               <div class="label">Company Name</div>
