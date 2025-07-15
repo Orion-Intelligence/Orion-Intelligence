@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 
 from fastapi import APIRouter
@@ -48,7 +49,14 @@ async def get_directory(param: dump_param_model = Depends()):
 @api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Retrieve analytics and strategic insights for dashboard overview.")
 async def get_insight():
-    return await homepage_model.getInstance().invoke_analytics()
+    insights_task = homepage_model.getInstance().invoke_analytics()
+    consolidated_param = search_consolidated_param_model() 
+    latestDocument_task = homepage_model.getInstance().insight_consolidated_result(consolidated_param)
+    insights, latestDocument = await asyncio.gather(insights_task, latestDocument_task)
+    return {
+        "insights": insights,
+        "latestDocument": latestDocument
+    }
 
 
 @api_routes.get("/api/search/strategic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
