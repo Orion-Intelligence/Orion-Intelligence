@@ -51,12 +51,19 @@ async def get_directory(param: dump_param_model = Depends()):
 async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
     latestDocument_task = homepage_model.getInstance().insight_consolidated_result()
-    insights, latestDocument = await asyncio.gather(insights_task, latestDocument_task)
+    graph_insight_task = homepage_model.getInstance().invoke_graphs()
+
+    insights, latestDocument, graph_insight = await asyncio.gather(
+        insights_task,
+        latestDocument_task,
+        graph_insight_task
+    )
+
     return {
         "insights": insights,
-        "latestDocument": latestDocument
+        "latestDocument": latestDocument,
+        "graph_insight": graph_insight
     }
-
 
 @api_routes.get("/api/search/strategic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search strategic intelligence reports using filters like category, title, date, or hash.")
@@ -79,22 +86,28 @@ async def search_telegram(param: search_credential_param_model = Depends()):
 async def search_consolidated(param: search_consolidated_param_model = Depends()):
     return await search_model.getInstance().search_consolidated_result(param)
 
-@api_routes.get("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+
+@api_routes.get("/api/search/consolidated/ranked",
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Depends()):
     return await search_model.getInstance().search_consolidated_ranked_result(param)
+
 
 @api_routes.get("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_chat_param_model = Depends()):
     return await search_model.getInstance().search_telegram_result(param)
 
+
 @api_routes.get("/api/social/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_discussion(param: search_general_param_model = Depends()):
     return await search_model.getInstance().search_discussion_result(param)
 
+
 @api_routes.get("/api/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_twitter(param: search_social_param_model = Depends()):
     return await search_model.getInstance().search_social_result(param)
+
 
 @api_routes.get("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
@@ -159,10 +172,12 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, al
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
+
 @api_routes.get("/api/search/social/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Get a specific strategic report document by its document ID and optional language.")
 async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_social_doc(doc_id, lang)
+
 
 @api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Perform a dynamic search for emails found in breach and defacement data.")

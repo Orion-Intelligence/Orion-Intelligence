@@ -1,9 +1,6 @@
 <div id="analytics">
   <div class="graph_insight_container">
-    <app-customize-bar-chart [graphModel]="GraphData"></app-customize-bar-chart>
-    <app-customize-bar-chart [graphModel]="GraphData"></app-customize-bar-chart>
-    <app-customize-bar-chart [graphModel]="GraphData"></app-customize-bar-chart>
-    <app-customize-bar-chart [graphModel]="GraphData"></app-customize-bar-chart>
+    <app-customize-bar-chart *ngFor="let graph of GraphData" [graphModel]="graph"></app-customize-bar-chart>
   </div>
   <div *ngFor="let modelKey of latestDocumentModelKeys">
     <div class="home_insight__container home_insight__container-top mt-4">
@@ -37,10 +34,7 @@
         <div class="home_insight__divider"></div>
 
         <div class="footer-section">
-          <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report"
-            [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]"
-            class="view-details-button">View
-            Details</button>
+          <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report" [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]" class="view-details-button">View Details</button>
         </div>
 
       </div>
@@ -61,11 +55,11 @@
                    : 'This is the Defacement'
                " class="home_insight__header">
             {{
-            model === 'general'
-            ? 'Generic Index'
-            : model === 'leak'
-            ? 'Leaked Index'
-            : 'Defacement Index'
+              model === 'general'
+                ? 'Generic Index'
+                : model === 'leak'
+                  ? 'Leaked Index'
+                  : 'Defacement Index'
             }}
           </div>
 

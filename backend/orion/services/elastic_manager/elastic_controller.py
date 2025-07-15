@@ -2,7 +2,6 @@ import pprint
 from datetime import datetime, timezone
 from string import capwords
 from elasticsearch import AsyncElasticsearch
-
 from orion.constants.constant import CONSTANTS
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
@@ -129,6 +128,37 @@ class elastic_controller:
                 results.append(None)
         return results
 
+    async def generate_graph(self):
+        try:
+            queries = self.__m_elastic_request_generator.generate_graph_queries()
+            all_bucket_data = []
+
+            for query in queries:
+                result = await self.__m_connection.search(
+                    index=query[ELASTIC_KEYS.S_DOCUMENT],
+                    body=query[ELASTIC_KEYS.S_FILTER]
+                )
+
+                aggs = result.get("aggregations", {})
+                for agg_name, agg_result in aggs.items():
+                    buckets = agg_result.get("buckets", [])
+                    data = {
+                        "aggregation_name": agg_name,
+                        "index": query[ELASTIC_KEYS.S_DOCUMENT],
+                        "buckets": []
+                    }
+                    for bucket in buckets:
+                        data["buckets"].append({
+                            "key": bucket.get("key"),
+                            "count": bucket.get("doc_count")
+                        })
+                    all_bucket_data.append(data)
+
+            return True, all_bucket_data
+
+        except Exception as ex:
+            log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
+            return False, None
 
     async def get_insight(self):
         try:

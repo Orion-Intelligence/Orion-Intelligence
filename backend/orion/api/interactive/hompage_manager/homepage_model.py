@@ -21,11 +21,24 @@ class homepage_model:
         return homepage_model.__instance
 
     @staticmethod
+    async def invoke_graphs():
+        redis_instance = redis_controller.getInstance()
+        redis_key = f"{REDIS_KEYS.GRAPH_INSIGHT_STAT}"
+        result = await elastic_controller.get_instance().generate_graph()
+        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+
+        if cached:
+            try:
+                return json.loads(cached)
+            except Exception as _:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
+        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(result), 86400])
+        return result
+
+    @staticmethod
     async def invoke_analytics():
-        results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING,
-                                                                      [REDIS_KEYS.INSIGHT_STAT,
-                                                                       InsightComparisonModel().model_dump_json(),
-                                                                       None])
+        results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, InsightComparisonModel().model_dump_json(), None])
         if not results:
             print("Error: No data retrieved from Redis")
             return None
@@ -33,6 +46,8 @@ class homepage_model:
         try:
             parsed_results = json.loads(results)
             validated_results = InsightComparisonModel.model_validate(parsed_results)
+
+
             return validated_results
         except json.JSONDecodeError as e:
             print(f"JSON Decode Error: {e}")

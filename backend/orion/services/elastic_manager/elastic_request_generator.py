@@ -1674,6 +1674,74 @@ class elastic_request_generator:
         return index_entries
 
     @staticmethod
+    def generate_graph_queries():
+        queries = [
+            {
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
+                ELASTIC_KEYS.S_FILTER: {
+                    "size": 0,
+                    "query": {
+                        "term": {
+                            "m_content_type": "leaks"
+                        }
+                    },
+                    "aggs": {
+                        "Top Teams (Leak)": {
+                            "terms": {
+                                "field": "m_team",
+                                "size": 4
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+                ELASTIC_KEYS.S_FILTER: {
+                    "size": 0,
+                    "aggs": {
+                        "Top Teams (Defacement)": {
+                            "terms": {
+                                "field": "m_team",
+                                "size": 4
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+                ELASTIC_KEYS.S_FILTER: {
+                    "size": 0,
+                    "aggs": {
+                        "Top Locations (Defacement)": {
+                            "terms": {
+                                "field": "m_location",
+                                "size": 4
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_CHATS_INDEX,
+                ELASTIC_KEYS.S_FILTER: {
+                    "size": 0,
+                    "aggs": {
+                        "Top Hashtags (Social)": {
+                            "terms": {
+                                "field": "m_hashtags",
+                                "size": 4
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+
+        return queries
+
+    @staticmethod
     def generate_insight_queries():
         queries = [
             {
