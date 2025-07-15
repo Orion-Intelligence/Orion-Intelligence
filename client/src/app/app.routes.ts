@@ -186,7 +186,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'archive',
+            redirectTo: 'hacked',
             pathMatch: 'full'
           },
           {
