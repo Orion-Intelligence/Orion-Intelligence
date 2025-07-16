@@ -1,7 +1,7 @@
 import asyncio
 from fastapi import HTTPException
 
-MAX_CONCURRENT_REQUESTS = 1
+MAX_CONCURRENT_REQUESTS = 15
 MAX_QUEUE_SIZE = 50
 
 semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)

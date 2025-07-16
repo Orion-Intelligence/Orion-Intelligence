@@ -18,12 +18,7 @@ from orion.api.server.crawl_manager.crawl_controller import crawl_controller
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
-crawl_routes = APIRouter(
-    dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.CRAWLER])),
-        Depends(limiter_dependency)
-    ]
-)
+crawl_routes = APIRouter()
 
 
 @crawl_routes.get("/api/feeder/{index_type}",
@@ -44,91 +39,77 @@ async def index_leak_data(request: Request):
 
 @crawl_routes.post("/api/index/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_leak_data(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_news_index(LeakDataModel(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_news_index(LeakDataModel(**body))
 
 
 @crawl_routes.post("/api/index/exploit", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_leak_data(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_exploit_index(ExploitDataModel(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_exploit_index(ExploitDataModel(**body))
 
 
 @crawl_routes.post("/api/index/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_defacement_data(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_defacement_index(DefacementDataModel(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_defacement_index(DefacementDataModel(**body))
 
 
 @crawl_routes.post("/api/screenshot", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def screenshot(payload: ScreenshotPayload, _=Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))):
-    return {}
-    # return await crawl_model.getInstance().invoke_file_upload(payload)
+    return await crawl_model.getInstance().invoke_file_upload(payload)
 
 
 @crawl_routes.post("/api/index/generic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_generic(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_generic_index(GeneralDataModel(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_generic_index(GeneralDataModel(**body))
 
 
 @crawl_routes.post("/api/nlp/parse", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def parse_text(payload: nlp_data_model):
-    return {}
-    # return await crawl_controller.getInstance().parse_chat(payload)
+    return await crawl_controller.getInstance().parse_chat(payload)
 
 
 @crawl_routes.post("/api/nlp/parse/ai", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def parse_text(payload: nlp_data_model):
-    return {}
-    # return await crawl_controller.getInstance().parse_chat_ai(payload)
+    return await crawl_controller.getInstance().parse_chat_ai(payload)
 
 
 @crawl_routes.post("/api/nlp/summarize/ai", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def parse_text(payload: nlp_data_model):
-    return {}
-    # return await crawl_controller.getInstance().parse_summarize_ai(payload)
+    return await crawl_controller.getInstance().parse_summarize_ai(payload)
 
 
 @crawl_routes.post("/api/index/chat", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_chat_data(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_chat_index(chat_data_model(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_chat_index(chat_data_model(**body))
 
 @crawl_routes.post("/api/index/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def index_social_data(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_social_index(social_data_model(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_social_index(social_data_model(**body))
 
 @crawl_routes.post("/api/index/credential", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_credential_data(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_credential_index(credential_data_model(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_credential_index(credential_data_model(**body))
 
 @crawl_routes.post("/api/index/entity", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_entity(request: Request):
-    return {}
-    # body = await request.json()
-    # await crawl_controller.getInstance().invoke_entity_index(entity_model(**body))
+    body = await request.json()
+    await crawl_controller.getInstance().invoke_entity_index(entity_model(**body))
 
 
 @crawl_routes.post("/api/index/dump", dependencies=[Depends(limiter_dependency)])
 async def index_dump(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_dump_index(DumpModel(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_dump_index(DumpModel(**body))
 
 @crawl_routes.post("/api/index/stealerlog", dependencies=[Depends(limiter_dependency)])
 async def index_stealerlog(request: Request):
-    return {}
-    # body = await request.json()
-    # model = LogModel(**body)
-    # return await crawl_controller.getInstance().invoke_stealerlog_index(model)
+    body = await request.json()
+    model = LogModel(**body)
+    return await crawl_controller.getInstance().invoke_stealerlog_index(model)
 
