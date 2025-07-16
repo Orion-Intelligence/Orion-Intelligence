@@ -201,48 +201,53 @@ class elastic_controller:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, None
 
+    from copy import deepcopy
+
     async def index_data(self, p_data):
         try:
-            log.g().i("Starting index_data operation")
-
             def ensure_creation_date(p_entry):
                 data = p_entry[ELASTIC_KEYS.S_VALUE]
-                if "m_creation_date" not in data:
-                    data["m_creation_date"] = datetime.now(timezone.utc).isoformat()
-                    log.g().i(f"Added m_creation_date to entry: {data['m_creation_date']}")
 
-                for key in list(data.keys()):
-                    value = data[key]
+                if not data.get("m_creation_date"):
+                    data["m_creation_date"] = datetime.now(timezone.utc).isoformat()
+
+                keys_to_remove = []
+
+                for key, value in data.items():
                     if isinstance(value, list):
-                        filtered = [v for v in value if v not in (None, "") and str(v).lower() != "null"]
+                        filtered = [v for v in value if v and str(v).lower() != "null"]
                         if filtered:
                             data[key] = filtered
                         else:
-                            del data[key]
-                            log.g().i(f"Removed empty list field: {key}")
-                    elif value is None or value == "" or (isinstance(value, str) and value.lower() == "null"):
-                        del data[key]
-                        log.g().i(f"Removed null/empty field: {key}")
+                            keys_to_remove.append(key)
+                    elif value in (None, "", "null", "NULL", "Null"):
+                        keys_to_remove.append(key)
+
+                for key in keys_to_remove:
+                    del data[key]
 
                 return p_entry
 
             if isinstance(p_data, list):
-                log.g().i(f"Indexing list of {len(p_data)} entries")
                 for entry in p_data:
                     entry = ensure_creation_date(entry)
-                    doc_id = entry[ELASTIC_KEYS.S_VALUE]["m_hash"]
-                    log.g().i(f"Indexing document with ID: {doc_id}")
+                    doc_id = entry[ELASTIC_KEYS.S_VALUE].get("m_hash")
+                    if not doc_id:
+                        log.g().w("Skipping document due to missing m_hash")
+                        continue
 
                     await self.__m_connection.update(
                         index=entry[ELASTIC_KEYS.S_DOCUMENT],
                         id=doc_id,
                         body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
                     )
+
             else:
-                log.g().i("Indexing single entry")
                 p_data = ensure_creation_date(p_data)
-                doc_id = p_data[ELASTIC_KEYS.S_VALUE]["m_hash"]
-                log.g().i(f"Indexing document with ID: {doc_id}")
+                doc_id = p_data[ELASTIC_KEYS.S_VALUE].get("m_hash")
+                if not doc_id:
+                    log.g().w("Skipping indexing due to missing m_hash")
+                    return False, "Missing m_hash in document"
 
                 await self.__m_connection.update(
                     index=p_data[ELASTIC_KEYS.S_DOCUMENT],
@@ -250,7 +255,6 @@ class elastic_controller:
                     body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
                 )
 
-            log.g().i("Indexing operation completed successfully")
             return True, None
 
         except Exception as ex:
