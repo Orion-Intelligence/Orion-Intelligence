@@ -87,7 +87,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 10G
 
   traefik:
     image: traefik:v2.10
