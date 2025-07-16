@@ -1231,29 +1231,44 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealerlogs_data(p_query_model):
         raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else ""
+
         if raw_query:
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
-
-        query = {
-            "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "match": {
-                                "log": {
-                                    "query": raw_query,
-                                    "boost": 1.5
+            query = {
+                "query": {
+                    "bool": {
+                        "should": [
+                            {
+                                "match": {
+                                    "log": {
+                                        "query": raw_query,
+                                        "boost": 1.5
+                                    }
                                 }
                             }
-                        }
-                    ],
-                    "minimum_should_match": 1
-                }
-            },
-            "from": 0,
-            "size": 5,
-            "track_total_hits": True
-        }
+                        ],
+                        "minimum_should_match": 1
+                    }
+                },
+                "from": 0,
+                "size": 30,
+                "track_total_hits": True,
+                "sort": [
+                    {"timestamp": {"order": "desc"}}
+                ]
+            }
+        else:
+            query = {
+                "query": {
+                    "match_all": {}
+                },
+                "from": 0,
+                "size": 30,
+                "track_total_hits": True,
+                "sort": [
+                    {"timestamp": {"order": "desc"}}
+                ]
+            }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
