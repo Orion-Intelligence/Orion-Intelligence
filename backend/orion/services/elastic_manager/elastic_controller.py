@@ -78,19 +78,20 @@ class elastic_controller:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
     async def purge_old_records(self):
-        print("Purging expired records 6", flush=True)
-        m_request = {"query": {"range": {"timestamp": {"lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"}}}}
-        try:
-            print("Purging expired records 7", flush=True)
-            await self.__m_connection.delete_by_query(
-                index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
-                body=m_request,
-                ignore=[404],
-                request_timeout=300
-            )
-        except Exception as ex:
-            print("Purging expired records 8", flush=True)
-            log.g().e(f"Failed to delete old records: {str(ex)}")
+        pass
+        # print("Purging expired records 6", flush=True)
+        # m_request = {"query": {"range": {"timestamp": {"lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"}}}}
+        # try:
+        #     print("Purging expired records 7", flush=True)
+        #     await self.__m_connection.delete_by_query(
+        #         index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
+        #         body=m_request,
+        #         ignore=[404],
+        #         request_timeout=300
+        #     )
+        # except Exception as ex:
+        #     print("Purging expired records 8", flush=True)
+        #     log.g().e(f"Failed to delete old records: {str(ex)}")
 
     async def get_doc(self, index, doc_id: str):
         try:
@@ -200,8 +201,6 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, None
-
-    from copy import deepcopy
 
     async def index_data(self, p_data):
         try:
