@@ -85,7 +85,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 10G
 
   traefik:
     image: traefik:v2.10
@@ -218,9 +218,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 3G
         reservations:
-          memory: 128M
+          memory: 3G
 
 networks:
   shared_bridge:
