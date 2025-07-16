@@ -4,9 +4,9 @@ import {
   Component,
   OnInit
 } from '@angular/core';
-import {AppService} from '../../../../services/core/app.service';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {ActivatedRoute, Router} from '@angular/router';
+import { AppService } from '../../../../services/core/app.service';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -14,23 +14,23 @@ import {
   switchMap,
   timer
 } from 'rxjs';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {ConsolidatedParamModel} from '../../../model/results/consolidated/consolidated.param.model';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { ConsolidatedParamModel } from '../../../model/results/consolidated/consolidated.param.model';
 import {
   NgForOf,
   NgIf,
   TitleCasePipe
 } from '@angular/common';
-import {ResultComponent} from '../../result/result.component';
+import { ResultComponent } from '../../result/result.component';
 import {
   DashboardResultsGridComponent
 } from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
-import {ConsolidatedCallbackModel} from '../../../model/results/consolidated/consolidated.callback.model';
+import { ConsolidatedCallbackModel } from '../../../model/results/consolidated/consolidated.callback.model';
 import {
   DashboardResultExploitComponent
 } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {SortGroupedResultsPipe} from '../../../model/pipes/sort-grouped-results.pipe';
+import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { SortGroupedResultsPipe } from '../../../model/pipes/sort-grouped-results.pipe';
 import {
   ApiSubCategory,
   BreachSubCategory,
@@ -40,11 +40,12 @@ import {
   FeedSubCategory,
   GeneralSubCategory, SocialSubCategory
 } from '../../../enums/pages';
-import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import {
   DashboardResultSocialComponent
 } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import { ResultInsightsComponent } from "../result-insights/result-insights.component";
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -59,7 +60,8 @@ import {
     DashboardResultChatComponent,
     SortGroupedResultsPipe,
     TooltipDirective,
-    DashboardResultSocialComponent
+    DashboardResultSocialComponent,
+    ResultInsightsComponent
   ],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
@@ -129,14 +131,14 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(_ = false): void {
-    if(!this.isGrouped){
+    if (!this.isGrouped) {
       this.fetchRanked()
       return
     }
     if (!this.consolidatedParamModel.q) {
       this.isLoading = false;
       this.consolidatedParamModel.q = '';
-      this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
+      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
     }
 
     this.isLoading = true;
@@ -266,7 +268,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
     this.router.navigate([routePrefix], {
-      queryParams: {mSearchParamPage: 1},
+      queryParams: { mSearchParamPage: 1 },
       queryParamsHandling: 'merge'
     }).then();
   }

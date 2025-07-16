@@ -1,0 +1,108 @@
+<!-- Keyword Insights -->
+<div class="insight-card">
+    <div class="card_header" (click)="toggleKeyword()">
+        <span>Keyword insights</span>
+        <div [attr.aria-label]="isKeywordExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
+            <img [ngClass]="{ '_rotated': !isKeywordExpanded }" alt="toggle icon"
+                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+        </div>
+    </div>
+
+    <div class="card-body" *ngIf="isKeywordExpanded">
+        <ng-container *ngFor="let item of keywordData; let i = index">
+            <div class="stat-item">
+                <div class="stat-value">{{ item.value }}</div>
+                <div class="stat-label">{{ item.label }}</div>
+            </div>
+            <div class="divider" *ngIf="i < keywordData.length - 1"></div>
+        </ng-container>
+    </div>
+</div>
+
+<!-- Results General Coverage -->
+<div class="insight-card">
+    <div class="card_header" (click)="toggleCoverage()">
+        <span>Results General Coverage</span>
+        <div [attr.aria-label]="isCoverageExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
+            <img [ngClass]="{ '_rotated': !isCoverageExpanded }" alt="toggle icon"
+                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+        </div>
+    </div>
+
+    <div class="card-body" *ngIf="isCoverageExpanded">
+        <ng-container *ngFor="let item of coverageData; let i = index">
+            <div class="stat-item">
+                <div class="stat-value">{{ item.value }}</div>
+                <div class="stat-label">
+                    <span *ngIf="item.color" class="dot" [ngStyle]="{ backgroundColor: item.color }"></span>
+                    {{ item.label }}
+                </div>
+            </div>
+            <div class="divider" *ngIf="i < coverageData.length - 1"></div>
+        </ng-container>
+    </div>
+</div>
+
+<!-- Threat Actor Search Section -->
+<div class="insight-card">
+    <div class="card_header" (click)="toggleThreatActor()">
+        <span>Search in Threat Actor</span>
+        <div [attr.aria-label]="isThreatExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
+            <img [ngClass]="{ '_rotated': !isThreatExpanded }" alt="toggle icon"
+                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+        </div>
+    </div>
+
+    <div *ngIf="isThreatExpanded">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <div class="icon">
+                <img src="/assets/images/shared/magnifyingglasswhite.svg">
+            </div>
+            <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" />
+        </div>
+
+        <!-- Toggle Filters -->
+        <div class="filter-toggles">
+            <label *ngFor="let option of filterOptions">
+                <input type="radio" name="filter" [checked]="selectedFilter === option"
+                    (change)="toggleFilter(option)" />
+                {{ option }}
+            </label>
+        </div>
+
+        <!-- Search Results -->
+        <div class="search-result" *ngFor="let item of threatResults()">
+            <span>{{ item }}</span>
+            <div class="redirect-icon">
+                <img src="/assets/images/shared/redirect.svg">
+            </div>
+        </div>
+
+        <!-- Optional: no results message -->
+        <div class="no-result" *ngIf="searchQuery && threatResults().length === 0">
+            No results found.
+        </div>
+    </div>
+</div>
+
+<!-- Unique URLs Section -->
+<div class="insight-card">
+    <div class="card_header" (click)="toggleUniqueUrls()">
+        <span>Unique URLs</span>
+        <div [attr.aria-label]="isUrlsExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
+            <img [ngClass]="{ '_rotated': !isUrlsExpanded }" alt="toggle icon"
+                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+        </div>
+    </div>
+
+    <div class="scrollable" *ngIf="isUrlsExpanded">
+        <div class="url-item" *ngFor="let url of uniqueUrls">
+            <div class="url-title">
+                <span class="dot" [ngStyle]="{ backgroundColor: url.active ? '#1ec773' : '#e6534b' }"></span>
+                {{ url.title }}
+            </div>
+            <div class="url-link">{{ url.url }}</div>
+        </div>
+    </div>
+</div>

@@ -4,7 +4,7 @@
     <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
       <span>Listings</span>
       <img [class.rotate]="collapseToggle" alt="" class="chevron"
-           src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+        src="/assets/images/shared/search_side_dropdown_icon.svg" />
     </div>
     <div (click)="$event.stopPropagation()" [class.show]="collapseToggle" class="collapse" id="detailsCollapse">
       <br>
@@ -12,10 +12,11 @@
         <div class="col-12">
           <div class="d-flex align-items-center">
             <input [(ngModel)]="searchText"
-                   class="filter__input filter__input_date text-start justify-content-between align-items-center" placeholder="Search..."/>
+              class="filter__input filter__input_date text-start justify-content-between align-items-center"
+              placeholder="Search..." />
             <button (click)="onSearchClick()" class="btn date_picker_button_bg ms-2 filter__input_date-button"
-                    type="button">
-              <img alt="Search" class="date_picker_button_image" src="assets/images/shared/magnifyingglasswhite.svg"/>
+              type="button">
+              <img alt="Search" class="date_picker_button_image" src="assets/images/shared/magnifyingglassblack.svg" />
             </button>
           </div>
         </div>
@@ -45,7 +46,7 @@
         <div class="text-muted opacity-70">No results found.</div>
       </ng-template>
       <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }"
-            class="floating-copied">Copied!</span>
+        class="floating-copied">Copied!</span>
     </div>
   </div>
 </ng-container>

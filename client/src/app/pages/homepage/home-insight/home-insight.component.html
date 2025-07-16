@@ -34,7 +34,9 @@
           <div class="home_insight__divider"></div>
 
           <div class="footer-section">
-            <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report" [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]" class="view-details-button">View Details</button>
+            <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report"
+              [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]"
+              class="view-details-button">View Details</button>
           </div>
         </div>
       </div>
@@ -55,11 +57,11 @@
                    : 'This is the Defacement'
                " class="home_insight__header">
             {{
-              model === 'general'
-                ? 'Generic Index'
-                : model === 'leak'
-                  ? 'Leaked Index'
-                  : 'Defacement Index'
+            model === 'general'
+            ? 'Generic Index'
+            : model === 'leak'
+            ? 'Leaked Index'
+            : 'Defacement Index'
             }}
           </div>
 
