@@ -13,7 +13,7 @@
       </div>
     </div>
     <div *ngIf="isExpanded" class="content pt-3">
-      <div class="directory-list__container report-mapping">
+      <div class="directory-list__container report-mapping" *ngIf="filteredItems.length>0">
         <table class="table table-striped directory-list__table clear-paddings mb-0">
           <thead>
             <tr>
