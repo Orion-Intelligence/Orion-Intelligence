@@ -39,9 +39,8 @@ async def parser():
 
 @crawl_routes.post("/api/index/leak", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_leak_data(request: Request):
-    return {}
-    # body = await request.json()
-    # return await crawl_controller.getInstance().invoke_leak_index(LeakDataModel(**body))
+    body = await request.json()
+    return await crawl_controller.getInstance().invoke_leak_index(LeakDataModel(**body))
 
 @crawl_routes.post("/api/index/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_leak_data(request: Request):
