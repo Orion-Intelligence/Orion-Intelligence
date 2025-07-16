@@ -1,18 +1,18 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {NgClass, NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { NgClass, NgForOf, NgIf, NgOptimizedImage } from '@angular/common';
 import {
   DefacementModel,
   GenericModel,
   InsightCallbackModel,
   LeakModel
 } from '../../../shared/model/homepage/insight.model';
-import {LatestDocument, LatestDocumentCallbackModel} from '../../../shared/model/homepage/latestDocument.model';
-import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
-import {ScrollService} from '../../../shared/services/scroll.service';
-import {CustomizeBarChartComponent} from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
-import {GraphModel} from '../../../shared/model/charts/charts.model';
-import {GraphInsightCallbackModel} from '../../../shared/model/homepage/graph.insight.model';
+import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/latestDocument.model';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ScrollService } from '../../../shared/services/scroll.service';
+import { CustomizeBarChartComponent } from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
+import { GraphModel } from '../../../shared/model/charts/charts.model';
+import { GraphInsightCallbackModel } from '../../../shared/model/homepage/graph.insight.model';
 
 @Component({
   selector: 'app-home-insight',

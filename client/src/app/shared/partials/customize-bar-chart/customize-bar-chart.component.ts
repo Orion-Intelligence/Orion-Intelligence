@@ -100,7 +100,7 @@ export class CustomizeBarChartComponent {
 
     this.ctx.strokeStyle = '#374151';
     this.ctx.fillStyle = '#9CA3AF';
-    this.ctx.font = '14px Inter, sans-serif';
+    this.ctx.font = '10px Inter, sans-serif';
     this.ctx.textAlign = 'right';
 
     const dataMax = Math.max(...this.graphModel.data.map(item => item.value));
@@ -177,9 +177,13 @@ export class CustomizeBarChartComponent {
       this.ctx.fillStyle = '#2A5784';
       this.drawRoundedRect(this.ctx, x, filledY, actualBarWidth, filledHeight, barRadius, false, false, true, true);
 
+      const maxLabelLength = 10;
+      const truncatedLabel = item.name.length > maxLabelLength ? item.name.slice(0, maxLabelLength) + '…' : item.name;
+
       this.ctx.fillStyle = '#9CA3AF';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText(item.name, x + actualBarWidth / 2, this.padding.top + chartHeight + 25);
+      this.ctx.fillText(truncatedLabel, x + actualBarWidth / 2, this.padding.top + chartHeight + 25);
+
 
       const smallLineLength = actualBarWidth * 1.2;
       const smallLineX = x + actualBarWidth / 2 - smallLineLength / 2;
@@ -211,17 +215,23 @@ export class CustomizeBarChartComponent {
       this.ctx.stroke();
       this.ctx.lineWidth = 1;
 
-      const tooltipText = `${item.value.toLocaleString()}`;
-      this.ctx.font = '16px Inter, sans-serif';
-      const textMetrics = this.ctx.measureText(tooltipText);
-      const textWidth = textMetrics.width;
-      const textHeight = 20;
-      const tooltipPadding = 10;
-      const tooltipWidth = textWidth + tooltipPadding * 2;
-      const tooltipHeight = textHeight + tooltipPadding * 2;
+      const valueText = `${item.value.toLocaleString()}`;
+      const labelText = item.name;
+
+      this.ctx.font = '14px Inter, sans-serif';
+      const valueMetrics = this.ctx.measureText(valueText);
+      const labelMetrics = this.ctx.measureText(labelText);
+      const tooltipWidth = Math.max(valueMetrics.width, labelMetrics.width) + 20;
+      const tooltipHeight = 50;
 
       const tooltipX = barXCenter - tooltipWidth / 2;
-      const tooltipY = barTopY - tooltipHeight - 15;
+      // const tooltipY = barTopY - tooltipHeight - 15;
+      let tooltipY = barTopY - tooltipHeight - 15;
+
+
+      if (tooltipY < 0) {
+        tooltipY = barTopY + 15;
+      }
 
       this.ctx.fillStyle = 'white';
       this.ctx.beginPath();
@@ -239,16 +249,25 @@ export class CustomizeBarChartComponent {
       this.ctx.fill();
 
       this.ctx.beginPath();
-      this.ctx.moveTo(barXCenter - 5, barTopY - 15);
-      this.ctx.lineTo(barXCenter + 5, barTopY - 15);
-      this.ctx.lineTo(barXCenter, barTopY - 5);
+
+      if (tooltipY > barTopY) {
+        this.ctx.moveTo(barXCenter - 5, barTopY + 15);
+        this.ctx.lineTo(barXCenter + 5, barTopY + 15);
+        this.ctx.lineTo(barXCenter, barTopY + 5);
+      } else {
+        this.ctx.moveTo(barXCenter - 5, barTopY - 15);
+        this.ctx.lineTo(barXCenter + 5, barTopY - 15);
+        this.ctx.lineTo(barXCenter, barTopY - 5);
+      }
       this.ctx.closePath();
       this.ctx.fillStyle = 'white';
       this.ctx.fill();
 
       this.ctx.fillStyle = '#1F2937';
       this.ctx.textAlign = 'center';
-      this.ctx.fillText(tooltipText, barXCenter, tooltipY + tooltipHeight / 2 + 5);
+      this.ctx.font = '12px Inter, sans-serif';
+      this.ctx.fillText(labelText, barXCenter, tooltipY + 18);
+      this.ctx.fillText(valueText, barXCenter, tooltipY + 38);
     }
   }
 
