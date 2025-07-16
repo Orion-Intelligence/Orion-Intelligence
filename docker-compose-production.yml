@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   web:
     container_name: trusted-web-main
@@ -30,7 +32,7 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 2 --threads 2 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 2 --threads 2 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 180"
 
   arangodb:
     container_name: trusted-web-arangodb
@@ -64,7 +66,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
     env_file:
@@ -85,7 +87,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 10G
+          memory: 2G
 
   traefik:
     image: traefik:v2.10
@@ -103,7 +105,6 @@ services:
       - ./dockerFiles/traefik/api_collector.yml:/etc/traefik/api_collector.yml:ro
       - /etc/letsencrypt/live/orion.genesistechnologies.org/cert.pem:/certs/cert.pem:ro
       - /etc/letsencrypt/live/orion.genesistechnologies.org/privkey.pem:/certs/privkey.pem:ro
-
     restart: unless-stopped
     networks:
       - backend
@@ -123,9 +124,7 @@ services:
       - "traefik.http.routers.dozzle.entrypoints=websecure"
       - "traefik.http.routers.dozzle.middlewares=auth@file"
       - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
-
     restart: unless-stopped
-
 
   redis_server:
     container_name: trusted-web-redis
