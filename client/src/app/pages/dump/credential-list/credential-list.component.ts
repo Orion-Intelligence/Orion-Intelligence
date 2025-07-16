@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { NgForOf, NgIf } from '@angular/common';
-import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import {Component, OnInit} from '@angular/core';
+import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-credential-list',
@@ -9,7 +9,8 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
   templateUrl: './credential-list.component.html',
   imports: [
     NgForOf,
-    NgIf
+    NgIf,
+    DatePipe
   ]
 })
 export class CredentialListComponent implements OnInit {
@@ -46,7 +47,6 @@ export class CredentialListComponent implements OnInit {
         return [url, username, password][index] || "";
       }
     }
-
     return "";
   }
 

@@ -320,12 +320,12 @@ class elastic_request_generator:
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX
         ], unified_query, [
-            {ELASTIC_INDEX.S_LEAK_INDEX: 3},
-            {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 2.8},
+            {ELASTIC_INDEX.S_LEAK_INDEX: 2},
+            {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.8},
             {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
             {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4},
-            {ELASTIC_INDEX.S_CHATS_INDEX: 1.2},
-            {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.0}
+            {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
+            {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}
         ]
 
     @staticmethod
