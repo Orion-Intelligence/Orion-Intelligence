@@ -22,7 +22,6 @@ export class ResultInsightsComponent {
   searchQuery = '';
   filterOptions = ['All', 'Email', 'Name'];
   selectedFilter: string = 'All';
-  allResults: string[] = ['Alex Robert', 'alex.lawson@example.com', 'alissd', 'alisdsd'];
   emails: string[] = [];
   names: string[] = [];
 
@@ -46,7 +45,6 @@ export class ResultInsightsComponent {
     const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel);
     this.emails = emails;
     this.names = names;
-    alert(this.emails.join(', '));
   }
   toggleKeyword() {
     this.isKeywordExpanded = !this.isKeywordExpanded;
@@ -66,7 +64,6 @@ export class ResultInsightsComponent {
   }
   threatResults(): string[] {
     const query = this.searchQuery.trim().toLowerCase();
-    if (!query) return [];
 
     let source: string[] = [];
 
