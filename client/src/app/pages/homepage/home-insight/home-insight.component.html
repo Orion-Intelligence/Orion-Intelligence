@@ -1,7 +1,8 @@
 <div id="analytics">
-  <div class="graph_insight_container">
+  <div class="graph_insight_container mt-lg-5">
     <app-customize-bar-chart *ngFor="let graph of GraphData" [graphModel]="graph"></app-customize-bar-chart>
   </div>
+  <div class="home_insight__single">Top Data Leaks</div>
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
     <ng-container *ngIf="i < 1 || last">
       <div class="home_insight__container home_insight__container-top mt-4">

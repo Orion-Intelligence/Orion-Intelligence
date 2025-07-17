@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -37,6 +37,7 @@ class _csocybercrime(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
+        # Starting URL for the CSO Cybercrime section (page 1)
         return "https://www.csoonline.com/uk/cybercrime/"
 
     @property
@@ -45,7 +46,7 @@ class _csocybercrime(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_javascript=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.NEWS)
 
     @property
     def card_data(self) -> List:
@@ -78,25 +79,20 @@ class _csocybercrime(leak_extractor_interface, ABC):
         self._is_crawled = False
 
         page.add_init_script("""(() => {
-            const clickModalButton = () => {
-                const btn = document.querySelector("button.primary-action.subscribers-cta-button");
-                if (btn) btn.click();
-            };
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', clickModalButton);
-            } else {
-                clickModalButton();
-            }
-        })();""")
+               window.addEventListener('DOMContentLoaded', () => {
+                   try {
+                       const modalBtn = document.querySelector("body > div.subscribers-modal-container.aae7b662c59641bfa43e91a5d7a53ef8 > div.subscribers-modal.aae7b662c59641bfa43e91a5d7a53ef8.subscribers-modal-bottom-left > div.subscribers-actions > button.secondary-action.subscribers-no-button");
+                       if (modalBtn) modalBtn.click();
+                   } catch (e) {}
+               });
+           })();""")
 
         all_links = set()
 
+
         for page_num in range(1, 2):
             page_url = self.seed_url.rstrip('/') + (f"/page/{page_num}/" if page_num > 1 else "")
-            try:
-                page.goto(page_url, wait_until="domcontentloaded", timeout=30000)
-            except Exception as _:
-                pass
+            page.goto(page_url, wait_until="domcontentloaded", timeout=60000)
             page.wait_for_load_state("networkidle")
 
             soup = BeautifulSoup(page.content(), "html.parser")
@@ -109,11 +105,8 @@ class _csocybercrime(leak_extractor_interface, ABC):
 
         for idx, link in enumerate(all_links, 1):
             try:
-                try:
-                    page.goto(link, wait_until="domcontentloaded", timeout=5000)
-                except Exception as _:
-                    pass
-                page.wait_for_selector("article, div.article-body, div.content, section.article__body", timeout=5000)
+                page.goto(link, wait_until="domcontentloaded", timeout=60000)
+                page.wait_for_selector("article, div.article-body, div.content, section.article__body", timeout=10000)
 
                 soup = BeautifulSoup(page.content(), "html.parser")
                 title_tag = soup.select_one("h1")
@@ -157,3 +150,5 @@ class _csocybercrime(leak_extractor_interface, ABC):
                 continue
 
         self._is_crawled = True
+
+

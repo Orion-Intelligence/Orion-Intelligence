@@ -55,6 +55,15 @@
   margin-top: -80px;
 }
 
+.home_insight__single{
+  font-size: 16px;
+  font-family: Roboto, sans-serif;
+  color: #fff;
+  opacity: 0.5;
+  margin-left: 30px;
+  margin-top: 30px;
+}
+
 .home_insight__content {
   display: flex;
   align-items: flex-start;
