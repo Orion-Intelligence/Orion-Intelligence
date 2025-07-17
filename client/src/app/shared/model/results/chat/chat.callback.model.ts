@@ -2,6 +2,7 @@ import {Suggestion} from '../shared/common-result';
 
 export class ChatResultItem {
   m_content?: string;
+  m_platform?: string;
   m_caption?: string;
   m_summary: string[] = [];
   m_message_date?: string;
@@ -15,6 +16,7 @@ export class ChatResultItem {
   m_file_path?: string;
   m_channel_name?: string;
   m_weblink: string[] = [];
+  m_network?: string;
   m_ref_html?: string;
   m_content_type?: string[];
   m_hash?: string;

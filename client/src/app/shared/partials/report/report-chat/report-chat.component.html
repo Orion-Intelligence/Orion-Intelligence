@@ -62,6 +62,18 @@
         <p>Sender:</p>
         <span>{{ resultItem.m_sender_name }}</span>
       </div>
+      <div *ngIf="resultItem.m_message_id" class="search__result-detail-meta-divs">
+        <p>Message ID:</p>
+        <span>{{ resultItem.m_message_id }}</span>
+      </div>
+      <div *ngIf="resultItem.m_platform" class="search__result-detail-meta-divs">
+        <p>Platform:</p>
+        <span>{{ resultItem.m_platform }}</span>
+      </div>
+      <div *ngIf="resultItem.m_network" class="search__result-detail-meta-divs">
+        <p>Network:</p>
+        <span>{{ resultItem.m_network }}</span>
+      </div>
     </div>
   </div>
 
@@ -86,6 +98,7 @@
       </div>
 
       <div class="search__result-tabs-line"></div>
+
       <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
 
       <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem [activeTab]="activeTab" [listItems]="listItems"></app-result-list>

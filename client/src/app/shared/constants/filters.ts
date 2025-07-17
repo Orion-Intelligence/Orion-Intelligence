@@ -43,7 +43,7 @@ export const directory_filters: FilterModel = {
         {key: "onion", label: "Onion"},
         {key: "i2p", label: "I2P"},
         {key: "clearnet", label: "Clearnet"},
-        {key: "telegram", label: "Telegram"},
+        {key: "telegram", label: "Telegram"}
       ],
       type: "dropdown",
       tooltip: "Web Layers",
@@ -59,6 +59,7 @@ export const directory_filters: FilterModel = {
         {key: "chat", label: "Chat"},
         {key: "exploit", label: "Exploit"},
         {key: "twitter", label: "Twitter"},
+        {key: "reddit", label: "Reddit"},
       ],
       type: "dropdown",
       tooltip: "",

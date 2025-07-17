@@ -52,7 +52,7 @@ class crawl_model:
         if network_type != "telegram":
             normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
 
-        if base_url.__contains__("twitter"):
+        if base_url.__contains__("twitter") or base_url.__contains__("reddit") or base_url.__contains__("forum"):
             normalized_url = base_url
 
         general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)

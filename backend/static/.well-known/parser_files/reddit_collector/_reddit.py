@@ -121,24 +121,23 @@ class _reddit(leak_extractor_interface, ABC):
                 except:
                     parsed_date = None
 
-            full_content = post['title']
+            full_content = "\n".join(item['content'] for item in post['comments'])
             if post.get('content'):
                 full_content += f"\n\n{post['content']}"
 
             card_data = social_model(
+                m_title=post['title'],
                 m_channel_url=subreddit_url,
                 m_sender_name=post.get('username') or "unknown",
                 m_message_sharable_link=post['url'],
                 m_weblink=post.get('weblinks', []),
                 m_content=full_content[:500],
-                m_content_type=["reddit"],
+                m_content_type=["social"],
                 m_network="clearnet",
                 m_message_date=parsed_date,
                 m_message_id=post['id'],
                 m_platform="reddit",
                 m_group_name=subreddit_name,
-                m_group_info=json.dumps(self._subreddit_metadata),
-                m_post_comments=json.dumps(post['comments'][:max_comments])
             )
 
             entity_data = entity_model(

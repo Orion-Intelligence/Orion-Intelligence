@@ -49,6 +49,7 @@ export enum SocialSubCategory {
   TELEGRAM = 'Telegram',
   TWITTER = 'Twitter',
   FORUM = 'Forum',
+  REDDIT = 'Reddit',
 }
 
 export enum ExploitSubCategory {

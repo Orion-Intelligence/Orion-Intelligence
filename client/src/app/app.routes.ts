@@ -222,6 +222,11 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'reddit',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
             path: ':category',
             component: DashboardChatsComponent,
             data: {type: 'Social', animation: 'CategoryPage'}

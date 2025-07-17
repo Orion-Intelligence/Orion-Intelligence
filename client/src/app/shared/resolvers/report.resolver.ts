@@ -35,7 +35,7 @@ export class ReportResolver implements Resolve<any> {
         apiUrl = hash ? `search/defacement/${hash}` : `search/defacement`;
         break;
       case 'social':
-        if (category_2 == "twitter")
+        if (category_2 == "twitter" || category_2 == "reddit")
           apiUrl = hash ? `search/social/${hash}` : `search/social`;
         else
           apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
