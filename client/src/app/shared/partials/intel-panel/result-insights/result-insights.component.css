@@ -1,5 +1,5 @@
 .insight-card {
-    width: 400px;
+    width: 500px;
     background: var(--dasshboard-sidebar-bg-light);
     border-radius: 8px;
     padding: 1rem;
@@ -147,7 +147,7 @@
 }
 
 .scrollable {
-    max-height: 180px;
+    max-height: 250px;
     overflow-y: auto;
     padding-right: 0.5rem;
 }
@@ -156,6 +156,10 @@
     width: 100%;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 0.75rem 0;
+}
+
+.no-border {
+    border-bottom: none !important;
 }
 
 .scrollable .url-item .url-title {

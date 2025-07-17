@@ -2,6 +2,8 @@ export interface LatestDocument {
     title: string;
     date: string;
     location: string;
+    phoneNumber: string,
+    url: string,
     source: string;
     hash: string;
 }

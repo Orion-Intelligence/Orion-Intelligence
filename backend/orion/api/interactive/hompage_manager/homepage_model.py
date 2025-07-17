@@ -115,17 +115,36 @@ class homepage_model:
         display_date = homepage_model.parse_date_fallback(raw_date)
 
         locations = []
+        phoneNumbers=[]
+        urls=[]
         if model_key == "defacement_model" and item.get("m_location"):
             if isinstance(item["m_location"], list):
                 locations = item["m_location"]
             elif isinstance(item["m_location"], str):
                 locations = [loc.strip() for loc in item["m_location"].split(",")]
-        elif model_key == "leak_model" and item.get("m_country_name"):
-            if isinstance(item["m_country_name"], str):
-                locations = [loc.strip() for loc in item["m_country_name"].split(",")]
+        elif model_key == "leak_model":
+            if item.get("m_country_name"):
+                if isinstance(item["m_country_name"], str):
+                    locations = [loc.strip() for loc in item["m_country_name"].split(",")]
+            elif item.get("m_phone_numbers"):
+                if isinstance(item["m_phone_numbers"], list):
+                    phoneNumber = item["m_phone_numbers"]
+                elif isinstance(item["m_phone_numbers"], str):
+                    phoneNumber = [num.strip() for num in item["m_phone_numbers"].split(",")] 
+            elif item.get("m_url"):
+                if isinstance(item["m_url"], list):
+                    phoneNumber = item["m_url"]
+                elif isinstance(item["m_url"], str):
+                    urls = [num.strip() for num in item["m_url"].split(",")]
 
         location_summary = ", ".join(locations)
-        location_summary = location_summary[:24] + "..." if len(location_summary) > 24 else location_summary or "-"
+        location_summary = location_summary[:24] + "..." if len(location_summary) > 24 else location_summary
+
+        phoneNumber=", ".join(phoneNumbers)
+        phoneNumber= phoneNumbers[:24] + "..." if len(phoneNumbers) > 24 else phoneNumbers
+
+        url=", ".join(urls)
+        url= urls[:24] + "..." if len(urls) > 24 else urls
 
         source = "-"
         if model_key == "defacement_model":
@@ -143,6 +162,8 @@ class homepage_model:
             "title": display_title,
             "date": display_date,
             "location": location_summary,
+            "phoneNumber":phoneNumber,
+            "url":url,
             "source": source,
             "hash":m_hash,
         }

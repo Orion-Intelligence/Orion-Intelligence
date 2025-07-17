@@ -65,12 +65,11 @@
                 {{ option }}
             </label>
         </div>
-
-        <div class="search-result" *ngFor="let item of threatResults()">
-            <span>{{ item }}</span>
-            <!-- <div class="redirect-icon">
-                <img src="/assets/images/shared/redirect.svg">
-            </div> -->
+        <div class="scrollable" *ngIf="isUrlsExpanded">
+            <div class="search-result" *ngFor="let item of threatResults() let isLast = last"
+                [ngClass]="{ 'no-border': isLast }">
+                <span>{{ item }}</span>
+            </div>
         </div>
 
         <div class="no-result" *ngIf="searchQuery && threatResults().length === 0">
@@ -89,12 +88,12 @@
     </div>
 
     <div class="scrollable" *ngIf="isUrlsExpanded">
-        <div class="url-item" *ngFor="let url of uniqueUrls">
+        <div class="url-item" *ngFor="let url of uniqueUrls let isLast = last" [ngClass]="{ 'no-border': isLast }">
             <div class="url-title">
                 <span class="dot" [ngStyle]="{ backgroundColor: url.status ? '#1ec773' : '#e6534b' }"></span>
-                {{ url.title }}
+                {{ url.title.length > 50 ? (url.title | slice: 0:50) + '…' : url.title }}
             </div>
-            <div class="url-link">{{ url.url }}</div>
+            <div class="url-link">{{ url.url.length > 130 ? (url.url | slice: 0:1130) + '…' : url.url }}</div>
         </div>
     </div>
 </div>

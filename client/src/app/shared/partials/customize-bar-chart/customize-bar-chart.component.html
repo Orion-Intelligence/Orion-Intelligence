@@ -7,6 +7,26 @@
 
     <div class="separator-line"></div>
 
-    <canvas #chartCanvas class="chart-canvas" (mousemove)="onMouseMove($event)" (mouseleave)="onMouseLeave()">
-    </canvas>
+    <div class="bar-chart-grid">
+        <div class="y-axis">
+            <div *ngFor="let step of [4, 3, 2, 1, 0] ">
+                {{ round((step / 4) * roundedMaxValue).toLocaleString() }}
+            </div>
+        </div>
+
+        <div class="bar-area">
+            <div class="bars">
+                <div class="bar-wrapper" *ngFor="let item of graphModel.data; let i = index">
+                    <div class="bar-container">
+                        <div class="bar" [style.height.%]="(item.value / roundedMaxValue) * 100"
+                            [appTooltip]="item.name + ': ' + item.value.toLocaleString()" tooltipPosition="top"></div>
+                    </div>
+
+                    <div class="bar-label">
+                        {{ item.name.length > 10 ? (item.name | slice: 0:10) + '…' : item.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
