@@ -27,24 +27,18 @@ export class ResultInsightsComponent {
 
   uniqueUrls: UniqueLinkItem[] = [];
 
-  keywordData = [
-    { value: 3432, label: 'Total Found' },
-    { value: 2435, label: 'Documents' },
-    { value: 323, label: 'Links' },
-    { value: 764, label: 'Pages' },
-  ];
-
-  coverageData = [
-    { value: 3432, label: 'Total' },
-    { value: 2435, label: 'Active', color: '#1ec773' },
-    { value: 323, label: 'Inactive', color: '#e6534b' },
-    { value: 764, label: 'Seldom', color: '#f08b36' },
-  ];
+  keywordData: { value: number, label: string }[] = [];
+  coverageData: { value: number, label: string, color: string }[] = [];
   ngOnInit(): void {
     this.uniqueUrls = this.getUniqueLinks(this.consolidatedCallbackModel);
     const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel);
     this.emails = emails;
     this.names = names;
+    this.keywordData.push({ value: this.getTotalResultCount(this.consolidatedCallbackModel), label: 'Total Found' })
+    this.keywordData.push({ value: this.emails.length + this.names.length, label: 'Documents' })
+    this.keywordData.push({ value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel), label: 'Links' })
+    this.keywordData.push({ value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages' })
+    this.getCoverageSummaryFromModels(this.consolidatedCallbackModel);
   }
   toggleKeyword() {
     this.isKeywordExpanded = !this.isKeywordExpanded;
@@ -82,8 +76,28 @@ export class ResultInsightsComponent {
 
     return source.filter(item => item.toLowerCase().includes(query));
   }
+  getTotalResultCount(consolidated: ConsolidatedCallbackModel): number {
+    return (
+      (consolidated.leak_model?.Result?.length || 0) +
+      (consolidated.chat_model?.Result?.length || 0) +
+      (consolidated.exploit_model?.Result?.length || 0) +
+      (consolidated.generic_model?.Result?.length || 0) +
+      (consolidated.defacement_model?.Result?.length || 0) +
+      (consolidated.social_model?.Result?.length || 0)
+    );
+  }
+  getActiveModelCount(consolidated: ConsolidatedCallbackModel): number {
+    const models = [
+      consolidated.leak_model,
+      consolidated.exploit_model,
+      consolidated.chat_model,
+      consolidated.generic_model,
+      consolidated.social_model,
+      consolidated.defacement_model,
+    ];
 
-
+    return models.filter(model => model && model.Result && model.Result.length > 0).length;
+  }
   getUniqueLinks(consolidated: ConsolidatedCallbackModel): UniqueLinkItem[] {
     const linkMap = new Map<string, UniqueLinkItem>();
 
@@ -94,7 +108,6 @@ export class ResultInsightsComponent {
       }
     };
 
-    // General
     consolidated.generic_model?.Result?.forEach(item => {
       addToMap(item.m_url, item.m_title, item.m_creation_date);
       item.m_clearnet_links?.forEach(link => addToMap(link, item.m_title, item.m_creation_date));
@@ -102,31 +115,26 @@ export class ResultInsightsComponent {
       item.m_dumplink?.forEach(link => addToMap(link, item.m_title, item.m_creation_date));
     });
 
-    // Leak (same as general if applicable)
     consolidated.leak_model?.Result?.forEach(item => {
       addToMap(item.m_url, item.m_title, item.m_update_date);
     });
 
-    // Defacement
     consolidated.defacement_model?.Result?.forEach(item => {
       addToMap(item.m_url, item.q, item.m_date_of_leak);
       item.m_source_url?.forEach(link => addToMap(link, item.q, item.m_date_of_leak));
     });
 
-    // Social
     consolidated.social_model?.Result?.forEach(item => {
       addToMap(item.m_channel_url, item.m_title, item.m_message_date);
       item.m_weblink?.forEach(link => addToMap(link, item.m_title, item.m_message_date));
     });
 
-    // Chat (if chat_model has links)
     consolidated.chat_model?.Result?.forEach(item => {
       item.m_weblink?.forEach(link =>
         addToMap(link, item.m_content || 'Chat Message', item.m_message_date)
       );
     });
 
-    // Exploit (if exploit_model has links)
     consolidated.exploit_model?.Result?.forEach(item => {
       addToMap(item.m_url, item.m_title || item.m_url, item.m_leak_date);
     });
@@ -165,7 +173,6 @@ export class ResultInsightsComponent {
       });
     };
 
-    // General
     consolidated.generic_model?.Result?.forEach(item => {
       extractFromText(item.m_content);
       extractFromText(item.m_highlighted);
@@ -173,13 +180,11 @@ export class ResultInsightsComponent {
       extractFromText(item.m_meta_description);
     });
 
-    // Defacement
     consolidated.defacement_model?.Result?.forEach(item => {
       extractFromText(item.m_attacker);
       extractFromText(item.m_team);
     });
 
-    // Social
     consolidated.social_model?.Result?.forEach(item => {
       extractFromText(item.m_sender_name);
       extractFromText(item.m_channel_name);
@@ -188,18 +193,15 @@ export class ResultInsightsComponent {
       extractFromText(item.m_content);
     });
 
-    // Leak
     consolidated.leak_model?.Result?.forEach(item => {
       extractFromText(item.m_title);
       extractFromText(item.m_content);
     });
 
-    // Exploit
     consolidated.exploit_model?.Result?.forEach(item => {
       extractFromText(item.m_title);
     });
 
-    // Chat
     consolidated.chat_model?.Result?.forEach(item => {
       extractFromText(item.m_content);
       extractFromText(item.m_sender_name);
@@ -211,5 +213,82 @@ export class ResultInsightsComponent {
       names: Array.from(names),
     };
   }
+  getCoverageSummaryFromModels(consolidated: ConsolidatedCallbackModel): void {
+    let active = 0;
+    let seldom = 0;
+    let inactive = 0;
+    let total = 0;
 
+    const allResults: any[] = [
+      ...(consolidated.leak_model?.Result || []),
+      ...(consolidated.chat_model?.Result || []),
+      ...(consolidated.generic_model?.Result || []),
+      ...(consolidated.exploit_model?.Result || []),
+      ...(consolidated.social_model?.Result || []),
+      ...(consolidated.defacement_model?.Result || [])
+    ];
+
+    total = allResults.length;
+
+    allResults.forEach(item => {
+      const rawDate =
+        item.m_update_date || item.m_date_of_leak || item.m_message_date || item.m_leak_date || item.m_creation_date;
+
+      const status = this.getStatusCategory(rawDate);
+
+      if (status === 'Active') active++;
+      else if (status === 'Seldom') seldom++;
+      else inactive++;
+    });
+
+    this.coverageData = [
+      { value: total, label: 'Total', color: '' },
+      { value: active, label: 'Active', color: '#1ec773' },
+      { value: inactive, label: 'Inactive', color: '#e6534b' },
+      { value: seldom, label: 'Seldom', color: '#f08b36' }
+    ];
+  }
+  getStatusCategory(dateString?: string): 'Active' | 'Seldom' | 'Inactive' {
+    if (!dateString) return 'Inactive';
+    const updatedDate = new Date(dateString);
+    const today = new Date();
+    const diffInDays = Math.floor((today.getTime() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays <= 5) {
+      return 'Active';
+    } else if (diffInDays <= 10) {
+      return 'Seldom';
+    } else {
+      return 'Inactive';
+    }
+  }
+  getSingleUrlPerResultCount(consolidated: ConsolidatedCallbackModel): number {
+    const fieldMap: { [key: string]: string[] } = {
+      generic_model: ['m_url', 'm_clearnet_links', 'm_weblink', 'm_dumplink'],
+      leak_model: ['m_url'],
+      defacement_model: ['m_url', 'm_source_url'],
+      social_model: ['m_channel_url', 'm_weblink'],
+      chat_model: ['m_weblink'],
+      exploit_model: ['m_url'],
+    };
+
+    const urls = new Set<string>();
+
+    Object.entries(fieldMap).forEach(([modelKey, fields]) => {
+      const results = consolidated[modelKey as keyof ConsolidatedCallbackModel]?.Result || [];
+      results.forEach((item: any) => {
+        for (const field of fields) {
+          const value = item[field];
+          const url = Array.isArray(value) ? value.find(v => typeof v === 'string' && v.startsWith('http'))
+            : (typeof value === 'string' && value.startsWith('http') ? value : null);
+          if (url) {
+            urls.add(url);
+            break;
+          }
+        }
+      });
+    });
+
+    return urls.size;
+  }
 }
