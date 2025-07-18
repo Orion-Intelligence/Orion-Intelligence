@@ -65,14 +65,14 @@
                 {{ option }}
             </label>
         </div>
-        <div class="scrollable" *ngIf="isUrlsExpanded">
+        <div class="scrollable" *ngIf="isThreatExpanded">
             <div class="search-result" *ngFor="let item of threatResults() let isLast = last"
                 [ngClass]="{ 'no-border': isLast }">
                 <span>{{ item }}</span>
             </div>
         </div>
 
-        <div class="no-result" *ngIf="searchQuery && threatResults().length === 0">
+        <div class="no-result" *ngIf="threatResults().length === 0">
             No results found.
         </div>
     </div>

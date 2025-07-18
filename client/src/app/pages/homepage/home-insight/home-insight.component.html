@@ -30,7 +30,7 @@
               <ng-container *ngIf="item.url; else checkPhone">
                 <div class="country-info">
                   <div class="label">URL</div>
-                  <div class="value">
+                  <div class="value" *ngIf="item.url[0]">
                     {{ item.url[0].length > 24 ? item.url[0].slice(0, 24) + '...' : item.url[0] }}
                   </div>
                 </div>

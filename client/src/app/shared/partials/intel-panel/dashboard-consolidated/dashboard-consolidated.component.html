@@ -33,7 +33,7 @@
         </ng-container>
       </ng-container>
     </div>
-    <div class="dashboard__layout-right">
+    <div class="dashboard__layout-right" *ngIf="getTotalResultCount()>0">
       <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel"></app-result-insights>
     </div>
   </div>
