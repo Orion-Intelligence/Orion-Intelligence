@@ -13,9 +13,9 @@
       </div>
     </div>
     <div *ngIf="isExpanded" class="content pt-3">
-      <div class="directory-list__container report-mapping" *ngIf="filteredItems.length>0">
+      <div class="directory-list__container report-mapping">
         <table class="table table-striped directory-list__table clear-paddings mb-0">
-          <thead>
+          <thead *ngIf="loading || filteredItems.length>0 ">
             <tr>
               <th class="narrow-col" scope="col">ID</th>
               <th scope="col">Mapping To</th>
@@ -84,6 +84,7 @@
         </table>
       </div>
       <div *ngIf="!loading && filteredItems.length==0">
+        <br>
         <div class="report-mapping-empty-header">No structured records found!</div>
         <div class="report-mapping-empty-body">We’re watching this source — new breach or tracking data will appear here
           once detected.</div>
