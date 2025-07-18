@@ -65,10 +65,13 @@
                 {{ option }}
             </label>
         </div>
-        <div class="scrollable" *ngIf="isThreatExpanded">
-            <div class="search-result" *ngFor="let item of threatResults() let isLast = last"
-                [ngClass]="{ 'no-border': isLast }">
-                <span>{{ item }}</span>
+
+        <div class="scroll-fade-container">
+            <div class="scrollable" *ngIf="isThreatExpanded">
+                <div class="search-result" *ngFor="let item of threatResults() let isLast = last"
+                    [ngClass]="{ 'no-border': isLast }">
+                    <span>{{ item }}</span>
+                </div>
             </div>
         </div>
 
@@ -87,13 +90,15 @@
         </div>
     </div>
 
-    <div class="scrollable" *ngIf="isUrlsExpanded">
-        <div class="url-item" *ngFor="let url of uniqueUrls let isLast = last" [ngClass]="{ 'no-border': isLast }">
-            <div class="url-title">
-                <span class="dot" [ngStyle]="{ backgroundColor: url.status ? '#1ec773' : '#e6534b' }"></span>
-                {{ url.title.length > 50 ? (url.title | slice: 0:50) + '…' : url.title }}
+    <div class="scroll-fade-container">
+        <div class="scrollable" *ngIf="isUrlsExpanded">
+            <div class="url-item" *ngFor="let url of uniqueUrls let isLast = last" [ngClass]="{ 'no-border': isLast }">
+                <div class="url-title">
+                    <span class="dot" [ngStyle]="{ backgroundColor: url.status ? '#1ec773' : '#e6534b' }"></span>
+                    {{ url.title.length > 50 ? (url.title | slice: 0:50) + '…' : url.title }}
+                </div>
+                <div class="url-link">{{ url.url.length > 130 ? (url.url | slice: 0:1130) + '…' : url.url }}</div>
             </div>
-            <div class="url-link">{{ url.url.length > 130 ? (url.url | slice: 0:1130) + '…' : url.url }}</div>
         </div>
     </div>
 </div>
