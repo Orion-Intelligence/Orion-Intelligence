@@ -19,26 +19,28 @@
           </div>
 
           <div class="detail-row">
-            <ng-container *ngIf="item.location; else checkPhone">
+            <ng-container *ngIf="item.location; else checkURL">
               <div class="country-info">
                 <div class="label">Location</div>
                 <div class="value">{{ item.location }}</div>
               </div>
             </ng-container>
 
-            <ng-template #checkPhone>
-              <ng-container *ngIf="item.phoneNumber; else checkURL">
+            <ng-template #checkURL>
+              <ng-container *ngIf="item.url; else checkPhone">
                 <div class="country-info">
-                  <div class="label">Phone Number</div>
-                  <div class="value">{{ item.phoneNumber }}</div>
+                  <div class="label">URL</div>
+                  <div class="value">
+                    {{ item.url[0].length > 24 ? item.url[0].slice(0, 24) + '...' : item.url[0] }}
+                  </div>
                 </div>
               </ng-container>
             </ng-template>
 
-            <ng-template #checkURL>
+            <ng-template #checkPhone>
               <div class="country-info">
-                <div class="label">URL</div>
-                <div class="value">{{ item.url || '-' }}</div>
+                <div class="label">Phone Number</div>
+                <div class="value">{{ item.phoneNumber || '-'}}</div>
               </div>
             </ng-template>
           </div>
