@@ -60,7 +60,7 @@ class homepage_model:
         
         cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
         
-        if cached:
+        if cached and 1!=1:
             try:
                 return json.loads(cached)
             except Exception as _:

@@ -60,7 +60,6 @@
   width: 30px;
 }
 
-
 .bar-area {
   flex-grow: 1;
   position: relative;
@@ -69,6 +68,7 @@
 
 .bars {
   display: flex;
+  padding-left: 20px;
   align-items: flex-end;
   height: 100%;
   gap: 30px;
