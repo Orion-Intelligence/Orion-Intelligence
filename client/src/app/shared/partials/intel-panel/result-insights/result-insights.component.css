@@ -13,6 +13,7 @@
 .insight-card .card_header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 14px;
     font-family: Roboto, sans-serif;
     cursor: pointer;
@@ -145,10 +146,22 @@
     padding: 0.5rem 0;
 }
 
+.scroll-fade-container {
+    max-height: 250px;
+    overflow: hidden;
+    position: relative;
+}
+
 .scrollable {
     max-height: 250px;
     overflow-y: auto;
     padding-right: 0.5rem;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
 }
 
 .scrollable .url-item {
