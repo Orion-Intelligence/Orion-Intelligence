@@ -132,7 +132,8 @@ class homepage_model:
 
         phoneNumber= phoneNumbers[:24] + "..." if len(phoneNumbers) > 24 else phoneNumbers
 
-        urls.append(item["m_url"])
+        if "m_url" in item:
+            urls.append(item["m_url"])
 
         source = "-"
         if model_key == "defacement_model":
