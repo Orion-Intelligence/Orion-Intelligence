@@ -1,7 +1,7 @@
-import { Component, Input, HostListener } from '@angular/core';
-import { CommonModule, NgFor } from '@angular/common';
-import { GraphModel } from '../../model/charts/charts.model';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import {Component, Input} from '@angular/core';
+import {CommonModule, NgFor} from '@angular/common';
+import {GraphModel} from '../../model/charts/charts.model';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-customize-bar-chart',
@@ -10,8 +10,12 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 })
 export class CustomizeBarChartComponent {
   @Input() graphModel!: GraphModel;
-
-  hoveredIndex: number | null = null;
+  tooltips: { [key: string]: string } = {
+    'Top Teams (Leak)': 'Displays the teams most frequently involved in leak incidents.',
+    'Top Teams (Defacement)': 'Highlights teams most affected by website defacements.',
+    'Top Locations (Defacement)': 'Shows geographic regions with the highest number of defacement incidents.',
+    'Top Hashtags (Social)': 'Lists the most used hashtags related to social media activity or incidents.'
+  };
 
   get roundedMaxValue(): number {
     const max = Math.max(...this.graphModel.data.map(d => d.value), 1);
@@ -29,18 +33,11 @@ export class CustomizeBarChartComponent {
     else if (rawStep / magnitude > 1) niceFactor = 2;
 
     const stepSize = niceFactor * magnitude;
-    const roundedMax = Math.ceil(max / stepSize) * stepSize;
-
-    return roundedMax;
+    let val = Math.ceil(max / stepSize) * stepSize
+    val = val + val * 0.15
+    return val;
   }
 
-  onMouseEnter(index: number): void {
-    this.hoveredIndex = index;
-  }
-
-  onMouseLeave(): void {
-    this.hoveredIndex = null;
-  }
   round(value: number): number {
     return Math.round(value);
   }
