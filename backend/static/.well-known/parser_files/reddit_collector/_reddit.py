@@ -8,8 +8,8 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-import json
 
 
 class _reddit(leak_extractor_interface, ABC):
@@ -111,6 +111,7 @@ class _reddit(leak_extractor_interface, ABC):
             )
 
         for post in posts:
+            page.wait_for_timeout(1000)
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
             post['comments'] = comments
 
