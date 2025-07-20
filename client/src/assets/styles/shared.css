@@ -113,6 +113,11 @@
   opacity: 0.5;
 }
 
+.default-input-button-icon img{
+  margin-left: 6px;
+  margin-bottom: 3px;
+}
+
 .col-md-6,
 .col-xl-6,
 .col-sm-12,
