@@ -12,6 +12,8 @@ import {ResultComponent} from '../../result/result.component';
 import {
   DashboardResultSocialComponent
 } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import {SortType} from '../../../constants/enums';
+import {HelperService} from '../../../services/helper.service';
 
 @Component({
   selector: 'app-dashboard-socials',
@@ -37,6 +39,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
 
   constructor(
+    protected helperService: HelperService,
     public appService: AppService,
     public dashboardService: DashboardService,
     private router: Router,
@@ -138,5 +141,27 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string) {
     this.socialParamModel.q = query;
+  }
+  onToggleSort(sort: SortType) {
+    let key;
+    let order: 'asc' | 'desc' = 'asc';
+
+    key = 'm_message_date';
+
+    if (sort === SortType.NEWEST_FIRST) {
+      order = 'desc';
+    } else if (sort === SortType.OLDEST_FIRST) {
+      order = 'asc';
+    } else if (sort === SortType.DEFAULT) {
+      this.fetchSearchResults(true);
+      return;
+    }
+
+    this.socialCallbackModel.Result = this.helperService.sortByKey<any>(
+      this.socialCallbackModel.Result,
+      key,
+      order
+    );
+    this.cdr.detectChanges();
   }
 }

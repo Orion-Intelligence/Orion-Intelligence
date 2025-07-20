@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -39,6 +40,10 @@ class _hackread(leak_extractor_interface, ABC):
     @property
     def seed_url(self) -> str:
         return "https://hackread.com/category/hacking-news/leaks-affairs/"
+
+    @property
+    def developer_signature(self) -> str:
+        return "name:signature"
 
     @property
     def base_url(self) -> str:
@@ -110,12 +115,14 @@ class _hackread(leak_extractor_interface, ABC):
                     full_content = f"{subtitle}\n\n{entry}"
 
                     important_text = subtitle if subtitle else " ".join(entry.split()[:150])
+                    article_date = datetime.strptime(page.text_content('div.cs-meta-date').strip(), '%B %d, %Y').date()
 
                     card_data = leak_model(
                         m_title=title,
                         m_url=page.url,
                         m_base_url=self.base_url,
                         m_screenshot="",
+                        m_leak_date=article_date,
                         m_content=full_content,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=important_text,

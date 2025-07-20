@@ -10,6 +10,7 @@ class search_consolidated_param_model(BaseModel):
     mSearchParamSafeSearch: bool = False
     mNetwork: str = "all"
     mDateRange: Optional[str] = ""
+    mMessageDate: Optional[str] = ""
     mContentType: Optional[str] = "all"
     mEntity: Optional[str] = ""
     mMitreTtp: Optional[str] = ""

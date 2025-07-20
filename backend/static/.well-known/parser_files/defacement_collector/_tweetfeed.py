@@ -44,6 +44,10 @@ class _tweetfeed(leak_extractor_interface, ABC):
         return "https://tweetfeed.live/"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
 
         return "https://tweetfeed.live/"

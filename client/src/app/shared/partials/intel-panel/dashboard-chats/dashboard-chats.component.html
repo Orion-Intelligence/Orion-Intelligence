@@ -1,4 +1,4 @@
-<app-result (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [filterModel]="chat_filters" [isLoading]="isLoading" [result_count]="Math.ceil(chatCallbackModel.Result.length)" [searchQuery]="query"
+<app-result (onToggleSort)="onToggleSort($event)" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [filterModel]="chat_filters" [isLoading]="isLoading" [result_count]="Math.ceil(chatCallbackModel.Result.length)" [searchQuery]="query"
             [showTabs]=false [suggestion]="chatCallbackModel.Suggestions[0]"></app-result>
 
 <div *ngIf="!isLoading" @fadeInDashboardItem>

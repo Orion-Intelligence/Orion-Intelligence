@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -43,6 +44,10 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
     def seed_url(self) -> str:
 
         return "https://www.bleepingcomputer.com/news/security/"
+
+    @property
+    def developer_signature(self) -> str:
+        return "name:signature"
 
     @property
     def base_url(self) -> str:
@@ -122,10 +127,12 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
                         else ""
                     )
                     short_description = " ".join(description.strip().split()[:100])
+                    article_date = datetime.strptime(page.text_content('li.cz-news-date').strip(), '%B %d, %Y').date()
 
                     card_data = leak_model(
                         m_title=title.strip(),
                         m_url=url,
+                        m_leak_date=article_date,
                         m_base_url=self.base_url,
                         m_screenshot="",
                         m_content=description.strip(),

@@ -12,3 +12,4 @@ class search_social_param_model(BaseModel):
     mEntity: Optional[str] = ""
     mPlatform: Optional[str] = ""
     mMitreTtp: Optional[str] = ""
+    mMessageDate: Optional[str] = ""

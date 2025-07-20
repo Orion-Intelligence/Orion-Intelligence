@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -43,6 +44,10 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
     def seed_url(self) -> str:
 
         return "https://www.infosecurity-magazine.com/data-breaches/"
+
+    @property
+    def developer_signature(self) -> str:
+        return "name:signature"
 
     @property
     def base_url(self) -> str:
@@ -104,11 +109,13 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
                 title = page.locator("div.container h1").inner_text()
                 content_node = page.locator("div.page-content")
                 description = content_node.inner_text() if content_node.count() else ""
+                article_date = datetime.strptime(page.get_attribute('div.article-meta time', 'datetime'), '%Y-%m-%dT%H:%M:%S').date()
 
                 card_data = leak_model(
                         m_title=title,
                         m_url=url,
                         m_base_url=self.base_url,
+                        m_leak_date=article_date,
                         m_screenshot="",
                         m_content=description,
                         m_network=helper_method.get_network_type(self.base_url),

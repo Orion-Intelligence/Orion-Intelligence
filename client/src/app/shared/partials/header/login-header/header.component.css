@@ -9,6 +9,10 @@
   align-items: center;
 }
 
+.dropdown-open-lift-icon{
+  margin-top: -2px;
+}
+
 .header-logout {
   position: absolute;
   right: 8px;
@@ -87,6 +91,7 @@
   padding: 0;
   cursor: pointer;
 }
+
 
 .header__menu {
   display: flex;

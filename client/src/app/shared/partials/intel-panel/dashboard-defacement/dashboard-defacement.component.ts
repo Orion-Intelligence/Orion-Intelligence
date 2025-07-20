@@ -12,6 +12,8 @@ import {DefacementCallbackModel} from '../../../model/results/defacement/defacem
 import {AppService} from '../../../../services/core/app.service';
 import {defacement_filters} from '../../../constants/filters';
 import {Category} from '../../../enums/pages';
+import {SortType} from '../../../constants/enums';
+import {HelperService} from '../../../services/helper.service';
 
 @Component({
   selector: 'app-dashboard-defacement',
@@ -31,7 +33,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   protected readonly defacement_filters = defacement_filters;
 
-  constructor(public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
+  constructor(protected helperService: HelperService, public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
   }
 
   ngAfterViewInit(): void {
@@ -153,5 +155,28 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       this.defacementParamModel.mAttacker = event['mAttacker'];
     }
     this.fetchSearchResults();
+  }
+
+  onToggleSort(sort: SortType) {
+    let key;
+    let order: 'asc' | 'desc' = 'asc';
+
+    key = 'm_date_of_leak';
+
+    if (sort === SortType.NEWEST_FIRST) {
+      order = 'desc';
+    } else if (sort === SortType.OLDEST_FIRST) {
+      order = 'asc';
+    } else if (sort === SortType.DEFAULT) {
+      this.fetchSearchResults(true);
+      return;
+    }
+
+    this.defacementCallbackModel.Result = this.helperService.sortByKey<any>(
+      this.defacementCallbackModel.Result,
+      key,
+      order
+    );
+    this.cdr.detectChanges();
   }
 }

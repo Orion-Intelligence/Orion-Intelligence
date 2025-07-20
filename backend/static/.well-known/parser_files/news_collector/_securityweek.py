@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -43,6 +44,10 @@ class _securityweek(leak_extractor_interface, ABC):
     def seed_url(self) -> str:
 
         return "https://www.securityweek.com/category/data-breaches/"
+
+    @property
+    def developer_signature(self) -> str:
+        return "name:signature"
 
     @property
     def base_url(self) -> str:
@@ -123,6 +128,7 @@ class _securityweek(leak_extractor_interface, ABC):
                         description_text += page.locator("div.zox-post-body.left.zoxrel.zox100").inner_text()
 
                     short_description = " ".join(description_text.split()[:100])
+                    article_date = datetime.fromisoformat(page.get_attribute('time.post-date.updated', 'datetime')).date()
 
                     card_data = leak_model(
                         m_title=title,
@@ -134,6 +140,7 @@ class _securityweek(leak_extractor_interface, ABC):
                         m_important_content=short_description,
                         m_weblink=[],
                         m_dumplink=[],
+                        m_leak_date=article_date,
                         m_content_type=["news"],
                     )
 

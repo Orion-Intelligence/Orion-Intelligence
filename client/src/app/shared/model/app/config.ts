@@ -4,6 +4,7 @@ interface ConfigSettingsInput {
   version?: string;
   language_allowed?: string;
   logo_url?: string;
+  enable_advanced_tools?: string | boolean; // included but not used
 }
 
 export class ConfigSettings {
@@ -12,6 +13,7 @@ export class ConfigSettings {
   version: string;
   language_allowed: string;
   logo_url: string;
+  enable_advanced_tools: boolean;
 
   constructor(data: ConfigSettingsInput = {}) {
     this.api_allowed = data.api_allowed === true || data.api_allowed === '1';
@@ -19,6 +21,7 @@ export class ConfigSettings {
     this.version = data.version ?? '1.0.0';
     this.language_allowed = data.language_allowed ?? 'en';
     this.logo_url = data.logo_url ?? '';
+    this.enable_advanced_tools = false;
   }
 }
 

@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 from bs4 import BeautifulSoup
 from playwright.sync_api import Page
@@ -39,6 +40,10 @@ class _csocybercrime(leak_extractor_interface, ABC):
     def seed_url(self) -> str:
         # Starting URL for the CSO Cybercrime section (page 1)
         return "https://www.csoonline.com/uk/cybercrime/"
+
+    @property
+    def developer_signature(self) -> str:
+        return "name:signature"
 
     @property
     def base_url(self) -> str:
@@ -127,6 +132,7 @@ class _csocybercrime(leak_extractor_interface, ABC):
 
                 lines = [line.strip() for line in full_text.splitlines() if line.strip()]
                 first_two_lines = "\n".join(lines[:2])
+                article_date = datetime.strptime(page.locator('div.card__info.card__info--light span').nth(0).text_content().strip(), '%b %d, %Y').date()
 
                 card_data = leak_model(
                     m_screenshot="",
@@ -139,7 +145,7 @@ class _csocybercrime(leak_extractor_interface, ABC):
                     m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=f"{title}\n{full_text}",
                     m_content_type=["news"],
-                    m_leak_date=None,
+                    m_leak_date=article_date,
                 )
                 entity_data = entity_model(m_team="CSO Cybercrime Section")
 

@@ -168,6 +168,23 @@ html::-webkit-scrollbar {
 	color: white;
 }
 
+.dropdown-menu{
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.dropdown-menu::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid white;
+  z-index: 1000;
+}
+
 .clear-paddings {
 	margin: 0 !important;
 	padding: 0 !important;
@@ -190,6 +207,10 @@ html::-webkit-scrollbar {
 img::before {
 	color: white;
 	font-size: 12px;
+}
+
+.dropdown-item.active, .dropdown-item:active{
+    background: #e6e6e6 !important;
 }
 
 .pagination-margin {

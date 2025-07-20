@@ -8,6 +8,8 @@ import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {NgIf} from '@angular/common';
 import {CredentialListComponent} from '../credential-list/credential-list.component';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
+import {SortType} from '../../../shared/constants/enums';
+import {HelperService} from '../../../shared/services/helper.service';
 
 @Component({
   selector: 'app-credential',
@@ -26,6 +28,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
 
   constructor(
+    protected helperService: HelperService,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
@@ -90,5 +93,28 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string): void {
     this.credentialParamModel.q = query;
+  }
+
+  onToggleSort(sort: SortType) {
+    let key;
+    let order: 'asc' | 'desc' = 'asc';
+
+    key = 'm_message_date';
+
+    if (sort === SortType.NEWEST_FIRST) {
+      order = 'desc';
+    } else if (sort === SortType.OLDEST_FIRST) {
+      order = 'asc';
+    } else if (sort === SortType.DEFAULT) {
+      this.fetchSearchResults();
+      return;
+    }
+
+    this.stealerlogCallbackModel.Result = this.helperService.sortByKey<any>(
+      this.stealerlogCallbackModel.Result,
+      key,
+      order
+    );
+    this.cdr.detectChanges();
   }
 }

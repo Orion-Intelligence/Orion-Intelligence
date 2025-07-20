@@ -45,6 +45,10 @@ class _github_openfish(leak_extractor_interface, ABC):
         return "https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
 
         return "https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt"

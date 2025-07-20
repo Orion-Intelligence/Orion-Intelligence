@@ -8,6 +8,7 @@ import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
 import {SidebarService} from '../../services/sidebar.service';
 import {FiltersComponent} from '../filters/filters.component';
 import {FilterModel} from '../../model/filter/filter.model';
+import { SortType } from '../../constants/enums';
 import {SuggestionComponent} from '../suggestion/suggestion.component';
 import {EmptyQueryComponent} from '../empty-query/empty-query.component';
 import {Suggestion} from '../../model/results/shared/common-result';
@@ -16,7 +17,7 @@ import {Category} from "../../enums/pages";
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {HelperService} from '../../services/helper.service';
+import {AppService} from '../../../services/core/app.service';
 
 @Component({
   selector: 'app-result',
@@ -37,22 +38,29 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() discussion = false;
   @Input() consolidated = false;
   @Input() showTabs = true;
+  @Input() filterModel!: FilterModel
+  @Input() showSorting:boolean = true
 
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
   @Output() resetFilter = new EventEmitter<void>();
   @Output() reloadData = new EventEmitter<void>();
   @Output() updateQuery = new EventEmitter<string>();
   @Output() onToggleSwitch = new EventEmitter<string>();
-  @Input() filterModel!: FilterModel
+  @Output() onToggleSort = new EventEmitter<SortType>();
 
   selectedFilters: Record<string, string | null> = {};
   isFilterOpen$: Observable<boolean>;
   result_triggered = false
+  SortType = SortType;
+  selectedSortBy: SortType = SortType.DEFAULT;
+
   local_query = ""
+  selectedSearchBy = 'Match any term';
+
   protected readonly query = query;
   protected readonly Category = Category;
 
-  constructor(public sidebarService: SidebarService, private helper_service: HelperService, private route: ActivatedRoute) {
+  constructor(public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -107,14 +115,35 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onFormSubmit() {
-    this.updateQuery.emit(this.local_query)
-    this.searchQuery = this.local_query
-    this.reloadData.emit()
-    this.result_triggered = true
+    let query = "";
+    if(this.local_query){
+      query = this.local_query.trim()
+    }
+    if (this.selectedSearchBy === 'Match indivisual terms') {
+      query = query.replace(/\s+/g, '"');
+      if (!query.startsWith('"')) {
+        query = '"' + query;
+      }
+      if (!query.endsWith('"')) {
+        query = query + '"';
+      }
+    } else if (this.selectedSearchBy === 'Match all terms') {
+      query = query.replace(/"/g, ' ').trim();
+      query = `"${query}"`;
+    } else if (this.selectedSearchBy === 'Match any term') {
+      query = query.replace(/"/g, ' ').trim();
+    }
+
+    query = query.trim();
+
+    this.updateQuery.emit(query);
+    this.searchQuery = query;
+    this.reloadData.emit();
+    this.result_triggered = true;
   }
 
   onGetSuggestion() {
-    if (this.suggestion && this.suggestion.options.length > 0 && this.suggestion.options.length < 15) {
+    if (this.searchQuery && this.suggestion && this.suggestion.options.length > 0 && this.suggestion.options.length < 15) {
       return this.searchQuery.replace(this.suggestion?.text, this.suggestion?.options[0].text)
     } else {
       return ""
@@ -145,5 +174,18 @@ export class ResultComponent implements OnInit, OnChanges {
 
   onToggleAnalytics(tab: string) {
     this.onToggleSwitch.emit(tab);
+  }
+
+  onToolToggle(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const cfg = this.app_service.configData();
+    cfg.settings.enable_advanced_tools = !cfg.settings.enable_advanced_tools;
+    this.app_service.configData.set(cfg);
+  }
+
+  onSortChange(type: SortType): void {
+    this.selectedSortBy = type;
+    this.onToggleSort.emit(type);
   }
 }

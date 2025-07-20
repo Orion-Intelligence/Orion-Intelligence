@@ -1,4 +1,4 @@
-<app-result [consolidated]="true" [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)"
+<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)"
   class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false"
   (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query"
   [result_count]="getTotalResultCount()"></app-result>

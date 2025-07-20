@@ -68,11 +68,15 @@ import { ResultInsightsComponent } from "../result-insights/result-insights.comp
   animations: [fadeInDashboardItem]
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
+
+  protected readonly Math = Math;
+  protected readonly fadeInDashboardItem = fadeInDashboardItem;
+
   public consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public groupedResults: { [index: string]: any[] } = {};
   public pageCounts: { [key: string]: number } = {};
-  protected readonly Math = Math;
+
   isGrouped = true
   query = '';
   isLoading = false;
@@ -301,6 +305,4 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.fetchRanked()
     }
   }
-
-  protected readonly fadeInDashboardItem = fadeInDashboardItem;
 }

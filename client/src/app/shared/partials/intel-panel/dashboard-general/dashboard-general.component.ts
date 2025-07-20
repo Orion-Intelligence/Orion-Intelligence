@@ -20,6 +20,8 @@ import {AppService} from '../../../../services/core/app.service';
 import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {ChatCallbackModel} from '../../../model/results/chat/chat.callback.model';
 import {DiscussionService} from '../../../services/discussion.service';
+import {HelperService} from '../../../services/helper.service';
+import {SortType} from '../../../constants/enums';
 
 @Component({
   selector: 'app-dashboard-general',
@@ -29,11 +31,14 @@ import {DiscussionService} from '../../../services/discussion.service';
 })
 export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
+  protected readonly Math = Math;
+  protected readonly general_filters = general_filters;
+  protected readonly Category = Category;
+
   public generalParamModel: GeneralParamModel = new GeneralParamModel();
   public generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   public leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
   public discussionCallbackModel: ChatCallbackModel = new ChatCallbackModel();
-
 
   query = ""
   analyticsData = {} as Analytics;
@@ -44,10 +49,8 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   onToggleDiscussion = false;
   isLoading = false;
   firstTrigger = true
-  protected readonly Math = Math;
-  protected readonly general_filters = general_filters;
 
-  constructor(protected discussionService: DiscussionService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(protected helperService: HelperService, protected discussionService: DiscussionService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
 
   get currentCallbackModel(): GeneralCallbackModel | LeakCallbackModel {
@@ -240,5 +243,31 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
-  protected readonly Category = Category;
+  onToggleSort(sort: SortType) {
+    let key;
+    let order: 'asc' | 'desc' = 'asc';
+
+    if (this.type === Category.BREACH) {
+      key = 'm_leak_date';
+    } else {
+      key = 'm_update_date';
+    }
+
+    if (sort === SortType.NEWEST_FIRST) {
+      order = 'desc';
+    } else if (sort === SortType.OLDEST_FIRST) {
+      order = 'asc';
+    } else if (sort === SortType.DEFAULT) {
+      this.fetchSearchResults(true);
+      return;
+    }
+
+    this.currentCallbackModel.Result = this.helperService.sortByKey<any>(
+      this.currentCallbackModel.Result,
+      key,
+      order
+    );
+
+    this.cdr.detectChanges();
+  }
 }

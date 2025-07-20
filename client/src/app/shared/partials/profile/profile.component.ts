@@ -2,6 +2,7 @@ import {Component, HostListener} from '@angular/core';
 import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
 import {AuthService} from '../../../services/authetication/auth.service';
 import {Observable} from 'rxjs';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-profile',
@@ -9,7 +10,8 @@ import {Observable} from 'rxjs';
   imports: [
     AsyncPipe,
     NgOptimizedImage,
-    NgIf
+    NgIf,
+    TooltipDirective
   ],
   templateUrl: './profile.component.html'
 })

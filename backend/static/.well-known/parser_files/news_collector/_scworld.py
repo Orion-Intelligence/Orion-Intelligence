@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -45,6 +46,10 @@ class _scworld(leak_extractor_interface, ABC):
         return "https://www.scworld.com/topic/data-security"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
 
         return "https://www.scworld.com/"
@@ -85,7 +90,7 @@ class _scworld(leak_extractor_interface, ABC):
         try:
             page.wait_for_timeout(25000)
             previous_height = 0
-            for _ in range(20):
+            for _ in range(10):
                 page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
                 page.wait_for_timeout(5000)
 
@@ -120,6 +125,7 @@ class _scworld(leak_extractor_interface, ABC):
                     title = page.locator("h1.tmb-3").inner_text()
                     desc_node = page.locator("article.Content_content__tfAq8.font-body-large.tmt-3")
                     description = desc_node.inner_text() if desc_node.count() else ""
+                    article_date = datetime.fromisoformat(page.get_attribute('time.d-inline-block.non-interactive.text-small', 'datetime')).date()
 
                     card_data = leak_model(
                         m_title=title,
@@ -131,6 +137,7 @@ class _scworld(leak_extractor_interface, ABC):
                         m_important_content=" ".join(description.split()[:150]),
                         m_weblink=[],
                         m_dumplink=[],
+                        m_leak_date=article_date,
                         m_content_type=["news"],
                     )
 

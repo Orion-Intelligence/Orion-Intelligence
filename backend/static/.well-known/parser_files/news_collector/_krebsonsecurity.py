@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -43,6 +44,10 @@ class _krebsonsecurity(leak_extractor_interface, ABC):
     def seed_url(self) -> str:
 
         return "https://krebsonsecurity.com/"
+
+    @property
+    def developer_signature(self) -> str:
+        return "name:signature"
 
     @property
     def base_url(self) -> str:
@@ -116,6 +121,7 @@ class _krebsonsecurity(leak_extractor_interface, ABC):
                     content_text = content.first.inner_text() if content.count() else ""
 
                     short_content = " ".join(content_text.split()[:100])
+                    article_date = datetime.strptime(page.text_content('span.date.updated').strip(), '%B %d, %Y').date()
 
                     card_data = leak_model(
                         m_title=title_text,
@@ -126,6 +132,7 @@ class _krebsonsecurity(leak_extractor_interface, ABC):
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=short_content,
                         m_weblink=[],
+                        m_leak_date=article_date,
                         m_dumplink=[],
                         m_content_type=["news"],
                     )

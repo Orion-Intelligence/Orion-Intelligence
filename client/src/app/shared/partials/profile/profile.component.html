@@ -8,7 +8,7 @@
   <ul [class.show]="dropdownOpen" class="profile-dropdown">
     <div class="profile-dropdown-arrow"></div>
     <li><a class="dropdown-item disabled">
-        <img alt="Settings" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15" />
+        <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15" />
         {{ username$ | async }}</a></li>
     <li class="dropdown-item dropdown-item-inline d-flex align-items-center disabled">
       <span class="bg-success rounded-circle d-inline-block me-2 user-active"></span> &nbsp;&nbsp;active
@@ -18,16 +18,16 @@
     </li>
     <li (click)="toggleThemeByClick()">
       <div class="dropdown-item theme-toggle">
-        <img alt="Settings" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp;
+        <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp;
         Theme &nbsp;
-        <label class="small-switch">
+        <label class="small-switch" (click)="$event.stopPropagation()">
           <input type="checkbox" [checked]="isDarkTheme" (click)="$event.stopPropagation()" />
           <span class="small-slider round"></span>
         </label>
       </div>
     </li>
     <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank">
-        <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp;
+        <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp;
         Settings</a>
     </li>
     <li *ngIf="isAdmin()">

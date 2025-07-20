@@ -57,21 +57,29 @@
 
 .default-input {
   align-self: center;
-  border-radius: 8px 0 0 7px;
+  border-radius: 0 !important;
   height: 42px;
-  background: #EFFDFF !important;
+  background: #fff !important;
   color: #3C3C43 !important;
   font-size: 16px !important;
   border: 1px solid #ffffff30 !important;
-  border-right: none !important;
-  padding-left: 20px;
+  border-left: none !important;
+  padding-left: 0;
   margin-left: 0;
   padding-right: 35px;
 }
 
+.search-icon {
+  display: block;
+  margin-bottom: 1px;
+  opacity: 0.8 !important;
+  margin-left: 6px;
+}
+
 .default-input::placeholder {
-  color: #ccc !important;
-  font-size: 14px;
+  color: #00000060 !important;
+  font-size: 15px;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
 }
 
@@ -82,8 +90,8 @@
 .default-input-button {
   background: #9ebfe030;
   width: 45px;
-  border-radius: 0 8px 8px 0;
-  border: 1px solid #ffffff30;
+  border-radius: 8px 0 0 8px;
+  border: 0 !important;
   border-left: none !important;
   outline: none !important;
   box-shadow: none !important;
@@ -94,7 +102,7 @@
 .default-input-button:focus,
 .default-input-button:active,
 .default-input-button:focus-visible {
-  background: #EFFDFF !important;
+  background: #fff !important;
   outline: none !important;
   box-shadow: none !important;
   border: 1px solid #ffffff30 !important;
@@ -135,6 +143,15 @@
   color: #fff;
   margin-left: 35px;
   margin-top: 30px;
+  margin-bottom: 10px;
+  font-family: Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.label-text-dropdown {
+  color: var(--filter-input-text);
+  margin-right: 14px;
   margin-bottom: 10px;
   font-family: Roboto, sans-serif;
   font-size: 13px;
@@ -377,7 +394,7 @@ table a:visited {
   padding-bottom: 12px;
 }
 
-.see-more:hover{
+.see-more:hover {
   color: #fff;
 }
 
@@ -390,13 +407,64 @@ table a:visited {
   transition: color 0.2s ease;
 }
 
-@media only screen and (width <=550px) {
+.default-input-container .small-switch{
+  background: #fff;
+  padding: 0 !important;
+  margin-bottom: 5px;
+}
+
+.default-input-container .input-group-text{
+  background: #fff;
+  border: 0;
+  font-size: 15px;
+  color: #292828;
+  font-family: Roboto, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  border-radius: 0 8px 8px 0;
+}
+
+.default-input-container .vertical-divider {
+  width: 1px;
+  height: 23px;
+  background-color: #00000020;
+  border: none;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  margin-right: 12px;
+}
+
+.default-input-container .small-slider::before {
+  height: 12px;
+  width: 12px;
+  margin-bottom: 1px;
+  background: #79747E;
+  margin-left: 1px;
+}
+
+.default-input-container .small-slider {
+  background: #e6e0e9;
+  border: 1px solid #79747E;
+  height: 20px;
+  width: 32px;
+  top: -2px;
+}
+
+.default-input-container input:checked + .small-slider {
+  background-color: #79747E !important;
+}
+
+.default-input-container input:checked + .small-slider::before {
+  background-color: #fff !important;
+}
+
+@media only screen and (width <= 550px) {
   .default-input-container {
     display: grid;
   }
 }
 
-@media only screen and (width <=1300px) {
+@media only screen and (width <= 1300px) {
   table thead {
     display: none;
   }
@@ -439,7 +507,7 @@ table a:visited {
 
 }
 
-@media only screen and (width <=943px) {
+@media only screen and (width <= 943px) {
   .label-text {
     margin-left: 15px;
   }
@@ -471,13 +539,13 @@ table a:visited {
   }
 }
 
-@media only screen and (width <=460px) {
+@media only screen and (width <= 460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (width <=700px) {
+@media only screen and (width <= 700px) {
   .dashboard-general-input {
     min-width: 100px;
   }

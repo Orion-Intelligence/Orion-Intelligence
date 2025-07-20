@@ -17,7 +17,7 @@ class result_item(BaseModel):
     m_message_sharable_link: str
     m_weblink: List[str] = Field(default_factory=list)
     m_network: str
-    m_content: str
+    m_content: Optional[str] = None
     m_content_type: List[str] = Field(default_factory=list)
     m_message_date: Optional[date] = None
     m_channel_url: Optional[str] = None

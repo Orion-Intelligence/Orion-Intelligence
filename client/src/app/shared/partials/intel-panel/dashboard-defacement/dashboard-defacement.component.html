@@ -1,4 +1,4 @@
-<app-result (reloadData)="fetchSearchResults(true)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)"
+<app-result (onToggleSort)="onToggleSort($event)" (reloadData)="fetchSearchResults(true)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)"
             [filterModel]="defacement_filters" [isLoading]="isLoading" [result_count]="Math.ceil(result_count)"
             [searchQuery]="query" [showTabs]=false
             [type]="type"></app-result>

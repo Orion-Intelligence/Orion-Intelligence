@@ -45,6 +45,10 @@ class _zone_xsec(leak_extractor_interface, ABC):
         return "https://zone-xsec.com/archive"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://zone-xsec.com"
 

@@ -112,4 +112,32 @@ export class HelperService {
     return `${keys.join(',')}\n${values}`;
   }
 
+  sortByKey<T>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {
+    return list.slice().sort((a, b) => {
+      const aVal = (a as any)[key]?.trim?.() ?? '';
+      const bVal = (b as any)[key]?.trim?.() ?? '';
+
+      const isDateKey = /date|timestamp/i.test(key);
+
+      if (isDateKey) {
+        const timeA = new Date(aVal).getTime();
+        const timeB = new Date(bVal).getTime();
+
+        const isValidA = !isNaN(timeA);
+        const isValidB = !isNaN(timeB);
+
+        if (!isValidA && !isValidB) return 0;
+        if (!isValidA) return order === 'asc' ? 1 : -1;
+        if (!isValidB) return order === 'asc' ? -1 : 1;
+
+        return order === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+
+      const strA = aVal.toString();
+      const strB = bVal.toString();
+      const comparison = strA.localeCompare(strB, undefined, {sensitivity: 'base'});
+
+      return order === 'asc' ? comparison : -comparison;
+    });
+  }
 }

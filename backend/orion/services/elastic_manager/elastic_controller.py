@@ -2,7 +2,6 @@ import pprint
 from datetime import datetime, timezone
 from string import capwords
 from elasticsearch import AsyncElasticsearch
-from orion.constants.constant import CONSTANTS
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -43,7 +42,6 @@ class elastic_controller:
             mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
             mapping_exploit_model = ELASTIC_ENUMS.mapping_exploit_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
-            mapping_credential_model = ELASTIC_ENUMS.mapping_credential_model
             mapping_stealer_model = ELASTIC_ENUMS.mapping_sealerlogs_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
 
@@ -64,9 +62,6 @@ class elastic_controller:
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model)
-
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CREDENTIAL_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CREDENTIAL_INDEX, body=mapping_credential_model)
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body=mapping_stealer_model)

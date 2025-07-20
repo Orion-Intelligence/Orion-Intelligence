@@ -38,3 +38,9 @@ export const ChannelTypeKeys = [
   'CLOUD',
   'NEWS'
 ];
+
+export enum SortType {
+  DEFAULT = 'Default',
+  NEWEST_FIRST = 'Newest first',
+  OLDEST_FIRST = 'Oldest first'
+}

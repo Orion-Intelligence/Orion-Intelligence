@@ -160,7 +160,32 @@ class elastic_request_generator:
                                     "decay": 0.5
                                 }
                             },
-                            "weight": 0.5
+                            "weight": 2
+                        },
+                        {
+                            "field_value_factor": {
+                                "field": "m_update_date",
+                                "factor": 1.1,
+                                "modifier": "log1p",
+                                "missing": 0
+                            }
+                        },
+                        {
+                            "filter": {
+                                "exists": {"field": "m_date_of_leak"}
+                            },
+                            "weight": 1
+                        },
+                        {
+                            "gauss": {
+                                "m_date_of_leak": {
+                                    "origin": "now",
+                                    "scale": "90d",
+                                    "offset": "5d",
+                                    "decay": 0.5
+                                }
+                            },
+                            "weight": 1
                         }
                     ],
                     "score_mode": "sum",
@@ -235,6 +260,17 @@ class elastic_request_generator:
                     })
             except ValueError:
                 pass
+        else:
+            to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
+            from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
+            must_clauses.append({
+                "range": {
+                    "m_update_date": {
+                        "gte": from_date,
+                        "lte": to_date
+                    }
+                }
+            })
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
@@ -571,7 +607,7 @@ class elastic_request_generator:
                             "gauss": {
                                 "m_update_date": {
                                     "origin": "now",
-                                    "scale": "30d",
+                                    "scale": "90d",
                                     "offset": "10d",
                                     "decay": 0.5
                                 }
@@ -585,6 +621,23 @@ class elastic_request_generator:
                                 "modifier": "log1p",
                                 "missing": 0
                             }
+                        },
+                        {
+                            "filter": {
+                                "exists": {"field": "m_leak_date"}
+                            },
+                            "weight": 1
+                        },
+                        {
+                            "gauss": {
+                                "m_leak_date": {
+                                    "origin": "now",
+                                    "scale": "90d",
+                                    "offset": "5d",
+                                    "decay": 0.5
+                                }
+                            },
+                            "weight": 1
                         }
                     ],
                     "score_mode": "sum",
@@ -694,6 +747,7 @@ class elastic_request_generator:
                     })
                 except ValueError:
                     pass
+
 
         if m_entity:
             entity_list = [
@@ -818,7 +872,7 @@ class elastic_request_generator:
                             "gauss": {
                                 "m_update_date": {
                                     "origin": "now",
-                                    "scale": "30d",
+                                    "scale": "90d",
                                     "offset": "10d",
                                     "decay": 0.5
                                 }
@@ -832,6 +886,23 @@ class elastic_request_generator:
                                 "modifier": "log1p",
                                 "missing": 0
                             }
+                        },
+                        {
+                            "filter": {
+                                "exists": {"field": "m_leak_date"}
+                            },
+                            "weight": 1
+                        },
+                        {
+                            "gauss": {
+                                "m_leak_date": {
+                                    "origin": "now",
+                                    "scale": "90d",
+                                    "offset": "5d",
+                                    "decay": 0.5
+                                }
+                            },
+                            "weight": 1
                         }
                     ],
                     "score_mode": "sum",
@@ -892,7 +963,13 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_social_data(p_query_model):
-        raw_query = "*"
+        if p_query_model.q != "*":
+            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
+        else:
+            raw_query = "*"
+        if raw_query == "":
+            raw_query = "*"
+
         if p_query_model.q != "":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
 
@@ -903,6 +980,27 @@ class elastic_request_generator:
         if p_query_model.mPlatform:
             must_clauses.append({"term": {"m_platform": p_query_model.mPlatform}})
 
+        if p_query_model.mMessageDate:
+            parts = p_query_model.mMessageDate.split(',')
+            if len(parts) == 2:
+                try:
+                    from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                    from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
+
+                    to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                    to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
+
+                    must_clauses.append({
+                        "range": {
+                            "m_message_date": {
+                                "gte": from_date,
+                                "lte": to_date
+                            }
+                        }
+                    })
+                except ValueError:
+                    pass
+
         search_fields = [
             "m_title^4",
             "m_content^3",
@@ -911,7 +1009,9 @@ class elastic_request_generator:
             "m_network^1.5"
         ]
 
-        if '"' in raw_query:
+        if raw_query == "*":
+            query_string_query = {"match_all": {}}
+        elif '"' in raw_query:
             query_string_query = {
                 "query_string": {
                     "query": raw_query,
@@ -971,12 +1071,12 @@ class elastic_request_generator:
                             "gauss": {
                                 "m_message_date": {
                                     "origin": "now",
-                                    "scale": "30d",
+                                    "scale": "90d",
                                     "offset": "10d",
-                                    "decay": 0.5
+                                    "decay": 0.5,
                                 }
                             },
-                            "weight": 1.5
+                            "weight": 1,
                         }
                     ],
                     "score_mode": "sum",
@@ -1141,12 +1241,12 @@ class elastic_request_generator:
                             "gauss": {
                                 "m_message_date": {
                                     "origin": "now",
-                                    "scale": "30d",
+                                    "scale": "90d",
                                     "offset": "10d",
                                     "decay": 0.5
                                 }
                             },
-                            "weight": 1.5
+                            "weight": 1
                         }
                     ],
                     "score_mode": "sum",
@@ -1287,7 +1387,6 @@ class elastic_request_generator:
         if not raw_query:
             return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
-        m_user_query = raw_query.lower().rstrip("/") + "*"
         m_url_query = raw_query
         m_safe_search = p_query_model.mSearchParamSafeSearch
         m_search_type = p_query_model.mSearchParamType
@@ -1433,12 +1532,22 @@ class elastic_request_generator:
                             "gauss": {
                                 "m_update_date": {
                                     "origin": "now",
-                                    "scale": "30d",
+                                    "scale": "90d",
                                     "offset": "10d",
                                     "decay": 0.5,
                                 }
                             },
                             "weight": 2,
+                        }, {
+                            "gauss": {
+                                "m_update_date": {
+                                    "origin": "now",
+                                    "scale": "90d",
+                                    "offset": "10d",
+                                    "decay": 0.5
+                                }
+                            },
+                            "weight": 2
                         }
                     ],
                     "boost_mode": "sum",

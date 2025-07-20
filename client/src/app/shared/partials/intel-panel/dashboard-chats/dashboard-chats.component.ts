@@ -11,7 +11,8 @@ import {ResultComponent} from '../../result/result.component';
 import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 import {chat_filters} from '../../../constants/filters';
-import {ChannelTypeKeys} from '../../../constants/enums';
+import {ChannelTypeKeys, SortType} from '../../../constants/enums';
+import {HelperService} from '../../../services/helper.service';
 
 @Component({
   selector: 'app-dashboard-chats',
@@ -35,7 +36,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   protected readonly chat_filters = chat_filters;
 
-  constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
 
   get currentResultCount(): number {
@@ -51,10 +52,10 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     this.result_count = this.chatCallbackModel.Result.length
     const category = this.route.snapshot.routeConfig?.path;
     let isDiscussion = false
-    if(category && ChannelTypeKeys.includes(category.toUpperCase())){
+    if (category && ChannelTypeKeys.includes(category.toUpperCase())) {
       this.chatParamModel.ctype = category
       isDiscussion = true
-    }else {
+    } else {
       this.chatParamModel.ctype = "all"
     }
 
@@ -169,4 +170,26 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
+  onToggleSort(sort: SortType) {
+    let key;
+    let order: 'asc' | 'desc' = 'asc';
+
+    key = 'm_message_date';
+
+    if (sort === SortType.NEWEST_FIRST) {
+      order = 'desc';
+    } else if (sort === SortType.OLDEST_FIRST) {
+      order = 'asc';
+    } else if (sort === SortType.DEFAULT) {
+      this.fetchSearchResults(true);
+      return;
+    }
+
+    this.chatCallbackModel.Result = this.helperService.sortByKey<any>(
+      this.chatCallbackModel.Result,
+      key,
+      order
+    );
+    this.cdr.detectChanges();
+  }
 }

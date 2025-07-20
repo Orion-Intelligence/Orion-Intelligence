@@ -45,6 +45,10 @@ class _phishunt(leak_extractor_interface, ABC):
         return "https://phishunt.io/feed.txt"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
 
         return "https://phishunt.io/feed.txt"

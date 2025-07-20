@@ -3,23 +3,25 @@
   <div class="row dashboard__api-search-input-div">
     <div class="col-lg-5 col-12 input-container">
       <div class="input-group default-input-sub-container">
-        <input [(ngModel)]="username" autocapitalize="none" autocomplete="off" class="form-control default-input"
-          maxlength="150" name="username" placeholder="Username" type="text">
-        <input type="hidden" value="1">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/user1.svg" priority width="20">
         </div>
+        <input [(ngModel)]="username" autocapitalize="none" autocomplete="off" class="form-control default-input"
+          maxlength="150" name="username" placeholder="Username" type="text">
+        <input type="hidden" value="1">
+        <span class="input-group-text"></span>
       </div>
     </div>
 
     <div class="col-lg-5 col-12 mt-lg-0 mt-2 input-container">
-      <div class="input-group default-input-sub-container">
-        <input [(ngModel)]="email" autocapitalize="none" autocomplete="off" class="form-control default-input" email
-          maxlength="150" name="email" placeholder="Email" type="email">
-        <input type="hidden" value="1">
+      <div class="input-group default-input-sub-container ">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/email.svg" priority width="20">
         </div>
+        <input [(ngModel)]="email" autocapitalize="none" autocomplete="off" class="form-control default-input " email
+          maxlength="150" name="email" placeholder="Email" type="email">
+        <input type="hidden" value="1">
+        <span class="input-group-text"></span>
       </div>
     </div>
 
