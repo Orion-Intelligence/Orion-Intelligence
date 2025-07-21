@@ -23,7 +23,7 @@
       </tr>
       </thead>
       <tbody>
-      <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults); let i = index">
+      <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 4)); let i = index">
         <tr (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
           <td>{{ i + 1 }}</td>
           <td>{{ item.m_base_url || 'Not Found' }}</td>
