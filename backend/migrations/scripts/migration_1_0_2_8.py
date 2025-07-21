@@ -41,7 +41,7 @@ class migration_1_0_2_8:
         es = elastic.get_connection()
 
         scroll = "15m"
-        size = 10000
+        size = 5000
         total_indexed = 0
         total_skipped = 0
         batch_count = 0
