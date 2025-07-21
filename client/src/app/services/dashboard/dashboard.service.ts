@@ -1,21 +1,21 @@
-import {Injectable} from '@angular/core';
-import {Observable, of, Subject} from 'rxjs';
-import {HttpParams} from '@angular/common/http';
-import {catchError, map, takeUntil} from 'rxjs/operators';
-import {ApiService} from '../../shared/services/api.service';
-import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
-import {GeneralCallbackModel} from '../../shared/model/results/general/general.callback.model';
-import {GeneralParamModel} from '../../shared/model/results/shared/general.param.model';
-import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.model';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ExploitCallbackModel} from '../../shared/model/results/exploit/exploit.callback.model';
-import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.param.model';
-import {ConsolidatedCallbackModel} from '../../shared/model/results/consolidated/consolidated.callback.model';
+import { Injectable } from '@angular/core';
+import { Observable, of, Subject } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
+import { catchError, map, takeUntil } from 'rxjs/operators';
+import { ApiService } from '../../shared/services/api.service';
+import { LeakCallbackModel } from '../../shared/model/results/leak/leak.callback.model';
+import { GeneralCallbackModel } from '../../shared/model/results/general/general.callback.model';
+import { GeneralParamModel } from '../../shared/model/results/shared/general.param.model';
+import { ChatCallbackModel } from '../../shared/model/results/chat/chat.callback.model';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ExploitCallbackModel } from '../../shared/model/results/exploit/exploit.callback.model';
+import { DefacementCallbackModel } from '../../shared/model/results/defacement/defacement.param.model';
+import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
 import {
   StealerLogCallbackModel,
 } from '../../shared/model/results/credentials/credential.callback.model';
-import {SocialCallbackModel} from '../../shared/model/results/social/social.callback.model';
-import {SocialParamModel} from '../../shared/model/results/social/social.param.model';
+import { SocialCallbackModel } from '../../shared/model/results/social/social.callback.model';
+import { SocialParamModel } from '../../shared/model/results/social/social.param.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +23,7 @@ import {SocialParamModel} from '../../shared/model/results/social/social.param.m
 export class DashboardService {
   generalParamModel: GeneralParamModel = new GeneralParamModel();
   socialParamModel: SocialParamModel = new SocialParamModel();
+
 
   generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
@@ -46,16 +47,16 @@ export class DashboardService {
   }> {
     this.cancelOngoingRequest();
 
-    const params = new HttpParams({fromObject: paramModel as any});
+    const params = new HttpParams({ fromObject: paramModel as any });
 
-    return this.apiService.get<T>(apiEndpoint, {params}).pipe(
+    return this.apiService.get<T>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),
       map((response: T) => ({
         success: true,
         isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
         data: response
       })),
-      catchError(() => of({success: false, isEmpty: false, data: null}))
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
     );
   }
 
@@ -67,9 +68,9 @@ export class DashboardService {
   }> {
     this.cancelOngoingRequest();
 
-    const params = new HttpParams({fromObject: paramModel as any});
+    const params = new HttpParams({ fromObject: paramModel as any });
 
-    return this.apiService.get<any[]>(apiEndpoint, {params}).pipe(
+    return this.apiService.get<any[]>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),
       map((response: any[]) => {
         const hasAnyResults = Array.isArray(response) && response.length > 0;
@@ -80,7 +81,7 @@ export class DashboardService {
           data: hasAnyResults ? response : null
         };
       }),
-      catchError(() => of({success: false, isEmpty: false, data: null}))
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
     );
   }
 
@@ -92,9 +93,9 @@ export class DashboardService {
   }> {
     this.cancelOngoingRequest();
 
-    const params = new HttpParams({fromObject: paramModel as any});
+    const params = new HttpParams({ fromObject: paramModel as any });
 
-    return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, {params}).pipe(
+    return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),
       map((response: ConsolidatedCallbackModel) => {
         const hasAnyResults = !!(
@@ -111,7 +112,7 @@ export class DashboardService {
           data: response
         };
       }),
-      catchError(() => of({success: false, isEmpty: false, data: null}))
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
     );
   }
 

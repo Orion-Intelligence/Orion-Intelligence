@@ -1,7 +1,13 @@
-<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="true" [discussion]="false" (reloadData)="fetchSearchResults(true)"
-  class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false"
-  (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query"
-  [result_count]="getTotalResultCount()"></app-result>
+<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false"
+  (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
+  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query"
+  [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)"
+  (resetFilter)="resetFilters($event)" [searchQuery]="query"></app-result>
+
+<!-- <app-result (onToggleSort)="onToggleSort($event)" (reloadData)="fetchSearchResults(true)"
+  (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)"
+  [filterModel]="defacement_filters" [isLoading]="isLoading" [result_count]="Math.ceil(result_count)"
+  [searchQuery]="query" [showTabs]=false [type]="type"></app-result> -->
 
 <div *ngIf="!isLoading" @fadeInDashboardItem>
   <div class="dashboard__layout-wrapper">

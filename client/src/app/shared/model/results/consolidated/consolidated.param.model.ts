@@ -2,9 +2,10 @@ export class ConsolidatedParamModel {
   q = "";
   mSearchParamPage = 1;
   mSearchParamType = "all";
+  mNetwork = "all";
   mDateRange = "";
+  mContentType = "";
   mEntity = "";
-  mMitreTtp = "";
 
   m_attacker: string[] = [];
   m_team = "";

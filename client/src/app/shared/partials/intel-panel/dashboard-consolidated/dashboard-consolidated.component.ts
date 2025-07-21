@@ -46,6 +46,7 @@ import {
   DashboardResultSocialComponent
 } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 import { ResultInsightsComponent } from "../result-insights/result-insights.component";
+import { consolidated_filters } from '../../../constants/filters';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -71,6 +72,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   protected readonly Math = Math;
   protected readonly fadeInDashboardItem = fadeInDashboardItem;
+  protected readonly consolidated_filters = consolidated_filters;
 
   public consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
@@ -139,6 +141,50 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.fetchRanked()
       return
     }
+
+
+
+
+    if (this.isLoading) return;
+    // if (reset)
+    //   this.consolidatedParamModel.mSearchParamPage = 1
+
+    // if (!this.consolidatedParamModel.q) {
+    //   this.isLoading = false;
+    //   this.consolidatedParamModel.q = ""
+    //   this.router.navigate([], {
+    //     queryParams: {},
+    //     queryParamsHandling: ''
+    //   }).then();
+    // }
+    // this.isLoading = true;
+
+
+    // const cleanedParams: any = {};
+
+    // Object.entries(this.consolidatedParamModel).forEach(([key, value]) => {
+    //   const isDefault =
+    //     (key === 'mSearchParamSafeSearch' && value === false) ||
+    //     (key === 'mNetwork' && value === 'all') ||
+    //     (value == null || value === "");
+
+    //   if (!reset || !isDefault) {
+    //     if (!isDefault) cleanedParams[key] = value;
+    //   }
+    // });
+    // this.router.navigate([], {
+    //   queryParams: cleanedParams,
+    //   queryParamsHandling: reset ? '' : 'merge'
+    // }).then();
+
+    // if (reset) {
+    //   this.isLoading = false;
+    //   return;
+    // }
+
+
+
+    // ////////////////////////////
     if (!this.consolidatedParamModel.q) {
       this.isLoading = false;
       this.consolidatedParamModel.q = '';
@@ -148,10 +194,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     const cleanedParams: any = {};
+
     Object.entries(this.consolidatedParamModel).forEach(([key, value]) => {
       if (value != null && value !== '') cleanedParams[key] = value;
     });
-
     this.router.navigate([], {
       queryParams: cleanedParams,
       queryParamsHandling: 'merge',
@@ -160,6 +206,29 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }).then(() => {
       this.cdr.detectChanges();
     });
+
+
+    // Object.entries(this.consolidatedParamModel).forEach(([key, value]) => {
+    //   const isDefault =
+    //     (key === 'mNetwork' && value === 'all') ||
+    //     (value == null || value === "");
+
+    //   if (!reset || !isDefault) {
+    //     if (!isDefault) cleanedParams[key] = value;
+    //   }
+    // });his.router.navigate([], {
+    //   queryParams: cleanedParams,
+    //   queryParamsHandling: reset ? '' : 'merge'
+    // }).then();
+
+    // if (reset) {
+    //   this.isLoading = false;
+    //   return;
+    // }
+
+
+
+
 
     this.dashboardService
       .fetchConsolidatedGroupedResults('search/consolidated', this.consolidatedParamModel)
@@ -176,6 +245,81 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
         this.isLoading = false;
       });
+  }
+  _fetchSearchResults(reset = false) {
+    if (this.isLoading) return;
+    if (reset)
+      this.consolidatedParamModel.mSearchParamPage = 1
+
+    if (!this.consolidatedParamModel.q) {
+      this.isLoading = false;
+      this.consolidatedParamModel.q = ""
+      this.router.navigate([], {
+        queryParams: {},
+        queryParamsHandling: ''
+      }).then();
+    }
+    this.isLoading = true;
+
+
+    const cleanedParams: any = {};
+
+    Object.entries(this.consolidatedParamModel).forEach(([key, value]) => {
+      const isDefault =
+        (key === 'mSearchParamSafeSearch' && value === false) ||
+        (key === 'mNetwork' && value === 'all') ||
+        (value == null || value === "");
+
+      if (!reset || !isDefault) {
+        if (!isDefault) cleanedParams[key] = value;
+      }
+    });
+    this.router.navigate([], {
+      queryParams: cleanedParams,
+      queryParamsHandling: reset ? '' : 'merge'
+    }).then();
+
+    if (reset) {
+      this.isLoading = false;
+      return;
+    }
+
+    // this.dashboardService.fetchSearchResults<ConsolidatedCallbackModel>(apiEndpoint, this.consolidatedParamModel)
+    //   .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
+    //   .subscribe(response => {
+    //     if (response.success && response.data) {
+    //         this.consolidatedCallbackModel = response.data as ConsolidatedCallbackModel;
+    //         this.dashboardService.consolidatedCallbackModel = response.data as ConsolidatedCallbackModel;
+
+    //     }
+
+    //     this.isLoading = false;
+    //   });
+  }
+  resetFilters(_: void) {
+    this.consolidatedParamModel.mDateRange = "";
+    this.consolidatedParamModel.mNetwork = "";
+    this.consolidatedParamModel.mEntity = "";
+    this.consolidatedParamModel.mContentType = "all";
+
+    this.fetchSearchResults(true);
+  }
+
+  reloadFilters(event: Record<string, string | null>) {
+    this.consolidatedParamModel.mSearchParamPage = 1
+    if (event['mNetwork']) {
+      this.consolidatedParamModel.mNetwork = event['mNetwork']
+    }
+    if (event['mDateRange']) {
+      this.consolidatedParamModel.mDateRange = event['mDateRange']
+    }
+    if (event['mEntity'] != null) {
+      this.consolidatedParamModel.mEntity = event['mEntity'];
+    }
+    if (event['mContentType'] != null) {
+      this.consolidatedParamModel.mContentType = event['mContentType'];
+    }
+    this.fetchSearchResults();
   }
 
   fetchRanked() {
