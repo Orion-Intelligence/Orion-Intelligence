@@ -42,7 +42,7 @@ class elastic_controller:
             mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
             mapping_exploit_model = ELASTIC_ENUMS.mapping_exploit_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
-            mapping_stealer_model = ELASTIC_ENUMS.mapping_sealerlogs_model
+            mapping_stealer_model = ELASTIC_ENUMS.mapping_sealerlog_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):

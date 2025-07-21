@@ -336,31 +336,51 @@ class ELASTIC_ENUMS:
             }
         }
     }
-    mapping_sealerlogs_model = {
+    mapping_sealerlog_model = {
         "settings": {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-            "max_result_window": 1_000_000,
-            "codec": "best_compression",
-            "blocks": {
-                "read_only_allow_delete": False
+            "index.max_ngram_diff": 49,
+            "analysis": {
+                "tokenizer": {
+                    "ngram_tokenizer": {
+                        "type": "ngram",
+                        "min_gram": 1,
+                        "max_gram": 50,
+                        "token_chars": ["letter", "digit", "punctuation", "symbol"]
+                    }
+                },
+                "analyzer": {
+                    "ngram_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "ngram_tokenizer",
+                        "filter": ["lowercase"]
+                    },
+                    "standard_lower": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": ["lowercase"]
+                    }
+                }
             }
         },
         "mappings": {
             "dynamic": True,
             "properties": {
                 "log": {
-                    "type": "text"
+                    "type": "text",
+                    "analyzer": "ngram_analyzer",
+                    "search_analyzer": "standard_lower",
+                    "fields": {
+                        "raw": {"type": "keyword"}
+                    }
                 },
-                "log_hash": {
-                    "type": "keyword"
-                },
-                "timestamp": {
-                    "type": "date"
-                }
+                "log_hash": {"type": "keyword"},
+                "timestamp": {"type": "date"},
+                "m_index": {"type": "keyword"},
+                "m_sub_host": {"type": "keyword"}
             }
         }
     }
+
     mapping_social_model = {
         "settings": {
             "number_of_shards": 1,
