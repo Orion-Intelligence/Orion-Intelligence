@@ -336,22 +336,13 @@ class ELASTIC_ENUMS:
             }
         }
     }
-    mapping_sealerlog_model = {
+    mapping_stealer_log_model = {
         "settings": {
-            "index.max_ngram_diff": 49,
             "analysis": {
-                "tokenizer": {
-                    "ngram_tokenizer": {
-                        "type": "ngram",
-                        "min_gram": 1,
-                        "max_gram": 50,
-                        "token_chars": ["letter", "digit", "punctuation", "symbol"]
-                    }
-                },
                 "analyzer": {
-                    "ngram_analyzer": {
+                    "custom_log_analyzer": {
                         "type": "custom",
-                        "tokenizer": "ngram_tokenizer",
+                        "tokenizer": "uax_url_email",
                         "filter": ["lowercase"]
                     },
                     "standard_lower": {
@@ -367,7 +358,7 @@ class ELASTIC_ENUMS:
             "properties": {
                 "log": {
                     "type": "text",
-                    "analyzer": "ngram_analyzer",
+                    "analyzer": "custom_log_analyzer",
                     "search_analyzer": "standard_lower",
                     "fields": {
                         "raw": {"type": "keyword"}

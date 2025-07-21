@@ -1328,25 +1328,29 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
+    import re
+
     @staticmethod
     def on_search_stealerlogs_data(p_query_model):
-        raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else ""
+        raw_query = p_query_model.q.strip().lower() if p_query_model.q and p_query_model.q != "*" else ""
+
         if raw_query:
-            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
+            terms = re.findall(r'"([^"]+)"|\S+', raw_query)
+
+            must_clauses = [
+                {
+                    "wildcard": {
+                        "log.raw": {
+                            "value": f"*{term}*"
+                        }
+                    }
+                } for term in terms
+            ]
+
             query = {
                 "query": {
                     "bool": {
-                        "should": [
-                            {
-                                "query_string": {
-                                    "query": raw_query,
-                                    "default_field": "log",
-                                    "boost": 1.5,
-                                    "default_operator": "AND"
-                                }
-                            }
-                        ],
-                        "minimum_should_match": 1
+                        "must": must_clauses
                     }
                 },
                 "from": 0,

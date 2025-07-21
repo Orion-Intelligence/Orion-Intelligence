@@ -20,7 +20,7 @@ class migration_1_0_2_8:
             await es.indices.delete(index=temp_index)
 
         print(f"[MIGRATION] Creating temporary index '{temp_index}'...")
-        await es.indices.create(index=temp_index, body=ELASTIC_ENUMS.mapping_sealerlog_model)
+        await es.indices.create(index=temp_index, body=ELASTIC_ENUMS.mapping_stealer_log_model)
 
         await es.indices.put_settings(index=temp_index, body={"index": {"blocks.write": False}})
 
