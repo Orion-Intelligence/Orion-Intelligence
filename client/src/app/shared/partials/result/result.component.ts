@@ -8,7 +8,7 @@ import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
 import {SidebarService} from '../../services/sidebar.service';
 import {FiltersComponent} from '../filters/filters.component';
 import {FilterModel} from '../../model/filter/filter.model';
-import { SortType } from '../../constants/enums';
+import {SortType} from '../../constants/enums';
 import {SuggestionComponent} from '../suggestion/suggestion.component';
 import {EmptyQueryComponent} from '../empty-query/empty-query.component';
 import {Suggestion} from '../../model/results/shared/common-result';
@@ -39,7 +39,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() consolidated = false;
   @Input() showTabs = true;
   @Input() filterModel!: FilterModel
-  @Input() showSorting:boolean = true
+  @Input() showSorting: boolean = true
 
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
   @Output() resetFilter = new EventEmitter<void>();
@@ -116,31 +116,29 @@ export class ResultComponent implements OnInit, OnChanges {
 
   onFormSubmit() {
     let query = "";
-    if(this.local_query){
-      query = this.local_query.trim()
-    }
-    if (this.selectedSearchBy === 'Match indivisual terms') {
-      query = query.replace(/\s+/g, '"');
-      if (!query.startsWith('"')) {
-        query = '"' + query;
-      }
-      if (!query.endsWith('"')) {
-        query = query + '"';
-      }
-    } else if (this.selectedSearchBy === 'Match all terms') {
-      query = query.replace(/"/g, ' ').trim();
-      query = `"${query}"`;
-    } else if (this.selectedSearchBy === 'Match any term') {
-      query = query.replace(/"/g, ' ').trim();
-    }
+    let quoteCount = (this.local_query.match(/"/g) || []).length;
 
-    query = query.trim();
+    if (this.local_query && quoteCount < 2) {
+      query = this.local_query.replace(/"/g, ' ').replace(/\s+/g, ' ').trim();
 
+      if (this.selectedSearchBy === 'Match indivisual terms') {
+        if (query) {
+          query = `"${query}"`;
+        }
+      } else if (this.selectedSearchBy === 'Match all terms') {
+        if (query) {
+          query = query.split(' ').map(t => `"${t}"`).join(' ');
+        }
+      }
+    } else if (this.local_query) {
+      query = this.local_query.replace(/^\s+|\s+$/g, '');
+    }
     this.updateQuery.emit(query);
     this.searchQuery = query;
     this.reloadData.emit();
     this.result_triggered = true;
   }
+
 
   onGetSuggestion() {
     if (this.searchQuery && this.suggestion && this.suggestion.options.length > 0 && this.suggestion.options.length < 15) {

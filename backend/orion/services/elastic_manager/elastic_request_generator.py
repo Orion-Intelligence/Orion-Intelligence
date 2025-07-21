@@ -1331,7 +1331,6 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealerlogs_data(p_query_model):
         raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else ""
-
         if raw_query:
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
             query = {
@@ -1339,11 +1338,11 @@ class elastic_request_generator:
                     "bool": {
                         "should": [
                             {
-                                "match": {
-                                    "log": {
-                                        "query": raw_query,
-                                        "boost": 1.5
-                                    }
+                                "query_string": {
+                                    "query": raw_query,
+                                    "default_field": "log",
+                                    "boost": 1.5,
+                                    "default_operator": "AND"
                                 }
                             }
                         ],
