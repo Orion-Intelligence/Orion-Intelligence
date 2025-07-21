@@ -225,7 +225,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     @staticmethod
-    def _strip_query(query, size=4):
+    def _strip_query(query, size=20):
         query["size"] = size
         query.pop("highlight", None)
         query.pop("suggest", None)
