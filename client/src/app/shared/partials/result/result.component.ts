@@ -65,7 +65,9 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(_: SimpleChanges): void {
-    this.local_query = this.searchQuery
+    if (!this.local_query){
+      this.local_query = this.searchQuery
+    }
   }
 
   ngOnInit(): void {
