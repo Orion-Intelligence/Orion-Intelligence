@@ -40,11 +40,11 @@
               <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
             </span>
             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term'">Match any term (OR)</a></li>
+              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onFormSubmit()">Match any term (OR)</a></li>
               <li><hr class="dropdown-divider mx-3"></li>
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match all terms'">Match all terms (AND)</a></li>
+              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match all terms';onFormSubmit()">Match all terms (AND)</a></li>
               <li><hr class="dropdown-divider mx-3"></li>
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms'">Match all indivisual (AND)</a></li>
+              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onFormSubmit()">Match all indivisual (AND)</a></li>
             </ul>
           </div>
         </div>
