@@ -7,6 +7,7 @@ interface UniqueLinkItem {
   url: string;
   status: boolean;
 }
+
 @Component({
   selector: 'app-result-insights',
   imports: [CommonModule, FormsModule],
@@ -15,15 +16,27 @@ interface UniqueLinkItem {
 })
 export class ResultInsightsComponent {
   @Input() consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
-  isKeywordExpanded = true;
-  isCoverageExpanded = true;
-  isThreatExpanded = true;
-  isUrlsExpanded = true;
+  sectionStates: Record<string, boolean> = {
+    isKeywordExpanded: true,
+    isCoverageExpanded: true,
+    isThreatExpanded: true,
+    isUrlsExpanded: true,
+    isLocationExpanded: false,
+    isNetworkExpanded: false,
+    isTeamExpanded: false,
+    isSenderExpanded: false,
+    isCveCweExpanded: false,
+  };
   searchQuery = '';
   filterOptions = ['All', 'Email', 'Name'];
   selectedFilter: string = 'All';
   emails: string[] = [];
   names: string[] = [];
+  locations: string[] = [];
+  networks: string[] = [];
+  teams: string[] = [];
+  senders: string[] = [];
+  cveCwe: string[] = [];
 
   uniqueUrls: UniqueLinkItem[] = [];
 
@@ -39,22 +52,22 @@ export class ResultInsightsComponent {
     this.keywordData.push({ value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel), label: 'Links' })
     this.keywordData.push({ value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages' })
     this.getCoverageSummaryFromModels(this.consolidatedCallbackModel);
-  }
-  toggleKeyword() {
-    this.isKeywordExpanded = !this.isKeywordExpanded;
-  }
-
-  toggleCoverage() {
-    this.isCoverageExpanded = !this.isCoverageExpanded;
-  }
-  toggleThreatActor() {
-    this.isThreatExpanded = !this.isThreatExpanded;
-  }
-  toggleUniqueUrls() {
-    this.isUrlsExpanded = !this.isUrlsExpanded;
+    this.locations = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_country_name']);
+    this.networks = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_network']);
+    this.teams = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_team', 'm_attacker', 'm_channel_name']);
+    this.senders = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_sender_name']);
+    this.cveCwe = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_cve', 'm_cwe']);
   }
   toggleFilter(option: string) {
     this.selectedFilter = option;
+  }
+  toggleSection(section: string): void {
+    if (section in this.sectionStates) {
+      this.sectionStates[section] = !this.sectionStates[section];
+    }
+  }
+  isSectionExpanded(section: string): boolean {
+    return !!this.sectionStates[section];
   }
   threatResults(): string[] {
     const query = this.searchQuery.trim().toLowerCase();
@@ -290,5 +303,36 @@ export class ResultInsightsComponent {
     });
 
     return urls.size;
+  }
+
+  extractFieldsFromModels(consolidatedModel: ConsolidatedCallbackModel, fields: string[]): string[] {
+    const result: string[] = [];
+
+    const allModels = [
+      consolidatedModel.chat_model,
+      consolidatedModel.leak_model,
+      consolidatedModel.exploit_model,
+      consolidatedModel.defacement_model,
+      consolidatedModel.social_model,
+      consolidatedModel.generic_model,
+    ];
+
+    for (const model of allModels) {
+      if (!model?.Result) continue;
+
+      for (const item of model.Result) {
+        for (const field of fields) {
+          const value = (item as any)[field];
+
+          if (Array.isArray(value)) {
+            result.push(...value.filter(v => typeof v === 'string' && v.trim()));
+          } else if (typeof value === 'string' && value.trim()) {
+            result.push(value);
+          }
+        }
+      }
+    }
+
+    return Array.from(new Set(result));
   }
 }

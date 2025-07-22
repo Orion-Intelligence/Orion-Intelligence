@@ -366,6 +366,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_consolidated_data(p_query_model):
+        p_query_model.mMessageDate=p_query_model.mDateRange
         if p_query_model.q != "*":
             raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
