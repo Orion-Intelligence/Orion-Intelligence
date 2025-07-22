@@ -25,7 +25,6 @@ class migration_manager:
 
     async def init_migration(self):
         try:
-            print("::::::::::::::::::::::::::::::::111", flush=True)
             version, _ = self.get_versions_from_toml()
             await mongo_controller.get_instance().link_connection()
             engine = mongo_controller.get_instance().get_engine()
@@ -33,38 +32,27 @@ class migration_manager:
                 raise Exception("MongoDB is not connected. Migration cannot proceed.")
             stored_version = await self.get_stored_version(engine)
             script_dir = os.path.join(os.path.dirname(__file__), "scripts")
-            print("::::::::::::::::::::::::::::::::112", flush=True)
-            print(script_dir, flush=True)
-            print("::::::::::::::::::::::::::::::::113", flush=True)
             if not os.path.exists(script_dir):
                 log.g().w(f"Scripts directory not found: {script_dir}")
-                print("::::::::::::::::::::::::::::::::114", flush=True)
                 return
-            print("::::::::::::::::::::::::::::::::115", flush=True)
             migration_files = [f for f in os.listdir(script_dir) if f.startswith("migration_") and f.endswith(".py")]
             migration_versions = []
-            print("::::::::::::::::::::::::::::::::116", flush=True)
             for file in migration_files:
                 version_str = file.replace("migration_", "").replace(".py", "").replace("_", ".")
                 migration_versions.append((version_str, file))
             migration_versions.sort(key=lambda x: [int(part) if part.isdigit() else part for part in x[0].split(".")])
             stored_version = stored_version or version
             target_version_parts = [int(part) if part.isdigit() else part for part in version.split(".")]
-            print("::::::::::::::::::::::::::::::::112", flush=True)
             if stored_version.__contains__("_"):
                 stored_version_parts = [int(part) if part.isdigit() else part for part in stored_version.split("_")]
             else:
                 stored_version_parts = [int(part) if part.isdigit() else part for part in stored_version.split(".")]
-            print("::::::::::::::::::::::::::::::::113", flush=True)
             sys.path.insert(0, script_dir)
-            print("::::::::::::::::::::::::::::::::114", flush=True)
             for version_str, file in migration_versions:
                 script_version_parts = [int(part) if part.isdigit() else part for part in version_str.split(".")]
-                print("::::::::::::::::::::::::::::::::116", flush=True)
                 if target_version_parts >= script_version_parts > stored_version_parts:
                     migration_script_name = file.replace(".py", "")
                     migration_module = importlib.import_module(migration_script_name)
-                    print("::::::::::::::::::::::::::::::::118", flush=True)
                     if hasattr(migration_module, migration_script_name):
                         migration_class = getattr(migration_module, migration_script_name)
                         if hasattr(migration_class, "migrate"):
@@ -73,8 +61,6 @@ class migration_manager:
                             log.g().w(f"No 'migrate' method in {migration_script_name}")
                     else:
                         log.g().w(f"No class {migration_script_name} in module")
-            print("::::::::::::::::::::::::::::::::111", flush=True)
-            return
             existing_version_entry = await engine.find_one(db_system_model, db_system_model.key == AllowedKeys.VERSION)
             if existing_version_entry:
                 existing_version_entry.value = version

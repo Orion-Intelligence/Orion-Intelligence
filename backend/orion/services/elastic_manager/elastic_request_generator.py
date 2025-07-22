@@ -1328,23 +1328,23 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
-    import re
-
     @staticmethod
     def on_search_stealerlogs_data(p_query_model):
-        raw_query = p_query_model.q.strip().lower() if p_query_model.q and p_query_model.q != "*" else ""
+        raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
 
         if raw_query:
-            terms = re.findall(r'"([^"]+)"|\S+', raw_query)
+            # Extract quoted and unquoted terms
+            terms = re.findall(r'"([^"]+)"|(\S+)', raw_query)
+            flat_terms = [t[0] or t[1] for t in terms]
 
             must_clauses = [
                 {
                     "wildcard": {
                         "log.raw": {
-                            "value": f"*{term}*"
+                            "value": f"*{term.lower()}*"
                         }
                     }
-                } for term in terms
+                } for term in flat_terms
             ]
 
             query = {
