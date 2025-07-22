@@ -1,6 +1,7 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+
 from orion.helper_manager.env_handler import env_handler
 
 
@@ -11,8 +12,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
-        host = request.headers.get("host", "")
-        is_tor_request = ".onion" in host
 
         if any(path in request.url.path for path in [
             "/docs",
@@ -26,7 +25,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         if request.url.path.startswith("/admin"):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self' data: blob:; "
-                "script-src 'self' 'unsafe-inline'; "
+                "script-src 'self' 'unsafe-inline';"
                 "style-src 'self' 'unsafe-inline' *; "
                 "img-src 'self' data: *; "
                 "font-src 'self' *; "
@@ -37,42 +36,23 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "object-src *; "
                 "form-action *; "
                 "base-uri 'self'; "
-                "upgrade-insecure-requests; "
                 "report-to csp-endpoint;"
             )
         else:
-            if is_tor_request:
-                response.headers["Content-Security-Policy"] = (
-                    "default-src 'self'; "
-                    "script-src 'self' 'unsafe-inline'; "
-                    "style-src 'self' 'unsafe-inline'; "
-                    "img-src 'self' data: *; "
-                    "font-src 'self'; "
-                    "connect-src 'self'; "
-                    "media-src 'self'; "
-                    "frame-ancestors 'self'; "
-                    "object-src 'none'; "
-                    "form-action 'self'; "
-                    "base-uri 'self'; "
-                    "upgrade-insecure-requests; "
-                    "report-to csp-endpoint;"
-                )
-            else:
-                response.headers["Content-Security-Policy"] = (
-                    "default-src 'self'; "
-                    "script-src 'self'; "
-                    "style-src 'self'; "
-                    "img-src 'self' data: https://try.orionintelligence.org; "
-                    "font-src 'self'; "
-                    "connect-src 'self'; "
-                    "media-src 'self'; "
-                    "frame-ancestors 'self'; "
-                    "object-src 'none'; "
-                    "form-action 'self'; "
-                    "base-uri 'self'; "
-                    "upgrade-insecure-requests; "
-                    "report-to csp-endpoint;"
-                )
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "style-src 'self'; "
+                "img-src 'self' data: https://try.orionintelligence.org; "
+                "font-src 'self'; "
+                "connect-src 'self'; "
+                "media-src 'self'; "
+                "frame-ancestors 'self'; "
+                "object-src 'none'; "
+                "form-action 'self'; "
+                "base-uri 'self'; "
+                "report-to csp-endpoint;"
+            )
 
         response.headers["Report-To"] = (
             '{"group":"csp-endpoint",'
