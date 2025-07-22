@@ -103,91 +103,22 @@
     </div>
 </div>
 
-<div class="insight-card" *ngIf="locations.length>0">
-    <div class="card_header" (click)="toggleSection('isLocationExpanded')">
-        <span>Locations</span>
-        <div [attr.aria-label]="isSectionExpanded('isLocationExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
-            <img [ngClass]="{ '_rotated': !isSectionExpanded('isLocationExpanded') }" alt="toggle icon"
-                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
-        </div>
-    </div>
-
-    <div class="scroll-fade-container">
-        <div class="scrollable" *ngIf="isSectionExpanded('isLocationExpanded')">
-            <div class="url-item" *ngFor="let l of locations let isLast = last" [ngClass]="{ 'no-border': isLast }">
-                <span>{{ l }}</span>
+<div *ngFor="let section of dataSections">
+    <div *ngIf="section.data?.length" class="insight-card">
+        <div class="card_header" (click)="toggleSection(section.key)">
+            <span>{{ section.title }}</span>
+            <div [attr.aria-label]="isSectionExpanded(section.key) ? 'Collapse' : 'Expand'" class="toggle-btn">
+                <img [ngClass]="{ '_rotated': !isSectionExpanded(section.key) }" alt="toggle icon"
+                    src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
             </div>
         </div>
-    </div>
-</div>
 
-<div class="insight-card" *ngIf="networks.length>0">
-    <div class="card_header" (click)="toggleSection('isNetworkExpanded')">
-        <span>Networks</span>
-        <div [attr.aria-label]="isSectionExpanded('isNetworkExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
-            <img [ngClass]="{ '_rotated': !isSectionExpanded('isNetworkExpanded') }" alt="toggle icon"
-                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
-        </div>
-    </div>
-
-    <div class="scroll-fade-container">
-        <div class="scrollable" *ngIf="isSectionExpanded('isNetworkExpanded')">
-            <div class="url-item" *ngFor="let l of networks let isLast = last" [ngClass]="{ 'no-border': isLast }">
-                <span>{{ l }}</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="insight-card" *ngIf="teams.length>0">
-    <div class="card_header" (click)="toggleSection('isTeamExpanded')">
-        <span>Teams</span>
-        <div [attr.aria-label]="isSectionExpanded('isTeamExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
-            <img [ngClass]="{ '_rotated': !isSectionExpanded('isTeamExpanded') }" alt="toggle icon"
-                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
-        </div>
-    </div>
-
-    <div class="scroll-fade-container">
-        <div class="scrollable" *ngIf="isSectionExpanded('isTeamExpanded')">
-            <div class="url-item" *ngFor="let l of teams let isLast = last" [ngClass]="{ 'no-border': isLast }">
-                <span>{{ l }}</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="insight-card" *ngIf="senders.length>0">
-    <div class="card_header" (click)="toggleSection('isSenderExpanded')">
-        <span>Senders</span>
-        <div [attr.aria-label]="isSectionExpanded('isSenderExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
-            <img [ngClass]="{ '_rotated': !isSectionExpanded('isSenderExpanded') }" alt="toggle icon"
-                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
-        </div>
-    </div>
-
-    <div class="scroll-fade-container">
-        <div class="scrollable" *ngIf="isSectionExpanded('isSenderExpanded')">
-            <div class="url-item" *ngFor="let l of senders let isLast = last" [ngClass]="{ 'no-border': isLast }">
-                <span>{{ l }}</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="insight-card" *ngIf="cveCwe.length>0">
-    <div class="card_header" (click)="toggleSection('isCveCweExpanded')">
-        <span>CVE & CWE</span>
-        <div [attr.aria-label]="isSectionExpanded('isCveCweExpanded') ? 'Collapse' : 'Expand'" class="toggle-btn">
-            <img [ngClass]="{ '_rotated': !isSectionExpanded('isCveCweExpanded') }" alt="toggle icon"
-                src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
-        </div>
-    </div>
-
-    <div class="scroll-fade-container">
-        <div class="scrollable" *ngIf="isSectionExpanded('isCveCweExpanded')">
-            <div class="url-item" *ngFor="let l of cveCwe let isLast = last" [ngClass]="{ 'no-border': isLast }">
-                <span>{{ l }}</span>
+        <div class="scroll-fade-container">
+            <div class="scrollable" *ngIf="isSectionExpanded(section.key)">
+                <div class="url-item" *ngFor="let item of section.data; let isLast = last"
+                    [ngClass]="{ 'no-border': isLast }">
+                    <span>{{ item }}</span>
+                </div>
             </div>
         </div>
     </div>
