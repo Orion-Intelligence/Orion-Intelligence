@@ -1,0 +1,23 @@
+# Ignore Python cache and envs
+__pycache__/
+*.py[cod]
+*.egg-info
+.venv
+venv/
+.env
+
+# Ignore node modules
+node_modules/
+client/node_modules/
+
+# Ignore build outputs
+dist/
+build/
+client/dist/
+client/build/
+
+# Ignore Git and OS junk
+.git
+.gitignore
+*.log
+.DS_Store
