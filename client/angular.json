@@ -18,8 +18,8 @@
               "replaceDuplicatePlugins": true
             },
             "outputPath": "build",
-            "baseHref": "/",
-            "deployUrl": "/",
+            "baseHref": "./",
+            "deployUrl": "./",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
