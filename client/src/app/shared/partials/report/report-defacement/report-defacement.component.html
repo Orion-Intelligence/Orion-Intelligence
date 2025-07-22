@@ -23,7 +23,7 @@
 </div>
 <div class="search__result-detail">
   <div class="dashboard__defacement-detail-header-url">
-    {{ defacementData?.m_source_url }}
+    {{ defacementData?.m_url }}
   </div>
   <div class="dashboard__defacement-detail-header-row">
     <div class="dashboard__defacement-detail-header-items">
@@ -43,7 +43,7 @@
       <strong>Web Server:</strong>{{ defacementData?.m_web_server ? defacementData?.m_web_server : 'Not found' }}
     </div>
     <div class="dashboard__defacement-detail-header-items">
-      <strong>Breach:</strong>{{ defacementData?.m_url }}
+      <strong>Breach:</strong>{{ defacementData?.m_source_url }}
     </div>
     <div class="dashboard__defacement-detail-header-items">
       <strong>IP:</strong>{{ defacementData?.m_ip }}
