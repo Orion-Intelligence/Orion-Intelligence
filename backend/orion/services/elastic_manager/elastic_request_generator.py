@@ -1334,7 +1334,6 @@ class elastic_request_generator:
         raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
 
         if raw_query:
-            # Extract quoted and unquoted terms
             terms = re.findall(r'"([^"]+)"|(\S+)', raw_query)
             flat_terms = [t[0] or t[1] for t in terms]
 
