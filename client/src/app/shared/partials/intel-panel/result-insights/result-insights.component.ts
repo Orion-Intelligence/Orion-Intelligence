@@ -2,11 +2,8 @@ import { FormsModule } from '@angular/forms';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConsolidatedCallbackModel } from '../../../model/results/consolidated/consolidated.callback.model';
-interface UniqueLinkItem {
-  title: string;
-  url: string;
-  status: boolean;
-}
+import { UniqueLinkItem } from '../../../model/homepage/consolidationInsights'
+
 
 @Component({
   selector: 'app-result-insights',
@@ -26,20 +23,19 @@ export class ResultInsightsComponent {
     isTeamExpanded: false,
     isSenderExpanded: false,
     isCveCweExpanded: false,
+    isContentTypeExpanded: false,
+    isPhoneNumbersExpanded: false,
   };
   searchQuery = '';
   filterOptions = ['All', 'Email', 'Name'];
   selectedFilter: string = 'All';
   emails: string[] = [];
   names: string[] = [];
-  locations: string[] = [];
-  networks: string[] = [];
-  teams: string[] = [];
-  senders: string[] = [];
-  cveCwe: string[] = [];
+
+
+  dataSections: { title: string; key: string; data: string[]; }[] = [];
 
   uniqueUrls: UniqueLinkItem[] = [];
-
   keywordData: { value: number, label: string }[] = [];
   coverageData: { value: number, label: string, color: string }[] = [];
   ngOnInit(): void {
@@ -52,11 +48,23 @@ export class ResultInsightsComponent {
     this.keywordData.push({ value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel), label: 'Links' })
     this.keywordData.push({ value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages' })
     this.getCoverageSummaryFromModels(this.consolidatedCallbackModel);
-    this.locations = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_country_name']);
-    this.networks = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_network']);
-    this.teams = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_team', 'm_attacker', 'm_channel_name']);
-    this.senders = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_sender_name']);
-    this.cveCwe = this.extractFieldsFromModels(this.consolidatedCallbackModel, ['m_cve', 'm_cwe']);
+    const fieldsMap = {
+      locations: ['m_country_name'],
+      teams: ['m_team', 'm_attacker', 'm_channel_name'],
+      senders: ['m_sender_name'],
+      cveCwe: ['m_cve', 'm_cwe'],
+      contentTypes: ['m_content_type', 'mContentType'],
+      phoneNumbers: ['m_phone_numbers'],
+    };
+    const extractedData = this.extractMultipleFieldsFromModels(this.consolidatedCallbackModel, fieldsMap);
+    this.dataSections = [
+      { title: 'Locations', key: 'isLocationExpanded', data: extractedData['locations'] },
+      { title: 'Teams', key: 'isTeamExpanded', data: extractedData['teams'] },
+      { title: 'Senders', key: 'isSenderExpanded', data: extractedData['senders'] },
+      { title: 'CVE & CWE', key: 'isCveCweExpanded', data: extractedData['cveCwe'] },
+      { title: 'Content Types', key: 'isContentTypeExpanded', data: extractedData['contentTypes'] },
+      { title: 'Phone Numbers', key: 'isContentTypeExpanded', data: extractedData['phoneNumbers'] },
+    ];
   }
   toggleFilter(option: string) {
     this.selectedFilter = option;
@@ -305,8 +313,11 @@ export class ResultInsightsComponent {
     return urls.size;
   }
 
-  extractFieldsFromModels(consolidatedModel: ConsolidatedCallbackModel, fields: string[]): string[] {
-    const result: string[] = [];
+  extractMultipleFieldsFromModels(
+    consolidatedModel: ConsolidatedCallbackModel,
+    fieldsMap: Record<string, string[]>
+  ): Record<string, string[]> {
+    const resultMap: Record<string, Set<string>> = {};
 
     const allModels = [
       consolidatedModel.chat_model,
@@ -317,22 +328,33 @@ export class ResultInsightsComponent {
       consolidatedModel.generic_model,
     ];
 
-    for (const model of allModels) {
-      if (!model?.Result) continue;
+    for (const [key, fields] of Object.entries(fieldsMap)) {
+      resultMap[key] = new Set();
 
-      for (const item of model.Result) {
-        for (const field of fields) {
-          const value = (item as any)[field];
+      for (const model of allModels) {
+        if (!model?.Result) continue;
 
-          if (Array.isArray(value)) {
-            result.push(...value.filter(v => typeof v === 'string' && v.trim()));
-          } else if (typeof value === 'string' && value.trim()) {
-            result.push(value);
+        for (const item of model.Result) {
+          for (const field of fields) {
+            const value = (item as any)[field];
+
+            if (Array.isArray(value)) {
+              value.forEach(v => {
+                if (typeof v === 'string' && v.trim()) resultMap[key].add(v);
+              });
+            } else if (typeof value === 'string' && value.trim()) {
+              resultMap[key].add(value);
+            }
           }
         }
       }
     }
 
-    return Array.from(new Set(result));
+    const finalResult: Record<string, string[]> = {};
+    for (const key in resultMap) {
+      finalResult[key] = Array.from(resultMap[key]);
+    }
+
+    return finalResult;
   }
 }
