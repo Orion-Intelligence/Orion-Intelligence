@@ -36,6 +36,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "object-src *; "
                 "form-action *; "
                 "base-uri 'self'; "
+                "upgrade-insecure-requests; "
                 "report-to csp-endpoint;"
             )
         else:
