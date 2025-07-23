@@ -13,18 +13,48 @@ import { UniqueLinkItem } from '../../../model/homepage/consolidationInsights'
 })
 export class ResultInsightsComponent {
   @Input() consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
+  @Input() results: any;
   sectionStates: Record<string, boolean> = {
     isKeywordExpanded: true,
     isCoverageExpanded: true,
     isThreatExpanded: true,
     isUrlsExpanded: true,
-    isLocationExpanded: false,
-    isNetworkExpanded: false,
-    isTeamExpanded: false,
-    isSenderExpanded: false,
+    isBitcoinExpanded: false,
+    isPhoneExpanded: false,
+    isDomainExpanded: false,
     isCveCweExpanded: false,
-    isContentTypeExpanded: false,
-    isPhoneNumbersExpanded: false,
+    isIpExpanded: false,
+    isYaraExpanded: false,
+    isAwsExpanded: false,
+    isFilePathExpanded: false,
+    isCreditCardExpanded: false,
+    isOrganizationExpanded: false,
+    isGpeExpanded: false,
+    isNorpExpanded: false,
+    isProductExpanded: false,
+    isPersonExpanded: false,
+    isLocationExpanded: false,
+    isLawExpanded: false,
+    isAadhaarExpanded: false,
+    isAustralianIdExpanded: false,
+    isIndianIdExpanded: false,
+    isUsIdExpanded: false,
+    isUsBankExpanded: false,
+    isUsernameExpanded: false,
+    isPasswordExpanded: false,
+    isHashtagExpanded: false,
+    isMentionExpanded: false,
+    isMitreExpanded: false,
+    isDocumentIdExpanded: false,
+    isMedicalExpanded: false,
+    isEmployeeExpanded: false,
+    isTeamExpanded: false,
+    isLanguageExpanded: false,
+    isUserAgentExpanded: false,
+    isAsnExpanded: false,
+    isChannelExpanded: false,
+    isSenderExpanded: false,
+    isContentTypeExpanded: false
   };
   searchQuery = '';
   filterOptions = ['All', 'Email', 'Name'];
@@ -49,21 +79,81 @@ export class ResultInsightsComponent {
     this.keywordData.push({ value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages' })
     this.getCoverageSummaryFromModels(this.consolidatedCallbackModel);
     const fieldsMap = {
-      locations: ['m_country_name'],
-      teams: ['m_team', 'm_attacker', 'm_channel_name'],
-      senders: ['m_sender_name'],
+      bitcoinAddresses: ['m_bitcoin_addresses'],
+      phoneNumbers: ['m_phone_number'],
+      domains: ['m_domain'],
       cveCwe: ['m_cve', 'm_cwe'],
-      contentTypes: ['m_content_type', 'mContentType'],
-      phoneNumbers: ['m_phone_numbers'],
+      ipAddresses: ['m_ip'],
+      yaraRules: ['m_yara_rule'],
+      awsSecrets: ['m_aws_secret'],
+      filePaths: ['m_file_path'],
+      creditCards: ['m_credit_card'],
+      organizations: ['m_org', 'm_company_name'],
+      geopoliticalEntities: ['m_gpe'],
+      norps: ['m_norp'],
+      products: ['m_product'],
+      persons: ['m_person'],
+      locations: ['m_location', 'm_country', 'm_states'],
+      laws: ['m_law'],
+      aadhaar: ['m_in_aadhaar'],
+      australianIds: ['m_au_abn', 'm_au_tfn'],
+      indianIds: ['m_in_vehicle_registration', 'm_in_pan', 'm_in_voter', 'm_in_passport'],
+      usIds: ['m_us_itin', 'm_us_ssn', 'm_us_passport', 'm_us_driver_license'],
+      usBankDetails: ['m_us_bank_number'],
+      usernames: ['m_username'],
+      passwords: ['m_password'],
+      hashtags: ['m_hashtag'],
+      mentions: ['m_mention'],
+      mitreTtp: ['m_mitre_ttp_type', 'm_mitre_ttp_name'],
+      documentIds: ['m_document_id'],
+      medicalLicenses: ['m_medical_license'],
+      employeeData: ['m_employee_count'],
+      teams: ['m_team', 'm_attacker'],
+      language: ['m_language'],
+      userAgents: ['m_user_agents'],
+      asns: ['m_asns'],
+      channels: ['m_channel_name'],
+      senders: ['m_sender_name'],
+      contentTypes: ['m_content_type', 'mContentType']
     };
-    const extractedData = this.extractMultipleFieldsFromModels(this.consolidatedCallbackModel, fieldsMap);
+    const extractedData = this.extractMultipleFieldsFromResults(this.results, fieldsMap);
     this.dataSections = [
-      { title: 'Locations', key: 'isLocationExpanded', data: extractedData['locations'] },
-      { title: 'Teams', key: 'isTeamExpanded', data: extractedData['teams'] },
-      { title: 'Senders', key: 'isSenderExpanded', data: extractedData['senders'] },
+      { title: 'Bitcoin Addresses', key: 'isBitcoinExpanded', data: extractedData['bitcoinAddresses'] },
+      { title: 'Phone Numbers', key: 'isPhoneExpanded', data: extractedData['phoneNumbers'] },
+      { title: 'Domains', key: 'isDomainExpanded', data: extractedData['domains'] },
       { title: 'CVE & CWE', key: 'isCveCweExpanded', data: extractedData['cveCwe'] },
-      { title: 'Content Types', key: 'isContentTypeExpanded', data: extractedData['contentTypes'] },
-      { title: 'Phone Numbers', key: 'isContentTypeExpanded', data: extractedData['phoneNumbers'] },
+      { title: 'IP Addresses', key: 'isIpExpanded', data: extractedData['ipAddresses'] },
+      { title: 'YARA Rules', key: 'isYaraExpanded', data: extractedData['yaraRules'] },
+      { title: 'AWS Secrets', key: 'isAwsExpanded', data: extractedData['awsSecrets'] },
+      { title: 'File Paths', key: 'isFilePathExpanded', data: extractedData['filePaths'] },
+      { title: 'Credit Cards', key: 'isCreditCardExpanded', data: extractedData['creditCards'] },
+      { title: 'Organizations', key: 'isOrganizationExpanded', data: extractedData['organizations'] },
+      { title: 'Geopolitical Entities', key: 'isGpeExpanded', data: extractedData['geopoliticalEntities'] },
+      { title: 'NORPs', key: 'isNorpExpanded', data: extractedData['norps'] },
+      { title: 'Products', key: 'isProductExpanded', data: extractedData['products'] },
+      { title: 'Persons', key: 'isPersonExpanded', data: extractedData['persons'] },
+      { title: 'Locations', key: 'isLocationExpanded', data: extractedData['locations'] },
+      { title: 'Laws', key: 'isLawExpanded', data: extractedData['laws'] },
+      { title: 'Aadhaar (IN)', key: 'isAadhaarExpanded', data: extractedData['aadhaar'] },
+      { title: 'Australian IDs', key: 'isAustralianIdExpanded', data: extractedData['australianIds'] },
+      { title: 'Indian IDs', key: 'isIndianIdExpanded', data: extractedData['indianIds'] },
+      { title: 'US IDs', key: 'isUsIdExpanded', data: extractedData['usIds'] },
+      { title: 'US Bank Numbers', key: 'isUsBankExpanded', data: extractedData['usBankDetails'] },
+      { title: 'Usernames', key: 'isUsernameExpanded', data: extractedData['usernames'] },
+      { title: 'Passwords', key: 'isPasswordExpanded', data: extractedData['passwords'] },
+      { title: 'Hashtags', key: 'isHashtagExpanded', data: extractedData['hashtags'] },
+      { title: 'Mentions', key: 'isMentionExpanded', data: extractedData['mentions'] },
+      { title: 'MITRE TTP', key: 'isMitreExpanded', data: extractedData['mitreTtp'] },
+      { title: 'Document IDs', key: 'isDocumentIdExpanded', data: extractedData['documentIds'] },
+      { title: 'Medical Licenses', key: 'isMedicalExpanded', data: extractedData['medicalLicenses'] },
+      { title: 'Employee Data', key: 'isEmployeeExpanded', data: extractedData['employeeData'] },
+      { title: 'Teams', key: 'isTeamExpanded', data: extractedData['teams'] },
+      { title: 'Languages', key: 'isLanguageExpanded', data: extractedData['language'] },
+      { title: 'User Agents', key: 'isUserAgentExpanded', data: extractedData['userAgents'] },
+      { title: 'ASNs', key: 'isAsnExpanded', data: extractedData['asns'] },
+      { title: 'Channels', key: 'isChannelExpanded', data: extractedData['channels'] },
+      { title: 'Senders', key: 'isSenderExpanded', data: extractedData['senders'] },
+      { title: 'Content Types', key: 'isContentTypeExpanded', data: extractedData['contentTypes'] }
     ];
   }
   toggleFilter(option: string) {
@@ -313,43 +403,36 @@ export class ResultInsightsComponent {
     return urls.size;
   }
 
-  extractMultipleFieldsFromModels(
-    consolidatedModel: ConsolidatedCallbackModel,
+  extractMultipleFieldsFromResults(
+    data: any,
     fieldsMap: Record<string, string[]>
   ): Record<string, string[]> {
     const resultMap: Record<string, Set<string>> = {};
 
-    const allModels = [
-      consolidatedModel.chat_model,
-      consolidatedModel.leak_model,
-      consolidatedModel.exploit_model,
-      consolidatedModel.defacement_model,
-      consolidatedModel.social_model,
-      consolidatedModel.generic_model,
-    ];
+    for (const [categoryKey, fields] of Object.entries(fieldsMap)) {
+      resultMap[categoryKey] = new Set();
 
-    for (const [key, fields] of Object.entries(fieldsMap)) {
-      resultMap[key] = new Set();
-
-      for (const model of allModels) {
-        if (!model?.Result) continue;
+      for (const modelKey in data) {
+        const model = data[modelKey];
+        if (!model?.Result || !Array.isArray(model.Result)) continue;
 
         for (const item of model.Result) {
           for (const field of fields) {
-            const value = (item as any)[field];
+            const value = item[field];
 
             if (Array.isArray(value)) {
-              value.forEach(v => {
-                if (typeof v === 'string' && v.trim()) resultMap[key].add(v);
-              });
+              for (const v of value) {
+                if (typeof v === 'string' && v.trim()) {
+                  resultMap[categoryKey].add(v);
+                }
+              }
             } else if (typeof value === 'string' && value.trim()) {
-              resultMap[key].add(value);
+              resultMap[categoryKey].add(value);
             }
           }
         }
       }
     }
-
     const finalResult: Record<string, string[]> = {};
     for (const key in resultMap) {
       finalResult[key] = Array.from(resultMap[key]);
