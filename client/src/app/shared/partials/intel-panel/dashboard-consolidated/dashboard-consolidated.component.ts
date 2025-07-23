@@ -77,6 +77,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   public consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public groupedResults: { [index: string]: any[] } = {};
+  public respons: any;
   public pageCounts: { [key: string]: number } = {};
 
   isGrouped = true
@@ -235,6 +236,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       .pipe(switchMap(response => timer(500).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
+          this.respons = response.data;
           this.consolidatedCallbackModel = response.data;
           this.dashboardService.consolidatedCallbackModel = this.consolidatedCallbackModel;
           this.populateGroupedResults();
