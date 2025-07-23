@@ -1,0 +1,52 @@
+<div class="filter-bar-container">
+    <div class="filter-grid-layout">
+
+        <div class="primary-filters-column">
+            <div [ngClass]="{ 'primary-filters-collapsed': !isExpanded, 'primary-filters-expanded': isExpanded }"
+                class="primary-filters-wrap custom-scrollbar">
+                <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
+                    <div class="filter-item">
+                        <div class="filter-label-edit">
+                            {{ filterKey.value.title }}
+                        </div>
+                        <span class="filter-value">{{ getSelectedLabel(filterKey.value) }}
+                        </span>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+
+        <div class="entity-filters-column">
+            <ng-container *ngIf="entityFilterCategories.length > 0">
+                <div class="filter-label-edit">
+                    Entity Filters
+
+                </div>
+            </ng-container>
+
+            <div [ngClass]="{ 'filter-chips-collapsed': !isExpanded, 'filter-chips-expanded': isExpanded }"
+                class="filter-chips-container custom-scrollbar">
+                <div class="filter-chips-wrap">
+                    <ng-container *ngFor="let category of entityFilterCategories">
+                        <span *ngFor="let tag of category.tags" class="filter-chip">
+                            {{ tag.value }}
+                            <img src="../../../../assets/images/shared/remove-filter.svg" class="filter-chip-remove-btn"
+                                (click)="removeEntityTypeFilterTag(category.id, tag.id)">
+                        </span>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-actions-wrapper">
+            <div [ngClass]="['expand-vertical-line', isExpanded ? 'expanded' : 'collapsed']"></div>
+            <div class="filter-actions-section">
+                <div (click)="clearAllFilters()" class="clear-all-btn">Clear All</div>
+                <div (click)="toggleExpandCollapse()" class="expand-collapse-btn">
+                    <img
+                        [src]="isExpanded ? '../../../../assets/images/shared/expand-filters.svg' : '../../../../assets/images/shared/collapse-filters.svg'">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

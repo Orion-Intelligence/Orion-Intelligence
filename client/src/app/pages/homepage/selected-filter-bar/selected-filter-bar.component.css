@@ -1,0 +1,199 @@
+.font-inter {
+    font-family: 'Inter', sans-serif;
+}
+
+.filter-bar-container {
+    padding: 16px 16px 16px 16px;
+    background-color: #174069;
+    border-radius: 10px;
+    border: 1px solid #FFFFFF40;
+    max-width: 835px;
+    margin-left: 31px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.filter-grid-layout {
+    display: grid;
+    grid-template-columns: 3.5fr 3.5fr 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+    height: 100%;
+}
+
+.primary-filters-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.primary-filters-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1.5rem;
+    row-gap: 0.75rem;
+    font-size: 0.875rem;
+    padding-right: 0.5rem;
+}
+
+.primary-filters-collapsed {
+    max-height: 40px;
+    overflow-y: hidden;
+}
+
+.primary-filters-expanded {
+    max-height: 90px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label-edit {
+
+
+    display: flex;
+    align-items: center;
+    color: #297AD3;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+
+
+.filter-value {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.entity-filters-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.filter-chips-container {
+    padding-right: 0.5rem;
+    flex-grow: 1;
+}
+
+.filter-chips-collapsed {
+    max-height: 30px;
+    overflow-y: hidden;
+}
+
+.filter-chips-expanded {
+    max-height: 75px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.filter-chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-chip {
+
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #2A5784B2;
+    color: #FFFFFFCC;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.filter-chip-remove-btn {
+
+
+    margin-left: 3px;
+    height: 16px;
+    width: 16px;
+}
+
+.filter-actions-wrapper {
+    display: flex;
+    align-items: flex-start;
+}
+
+.filter-actions-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.expand-vertical-line {
+    width: 2px;
+    background-color: #FFFFFF33;
+    margin-right: 15px;
+    border-radius: 5px;
+}
+
+.expanded {
+    height: 100px;
+}
+
+.collapsed {
+    height: 60px;
+}
+
+.clear-all-btn {
+    display: flex;
+    align-items: center;
+    line-height: 1;
+    white-space: nowrap;
+    justify-content: center;
+    padding: 0.5rem 1.25rem;
+    background-color: #2A5784;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    max-width: 78px;
+    max-height: 26px;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+
+.expand-collapse-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expand-collapse-btn img {
+    width: 24px;
+    height: 12px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #2a63b0;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #80aedb;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #b0d0f0;
+}

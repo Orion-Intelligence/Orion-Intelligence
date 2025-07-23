@@ -1,14 +1,14 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {FilterModel} from '../../model/filter/filter.model';
-import {last} from 'rxjs';
-import {filterAnimation} from '../../animations/filter.animation';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {DatePickerComponent} from './date-picker/date-picker.component';
-import {MultipleSelectionComponent} from './multiple-selection/multiple-selection.component';
-import {ActivatedRoute} from '@angular/router';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { FilterModel } from '../../model/filter/filter.model';
+import { last } from 'rxjs';
+import { filterAnimation } from '../../animations/filter.animation';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { DatePickerComponent } from './date-picker/date-picker.component';
+import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-filters',
@@ -24,6 +24,7 @@ export class FiltersComponent implements OnInit {
   @Output() filterReset = new EventEmitter<void>();
   @Output() filterClose = new EventEmitter<void>();
 
+  initialModel!: FilterModel;
   selectedFilters: Record<string, string | null> = {};
   protected readonly Object = Object;
   protected readonly last = last;
@@ -32,20 +33,29 @@ export class FiltersComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.initialModel = structuredClone(this.filterModel)
     this.initializeFilters();
     this.readFiltersFromUrl();
   }
 
   updateFilter(event: { key: string; value: string }) {
     this.selectedFilters[event.key] = event.value;
+
+    if (this.filterModel.filters[event.key]) {
+      this.filterModel.filters[event.key].selected = event.value;
+    }
   }
 
   onSelectionChange(key: string, value: string | null) {
     this.selectedFilters[key] = value;
+
+    if (this.filterModel.filters[key]) {
+      this.filterModel.filters[key].selected = value ?? '';
+    }
   }
 
   applyFilters() {
-    this.filterChanged.emit({...this.selectedFilters});
+    this.filterChanged.emit({ ...this.selectedFilters });
     this.closeFilter();
   }
 
@@ -69,11 +79,11 @@ export class FiltersComponent implements OnInit {
   }
 
   private initializeFilters() {
-    this.selectedFilters = Object.keys(this.filterModel.filters)
+    this.selectedFilters = Object.keys(this.initialModel.filters)
       .reduce((acc, key) => {
-        const defaultValue = this.filterModel.filters[key].selected;
+        const defaultValue = this.initialModel.filters[key].selected;
         const isDefault = defaultValue === 'all' || defaultValue === '' || (Array.isArray(defaultValue) && defaultValue.length === 0);
-
+        this.filterModel.filters[key].selected = isDefault ? '' : defaultValue
         return {
           ...acc,
           [key]: isDefault ? null : defaultValue

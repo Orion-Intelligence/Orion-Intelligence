@@ -34,15 +34,22 @@
   transition: 0.3s;
 }
 
-.analytics input:checked + label {
-  background: #1e6cb7;;
+.analytics input:checked+label {
+  background: #1e6cb7;
+  ;
 }
 
-.analytics input:checked + label::after {
+.analytics input:checked+label::after {
   left: calc(100% - 2px);
   transform: translateX(-100%);
 }
 
 .analytics label:active::after {
   width: 18px;
+}
+
+.filters-overlay {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
 }

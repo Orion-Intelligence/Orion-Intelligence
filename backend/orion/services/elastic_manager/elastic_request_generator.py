@@ -2,6 +2,7 @@ import hashlib
 import re
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
+from typing import Any, Dict, List
 
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
     search_defacement_param_model
@@ -14,7 +15,7 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_I
 class elastic_request_generator:
 
     @staticmethod
-    def on_search_defacement_data(p_query_model: search_defacement_param_model):
+    def on_search_defacement_data(p_query_model: search_defacement_param_model,entity_filter_clauses: List[Dict[str, Any]]):
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
@@ -68,6 +69,9 @@ class elastic_request_generator:
 
         if m_team:
             must_clauses.append({"term": {"m_team": m_team}})
+
+        if entity_filter_clauses:
+            must_clauses.extend(entity_filter_clauses)
 
         import ipaddress
 
@@ -365,7 +369,8 @@ class elastic_request_generator:
         ]
 
     @staticmethod
-    def on_search_consolidated_data(p_query_model):
+    def on_search_consolidated_data(p_query_model,entity_filter_clauses: List[Dict[str, Any]]):
+        print("__________________________search_consolidated___________________________")
         p_query_model.mMessageDate=p_query_model.mDateRange
         if p_query_model.q != "*":
             raw_query = p_query_model.q
@@ -387,12 +392,12 @@ class elastic_request_generator:
         indices = []
 
         m1 = clone_model(p_query_model)
-        i1, q1 = elastic_request_generator.on_search_leakdata(m1)
+        i1, q1 = elastic_request_generator.on_search_leakdata(m1,entity_filter_clauses)
         queries.append(elastic_request_generator._strip_query(q1))
         indices.append(i1)
 
         m2 = clone_model(p_query_model)
-        i2, q2 = elastic_request_generator.on_search_general_data(m2)
+        i2, q2 = elastic_request_generator.on_search_general_data(m2,entity_filter_clauses)
         queries.append(elastic_request_generator._strip_query(q2))
         indices.append(i2)
 
@@ -407,7 +412,7 @@ class elastic_request_generator:
         indices.append(i4)
 
         m5 = clone_model(p_query_model)
-        i5, q5 = elastic_request_generator.on_search_defacement_data(m5)
+        i5, q5 = elastic_request_generator.on_search_defacement_data(m5,entity_filter_clauses)
         queries.append(elastic_request_generator._strip_query(q5))
         indices.append(i5)
 
@@ -419,7 +424,7 @@ class elastic_request_generator:
         return indices, queries
 
     @staticmethod
-    def on_search_leakdata(p_query_model):
+    def on_search_leakdata(p_query_model,entity_filter_clauses: List[Dict[str, Any]]):
         if p_query_model.q != "*":
             raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
@@ -513,6 +518,9 @@ class elastic_request_generator:
             must_not_clause.append({"term": {"m_content_type": "adult"}})
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
+
+        if entity_filter_clauses:
+            must_clauses.extend(entity_filter_clauses)
 
         url_priority_query = {
             "bool": {
@@ -1377,7 +1385,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
-    def on_search_general_data(p_query_model):
+    def on_search_general_data(p_query_model,entity_filter_clauses: List[Dict[str, Any]]):
         if p_query_model.q != "*":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
@@ -1451,6 +1459,9 @@ class elastic_request_generator:
 
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
+
+        if entity_filter_clauses:
+            must_clauses.extend(entity_filter_clauses)
 
         url_priority_query = {
             "bool": {

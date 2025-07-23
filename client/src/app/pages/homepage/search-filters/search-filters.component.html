@@ -1,0 +1,91 @@
+<div class="search-filter-main-div d-flex align-items-start justify-content-between w-100 flex-wrap">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="search-filters-bg">
+            <div class="top-bar">
+                <div class="selected-filter-text">Selected Filters</div>
+                <div class="search-clear-wrapper">
+                    <div class="input-wrapper">
+                        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
+                            class="search-filters-input" maxlength="150" name="q" placeholder="" type="search"
+                            (keyup.enter)="onSearchSubmit()" />
+
+                        <button class="search-button" type="button">
+                            <img alt="Search" src="../../../../assets/images/shared/magnifyingglasswhite.svg">
+                        </button>
+                    </div>
+                    <button class="clear-button" (click)="clearAllSelectedFilters()">Clear</button>
+                </div>
+            </div>
+            <div class="custom-line"></div>
+            <div class="selected-tags-display-area"
+                *ngIf="getCurrentEntityFilter(searchQuery,true).length > 0; else noFilters">
+                <button *ngIf="showLeftArrow" class="nav-arrow left-arrow" (click)="scrollSelectedTags('left')">
+                    <img src="../../../../assets/images/shared/filter-left.svg" alt="Previous" />
+                </button>
+                <div class="selected-filter-tags-scroll-container" #selectedFilterTagsScrollContainer>
+                    <span class="filter-tag"
+                        *ngFor="let filter of getCurrentEntityFilter(searchQuery,true); trackBy: filterTrackBy">
+                        {{ filter.value }}
+                        <img src="../../../../assets/images/shared/remove-filter.svg" alt="Remove filter"
+                            class="remove-filter-icon" (click)="removeSelectedFilter(filter.id)" />
+                    </span>
+                </div>
+                <button *ngIf="showRightArrow" class="nav-arrow right-arrow" (click)="scrollSelectedTags('right')">
+                    <img src="../../../../assets/images/shared/filter-right.svg" alt="Next" />
+                </button>
+            </div>
+
+            <ng-template #noFilters>
+                <div class="no-filters-message">
+                    No filter added.
+                </div>
+            </ng-template>
+
+            <div class="entity-filters-section">
+                <div class="middle-bar">
+                    <div class="entity-filters-header">Entity Filters</div>
+                    <div class="search-clear-wrapper">
+                        <div class="input-wrapper">
+                            <input [(ngModel)]="addedFilter" autocapitalize="none" autocomplete="off"
+                                class="search-filters-input" maxlength="150" name="q" placeholder="" type="search"
+                                (keyup.enter)="onSearchSubmit()" />
+
+                            <button class="plus-button" type="button" (click)="onSearchSubmit()">
+                                <img alt="Search" src="../../../../assets/images/shared/plus-icon.svg">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-line"></div>
+                <div class="entity-categories">
+                    <div class="category-item" *ngFor="let category of filterCategories; trackBy: categoryTrackBy"
+                        [class.active]="category.id === selectedCategoryId" (click)="selectCategory(category.id)">
+                        <!-- <div class="category-underline"></div> -->
+                        {{ category.name }}
+                        <img *ngIf="category.id === selectedCategoryId; else unselectedImage"
+                            src="../../../../assets/images/shared/filter-selected.svg" alt="Selected"
+                            class="category-indicator">
+                        <ng-template #unselectedImage>
+                            <img src="../../../../assets/images/shared/filter-unselected.svg" alt="Unselected"
+                                class="category-indicator">
+                        </ng-template>
+                    </div>
+                </div>
+
+                <div class="entity-filter-tags-display">
+                    <ng-container *ngIf="getCurrentEntityFilter('').length > 0; else noFiltersAdded">
+                        <span class="filter-tag" *ngFor="let tag of getCurrentEntityFilter(''); trackBy: filterTrackBy">
+                            {{ tag.value }}
+                            <img src="../../../../assets/images/shared/remove-filter.svg" alt="Remove filter"
+                                class="remove-filter-icon" (click)="removeSelectedFilter(tag.id)">
+                        </span>
+                    </ng-container>
+                    <ng-template #noFiltersAdded>
+                        <p class="no-filters-message">No filters added yet.</p>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

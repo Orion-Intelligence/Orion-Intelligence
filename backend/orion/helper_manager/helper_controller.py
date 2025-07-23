@@ -8,9 +8,48 @@ from deep_translator import GoogleTranslator
 from starlette.requests import Request
 from stopwords import get_stopwords
 
+import json
+from typing import Any, Dict, List, Optional
+from pydantic import root_validator, validator
+from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import entity_filter_param_model
+
 
 class helper_controller:
     __instance = None
+
+    filters_json: Optional[str]
+    filters: Optional[List[entity_filter_param_model]]
+
+    @validator('filters', pre=True, always=True)
+    def parse_filters_json(cls, v, values):
+        filters_json_str = values.get('filters_json')
+        if filters_json_str:
+            try:
+                return json.loads(filters_json_str)
+            except json.JSONDecodeError:
+                return None
+        return v
+
+    @root_validator(pre=False, skip_on_failure=True)
+    def parse_filters_from_json(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        filters_json_str = values.get('filters_json')
+        if filters_json_str:
+            try:
+                parsed_filters_data = json.loads(filters_json_str)
+                if not isinstance(parsed_filters_data, list):
+                    values['filters'] = None
+                else:
+                    values['filters'] = [
+                        entity_filter_param_model(**item)
+                        for item in parsed_filters_data
+                        if isinstance(item, dict)
+                    ]
+            except Exception:
+                values['filters'] = None
+        else:
+            values['filters'] = None
+        return values
+
 
     @staticmethod
     def create_template_context(request: Request, response_data: dict) -> dict:
