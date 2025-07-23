@@ -11,7 +11,7 @@ from orion.api.server.crawl_manager.class_model.exploit_model import ExploitData
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
-from orion.api.server.crawl_manager.class_model.log_model import LogModel
+from orion.api.server.crawl_manager.class_model.log_model import LogModel, LogBatchModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.class_model.social_model import social_data_model
 from orion.api.server.crawl_manager.crawl_controller import crawl_controller
@@ -108,8 +108,5 @@ async def index_dump(request: Request):
     return await crawl_controller.getInstance().invoke_dump_index(DumpModel(**body))
 
 @crawl_routes.post("/api/index/stealerlog", dependencies=[Depends(limiter_dependency)])
-async def index_stealerlog(request: Request):
-    body = await request.json()
-    model = LogModel(**body)
+async def index_stealerlog(model: LogBatchModel):
     return await crawl_controller.getInstance().invoke_stealerlog_index(model)
-
