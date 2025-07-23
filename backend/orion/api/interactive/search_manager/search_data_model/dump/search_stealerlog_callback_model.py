@@ -11,11 +11,11 @@ class suggestion(BaseModel):
 
 
 class stealerlog_result_item(BaseModel):
-    url: str
-    username: str
-    domain: str
+    url: Optional[str] = None
+    username: Optional[str] = None
+    domain: Optional[str] = None
     password: Optional[str] = None
-    log_hash: str
+    log_hash: Optional[str] = None
     timestamp: Optional[str] = None
 
     class Config:
