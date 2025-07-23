@@ -1337,40 +1337,50 @@ class elastic_request_generator:
             terms = re.findall(r'"([^"]+)"|(\S+)', raw_query)
             flat_terms = [t[0] or t[1] for t in terms]
 
-            must_clauses = [
-                {
-                    "wildcard": {
-                        "log.raw": {
-                            "value": f"*{term.lower()}*"
+            should_clauses = []
+            for term in flat_terms:
+                should_clauses.extend([
+                    {
+                        "query_string": {
+                            "query": term,
+                            "fields": ["log"],
+                            "default_operator": "AND",
+                            "analyze_wildcard": True,
+                            "allow_leading_wildcard": True
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "log.raw": {
+                                "value": f"*{term.lower()}*"
+                            }
                         }
                     }
-                } for term in flat_terms
-            ]
+                ])
 
             query = {
                 "query": {
                     "bool": {
-                        "must": must_clauses
+                        "must": [
+                            {"bool": {"should": should_clauses[i:i + 2], "minimum_should_match": 1}}
+                            for i in range(0, len(should_clauses), 2)
+                        ]
                     }
                 },
                 "from": 0,
                 "size": 30,
                 "track_total_hits": True,
-                "sort": [
-                    {"timestamp": {"order": "desc"}}
-                ]
+                "sort": [{"timestamp": {"order": "desc"}}],
+                "_source": ["log", "timestamp", "log_hash", "m_index", "m_sub_host"]
             }
         else:
             query = {
-                "query": {
-                    "match_all": {}
-                },
+                "query": {"match_all": {}},
                 "from": 0,
                 "size": 30,
                 "track_total_hits": True,
-                "sort": [
-                    {"timestamp": {"order": "desc"}}
-                ]
+                "sort": [{"timestamp": {"order": "desc"}}],
+                "_source": ["log", "timestamp", "log_hash", "m_index", "m_sub_host"]
             }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
