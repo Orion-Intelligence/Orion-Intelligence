@@ -44,6 +44,10 @@ class _handala_hack(leak_extractor_interface, ABC):
         return "https://handala-hack.to"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://handala-hack.to"
 

@@ -44,6 +44,10 @@ class _ransomlook(leak_extractor_interface, ABC):
         return "https://www.ransomlook.io/leaks"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://www.ransomlook.io"
 

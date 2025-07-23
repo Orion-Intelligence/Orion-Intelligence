@@ -41,6 +41,10 @@ class _sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad(leak_extractor_i
         return "http://sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.onion/"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "http://sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.onion/"
 
@@ -71,25 +75,38 @@ class _sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad(leak_extractor_i
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-
         page_allowed = 7
         if self.is_crawled:
             page_allowed = 2
 
         for page_number in range(1, page_allowed):
-
             url = f"{self.base_url}?page={page_number}"
             page.goto(url, wait_until="domcontentloaded")
 
-            buttons = page.query_selector_all(".card-footer .company_button")
+            cards = page.query_selector_all(".col")
 
-            for idx, button in enumerate(buttons, start=1):
+            for card in cards:
+                button = card.query_selector(".card-footer .company_button")
+                if not button:
+                    continue
 
                 button.scroll_into_view_if_needed()
 
                 target_modal_id = button.get_attribute("data-bs-target")
                 if not target_modal_id:
                     continue
+
+                site_elem = card.query_selector(".card-main .card-text")
+                site_text = site_elem.inner_text() if site_elem else ""
+
+                site_value = ""
+                industry_value = ""
+
+                for line in site_text.splitlines():
+                    if "Site:" in line:
+                        site_value = line.split("Site:", 1)[1].strip()
+                    elif "Industry:" in line:
+                        industry_value = line.split("Industry:", 1)[1].strip()
 
                 button.click()
 
@@ -109,7 +126,6 @@ class _sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad(leak_extractor_i
                 images = page.query_selector_all(f"{target_modal_id} .modal-body img")
                 image_urls = [img.get_attribute("src") for img in images]
 
-
                 download_link_elem = page.query_selector(
                     f"{target_modal_id} div:has-text('Download Link:') a[href^='http']"
                 )
@@ -120,26 +136,25 @@ class _sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad(leak_extractor_i
                     geo_elem.inner_text().split(":", 1)[1].strip() if geo_elem else ""
                 )
 
-
                 leak = leak_model(
                     m_title=title,
                     m_url=page.url,
                     m_base_url=self.base_url,
-                    m_screenshot=helper_method.get_screenshot_base64(page,title,self.base_url),
+                    m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
                     m_content=description,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=description[:500],
                     m_dumplink=[download_link],
                     m_content_type=["leaks"],
                     m_data_size=leak_size,
-                    m_logo_or_images=image_urls
-
+                    m_logo_or_images=image_urls,
+                    m_weblink=[site_value]
                 )
 
                 entity = entity_model(
                     m_team="sarcoma group",
-                    m_location=[geo_location]
-
+                    m_location=[geo_location],
+                    m_industry=industry_value
                 )
 
                 self.append_leak_data(leak, entity)
@@ -147,6 +162,7 @@ class _sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad(leak_extractor_i
                 close_button = page.query_selector(f"{target_modal_id} .modal-header button.btn-close")
                 if close_button:
                     close_button.click()
+
 
 
 

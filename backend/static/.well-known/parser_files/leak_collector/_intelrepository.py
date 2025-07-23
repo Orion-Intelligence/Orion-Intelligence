@@ -44,6 +44,10 @@ class _intelrepository(leak_extractor_interface, ABC):
         return "https://intelrepository.com/"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://intelrepository.com/"
 

@@ -7,7 +7,7 @@ from crawler.crawler_instance.local_shared_model.data_model.leak_model import le
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
-
+from datetime import datetime
 
 class _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd(leak_extractor_interface, ABC):
     _instance = None
@@ -37,6 +37,10 @@ class _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd(leak_extractor_i
     @property
     def seed_url(self) -> str:
         return "http://weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd.onion/leaks"
+
+    @property
+    def developer_signature(self) -> str:
+        return "name:signature"
 
     @property
     def base_url(self) -> str:
@@ -70,13 +74,34 @@ class _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
 
-
         article_links = page.query_selector_all('div.border.rounded-xl a[href*="/leaks/"]')
-        article_urls = [link.get_attribute('href') for link in article_links]
+        articles = []
+        for link in article_links:
+            href = link.get_attribute('href')
+            time_element = link.query_selector('time')
+            raw_date = time_element.get_attribute('datetime') if time_element else ""
+            parsed_date = None
+            if raw_date:
+                try:
+                    parsed_date = datetime.fromisoformat(raw_date.replace("Z", "+00:00")).date()
+                except ValueError:
+                    parsed_date = None
 
-        for article_url in article_urls:
+            info_element = link.query_selector('p.z-20.mt-4.text-sm')
+            revenue, location = "", ""
+            if info_element:
+                info_text = info_element.inner_text()
+                parts = info_text.split(',')
+                revenue = parts[0].strip() if parts else ""
+                location = parts[1].strip() if len(parts) > 1 else ""
+
+
+
+            articles.append({"href": href, "date": parsed_date, "revenue": revenue, "location": location})
+
+        for article in articles:
+            article_url = article["href"]
             full_url = article_url if article_url.startswith('http') else self.base_url + article_url
-
             page.goto(full_url)
 
 
@@ -97,6 +122,8 @@ class _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd(leak_extractor_i
             website_link_element = page.query_selector('a[href*="adriaticglass.com"]')
             website_url = website_link_element.get_attribute('href') if website_link_element else ""
 
+
+
             card_data = leak_model(
                 m_title=title,
                 m_url=full_url,
@@ -108,9 +135,12 @@ class _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd(leak_extractor_i
                 m_weblink=[website_url] if website_url else [],
                 m_dumplink=[files_url] if files_url else [],
                 m_content_type=["leaks"],
+                m_leak_date=article['date'],
+                m_revenue=article['revenue']
             )
             entity_data = entity_model(
                 m_team="Weyhro",
+                m_location=[article['location']]
             )
 
             self.append_leak_data(card_data, entity_data)

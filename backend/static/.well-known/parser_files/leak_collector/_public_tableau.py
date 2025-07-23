@@ -45,6 +45,10 @@ class _public_tableau(leak_extractor_interface, ABC):
         return "https://public.tableau.com/views/DataBreachChronologyFeatures/ChronologyofDataBreaches?%3Aembed=y&%3AshowVizHome=no&%3Ahost_url=https%3A%2F%2Fpublic.tableau.com%2F&%3Aembed_code_version=3&%3Atabs=no&%3Atoolbar=yes&%3Aanimate_transition=yes&%3Adisplay_static_image=no&%3Adisplay_spinner=no&%3Adisplay_overlay=yes&%3Adisplay_count=yes&%3Alanguage=en-US&%3AloadOrderID=6"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://public.tableau.com"
 
@@ -163,7 +167,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                 card_data = leak_model(
                     m_title=company_name,
                     m_section=content_parts,
-                    m_url=base_url,
+                    m_url="https://public.tableau.com/views/DataBreachChronologyFeatures/ChronologyofDataBreaches?"+company_name,
                     m_base_url=base_url,
                     m_screenshot="",
                     m_content=m_content + " " + self.base_url + " " + page.url,

@@ -43,6 +43,10 @@ class _ddosecrets(leak_extractor_interface, ABC):
         return "https://ddosecrets.com/all_articles/a-z"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://ddosecrets.com"
 

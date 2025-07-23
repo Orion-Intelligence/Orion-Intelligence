@@ -45,6 +45,10 @@ class _business_data_leaks(leak_extractor_interface, ABC):
         return "https://business-data-leaks.com/"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://business-data-leaks.com/"
 

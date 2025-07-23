@@ -1,17 +1,15 @@
 from abc import ABC
 from typing import List
 from playwright.sync_api import Page
-
-from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
-from bs4 import BeautifulSoup
-class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_interface, ABC):
+from datetime import datetime
+
+class _vg6xwkmfyirv3l6qtqus7jykcuvgx6imegb73hqny2avxccnmqt5m2id(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
@@ -31,7 +29,7 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
     def __new__(cls, callback=None):
 
         if cls._instance is None:
-            cls._instance = super(_imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid, cls).__new__(cls)
+            cls._instance = super(_vg6xwkmfyirv3l6qtqus7jykcuvgx6imegb73hqny2avxccnmqt5m2id, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -41,7 +39,7 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
 
     @property
     def seed_url(self) -> str:
-        return "http://imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid.onion/"
+        return "http://vg6xwkmfyirv3l6qtqus7jykcuvgx6imegb73hqny2avxccnmqt5m2id.onion/"
 
     @property
     def developer_signature(self) -> str:
@@ -49,11 +47,11 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
 
     @property
     def base_url(self) -> str:
-        return "http://imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid.onion/"
+        return "http://vg6xwkmfyirv3l6qtqus7jykcuvgx6imegb73hqny2avxccnmqt5m2id.onion/"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_resoource_block=False, m_timeout = 27200, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -64,12 +62,14 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
+
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-        return "http://imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid.onion/"
+        return "http://vg6xwkmfyirv3l6qtqus7jykcuvgx6imegb73hqny2avxccnmqt5m2id.onion/contact"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
+
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
@@ -78,58 +78,57 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
+        page.wait_for_load_state('networkidle')
+        elapsed = 0
+        while elapsed < 10000:
+            cards = page.query_selector_all("div[style*='background-color: var(--card)']")
+            if len(cards) >= 3:
+                break
+            page.wait_for_timeout(5000)
+            elapsed += 5000
 
-        page.wait_for_selector("div.block")
-        html = page.content()
-        soup = BeautifulSoup(html, "html.parser")
+        cards = page.query_selector_all("div[style*='background-color: var(--card)']")
 
-        card_blocks = soup.find_all("div", class_="block")
 
-        for card in card_blocks:
-            title_tag = card.find("h3", class_="yellow-text")
-            title = title_tag.get_text(strip=True) if title_tag else ""
+        for card in cards:
+            title_el = card.query_selector("h2")
+            title = title_el.inner_text().strip() if title_el else "N/A"
 
-            desc_tag = card.find("p")
-            m_content = desc_tag.get_text(strip=True) if desc_tag else ""
+            desc_el = card.query_selector("p")
+            description = desc_el.inner_text().strip() if desc_el else "N/A"
 
-            words = m_content.split()
-            if len(words) > 500:
-                important_content = ' '.join(words[:500])
+            release_date_el = card.query_selector("div[style*='font-size: 0.875rem'] span")
+            release_date_text = release_date_el.inner_text().strip() if release_date_el else "N/A"
+
+            if release_date_text != "N/A":
+                try:
+                    date_obj = datetime.strptime(release_date_text, "%B %d, %Y").date()
+                except ValueError:
+                    date_obj = None
             else:
-                important_content = m_content
-
-            download_link = ""
-            spoiler_content = card.find("div", class_="spoiler-content")
-            if spoiler_content:
-                a_tag = spoiler_content.find("a", href=True)
-                if a_tag:
-                    download_link = a_tag["href"]
-
-            image_urls = []
-            images_div = card.find("div", class_="images")
-            if images_div:
-                for img_tag in images_div.find_all("img", src=True):
-                    image_urls.append(img_tag["src"])
-
-            ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                date_obj = None
 
             card_data = leak_model(
                 m_title=title,
-                m_ref_html=ref_html,
                 m_url=page.url,
                 m_base_url=self.base_url,
-                m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
-                m_content=m_content,
+                m_screenshot=helper_method.get_screenshot_base64(page,title,self.base_url),
+                m_content=description,
                 m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=important_content,
-                m_logo_or_images=image_urls,
-                m_dumplink=[download_link] if download_link else [],
+                m_important_content=description[:500],
+                m_dumplink=[page.url],
                 m_content_type=["leaks"],
+                m_leak_date=date_obj
 
             )
 
             entity_data = entity_model(
-                m_team="imn crew",
+                m_team="GLOBAL GROUP",
             )
 
             self.append_leak_data(card_data, entity_data)
+
+
+
+
+

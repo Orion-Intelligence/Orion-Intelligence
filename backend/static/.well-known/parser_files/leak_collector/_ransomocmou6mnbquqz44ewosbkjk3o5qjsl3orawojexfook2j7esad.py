@@ -47,6 +47,10 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
         return "http://ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.onion/news"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "http://ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.onion"
 
@@ -77,14 +81,14 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
 
     def parse_leak_data(self, page: Page):
         page.goto(self.seed_url)
-        page.wait_for_selector('div.category-item.js-open-social')
+        page.wait_for_selector('div.category-item.js-open-chat')
 
         error_count = 0
         index = 0
 
         while True:
             try:
-                category_items = page.query_selector_all('div.category-item.js-open-social')
+                category_items = page.query_selector_all('div.category-item.js-open-chat')
                 if index >= len(category_items):
                     break
 

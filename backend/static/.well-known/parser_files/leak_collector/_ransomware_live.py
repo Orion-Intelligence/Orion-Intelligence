@@ -45,6 +45,10 @@ class _ransomware_live(leak_extractor_interface, ABC):
         return "https://www.ransomware.live/"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://www.ransomware.live/"
 

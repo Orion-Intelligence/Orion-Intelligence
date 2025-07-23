@@ -45,6 +45,10 @@ class _ransom(leak_extractor_interface, ABC):
         return "https://ransom.wiki/"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://ransom.wiki/"
 

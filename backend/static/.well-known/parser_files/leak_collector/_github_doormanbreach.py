@@ -43,6 +43,10 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
         return "https://github.com/doormanBreach/DataBreaches"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://github.com/doormanBreach"
 

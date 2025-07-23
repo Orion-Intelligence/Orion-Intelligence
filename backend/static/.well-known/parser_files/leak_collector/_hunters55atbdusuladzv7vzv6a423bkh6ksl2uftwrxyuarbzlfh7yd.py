@@ -43,6 +43,10 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
         return "https://hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd.onion"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd.onion"
 
@@ -148,7 +152,6 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
                 )
 
                 entity_data = entity_model(
-                    m_company_name=title_name if title_name else None,
                     m_team="hunter",
                     m_employee_count = str(employees),
                     m_country_name = country,
@@ -182,7 +185,7 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
                     card_data = leak_model(
                         m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
                         m_title=disclosure_title,
-                        m_url=page.url,
+                        m_url=self.base_url + "?" + disclosure_title,
                         m_base_url=self.base_url,
                         m_content=full_text,
                         m_network=helper_method.get_network_type(self.base_url),
@@ -194,7 +197,6 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_company_name=disclosure_title,
                         m_team="hunter",
                         m_country_name=country,
                     )

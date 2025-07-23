@@ -45,6 +45,10 @@ class _leak_lookup(leak_extractor_interface, ABC):
         return "https://leak-lookup.com/breaches"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://leak-lookup.com"
 

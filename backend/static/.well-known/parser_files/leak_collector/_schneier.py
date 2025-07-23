@@ -45,6 +45,10 @@ class _schneier(leak_extractor_interface, ABC):
         return "https://www.schneier.com/tag/data-breaches/"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
 
         return "https://www.schneier.com/"
@@ -88,7 +92,7 @@ class _schneier(leak_extractor_interface, ABC):
             current_page = 1
             if self.is_crawled:
                 max_pages = 5
-                
+
             while current_page <= max_pages:
 
                 page.wait_for_selector("h3.entry a", timeout=10000)

@@ -44,6 +44,10 @@ class _z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid(leak_extractor_i
         return "http://z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid.onion/blog"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "http://z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid.onion"
 

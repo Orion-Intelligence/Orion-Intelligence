@@ -39,6 +39,10 @@ class _bertblogsoqmm4ow7nqyh5ik7etsmefdbf25stauecytvwy7tkgizhad(leak_extractor_i
         return self._is_crawled
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def seed_url(self) -> str:
 
         return "http://bertblogsoqmm4ow7nqyh5ik7etsmefdbf25stauecytvwy7tkgizhad.onion"

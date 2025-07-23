@@ -40,6 +40,10 @@ class _netleaks(leak_extractor_interface, ABC):
         return "https://netleaks.net/databases"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "https://netleaks.net"
 
@@ -101,7 +105,6 @@ class _netleaks(leak_extractor_interface, ABC):
 
             file_info_element = page.locator('div.prose.prose-lg pre').nth(0).inner_text()
             file_info = file_info_element.strip()
-
 
             compressed_size = ""
             uncompressed_size = ""

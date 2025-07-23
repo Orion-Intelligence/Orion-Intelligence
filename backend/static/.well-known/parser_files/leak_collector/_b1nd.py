@@ -43,6 +43,10 @@ class _b1nd(leak_extractor_interface, ABC):
         return "http://b1nd.net"
 
     @property
+    def developer_signature(self) -> str:
+        return "name:signature"
+
+    @property
     def base_url(self) -> str:
         return "http://b1nd.net"
 
