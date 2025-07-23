@@ -80,6 +80,8 @@ if [ "$COMMAND" = "build" ]; then
 
             use_compose_file "production"
             cp nginx/nginx-prod.conf nginx/nginx.conf
+            sudo mkdir -p /srv/elasticsearch/data
+            sudo chown -R 1000:1000 /srv/elasticsearch/data
             ;;
         *)
             echo "Unknown build flag: $FLAG"

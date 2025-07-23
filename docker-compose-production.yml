@@ -72,7 +72,7 @@ services:
     ports:
       - "9400:9400"
     volumes:
-      - elastic:/usr/share/elasticsearch/data
+      - /srv/elasticsearch/data:/usr/share/elasticsearch/data
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9400/_cluster/health" ]
       interval: 20s
