@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 import { catchError, map, takeUntil } from 'rxjs/operators';
@@ -33,6 +33,7 @@ export class DashboardService {
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
+  showSubscription = signal<boolean>(false);
 
   private cancelRequest$ = new Subject<void>();
 

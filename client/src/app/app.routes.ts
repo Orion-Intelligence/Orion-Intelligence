@@ -30,6 +30,7 @@ import {
 } from './shared/partials/intel-panel/dashboard-consolidated/dashboard-consolidated.component';
 import {ReportConsolidatedResolver} from './shared/resolvers/consolidated.resolver';
 import {DashboardSocialsComponent} from './shared/partials/intel-panel/dashboard-social/dashboard-social.component';
+import {subscriptionGuard} from './shared/guards/subscription.guard';
 
 export const routes: Routes = [
   {
@@ -364,6 +365,7 @@ export const routes: Routes = [
       },
       {
         path: 'stealerlogs',
+        canActivate: [subscriptionGuard],
         data: {animation: 'StealerlogsPage'},
         children: [
           {

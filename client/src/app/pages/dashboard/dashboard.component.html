@@ -1,3 +1,4 @@
+<app-pro-subscription *ngIf="dashboardService.showSubscription()" (close)="hideSubscription()"></app-pro-subscription>
 <div *ngIf="!isCtiGraph()">
   <div id="top"></div>
   <div class="row dashboard__sidebar-main" id="dashboard__sidebar-main">

@@ -5,6 +5,8 @@ import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.glob
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import {ProSubscriptionComponent} from '../../shared/partials/pro-subscription/pro-subscription.component';
+import {DashboardService} from '../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,7 +17,8 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     NgClass,
     RouterOutlet,
     ScrollingModule,
-    NgIf
+    NgIf,
+    ProSubscriptionComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
@@ -24,7 +27,7 @@ export class DashboardComponent implements AfterViewInit {
   isMenuOpen = true;
   animationState: any;
 
-  constructor(private cdr: ChangeDetectorRef, public router: Router, private renderer: Renderer2) {
+  constructor(protected dashboardService:DashboardService, private cdr: ChangeDetectorRef, public router: Router, private renderer: Renderer2) {
   }
   toggleNavigation() {
     this.isMenuOpen = !this.isMenuOpen;
@@ -41,5 +44,9 @@ export class DashboardComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.cdr.detectChanges();
+  }
+
+  hideSubscription() {
+    this.dashboardService.showSubscription.set(false)
   }
 }
