@@ -17,12 +17,12 @@ import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
 import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscription.component";
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent, ProSubscriptionComponent],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
@@ -45,9 +45,8 @@ export class ReportComponent implements OnInit {
   protected readonly Category = Category;
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
-  showSubscriptionPopup = false;
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, appService: AppService, protected authService: AuthService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService:DashboardService, private route: ActivatedRoute, private helperService: HelperService, appService: AppService, protected authService: AuthService) {
     this.lang = appService.getConfig().language_allowed
     this.lang_detected = appService.getConfig().language_allowed
     this.username$ = this.authService.getUsername$();
@@ -141,7 +140,7 @@ export class ReportComponent implements OnInit {
   }
   aiSuggest() {
     if (!this.isAdmin()) {
-      this.showSubscriptionPopup = true;
+      this.dashboardService.showSubscription.set(true);
       return;
     }
     const apiUrl = 'nlp/summarize/ai';
@@ -196,9 +195,7 @@ export class ReportComponent implements OnInit {
       window.open(this.resultItem.m_url, '_blank');
     }
   }
-  onSubscriptionPopupClose() {
-    this.showSubscriptionPopup = false;
-  }
+
   open_graph() {
     const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
     const parts = window.location.pathname.split('/');

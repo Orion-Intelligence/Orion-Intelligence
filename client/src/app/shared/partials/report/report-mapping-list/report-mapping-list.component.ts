@@ -5,13 +5,13 @@ import { ApiService } from '../../../services/api.service';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscription.component";
 import { Observable } from 'rxjs';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-report-mapping-list',
   templateUrl: './report-mapping-list.component.html',
-  imports: [CommonModule, TooltipDirective, ProSubscriptionComponent],
+  imports: [CommonModule, TooltipDirective],
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingListComponent implements OnInit {
@@ -21,9 +21,8 @@ export class ReportMappingListComponent implements OnInit {
   isExpanded = false;
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
-  showSubscriptionPopup = false;
 
-  constructor(private api: ApiService, protected authService: AuthService) {
+  constructor(private api: ApiService, protected dashboardservice:DashboardService, protected authService: AuthService) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
@@ -36,16 +35,13 @@ export class ReportMappingListComponent implements OnInit {
   }
   toggleContent(): void {
     if (!this.isAdmin()) {
-      this.showSubscriptionPopup = true;
+      this.dashboardservice.showSubscription.set(true);
       return;
     }
     this.isExpanded = !this.isExpanded;
     if (this.isExpanded && this.filteredItems.length == 0) {
       this.loadGraph();
     }
-  }
-  onSubscriptionPopupClose() {
-    this.showSubscriptionPopup = false;
   }
 
   loadGraph(): void {

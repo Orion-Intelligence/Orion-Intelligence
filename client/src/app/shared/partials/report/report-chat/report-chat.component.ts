@@ -11,8 +11,8 @@ import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.co
 import { ApiService } from '../../../services/api.service';
 import { last, Observable } from 'rxjs';
 import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProSubscriptionComponent } from "../../pro-subscription/pro-subscription.component";
 import {SocialResultItem} from '../../../model/results/social/social.callback.model';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-report-chat',
@@ -25,7 +25,7 @@ import {SocialResultItem} from '../../../model/results/social/social.callback.mo
     ResultListComponent,
     ResultSectionComponent,
     SlicePipe, CommonModule,
-    JsonApiViewerComponent, TooltipDirective, ProSubscriptionComponent
+    JsonApiViewerComponent, TooltipDirective
   ],
   animations: [fadeInDashboardItem]
 })
@@ -40,12 +40,12 @@ export class ReportChatComponent implements OnInit {
   aiSuggestSummary = ""
   protected readonly last = last;
   isExpandedMetadata = true
-  showSubscriptionPopup = false;
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
   constructor(
     private helper: HelperService,
+    private dashboardService:DashboardService,
     private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, protected authService: AuthService
   ) {
     this.username$ = this.authService.getUsername$();
@@ -132,7 +132,7 @@ export class ReportChatComponent implements OnInit {
 
   aiSuggest() {
     if (!this.isAdmin()) {
-      this.showSubscriptionPopup = true;
+      this.dashboardService.showSubscription.set(true)
       return;
     }
     const apiUrl = 'nlp/summarize/ai';
@@ -172,10 +172,6 @@ export class ReportChatComponent implements OnInit {
 
     const fullUrl = `${baseUrl}?${params.toString()}`;
     window.open(fullUrl, '_blank');
-  }
-
-  onSubscriptionPopupClose() {
-    this.showSubscriptionPopup = false;
   }
 
   redirectToUrl() {

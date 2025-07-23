@@ -79,6 +79,7 @@ export const routes: Routes = [
       },
       {
         path: 'api',
+        canActivate: [subscriptionGuard],
         data: {animation: 'APIPage'},
         children: [
           {
