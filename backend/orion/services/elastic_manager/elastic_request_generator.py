@@ -1334,45 +1334,48 @@ class elastic_request_generator:
         raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
 
         if raw_query:
+            raw_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), raw_query)
             terms = re.findall(r'"([^"]+)"|(\S+)', raw_query)
-            flat_terms = [t[0] or t[1] for t in terms]
 
+            must_should = []
             should_clauses = []
-            for term in flat_terms:
-                should_clauses.extend([
-                    {
-                        "query_string": {
-                            "query": term,
-                            "fields": ["log"],
-                            "default_operator": "AND",
-                            "analyze_wildcard": True,
-                            "allow_leading_wildcard": True
-                        }
-                    },
-                    {
-                        "wildcard": {
-                            "log.raw": {
-                                "value": f"*{term.lower()}*"
-                            }
-                        }
+
+            for quoted, unquoted in terms:
+                term = quoted or unquoted
+                clause = {
+                    "bool": {
+                        "should": [
+                            {"term": {"username": term}},
+                            {"term": {"domain": term}},
+                            {"term": {"url.raw": term}},
+                            {"match_phrase": {"url": term.lower()}}
+                        ],
+                        "minimum_should_match": 1
                     }
-                ])
+                }
+
+                if quoted:
+                    must_should.append(clause)
+                else:
+                    should_clauses.append(clause)
 
             query = {
                 "query": {
-                    "bool": {
-                        "must": [
-                            {"bool": {"should": should_clauses[i:i + 2], "minimum_should_match": 1}}
-                            for i in range(0, len(should_clauses), 2)
-                        ]
-                    }
+                    "bool": {}
                 },
                 "from": 0,
                 "size": 30,
                 "track_total_hits": True,
                 "sort": [{"timestamp": {"order": "desc"}}],
-                "_source": ["log", "timestamp", "log_hash", "m_index", "m_sub_host"]
+                "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
             }
+
+            if must_should:
+                query["query"]["bool"]["must"] = must_should
+            if should_clauses:
+                query["query"]["bool"]["should"] = should_clauses
+                query["query"]["bool"]["minimum_should_match"] = 1
+
         else:
             query = {
                 "query": {"match_all": {}},
@@ -1380,7 +1383,7 @@ class elastic_request_generator:
                 "size": 30,
                 "track_total_hits": True,
                 "sort": [{"timestamp": {"order": "desc"}}],
-                "_source": ["log", "timestamp", "log_hash", "m_index", "m_sub_host"]
+                "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
             }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
@@ -1723,14 +1726,22 @@ class elastic_request_generator:
         bulk_entries = []
 
         for log in p_index_data.get("logs", []):
-            if not log:
+            if not log or not log.get("url"):
                 continue
 
-            m_hash = hashlib.sha256(log.encode()).hexdigest()
+            raw_string = f'{log.get("url", "")} {log.get("username", "")} {log.get("domain", "")} {log.get("password", "")}'
+            m_hash = hashlib.sha256(raw_string.encode()).hexdigest()
+
             doc = {
-                "log": log,
+                "url": log.get("url", ""),
+                "username": log.get("username", None),
+                "domain": log.get("domain", None),
+                "password": log.get("password", None),
                 "log_hash": m_hash,
-                "timestamp": now
+                "timestamp": now,
+                "m_index": "stealer_model",
+                "m_sub_host": "/",
+                "m_hash": m_hash
             }
 
             bulk_entries.append({

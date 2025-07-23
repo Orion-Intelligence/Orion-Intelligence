@@ -11,7 +11,10 @@ class suggestion(BaseModel):
 
 
 class stealerlog_result_item(BaseModel):
-    log: str
+    url: str
+    username: str
+    domain: str
+    password: Optional[str] = None
     log_hash: str
     timestamp: Optional[str] = None
 
@@ -26,4 +29,3 @@ class search_stealerlog_callback_model(BaseModel):
 
     class Config:
         extra = Extra.allow
-

@@ -1,9 +1,13 @@
 import { Suggestion } from "../shared/common-result";
 
 export class StealerLogResultItem {
-  log: string = "";
+  url: string = "";
+  username: string = "";
+  domain: string = "";
+  password: string = "";
   log_hash: string = "";
   timestamp?: string;
+  m_hash?: string;
 
   constructor(init?: Partial<StealerLogResultItem>) {
     Object.assign(this, init);

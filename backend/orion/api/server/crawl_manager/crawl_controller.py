@@ -6,7 +6,7 @@ from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
 from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
-from orion.api.server.crawl_manager.class_model.log_model import LogModel
+from orion.api.server.crawl_manager.class_model.log_model import LogModel, LogBatchModel
 from orion.api.server.crawl_manager.class_model.social_model import social_data_model
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -64,7 +64,7 @@ class crawl_controller:
     async def invoke_credential_index(self, leak_index: credential_data_model):
         return await self.__crawl_model.invoke_credential_index(leak_index)
 
-    async def invoke_stealerlog_index(self, leak_index: LogModel):
+    async def invoke_stealerlog_index(self, leak_index: LogBatchModel):
         return await self.__crawl_model.invoke_stealerlogs_index(leak_index)
 
     @staticmethod

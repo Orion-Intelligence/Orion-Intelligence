@@ -22,7 +22,7 @@
 }
 
 .directory-list__container .directory-list__column-id-min {
-  width: 50px;
+  width: 50px !important;
 }
 
 .copy_url {
@@ -30,7 +30,7 @@
 }
 
 .directory-list__column-service-url {
-  width: 50%;
+  width: 40%;
 }
 
 .directory-list__column-category {

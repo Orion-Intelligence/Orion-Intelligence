@@ -61,6 +61,8 @@ class migration_manager:
                             log.g().w(f"No 'migrate' method in {migration_script_name}")
                     else:
                         log.g().w(f"No class {migration_script_name} in module")
+            if 1==1:
+                return
             existing_version_entry = await engine.find_one(db_system_model, db_system_model.key == AllowedKeys.VERSION)
             if existing_version_entry:
                 existing_version_entry.value = version

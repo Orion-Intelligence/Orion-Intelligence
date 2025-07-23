@@ -16,7 +16,7 @@ from orion.api.server.crawl_manager.class_model.exploit_model import ExploitData
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
 from orion.api.server.crawl_manager.class_model.general_model import GeneralDataModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
-from orion.api.server.crawl_manager.class_model.log_model import LogModel
+from orion.api.server.crawl_manager.class_model.log_model import LogModel, LogBatchModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
 from orion.api.server.crawl_manager.class_model.social_model import social_data_model
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
@@ -138,7 +138,7 @@ class crawl_model:
         return {"parsed":"true"}
 
     @staticmethod
-    async def invoke_stealerlogs_index(credential_index: LogModel):
+    async def invoke_stealerlogs_index(credential_index: LogBatchModel):
         m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
 
         await elastic_controller.get_instance().index_bulk_data(m_data)

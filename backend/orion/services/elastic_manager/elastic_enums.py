@@ -349,6 +349,18 @@ class ELASTIC_ENUMS:
                         "type": "custom",
                         "tokenizer": "standard",
                         "filter": ["lowercase"]
+                    },
+                    "url_path_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "custom_url_tokenizer",
+                        "filter": ["lowercase"]
+                    }
+                },
+                "tokenizer": {
+                    "custom_url_tokenizer": {
+                        "type": "pattern",
+                        "pattern": "/[^/]+",
+                        "group": 0
                     }
                 }
             }
@@ -356,18 +368,34 @@ class ELASTIC_ENUMS:
         "mappings": {
             "dynamic": True,
             "properties": {
-                "log": {
+                "username": {
+                    "type": "keyword"
+                },
+                "domain": {
+                    "type": "keyword"
+                },
+                "password": {
+                    "type": "keyword",
+                    "index": False,
+                    "doc_values": False
+                },
+                "url": {
                     "type": "text",
-                    "analyzer": "custom_log_analyzer",
-                    "search_analyzer": "standard_lower",
+                    "analyzer": "url_path_analyzer",
+                    "search_analyzer": "url_path_analyzer",
                     "fields": {
                         "raw": {"type": "keyword"}
                     }
                 },
-                "log_hash": {"type": "keyword"},
-                "timestamp": {"type": "date"},
-                "m_index": {"type": "keyword"},
-                "m_sub_host": {"type": "keyword"}
+                "log_hash": {
+                    "type": "keyword"
+                },
+                "timestamp": {
+                    "type": "date"
+                },
+                "m_hash": {
+                    "type": "keyword"
+                }
             }
         }
     }

@@ -65,8 +65,11 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(_: SimpleChanges): void {
-    if (!this.local_query){
+    if (!this.local_query) {
       this.local_query = this.searchQuery
+        ?.replace(/"/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim() || '';
     }
   }
 

@@ -1,6 +1,6 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {switchMap, timer, map, distinctUntilChanged, combineLatest} from 'rxjs';
 import {ResultComponent} from '../../../shared/partials/result/result.component';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 import {CredentialParamModel} from '../../../shared/model/results/credentials/credential.param.model';
@@ -33,14 +33,15 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private dashboardService: DashboardService
-  ) {}
+  ) {
+  }
 
   get currentResultCount(): number {
     return this.stealerlogCallbackModel?.Result?.length ?? 0;
   }
 
   ngOnInit(): void {
-    this.stealerlogCallbackModel = { ...this.dashboardService.stealerlogCallbackModel };
+    this.stealerlogCallbackModel = {...this.dashboardService.stealerlogCallbackModel};
 
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
@@ -61,7 +62,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       });
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void {
+  }
 
   fetchSearchResults(): void {
     if (this.isLoading) return;
@@ -79,6 +81,12 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParams: cleanedParams,
       queryParamsHandling: 'merge'
     }).then();
+
+    this.credentialParamModel.q = this.credentialParamModel.q.replace(/"([^"]*?)@([^"]*?)"/g, '"$1" "$2"');
+    this.credentialParamModel.q = this.credentialParamModel.q
+      .split(' ')
+      .map(token => token.startsWith('@') && !token.includes('"') ? token.replace('@', '') : token)
+      .join(' ');
 
     this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.credentialParamModel)
       .pipe(switchMap(response => timer(300).pipe(map(() => response))))
