@@ -168,7 +168,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                     m_title=company_name,
                     m_section=content_parts,
                     m_url="https://public.tableau.com/views/DataBreachChronologyFeatures/ChronologyofDataBreaches?"+company_name,
-                    m_base_url=base_url,
+                    m_base_url=self.base_url,
                     m_screenshot="",
                     m_content=m_content + " " + self.base_url + " " + page.url,
                     m_network=helper_method.get_network_type(self.base_url),

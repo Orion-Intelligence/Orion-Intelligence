@@ -136,7 +136,7 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
                         m_ref_html=ref_html,
                         m_title=title,
                         m_url=detail_url,
-                        m_base_url=base_url,
+                        m_base_url=self.base_url,
                         m_screenshot=helper_method.get_screenshot_base64(detail_page, None, self.base_url),
                         m_content=full_text,
                         m_network=helper_method.get_network_type(base_url),

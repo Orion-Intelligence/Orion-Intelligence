@@ -138,7 +138,7 @@ class _krakenccj3wr23452a4ibkbkuph4d6soyx2xgjoogtuamc3m7u7wemad(leak_extractor_i
                         m_ref_html=ref_html,
                         m_title=title,
                         m_url=href,
-                        m_base_url=base_url,
+                        m_base_url=self.base_url,
                         m_weblink=weblink,
                         m_websites=m_websites,
                         m_content=description,

@@ -90,6 +90,7 @@ class _5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid(leak_extractor_i
                 try:
                     card = page.query_selector_all('.companies-list__item')[i]
                     title_el = card.query_selector('.name a')
+                    title_el_link = card.query_selector('.name a').get_attribute('href')
                     description_el = card.query_selector('.text')
                     weblink_el = description_el.query_selector('a[href^="http"]') if description_el else None
                     dumplink_el = card.query_selector('a.btn.btn-primary:not([disabled])')
@@ -120,7 +121,7 @@ class _5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid(leak_extractor_i
                     card_data = leak_model(
                         m_ref_html=ref_html,
                         m_title=title,
-                        m_url=page.url,
+                        m_url=title_el_link,
                         m_base_url=self.base_url,
                         m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
                         m_content=description,

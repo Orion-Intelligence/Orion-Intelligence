@@ -156,7 +156,7 @@ class _ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd(leak_extractor_i
                             m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
                             m_title=title,
                             m_url=href,
-                            m_base_url=base_url,
+                            m_base_url=self.base_url,
                             m_content=description,
                             m_network=helper_method.get_network_type(base_url),
                             m_important_content=important_content,

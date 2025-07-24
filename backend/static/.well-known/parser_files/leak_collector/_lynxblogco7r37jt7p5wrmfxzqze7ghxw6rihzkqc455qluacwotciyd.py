@@ -172,7 +172,7 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
                             card_data = leak_model(
                                 m_ref_html=ref_html,
                                 m_title=title,
-                                m_url=self.base_url + "?" + title,
+                                m_url=page.url,
                                 m_base_url=self.base_url,
                                 m_screenshot=helper_method.get_screenshot_base64(page, title, self.base_url),
                                 m_content=description,
