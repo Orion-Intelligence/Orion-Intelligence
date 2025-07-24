@@ -1334,6 +1334,7 @@ class elastic_request_generator:
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model):
         user_query = p_query_model.mUser.strip() if p_query_model.mUser and p_query_model.mUser != "*" else ""
         url_query = p_query_model.mURL.strip() if p_query_model.mURL else ""
+        url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
         date_range_filter = {}
 
         if p_query_model.mDateRange:
