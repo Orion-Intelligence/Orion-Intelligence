@@ -42,6 +42,7 @@ jobs:
           format: sarif
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
+          arguments: --allow-unknown-tools
 
       - name: Validate SARIF structure
         run: |
