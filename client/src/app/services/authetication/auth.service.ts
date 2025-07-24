@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, tap, map} from 'rxjs';
+import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 import {ApiService} from '../../shared/services/api.service';
 import {Router} from '@angular/router';
 import {AuthModel} from '../../shared/model/auth/auth.model';
@@ -39,7 +39,11 @@ export class AuthService {
       next: (response) => {
         if (response.role === 'crawler') {
           this.authState.next({
-            token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Not enough credentials'
+            token: null,
+            username: null,
+            role: null,
+            isAuthenticated: false,
+            error: 'Access denied! Not enough credentials'
           });
           return
         }
@@ -47,7 +51,7 @@ export class AuthService {
         this.startTokenRefresh();
       }, error: (err) => {
         this.authState.next({
-            token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Invalid credentials'
+          token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Invalid credentials'
         });
       }
     }));
@@ -95,7 +99,11 @@ export class AuthService {
   private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
     return {
-      token, username: localStorage.getItem('username'), role: localStorage.getItem('role'), isAuthenticated: !!token, error: null
+      token,
+      username: localStorage.getItem('username'),
+      role: localStorage.getItem('role'),
+      isAuthenticated: !!token,
+      error: null
     };
   }
 

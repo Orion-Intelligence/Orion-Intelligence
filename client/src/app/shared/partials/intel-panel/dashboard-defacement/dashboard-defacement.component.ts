@@ -10,6 +10,10 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
 import {DefacementParamModel} from '../../../model/results/defacement/defacement.callback.model';
 import {DefacementCallbackModel} from '../../../model/results/defacement/defacement.param.model';
 import {AppService} from '../../../../services/core/app.service';
+import {defacement_filters} from '../../../constants/filters';
+import {Category} from '../../../enums/pages';
+import {SortType} from '../../../constants/enums';
+import {HelperService} from '../../../services/helper.service';
 
 @Component({
   selector: 'app-dashboard-defacement',
@@ -21,36 +25,41 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   defacementParamModel: DefacementParamModel = new DefacementParamModel();
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
   result_count = 0;
+  type = Category.DEFACEMENT
 
   query = '';
   isLoading = false;
   firstTrigger = true;
+  protected readonly Math = Math;
+  protected readonly defacement_filters = defacement_filters;
 
-  constructor(public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
+  constructor(protected helperService: HelperService, public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(1)
+    this.appService.updatePage(this.defacementParamModel.mSearchParamPage)
   }
 
   ngOnInit(): void {
+    this.defacementCallbackModel = {...this.dashboardService.defacementCallbackModel} as DefacementCallbackModel;
+    this.result_count = this.defacementCallbackModel.Result.length
+
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
         this.query = params['q'] || '';
         this.defacementParamModel.q = params['q'] || '';
         this.defacementParamModel.mSearchParamPage = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1;
+        this.defacementParamModel.mDateRange = params['mDateRange'] || '';
 
-        if (this.firstTrigger && this.defacementCallbackModel.Result.length > 0) {
+        if (this.firstTrigger && ((this.defacementCallbackModel.Result.length > 0))) {
           this.isLoading = false;
-          this.query = this.defacementParamModel.q;
-        } else if (this.firstTrigger) {
-          this.defacementParamModel.q = '*';
-          this.query = '';
-          this.fetchSearchResults();
+          this.query = this.defacementParamModel.q
+        } else {
           this.cdr.detectChanges();
+          this.fetchSearchResults()
         }
-        this.firstTrigger = false;
+        this.firstTrigger = false
       });
   }
 
@@ -60,13 +69,50 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
-  fetchSearchResults() {
+  fetchSearchResults(reset = false) {
+    let segment = this.route.snapshot.url.at(-1)?.path
+    if (segment)
+      this.defacementParamModel.mContentType = segment
+
+    if (reset)
+      this.defacementParamModel.mSearchParamPage = 1
+    if (!this.defacementParamModel.q) {
+      this.isLoading = false;
+      this.defacementParamModel.q = ""
+
+      this.router.navigate([], {
+        queryParams: {},
+        queryParamsHandling: ''
+      }).then();
+
+    }
+
     this.isLoading = true;
+
+    const cleanedParams: any = {};
+
+    Object.entries(this.defacementParamModel).forEach(([key, value]) => {
+      const isDefault =
+        (key === 'mSearchParamSafeSearch' && value === false) ||
+        (key === 'mNetwork' && value === 'all') ||
+        (value == null || value === '');
+
+      if (!reset || !isDefault) {
+        if (!isDefault) cleanedParams[key] = value;
+      }
+    });
+
     this.router.navigate([], {
-      relativeTo: this.route, queryParams: {
-        q: this.defacementParamModel.q, mSearchParamPage: this.defacementParamModel.mSearchParamPage,
-      }, queryParamsHandling: 'merge', replaceUrl: true,
+      queryParams: cleanedParams,
+      queryParamsHandling: reset ? '' : 'merge',
+      replaceUrl: true,
+      relativeTo: this.route
     }).then();
+
+    if (reset) {
+      this.isLoading = false;
+      return;
+    }
 
     this.dashboardService
       .fetchSearchResults<DefacementCallbackModel>('search/defacement', this.defacementParamModel)
@@ -74,6 +120,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       .subscribe(response => {
         if (response.success && response.data) {
           this.defacementCallbackModel = response.data as DefacementCallbackModel;
+          this.dashboardService.defacementCallbackModel = response.data as DefacementCallbackModel;
         } else {
           this.defacementCallbackModel = new DefacementCallbackModel();
         }
@@ -88,5 +135,48 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
-  protected readonly Math = Math;
+  resetFilters(_: void) {
+    this.defacementParamModel.mDateRange = "";
+    this.defacementParamModel.mTeam = "";
+    this.defacementParamModel.mAttacker = "";
+
+    this.fetchSearchResults(true);
+  }
+
+  reloadFilters(event: Record<string, string | null>) {
+    this.defacementParamModel.mSearchParamPage = 1
+    if (event['mDateRange']) {
+      this.defacementParamModel.mDateRange = event['mDateRange']
+    }
+    if (event['mTeam'] != null) {
+      this.defacementParamModel.mTeam = event['mTeam'];
+    }
+    if (event['mAttacker'] != null) {
+      this.defacementParamModel.mAttacker = event['mAttacker'];
+    }
+    this.fetchSearchResults();
+  }
+
+  onToggleSort(sort: SortType) {
+    let key;
+    let order: 'asc' | 'desc' = 'asc';
+
+    key = 'm_date_of_leak';
+
+    if (sort === SortType.NEWEST_FIRST) {
+      order = 'desc';
+    } else if (sort === SortType.OLDEST_FIRST) {
+      order = 'asc';
+    } else if (sort === SortType.DEFAULT) {
+      this.fetchSearchResults(true);
+      return;
+    }
+
+    this.defacementCallbackModel.Result = this.helperService.sortByKey<any>(
+      this.defacementCallbackModel.Result,
+      key,
+      order
+    );
+    this.cdr.detectChanges();
+  }
 }

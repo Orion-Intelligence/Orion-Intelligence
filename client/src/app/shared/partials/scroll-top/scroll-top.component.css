@@ -1,11 +1,11 @@
-.scroller{
-  position: absolute;
+.scroller {
+  position: fixed;
   right: 40px;
   bottom: 40px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
+
 .scroller:hover {
   transform: scale(1.1);
 }
-

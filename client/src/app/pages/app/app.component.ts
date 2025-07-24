@@ -1,16 +1,17 @@
 import {Component, signal} from '@angular/core';
-import {Router, NavigationEnd, RouterOutlet} from '@angular/router';
+import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {ErrorStoreService} from '../../shared/services/error-store.service';
-import {Observable, filter, map} from 'rxjs';
+import {filter, map, Observable} from 'rxjs';
 import {NgIf} from '@angular/common';
 import {LoaderComponent} from '../../shared/partials/loader/loader.component';
 import {AppService} from '../../services/core/app.service';
 import {appAnimation} from '../../shared/animations/app.animations';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NgIf, LoaderComponent,],
+  imports: [RouterOutlet, NgIf, LoaderComponent, FormsModule, ReactiveFormsModule,],
   templateUrl: './app.component.html',
   animations: [appAnimation],
 })
@@ -20,6 +21,9 @@ export class AppComponent {
   currentRoute = signal('');
 
   constructor(private router: Router, private errorStore: ErrorStoreService, appService: AppService) {
+    const theme = localStorage.getItem('theme') || 'dark-theme';
+    document.body.classList.add(theme);
+
     appService.loadConfig();
     this.error$ = this.errorStore.error$;
 

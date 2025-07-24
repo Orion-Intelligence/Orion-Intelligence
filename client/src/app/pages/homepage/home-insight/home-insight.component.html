@@ -1,14 +1,93 @@
 <div id="analytics">
+  <div class="graph_insight_container mt-lg-5">
+    <app-customize-bar-chart *ngFor="let graph of GraphData" [graphModel]="graph"></app-customize-bar-chart>
+  </div>
+  <div class="home_insight__single">Top Data Leaks</div>
+  <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
+    <ng-container *ngIf="i < 1 || last">
+      <div class="home_insight__container home_insight__container-top mt-4">
+        <div *ngFor="let item of getResultItems(modelKey);" class="card-container">
+          <div class="header-section">
+            <div class="company-info">
+              <div class="label">Company Name</div>
+              <div class="value">{{ item.title }}</div>
+            </div>
+            <div class="attacker-info">
+              <div class="label">Source</div>
+              <div class="value">{{ item.source }}</div>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <ng-container *ngIf="item.location; else checkURL">
+              <div class="country-info">
+                <div class="label">Location</div>
+                <div class="value">{{ item.location }}</div>
+              </div>
+            </ng-container>
+
+            <ng-template #checkURL>
+              <ng-container *ngIf="item.url; else checkPhone">
+                <div class="country-info">
+                  <div class="label">URL</div>
+                  <div class="value" *ngIf="item.url[0]">
+                    {{ item.url[0].length > 24 ? item.url[0].slice(0, 24) + '...' : item.url[0] }}
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+
+            <ng-template #checkPhone>
+              <div class="country-info">
+                <div class="label">Phone Number</div>
+                <div class="value">{{ item.phoneNumber || '-'}}</div>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="detail-row">
+            <div class="date-time-info">
+              <div class="label">Date</div>
+              <div class="value">{{ item.date || '-' }}</div>
+            </div>
+          </div>
+
+          <div class="home_insight__divider"></div>
+
+          <div class="footer-section">
+            <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report"
+              [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]"
+              class="view-details-button">View Details</button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+  <br><br>
+
   <div *ngFor="let model of models">
     <div class="home_insight__container">
-      <div class="home_insight__card" *ngFor="let key of getKeys(insights[model]); let first = first">
+      <div *ngFor="let key of getKeys(insights[model]); let first = first" class="home_insight__card">
         <div class="home_insight__content">
-          <div *ngIf="first" class="home_insight__header">
-            {{ model === 'general' ? 'Generic Index' : model === 'leak' ? 'Leaked Index' : 'Defacement Index' }}
+
+          <div *ngIf="first" [appTooltip]="
+                 model === 'general'
+                   ? 'Track Data States/Crawl Insights Panel'
+                   : model === 'leak'
+                   ? 'This is the Leaked Data'
+                   : 'This is the Defacement'
+               " class="home_insight__header">
+            {{
+            model === 'general'
+            ? 'Generic Index'
+            : model === 'leak'
+            ? 'Leaked Index'
+            : 'Defacement Index'
+            }}
           </div>
 
           <div class="home_insight__icon">
-            <img ngSrc="/assets/images/statistics/{{ key }}.svg" alt="{{ key }}" width="32" height="32">
+            <img alt="{{ key }}" height="32" ngSrc="/assets/images/statistics/{{ key }}.svg" width="32">
           </div>
 
           <div class="home_insight__text">
@@ -22,22 +101,24 @@
 
           <div class="home_insight__percentage">
             <div [ngClass]="{
-                'text-success': insights[model][key].change_daily?.startsWith('+'),
-                'text-warning': insights[model][key].change_daily?.startsWith('-'),
-                'home_insight__percentage-default': !insights[model][key].change_daily
-              }">
+                  'text-success': String(insights[model][key].change_daily).startsWith('+'),
+                  'text-warning': String(insights[model][key].change_daily).startsWith('-'),
+                  'home_insight__percentage-default': !insights[model][key].change_daily
+                }" appTooltip="stat changes daily">
               {{ insights[model][key].change_daily || '-' }}
             </div>
+
             <div [ngClass]="{
-                'text-success': insights[model][key].change_weekly?.startsWith('+'),
-                'text-warning': insights[model][key].change_weekly?.startsWith('-'),
-                'home_insight__percentage-default': !insights[model][key].change_weekly
-              }">
+                  'text-success': String(insights[model][key].change_weekly).startsWith('+'),
+                  'text-warning': String(insights[model][key].change_weekly).startsWith('-'),
+                  'home_insight__percentage-default': !insights[model][key].change_weekly
+                }" appTooltip="stat changes weekly">
               {{ insights[model][key].change_weekly || '-' }}
             </div>
           </div>
         </div>
       </div>
-    </div><br><br>
+    </div>
+    <br><br>
   </div>
 </div>

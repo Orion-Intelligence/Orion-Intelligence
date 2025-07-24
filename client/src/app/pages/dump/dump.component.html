@@ -1,0 +1,36 @@
+<ng-container>
+  <span id="top"></span>
+  <div class="directory">
+    <div class="directory__container">
+      <div class="directory__main-container">
+        <div class="directory__upper-heading">
+          <div class="directory__pagination-heading">
+            <p class="directory__header">Leak Dump Records</p>
+          </div>
+
+          <div class="directory-pagination col-7"></div>
+
+          <div class="side-menu-container">
+            <label (click)="openSidebar()" class="filters-button">
+              <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/filter_icon.svg" priority width="24">
+              Filter
+            </label>
+
+            <div [class.filter__container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async"
+                 class="filters-container">
+              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
+                           (filterReset)="resetFilters()" [filterModel]="filterModel"
+                           [isFilterOpen]="isFilterOpen$ | async">
+              </app-filters>
+            </div>
+          </div>
+        </div>
+
+        <dump-list></dump-list>
+      </div>
+
+      <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages"></app-pagination>
+    </div>
+  </div>
+  <span id="bottom"></span>
+</ng-container>

@@ -1,0 +1,153 @@
+.graph-container {
+  width: 100vw;
+  height: 100vh;
+  padding-left: 251px;
+  background-color: #051320;
+}
+
+.graph-container-empty {
+  height: 90vh;
+  position: absolute;
+  top: 35%;
+  left: 45%;
+}
+
+.graph-controls-container {
+  padding: 1rem;
+  text-align: left;
+  margin-left: 10px;
+}
+
+.graph-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.graph-form-block {
+  width: 250px;
+}
+
+.graph-form-button-block {
+  width: 100px;
+}
+
+.graph-form-element,
+.graph-form-button {
+  height: 40px;
+  width: 100%;
+  padding-left: 10px;
+}
+
+.graph-notification {
+  position: absolute;
+  top: 0;
+  left: 300px
+}
+
+.context-menu {
+  position: absolute;
+  display: none;
+  background: #fff;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+  z-index: 1000;
+  width: 160px;
+}
+
+.context-menu .dropdown-divider {
+  padding: 0;
+  margin: 0;
+}
+
+.context-menu .dropdown-item {
+  padding-left: 10px !important;
+}
+
+.context-menu .dropdown-item img {
+  opacity: 0.4;
+  margin-right: 15px !important;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px 8px 15px;
+  color: #000 !important;
+}
+
+.button-content:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.button-content:focus,
+.button-content:active {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.share-wrapper {
+  position: relative;
+}
+
+.floating-copied {
+  position: absolute;
+  background-color: #f0f0f0;
+  color: rgb(0 0 0);
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+  z-index: 1000;
+}
+
+@keyframes searchMotion {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  12.5% {
+    transform: translate(7px, -7px) rotate(4deg);
+  }
+
+  25% {
+    transform: translate(10px, -14px) rotate(6deg);
+  }
+
+  37.5% {
+    transform: translate(7px, -21px) rotate(2deg);
+  }
+
+  50% {
+    transform: translate(0px, -25px) rotate(-2deg);
+  }
+
+  62.5% {
+    transform: translate(-7px, -21px) rotate(-4deg);
+  }
+
+  75% {
+    transform: translate(-10px, -14px) rotate(-6deg);
+  }
+
+  87.5% {
+    transform: translate(-7px, -7px) rotate(-2deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+.magnify-animation {
+  animation: searchMotion 3s linear infinite;
+  transform-origin: center center;
+  display: inline-block;
+}

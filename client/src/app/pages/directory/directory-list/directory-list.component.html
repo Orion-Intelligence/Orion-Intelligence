@@ -2,12 +2,12 @@
   <table class="table table-striped directory-list__table clear-paddings">
     <thead>
     <tr>
-      <th scope="col" class="directory-list__column-id">ID</th>
-      <th scope="col" class="directory-list__column-service-url">Service URL</th>
-      <th scope="col" class="directory-list__column-category">Category</th>
-      <th scope="col" class="directory-list__column-url-status">General</th>
-      <th scope="col" class="directory-list__column-leak-status">Leak</th>
-      <th scope="col" class="directory-list__column-network-type">Network</th>
+      <th class="directory-list__column-id-min" scope="col">ID</th>
+      <th class="directory-list__column-service-url" scope="col">Service URL</th>
+      <th class="directory-list__column-category" scope="col">Category</th>
+      <th class="directory-list__column-url-status" scope="col">General</th>
+      <th class="directory-list__column-leak-status" scope="col">Leak</th>
+      <th class="directory-list__column-network-type" scope="col">Network</th>
     </tr>
     </thead>
     <tbody>
@@ -17,16 +17,25 @@
           {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
         </td>
 
+
         <td data-label="Service URL">
-          <a [href]="item.url" class="directory-list__table-url text-decoration-none text-reset">
-            {{ item.url }}
-          </a>
+          <ng-container *ngIf="item.network_type === 'telegram'">
+            <a class="directory-list__table-url text-decoration-none text-reset">
+              {{ item.name?.toLowerCase() }}
+            </a>
+          </ng-container>
+          <ng-container *ngIf="item.network_type !== 'telegram'">
+            <a class="directory-list__table-url text-decoration-none text-reset">
+              {{ item.url }}
+            </a>
+          </ng-container>
         </td>
 
         <td data-label="Category">
           <div class="d-flex flex-wrap">
             <ng-container *ngIf="item.content_type.length; else noCategory">
-              <div class="directory-list__content-category px-2 py-1" *ngFor="let category of item.content_type | slice:0:3">
+              <div *ngFor="let category of item.content_type | slice:0:2"
+                   class="directory-list__content-category px-2 py-1">
                 {{ category | titlecase }}
               </div>
             </ng-container>
@@ -36,14 +45,16 @@
           </div>
         </td>
 
-        <td data-label="General Model Status" class="onion__table-leak-status">
-            <span class="directory-list__status-default-pointer" [class.directory-list__status-inactive-pointer]="!isRecent(item.geneic_model_last_update)">
+        <td class="onion__table-leak-status" data-label="General Model Status">
+            <span [class.directory-list__status-inactive-pointer]="!isRecent(item.geneic_model_last_update)"
+                  class="directory-list__status-default-pointer">
             </span>
           {{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
         </td>
 
-        <td data-label="Leak Model Status" class="onion__table-leak-status">
-            <span class="directory-list__status-default-pointer" [class.directory-list__status-inactive-pointer]="!isRecent(item.leak_model_last_update)">
+        <td class="onion__table-leak-status" data-label="Leak Model Status">
+            <span [class.directory-list__status-inactive-pointer]="!isRecent(item.leak_model_last_update)"
+                  class="directory-list__status-default-pointer">
             </span>
           {{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
         </td>

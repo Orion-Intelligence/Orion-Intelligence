@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
 from datetime import timedelta
+
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from starlette.responses import JSONResponse
 
@@ -30,13 +31,15 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends()):
 
     return {"access_token": access_token, "token_type": "bearer", "role": role}
 
+
 @auth_router.post("/api/token/refresh")
 async def refresh_token(ptoken: str = Depends(oauth2_scheme)):
     return await session_manager.get_instance().refresh_token(ptoken)
 
+
 @auth_router.post("/api/logout")
 async def logout(ptoken: str = Depends(oauth2_scheme)):
-    session_manager.logout_user(ptoken = ptoken)
+    session_manager.logout_user(ptoken=ptoken)
     response = JSONResponse(content={"detail": "Logged out"})
     response.delete_cookie("access_token", path="/")
     return response

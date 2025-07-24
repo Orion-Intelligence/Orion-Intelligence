@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Router, NavigationEnd} from '@angular/router';
+import {NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {ErrorHandlerComponent} from '../../pages/error-handler/error-handler.component';
@@ -11,6 +11,14 @@ export class ErrorStoreService {
 
   constructor(private router: Router) {
     this.setupRouterListener();
+  }
+
+  setError() {
+    this.errorSubject.next(true);
+  }
+
+  clearError() {
+    this.errorSubject.next(false);
   }
 
   private setupRouterListener() {
@@ -33,13 +41,5 @@ export class ErrorStoreService {
           this.clearError();
         }
       });
-  }
-
-  setError() {
-    this.errorSubject.next(true);
-  }
-
-  clearError() {
-    this.errorSubject.next(false);
   }
 }

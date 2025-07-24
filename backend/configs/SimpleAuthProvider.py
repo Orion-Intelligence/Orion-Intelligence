@@ -1,28 +1,29 @@
-from starlette_admin.contrib.odmantic import Admin, ModelView
+from datetime import timedelta
+
+from fastapi import HTTPException, status, Form
 from odmantic import AIOEngine
+from starlette.requests import Request
+from starlette.responses import Response, RedirectResponse
+from starlette.status import HTTP_303_SEE_OTHER
+from starlette_admin.auth import AdminConfig, AdminUser, AuthProvider
+from starlette_admin.contrib.odmantic import Admin, ModelView
 
 from orion.helper_manager.env_handler import env_handler
+from orion.services.auth_manager.auth_manager import auth_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
-from starlette_admin.auth import AdminConfig, AdminUser, AuthProvider
-from starlette.requests import Request
-from starlette.responses import Response, RedirectResponse
-from fastapi import HTTPException, status, Form
-from starlette.status import HTTP_303_SEE_OTHER
-from datetime import timedelta
 from orion.services.session_manager.session_manager import session_manager
-from orion.services.auth_manager.auth_manager import auth_manager
 
 
 class TokenAuthProvider(AuthProvider):
     async def login(
-        self,
-        username: str = Form(...),
-        password: str = Form(...),
-        remember_me: bool = Form(False),
-        request: Request = None,
-        response: Response = None,
+            self,
+            username: str = Form(...),
+            password: str = Form(...),
+            remember_me: bool = Form(False),
+            request: Request = None,
+            response: Response = None,
     ) -> Response:
         try:
             IS_DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
@@ -75,7 +76,7 @@ class TokenAuthProvider(AuthProvider):
     def get_admin_config(self, request: Request) -> AdminConfig:
         return AdminConfig(
             app_title="Admin Panel",
-            logo_url="https://orion.genesistechnologies.org/assets/images/sidebar/search_nav_logo.png"
+            logo_url="https://try.orionintelligence.org/assets/images/sidebar/search_nav_logo.png"
         )
 
     def get_admin_user(self, request: Request) -> AdminUser:

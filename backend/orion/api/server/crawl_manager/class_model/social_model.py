@@ -1,0 +1,31 @@
+from typing import List, Optional
+from pydantic import BaseModel, Field
+from datetime import date
+
+
+class social_model(BaseModel):
+    m_title: Optional[str] = None
+    m_sender_name: Optional[str] = None
+    m_message_sharable_link: str
+    m_weblink: List[str] = Field(default_factory=list)
+    m_content: str
+    m_content_type: List[str] = Field(default_factory=list)
+    m_message_date: Optional[date] = None
+    m_channel_url: Optional[str] = None
+    m_message_id: Optional[str] = None
+    m_platform: str
+    m_network: str
+
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "json_encoders": {
+            date: lambda v: v.strftime("%Y-%m-%d") if v else None
+        }
+    }
+
+class social_data_model(BaseModel):
+    cards_data: List[social_model] = Field(default_factory=list)
+    contact_link: str = ""
+    base_url: str = ""
+    seed_url: str = ""
+    m_network: str = "clearnet"

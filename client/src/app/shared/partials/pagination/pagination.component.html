@@ -1,29 +1,29 @@
-<div class="search__pagination disable-highlight">
+<div *ngIf="maxPages>1" class="search__pagination disable-highlight">
   <div class="search__pagination-container">
 
-    <button class="search__pagination-navigation"
+    <button (click)="currentPage !== 1 && onPageChange(1)"
             [class.disabled]="currentPage === 1"
-            (click)="currentPage !== 1 && onPageChange(1)">
-      <img ngSrc="assets/images/shared/nav-first.svg" alt="nav-first" height="16" width="16">
+            class="search__pagination-navigation">
+      <img alt="nav-first" height="16" ngSrc="assets/images/shared/nav-first.svg" width="16">
     </button>
 
-    <button class="search__pagination-navigation gc-clear-selection"
+    <button (click)="currentPage !== 1 && onPageChange(currentPage - 1)"
             [class.disabled]="currentPage === 1"
-            (click)="currentPage !== 1 && onPageChange(currentPage - 1)">
-      <img ngSrc="assets/images/shared/nav-prev.svg" alt="nav-prev" height="16" width="16">
+            class="search__pagination-navigation gc-clear-selection">
+      <img alt="nav-prev" height="16" ngSrc="assets/images/shared/nav-prev.svg" width="16">
     </button>
 
-    <button *ngFor="let page of getPageRange(); let i = index"
-            class="search__navigation gc-clear-selection"
+    <button (click)="onPageChange(page)"
+            *ngFor="let page of getPageRange()"
             [class.search__navigation--focus]="page === currentPage"
-            (click)="onPageChange(page)">
+            class="search__navigation gc-clear-selection">
       {{ page }}
     </button>
 
-    <button class="search__pagination-navigation gc-clear-selection"
+    <button (click)="currentPage < maxPages && onPageChange(currentPage + 1)"
             [class.disabled]="currentPage >= maxPages"
-            (click)="currentPage < maxPages && onPageChange(currentPage + 1)">
-      <img ngSrc="assets/images/shared/nav-next.svg" alt="nav-next" height="16" width="16" priority>
+            class="search__pagination-navigation gc-clear-selection">
+      <img alt="nav-next" height="16" ngSrc="assets/images/shared/nav-next.svg" priority width="16">
     </button>
 
   </div>

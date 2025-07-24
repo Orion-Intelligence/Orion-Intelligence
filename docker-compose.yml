@@ -10,6 +10,7 @@ services:
     depends_on:
       - elasticsearch
       - mongo
+      - arangodb
     volumes:
       - ./backend/orion:/app/orion:cached
       - ./backend/routes:/app/routes:cached
@@ -22,13 +23,34 @@ services:
       - backend
       - shared_bridge
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8070"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8070" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
     command: >
       sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+
+  arangodb:
+    container_name: trusted-web-arangodb
+    image: arangodb:3.11
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD}
+      ARANGODB_DEFAULT_SERVER_ENDPOINT: tcp://0.0.0.0:8529
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb:/var/lib/arangodb3
+    networks:
+      backend:
+        ipv4_address: 172.20.1.15
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   nginx:
     container_name: trusted-web-nginx
@@ -47,7 +69,7 @@ services:
       backend:
         ipv4_address: 172.20.1.13
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080 || exit 1" ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -72,7 +94,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
+      test: [ "CMD-SHELL", "exit 0" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -94,7 +116,7 @@ services:
 
   elasticsearch:
     container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.20
     environment:
       - discovery.type=single-node
       - network.host=0.0.0.0
@@ -103,7 +125,6 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
     env_file:
@@ -118,6 +139,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    command:
+      - bash
+      - -c
+      - |
+        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m"
+        exec /usr/local/bin/docker-entrypoint.sh eswrapper
     networks:
       backend:
         ipv4_address: 172.20.1.11
@@ -126,19 +153,20 @@ services:
         limits:
           memory: 1G
 
+
   redis_server:
     container_name: trusted-web-redis
     image: redis:7.4.0
     logging:
       driver: none
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
     restart: always
     env_file:
       - .env
     volumes:
       - redis:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -186,7 +214,7 @@ services:
       backend:
         ipv4_address: 172.20.1.14
     healthcheck:
-      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/27017' || exit 1"]
+      test: [ "CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/27017' || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -213,3 +241,4 @@ volumes:
   elastic:
   static_volume:
   media_volume:
+  arangodb:

@@ -1,96 +1,355 @@
-@import 'assets/libs/bootstrap.min.css';
-@import 'assets/styles/shared.css';
-@import 'app/pages/error-handler/error-handler.component.css';
-@import 'app/pages/homepage/homepage.component.css';
-@import 'app/shared/partials/footer/footer.component.css';
-@import 'app/shared/partials/header/login-header/header.component.css';
-@import 'app/pages/homepage/home-insight/home-insight.component.css';
-@import 'app/pages/homepage/home-search/home-search.component.css';
-@import 'app/shared/partials/loader/loader.component.css';
-@import 'app/pages/login/login-container/login-container.component.css';
-@import 'app/pages/directory/directory-list/directory-list.component.css';
-@import 'app/shared/partials/filters/filters.component.css';
-@import 'app/pages/directory/directory.component.css';
-@import 'app/shared/partials/profile/profile.component.css';
-@import 'app/shared/partials/empty-result/empty-result.component.css';
-@import 'app/shared/partials/header/dashboard-header/dashboard-header.component.css';
-@import 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
-@import 'app/shared/partials/pagination/pagination.component.css';
-@import 'app/pages/dashboard/dashboard.component.css';
-@import 'app/shared/partials/suggestion/suggestion.component.css';
-@import 'app/shared/partials/loading-form/loading-form.component.css';
-@import 'app/shared/partials/report/report_general/report.component.css';
-@import 'app/shared/partials/report/report-defacement/report-defacement.component.css';
-@import 'app/shared/partials/result-components/result-section/result-section.component.css';
-@import 'app/shared/partials/result-components/result-list/result-list.component.css';
-@import 'app/shared/partials/empty-query/empty-query.component.css';
-@import 'app/shared/partials/insights/data-insight/data-insight.component.css';
-@import 'app/shared/partials/insights/general-insights/general-insights.component.css';
-@import 'app/shared/partials/result/result.component.css';
-@import 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-list/dashboard-result-list.component.css';
-@import 'app/shared/partials/insights/data-insight/data-accordian/data-accordian.component.css';
-@import 'app/shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component.css';
-@import 'app/shared/partials/scroll-top/scroll-top.component.css';
-@import 'assets/styles/fonts.scss';
+@use 'assets/libs/bootstrap.min.css';
+@use 'assets/styles/shared.css';
+@use 'assets/styles/fonts.scss';
+@use 'app/pages/error-handler/error-handler.component.css';
+@use 'app/pages/homepage/homepage.component.css';
+@use 'app/shared/partials/footer/footer.component.css';
+@use 'app/shared/partials/header/login-header/header.component.css';
+@use 'app/pages/homepage/home-insight/home-insight.component.css';
+@use 'app/pages/homepage/home-search/home-search.component.css';
+@use 'app/shared/partials/loader/loader.component.css';
+@use 'app/pages/login/login-container/login-container.component.css';
+@use 'app/pages/directory/directory-list/directory-list.component.css';
+@use 'app/shared/partials/filters/filters.component.css';
+@use 'app/pages/directory/directory.component.css';
+@use 'app/shared/partials/profile/profile.component.css';
+@use 'app/shared/partials/empty-result/empty-result.component.css';
+@use 'app/shared/partials/header/dashboard-header/dashboard-header.component.css';
+@use 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
+@use 'app/shared/partials/pagination/pagination.component.css';
+@use 'app/shared/partials/customize-bar-chart/customize-bar-chart.component.css';
+@use 'app/pages/dashboard/dashboard.component.css';
+@use 'app/pages/dump/credential/credential.component.css';
+@use 'app/shared/partials/suggestion/suggestion.component.css';
+@use 'app/shared/partials/loading-form/loading-form.component.css';
+@use 'app/shared/partials/report/report_general/report.component.css';
+@use 'app/shared/partials/report/report-defacement/report-defacement.component.css';
+@use 'app/shared/partials/report/report-mapping-list/report-mapping-list.component.css';
+@use 'app/shared/partials/result-components/result-section/result-section.component.css';
+@use 'app/shared/partials/result-components/result-list/result-list.component.css';
+@use 'app/shared/partials/empty-query/empty-query.component.css';
+@use 'app/shared/partials/pro-subscription/pro-subscription.component.css';
+@use 'app/shared/partials/insights/data-insight/data-insight.component.css';
+@use 'app/shared/partials/insights/general-insights/general-insights.component.css';
+@use 'app/shared/partials/result/result.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-list/dashboard-result-list.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-consolidated/dashboard-consolidated.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component.css';
+@use 'app/shared/partials/insights/data-insight/data-accordian/data-accordian.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component.css';
+@use 'app/shared/partials/intel-panel/result-insights/result-insights.component.css';
+@use 'app/shared/partials/scroll-top/scroll-top.component.css';
+@use 'app/pages/graphs/graphs.component.css';
+@use 'app/pages/graphs/graph-info/graph-info.component.css';
+@use 'app/pages/graphs/listings/listings.component.css';
+@use 'app/pages/graphs/sidebar/sidebar.component.css';
+@use 'app/shared/partials/report/report-chat/report-chat.component.css';
+@use 'app/shared/partials/filters/date-picker/date-picker.component.css';
+@use 'app/shared/partials/filters/multiple-selection/multiple-selection.component.css';
+@use 'app/shared/partials/json-api-viewer/json-viewer/json-viewer.component.css';
+@use 'assets/styles/ng-bootstrap/datepicker/datepicker';
+@use 'assets/styles/ng-bootstrap/datepicker/datepicker-day-view';
+@use 'assets/styles/ng-bootstrap/datepicker/datepicker-month';
+@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation';
+@use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
+
+:root {
+	--dasshboard-sidebar-bg: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
+	--dasshboard-sidebar-bg-light: #17223560;
+	--sidebar-item-bg: #2A578459;
+	--sidebar-item-bg-hover: #2A578435;
+	--sidebar-subitem: #2A578459;
+	--cti-sidebar-bg: linear-gradient(to bottom, #0E2D4D, #144170);
+	--dashboard-bg: #0E1626 !important;
+	--dashboard-header-login: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
+	--dashboard-header: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%) !important;
+	--dashboard-search-main-div: #0e2d4d80;
+	--dashboard-search-main-div-hover: #103356;
+	--home-insight-card-bg: #0f335780;
+	--no-result-container-bg: #17406999;
+	--loading-form-bg: #0f335775;
+	--loading-form-divs-bg: #234d79;
+	--loading-form-shimmer: linear-gradient(to right, #234d79 50%, #2d5c91 70%, #234d79 80%, #234d79 100%);
+	--report-menu-option: #143352;
+	--report-menu-option-hover: #0f263e;
+	--search-result-detail: #0E2D4D99;
+	--table-header-bg: #12335450;
+	--table-tr-nth-child-even: #214b75;
+	--table-tr-nth-child-odd: #1e456c;
+	--table-tbody-tr-hover: #3A6A9A;
+	--filter-dashboard-button: #0E2D4D;
+	--filter-dashboard-button-hover: #14335299;
+	--filter-form-bg: linear-gradient(to bottom, #174069, #2A5784);
+	--filter-header: #153454;
+	--filter-submit-button: #2b90ee;
+	--filter-submit-button-hover: #1176d4;
+	--filter-form-dropdown-item-hover: #f2f2f2;
+	--filter-item-hover: #1176d4;
+	--login-footer: #295785;
+	--filter-input: white;
+	--filter-input-text: #3c3c43;
+}
+
+.dark-theme {
+	--dasshboard-sidebar-bg: #172235;
+	--dasshboard-sidebar-bg-light: #17223550;
+	--sidebar-item-bg: #1D2D47;
+	--sidebar-item-bg-hover: #1D2D47;
+	--sidebar-subitem: #1D2D47;
+	--cti-sidebar-bg: #1D2D47;
+	--dashboard-bg: #0E1626 !important;
+	--dashboard-header: #0E1626;
+	--dashboard-header-login: #0E1626;
+	--dashboard-search-main-div: #172235;
+	--dashboard-search-main-div-hover: #1f2e47;
+	--home-insight-card-bg: #172235;
+	--no-result-container-bg: #172235;
+	--loading-form-bg: #172235;
+	--loading-form-divs-bg: #101A2B;
+	--loading-form-shimmer: linear-gradient(to right,
+			#FCFCFC20 0%,
+			#FCFCFC30 50%,
+			#FCFCFC20 100%);
+	--report-menu-option: #172235;
+	--report-menu-option-hover: #4d5155;
+	--search-result-detail: #172235;
+	--table-header-bg: #131E30;
+	--table-tr-nth-child-even: #172235;
+	--table-tr-nth-child-odd: #131E30;
+	--table-tbody-tr-hover: #1D2A41;
+	--filter-dashboard-button: #1f2e47;
+	--filter-dashboard-button-hover: #172235;
+	--filter-form-bg: #0e1626;
+	--filter-header: #1f2e47;
+	--filter-submit-button: #57A5EB;
+	--filter-submit-button-hover: #1792fe;
+	--filter-form-dropdown-item-hover: #f2f2f2;
+	--filter-item-hover: #0E1626;
+	--login-footer: #0E1626;
+	--filter-input: #172235;
+	--filter-input-text: #A0B8D1;
+}
+
 
 html {
-  background: rgba(41, 87, 132, 255) !important;
-  scrollbar-width: none;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
+	background: var(--dashboard-bg) !important;
+	scrollbar-width: none;
+	overflow-x: hidden;
+	scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
-  background: linear-gradient(
-      to bottom,
-      rgba(18, 52, 84, 255),
-      rgba(41, 87, 132, 255),
-      rgba(41, 87, 132, 255)
-  ) !important;
-  height: 100vh;
-  min-height: 100vh;
-  scrollbar-width: none;
+	margin: 0;
+	background: var(--dashboard-bg) !important;
+	height: 100vh;
+	min-height: 100vh;
+	scrollbar-width: none;
+}
+
+body.dark-theme {
+	background-color: #0E1626 !important;
+}
+
+body.light-theme {
+	background-color: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%) !important;
 }
 
 body::-webkit-scrollbar,
 html::-webkit-scrollbar {
-  display: none;
+	display: none;
 }
 
 .gc-clear-selection {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  outline: none;
-  text-decoration: none !important;
-  text-underline: none;
-  color: white;
+	-webkit-touch-callout: none;
+	user-select: none;
+	outline: none;
+	text-decoration: none !important;
+	text-underline: none;
+	color: white;
+}
+
+.dropdown-menu{
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.dropdown-menu::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid white;
+  z-index: 1000;
 }
 
 .clear-paddings {
-  margin: 0 !important;
-  padding: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 .app-background {
-  position: absolute;
-  right: 0;
-  top: 0;
-  opacity: 0.07;
-  object-fit: contain;
-  object-position: top right;
-  pointer-events: none;
+	position: absolute;
+	right: 0;
+	top: 0;
+	opacity: 3%;
+	object-fit: contain;
+	object-position: top right;
+	pointer-events: none;
+}
+
+.app-background-dark {
+	opacity: 5%;
 }
 
 img::before {
-  color: white;
-  font-size: 12px;
+	color: white;
+	font-size: 12px;
 }
 
-.pagination-margin{
-  margin-left: 28px;
+.dropdown-item.active, .dropdown-item:active{
+    background: #e6e6e6 !important;
 }
 
+.pagination-margin {
+	margin-left: 28px;
+}
+
+ngb-datepicker-navigation {
+	display: flex;
+	align-items: center;
+}
+
+.ngb-dp {
+	&-navigation-chevron {
+		border-style: solid;
+		border-width: 0.2em 0.2em 0 0;
+		display: inline-block;
+		width: 0.75em;
+		height: 0.75em;
+		margin-left: 0.25em;
+		margin-right: 0.15em;
+		transform: rotate(-135deg);
+	}
+
+	&-arrow {
+		display: flex;
+		flex: 1 1 auto;
+		padding-right: 0;
+		padding-left: 0;
+		margin: 0;
+		width: 2rem;
+		height: 2rem;
+
+		&-next {
+			justify-content: flex-end;
+
+			.ngb-dp-navigation-chevron {
+				transform: rotate(45deg);
+				margin-left: 0.15em;
+				margin-right: 0.25em;
+			}
+		}
+	}
+
+	&-arrow-btn {
+		padding: 0 0.25rem;
+		margin: 0 0.5rem;
+		border: none;
+		background-color: transparent;
+		z-index: 1;
+
+		&:focus {
+			outline-width: 1px;
+			outline-style: auto;
+		}
+
+		// IE workaround, as outline-style: auto doesn't work
+		@media all and (-ms-high-contrast: none),
+		(-ms-high-contrast: active) {
+			&:focus {
+				outline-style: solid;
+			}
+		}
+	}
+
+	&-month-name {
+		font-size: larger;
+		height: 2rem;
+		line-height: 2rem;
+		text-align: center;
+	}
+
+	&-navigation-select {
+		display: flex;
+		flex: 1 1 9rem;
+	}
+}
+
+ngb-datepicker-navigation-select>.form-select {
+	flex: 1 1 auto;
+	padding: 0 0.5rem;
+	font-size: 0.875rem;
+	height: 1.85rem;
+
+	&:focus {
+		z-index: 1;
+	}
+
+	// IE11, Edge: Fix arrow icon disappears on focus
+	&::-ms-value {
+		background-color: transparent !important;
+	}
+}
+
+ngb-datepicker-month {
+	display: block;
+}
+
+.ngb-dp {
+
+	&-weekday,
+	&-week-number {
+		line-height: 2rem;
+		text-align: center;
+		font-style: italic;
+	}
+
+	&-weekday {
+		color: var(--bs-info);
+	}
+
+	&-week {
+		border-radius: 0.25rem;
+		display: flex;
+	}
+
+	&-weekdays {
+		border-bottom: 1px solid var(--bs-border-color);
+		border-radius: 0;
+		background-color: var(--bs-tertiary-bg);
+	}
+
+	&-day,
+	&-weekday,
+	&-week-number {
+		width: 2rem;
+		height: 2rem;
+	}
+
+	&-day {
+		cursor: pointer;
+
+		&.disabled,
+		&.hidden {
+			cursor: default;
+			pointer-events: none;
+		}
+
+		&[tabindex='0'] {
+			z-index: 1;
+		}
+	}
+}

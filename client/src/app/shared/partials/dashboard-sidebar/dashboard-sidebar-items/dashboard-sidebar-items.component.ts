@@ -1,23 +1,29 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {AsyncPipe, NgClass, NgForOf, NgOptimizedImage} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {LowerPipe} from '../../../model/pipes/lower.pipe';
+import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
 
 @Component({
   selector: 'app-dashboard-sidebar-items',
   standalone: true,
-  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf],
+  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, NgForOf, TooltipDirective, LowerPipe],
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {
-  @Input() title: string = '';
-  @Input() icon: string = '';
+  @Input() title = '';
+  @Input() icon = '';
   @Input() items: string[] = [];
   @Input() category: any;
-  @Input() routePrefix: string = '';
-  @Input() selectionStore: any;
+  @Input() routePrefix = '';
+  @Input() tooltip = '';
 
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
+
+  constructor(protected selectionStore: SelectionStoreService) {
+  }
 
   selectSection() {
     this.sectionSelected.emit(this.category);
@@ -26,4 +32,5 @@ export class DashboardSidebarItemsComponent {
   selectOption(item: string) {
     this.optionSelected.emit(item);
   }
+
 }

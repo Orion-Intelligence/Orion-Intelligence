@@ -1,6 +1,7 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+
 from orion.helper_manager.env_handler import env_handler
 
 
@@ -43,7 +44,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "default-src 'self'; "
                 "script-src 'self'; "
                 "style-src 'self'; "
-                "img-src 'self' data: https://orion.genesistechnologies.org; "
+                "img-src 'self' data: https://try.orionintelligence.org; "
                 "font-src 'self'; "
                 "connect-src 'self'; "
                 "media-src 'self'; "
@@ -51,14 +52,13 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                 "object-src 'none'; "
                 "form-action 'self'; "
                 "base-uri 'self'; "
-                "upgrade-insecure-requests; "
                 "report-to csp-endpoint;"
             )
 
         response.headers["Report-To"] = (
             '{"group":"csp-endpoint",'
             '"max_age":10886400,'
-            '"endpoints":[{"url":"https://yourdomain.com/csp-report-endpoint/"}]}'
+            '"endpoints":[{"url":"https://try.orionintelligence.org/csp-report-endpoint/"}]}'
         )
 
         if not self.DEBUG:

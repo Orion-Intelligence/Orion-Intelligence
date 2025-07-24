@@ -1,0 +1,74 @@
+<div class="position-fixed">
+  <div #networkContainer class="graph-container d-none d-md-block"></div>
+
+  <graph-sidebar (filtersApplied)="onSidebarApply($event)" class="d-none d-md-block"></graph-sidebar>
+
+  <app-graph-info (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()"
+                  (physicsToggled)="onPhysicsToggled($event)" (ruleSetChange)="ruleSetChange($event)"
+                  [(ruleSet)]="ruleSet" [expandEnabledTemp]="expandEnabled"
+                  [physicsEnabled]=physicsEnabled [propertyType]="propertyType" [propertyValue]="propertyValue"
+                  [result]="flattenedDocuments" [selectedType]="selectedType" [singleInput]="singleInput"
+                  class="d-none d-md-block">
+  </app-graph-info>
+
+
+  <div class="context-menu" id="customContextMenu">
+    <button (click)="expandGroupNode()" class="dropdown-item button-content">
+      <img alt="" class="graph-filters__listing-margin" height="15" src="assets/images/shared/expand.svg" width="15">
+      Expand
+    </button>
+
+    <hr class="dropdown-divider mx-3">
+
+    <button (click)="collapseGroupNode()" class="dropdown-item button-content">
+      <img alt="" class="graph-filters__listing-margin" height="15" src="assets/images/shared/collapse.svg" width="15">
+      Collapse
+    </button>
+    <hr class="dropdown-divider mx-3">
+
+    <button (click)="openCTI()" class="dropdown-item button-content">
+      <img alt="" class="share-wrapper graph-filters__listing-margin" height="15"
+           src="assets/images/shared/share-black.svg" width="15">
+      Open CTI
+    </button>
+    <hr class="dropdown-divider mx-3">
+    <button (click)="copyNodeLabel($event)" class="dropdown-item button-content">
+      <img alt="" class="share-wrapper graph-filters__listing-margin" height="15"
+           src="assets/images/shared/label.svg" width="15">
+      Copy Label
+    </button>
+    <hr class="dropdown-divider mx-3">
+    <button (click)="viewReport()" class="dropdown-item button-content">
+      <img alt="" class="share-wrapper graph-filters__listing-margin" height="15"
+           src="assets/images/shared/redirect-black.svg" width="15">
+      Open Report
+    </button>
+
+  </div>
+  <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="floating-copied ">Copied!</span>
+
+
+  <div *ngIf="maxEdge>50" class="graph-notification">
+    <div class="default-notification-banner default-notification-banner-cti">
+    <span>
+      <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg">
+      <span>
+        You can see {{ maxEdge }} nodes at a time, avoid using extreme values for better performance
+      </span>
+    </span>
+    </div>
+  </div>
+
+  <div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
+    <img *ngIf="loading" alt="No Data" class="img-fluid w-auto" src="assets/images/shared/cti-empty.svg"/>
+    <img *ngIf="!loading" alt="No Data" class="magnify-animation img-fluid w-auto" src="assets/images/shared/magnifying_search.svg"/>
+  </div>
+
+  <div class="blocked-media d-block d-md-none text-center p-4">
+    <h5 class="mb-3">Mobile Access Not Supported</h5>
+    <p class="mb-0">
+      This CTI Graph is designed for desktop use only.<br>
+      Please switch to a larger screen for the best experience.
+    </p>
+  </div>
+</div>

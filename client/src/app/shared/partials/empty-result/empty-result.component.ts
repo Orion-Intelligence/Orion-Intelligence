@@ -7,13 +7,9 @@ import {Category} from '../../enums/pages';
 export class EmptyResultComponent {
   @Input() searchQuery!: string;
   query = ""
+  protected readonly category = Category;
 
   ngOnInit(_: SimpleChanges): void {
     this.query = this.searchQuery
   }
-
-  constructor() {
-  }
-
-  protected readonly category = Category;
 }

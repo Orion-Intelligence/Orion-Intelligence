@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Resolve, ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router';
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from '@angular/router';
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {ApiService} from '../services/api.service';
@@ -13,17 +13,15 @@ export class DirectoryResolver implements Resolve<DirectoryCallbackModel> {
   constructor(private apiService: ApiService, private directoryService: DirectoryService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<DirectoryCallbackModel> {
+  resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<DirectoryCallbackModel> {
     const queryParams = route.queryParams;
 
-    const validFilters: { [key: string]: string } = {};
+    const validFilters: Record<string, string> = {};
     const filterConfig = directory_filters.filters;
 
     for (const key of Object.keys(filterConfig)) {
       const value = queryParams[key];
-      const validOptions = filterConfig[key].options;
-
-      if (value && validOptions.includes(value)) {
+      if (value) {
         validFilters[key] = value;
       }
     }

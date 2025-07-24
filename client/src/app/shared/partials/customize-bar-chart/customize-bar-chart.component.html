@@ -1,0 +1,38 @@
+<div class="bar-chart-container">
+  <div class="statistics-text">
+    <span>Statistics</span> <img src="/assets/images/shared/info.svg" alt="info" class="info-icon" [appTooltip]="tooltips[graphModel.title!]"/>
+  </div>
+
+  <div *ngIf="graphModel?.title" class="chart-title">
+    {{ graphModel.title }}
+  </div>
+
+  <div class="separator-line"></div>
+
+  <div class="bar-chart-grid">
+    <div class="y-axis">
+      <div class="y-axis-step" *ngFor="let step of [4, 3, 2, 1, 0]">
+        {{ round((step / 4) * roundedMaxValue).toLocaleString() }}
+      </div>
+    </div>
+
+    <div class="bar-area">
+      <div class="y-axis-gridlines">
+        <ng-container *ngFor="let step of [4, 3, 2, 1, 0]">
+          <div class="grid-line" [class.no-line]="step === 0"></div>
+        </ng-container>
+      </div>
+
+      <div class="bars">
+        <div class="bar-wrapper" *ngFor="let item of graphModel.data; let i = index">
+          <div class="bar-container">
+            <div class="bar" [style.height.%]="(item.value / roundedMaxValue) * 100" [appTooltip]="item.name + ': ' + item.value.toLocaleString()" tooltipPosition="top"></div>
+          </div>
+          <div class="bar-label">
+            {{ item.name.length > 10 ? (item.name | slice: 0:10) + '…' : item.name }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

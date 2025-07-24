@@ -1,0 +1,128 @@
+<div class="dashboard__search-container dashboard__search-container-chat">
+  <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults).slice(0, 4)"
+    class="dashboard__search-card">
+    <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
+      <div class="dashboard__search-tags">
+        <div class="dashboard__search-tags">
+          <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
+            <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+          </ng-container>
+          <ng-template #unknownTag>
+            <span class="dashboard__tag">unknown</span>
+          </ng-template>
+        </div>
+        <div (click)="scrollService.saveSession(item.m_message_id ?? '')" appTooltip="Open Report"
+          [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+          <div class="dashboard__search-button-inner">
+            <img height="20" src="/assets/images/shared/redirect.svg" width="20"  alt=""/>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <img alt="Channel" height="20" src="/assets/images/shared/channel.svg" width="20" />
+        <h2 class="dashboard__search-title mb-0 ml-2">{{ item.m_channel_name || 'Untitled' }}</h2>
+      </div>
+      <div *ngIf="item.m_message_sharable_link" class="dashboard__search-link dashboard__search-link-chat">
+        {{ item.m_message_sharable_link }}
+      </div>
+
+
+      <ng-container *ngIf="item.m_summary && item.m_summary[0] && item.m_summary[0].length > 5">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">AI Summary</h5>
+        <div class="dashboard__search-link">
+          {{ item.m_summary[0].slice(0, 500) }}...
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="item.m_file_name?.length">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary">Embedded Files</h5>
+        <div *ngFor="let file of item.m_file_name | slice:0:3" class="dashboard__search-link">
+          <ng-container *ngFor="let part of file.split(' - ')">
+            <div>{{ part }}</div>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="item">
+        <ng-container *ngIf="item.m_caption && item.m_caption.length > 5; else checkMedia">
+          <p class="dashboard__search-description highlight mt-2">
+            {{ item.m_caption.slice(0, 300) }}... </p>
+          <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5">
+            <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Media Caption</h5>
+            <div class="dashboard__search-link">
+              {{ item.m_media_caption.slice(0, 300) }}...
+            </div>
+          </ng-container>
+          <ng-container *ngIf="item.m_content">
+            <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Raw Data Content</h5>
+            <p class="dashboard__search-description highlight mt-2">
+              <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
+                {{ part }}<br *ngIf="!last" />...
+              </ng-container>
+              <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
+            </p>
+          </ng-container>
+        </ng-container>
+
+        <ng-template #checkMedia>
+          <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5; else checkContent">
+            <p class="dashboard__search-description highlight mt-2">
+              {{ item.m_media_caption.slice(0, 300) }}... </p>
+            <ng-container *ngIf="item.m_content">
+              <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Raw Data Content</h5>
+              <p class="dashboard__search-description highlight mt-2">
+                <ng-container
+                  *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
+                  {{ part }}<br *ngIf="!last" />...
+                </ng-container>
+                <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
+              </p>
+            </ng-container>
+          </ng-container>
+        </ng-template>
+
+        <ng-template #checkContent>
+          <ng-container *ngIf="item.m_content; else noContent">
+            <p class="dashboard__search-description highlight mt-2">
+              <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
+                {{ part }}<br *ngIf="!last" />...
+              </ng-container>
+              <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
+            </p>
+          </ng-container>
+        </ng-template>
+
+        <ng-template #noContent>
+          <p class="dashboard__search-description highlight mt-2">No content available</p>
+        </ng-template>
+      </ng-container>
+
+
+      <ng-container *ngIf="item.m_weblink?.length">
+        <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Embedded URL</h5>
+        <div *ngFor="let link of item.m_weblink | slice:0:3" class="dashboard__search-link">
+          {{ link }}
+        </div>
+      </ng-container>
+
+      <div class="dashboard__search-info dashboard__search-info-chat">
+        <div class="dashboard__search-info-item">
+          <span class="dashboard__info-label">Message Date:</span> <span class="dashboard__info-value">
+            {{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : 'Not available' }}
+          </span>
+        </div>
+
+        <div *ngIf="item.m_views" class="dashboard__search-info-item">
+          <span class="dashboard__info-label">Views:</span> <span class="dashboard__info-value">{{
+            item.m_views
+            }}</span>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+  <div class="see-more-wrapper" *ngIf="isExpandAble && searchResults.length > 2">
+    <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+  </div>
+</div>

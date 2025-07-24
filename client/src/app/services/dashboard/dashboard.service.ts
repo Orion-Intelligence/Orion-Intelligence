@@ -1,39 +1,120 @@
-import {Injectable} from '@angular/core';
-import {Observable, of, Subject} from 'rxjs';
-import {HttpParams} from '@angular/common/http';
-import {catchError, map, takeUntil} from 'rxjs/operators';
-import {ApiService} from '../../shared/services/api.service';
-import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
-import {GeneralCallbackModel} from '../../shared/model/results/general/general.callback.model';
-import {GeneralParamModel} from '../../shared/model/results/shared/generalParamModel';
+import {Injectable, signal} from '@angular/core';
+import { Observable, of, Subject } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
+import { catchError, map, takeUntil } from 'rxjs/operators';
+import { ApiService } from '../../shared/services/api.service';
+import { LeakCallbackModel } from '../../shared/model/results/leak/leak.callback.model';
+import { GeneralCallbackModel } from '../../shared/model/results/general/general.callback.model';
+import { GeneralParamModel } from '../../shared/model/results/shared/general.param.model';
+import { ChatCallbackModel } from '../../shared/model/results/chat/chat.callback.model';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ExploitCallbackModel } from '../../shared/model/results/exploit/exploit.callback.model';
+import { DefacementCallbackModel } from '../../shared/model/results/defacement/defacement.param.model';
+import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
+import {
+  StealerLogCallbackModel,
+} from '../../shared/model/results/credentials/credential.callback.model';
+import { SocialCallbackModel } from '../../shared/model/results/social/social.callback.model';
+import { SocialParamModel } from '../../shared/model/results/social/social.param.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
   generalParamModel: GeneralParamModel = new GeneralParamModel();
+  socialParamModel: SocialParamModel = new SocialParamModel();
+
+
   generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
+  chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
+  exploitCallbackModel: ExploitCallbackModel = new ExploitCallbackModel();
   leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
+  defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
+  stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
+  consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
+  socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
+  showSubscription = signal<boolean>(false);
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService) {
+  constructor(private apiService: ApiService, private _router: Router, private _route: ActivatedRoute) {
   }
 
-  fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{
+  fetchSearchResults<T extends {
+    Result?: any[];
+    cards_data?: any[]
+  }>(apiEndpoint: string, paramModel: any): Observable<{
     success: boolean; isEmpty: boolean; data: T | null
   }> {
     this.cancelOngoingRequest();
 
-    const params = new HttpParams({fromObject: paramModel as any});
+    const params = new HttpParams({ fromObject: paramModel as any });
 
-    return this.apiService.get<T>(apiEndpoint, {params}).pipe(takeUntil(this.cancelRequest$), map((response: T) => ({
-      success: true, isEmpty: (response.Result?.length === 0 || response.cards_data?.length === 0), data: response
-    })), catchError(() => of({success: false, isEmpty: false, data: null})));
+    return this.apiService.get<T>(apiEndpoint, { params }).pipe(
+      takeUntil(this.cancelRequest$),
+      map((response: T) => ({
+        success: true,
+        isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
+        data: response
+      })),
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
+    );
   }
 
-  private cancelOngoingRequest() {
-    this.cancelRequest$.next();
+  fetchConsolidatedRankededResults(
+    apiEndpoint: string,
+    paramModel: any
+  ): Observable<{
+    success: boolean; isEmpty: boolean; data: any[] | null;
+  }> {
+    this.cancelOngoingRequest();
+
+    const params = new HttpParams({ fromObject: paramModel as any });
+
+    return this.apiService.get<any[]>(apiEndpoint, { params }).pipe(
+      takeUntil(this.cancelRequest$),
+      map((response: any[]) => {
+        const hasAnyResults = Array.isArray(response) && response.length > 0;
+
+        return {
+          success: true,
+          isEmpty: !hasAnyResults,
+          data: hasAnyResults ? response : null
+        };
+      }),
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
+    );
+  }
+
+  fetchConsolidatedGroupedResults(
+    apiEndpoint: string,
+    paramModel: any
+  ): Observable<{
+    success: boolean; isEmpty: boolean; data: ConsolidatedCallbackModel | null
+  }> {
+    this.cancelOngoingRequest();
+
+    const params = new HttpParams({ fromObject: paramModel as any });
+
+    return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, { params }).pipe(
+      takeUntil(this.cancelRequest$),
+      map((response: ConsolidatedCallbackModel) => {
+        const hasAnyResults = !!(
+          response?.leak_model?.Result?.length ||
+          response?.exploit_model?.Result?.length ||
+          response?.chat_model?.Result?.length ||
+          response?.generic_model?.Result?.length ||
+          response?.defacement_model?.Result?.length
+        );
+
+        return {
+          success: true,
+          isEmpty: !hasAnyResults,
+          data: response
+        };
+      }),
+      catchError(() => of({ success: false, isEmpty: false, data: null }))
+    );
   }
 
   generateAnalytics<T extends { m_update_date: string }>(resultItems: T[]): any {
@@ -54,22 +135,26 @@ export class DashboardService {
       }).length,
       inactive_links: resultItems.filter(item => (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24) > 10).length,
       consolidated_lists: (() => {
-        const consolidated: { [key: string]: string[] } = {};
+        const consolidated: Record<string, string[]> = {};
         resultItems.forEach(item => {
           const typedItem = item as any;
           Object.entries(typedItem).forEach(([key, value]) => {
             if (Array.isArray(value) && value.every(v => typeof v === 'string') && value.length > 0) {
               const filteredValue = value.filter(v => v !== "");
               if (filteredValue.length > 0) {
-                consolidated[key] = Array.from(new Set([...(consolidated[key] || []), ...filteredValue]));
+                consolidated[key] = Array.from(new Set([...(consolidated[key] ?? []), ...filteredValue]));
               }
             } else if (typeof value === 'string' && key !== 'm_update_date' && value !== "") {
-              consolidated[key] = Array.from(new Set([...(consolidated[key] || []), value]));
+              consolidated[key] = Array.from(new Set([...(consolidated[key] ?? []), value]));
             }
           });
         });
         return consolidated;
       })()
     };
+  }
+
+  private cancelOngoingRequest() {
+    this.cancelRequest$.next();
   }
 }

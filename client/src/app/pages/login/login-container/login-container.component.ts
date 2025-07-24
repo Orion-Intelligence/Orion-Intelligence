@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../services/authetication/auth.service';
-import { Subscription } from 'rxjs';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {NgClass, NgIf} from '@angular/common';
+import {FormsModule, NgForm} from '@angular/forms';
+import {Router} from '@angular/router';
+import {AuthService} from '../../../services/authetication/auth.service';
+import {Subscription} from 'rxjs';
 import {HeaderComponent} from '../../../shared/partials/header/login-header/header.component';
 import {AppService} from '../../../services/core/app.service';
 
@@ -14,21 +14,22 @@ import {AppService} from '../../../services/core/app.service';
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
-  user = { username: '', password: '' };
+  user = {username: '', password: ''};
   errorMessage: string | null = null;
-  authenticated: boolean = true;
+  authenticated = true;
   private authSubscription!: Subscription;
 
-  constructor(public authService: AuthService, private router: Router, protected appService: AppService) {}
+  constructor(public authService: AuthService, private router: Router, protected appService: AppService) {
+  }
 
   ngOnInit() {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.router.navigate(['dashboard'], { replaceUrl: true }).then();
+        this.router.navigate(['dashboard'], {replaceUrl: true}).then();
       } else {
         this.authenticated = false;
       }
-      this.errorMessage = authState.error || null;
+      this.errorMessage = authState.error ?? null;
     });
   }
 

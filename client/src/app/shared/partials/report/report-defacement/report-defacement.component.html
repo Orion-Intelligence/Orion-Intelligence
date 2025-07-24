@@ -1,43 +1,57 @@
-<img src="/assets/images/shared/Bg.webp" alt="background" class="app-background img-fluid w-100 h-100 object-fit-cover" >
-
-<div class="d-flex justify-content-start">
+<div class="d-flex justify-content-end">
   <div class="btn-group report-menu-option-container">
-    <button class="p-0 report-menu-option" (click)="downloadCSV()">
-      <img ngSrc="../../../../../assets/images/shared/download.svg" alt="background" height="25" width="25">
+    <button (click)="downloadCSV()" appTooltip="Download" class="p-0 report-menu-option">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/download.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="langUpdate()">
-      <img ngSrc="../../../../../assets/images/shared/translate.svg" alt="background" height="25" width="25">
+    <button (click)="printPage()" appTooltip="Print" class="p-0 report-menu-option">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/print.svg" width="25">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="printPage()">
-      <img ngSrc="../../../../../assets/images/shared/print.svg" alt="background" height="25" width="25">
+    <button (click)="shareResult()" appTooltip="Share" class="p-0 report-menu-option">
+      <img alt="background" height="22" ngSrc="../../../../../assets/images/shared/share.svg" width="22">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="shareResult()">
-      <img ngSrc="../../../../../assets/images/shared/share.svg" alt="background" height="22" width="22">
+    <button (click)="redirectToUrl()" appTooltip="Open in new Tab" class="p-0 report-menu-option" matTooltipClass="mat-tooltip">
+      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/redirect.svg" width="15">
     </button>
     <div class="vr report-menu-divider"></div>
-    <button class="p-0 report-menu-option" (click)="redirectToUrl()">
-      <img ngSrc="../../../../../assets/images/shared/redirect.svg" alt="background" height="25" width="25">
+    <button (click)="open_graph()" appTooltip="Open CTI Graph" class="p-0 report-menu-option">
+      <img alt="background" height="17" ngSrc="../../../../../assets/images/sidebar/graph.svg" width="17">
     </button>
   </div>
 </div>
-<div class="dashboard__defacement-detail-container">
-  <div class="dashboard__defacement-detail-header">
-    <div class="dashboard__defacement-detail-header-url">{{ defacementData?.m_web_url }}</div>
-    <div class="dashboard__defacement-detail-header-row">
-      <div class="dashboard__defacement-detail-header-items"><strong>Saved on:</strong> {{ defacementData?.m_date_of_leak }}
-      </div>
-      <div class="dashboard__defacement-detail-header-items"><strong>Defacer:</strong> {{ defacementData?.m_attacker }}
-      </div>
-      <div class="dashboard__defacement-detail-header-items"><strong>Team:</strong> {{ defacementData?.m_team }}</div>
-      <div class="dashboard__defacement-detail-header-items"><strong>Web Server:</strong> {{ defacementData?.m_web_server }}
-      </div>
-      <div class="dashboard__defacement-detail-header-items"><strong>Breach:</strong> {{ defacementData?.m_url }}</div>
-      <div class="dashboard__defacement-detail-header-items"><strong>IP:</strong> {{ defacementData?.m_ip }}</div>
-      <div class="dashboard__defacement-detail-header-items"><strong>Location:</strong> {{ defacementData?.m_location }}
-      </div>
+<div class="search__result-detail">
+  <div class="dashboard__defacement-detail-header-url">
+    {{ defacementData?.m_url }}
+  </div>
+  <div class="dashboard__defacement-detail-header-row">
+    <div class="dashboard__defacement-detail-header-items">
+      <strong>Saved on:</strong>{{
+        defacementData?.m_date_of_leak
+          ? (defacementData?.m_date_of_leak | date: 'MMM d, y')
+          : 'Not found'
+      }}
+    </div>
+    <div class="dashboard__defacement-detail-header-items">
+      <strong>Defacer:</strong>{{ defacementData?.m_attacker ? defacementData?.m_attacker : 'Not found' }}
+    </div>
+    <div class="dashboard__defacement-detail-header-items">
+      <strong>Team:</strong>{{ defacementData?.m_team }}
+    </div>
+    <div class="dashboard__defacement-detail-header-items">
+      <strong>Web Server:</strong>{{ defacementData?.m_web_server ? defacementData?.m_web_server : 'Not found' }}
+    </div>
+    <div class="dashboard__defacement-detail-header-items">
+      <strong>Breach:</strong>{{ defacementData?.m_source_url }}
+    </div>
+    <div class="dashboard__defacement-detail-header-items">
+      <strong>IP:</strong>{{ defacementData?.m_ip }}
+    </div>
+    <div class="dashboard__defacement-detail-header-items">
+      <strong>Location:</strong>{{ defacementData?.m_location ? defacementData?.m_location : 'Not found' }}
     </div>
   </div>
 </div>
+<app-json-api-viewer [jsonData]="defacementData"></app-json-api-viewer>
+<app-report-mapping-list></app-report-mapping-list>

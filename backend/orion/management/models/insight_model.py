@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class GenericModel(BaseModel):
     document_count: int = 0
@@ -15,6 +17,7 @@ class GenericModel(BaseModel):
     clearnet_document_count: int = 0
     common_types: Optional[str] = "-"
 
+
 class LeakModel(BaseModel):
     document_count: int = 0
     unique_base_urls: int = 0
@@ -25,16 +28,19 @@ class LeakModel(BaseModel):
     most_recent: Optional[str] = "-"
     oldest_update: Optional[str] = "-"
 
+
 class DefacementModel(BaseModel):
     document_count: int = 0
     updated_5_days_ago: int = 0
     top_team: Optional[str] = "-"
     common_server: Optional[str] = "-"
 
+
 class InsightData(BaseModel):
     general: GenericModel = Field(default_factory=GenericModel)
     leak: LeakModel = Field(default_factory=LeakModel)
     defacement: DefacementModel = Field(default_factory=DefacementModel)
+
 
 GENERIC_AGGREGATION_MAPPING = {
     "Document Count": "document_count",

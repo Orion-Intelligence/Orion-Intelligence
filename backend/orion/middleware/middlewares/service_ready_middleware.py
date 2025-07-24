@@ -4,6 +4,7 @@ from starlette.responses import Response, JSONResponse
 
 from orion.management.managers.service_manager import service_manager
 
+
 class service_ready_middleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)

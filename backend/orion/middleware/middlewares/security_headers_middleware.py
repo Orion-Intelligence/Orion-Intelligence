@@ -1,5 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+
 from configs import config
 from orion.helper_manager.env_handler import env_handler
 

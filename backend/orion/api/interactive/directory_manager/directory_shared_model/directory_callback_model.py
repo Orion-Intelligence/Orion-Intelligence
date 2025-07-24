@@ -1,6 +1,8 @@
 from datetime import datetime
-from pydantic import BaseModel
 from typing import List, Optional
+
+from pydantic import BaseModel
+
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 
 
@@ -11,6 +13,7 @@ class directory_callback_link(BaseModel):
     leak_model_last_update: Optional[datetime]
     geneic_model_last_update: Optional[datetime]
     network_type: Optional[str]
+    name: Optional[str]
 
     @classmethod
     def from_odmantic(cls, odmantic_doc: db_url_data_model):

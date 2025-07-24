@@ -1,7 +1,13 @@
 from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
+
 class card_data(BaseModel):
+    m_attacker: Optional[str] = None
+    m_crypto_addresses: Optional[str] = None
+    m_ref_html: Optional[str] = None
+    m_password: Optional[str] = None
     m_title: Optional[str] = None
     m_url: Optional[str] = None
     m_base_url: Optional[str] = None
@@ -12,7 +18,7 @@ class card_data(BaseModel):
     m_weblink: List[str] = Field(default_factory=list)
     m_dumplink: List[str] = Field(default_factory=list)
     m_name: Optional[str] = None
-    m_email_addresses: List[str] = Field(default_factory=list)
+    m_email: List[str] = Field(default_factory=list)
     m_industry: Optional[str] = None
     m_phone_numbers: List[str] = Field(default_factory=list)
     m_addresses: List[str] = Field(default_factory=list)
@@ -24,6 +30,7 @@ class card_data(BaseModel):
     m_data_size: Optional[str] = None
     m_country_name: Optional[str] = None
     m_revenue: Optional[str] = None
+
 
 class breach_data(BaseModel):
     cards_data: List[card_data] = Field(default_factory=list)

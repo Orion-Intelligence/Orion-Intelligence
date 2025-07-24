@@ -1,6 +1,7 @@
 services:
   web:
     container_name: trusted-web-main
+    restart: unless-stopped
     build:
       context: .
       dockerfile: dockerFiles/api_docker
@@ -10,6 +11,7 @@ services:
     depends_on:
       - elasticsearch
       - mongo
+      - arangodb
     volumes:
       - ./backend/orion:/app/orion:cached
       - ./backend/routes:/app/routes:cached
@@ -22,17 +24,38 @@ services:
       - backend
       - shared_bridge
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8070"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8070" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
     command: >
-      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 180"
+
+  arangodb:
+    container_name: trusted-web-arangodb
+    image: arangodb:3.11
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD}
+      ARANGODB_DEFAULT_SERVER_ENDPOINT: tcp://0.0.0.0:8529
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb:/var/lib/arangodb3
+    networks:
+      backend:
+        ipv4_address: 172.20.1.15
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   elasticsearch:
     container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.20
     environment:
       - discovery.type=single-node
       - network.host=0.0.0.0
@@ -41,7 +64,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
     env_file:
@@ -49,7 +72,7 @@ services:
     ports:
       - "9400:9400"
     volumes:
-      - elastic:/usr/share/elasticsearch/data
+      - /srv/elasticsearch/data:/usr/share/elasticsearch/data
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9400/_cluster/health" ]
       interval: 20s
@@ -62,7 +85,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 10G
 
   traefik:
     image: traefik:v2.10
@@ -80,7 +103,6 @@ services:
       - ./dockerFiles/traefik/api_collector.yml:/etc/traefik/api_collector.yml:ro
       - /etc/letsencrypt/live/orion.genesistechnologies.org/cert.pem:/certs/cert.pem:ro
       - /etc/letsencrypt/live/orion.genesistechnologies.org/privkey.pem:/certs/privkey.pem:ro
-
     restart: unless-stopped
     networks:
       - backend
@@ -100,9 +122,7 @@ services:
       - "traefik.http.routers.dozzle.entrypoints=websecure"
       - "traefik.http.routers.dozzle.middlewares=auth@file"
       - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
-
     restart: unless-stopped
-
 
   redis_server:
     container_name: trusted-web-redis
@@ -195,9 +215,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 3G
         reservations:
-          memory: 128M
+          memory: 3G
 
 networks:
   shared_bridge:
@@ -216,3 +236,4 @@ volumes:
   static_volume:
   media_volume:
   letsencrypt-webroot:
+  arangodb:

@@ -7,5 +7,5 @@ export interface Analytics {
   inactive_links: number;
   seldom_active_links: number;
 
-  consolidated_lists: { [key: string]: string[] };
+  consolidated_lists: Record<string, string[]>;
 }

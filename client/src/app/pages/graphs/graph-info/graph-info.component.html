@@ -1,0 +1,136 @@
+<div class="graph-filters__container">
+  <div (click)="toggleAnimation()" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+    <div class="analytics d-flex align-items-center gap-2">
+      <input [checked]="physicsEnabled " class="pe-none" id="switch" type="checkbox"> <label class="mb-0 pe-none"
+                                                                                             for="switch"></label>
+      <span>&nbsp; Toggle Physics</span>
+    </div>
+  </div>
+  <br>
+
+  <div (click)="toggleExpand()" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+    <div class="analytics d-flex align-items-center gap-2">
+      <input [checked]="expandEnabled && expandEnabledTemp" class="pe-none" id="switchExpand" type="checkbox"> <label
+      class="mb-0 pe-none" for="switchExpand"></label> <span>&nbsp; Expand</span>
+    </div>
+  </div>
+  <br>
+
+  <div (click)="toggleCollapse('details')" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
+      <span>Details</span> <img [class.rotate]="detailsOpen" alt=""
+                                class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+    </div>
+    <div [class.show]="detailsOpen" class="collapse" id="detailsCollapse">
+      <br>
+      <ng-container *ngIf="selectedType === 'all'">
+        <div class="detail-section">
+          <div class="detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="detail-line">{{ 'no filter' | titlecase }}</div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedType === 'cluster' || selectedType === 'document'">
+        <div class="detail-section">
+          <div class="detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="detail-line">{{ selectedType | titlecase }}</div>
+        </div>
+        <div class="detail-section mt-4">
+          <div class="detail-heading">{{ "Cluster Type" | titlecase }}</div>
+          <div class="detail-line">{{ singleInput | titlecase }}</div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedType === 'property'">
+        <div class="detail-section">
+          <div class="detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="detail-line">{{ selectedType | titlecase }}</div>
+        </div>
+        <div class="detail-section mt-4">
+          <div class="detail-heading">{{ "Property Type" | titlecase }}</div>
+          <div class="detail-line">{{ formatPropertyName(propertyType) | titlecase }}</div>
+        </div>
+        <div class="detail-section mt-4">
+          <div class="detail-heading">{{ "Property Value" | titlecase }}</div>
+          <div class="detail-line">{{ (propertyValue || 'empty') | titlecase }}</div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  <br>
+  <div (click)="toggleCollapse('indicators')"
+       class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
+      <span>Indicators</span> <img [class.rotate]="indicatorsOpen" alt=""
+                                   class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+    </div>
+    <div [class.show]="indicatorsOpen" class="collapse" id="indicatorsCollapse">
+      <br>
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-warning rounded-circle p-1"></div>
+        <div class="ml-2">Cluster</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-danger rounded-circle p-1"></div>
+        <div class="ml-2">Document</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-warning rounded-circle p-1"></div>
+        <div class="ml-2">Property Type</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="bg-primary rounded-circle p-1"></div>
+        <div class="ml-2">Property Value</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="group-expand rounded-circle p-1"></div>
+        <div class="ml-2">Group</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="group-collapse rounded-circle p-1"></div>
+        <div class="ml-2">Node Menu</div>
+      </div>
+
+    </div>
+  </div>
+  <app-listings [result]="result"></app-listings>
+
+  <br>
+  <div (click)="toggleCollapse('ruleset')" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
+      <span>Preferences</span> <img [class.rotate]="rulesetOpen" alt=""
+                                    class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+    </div>
+    <div (click)="$event.stopPropagation()" [class.show]="rulesetOpen" class="collapse" id="rulesetCollapse">
+      <br>
+      <div (click)="onRuleToggle('edgePointers', true)" class="analytics d-flex align-items-center gap-2 mt-2">
+        <input [checked]="ruleSet.edgePointers" class="pe-none" type="checkbox">
+        <label class="mb-0 pe-none"></label>
+        <span>&nbsp; Edge Pointers</span>
+      </div>
+      <br>
+      <div (click)="onRuleToggle('edgeHighlight', true)" class="analytics d-flex align-items-center gap-2">
+        <input [checked]="ruleSet.edgeHighlight" class="pe-none" type="checkbox">
+        <label class="mb-0 pe-none"></label>
+        <span>&nbsp; Edge Highlight</span>
+      </div>
+      <br>
+      <div (click)="onRuleToggle('edgeColor', true)" class="analytics d-flex align-items-center gap-2">
+        <input [checked]="ruleSet.edgeColor" class="pe-none" type="checkbox">
+        <label class="mb-0 pe-none"></label>
+        <span>&nbsp; Edge Color</span>
+      </div>
+      <!--      <div class="analytics d-flex align-items-center gap-2" (click)="onRuleToggle('expandTrigger', true);onRuleToggle('edgeHighlight', false)">-->
+      <!--        <input type="checkbox" [checked]="ruleSet.expandTrigger" class="pe-none">-->
+      <!--        <label class="mb-0 pe-none"></label>-->
+      <!--        <span>&nbsp; Expand Trigger</span>-->
+      <!--      </div>-->
+    </div>
+  </div>
+
+</div>

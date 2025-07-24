@@ -1,30 +1,79 @@
 <div class="dashboard__search-container">
-  <ng-container *ngFor="let item of searchResults" class="dashboard__search-card">
 
-    <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" (click)="saveSession(item.m_hash)">
-
+  <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 4))"
+    class="dashboard__search-card">
+    <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
-        <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+        <div class="dashboard__search-tags">
+          <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+        </div>
+
+        <div class="dashboard__buttons">
+          <div (click)="scrollService.openCTI(item.m_hash)" [queryParams]="queryParams" appTooltip="Open CTI Graph"
+            [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+            <div class="dashboard__search-button-inner">
+              <img height="20" src="/assets/images/sidebar/graph.svg" width="20" alt="" />
+            </div>
+          </div>
+
+          <div (click)="scrollService.saveSession(item.m_hash)" [queryParams]="queryParams" appTooltip="Open Report"
+            [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+            <div class="dashboard__search-button-inner">
+              <img height="20" src="/assets/images/shared/redirect.svg" width="20" alt="" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <h2 class="dashboard__search-title">{{ item.m_title }}</h2>
 
-      <p class="dashboard__search-description highlight" [innerHTML]="highlightWords(item.m_important_content)">&nbsp;...</p>
 
-      <div class="dashboard__search-link">{{ item.m_url }}</div>
+      <ng-container *ngIf="item?.m_title as title; else noTitle">
+        <h2 *ngIf="title.trim().length > 1; else noTitle" class="dashboard__search-title">
+          {{ title }}
+        </h2>
+      </ng-container>
+      <ng-template #noTitle>
+        <h2 class="dashboard__search-title">Title not available</h2>
+      </ng-template>
+
+      <ng-container *ngIf="item?.m_important_content as content; else noDescription">
+        <p *ngIf="content.trim().length > 1; else noDescription" [innerHTML]="content.slice(0, 600)"
+          class="dashboard__search-description">
+        </p>
+      </ng-container>
+      <ng-template #noDescription>
+        <p class="dashboard__search-description">Description not available</p>
+      </ng-template>
+
+      <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
+        <span class="dashboard__search-title dashboard__search-title-secondary highlight">Webpage Content</span>
+        <p [innerHTML]="highlightWords(item.m_highlighted)"
+          class="dashboard__search-description dashboard__search-description-light"></p>
+      </ng-container>
+
+      <ng-container *ngIf="item?.m_url as url; else noUrl">
+        <div *ngIf="url.trim().length > 1; else noUrl" class="dashboard__search-link">
+          {{ url }}
+        </div>
+      </ng-container>
+      <ng-template #noUrl>
+        <div class="dashboard__search-link">URL not available</div>
+      </ng-template>
 
       <div class="dashboard__search-info">
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Published on:</span>
-          <span class="dashboard__info-value">{{ item.m_creation_date }}</span>
+          <span class="dashboard__info-value">{{
+            item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : 'Not found'
+            }}</span>
         </div>
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Network:</span>
           <span class="dashboard__info-value">{{ item.m_network }}</span>
         </div>
         <div class="dashboard__search-info-item">
-          <span class="dashboard__info-label">Updated on:</span>
-          <span class="dashboard__info-value">{{ item.m_update_date }}</span>
+          <span class="dashboard__info-label">Last checked:</span>
+          <span class="dashboard__info-value">{{ item?.m_creation_date | date: 'mediumDate' }}</span>
         </div>
         <div class="dashboard__search-status">
           <span class="dashboard__info-label">Status</span>
@@ -37,4 +86,8 @@
 
     </div>
   </ng-container>
+  <div class="see-more-wrapper" *ngIf="isExpandAble && searchResults.length > 2">
+    <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+  </div>
+
 </div>

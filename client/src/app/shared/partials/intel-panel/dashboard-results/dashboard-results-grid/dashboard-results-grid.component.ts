@@ -1,74 +1,53 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
-import {NgForOf} from '@angular/common';
-import {SafeHtml} from '@angular/platform-browser';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {HelperService} from '../../../../services/helper.service';
-import {GeneralResultItem} from '../../../../model/results/general/general.callback.model';
-import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
+import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { CommonModule, DatePipe, NgForOf, NgIf } from '@angular/common';
+import { SafeHtml } from '@angular/platform-browser';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HelperService } from '../../../../services/helper.service';
+import { GeneralResultItem } from '../../../../model/results/general/general.callback.model';
+import { LeakResultItem } from '../../../../model/results/leak/leak.callback.model';
+import { ScrollService } from '../../../../services/scroll.service';
+import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-results-grid',
   templateUrl: './dashboard-results-grid.component.html',
-  imports: [NgForOf, RouterLink],
+  imports: [NgForOf, RouterLink, DatePipe, NgIf, TooltipDirective, CommonModule],
   standalone: true
 })
-export class DashboardResultsGridComponent implements AfterViewInit {
+export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
   @Input() query!: string;
   @Input() type!: string;
   @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
-  currentUrl: string = '';
+  @Input() isExpandAble: boolean = false;
+  currentUrl = '';
   queryParams: any = {};
+  isCollapsed = true;
 
-  constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute) {
+  constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngOnInit() {
     this.currentUrl = this.router.url.split('?')[0];
+
+    const ci = this.type === 'leak' ? 'leak' : 'general';
+
+    if (this.currentUrl.includes('/consolidated/all')) {
+      this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);
+    }
+
     this.route.queryParams.subscribe(params => {
-      this.queryParams = params;
+      this.queryParams = {
+        ...params,
+        ci
+      };
     });
   }
 
   ngAfterViewInit() {
-    this.scrollToSavedPosition();
+    this.scrollService.scrollToSavedPosition();
   }
 
-  saveSession(itemId: string) {
-    if (itemId) {
-      sessionStorage.setItem('selectedItem', itemId);
-      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + itemId);
-      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
-        scrollableContainer = scrollableContainer.parentElement;
-      }
-      const scrollPosition = scrollableContainer ? scrollableContainer.scrollTop : window.scrollY;
-      sessionStorage.setItem('scrollPosition', scrollPosition.toString());
-    }
-  }
-
-  private isScrollable(element: HTMLElement): boolean {
-    const style = window.getComputedStyle(element);
-    const overflowY = style.overflowY;
-    return (overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight;
-  }
-
-  scrollToSavedPosition() { // Renamed from scrollToSavedItem
-    const savedPosition = sessionStorage.getItem('scrollPosition');
-    const savedItemId = sessionStorage.getItem('selectedItem');
-    if (savedPosition !== null && savedItemId) {
-      const position = parseInt(savedPosition, 10);
-      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + savedItemId);
-      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
-        scrollableContainer = scrollableContainer.parentElement;
-      }
-      if (scrollableContainer) {
-        scrollableContainer.scrollTop = position;
-      } else {
-        window.scrollTo({top: position, behavior: 'auto'});
-      }
-    }
-  }
-
-  highlightWords(text: string, maxLength: number = 250): SafeHtml {
-    return this.helperService.highlightWords(text, this.query, maxLength);
+  highlightWords(text: string): SafeHtml {
+    return this.helperService.highlightWords(text);
   }
 }

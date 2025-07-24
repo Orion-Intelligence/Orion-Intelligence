@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 
 @Component({
@@ -9,6 +9,5 @@ import {NgOptimizedImage} from '@angular/common';
   templateUrl: './error-handler.component.html',
 })
 export class ErrorHandlerComponent {
-  constructor() {}
 
 }

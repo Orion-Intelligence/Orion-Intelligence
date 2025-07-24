@@ -3,16 +3,13 @@
   flex: 1;
   height: auto;
   overflow: hidden;
-  background: linear-gradient(to bottom,
-  rgba(18, 52, 84, 1),
-  rgba(41, 87, 132, 1) 50vh,
-  rgba(41, 87, 132, 1) 100%) !important;
-  max-height: 100vh;
+  background: var(--dashboard-bg);
+  max-height: 100%;
   z-index: 1;
 }
 
 .dashboard-content-scroll {
-  height: 100vh;
+  height: 1vh;
   overflow-y: auto;
   padding: 0;
 }
@@ -31,9 +28,9 @@
 }
 
 .dashboard {
-  min-height: 100vh;
+  min-height: 100%;
   padding-bottom: 100px;
-  background-image: linear-gradient(to bottom, #102F4E 0%, #102F4E00 15%);
+  background-image: var(--dashboard-header);
 }
 
 .dashboard-body {
@@ -57,9 +54,9 @@
   margin-left: 0;
   margin-right: 0;
   height: 100vh;
-  overflow-y: hidden;
-  background: #1C4D7D;
-  overflow-x: hidden;
+  overflow: hidden visible;
+  min-height: 800px;
+  background: var(--dashboard-bg);
 }
 
 .dashboard__sidebar-content {
@@ -83,11 +80,26 @@
 
 .dashboard__sidebar {
   width: 300px;
+  border-right: 1px solid #ffffff15;
   position: sticky;
   padding: 0;
-  height: 100vh;
-  background: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
-  transition: width 0.25s ease-in-out;
+  height: 100%;
+  overflow: hidden auto;
+  background: var(--dasshboard-sidebar-bg);
+  scrollbar-color: var(--sidebar-item-bg) transparent;
+}
+
+.search__result-detail::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search__result-detail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search__result-detail::-webkit-scrollbar-thumb {
+  background-color: var(--sidebar-item-bg);
+  border-radius: 10px;
 }
 
 .dashboard__sidebar.collapsed {
@@ -100,7 +112,7 @@
   display: none;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (width <=600px) {
   .dashboard__sidebar {
     width: 100vw;
     overflow: hidden;
@@ -116,10 +128,12 @@
     margin-left: 70px;
   }
 }
-.filters-container{
+
+.filters-container {
   z-index: 3;
 }
-@media only screen and (max-width: 460px) {
+
+@media only screen and (width <=460px) {
   .filters-container {
     display: none !important;
   }

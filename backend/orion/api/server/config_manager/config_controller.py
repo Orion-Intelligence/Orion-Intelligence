@@ -1,7 +1,9 @@
 import asyncio
+
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
+
 
 class config_controller:
     __instance = None

@@ -28,3 +28,12 @@
 .list-container thead tr:first-child th {
   border-top: none !important;
 }
+
+.directory-list__container-result .toggle-btn img {
+  width: 40px;
+  height: 40px;
+}
+
+.see-more-button {
+  padding-top: 20px;
+}

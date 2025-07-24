@@ -1,24 +1,30 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+
 @Component({
   selector: 'app-result-list',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './result-list.component.html',
-  animations: [
-    fadeInDashboardItem
-  ]
+  animations: [fadeInDashboardItem]
 })
 export class ResultListComponent {
-  @Input() listItems: string[] = [];
-  @Input() activeTab: string = '';
+  @Input() set listItems(items: string[]) {
+    this.filteredItems = items.filter(item => item.length >= 2);
+  }
 
-  getRows(items: string[], itemsPerRow: number): string[][] {
-    const rows = [];
-    for (let i = 0; i < items.length; i += itemsPerRow) {
-      rows.push(items.slice(i, i + itemsPerRow));
-    }
-    return rows;
+  @Input() activeTab = '';
+
+  filteredItems: string[] = [];
+  copiedIndex: number | null = null;
+
+  copyText(text: string, index: number): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.copiedIndex = index;
+      setTimeout(() => {
+        this.copiedIndex = null;
+      }, 1500);
+    });
   }
 }

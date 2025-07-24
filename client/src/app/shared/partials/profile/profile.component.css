@@ -47,7 +47,7 @@
 
 .profile-header .profile-dropdown .dropdown-item:active {
   background: #cccccc80;
-  color: #000000;
+  color: #000;
 }
 
 .profile-header .user-active {
@@ -64,4 +64,55 @@
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-bottom: 10px solid white;
+}
+
+.small-switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 18px;
+  top:3px
+}
+
+.small-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.small-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #1b60a5;
+  transition: 0.3s;
+  border-radius: 12px;
+}
+
+.small-slider::before {
+  content: "";
+  position: absolute;
+  height: 14px;
+  width: 13px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.theme-toggle{
+  font-size: 15px;
+}
+
+input:checked+.small-slider {
+  background-color: #4667a0;
+}
+
+input:checked+.small-slider::before {
+  transform: translateX(12px);
+}
+
+.small-slider.round {
+  border-radius: 12px;
 }

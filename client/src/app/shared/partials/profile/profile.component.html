@@ -1,28 +1,40 @@
-<div class="profile-header header_form-user--logout" (click)="toggleDropdown($event)" *ngIf="this.username$|async">
-  <a class="profile-dropdown-toggle">
+<div (click)="toggleDropdown($event)" *ngIf="this.username$|async" class="profile-header header_form-user--logout">
+  <a appTooltip="This is a secure tooltip" class="profile-dropdown-toggle">
     <div class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold">
-      <img ngSrc="assets/images/shared/profile-icon.svg" alt="Logout" width="24" height="24" priority>
+      <img alt="Logout" height="24" ngSrc="assets/images/shared/profile-icon.svg" priority width="24">
     </div>
   </a>
 
-  <ul class="profile-dropdown" [class.show]="dropdownOpen">
+  <ul [class.show]="dropdownOpen" class="profile-dropdown">
     <div class="profile-dropdown-arrow"></div>
     <li><a class="dropdown-item disabled">
-      <img ngSrc="assets/images/shared/profile.svg" alt="Settings" width="15" height="15" priority/>
-      {{ username$ | async }}</a></li>
+        <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15" />
+        {{ username$ | async }}</a></li>
     <li class="dropdown-item dropdown-item-inline d-flex align-items-center disabled">
       <span class="bg-success rounded-circle d-inline-block me-2 user-active"></span> &nbsp;&nbsp;active
     </li>
     <li>
       <hr class="dropdown-divider mx-3">
     </li>
-    <li><a class="dropdown-item" href="admin/" target="_blank" *ngIf="isAdmin()">
-      <img ngSrc="assets/images/shared/settings.svg" alt="Settings" width="15" height="15" priority> &nbsp; Settings</a>
+    <li (click)="toggleThemeByClick()">
+      <div class="dropdown-item theme-toggle">
+        <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp;
+        Theme &nbsp;
+        <label class="small-switch" (click)="$event.stopPropagation()">
+          <input type="checkbox" [checked]="isDarkTheme" (click)="$event.stopPropagation()" />
+          <span class="small-slider round"></span>
+        </label>
+      </div>
+    </li>
+    <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank">
+        <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp;
+        Settings</a>
     </li>
     <li *ngIf="isAdmin()">
       <hr class="dropdown-divider mx-3">
     </li>
-    <li><a class="dropdown-item" id="logout-button" (click)="logout()">
-      <img ngSrc="assets/images/shared/logout.svg" alt="Logout" width="15" height="15" priority> &nbsp; Logout</a></li>
+    <li><a (click)="logout()" class="dropdown-item" id="logout-button">
+        <img alt="Logout" height="15" ngSrc="assets/images/shared/logout.svg" priority width="15"> &nbsp; Logout</a>
+    </li>
   </ul>
 </div>

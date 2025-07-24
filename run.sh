@@ -10,15 +10,15 @@ stop_docker() {
 }
 
 create_parser_zip() {
-    PARSER_DIR="backend/static/.well-known/parser"
+    PARSER_DIR="backend/static/.well-known/parser_files"
     OUTPUT_DIR="backend/static/.well-known"
     ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
     if ! command -v zip &> /dev/null; then
         echo "Error: 'zip' command not found. Please install 'zip' and try again."
         exit 1
     fi
+    [ -f "$ZIP_FILE" ] && rm -f "$ZIP_FILE"
     if [ -d "$PARSER_DIR" ]; then
-        [ -f "$ZIP_FILE" ] && rm -f "$ZIP_FILE"
         (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .) || exit 1
     fi
 }
@@ -77,8 +77,11 @@ if [ "$COMMAND" = "build" ]; then
             ;;
         -p)
             client_build "$FLAG"
+
             use_compose_file "production"
             cp nginx/nginx-prod.conf nginx/nginx.conf
+            sudo mkdir -p /srv/elasticsearch/data
+            sudo chown -R 1000:1000 /srv/elasticsearch/data
             ;;
         *)
             echo "Unknown build flag: $FLAG"

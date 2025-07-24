@@ -10,7 +10,6 @@
 .search__pagination-navigation {
   font-size: 13px;
   text-align: center;
-  border: 0;
   border-radius: 10px;
   width: 35px;
   height: 35px;
@@ -43,11 +42,11 @@
   outline: none;
 }
 
-.btn{
-  outline: none ;
+.btn {
+  outline: none;
 }
 
-.search__navigation:hover{
+.search__navigation:hover {
 }
 
 .search__navigation {
@@ -60,7 +59,7 @@
   border-radius: 10px;
   margin-right: 2px;
   margin-top: -2px;
-  color: #ffffff;
+  color: #fff;
   background: #15345475;
   border: 0;
   font-weight: 500;
@@ -81,14 +80,14 @@
   box-shadow: none !important;
 }
 
-.search__navigation--focus{
+.search__navigation--focus {
   background: #102A4699;
   color: #fff;
   transition: background 0.2s ease-in-out;
 }
 
 .search__navigation:active {
-  background: #102A4685 ;
+  background: #102A4685;
 }
 
 .search__navigation:hover {

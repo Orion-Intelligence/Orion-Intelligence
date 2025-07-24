@@ -5,11 +5,11 @@
 }
 
 .default-input-button-light {
-  background: #EFFDFF !important;
+  background: #fff !important;
 }
 
 .default-input-button-light:hover {
-  background: #EFFDFF !important;
+  background: #fff !important;
 }
 
 .dash-search-button {
@@ -21,12 +21,13 @@
   font-weight: 400;
   font-size: 14px;
   color: #fff;
-  font-family: 'Roboto', sans-serif;
+  font-family: Roboto, sans-serif;
   cursor: pointer;
   transition: opacity 0.2s ease-in-out, background 0.2s ease-in-out;
   opacity: 0.9;
 
 }
+
 .dash-search-button:hover {
   opacity: 1;
 }
@@ -35,11 +36,11 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
 .dashboard__search-table-header {
   padding-top: 15px;
   padding-bottom: 0;
   padding-left: 15px;
-
   font-weight: 500;
   color: #fff;
   font-size: 18px;
@@ -102,11 +103,11 @@
   margin-left: 35px;
 }
 
-@media (max-width: 1000px) {
+@media (width <= 1000px) {
   .dashboard__api-search-input-div {
     padding: 15px 15px 15px 0;
-    margin: 0;
   }
+
   .default-input-container {
     margin-right: 15px;
   }

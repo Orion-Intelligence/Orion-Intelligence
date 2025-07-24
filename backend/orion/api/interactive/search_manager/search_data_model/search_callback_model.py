@@ -1,12 +1,15 @@
-from typing import List, Optional, Union
-from pydantic import BaseModel, HttpUrl
 from datetime import datetime
+from typing import List, Optional, Union
+
+from pydantic import BaseModel, HttpUrl
+
 
 class suggestion(BaseModel):
     text: str
     offset: int
     length: int
     options: List[str]
+
 
 class result_item(BaseModel):
     m_title: str
@@ -36,6 +39,7 @@ class result_item(BaseModel):
     m_creation_date: datetime
     m_sub_host: Optional[str] = None
     m_host: Optional[str] = None
+
 
 class search_callback_model(BaseModel):
     Result: List[result_item]

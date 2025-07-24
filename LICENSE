@@ -1,76 +1,105 @@
--------------------------------------------------------------------------------
-Copyright (c) 2024 - Orion Platform
+CYBERSAGE TECHNOLOGIES – COMMERCIAL END‑USER LICENSE AGREEMENT
+Version 1.0  (Effective 1 August 2025)
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
+PLEASE READ THIS AGREEMENT CAREFULLY. BY DOWNLOADING, INSTALLING, OR USING
+ANY PART OF THE CYBERSAGE PLATFORM (THE “SOFTWARE”), YOU (“CUSTOMER”)
+ACKNOWLEDGE THAT YOU HAVE AGREED TO BE BOUND BY ALL TERMS AND CONDITIONS OF
+THIS END‑USER LICENSE AGREEMENT (“AGREEMENT”) WITH CYBERSAGE TECHNOLOGIES
+(“CYBERSAGE”). IF YOU DO NOT AGREE, DO NOT INSTALL OR USE THE SOFTWARE.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
+────────────────────────────────────────────────────────────────────────────
+1. DEFINITIONS
+   1.1 “Software” means the object‑code version of the Cybersage Platform
+        module hosted in the repository `github.com/Orion-Intelligence/
+        Orion-Intelligence`, together with all Updates supplied under this
+        Agreement.
+   1.2 “Authorized User” means an employee or contractor of Customer who
+        has been granted access credentials and is bound by obligations
+        no less restrictive than those herein.
+   1.3 “License Key” means the technical means—file, token, or SaaS
+        entitlement—furnished by Cybersage to enable the Software.
+   1.4 “Updates” means bug fixes, patches, or enhancements Cybersage
+        elects to provide under an active Support Subscription.
 
-Below is a full copy of the GNU Affero General Public License v3 along with
-additional terms allowed under section 7 of the AGPLv3.
--------------------------------------------------------------------------------
-                               AGPLv3 LICENSE
--------------------------------------------------------------------------------
-                    GNU AFFERO GENERAL PUBLIC LICENSE
-                       Version 3, 19 November 2007
+2. GRANT OF LICENSE
+   2.1 Scope. Subject to full payment of applicable fees and Customer’s
+        continued compliance, Cybersage grants Customer a limited,
+        non‑exclusive, non‑transferable, non‑sublicensable license to
+        install and use the Software solely:
+        a) within Customer’s own internal production environment; and
+        b) up to the quantity of License Keys purchased.
+   2.2 Reservation of Rights. The Software is licensed, not sold. All
+        rights not expressly granted are reserved by Cybersage.
 
- Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
+3. RESTRICTIONS
+   Customer shall not, and shall not permit any third‑party to:
+   a) copy, modify, translate, or create derivative works of the Software;
+   b) reverse‑engineer, decompile, or disassemble any part of the Software
+      except to the limited extent such activity is expressly permitted by
+      applicable law notwithstanding this restriction;
+   c) remove or obscure any proprietary notices;
+   d) disclose, sublicense, rent, lease, lend, supply as a service bureau,
+      publish, or otherwise make the Software available to any third party.
 
-                            Preamble
+4. CONFIDENTIALITY
+   The Software, License Key, pricing, and non‑public documentation are
+   “Confidential Information.” Customer shall maintain them in strict
+   confidence, using at least the same degree of care as for its own
+   confidential data, and in no event less than reasonable care.
 
-  The GNU Affero General Public License is a free, copyleft license for
-software and other kinds of works, specifically designed to ensure
-cooperation with the community in the case of network server software.
+5. OWNERSHIP
+   Cybersage and its licensors retain all intellectual‑property rights
+   in and to the Software and any copies thereof. No title passes to
+   Customer under this Agreement.
 
-  The licenses for most software and other practical works are designed
-to take away your freedom to share and change the works.  By contrast,
-our General Public Licenses are intended to guarantee your freedom to
-share and change all versions of a program--to make sure it remains free
-software for all its users.
+6. LIMITED WARRANTY; DISCLAIMER
+   6.1 Limited Warranty. Cybersage warrants that for ninety (90) days from
+        first delivery the unmodified Software will substantially conform
+        to its published documentation.
+   6.2 Remedy. Cybersage’s sole liability and Customer’s exclusive remedy
+        for breach of the foregoing warranty shall be, at Cybersage’s
+        option, (a) repair or replacement of the non‑conforming Software
+        or (b) refund of fees paid for the affected License Key.
+   6.3 Disclaimer. EXCEPT AS EXPRESSLY PROVIDED, THE SOFTWARE IS PROVIDED
+        “AS IS” AND CYBERSAGE DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR
+        IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+        PARTICULAR PURPOSE, AND NON‑INFRINGEMENT.
 
-  When we speak of free software, we are referring to freedom, not
-price.  Our General Public Licenses are designed to make sure that you
-have the freedom to distribute copies of free software (and charge for
-them if you wish), that you receive source code or can get it if you
-want it, that you can change the software or use pieces of it in new
-free programs, and that you know you can do these things.
+7. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL CYBERSAGE BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
+   SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF
+   PROFITS, REVENUE, DATA, OR BUSINESS, ARISING OUT OF OR RELATED TO THIS
+   AGREEMENT, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. CYBERSAGE’S
+   AGGREGATE LIABILITY SHALL NOT EXCEED FEES PAID BY CUSTOMER FOR THE
+   LICENSE KEY GIVING RISE TO THE CLAIM.
 
-  Developers that use our General Public Licenses protect your rights
-with two steps: (1) assert copyright on the software, and (2) offer
-you this License which gives you legal permission to copy, distribute
-and/or modify the software.
+8. COMPLIANCE & AUDIT
+   Upon thirty (30) days’ written notice, Cybersage may audit Customer’s
+   deployment to verify compliance. Customer shall cooperate and, if an
+   audit reveals non‑compliance, promptly pay additional fees plus
+   reasonable audit costs.
 
-  A secondary benefit of defending all users' freedom is that
-improvements made in alternate versions of the program, if they
-receive widespread use, become available for other developers to
-incorporate.  Many developers of free software are heartened and
-encouraged by the resulting cooperation.  However, in the case of
-software used on network servers, this result may fail to come about.
-The GNU General Public License permits making a modified version and
-letting the public access it on a server without ever releasing its
-source code to the public.
+9. EXPORT CONTROL
+   Customer shall not export or re‑export the Software except in
+   compliance with U.S. export control laws and regulations and those of
+   any other relevant jurisdiction.
 
-  The GNU Affero General Public License is designed specifically to
-ensure that, in such cases, the modified source code becomes available
-to the community.  It requires the operator of a network server to
-provide the source code of the modified version running there to the
-users of that server.  Therefore, public use of a modified version, on
-a publicly accessible server, gives the public access to the source
-code of the modified version.
+10. GOVERNING LAW; VENUE
+    This Agreement is governed by the laws of the State of Delaware,
+    USA, without regard to conflict‑of‑laws principles. Any litigation
+    shall be brought exclusively in the state or federal courts located
+    in Wilmington, Delaware, and the parties expressly consent to such
+    jurisdiction.
 
-  An older license, called the Affero General Public License and
-published by Affero, was designed to accomplish similar goals.  This is
-a different license, not a version of the Affero GPL, but Affero has
-released a new version of the Affero GPL which permits relicensing under
-this license.
+11. TERM & TERMINATION
+    11.1 Term. This Agreement remains in effect until terminated.
+    11.2 Termination for Cause. Either party may terminate for material
+         breach not cured within thirty (30) days after written notice.
+    11.3 Effect. Upon termination, Customer shall cease all use of the
+         Software and destroy all copies. Sections 4–10 shall survive.
 
-  The precise terms and conditions for copying, distribution and
-modification follow.
--------------------------------------------------------------------------------
+12. ENTIRE AGREEMENT
+    This Agreement, together with any fully‑executed Order Form, is the
+    entire agreement between the parties and supersedes all prior or
+    contemporaneous proposals, representations, and understandings.
+────────────────────────────────────────────────────────────────────────────

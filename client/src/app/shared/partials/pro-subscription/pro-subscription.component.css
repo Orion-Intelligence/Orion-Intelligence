@@ -1,0 +1,361 @@
+.pro-subscription-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0 0 0 / 60%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: auto;
+}
+
+.pro-subscription-container {
+  display: flex;
+  font-family: Arial, sans-serif;
+  max-width: 892px;
+  max-height: 445px;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 40%);
+  animation: fadeInScale 0.3s ease-out forwards;
+  transform: translateY(-20%) !important;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+.left-section {
+  flex: 1;
+  background-color: #ECF3F9;
+  padding: 30px;
+  max-width: 353px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.left-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #000;
+}
+
+.feature-item {
+  margin-bottom: 5px;
+}
+
+.feature-item h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #165176;
+}
+
+.feature-item p {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #78A1BB;
+}
+
+.total-due {
+  margin-top: 0;
+}
+
+.total-due h3 {
+  font-size: 15px;
+  font-weight: 400;
+  margin-bottom: 4px;
+  color: #78A1BB;
+}
+
+.total-due p {
+  font-size: 30px;
+  font-weight: bold;
+  color: #000;
+}
+
+.total-due .per-year {
+  font-size: 15px;
+  font-weight: 400;
+  padding-top: 10px;
+  vertical-align: super;
+  color: #000;
+}
+
+.right-section {
+  flex: 1.5;
+  background-color: #fff;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.right-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: -5px;
+  color: #10182B;
+}
+
+.right-section p {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  margin-bottom: 0;
+  color: #787878;
+}
+
+.subscription-options {
+  display: flex;
+  gap: 30px;
+}
+
+.subscription-option {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  max-width: 224px;
+  max-height: 65px;
+}
+
+.subscription-option:hover {
+  border-color: #007bff;
+}
+
+.subscription-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.subscription-option input[type="radio"] + .option-content::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.subscription-option input[type="radio"]:checked + .option-content::before {
+  border-color: #007bff;
+  background-color: #007bff;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.option-content h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+.option-content p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #787878;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-row {
+  display: flex;
+  gap: 30px;
+}
+
+.pro-subscription-overlay .form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.pro-subscription-overlay .form-group.full-width {
+  flex: none;
+  width: 100%;
+}
+
+.pro-subscription-overlay .form-group label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #10182B;
+  font-size: 12px;
+}
+
+.pro-subscription-overlay .form-group input[type="text"],
+.pro-subscription-overlay .form-group input[type="tel"] {
+  max-width: 224px;
+  max-height: 35px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+
+.pro-subscription-overlay .form-group input[type="email"] {
+  max-width: 478px;
+  max-height: 35px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+
+.pro-subscription-overlay .form-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgb(0 123 255 / 25%);
+}
+
+.pro-subscription-overlay .btn-proceed {
+  max-width: 478px;
+  max-height: 50px;
+  background-color: #2272B0;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+.pro-subscription-overlay .btn-close {
+  max-width: 478px;
+  max-height: 50px;
+  background-color: #fff;
+  color: #10182B;
+  padding: 12px 20px;
+  border: 1px solid #D9D9D9;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+@media (width <= 768px) {
+  .pro-subscription-overlay .btn-close {
+    background-color: #2272B0;
+    color: #fff;
+  }
+
+  .pro-subscription-overlay .form-group input[type="text"],
+  .pro-subscription-overlay .form-group input[type="tel"],
+  .pro-subscription-overlay .form-group input[type="email"] {
+    max-width: none;
+  }
+
+  .subscription-option {
+    max-width: none;
+  }
+
+  .pro-subscription-container {
+    flex-direction: column;
+    left: 20px;
+    right: 20px;
+    top: 25%;
+    transform: translateY(-50%);
+    max-height: unset;
+    position: absolute;
+  }
+
+  .righ-section {
+  }
+
+  .left-section {
+    display: none;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .subscription-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .left-section h2 {
+    font-size: 1.4em;
+  }
+
+  .feature-item h3 {
+    font-size: 1em;
+  }
+
+  .feature-item p,
+  .right-section p {
+    font-size: 0.8em;
+  }
+
+  .total-due p {
+    font-size: 1.5em;
+  }
+
+  .right-section h2 {
+    font-size: 1.3em;
+  }
+
+  .option-content h4 {
+    font-size: 0.95em;
+  }
+
+  .option-content p {
+    font-size: 0.75em;
+  }
+
+  .pro-subscription-overlay .form-group label {
+    font-size: 0.8em;
+  }
+
+  .pro-subscription-overlay .form-group input {
+    font-size: 0.85em;
+    padding: 8px 10px;
+  }
+
+  .btn-proceed,
+  .btn-close {
+    font-size: 0.95em;
+    padding: 10px 15px;
+  }
+}
+
+.option-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

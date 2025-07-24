@@ -1,10 +1,11 @@
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+from configs import config
 from orion.helper_manager.env_handler import env_handler
 from orion.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
 from orion.middleware.middlewares.security_headers_middleware import security_headers_middleware
 from orion.middleware.middlewares.service_ready_middleware import service_ready_middleware
-from configs import config
 
 
 def setup_middlewares(app):

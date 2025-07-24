@@ -1,0 +1,57 @@
+name: "CI: Docker + Angular Health Check"
+
+on:
+  push:
+    branches: [trusted-main]
+  pull_request:
+    branches: [trusted-main]
+
+jobs:
+  docker-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js (for Angular build)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Angular CLI globally
+        run: npm install -g @angular/cli
+
+      - name: Set up Docker Compose and Zip
+        run: sudo apt-get update && sudo apt-get install -y docker-compose zip
+
+      - name: Write .env from GitHub Secret
+        run: echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Make run.sh executable
+        run: chmod +x ./run.sh
+
+      - name: Run build script
+        run: ./run.sh build -d
+
+      - name: Check container health
+        run: |
+          echo "Checking container health status..."
+          failed=0
+          for container in $(docker ps -q); do
+            health_status=$(docker inspect --format='{{ .Name }}: {{ .State.Health.Status }}' "$container" 2>/dev/null || echo "no-healthcheck")
+            if echo "$health_status" | grep -q "unhealthy"; then
+              echo "❌ Unhealthy container: $health_status"
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -eq 1 ]; then
+            exit 1
+          else
+            echo "✅ All containers are healthy (or have no healthcheck)"
+          fi
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v

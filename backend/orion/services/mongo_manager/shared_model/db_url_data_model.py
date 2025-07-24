@@ -1,6 +1,7 @@
-from odmantic import Model, Field
 from datetime import datetime
 from typing import Optional, List
+
+from odmantic import Model, Field
 
 
 class db_url_data_model(Model):
@@ -10,3 +11,4 @@ class db_url_data_model(Model):
     leak_model_last_update: Optional[datetime] = None
     geneic_model_last_update: Optional[datetime] = None
     network_type: Optional[str] = "onion"
+    name: Optional[str] = None

@@ -1,8 +1,11 @@
-import json
-import aiohttp
 import hashlib
+import json
+
+import aiohttp
+
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
+
 
 class external_request_controller:
     __instance = None
@@ -26,7 +29,7 @@ class external_request_controller:
         return hashlib.sha256(hash_input.encode()).hexdigest()
 
     async def fetch_email_leak(self, p_data):
-        url = "http://trusted-micros-api:8010/runtime/parse"
+        url = "http://168.231.86.34:8010/runtime/parse"
         param = {"text": p_data.model_dump()}
         cache_key = self.generate_cache_key(url, param)
 
@@ -42,7 +45,8 @@ class external_request_controller:
                     result = await response.json()
                     if result:
                         await self.redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [cache_key, result, None])
-                    cached_response = await self.redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [cache_key, None, None])
+                    cached_response = await self.redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING,
+                                                                      [cache_key, None, None])
                     return json.loads(cached_response)
         except aiohttp.ClientError as e:
             return {"error": f"Request failed: {str(e)}"}

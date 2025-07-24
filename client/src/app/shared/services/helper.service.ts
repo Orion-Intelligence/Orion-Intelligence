@@ -1,5 +1,7 @@
 import {Injectable} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {franc} from 'franc-min';
+import {LANGUAGE_MAP} from '../constants/enums';
 
 @Injectable({
   providedIn: 'root'
@@ -7,6 +9,17 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 export class HelperService {
 
   constructor(private sanitizer: DomSanitizer) {
+  }
+
+  detectLanguageName(text: string): string {
+    const iso639_3 = franc(text);
+
+    if (iso639_3 === 'und') {
+      return "en";
+    }
+
+    const match = LANGUAGE_MAP[iso639_3];
+    return match ? match.iso1 : "en";
   }
 
   downloadAsCSV(data: any) {
@@ -19,12 +32,6 @@ export class HelperService {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  private convertToCSV(data: any): string {
-    const keys = Object.keys(data);
-    const values = keys.map(key => `"${data[key]}"`).join(',');
-    return `${keys.join(',')}\n${values}`;
   }
 
   printPage() {
@@ -41,70 +48,96 @@ export class HelperService {
     }
   }
 
-  highlightWords(text: string, query: string, maxLength: number = 250): SafeHtml {
-    if (!query || text.length <= maxLength) {
-      let truncatedText = text.substring(0, maxLength);
-      if (text.length > maxLength) {
-        const lastSpaceIndex = truncatedText.lastIndexOf(' ');
-        if (lastSpaceIndex > 0) {
-          truncatedText = truncatedText.substring(0, lastSpaceIndex);
+  highlightWords(text: string): SafeHtml {
+    if (!text) return '';
+
+    let highlighted: string;
+
+    if (text.includes('<em>') && text.includes('</em>')) {
+      const regex = /<em>(.*?)<\/em>/g;
+      const matches = [...text.matchAll(regex)];
+
+      let result = '';
+      let lastIndex = 0;
+      let i = 0;
+
+      while (i < matches.length) {
+        let merged = matches[i][1];
+        const start = matches[i].index!;
+        let end = start + matches[i][0].length;
+        let j = i + 1;
+
+        while (j < matches.length) {
+          const prevEnd = end;
+          const nextStart = matches[j].index!;
+          const betweenText = text.slice(prevEnd, nextStart);
+
+          const wordGap = betweenText
+            .replace(/<[^>]+>/g, '') // remove tags
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean).length;
+
+          if (wordGap <= 2) {
+            const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
+            merged += ` ${cleanBetween} ${matches[j][1]}`;
+            end = matches[j].index! + matches[j][0].length;
+            j++;
+          } else {
+            break;
+          }
         }
-        truncatedText += '...';
+
+        result += text.slice(lastIndex, start);
+        result += `<em>${merged}</em>`;
+        lastIndex = end;
+        i = j;
       }
-      return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(truncatedText));
+
+      result += text.slice(lastIndex);
+
+      highlighted = result
+        .replace(/<em>/g, '<span class="dashboard__search-highlight">')
+        .replace(/<\/em>/g, '</span>');
+    } else {
+      highlighted = text.length > 500 ? text.substring(0, 500) : text;
     }
 
-    const queryWords = query
-      .split(/\s+/)
-      .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').toLowerCase());
-    const effectiveMaxLength = maxLength - 3;
-
-    let bestSubstring = '';
-    let maxKeywordCount = 0;
-    let bestStartIndex = 0;
-
-    for (let i = 0; i <= text.length - effectiveMaxLength; i++) {
-      const windowText = text.slice(i, i + effectiveMaxLength);
-      const wordCount = queryWords.reduce((count, word) => count + (windowText.toLowerCase().split(word).length - 1), 0);
-
-      if (wordCount > maxKeywordCount) {
-        maxKeywordCount = wordCount;
-        bestSubstring = windowText;
-        bestStartIndex = i;
-      }
-    }
-
-    if (!bestSubstring) {
-      bestSubstring = text.substring(0, effectiveMaxLength);
-      bestStartIndex = 0;
-    }
-
-    if (bestStartIndex > 0) {
-      let adjustedStart = text.lastIndexOf('. ', bestStartIndex - 1);
-      if (adjustedStart === -1 || adjustedStart < bestStartIndex - effectiveMaxLength) {
-        adjustedStart = text.lastIndexOf(' ', bestStartIndex - 1);
-      }
-      if (adjustedStart !== -1 && adjustedStart >= 0) {
-        bestSubstring = text.slice(adjustedStart + 1, adjustedStart + 1 + effectiveMaxLength);
-      }
-    }
-
-    const lastSpaceIndex = bestSubstring.lastIndexOf(' ');
-    if (lastSpaceIndex > 0 && bestSubstring.length === effectiveMaxLength) {
-      bestSubstring = bestSubstring.substring(0, lastSpaceIndex);
-    }
-
-    const regex = new RegExp(`\\b(${queryWords.join('|')})\\b`, 'gi');
-    let escapedSnippet = this.escapeHtml(bestSubstring);
-    let highlightedText = escapedSnippet.replace(regex, match => `<span class="dashboard__search-highlight">${match}</span>`);
-
-    highlightedText += '...';
-    return this.sanitizer.bypassSecurityTrustHtml(highlightedText);
+    return this.sanitizer.bypassSecurityTrustHtml(highlighted);
   }
 
-  private escapeHtml(text: string): string {
-    let tempDiv = document.createElement("div");
-    tempDiv.textContent = text;
-    return tempDiv.innerHTML;
+  private convertToCSV(data: any): string {
+    const keys = Object.keys(data);
+    const values = keys.map(key => `"${data[key]}"`).join(',');
+    return `${keys.join(',')}\n${values}`;
+  }
+
+  sortByKey<T>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {
+    return list.slice().sort((a, b) => {
+      const aVal = (a as any)[key]?.trim?.() ?? '';
+      const bVal = (b as any)[key]?.trim?.() ?? '';
+
+      const isDateKey = /date|timestamp/i.test(key);
+
+      if (isDateKey) {
+        const timeA = new Date(aVal).getTime();
+        const timeB = new Date(bVal).getTime();
+
+        const isValidA = !isNaN(timeA);
+        const isValidB = !isNaN(timeB);
+
+        if (!isValidA && !isValidB) return 0;
+        if (!isValidA) return order === 'asc' ? 1 : -1;
+        if (!isValidB) return order === 'asc' ? -1 : 1;
+
+        return order === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+
+      const strA = aVal.toString();
+      const strB = bVal.toString();
+      const comparison = strA.localeCompare(strB, undefined, {sensitivity: 'base'});
+
+      return order === 'asc' ? comparison : -comparison;
+    });
   }
 }

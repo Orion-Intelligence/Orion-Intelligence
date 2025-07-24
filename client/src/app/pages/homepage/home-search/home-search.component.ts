@@ -1,27 +1,30 @@
 import {Component} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {NgOptimizedImage} from "@angular/common";
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {ConsolidatedCallbackModel} from '../../../shared/model/results/consolidated/consolidated.callback.model';
 
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage],
+  imports: [FormsModule, NgOptimizedImage, CommonModule],
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent {
-  searchQuery: string = '';
+  searchQuery = '';
 
-  constructor(private route: ActivatedRoute, private router: Router) {
+  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router) {
   }
 
   onSearchSubmit(): void {
+    this.dashboardService.consolidatedCallbackModel = new ConsolidatedCallbackModel();
     const queryParams = {
       ...this.route.snapshot.queryParams,
       q: this.searchQuery || null
     };
 
-    this.router.navigate(['/dashboard/breach/databases'], {
+    this.router.navigate(['/dashboard/consolidated/all'], {
       queryParams,
       queryParamsHandling: 'merge'
     }).then();

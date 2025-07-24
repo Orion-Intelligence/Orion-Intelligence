@@ -1,5 +1,5 @@
 .no-result-container {
-  background: #17406999;
+  background: var(--no-result-container-bg);
   width: calc(100% - 66px);
   height: calc(100vh - 66px);
   max-width: 100%;
@@ -19,23 +19,23 @@
   margin: 0;
 }
 
-.no-result-container-header{
+.no-result-container-header {
   padding-top: 10px;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, sans-serif;
   font-size: 20px;
   font-weight: 500;
   color: #fff;
 }
 
-.no-result-container-description{
-  font-family: 'Inter', sans-serif;
+.no-result-container-description {
+  font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 400;
   color: #A0B8D1;
 }
 
-@media only screen and (max-width: 943px) {
-  .no-result-container{
+@media only screen and (width <=943px) {
+  .no-result-container {
     padding: 15px;
     margin: 15px;
     width: calc(100% - 30px);

@@ -2,6 +2,8 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {Router, NavigationEnd} from '@angular/router';
 import {filter} from 'rxjs/operators';
+import {Location} from '@angular/common';
+import {ScrollService} from '../../shared/services/scroll.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,9 @@ export class SelectionStoreService {
   selectedSection$ = this.selectedSectionSubject.asObservable();
   selectedOption$ = this.selectedOptionSubject.asObservable();
 
-  constructor(private router: Router) {
+  first_trigger = true
+
+  constructor(private router: Router, private location: Location, private scroll_service: ScrollService) {
     this.setInitialSelectionFromUrl(this.router.url);
 
     this.router.events
@@ -29,15 +33,35 @@ export class SelectionStoreService {
 
   private setInitialSelectionFromUrl(url: string) {
     const pathOnly = url.split('?')[0].split('#')[0];
-    const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+)?)?$/);
+    const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
 
     if (match) {
       const section = match[1];
       const option = match[2];
 
-      if (!option && section !== 'home' && section !== 'directory') {
+      const currentSection = this.getSelectedSection();
+      const currentOption = this.selectedOptionSubject.value;
+
+      const shouldRedirectToHome =
+        !this.first_trigger &&
+        (!currentSection && !currentOption);
+
+      this.first_trigger = false;
+
+      if ((!option && section !== 'home' && section !== 'directory') || (currentSection === section && currentOption === option)) {
         return;
       }
+
+      if (shouldRedirectToHome && this.router.url !== '/dashboard/home') {
+        this.router.navigate(['/dashboard', 'home'], {
+          replaceUrl: true,
+          queryParams: {},
+          queryParamsHandling: '',
+        }).then();
+        this.scroll_service.resetOnReload(true)
+        return;
+      }
+
       const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
       this.setSelectedSection(capitalizedSection);
 

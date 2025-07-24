@@ -1,0 +1,39 @@
+.graph-sidebar__container {
+  width: 280px;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--cti-sidebar-bg);
+}
+
+.graph-sidebar__container .filter__label{
+  margin-top: 5px;
+}
+
+.graph-sidebar__container .filter__input {
+  font-size: 14px;
+}
+
+.graph-sidebar__container .filter__input-form {
+  border: 2px solid #2C86DD;
+}
+
+.graph-sidebar__container-logo {
+  margin: 0 12px 12px 0;
+}
+
+.graph-sidebar__container-logo-padded {
+  margin-left: 12px;
+  margin-top: 20px;
+}
+
+.graph-sidebar__container .filter__form {
+  background: none;
+  padding: 12px 17px 12px 12px;
+  height: 90vh;
+}
+
+.graph-sidebar__container .filter__submit {
+  margin-bottom: 20px;
+}
