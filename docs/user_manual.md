@@ -52,10 +52,11 @@ workflow. It consists of the following main menu items:
 6. **Live APIs:** Offers real-time data streams through APIs, facilitating integration with external systems and tools.
    This feature supports continuous monitoring and enables timely responses to evolving cybersecurity events.
 
-7. **Data Dumps:**  Provides access to large collections of compromised data gathered from various underground and open
-   sources.
-   These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive
-   information.
+7. **Exploit:** The Exploit module in Orion Intelligence enables users to identify, analyze, and simulate known vulnerabilities using CVE data and integrated exploit tools. With AI-powered suggestions, Orion assists in selecting relevant exploits based on system context, helping security teams assess real-world risk faster and more efficiently.
+8. **Feed:** The Feed module delivers real-time updates on cybersecurity threats, CVEs, breaches, and industry trends from trusted global sources. Orion curates and prioritizes the most relevant news, keeping your team informed about emerging risks and developments that could impact your infrastructure or applications.
+
+9. **Data Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
+These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
    In this module, the system actively collects data from:
 
@@ -67,25 +68,13 @@ workflow. It consists of the following main menu items:
     - Other open-source intelligence (OSINT) platforms: Tracks and organizes dump-related information for quick
       analysis.
 
-8. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex
-   relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques,
-   and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections
-   visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and
-   correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational
-   awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark
-   web monitoring, and internal alerts to provide contextual, actionable insights.
+10. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
 
-9. **Link:** This module displays links associated with recent data dumps collected from platforms monitored sources.
-   These links typically point to external locations where leaked or compromised data is hosted. By centralizing these
-   dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in
-   the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and
-   scope of leaked content.
+11. **Orion Link:** The Orion Link feature allows secure access to Orion Intelligence through the Tor browser. By clicking the Orion Link, users can operate the tool anonymously over the dark web, ensuring privacy and resilience in restricted or high-risk environments. Ideal for sensitive investigations and secure threat intelligence operations.
 
-10. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a
-    detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide
-    technical users through integration, API usage, and system architecture. This module ensures that both end-users and
-    developers can easily understand and utilize the platform's full capabilities.
+12. **Link:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
 
+13. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
 ![navigation](https://github.com/user-attachments/assets/025ab902-7de7-4c71-9bfe-ee46390534b7)
 
 ## Homepage
@@ -315,11 +304,8 @@ crypto for money laundering or ransom payments.
 Focuses on leaked documents, databases, or credentials published online. These could include government files, internal
 company data, or proprietary tools that have been exposed.
 
-## DataBreach
-
-The Data Breach section in the navigation bar includes two subcategories:
-
-![Databreach-modified](https://github.com/user-attachments/assets/26878091-cb9f-4839-bd47-51c045920748)
+The Data Breach section in the navigation bar includes six categories:
+![breach](https://github.com/user-attachments/assets/da68c499-5701-464e-bee4-3d205a10f7e2)
 
 1. ### Databases
 
@@ -330,12 +316,17 @@ understand the type of sensitive information that was exposed.
 
 ![databasebreach-modified](https://github.com/user-attachments/assets/29c0fd5b-56bb-4b90-b79f-196f77186362)
 
-2. ### Track
+2. ### Email
+This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
 
-This section provides breach-related information tracked from forums. It is primarily used for monitoring discussions
-and mentions of potential breaches across underground communities. Note: This section does not contain actual breached
-data — it only displays references or claims gathered from forum sources.
-![tracking-modified](https://github.com/user-attachments/assets/657279c5-e9e3-441e-9dd0-c691dc535d86)
+3. ### Logs
+The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
+
+4. ### Warfare
+This section provides curated intelligence on cyber warfare activities, including attacks on critical infrastructure, state-sponsored campaigns, and geopolitical cyber threats. Orion continuously monitors sources for warfare-related incidents, offering organizations timely insights into high-level threats with global implications.
+
+5. ### Cloud
+The Cloud module focuses on identifying misconfigurations, leaked credentials, and potential vulnerabilities in cloud environments. Orion scans for exposed cloud assets, such as open buckets, API keys, or improperly secured services, helping teams secure their cloud infrastructure proactively.
 
 ## Defacement
 
