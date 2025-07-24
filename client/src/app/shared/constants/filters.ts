@@ -34,6 +34,19 @@ export const dump_filters: FilterModel = {
   }
 };
 
+export const stealer_filters: FilterModel = {
+  filters: {
+    mDateRange: {
+      title: "Date Range",
+      options: [],
+      type: 'daterange',
+      tooltip: "Date Range",
+      selected: ""
+    }
+  }
+};
+
+
 export const directory_filters: FilterModel = {
   filters: {
     network: {

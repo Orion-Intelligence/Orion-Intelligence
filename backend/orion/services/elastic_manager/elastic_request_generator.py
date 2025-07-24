@@ -366,7 +366,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_consolidated_data(p_query_model):
-        p_query_model.mMessageDate=p_query_model.mDateRange
+        p_query_model.mMessageDate = p_query_model.mDateRange
         if p_query_model.q != "*":
             raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
@@ -748,7 +748,6 @@ class elastic_request_generator:
                     })
                 except ValueError:
                     pass
-
 
         if m_entity:
             entity_list = [
@@ -1332,6 +1331,18 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealerlogs_data(p_query_model):
         raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
+        date_range_filter = {}
+
+        if p_query_model.mDateRange:
+            start_date, end_date = [d.strip() for d in p_query_model.mDateRange.split(",")]
+            date_range_filter = {
+                "range": {
+                    "timestamp": {
+                        "gte": start_date,
+                        "lte": end_date
+                    }
+                }
+            }
 
         if raw_query:
             raw_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), raw_query)
@@ -1359,26 +1370,31 @@ class elastic_request_generator:
                 else:
                     should_clauses.append(clause)
 
+            bool_query = {}
+            if must_should:
+                bool_query["must"] = must_should
+            if should_clauses:
+                bool_query["should"] = should_clauses
+                bool_query["minimum_should_match"] = 1
+            if date_range_filter:
+                bool_query.setdefault("filter", []).append(date_range_filter)
+
             query = {
-                "query": {
-                    "bool": {}
-                },
+                "query": {"bool": bool_query},
                 "from": 0,
-                "size": 30,
+                "size": 100,
                 "track_total_hits": True,
                 "sort": [{"timestamp": {"order": "desc"}}],
                 "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
             }
 
-            if must_should:
-                query["query"]["bool"]["must"] = must_should
-            if should_clauses:
-                query["query"]["bool"]["should"] = should_clauses
-                query["query"]["bool"]["minimum_should_match"] = 1
-
         else:
             query = {
-                "query": {"match_all": {}},
+                "query": {
+                    "bool": {
+                        "filter": [date_range_filter] if date_range_filter else []
+                    }
+                },
                 "from": 0,
                 "size": 30,
                 "track_total_hits": True,

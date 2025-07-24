@@ -10,6 +10,7 @@ import {CredentialListComponent} from '../credential-list/credential-list.compon
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {SortType} from '../../../shared/constants/enums';
 import {HelperService} from '../../../shared/services/helper.service';
+import {stealer_filters} from '../../../shared/constants/filters';
 
 @Component({
   selector: 'app-credential',
@@ -26,6 +27,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   credentialParamModel: CredentialParamModel = new CredentialParamModel();
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   protected readonly Math = Math;
+  protected readonly filters = stealer_filters;
 
   constructor(
     protected helperService: HelperService,
@@ -65,7 +67,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
   }
 
-  fetchSearchResults(): void {
+  fetchSearchResults(reset = false): void {
     if (this.isLoading) return;
 
     this.isLoading = true;
@@ -76,11 +78,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         cleanedParams[key] = value;
       }
     });
-
     this.router.navigate([], {
       queryParams: cleanedParams,
-      queryParamsHandling: 'merge'
+      queryParamsHandling: reset ? '' : 'merge'
     }).then();
+
 
     this.credentialParamModel.q = this.credentialParamModel.q.replace(/"([^"]*?)@([^"]*?)"/g, '"$1" "$2"');
     this.credentialParamModel.q = this.credentialParamModel.q
@@ -125,4 +127,17 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     );
     this.cdr.detectChanges();
   }
+
+  reloadFilters(event: Record<string, string | null>) {
+    if (event['mDateRange']) {
+      this.credentialParamModel.mDateRange = event['mDateRange']
+    }
+    this.fetchSearchResults();
+  }
+
+  resetFilters(_: void) {
+    this.credentialParamModel.mDateRange = "";
+    this.fetchSearchResults(true);
+  }
+
 }
