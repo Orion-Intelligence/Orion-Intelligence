@@ -32,19 +32,16 @@ jobs:
           format: sarif
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
-          # Add this flag to skip remote tools that fail schema validation
-          extra-args: --allow-unknown-tools
 
-      - name: Debug SARIF file presence
-        run: |
-          echo "== Debug: Checking SARIF file =="
-          if [ -f results.sarif ]; then
-            ls -lah results.sarif
-            head -n 20 results.sarif
-          else
-            echo "ERROR: results.sarif not found!"
-            exit 1
-          fi
+      - name: Run Codacy Analysis CLI
+        uses: codacy/codacy-analysis-cli-action@v4.4.5
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          verbose: true
+          output: results.sarif
+          format: sarif
+          gh-code-scanning-compat: true
+          max-allowed-issues: 2147483647
 
       - name: Validate SARIF structure
         run: |
