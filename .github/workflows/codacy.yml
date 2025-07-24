@@ -29,4 +29,3 @@ jobs:
         with:
           project-token: 39eddc129f0649bfbc706815ccd81eec
           verbose: true
-          tool: 'bandit,spotbugs,eslint'
