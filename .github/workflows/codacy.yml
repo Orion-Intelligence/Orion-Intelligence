@@ -2,65 +2,30 @@ name: Codacy Security Scan
 
 on:
   push:
-    branches: ["trusted-main", "devel"]
+    branches:
+      - trusted-main
+      - devel
   pull_request:
-    branches: ["trusted-main"]
-  schedule:
-    - cron: '33 6 * * 2'
-
-permissions: read-all
+    branches:
+      - trusted-main
 
 jobs:
   codacy-security-scan:
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    name: Codacy Security Scan
     runs-on: ubuntu-latest
+    name: Codacy Security Scan
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4
 
-      - name: Run Codacy Analysis CLI
-        uses: codacy/codacy-analysis-cli-action@v4.4.5
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Run Codacy Security Scan
+        uses: codacy/codacy-analysis-cli-action@v4
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
-          output: results.sarif
-          format: sarif
-          gh-code-scanning-compat: true
-          max-allowed-issues: 2147483647
-          # Add this flag to skip remote tools that fail schema validation
-          extra-args: --allow-unknown-tools
-
-      - name: Debug SARIF file presence
-        run: |
-          echo "== Debug: Checking SARIF file =="
-          if [ -f results.sarif ]; then
-            ls -lah results.sarif
-            head -n 20 results.sarif
-          else
-            echo "ERROR: results.sarif not found!"
-            exit 1
-          fi
-
-      - name: Validate SARIF structure
-        run: |
-          echo "== Debug: Ensuring SARIF has runs =="
-          if ! grep -q '"runs": \[' results.sarif; then
-            echo "ERROR: SARIF missing expected 'runs' element"
-            exit 1
-          fi
-
-      - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@v3.28.9
-        with:
-          sarif_file: results.sarif
-
-      - name: List workspace files (on failure)
-        if: failure()
-        run: |
-          echo "Workspace file listing for debug:"
-          find . -type f
