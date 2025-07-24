@@ -1831,7 +1831,7 @@ class elastic_request_generator:
             if not card["m_url"] or not card["m_title"]:
                 continue
 
-            card["m_hash"] = helper_controller.generate_data_hash(card["m_url"] + "_" + card["m_title"])
+            card["m_hash"] = helper_controller.generate_data_hash(card["m_base_url"] + "_" + card["m_title"])
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
 
