@@ -1,4 +1,4 @@
-<form (submit)="onFormSubmit()" @fadeInDashboardItem class="default-input-container default-input-sub-container-padded w-90">
+<form (submit)="onFormSubmit()" @fadeInDashboardItem class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
     <div class="col-md-10 col-sm-12 col-xs-12">
       <div class="input-group default-input-sub-container">
@@ -79,8 +79,8 @@
   </div>
 </form>
 
-<ul *ngIf="showTabs && (analyticsToggle || discussion || consolidated)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
-  <li class="nav-item" *ngIf="!consolidated">
+<ul *ngIf="showTabs && (analyticsToggle || domain || discussion || consolidated)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
+  <li class="nav-item" *ngIf="!consolidated && !domain">
     <a class="nav-link cursor-pointer active">Results</a>
   </li>
   <li class="nav-item" *ngIf="analyticsToggle">
@@ -94,6 +94,12 @@
   </li>
   <li class="nav-item" *ngIf="consolidated">
     <a class="nav-link cursor-pointer">Ranked</a>
+  </li>
+  <li class="nav-item" *ngIf="domain">
+    <a class="nav-link cursor-pointer active">Fast Search</a>
+  </li>
+  <li class="nav-item" *ngIf="domain">
+    <a class="nav-link cursor-pointer">Full Search</a>
   </li>
 </ul>
 

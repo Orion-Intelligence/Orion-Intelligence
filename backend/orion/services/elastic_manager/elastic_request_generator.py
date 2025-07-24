@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
     search_defacement_param_model
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import \
+    search_credential_param_model
 from orion.constants.constant import CONSTANTS
 from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.helper_controller import helper_controller
@@ -1329,8 +1331,9 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model):
-        raw_query = p_query_model.q.strip() if p_query_model.q and p_query_model.q != "*" else ""
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model):
+        user_query = p_query_model.mUser.strip() if p_query_model.mUser and p_query_model.mUser != "*" else ""
+        url_query = p_query_model.mURL.strip() if p_query_model.mURL else ""
         date_range_filter = {}
 
         if p_query_model.mDateRange:
@@ -1344,63 +1347,90 @@ class elastic_request_generator:
                 }
             }
 
-        if raw_query:
-            raw_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), raw_query)
-            terms = re.findall(r'"([^"]+)"|(\S+)', raw_query)
+        must_should = []
+        should_clauses = []
 
-            must_should = []
-            should_clauses = []
+        if p_query_model.mFullSearch:
+            if user_query:
+                user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
+                terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
 
-            for quoted, unquoted in terms:
-                term = quoted or unquoted
-                clause = {
+                for quoted, unquoted in terms:
+                    term = quoted or unquoted
+                    clause = {
+                        "bool": {
+                            "should": [
+                                {"wildcard": {"username": f"*{term}*"}},
+                                {"wildcard": {"domain": f"*{term}*"}},
+                                {"wildcard": {"url.raw": f"*{term}*"}},
+                                {"wildcard": {"url": f"*{term.lower()}*"}}
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    }
+                    must_should.append(clause)
+
+            if url_query:
+                url_clause = {
                     "bool": {
                         "should": [
-                            {"term": {"username": term}},
-                            {"term": {"domain": term}},
-                            {"term": {"url.raw": term}},
-                            {"match_phrase": {"url": term.lower()}}
+                            {"wildcard": {"url.raw": f"*{url_query}*"}},
+                            {"wildcard": {"url": f"*{url_query.lower()}*"}}
                         ],
                         "minimum_should_match": 1
                     }
                 }
-
-                if quoted:
-                    must_should.append(clause)
-                else:
-                    should_clauses.append(clause)
-
-            bool_query = {}
-            if must_should:
-                bool_query["must"] = must_should
-            if should_clauses:
-                bool_query["should"] = should_clauses
-                bool_query["minimum_should_match"] = 1
-            if date_range_filter:
-                bool_query.setdefault("filter", []).append(date_range_filter)
-
-            query = {
-                "query": {"bool": bool_query},
-                "from": 0,
-                "size": 100,
-                "track_total_hits": True,
-                "sort": [{"timestamp": {"order": "desc"}}],
-                "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
-            }
+                should_clauses.append(url_clause)
 
         else:
-            query = {
-                "query": {
-                    "bool": {
-                        "filter": [date_range_filter] if date_range_filter else []
+            if user_query:
+                user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
+                terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
+
+                for quoted, unquoted in terms:
+                    term = quoted or unquoted
+                    clause = {
+                        "bool": {
+                            "should": [
+                                {"term": {"username": term}},
+                                {"term": {"domain": term}},
+                                {"term": {"url.raw": term}},
+                                {"match_phrase": {"url": term.lower()}}
+                            ],
+                            "minimum_should_match": 1
+                        }
                     }
-                },
-                "from": 0,
-                "size": 30,
-                "track_total_hits": True,
-                "sort": [{"timestamp": {"order": "desc"}}],
-                "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
-            }
+                    must_should.append(clause)
+
+            if url_query:
+                url_clause = {
+                    "bool": {
+                        "should": [
+                            {"term": {"url.raw": url_query}},
+                            {"match_phrase": {"url": url_query.lower()}}
+                        ],
+                        "minimum_should_match": 1
+                    }
+                }
+                should_clauses.append(url_clause)
+
+        bool_query = {}
+        if must_should:
+            bool_query["must"] = must_should
+        if should_clauses:
+            bool_query["should"] = should_clauses
+            bool_query["minimum_should_match"] = 1
+        if date_range_filter:
+            bool_query.setdefault("filter", []).append(date_range_filter)
+
+        query = {
+            "query": {"bool": bool_query},
+            "from": 0,
+            "size": 100,
+            "track_total_hits": True,
+            "sort": [{"timestamp": {"order": "desc"}}],
+            "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
+        }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 

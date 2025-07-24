@@ -5,29 +5,32 @@ import {ResultComponent} from '../../../shared/partials/result/result.component'
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 import {CredentialParamModel} from '../../../shared/model/results/credentials/credential.param.model';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {NgIf} from '@angular/common';
+import {NgIf, NgOptimizedImage} from '@angular/common';
 import {CredentialListComponent} from '../credential-list/credential-list.component';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {SortType} from '../../../shared/constants/enums';
 import {HelperService} from '../../../shared/services/helper.service';
 import {stealer_filters} from '../../../shared/constants/filters';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-credential',
   standalone: true,
-  imports: [ResultComponent, NgIf, CredentialListComponent],
+  imports: [ResultComponent, NgIf, CredentialListComponent, FormsModule, NgOptimizedImage],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
 export class CredentialComponent implements OnInit, AfterViewInit {
-  query: string = "";
+  protected readonly Math = Math;
+  protected readonly filters = stealer_filters;
+
   isLoading: boolean = false;
   firstTrigger: boolean = true;
+  mUser: any;
+  mURL: any;
 
   credentialParamModel: CredentialParamModel = new CredentialParamModel();
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
-  protected readonly Math = Math;
-  protected readonly filters = stealer_filters;
 
   constructor(
     protected helperService: HelperService,
@@ -44,17 +47,19 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.stealerlogCallbackModel = {...this.dashboardService.stealerlogCallbackModel};
+    this.credentialParamModel.mFullSearch = false;
 
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params]) => {
-        this.query = params['q'];
-        this.credentialParamModel.q = params['q'] || '';
+        this.mURL = params['mURL'];
+        this.mUser = params['mUser'];
+
+        this.credentialParamModel.mURL = params['mURL'] || '';
+        this.credentialParamModel.mUser = params['mUser'] || '';
 
         if (this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
           this.isLoading = false;
-          if (this.credentialParamModel.q)
-            this.query = this.credentialParamModel.q;
         } else {
           this.cdr.detectChanges();
           this.fetchSearchResults();
@@ -67,7 +72,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
   }
 
-  fetchSearchResults(reset = false): void {
+  fetchSearchResults(reset = true): void {
+    this.credentialParamModel.mURL = this.mURL
+    this.credentialParamModel.mUser = this.mUser
     if (this.isLoading) return;
 
     this.isLoading = true;
@@ -83,12 +90,12 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-
-    this.credentialParamModel.q = this.credentialParamModel.q.replace(/"([^"]*?)@([^"]*?)"/g, '"$1" "$2"');
-    this.credentialParamModel.q = this.credentialParamModel.q
-      .split(' ')
-      .map(token => token.startsWith('@') && !token.includes('"') ? token.replace('@', '') : token)
-      .join(' ');
+    if (!this.credentialParamModel.mUser){
+      this.credentialParamModel.mUser = ""
+    }
+    if (!this.credentialParamModel.mURL){
+      this.credentialParamModel.mURL = ""
+    }
 
     this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.credentialParamModel)
       .pipe(switchMap(response => timer(300).pipe(map(() => response))))
@@ -99,10 +106,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         }
         this.isLoading = false;
       });
-  }
-
-  onUpdateQuery(query: string): void {
-    this.credentialParamModel.q = query;
   }
 
   onToggleSort(sort: SortType) {
@@ -140,4 +143,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults(true);
   }
 
+  onToggleAnalyticsTrigger($event: string) {
+    this.credentialParamModel.mFullSearch = $event == "Full Search";
+    this.fetchSearchResults(true);
+  }
 }

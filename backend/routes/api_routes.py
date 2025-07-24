@@ -70,12 +70,6 @@ async def get_insight():
 async def search_general(param: search_general_param_model = Depends()):
     return await search_model.getInstance().search_general_result(param)
 
-
-@api_routes.get("/api/search/credential", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
-async def search_telegram(param: search_credential_param_model = Depends()):
-    return await search_model.getInstance().search_credential_result(param)
-
-
 @api_routes.get("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_credential_param_model = Depends()):
     return await search_model.getInstance().search_stealerlogs_result(param)

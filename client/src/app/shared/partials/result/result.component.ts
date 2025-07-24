@@ -37,6 +37,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() type!: Category;
   @Input() discussion = false;
   @Input() consolidated = false;
+  @Input() domain = false;
   @Input() showTabs = true;
   @Input() filterModel!: FilterModel
   @Input() showSorting: boolean = true
