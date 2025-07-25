@@ -1,21 +1,25 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import { NgFor, NgIf, CommonModule } from '@angular/common';
-import { FilterCategory, FilterModel, FilterOption, FilterTag } from '../../../shared/model/filter/filter.model';
+import { FilterCategory, FilterModel, FilterOption } from '../../../shared/model/filter/filter.model';
 import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
 import { Subscription } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
-import { NgbSlide } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap/carousel/carousel";
 
 
 @Component({
   selector: 'app-selected-filter-bar',
-  imports: [NgIf, NgFor, CommonModule, NgbSlide],
+  imports: [NgIf, NgFor, CommonModule],
   templateUrl: './selected-filter-bar.component.html'
 })
-export class SelectedFilterBarComponent {
+export class SelectedFilterBarComponent implements OnInit{
+  private subscriptions: Subscription[] = [];
+
   @Input() filterModel!: FilterModel;
   @Output() clearAll = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
+
+  @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
+  @ViewChild('filterScroll', { static: true }) filterScroll!: ElementRef;
+
   categories: FilterCategory[] = [];
   selectedCategoryIndex = 0;
   isFiltersExpanded: boolean = true;
@@ -25,12 +29,9 @@ export class SelectedFilterBarComponent {
   showFilterRightFade = false;
   showIocRightFade = false;
   showIocLeftFade = false;
-
-  @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
-  @ViewChild('filterScroll', { static: true }) filterScroll!: ElementRef;
-  private subscriptions: Subscription[] = [];
   Object: any;
-  constructor(private entityFilterService: EntityFilterService, private route: ActivatedRoute) { }
+
+  constructor(private entityFilterService: EntityFilterService) { }
   get selectedCategory(): FilterCategory {
     return this.categories[this.selectedCategoryIndex];
   }
