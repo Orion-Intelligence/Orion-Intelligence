@@ -20,11 +20,11 @@
             <span class="small-slider round"></span>
           </label>
         </span>
-        <div class="advance-search" (click)="onSearchFocus()">Advance Search
-          <div *ngIf=" getNonEmptyCategoryCount( )> 0" class="advance-search__category-count">
-            {{ getNonEmptyCategoryCount() }}
-          </div>
-        </div>
+<!--        <div class="advance-search" (click)="onSearchFocus()">Advance Search-->
+<!--          <div *ngIf=" getNonEmptyCategoryCount( )> 0" class="advance-search__category-count">-->
+<!--            {{ getNonEmptyCategoryCount() }}-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
       <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay">
         <app-search-filters (searchFiltersChange)="searchFiltersChanged()"
@@ -106,8 +106,8 @@
     </div>
   </div>
 </form>
-<app-selected-filter-bar [filterModel]="filterModel" (clearAll)="onClearAllFromBar()"
-  (searchFiltersChange)="searchFiltersChanged()"></app-selected-filter-bar>
+<!--<app-selected-filter-bar [filterModel]="filterModel" (clearAll)="onClearAllFromBar()"-->
+<!--  (searchFiltersChange)="searchFiltersChanged()"></app-selected-filter-bar>-->
 <ul *ngIf="showTabs && (analyticsToggle || domain || discussion || consolidated)" class="nav nav-tabs default-input-container-tab"
   (click)="onTabClick($event)">
   <li class="nav-item" *ngIf="!consolidated">
