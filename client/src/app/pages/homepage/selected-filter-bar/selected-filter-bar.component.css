@@ -7,10 +7,47 @@
     background-color: #174069;
     border-radius: 10px;
     border: 1px solid #FFFFFF40;
-    max-width: 835px;
+    max-width: 950px;
     margin-left: 31px;
     margin-top: 20px;
     margin-bottom: 10px;
+}
+
+.left-space {
+    margin-left: 31px;
+}
+
+.left-space .expand-icon img {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg)
+}
+
+.left-space .expand-icon.expand img {
+    transform: rotate(90deg);
+}
+
+.filter-tag {
+    display: flex;
+    align-items: center;
+    background-color: #FCFCFC0D;
+    border: 1px solid #FCFCFC12;
+    border-radius: 5px;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 400;
+    color: white;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-scroll-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 16px 0;
+    overflow: hidden;
+    gap: 15px;
 }
 
 .filter-grid-layout {
@@ -33,6 +70,7 @@
     row-gap: 0.75rem;
     font-size: 0.875rem;
     padding-right: 0.5rem;
+    margin-top: 10px;
 }
 
 .primary-filters-collapsed {
@@ -57,10 +95,10 @@
 
     display: flex;
     align-items: center;
-    color: #297AD3;
-    margin-bottom: 0.25rem;
+    color: #A0B8D1;
+    margin-bottom: 4px;
     font-weight: 500;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 

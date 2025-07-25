@@ -1,52 +1,114 @@
-<div class="filter-bar-container">
-    <div class="filter-grid-layout">
-
-        <div class="primary-filters-column">
-            <div [ngClass]="{ 'primary-filters-collapsed': !isExpanded, 'primary-filters-expanded': isExpanded }"
-                class="primary-filters-wrap custom-scrollbar">
-                <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
-                    <div class="filter-item">
-                        <div class="filter-label-edit">
-                            {{ filterKey.value.title }}
+<div class="filter-panel left-space">
+    <div class="top-row">
+        <div class="title">Filters</div>
+        <div class="actions">
+            <button class="clear-btn" (click)="clearAllFilters()">Clear Selection</button>
+            <div class="expand-icon" [ngClass]="{ 'expand': isFiltersExpanded }" (click)="toggleFiltersCollapse()">
+                <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" alt="Toggle Icon" />
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isFiltersExpanded">
+        <div [ngClass]="{ 'primary-filters-collapsed': !isFiltersExpanded, 'primary-filters-expanded': isFiltersExpanded }"
+            class="primary-filters-wrap custom-scrollbar">
+            <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
+                <div class="filter-item">
+                    <div class="filter-label-edit">
+                        {{ filterKey.value.title }}
+                    </div>
+                    <ng-template *ngIf="filterKey.value.type=='multiSelection'">
+                        <div *ngFor="let l of getSelectedLabels(filterKey.value)">
+                            <div class="filter-tag">{{l}}</div>
                         </div>
-                        <span class="filter-value">{{ getSelectedLabel(filterKey.value) }}
-                        </span>
+
+                    </ng-template>
+                    <span *ngIf="!(filterKey.value.type=='multiSelection')" class="filter-tag">{{
+                        getSelectedLabel(filterKey.value) }}</span>
+                </div>
+            </ng-container>
+        </div>
+
+    </div>
+</div>
+<br>
+
+<div class="filter-panel left-space">
+    <div class="top-row">
+        <div class="title">Advance Filters</div>
+        <div class="actions">
+            <button class="clear-btn" (click)="clearAdvanceSearchAllFilters()">Clear Selection</button>
+            <div class="expand-icon" [ngClass]="{ 'expand': isAdvanceSearchExpanded }"
+                (click)="toggleAdvanceSearchCollapse()">
+                <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" alt="Toggle Icon" />
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isAdvanceSearchExpanded">
+        <div class="filter-scroll-container">
+            <div class="fade-left" *ngIf="showFilterLeftFade"></div>
+
+            <div class="scroll-btn" (click)="scrollLeft(filterScroll)">
+                <img src="../../../../assets/images/shared/searchFilter_leftButton.svg" />
+            </div>
+
+            <div class="filter-panel__category-scroll" #filterScroll>
+                <ng-container *ngFor="let category of categories">
+                    <div *ngFor="let tag of category.tags" class="filter-tag">
+                        {{ tag.value }}
+                        <div class="remove-x" (click)="removeEntityTypeFilterTag(category.id,tag.id)">×</div>
                     </div>
                 </ng-container>
             </div>
+
+            <div class="scroll-btn" (click)="scrollRight(filterScroll)">
+                <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" />
+            </div>
+
+            <div class="fade-right" *ngIf="showFilterRightFade"></div>
         </div>
 
-        <div class="entity-filters-column">
-            <ng-container *ngIf="entityFilterCategories.length > 0">
-                <div class="filter-label-edit">
-                    Entity Filters
+        <div class="divider"></div>
 
-                </div>
-            </ng-container>
-
-            <div [ngClass]="{ 'filter-chips-collapsed': !isExpanded, 'filter-chips-expanded': isExpanded }"
-                class="filter-chips-container custom-scrollbar">
-                <div class="filter-chips-wrap">
-                    <ng-container *ngFor="let category of entityFilterCategories">
-                        <span *ngFor="let tag of category.tags" class="filter-chip">
-                            {{ tag.value }}
-                            <img src="../../../../assets/images/shared/remove-filter.svg" class="filter-chip-remove-btn"
-                                (click)="removeEntityTypeFilterTag(category.id, tag.id)">
-                        </span>
-                    </ng-container>
-                </div>
+        <div class="expand-header" (click)="toggleIocExpand()">
+            <div class="expand-label">IOC’s</div>
+            <div class="expand-icon" [ngClass]="{ 'expand': isIocExpanded }">
+                <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" alt="Toggle Icon" />
             </div>
+
         </div>
+        <!-- Summary by Category -->
+        <div *ngIf="isIocExpanded" class="summary-section">
+            <div *ngIf="getNonEmptyCategoryCount()>0" class="filter-panel__category-scroll-container">
+                <div class="fade-left" *ngIf="showIocLeftFade"></div>
 
-        <div class="filter-actions-wrapper">
-            <div [ngClass]="['expand-vertical-line', isExpanded ? 'expanded' : 'collapsed']"></div>
-            <div class="filter-actions-section">
-                <div (click)="clearAllFilters()" class="clear-all-btn">Clear All</div>
-                <div (click)="toggleExpandCollapse()" class="expand-collapse-btn">
-                    <img
-                        [src]="isExpanded ? '../../../../assets/images/shared/expand-filters.svg' : '../../../../assets/images/shared/collapse-filters.svg'">
+                <div class="scroll-btn" (click)="scrollLeft(categoryScroll)">
+                    <img src="../../../../assets/images/shared/searchFilter_leftButton.svg" />
+                </div>
+
+                <div class="filter-panel__category-scroll" #categoryScroll>
+                    <div *ngFor="let category of categories; let i = index" class="category-tab"
+                        [class.selected]="i === selectedCategoryIndex" (click)="selectedCategoryIndex = i">
+                        {{ category.name }}
+                        <div *ngIf="category.tags.length > 0" class="filter-panel__category-count">
+                            {{ category.tags.length }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scroll-btn" (click)="scrollRight(categoryScroll)">
+                    <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" />
+                </div>
+
+                <div class="fade-right" *ngIf="showIocRightFade"></div>
+            </div>
+            <!-- <ng-container *ngFor="let category of categories"> -->
+            <div class="tag-list">
+                <div *ngFor="let tag of selectedCategory.tags" class="filter-tag">
+                    {{ tag.value }}
+                    <div class="remove-x" (click)="removeEntityTypeFilterTag(selectedCategory.id,tag.id)">×</div>
                 </div>
             </div>
+            <!-- </ng-container> -->
         </div>
     </div>
 </div>

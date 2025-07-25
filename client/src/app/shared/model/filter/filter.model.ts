@@ -3,7 +3,7 @@ export interface FilterOption {
   type: string;
   title: string;
   tooltip: string;
-  selected: string | [];
+  selected: string | string[];
 }
 
 export interface FilterModel {

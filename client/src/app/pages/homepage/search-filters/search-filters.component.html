@@ -1,91 +1,80 @@
-<div class="search-filter-main-div d-flex align-items-start justify-content-between w-100 flex-wrap">
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="search-filters-bg">
-            <div class="top-bar">
-                <div class="selected-filter-text">Selected Filters</div>
-                <div class="search-clear-wrapper">
-                    <div class="input-wrapper">
-                        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
-                            class="search-filters-input" maxlength="150" name="q" placeholder="" type="search"
-                            (keyup.enter)="onSearchSubmit()" />
+<div class="filter-panel" [ngClass]="{ 'mt-40': showSorting, 'mt-10': !showSorting }">
 
-                        <button class="search-button" type="button">
-                            <img alt="Search" src="../../../../assets/images/shared/magnifyingglasswhite.svg">
-                        </button>
-                    </div>
-                    <button class="clear-button" (click)="clearAllSelectedFilters()">Clear</button>
-                </div>
-            </div>
-            <div class="custom-line"></div>
-            <div class="selected-tags-display-area"
-                *ngIf="getCurrentEntityFilter(searchQuery,true).length > 0; else noFilters">
-                <button *ngIf="showLeftArrow" class="nav-arrow left-arrow" (click)="scrollSelectedTags('left')">
-                    <img src="../../../../assets/images/shared/filter-left.svg" alt="Previous" />
-                </button>
-                <div class="selected-filter-tags-scroll-container" #selectedFilterTagsScrollContainer>
-                    <span class="filter-tag"
-                        *ngFor="let filter of getCurrentEntityFilter(searchQuery,true); trackBy: filterTrackBy">
-                        {{ filter.value }}
-                        <img src="../../../../assets/images/shared/remove-filter.svg" alt="Remove filter"
-                            class="remove-filter-icon" (click)="removeSelectedFilter(filter.id)" />
-                    </span>
-                </div>
-                <button *ngIf="showRightArrow" class="nav-arrow right-arrow" (click)="scrollSelectedTags('right')">
-                    <img src="../../../../assets/images/shared/filter-right.svg" alt="Next" />
-                </button>
-            </div>
+    <div class="top-row">
+        <div class="title">Filters</div>
+        <div class="actions">
+            <button class="clear-btn" (click)="clearSelection()">Clear Selection</button>
+            <img src="../../../../assets/images/shared/searchFilter_clossButton.svg" class="close-btn"
+                (click)="clossFilter()" />
 
-            <ng-template #noFilters>
-                <div class="no-filters-message">
-                    No filter added.
-                </div>
-            </ng-template>
+        </div>
+    </div>
 
-            <div class="entity-filters-section">
-                <div class="middle-bar">
-                    <div class="entity-filters-header">Entity Filters</div>
-                    <div class="search-clear-wrapper">
-                        <div class="input-wrapper">
-                            <input [(ngModel)]="addedFilter" autocapitalize="none" autocomplete="off"
-                                class="search-filters-input" maxlength="150" name="q" placeholder="" type="search"
-                                (keyup.enter)="onSearchSubmit()" />
+    <div class="filter-panel__category-scroll-container">
+        <div class="fade-left" *ngIf="showLeftFade"></div>
 
-                            <button class="plus-button" type="button" (click)="onSearchSubmit()">
-                                <img alt="Search" src="../../../../assets/images/shared/plus-icon.svg">
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <div class="scroll-btn" (click)="scrollLeft()">
+            <img src="../../../../assets/images/shared/searchFilter_leftButton.svg" />
+        </div>
 
-                <div class="category-line"></div>
-                <div class="entity-categories">
-                    <div class="category-item" *ngFor="let category of filterCategories; trackBy: categoryTrackBy"
-                        [class.active]="category.id === selectedCategoryId" (click)="selectCategory(category.id)">
-                        <!-- <div class="category-underline"></div> -->
-                        {{ category.name }}
-                        <img *ngIf="category.id === selectedCategoryId; else unselectedImage"
-                            src="../../../../assets/images/shared/filter-selected.svg" alt="Selected"
-                            class="category-indicator">
-                        <ng-template #unselectedImage>
-                            <img src="../../../../assets/images/shared/filter-unselected.svg" alt="Unselected"
-                                class="category-indicator">
-                        </ng-template>
-                    </div>
-                </div>
-
-                <div class="entity-filter-tags-display">
-                    <ng-container *ngIf="getCurrentEntityFilter('').length > 0; else noFiltersAdded">
-                        <span class="filter-tag" *ngFor="let tag of getCurrentEntityFilter(''); trackBy: filterTrackBy">
-                            {{ tag.value }}
-                            <img src="../../../../assets/images/shared/remove-filter.svg" alt="Remove filter"
-                                class="remove-filter-icon" (click)="removeSelectedFilter(tag.id)">
-                        </span>
-                    </ng-container>
-                    <ng-template #noFiltersAdded>
-                        <p class="no-filters-message">No filters added yet.</p>
-                    </ng-template>
+        <div class="filter-panel__category-scroll" #categoryScroll>
+            <div *ngFor="let category of categories; let i = index" class="category-tab"
+                [class.selected]="i === selectedCategoryIndex" (click)="selectedCategoryIndex = i">
+                {{ category.name }}
+                <div *ngIf="category.tags.length > 0" class="filter-panel__category-count">
+                    {{ category.tags.length }}
                 </div>
             </div>
         </div>
+
+        <div class="scroll-btn" (click)="scrollRight()">
+            <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" />
+        </div>
+
+        <div class="fade-right" *ngIf="showRightFade"></div>
     </div>
+    <div class="input-row">
+        <input type="text" [(ngModel)]="newValue" placeholder="Enter Value" class="tag-input"
+            (keydown.enter)="addTag()" />
+        <button class="add-btn" (click)="addTag()">
+            <img src="../../../../assets/images/shared/searchFilter_addButton.svg" />
+        </button>
+        <div class="reset-selection" (click)="resetCategorySelection()">Reset Selection</div>
+    </div>
+
+    <div class="selected-filters">
+        <div class="section-title">All Selected Filters</div>
+        <div class="tag-list">
+            <ng-container *ngFor="let category of categories">
+                <div *ngFor="let tag of category.tags" class="filter-tag">
+                    {{ tag.value }}
+                    <div class="remove-x" (click)="removeTag(category, tag.id)">×</div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="expand-header" (click)="toggleExpand()">
+        <div class="expand-label">IOC’s</div>
+        <div class="expand-icon" [ngClass]="{ 'expand': isExpanded }">
+            <img src="../../../../assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon" />
+        </div>
+
+    </div>
+    <div *ngIf="isExpanded" class="summary-section">
+        <ng-container *ngFor="let category of categories">
+            <div *ngIf="category.tags.length > 0" class="summary-category">
+                <div class="category-title">{{ category.name }}</div>
+                <div class="tag-list">
+                    <div *ngFor="let tag of category.tags" class="filter-tag">
+                        {{ tag.value }}
+                        <div class="remove-x" (click)="removeTag(category, tag.id)">×</div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+
 </div>

@@ -13,8 +13,7 @@
           type="search"> -->
 
         <input class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query"
-          autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search"
-          (focus)="onSearchFocus()" />
+          autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" />
 
         <input type="hidden" value="1">
 
@@ -26,9 +25,16 @@
             <span class="small-slider round"></span>
           </label>
         </span>
+        <div class="advance-search" (click)="onSearchFocus()">Advance Search
+          <div *ngIf=" getNonEmptyCategoryCount( )> 0" class="advance-search__category-count">
+            {{ getNonEmptyCategoryCount() }}
+          </div>
+        </div>
       </div>
       <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay">
-        <app-search-filters (searchFiltersChange)="searchFiltersChanged()"></app-search-filters>
+        <app-search-filters (searchFiltersChange)="searchFiltersChanged()"
+          [showSorting]="app_service.configData().settings.enable_advanced_tools"
+          (clossFilters)="setFilterOverlay($event)"></app-search-filters>
       </div>
       <ng-container *ngIf="app_service.configData().settings.enable_advanced_tools; else emptySpace">
         <div class="mt-2 d-flex gap-3" @fadeInDashboardItem>

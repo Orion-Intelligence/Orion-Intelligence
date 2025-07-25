@@ -3,10 +3,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { FilterTag, FilterCategory } from '../../shared/model/filter/filter.model';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class EntityFilterService {
-
     private _filterCategories = new BehaviorSubject<FilterCategory[]>([]);
     public filterCategories$: Observable<FilterCategory[]> = this._filterCategories.asObservable();
 
@@ -15,11 +14,6 @@ export class EntityFilterService {
 
     constructor() {
         this.loadStateFromLocalStorage();
-    }
-
-
-    updateSelectedFilters(filters: FilterTag[]): void {
-        this.saveStateToLocalStorage();
     }
 
     updateFilterCategories(categories: FilterCategory[]): void {
@@ -31,7 +25,6 @@ export class EntityFilterService {
         this._selectedCategoryId.next(id);
     }
 
-
     getCurrentFilterCategories(): FilterCategory[] {
         return this._filterCategories.getValue();
     }
@@ -40,6 +33,11 @@ export class EntityFilterService {
         return this._selectedCategoryId.getValue();
     }
 
+    clearPersistedState(): void {
+        this._filterCategories.next([]);
+        this._selectedCategoryId.next('email');
+        localStorage.removeItem('appFilterCategories');
+    }
 
     private saveStateToLocalStorage(): void {
         try {
@@ -51,23 +49,23 @@ export class EntityFilterService {
 
     private loadStateFromLocalStorage(): void {
         try {
-
             const savedFilterCategories = localStorage.getItem('appFilterCategories');
             if (savedFilterCategories) {
                 this._filterCategories.next(JSON.parse(savedFilterCategories));
             }
-
         } catch (e) {
             console.error('Error loading filter state from localStorage', e);
-            localStorage.removeItem('appFilterSelectedFilters');
             localStorage.removeItem('appFilterCategories');
         }
     }
-
-    clearPersistedState(): void {
-        this._filterCategories.next([]);
-        this._selectedCategoryId.next('email');
-        localStorage.removeItem('appFilterSelectedFilters');
-        localStorage.removeItem('appFilterCategories');
+    initializeFilterCategories(defaultCategories: FilterCategory[]): void {
+        const currentCategories = this._filterCategories.getValue();
+        if (!currentCategories || currentCategories.length === 0) {
+            this._filterCategories.next(defaultCategories);
+            this.saveStateToLocalStorage();
+        }
+    }
+    getNonEmptyCategoryCount(): number {
+        return this._filterCategories.getValue().filter(category => category.tags.length > 0).length;
     }
 }
