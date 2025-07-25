@@ -76,7 +76,6 @@
             </div>
 
         </div>
-        <!-- Summary by Category -->
         <div *ngIf="isIocExpanded" class="summary-section">
             <div *ngIf="getNonEmptyCategoryCount()>0" class="filter-panel__category-scroll-container">
                 <div class="fade-left" *ngIf="showIocLeftFade"></div>
@@ -101,14 +100,12 @@
 
                 <div class="fade-right" *ngIf="showIocRightFade"></div>
             </div>
-            <!-- <ng-container *ngFor="let category of categories"> -->
             <div class="tag-list">
                 <div *ngFor="let tag of selectedCategory.tags" class="filter-tag">
                     {{ tag.value }}
                     <div class="remove-x" (click)="removeEntityTypeFilterTag(selectedCategory.id,tag.id)">×</div>
                 </div>
             </div>
-            <!-- </ng-container> -->
         </div>
     </div>
 </div>
