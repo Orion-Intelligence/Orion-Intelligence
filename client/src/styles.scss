@@ -7,6 +7,8 @@
 @use 'app/shared/partials/header/login-header/header.component.css';
 @use 'app/pages/homepage/home-insight/home-insight.component.css';
 @use 'app/pages/homepage/home-search/home-search.component.css';
+@use 'app/pages/homepage/search-filters/search-filters.component.css';
+@use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
 @use 'app/pages/login/login-container/login-container.component.css';
 @use 'app/pages/directory/directory-list/directory-list.component.css';
@@ -168,21 +170,21 @@ html::-webkit-scrollbar {
 	color: white;
 }
 
-.dropdown-menu{
-  border-radius: 10px;
-  font-size: 14px;
+.dropdown-menu {
+	border-radius: 10px;
+	font-size: 14px;
 }
 
 .dropdown-menu::before {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 8px solid white;
-  z-index: 1000;
+	content: "";
+	position: absolute;
+	top: -8px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-bottom: 8px solid white;
+	z-index: 1000;
 }
 
 .clear-paddings {
@@ -209,8 +211,9 @@ img::before {
 	font-size: 12px;
 }
 
-.dropdown-item.active, .dropdown-item:active{
-    background: #e6e6e6 !important;
+.dropdown-item.active,
+.dropdown-item:active {
+	background: #e6e6e6 !important;
 }
 
 .pagination-margin {

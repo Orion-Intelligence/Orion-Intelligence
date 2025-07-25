@@ -113,7 +113,7 @@
   opacity: 0.5;
 }
 
-.default-input-button-icon img{
+.default-input-button-icon img {
   margin-left: 6px;
   margin-bottom: 3px;
 }
@@ -307,12 +307,13 @@ table a:visited {
   display: flex;
   flex-wrap: inherit;
   background: #FFC1071A;
-  max-width: 795px;
+  max-width: 835px;
   padding: 10px;
   font-size: 13px;
   border-radius: 10px;
   margin-top: 20px;
   color: #fff;
+  margin-bottom: 0;
 }
 
 .default-notification-banner-stealer {
@@ -322,7 +323,9 @@ table a:visited {
 
 .dashboard-general-input {
   max-width: 750px;
+  max-width: 787px;
   min-width: 500px;
+  background-color: white !important;
 }
 
 .report-menu-option {
@@ -412,13 +415,13 @@ table a:visited {
   transition: color 0.2s ease;
 }
 
-.default-input-container .small-switch{
+.default-input-container .small-switch {
   background: #fff;
   padding: 0 !important;
   margin-bottom: 5px;
 }
 
-.default-input-container .input-group-text{
+.default-input-container .input-group-text {
   background: #fff;
   border: 0;
   font-size: 15px;
@@ -455,21 +458,21 @@ table a:visited {
   top: -2px;
 }
 
-.default-input-container input:checked + .small-slider {
+.default-input-container input:checked+.small-slider {
   background-color: #79747E !important;
 }
 
-.default-input-container input:checked + .small-slider::before {
+.default-input-container input:checked+.small-slider::before {
   background-color: #fff !important;
 }
 
-@media only screen and (width <= 550px) {
+@media only screen and (width <=550px) {
   .default-input-container {
     display: grid;
   }
 }
 
-@media only screen and (width <= 1300px) {
+@media only screen and (width <=1300px) {
   table thead {
     display: none;
   }
@@ -512,7 +515,7 @@ table a:visited {
 
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .label-text {
     margin-left: 15px;
   }
@@ -537,6 +540,7 @@ table a:visited {
   .dashboard-general-input {
     margin-left: 0;
     min-width: 500px;
+    background-color: white !important;
   }
 
   .default-input-container {
@@ -544,15 +548,16 @@ table a:visited {
   }
 }
 
-@media only screen and (width <= 460px) {
+@media only screen and (width <=460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (width <= 700px) {
+@media only screen and (width <=700px) {
   .dashboard-general-input {
     min-width: 100px;
+    background-color: white !important;
   }
 
   .default-input-container-tab {

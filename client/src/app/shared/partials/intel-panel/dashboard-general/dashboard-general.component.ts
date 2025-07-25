@@ -1,27 +1,28 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NgIf} from '@angular/common';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgIf } from '@angular/common';
 import {
   DashboardResultsGridComponent
 } from '../dashboard-results/dashboard-results-grid/dashboard-results-grid.component';
-import {PaginationComponent} from '../../pagination/pagination.component';
-import {InsightsComponent} from '../../insights/insights.component';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {Analytics} from '../../../model/analytics/analytics.model';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {GeneralCallbackModel, GeneralResultItem} from '../../../model/results/general/general.callback.model';
-import {LeakCallbackModel, LeakResultItem} from '../../../model/results/leak/leak.callback.model';
-import {GeneralParamModel} from '../../../model/results/shared/general.param.model';
-import {Category} from '../../../enums/pages';
-import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {ResultComponent} from '../../result/result.component';
-import {general_filters} from '../../../constants/filters';
-import {AppService} from '../../../../services/core/app.service';
-import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {ChatCallbackModel} from '../../../model/results/chat/chat.callback.model';
-import {DiscussionService} from '../../../services/discussion.service';
-import {HelperService} from '../../../services/helper.service';
-import {SortType} from '../../../constants/enums';
+import { PaginationComponent } from '../../pagination/pagination.component';
+import { InsightsComponent } from '../../insights/insights.component';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { Analytics } from '../../../model/analytics/analytics.model';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { GeneralCallbackModel, GeneralResultItem } from '../../../model/results/general/general.callback.model';
+import { LeakCallbackModel, LeakResultItem } from '../../../model/results/leak/leak.callback.model';
+import { GeneralParamModel } from '../../../model/results/shared/general.param.model';
+import { Category } from '../../../enums/pages';
+import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { ResultComponent } from '../../result/result.component';
+import { general_filters } from '../../../constants/filters';
+import { AppService } from '../../../../services/core/app.service';
+import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { ChatCallbackModel } from '../../../model/results/chat/chat.callback.model';
+import { DiscussionService } from '../../../services/discussion.service';
+import { HelperService } from '../../../services/helper.service';
+import { SortType } from '../../../constants/enums';
+import { FilterCategory } from '../../../model/filter/filter.model';
 
 @Component({
   selector: 'app-dashboard-general',
@@ -39,6 +40,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   public generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   public leakCallbackModel: LeakCallbackModel = new LeakCallbackModel();
   public discussionCallbackModel: ChatCallbackModel = new ChatCallbackModel();
+  public entityFilters: FilterCategory[] = [];
 
   query = ""
   analyticsData = {} as Analytics;
@@ -80,9 +82,9 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.type = this.route.snapshot.data['type'];
 
-    this.generalParamModel = {...this.dashboardService.generalParamModel} as GeneralParamModel;
-    this.generalCallbackModel = {...this.dashboardService.generalCallbackModel} as GeneralCallbackModel;
-    this.leakCallbackModel = {...this.dashboardService.leakCallbackModel} as LeakCallbackModel;
+    this.generalParamModel = { ...this.dashboardService.generalParamModel } as GeneralParamModel;
+    this.generalCallbackModel = { ...this.dashboardService.generalCallbackModel } as GeneralCallbackModel;
+    this.leakCallbackModel = { ...this.dashboardService.leakCallbackModel } as LeakCallbackModel;
 
     this.initAnalytics()
     combineLatest([this.route.queryParams, this.route.url])
@@ -116,7 +118,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
-  fetchSearchResults(reset = false) {
+  fetchSearchResults(reset = false, isSearchFilter = false) {
     if (this.isLoading) return;
     if (reset)
       this.generalParamModel.mSearchParamPage = 1
@@ -207,21 +209,21 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults(true);
   }
 
-  reloadFilters(event: Record<string, string | null>) {
+  reloadFilters(filters: Record<string, string | null>) {
     this.generalParamModel.mSearchParamPage = 1
-    if (event['mNetwork'] != null) {
-      this.generalParamModel.mNetwork = event['mNetwork'];
+    if (filters['mNetwork'] != null) {
+      this.generalParamModel.mNetwork = filters['mNetwork'];
     }
-    if (event['mDateRange']) {
-      this.generalParamModel.mDateRange = event['mDateRange']
+    if (filters['mDateRange']) {
+      this.generalParamModel.mDateRange = filters['mDateRange']
     }
-    if (event['mContentType'] != null) {
-      this.generalParamModel.mContentType = event['mContentType'];
+    if (filters['mContentType'] != null) {
+      this.generalParamModel.mContentType = filters['mContentType'];
     }
-    if (event['mEntity'] != null) {
-      this.generalParamModel.mEntity = event['mEntity'];
+    if (filters['mEntity'] != null) {
+      this.generalParamModel.mEntity = filters['mEntity'];
     }
-    this.generalParamModel.mSearchParamSafeSearch = event['mSearchParamSafeSearch'] === 'yes';
+    this.generalParamModel.mSearchParamSafeSearch = filters['mSearchParamSafeSearch'] === 'yes';
     this.fetchSearchResults();
   }
 

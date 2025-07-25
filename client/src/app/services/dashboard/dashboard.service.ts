@@ -16,6 +16,8 @@ import {
 } from '../../shared/model/results/credentials/credential.callback.model';
 import { SocialCallbackModel } from '../../shared/model/results/social/social.callback.model';
 import { SocialParamModel } from '../../shared/model/results/social/social.param.model';
+import { FilterCategory } from '../../shared/model/filter/filter.model';
+import { EntityFilterService } from '../entityFilter/entity.filter.service';
 
 @Injectable({
   providedIn: 'root'
@@ -37,18 +39,55 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private apiService: ApiService, private _router: Router, private _route: ActivatedRoute) {
+  constructor(private apiService: ApiService, private entityFilterService: EntityFilterService, private _router: Router, private _route: ActivatedRoute) {
   }
 
-  fetchSearchResults<T extends {
-    Result?: any[];
-    cards_data?: any[]
-  }>(apiEndpoint: string, paramModel: any): Observable<{
-    success: boolean; isEmpty: boolean; data: T | null
-  }> {
-    this.cancelOngoingRequest();
+  // fetchSearchResults<T extends {
+  //   Result?: any[];
+  //   cards_data?: any[]
+  // }>(apiEndpoint: string, paramModel: any): Observable<{
+  //   success: boolean; isEmpty: boolean; data: T | null
+  // }> {
+  //   this.cancelOngoingRequest();
 
-    const params = new HttpParams({ fromObject: paramModel as any });
+  //   const params = new HttpParams({ fromObject: paramModel as any });
+
+  //   return this.apiService.get<T>(apiEndpoint, { params }).pipe(
+  //     takeUntil(this.cancelRequest$),
+  //     map((response: T) => ({
+  //       success: true,
+  //       isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
+  //       data: response
+  //     })),
+  //     catchError(() => of({ success: false, isEmpty: false, data: null }))
+  //   );
+  // }
+
+
+  fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(
+    apiEndpoint: string,
+    paramModel: any
+  ): Observable<{ success: boolean; isEmpty: boolean; data: T | null }> {
+
+    this.cancelOngoingRequest();
+    const currentFilterCategories: FilterCategory[] = this.entityFilterService.getCurrentFilterCategories();
+
+    const categoriesWithTags = currentFilterCategories.filter(
+      category => category.tags && category.tags.length > 0
+    );
+
+    const formattedFiltersForApi = categoriesWithTags.map(category => ({
+      categoryId: category.id,
+      categoryName: category.name,
+      tags: category.tags.map(tag => tag.value),
+    }));
+
+    const baseParams: any = { ...paramModel };
+
+    if (formattedFiltersForApi.length > 0) {
+      baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
+    }
+    const params = new HttpParams({ fromObject: baseParams });
 
     return this.apiService.get<T>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),
@@ -57,7 +96,10 @@ export class DashboardService {
         isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
         data: response
       })),
-      catchError(() => of({ success: false, isEmpty: false, data: null }))
+      catchError((error) => {
+        console.error('Search API call failed:', error);
+        return of({ success: false, isEmpty: false, data: null });
+      })
     );
   }
 
@@ -94,7 +136,26 @@ export class DashboardService {
   }> {
     this.cancelOngoingRequest();
 
-    const params = new HttpParams({ fromObject: paramModel as any });
+    const currentFilterCategories: FilterCategory[] = this.entityFilterService.getCurrentFilterCategories();
+
+    const categoriesWithTags = currentFilterCategories.filter(
+      category => category.tags && category.tags.length > 0
+    );
+
+    const formattedFiltersForApi = categoriesWithTags.map(category => ({
+      categoryId: category.id,
+      categoryName: category.name,
+      tags: category.tags.map(tag => tag.value),
+    }));
+
+    const baseParams: any = { ...paramModel };
+
+    if (formattedFiltersForApi.length > 0) {
+      baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
+    }
+    const params = new HttpParams({ fromObject: baseParams });
+
+    // const params = new HttpParams({ fromObject: paramModel as any });
 
     return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),

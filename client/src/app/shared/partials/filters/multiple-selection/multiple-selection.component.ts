@@ -1,5 +1,6 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FilterModel } from '../../../model/filter/filter.model';
 
 @Component({
   selector: 'app-multiple-selection',
@@ -8,7 +9,7 @@ import {CommonModule} from '@angular/common';
 })
 export class MultipleSelectionComponent {
   @Input() key = '';
-  @Input() filterModel: any;
+  @Input() filterModel!: FilterModel;
   @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
   @Input() mSelectedFilters: any
 

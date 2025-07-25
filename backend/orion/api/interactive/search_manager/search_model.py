@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException
 from starlette import status
+from datetime import datetime
 
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import \
@@ -44,6 +45,8 @@ from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
+from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import \
+    entity_filter_param_model
 
 
 class search_model:
@@ -130,7 +133,12 @@ class search_model:
         return await self.__search_callback.get_doc(result)
 
     async def search_general_result(self, param: search_general_param_model):
-        document, data_filter = elastic_request_generator().on_search_general_data(param)
+        # document, data_filter = elastic_request_generator().on_search_general_data(param)
+        entity_filter_clauses = self._process_entity_filters_generic(
+            param.filters,
+            self._GENERAL_FIELD_MAPPING 
+        )
+        document, data_filter = elastic_request_generator().on_search_general_data(param,entity_filter_clauses)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -139,7 +147,12 @@ class search_model:
         )
 
     async def search_leak_result(self, param: search_leak_param_model):
-        document, data_filter = elastic_request_generator().on_search_leakdata(param)
+        # document, data_filter = elastic_request_generator().on_search_leakdata(param)
+        entity_filter_clauses = self._process_entity_filters_generic(
+            param.filters,
+            self._LEAK_FIELD_MAPPING 
+        )
+        document, data_filter = elastic_request_generator().on_search_leakdata(param,entity_filter_clauses)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -165,9 +178,14 @@ class search_model:
 
         return ranked_results
 
-    @staticmethod
-    async def search_consolidated_result(param: search_consolidated_param_model):
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param)
+
+    async def search_consolidated_result(self,param: search_consolidated_param_model):
+        entity_filter_clauses = self._process_entity_filters_generic(
+            param.filters,
+            self._LEAK_FIELD_MAPPING 
+        )
+        print("__________________________search_model___________________________")
+        indices, queries = elastic_request_generator().on_search_consolidated_data(param,entity_filter_clauses)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         leak_data = {}
@@ -275,7 +293,12 @@ class search_model:
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
-        document, data_filter = elastic_request_generator().on_search_defacement_data(param)
+        # document, data_filter = elastic_request_generator().on_search_defacement_data(param)
+        entity_filter_clauses = self._process_entity_filters_generic(
+            param.filters,
+            self._DEFACEMENT_FIELD_MAPPING 
+        )
+        document, data_filter = elastic_request_generator().on_search_defacement_data(param,entity_filter_clauses)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(
@@ -283,3 +306,50 @@ class search_model:
             search_defacement_callback_model,
             []
         )
+    
+    def _process_entity_filters_generic(
+        self,
+        filters: Optional[List[entity_filter_param_model]],
+        field_mapping: Dict[str, str] 
+    ) -> List[Dict[str, Any]]:
+        es_clauses = []
+
+
+        if not filters:
+            return es_clauses
+
+
+        for filter_category in filters:
+            category_id = filter_category.categoryId
+            tags = filter_category.tags
+
+            if tags:
+                es_field_name = field_mapping.get(category_id)
+
+                if es_field_name:
+                    if len(tags) == 1:
+                        es_clauses.append({"term": {es_field_name: tags[0]}})
+                    else:
+                        es_clauses.append({"terms": {es_field_name: tags}})
+                else:
+                    print(f"Warning: No Elasticsearch field mapping found for category ID: {category_id} in the provided context.")
+        return es_clauses
+    
+
+    _DEFACEMENT_FIELD_MAPPING = {
+        'email': 'm_email',
+        'country': 'm_location',
+        'hashes': 'm_hash',
+    }
+
+    _LEAK_FIELD_MAPPING = {
+        'email': 'm_email',
+        'country': 'm_country_name',
+        'hashes': 'm_hash', 
+    }
+
+    _GENERAL_FIELD_MAPPING = {
+        'email': 'general_email_field',
+        'country': 'general_m_location',
+        'hashes': 'm_hash',
+    }
