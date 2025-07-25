@@ -91,9 +91,6 @@ async def search_consolidated(param: search_consolidated_param_model = Depends()
 
 @api_routes.get("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_chat_param_model = Depends()):
-    if param.ctype=="warfare":
-        param.ctype = "war"
-
     return await search_model.getInstance().search_telegram_result(param)
 
 
