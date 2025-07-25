@@ -404,10 +404,6 @@
 }
 
 @media only screen and (height <= 943px) {
-  .sidebar__item-dropdown-max {
-    display: none;
-  }
-
   .sidebar__items {
     list-style: none;
     overflow-y: auto;
@@ -415,7 +411,7 @@
   }
 
   .sidebar-collapsed .sidebar__items {
-    height: 100vh;
+    height: calc(100vh - 120px);
   }
 
 }

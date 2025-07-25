@@ -90,6 +90,9 @@ async def search_consolidated(param: search_consolidated_param_model = Depends()
 
 @api_routes.get("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_chat_param_model = Depends()):
+    if param.mContentType=="warfare":
+        param.mContentType = "war"
+
     return await search_model.getInstance().search_telegram_result(param)
 
 
@@ -161,8 +164,7 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, al
     return await search_model.getInstance().request_general_doc(doc_id, lang)
 
 
-@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
-                description="Get a specific strategic report document by its document ID and optional language.")
+@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],description="Get a specific strategic report document by its document ID and optional language.")
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
