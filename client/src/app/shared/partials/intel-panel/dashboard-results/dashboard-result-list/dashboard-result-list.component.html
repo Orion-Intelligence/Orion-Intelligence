@@ -1,29 +1,29 @@
-<div class="directory-list__container-result">
-  <div class="directory-list__container list-container">
+<div class="list__container-result">
+  <div class="list__container list-container">
     <table class="table table-striped directory-list__table clear-paddings">
       <thead>
       <tr>
-        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="directory-list__container-sort directory-list__column-id-min" scope="col">
+        <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="list__container-sort list__column-id-min" scope="col">
           #
         </th>
-        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="directory-list__container-sort" scope="col">Base URL
+        <th (click)="sortTable('m_base_url')" [ngClass]="getSortClass('m_base_url')" class="list__container-sort" scope="col">Base URL
         </th>
-        <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="directory-list__container-sort" scope="col">IP Addresses
+        <th (click)="sortTable('m_ip')" [ngClass]="getSortClass('m_ip')" class="list__container-sort" scope="col">IP Addresses
         </th>
-        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="directory-list__container-sort" scope="col">Attacker
+        <th (click)="sortTable('m_attacker')" [ngClass]="getSortClass('m_attacker')" class="list__container-sort" scope="col">Attacker
         </th>
-        <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="directory-list__container-sort" scope="col">Team
+        <th (click)="sortTable('m_team')" [ngClass]="getSortClass('m_team')" class="list__container-sort" scope="col">Team
         </th>
-        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="directory-list__container-sort" scope="col">Web Server
+        <th (click)="sortTable('m_web_server')" [ngClass]="getSortClass('m_web_server')" class="list__container-sort" scope="col">Web Server
         </th>
-        <th (click)="sortTable('m_date_of_leak')" [ngClass]="getSortClass('m_date_of_leak')" class="directory-list__container-sort" scope="col">Leak Date
+        <th (click)="sortTable('m_date_of_leak')" [ngClass]="getSortClass('m_date_of_leak')" class="list__container-sort" scope="col">Leak Date
         </th>
-        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="directory-list__container-sort" scope="col">Web URL
+        <th (click)="sortTable('m_web_url')" [ngClass]="getSortClass('m_web_url')" class="list__container-sort" scope="col">Web URL
         </th>
       </tr>
       </thead>
       <tbody>
-      <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 4)); let i = index">
+      <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults: searchResults); let i = index">
         <tr (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
           <td>{{ i + 1 }}</td>
           <td>{{ item.m_url || 'Not Found' }}</td>

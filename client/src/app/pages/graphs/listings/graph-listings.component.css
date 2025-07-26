@@ -1,4 +1,4 @@
-.doc-id {
+.graph-listing-doc-id {
   font-size: 14px;
   opacity: 0.7;
   margin-bottom: 4px;
@@ -8,39 +8,35 @@
   text-overflow: ellipsis;
 }
 
-.doc-title {
+.graph-listing-doc-title {
   font-size: 12px;
   font-weight: 500;
   opacity: 1;
   margin-top: -10px;
 }
 
-.doc-cluster {
+.graph-listing-doc-cluster {
   font-size: 12px;
   font-weight: 500;
   opacity: 1;
   margin-top: 0;
 }
 
-.divider {
-  height: 1px;
-  background-color: rgb(255 255 255 / 10%);
-  margin: 12px 0;
-}
-
-.doc-id-line {
+.graph-listing-doc-line {
   display: flex;
   align-items: center;
   margin-bottom: 4px;
 }
 
-.left {
-  display: flex;
-  flex-direction: column;
+/* Override */
+
+.graph-listing-container .divider {
+  height: 1px;
+  background-color: rgb(255 255 255 / 10%);
+  margin: 12px 0;
 }
 
-.doc-icon {
-  width: 18px;
-  height: 18px;
-  margin-left: 15px;
+.graph-listing-container .left {
+  display: flex;
+  flex-direction: column;
 }

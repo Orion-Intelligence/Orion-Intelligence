@@ -4,8 +4,7 @@
 </ng-container>
 
 <div class="login-wrapper">
-  <img alt="background" class="login-background img-fluid w-100 h-100 object-fit-cover"
-       src="assets/images/shared/Bg.webp">
+  <img alt="background" class="login-background img-fluid w-100 h-100 object-fit-cover" src="assets/images/shared/Bg.webp">
 </div>
 
 <div *ngIf="!authenticated" class="login-container" id="content">
@@ -19,20 +18,15 @@
 
     <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
       <div class="login-form-group">
-        <label class="login-hidden-label" for="id_username">Username</label>
-        <input [(ngModel)]="user.username" class="login-input login-input-username" id="id_username" name="username" placeholder="Username"
-               required type="text">
+        <label class="login-hidden-label" for="id_username">Username</label> <input [(ngModel)]="user.username" class="login-input login-input-username" id="id_username" name="username" placeholder="Username" required type="text">
       </div>
 
       <div class="login-form-group">
-        <label class="login-hidden-label" for="id_password">Password</label>
-        <input [(ngModel)]="user.password" class="login-input" id="id_password" minlength="6" name="password"
-               placeholder="Password" required type="password">
+        <label class="login-hidden-label" for="id_password">Password</label> <input [(ngModel)]="user.password" class="login-input" id="id_password" minlength="6" name="password" placeholder="Password" required type="password">
       </div>
 
       <div class="login-button-container">
-        <input [disabled]="!loginForm.valid" [ngClass]="loginForm.valid ? 'login-btn-submit' : 'login-btn-disabled'"
-               type="submit" value="Log in"/>
+        <input [disabled]="!loginForm.valid" [ngClass]="loginForm.valid ? 'login-btn-submit' : 'login-btn-disabled'" type="submit" value="Log in"/>
       </div>
     </form>
   </div>

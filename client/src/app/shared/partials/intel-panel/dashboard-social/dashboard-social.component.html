@@ -5,5 +5,5 @@
 </div>
 
 <div *ngIf="!isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="socialParamModel.mSearchParamPage" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
+  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="this.dashboardService.consolidatedParamModel.mSearchParamPage" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
 </div>

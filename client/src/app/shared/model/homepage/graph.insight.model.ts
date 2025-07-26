@@ -1,12 +1,12 @@
 export interface GraphBucket {
-    key: string;
-    count: number;
+  key: string;
+  count: number;
 }
 
 export interface GraphAggregation {
-    aggregation_name: string;
-    index: string;
-    buckets: GraphBucket[];
+  aggregation_name: string;
+  index: string;
+  buckets: GraphBucket[];
 }
 
 export type GraphInsightCallbackModel = [true, GraphAggregation[]] | [false, null];

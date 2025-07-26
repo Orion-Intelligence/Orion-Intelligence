@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { JsonViewerComponent } from './json-viewer/json-viewer.component';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {JsonViewerComponent} from './json-viewer/json-viewer.component';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-json-api-viewer',

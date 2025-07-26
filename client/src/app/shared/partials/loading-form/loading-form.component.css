@@ -162,7 +162,7 @@
   }
 }
 
-@media only screen and (width <=943px) {
+@media only screen and (width <= 943px) {
   .skeleton-loader {
     width: calc(100% - 30px);
     margin-left: 15px;

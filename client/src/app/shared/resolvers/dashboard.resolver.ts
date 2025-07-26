@@ -6,7 +6,6 @@ import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from '@angular/rou
 })
 export class DashboardResolver implements Resolve<boolean> {
   resolve(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): boolean {
-
     return true;
   }
 }

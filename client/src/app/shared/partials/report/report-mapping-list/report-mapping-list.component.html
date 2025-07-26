@@ -12,7 +12,7 @@
       </div>
     </div>
     <div *ngIf="isExpanded" class="content pt-3">
-      <div class="directory-list__container report-mapping">
+      <div class="list__container report-mapping">
         <table class="table table-striped directory-list__table clear-paddings mb-0">
           <thead *ngIf="loading || filteredItems.length>0 ">
             <tr>
@@ -29,20 +29,20 @@
                   {{ (i + 1) }}
                 </td>
                 <td data-label="Service URL">
-                  <a class="directory-list__table-url text-decoration-none text-reset">
+                  <a class="list__table-url text-decoration-none text-reset">
                     {{ extractId(item.edge._id) }}
                   </a>
                 </td>
                 <td data-label="Category">
                   <div class="d-flex flex-wrap">
-                    <div class="directory-list__content-category px-2 py-1 text-truncate">
+                    <div class="list__content-category px-2 py-1 text-truncate">
                       {{ extractProperty(item.edge._id, "key") }}
                     </div>
                   </div>
                 </td>
                 <td data-label="Category">
                   <div class="d-flex flex-wrap">
-                    <div class="directory-list__content-category px-2 py-1 text-truncate">
+                    <div class="list__content-category px-2 py-1 text-truncate">
                       {{ extractProperty(item.edge._id, "value") }}
                     </div>
                   </div>

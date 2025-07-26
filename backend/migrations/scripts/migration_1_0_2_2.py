@@ -53,7 +53,6 @@ class migration_1_0_2_2:
             }
             success, error = await elastic.index_data(entry)
             migration_count = migration_count + 1
-            print(migration_count)
             if not success:
                 return False, f"Re-indexing failed: {error}"
         return True, None
@@ -96,7 +95,6 @@ class migration_1_0_2_2:
                     ELASTIC_KEYS.S_VALUE: new_data
                 }
                 migration_count = migration_count + 1
-                print(migration_count)
                 success, error = await elastic.index_data(entry)
                 if not success:
                     return False, f"Re-indexing failed: {error}"

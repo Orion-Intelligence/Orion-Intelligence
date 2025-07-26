@@ -1,4 +1,10 @@
-.main-container {
+.notice {
+  margin-top: 100px;
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.notice-container {
   background-image: url("/assets/images/shared/error-page.png");
   margin-left: -5px;
   height: 100vh !important;
@@ -15,12 +21,6 @@
 .notice__action-button {
   margin-top: 10px;
   width: 300px
-}
-
-.notice {
-  margin-top: 100px;
-  padding: 40px 15px;
-  text-align: center;
 }
 
 .notice__actions {

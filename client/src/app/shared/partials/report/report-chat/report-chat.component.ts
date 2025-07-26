@@ -152,9 +152,9 @@ export class ReportChatComponent implements OnInit {
     );
   }
 
-  formatKeyTitle(key: string): string {
-    const cleaned = (key.startsWith('m_') ? key.slice(2) : key).split('_').join(' ');
-    return cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
+  formatKeyLabel(key: string): string {
+    const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
+    return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
   }
 
   shareResult() {

@@ -9,7 +9,7 @@ import { HelperService } from '../../../services/helper.service';
 import { LeakResultItem } from '../../../model/results/leak/leak.callback.model';
 import { GeneralResultItem } from '../../../model/results/general/general.callback.model';
 import { AppService } from '../../../../services/core/app.service';
-import { Category } from '../../../enums/pages';
+import { Category } from '../../../constants/pages';
 import { ApiService } from '../../../services/api.service';
 import { HttpParams } from '@angular/common/http';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';

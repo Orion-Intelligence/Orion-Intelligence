@@ -6,7 +6,10 @@ export class ConsolidatedParamModel {
   mDateRange = "";
   mContentType = "";
   mEntity = "";
-
+  mMitreTtp = "";
+  ctype = "";
+  mTeam = ""
+  mAttacker = "";
   m_attacker: string[] = [];
   m_team = "";
   m_web_server: string[] = [];
@@ -16,6 +19,13 @@ export class ConsolidatedParamModel {
   m_date_of_leak?: string;
   m_web_url: string[] = [];
   m_hash = "";
+  mSearchParamSafeSearch = false;
   m_screenshot?: string;
   m_url = "";
+  email?: string;
+  username?: string;
+  mPlatform="";
+  mURL = ""
+  mUser = ""
+  mFullSearch = false
 }

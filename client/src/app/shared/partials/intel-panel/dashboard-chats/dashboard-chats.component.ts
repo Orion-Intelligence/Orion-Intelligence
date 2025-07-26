@@ -3,7 +3,6 @@ import {AppService} from '../../../../services/core/app.service';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {ChatParamModel} from '../../../model/results/chat/chat.param.model';
 import {ChatCallbackModel} from '../../../model/results/chat/chat.callback.model';
 import {NgIf} from '@angular/common';
 import {PaginationComponent} from '../../pagination/pagination.component';
@@ -11,7 +10,7 @@ import {ResultComponent} from '../../result/result.component';
 import {DashboardResultChatComponent} from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 import {chat_filters} from '../../../constants/filters';
-import {ChannelTypeKeys, SortType} from '../../../constants/enums';
+import {ChannelTypeKeys, SortType} from '../../../constants/shared-enums';
 import {HelperService} from '../../../services/helper.service';
 
 @Component({
@@ -26,7 +25,6 @@ import {HelperService} from '../../../services/helper.service';
   animations: [fadeInDashboardItem]
 })
 export class DashboardChatsComponent implements OnInit, AfterViewInit {
-  public chatParamModel: ChatParamModel = new ChatParamModel();
   public chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
 
   query = ""
@@ -44,7 +42,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(this.chatParamModel.mSearchParamPage)
+    this.appService.updatePage(this.dashboardService.consolidatedParamModel.mSearchParamPage)
   }
 
   ngOnInit(): void {
@@ -53,22 +51,22 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     const category = this.route.snapshot.routeConfig?.path;
     let isDiscussion = false
     if (category && ChannelTypeKeys.includes(category.toUpperCase())) {
-      this.chatParamModel.ctype = category
+      this.dashboardService.consolidatedParamModel.ctype = category
       isDiscussion = true
     } else {
-      this.chatParamModel.ctype = "all"
+      this.dashboardService.consolidatedParamModel.ctype = "all"
     }
 
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
         this.query = params['q'];
-        this.chatParamModel.q = params['q'] || '';
-        this.chatParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
+        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
+        this.dashboardService.consolidatedParamModel.mSearchParamPage = params['mSearchParamPage'] || '1';
 
         if (!isDiscussion && this.firstTrigger && ((this.chatCallbackModel.Result.length > 0))) {
           this.isLoading = false;
-          this.query = this.chatParamModel.q
+          this.query = this.dashboardService.consolidatedParamModel.q
         } else {
           this.cdr.detectChanges();
           this.fetchSearchResults()
@@ -79,11 +77,11 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
   fetchSearchResults(reset = false): void {
     if (reset)
-      this.chatParamModel.mSearchParamPage = 1;
+      this.dashboardService.consolidatedParamModel.mSearchParamPage = 1;
 
-    if (!this.chatParamModel.q) {
+    if (!this.dashboardService.consolidatedParamModel.q) {
       this.isLoading = false;
-      this.chatParamModel.q = "";
+      this.dashboardService.consolidatedParamModel.q = "";
 
       this.router.navigate([], {
         queryParams: {},
@@ -95,7 +93,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
     const cleanedParams: any = {};
 
-    Object.entries(this.chatParamModel).forEach(([key, value]) => {
+    Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       const isDefault =
         (key === 'mContentType' && value === 'all') ||
         (key === 'mDateRange' && value === '') ||
@@ -122,7 +120,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     }
 
     this.dashboardService
-      .fetchSearchResults<ChatCallbackModel>('chat/telegram', this.chatParamModel)
+      .fetchSearchResults<ChatCallbackModel>('chat/telegram', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
@@ -137,35 +135,35 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   onPageChange(step: number) {
-    this.chatParamModel.mSearchParamPage = step;
+    this.dashboardService.consolidatedParamModel.mSearchParamPage = step;
     this.fetchSearchResults();
   }
 
   onUpdateQuery(query: string) {
-    this.chatParamModel.q = query
+    this.dashboardService.consolidatedParamModel.q = query
   }
 
   resetFilters(_: void) {
-    this.chatParamModel.mSearchParamPage = 1;
-    this.chatParamModel.mContentType = "all";
-    this.chatParamModel.mDateRange = "";
-    this.chatParamModel.mEntity = "";
-    this.chatParamModel.mMitreTtp = "";
+    this.dashboardService.consolidatedParamModel.mSearchParamPage = 1;
+    this.dashboardService.consolidatedParamModel.mContentType = "all";
+    this.dashboardService.consolidatedParamModel.mDateRange = "";
+    this.dashboardService.consolidatedParamModel.mEntity = "";
+    this.dashboardService.consolidatedParamModel.mMitreTtp = "";
     this.fetchSearchResults(true);
   }
 
   reloadFilters(event: Record<string, string | null>) {
     if (event['mContentType'] != null) {
-      this.chatParamModel.mContentType = event['mContentType'];
+      this.dashboardService.consolidatedParamModel.mContentType = event['mContentType'];
     }
     if (event['mDateRange'] != null) {
-      this.chatParamModel.mDateRange = event['mDateRange'];
+      this.dashboardService.consolidatedParamModel.mDateRange = event['mDateRange'];
     }
     if (event['mEntity'] != null) {
-      this.chatParamModel.mEntity = event['mEntity'];
+      this.dashboardService.consolidatedParamModel.mEntity = event['mEntity'];
     }
     if (event['mMitreTtp'] != null) {
-      this.chatParamModel.mMitreTtp = event['mMitreTtp'];
+      this.dashboardService.consolidatedParamModel.mMitreTtp = event['mMitreTtp'];
     }
     this.fetchSearchResults();
   }

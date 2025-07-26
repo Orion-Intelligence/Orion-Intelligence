@@ -1,8 +1,9 @@
-import { FormsModule } from '@angular/forms';
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ConsolidatedCallbackModel } from '../../../model/results/consolidated/consolidated.callback.model';
-import { UniqueLinkItem } from '../../../model/homepage/consolidationInsights'
+import {FormsModule} from '@angular/forms';
+import {Component, Input, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ConsolidatedCallbackModel} from '../../../model/results/consolidated/consolidated.callback.model';
+import {UniqueLinkItem} from '../../../model/homepage/consolidation_insights';
+import {DATA_SECTION_TEMPLATE, FIELDS_MAP} from '../../../constants/shared-enums';
 
 
 @Component({
@@ -11,7 +12,7 @@ import { UniqueLinkItem } from '../../../model/homepage/consolidationInsights'
   templateUrl: './result-insights.component.html',
   styleUrl: './result-insights.component.css'
 })
-export class ResultInsightsComponent {
+export class ResultInsightsComponent implements OnInit {
   @Input() consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   @Input() results: any;
   sectionStates: Record<string, boolean> = {
@@ -68,109 +69,45 @@ export class ResultInsightsComponent {
   uniqueUrls: UniqueLinkItem[] = [];
   keywordData: { value: number, label: string }[] = [];
   coverageData: { value: number, label: string, color: string }[] = [];
+
   ngOnInit(): void {
     this.uniqueUrls = this.getUniqueLinks(this.consolidatedCallbackModel);
-    const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel);
+    const {emails, names} = this.extractNamesAndEmails(this.consolidatedCallbackModel);
     this.emails = emails;
     this.names = names;
-    this.keywordData.push({ value: this.getTotalResultCount(this.consolidatedCallbackModel), label: 'Total Found' })
-    this.keywordData.push({ value: this.emails.length + this.names.length, label: 'Documents' })
-    this.keywordData.push({ value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel), label: 'Links' })
-    this.keywordData.push({ value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages' })
+    this.keywordData.push({value: this.getTotalResultCount(this.consolidatedCallbackModel), label: 'Total Found'})
+    this.keywordData.push({value: this.emails.length + this.names.length, label: 'Documents'})
+    this.keywordData.push({value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel), label: 'Links'})
+    this.keywordData.push({value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages'})
     this.getCoverageSummaryFromModels(this.consolidatedCallbackModel);
-    const fieldsMap = {
-      bitcoinAddresses: ['m_bitcoin_addresses'],
-      phoneNumbers: ['m_phone_number'],
-      domains: ['m_domain'],
-      cveCwe: ['m_cve', 'm_cwe'],
-      ipAddresses: ['m_ip'],
-      yaraRules: ['m_yara_rule'],
-      awsSecrets: ['m_aws_secret'],
-      filePaths: ['m_file_path'],
-      creditCards: ['m_credit_card'],
-      organizations: ['m_org', 'm_company_name'],
-      geopoliticalEntities: ['m_gpe'],
-      norps: ['m_norp'],
-      products: ['m_product'],
-      persons: ['m_person'],
-      locations: ['m_location', 'm_country', 'm_states'],
-      laws: ['m_law'],
-      aadhaar: ['m_in_aadhaar'],
-      australianIds: ['m_au_abn', 'm_au_tfn'],
-      indianIds: ['m_in_vehicle_registration', 'm_in_pan', 'm_in_voter', 'm_in_passport'],
-      usIds: ['m_us_itin', 'm_us_ssn', 'm_us_passport', 'm_us_driver_license'],
-      usBankDetails: ['m_us_bank_number'],
-      usernames: ['m_username'],
-      passwords: ['m_password'],
-      hashtags: ['m_hashtag'],
-      mentions: ['m_mention'],
-      mitreTtp: ['m_mitre_ttp_type', 'm_mitre_ttp_name'],
-      documentIds: ['m_document_id'],
-      medicalLicenses: ['m_medical_license'],
-      employeeData: ['m_employee_count'],
-      teams: ['m_team', 'm_attacker'],
-      language: ['m_language'],
-      userAgents: ['m_user_agents'],
-      asns: ['m_asns'],
-      channels: ['m_channel_name'],
-      senders: ['m_sender_name'],
-      contentTypes: ['m_content_type', 'mContentType']
-    };
-    const extractedData = this.extractMultipleFieldsFromResults(this.results, fieldsMap);
-    this.dataSections = [
-      { title: 'Bitcoin Addresses', key: 'isBitcoinExpanded', data: extractedData['bitcoinAddresses'] },
-      { title: 'Phone Numbers', key: 'isPhoneExpanded', data: extractedData['phoneNumbers'] },
-      { title: 'Domains', key: 'isDomainExpanded', data: extractedData['domains'] },
-      { title: 'CVE & CWE', key: 'isCveCweExpanded', data: extractedData['cveCwe'] },
-      { title: 'IP Addresses', key: 'isIpExpanded', data: extractedData['ipAddresses'] },
-      { title: 'YARA Rules', key: 'isYaraExpanded', data: extractedData['yaraRules'] },
-      { title: 'AWS Secrets', key: 'isAwsExpanded', data: extractedData['awsSecrets'] },
-      { title: 'File Paths', key: 'isFilePathExpanded', data: extractedData['filePaths'] },
-      { title: 'Credit Cards', key: 'isCreditCardExpanded', data: extractedData['creditCards'] },
-      { title: 'Organizations', key: 'isOrganizationExpanded', data: extractedData['organizations'] },
-      { title: 'Geopolitical Entities', key: 'isGpeExpanded', data: extractedData['geopoliticalEntities'] },
-      { title: 'NORPs', key: 'isNorpExpanded', data: extractedData['norps'] },
-      { title: 'Products', key: 'isProductExpanded', data: extractedData['products'] },
-      { title: 'Persons', key: 'isPersonExpanded', data: extractedData['persons'] },
-      { title: 'Locations', key: 'isLocationExpanded', data: extractedData['locations'] },
-      { title: 'Laws', key: 'isLawExpanded', data: extractedData['laws'] },
-      { title: 'Aadhaar (IN)', key: 'isAadhaarExpanded', data: extractedData['aadhaar'] },
-      { title: 'Australian IDs', key: 'isAustralianIdExpanded', data: extractedData['australianIds'] },
-      { title: 'Indian IDs', key: 'isIndianIdExpanded', data: extractedData['indianIds'] },
-      { title: 'US IDs', key: 'isUsIdExpanded', data: extractedData['usIds'] },
-      { title: 'US Bank Numbers', key: 'isUsBankExpanded', data: extractedData['usBankDetails'] },
-      { title: 'Usernames', key: 'isUsernameExpanded', data: extractedData['usernames'] },
-      { title: 'Passwords', key: 'isPasswordExpanded', data: extractedData['passwords'] },
-      { title: 'Hashtags', key: 'isHashtagExpanded', data: extractedData['hashtags'] },
-      { title: 'Mentions', key: 'isMentionExpanded', data: extractedData['mentions'] },
-      { title: 'MITRE TTP', key: 'isMitreExpanded', data: extractedData['mitreTtp'] },
-      { title: 'Document IDs', key: 'isDocumentIdExpanded', data: extractedData['documentIds'] },
-      { title: 'Medical Licenses', key: 'isMedicalExpanded', data: extractedData['medicalLicenses'] },
-      { title: 'Employee Data', key: 'isEmployeeExpanded', data: extractedData['employeeData'] },
-      { title: 'Teams', key: 'isTeamExpanded', data: extractedData['teams'] },
-      { title: 'Languages', key: 'isLanguageExpanded', data: extractedData['language'] },
-      { title: 'User Agents', key: 'isUserAgentExpanded', data: extractedData['userAgents'] },
-      { title: 'ASNs', key: 'isAsnExpanded', data: extractedData['asns'] },
-      { title: 'Channels', key: 'isChannelExpanded', data: extractedData['channels'] },
-      { title: 'Senders', key: 'isSenderExpanded', data: extractedData['senders'] },
-      { title: 'Content Types', key: 'isContentTypeExpanded', data: extractedData['contentTypes'] }
-    ];
+
+    const extractedData = this.extractMultipleFieldsFromResults(this.results, FIELDS_MAP);
+
+    this.dataSections = DATA_SECTION_TEMPLATE.map(section => ({
+      title: section.title,
+      key: section.key,
+      data: extractedData[section.fieldKey] || []
+    }));
   }
+
   toggleFilter(option: string) {
     this.selectedFilter = option;
   }
+
   toggleSection(section: string): void {
     if (section in this.sectionStates) {
       this.sectionStates[section] = !this.sectionStates[section];
     }
   }
+
   isSectionExpanded(section: string): boolean {
-    return !!this.sectionStates[section];
+    return this.sectionStates[section];
   }
+
   threatResults(): string[] {
     const query = this.searchQuery.trim().toLowerCase();
 
-    let source: string[] = [];
+    let source: string[];
 
     switch (this.selectedFilter) {
       case 'Email':
@@ -187,6 +124,7 @@ export class ResultInsightsComponent {
 
     return source.filter(item => item.toLowerCase().includes(query));
   }
+
   getTotalResultCount(consolidated: ConsolidatedCallbackModel): number {
     return (
       (consolidated.leak_model?.Result?.length || 0) +
@@ -197,6 +135,7 @@ export class ResultInsightsComponent {
       (consolidated.social_model?.Result?.length || 0)
     );
   }
+
   getActiveModelCount(consolidated: ConsolidatedCallbackModel): number {
     const models = [
       consolidated.leak_model,
@@ -209,13 +148,14 @@ export class ResultInsightsComponent {
 
     return models.filter(model => model && model.Result && model.Result.length > 0).length;
   }
+
   getUniqueLinks(consolidated: ConsolidatedCallbackModel): UniqueLinkItem[] {
     const linkMap = new Map<string, UniqueLinkItem>();
 
     const addToMap = (url: string | undefined, title: string | undefined, date?: string) => {
       if (url && !linkMap.has(url)) {
         const status = this.getStatus(date);
-        linkMap.set(url, { url, title: title || 'Untitled', status });
+        linkMap.set(url, {url, title: title || 'Untitled', status});
       }
     };
 
@@ -261,11 +201,7 @@ export class ResultInsightsComponent {
 
     if (diffInDays <= 5) {
       return true;
-    } else if (diffInDays <= 10) {
-      return true;
-    } else {
-      return false;
-    }
+    } else return diffInDays <= 10;
   }
 
   extractNamesAndEmails(consolidated: ConsolidatedCallbackModel): { emails: string[], names: string[] } {
@@ -291,7 +227,7 @@ export class ResultInsightsComponent {
       extractFromText(item.m_meta_description);
     });
 
-    consolidated.defacement_model?.Result?.forEach(item => {
+    consolidated.defacement_model?.Result?.forEach((item: { m_attacker: string | string[] | undefined; m_team: string | string[] | undefined; }) => {
       extractFromText(item.m_attacker);
       extractFromText(item.m_team);
     });
@@ -324,11 +260,12 @@ export class ResultInsightsComponent {
       names: Array.from(names),
     };
   }
+
   getCoverageSummaryFromModels(consolidated: ConsolidatedCallbackModel): void {
     let active = 0;
     let seldom = 0;
     let inactive = 0;
-    let total = 0;
+    let total;
 
     const allResults: any[] = [
       ...(consolidated.leak_model?.Result || []),
@@ -353,12 +290,13 @@ export class ResultInsightsComponent {
     });
 
     this.coverageData = [
-      { value: total, label: 'Total', color: '' },
-      { value: active, label: 'Active', color: '#1ec773' },
-      { value: inactive, label: 'Inactive', color: '#e6534b' },
-      { value: seldom, label: 'Seldom', color: '#f08b36' }
+      {value: total, label: 'Total', color: ''},
+      {value: active, label: 'Active', color: '#1ec773'},
+      {value: inactive, label: 'Inactive', color: '#e6534b'},
+      {value: seldom, label: 'Seldom', color: '#f08b36'}
     ];
   }
+
   getStatusCategory(dateString?: string): 'Active' | 'Seldom' | 'Inactive' {
     if (!dateString) return 'Inactive';
     const updatedDate = new Date(dateString);
@@ -373,6 +311,7 @@ export class ResultInsightsComponent {
       return 'Inactive';
     }
   }
+
   getSingleUrlPerResultCount(consolidated: ConsolidatedCallbackModel): number {
     const fieldMap: { [key: string]: string[] } = {
       generic_model: ['m_url', 'm_clearnet_links', 'm_weblink', 'm_dumplink'],
@@ -422,6 +361,7 @@ export class ResultInsightsComponent {
 
             if (Array.isArray(value)) {
               for (const v of value) {
+                // noinspection SuspiciousTypeOfGuard
                 if (typeof v === 'string' && v.trim()) {
                   resultMap[categoryKey].add(v);
                 }

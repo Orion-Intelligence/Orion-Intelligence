@@ -1,15 +1,18 @@
-import {Component, Input, SimpleChanges} from '@angular/core';
-import {Category} from '../../enums/pages';
+import {Component, Input, OnInit} from '@angular/core';
+import {Category} from '../../constants/pages';
 
 @Component({
-  selector: 'app-empty-result', imports: [], templateUrl: './empty-result.component.html',
+  selector: 'app-empty-result',
+  templateUrl: './empty-result.component.html',
+  standalone: true,
+  imports: [],
 })
-export class EmptyResultComponent {
+export class EmptyResultComponent implements OnInit {
   @Input() searchQuery!: string;
-  query = ""
+  query = '';
   protected readonly category = Category;
 
-  ngOnInit(_: SimpleChanges): void {
-    this.query = this.searchQuery
+  ngOnInit(): void {
+    this.query = this.searchQuery;
   }
 }

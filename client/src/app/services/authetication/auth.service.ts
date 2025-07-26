@@ -49,7 +49,7 @@ export class AuthService {
         }
         this.setToken(response.access_token, username, response.role);
         this.startTokenRefresh();
-      }, error: (err) => {
+      }, error: (_) => {
         this.authState.next({
           token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Invalid credentials'
         });

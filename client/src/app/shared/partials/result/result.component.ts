@@ -8,26 +8,24 @@ import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { SidebarService } from '../../services/sidebar.service';
 import { FiltersComponent } from '../filters/filters.component';
 import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
-import { SortType } from '../../constants/enums';
+import { SortType } from '../../constants/shared-enums';
 import { SuggestionComponent } from '../suggestion/suggestion.component';
 import { EmptyQueryComponent } from '../empty-query/empty-query.component';
 import { Suggestion } from '../../model/results/shared/common-result';
 import { query } from '@angular/animations';
-import { Category } from "../../enums/pages";
+import { Category } from "../../constants/pages";
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { AppService } from '../../../services/core/app.service';
 import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/search-filters.component";
-import { SelectedFilterBarComponent } from "../../../pages/homepage/selected-filter-bar/selected-filter-bar.component";
-import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
@@ -69,7 +67,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
-  constructor(public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute, private advanceSearhFilters: EntityFilterService) {
+  constructor(public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -119,9 +117,7 @@ export class ResultComponent implements OnInit, OnChanges {
   searchFiltersChanged() {
     this.applyFilters(this.selectedFilters)
   }
-  onClearAllFromBar(): void {
-    this.resetFilters();
-  }
+
   applyFilters(filters: Record<string, string | null>) {
     this.selectedFilters = filters;
     this.reloadFilters.emit(this.selectedFilters);
@@ -140,11 +136,11 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query && quoteCount < 2) {
       query = this.local_query.replace(/"/g, ' ').replace(/\s+/g, ' ').trim();
 
-      if (this.selectedSearchBy === 'Match indivisual terms') {
+      if (this.selectedSearchBy === 'Match full query') {
         if (query) {
           query = `"${query}"`;
         }
-      } else if (this.selectedSearchBy === 'Match all terms') {
+      } else if (this.selectedSearchBy === 'Match indivisual terms') {
         if (query) {
           query = query.split(' ').map(t => `"${t}"`).join(' ');
         }
@@ -205,9 +201,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.selectedSortBy = type;
     this.onToggleSort.emit(type);
   }
-  onSearchFocus() {
-    this.setFilterOverlay(true);
-  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -223,8 +217,5 @@ export class ResultComponent implements OnInit, OnChanges {
   }
   setFilterOverlay(newValue: boolean) {
     this.showFiltersOverlay = newValue;
-  }
-  getNonEmptyCategoryCount(): number {
-    return this.advanceSearhFilters.getNonEmptyCategoryCount();
   }
 }

@@ -7,12 +7,11 @@ import {DashboardService} from '../../../../services/dashboard/dashboard.service
 import {PaginationComponent} from '../../pagination/pagination.component';
 import {DashboardResultListComponent} from '../dashboard-results/dashboard-result-list/dashboard-result-list.component';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {DefacementParamModel} from '../../../model/results/defacement/defacement.callback.model';
-import {DefacementCallbackModel} from '../../../model/results/defacement/defacement.param.model';
+import {DefacementCallbackModel} from '../../../model/results/defacement/defacement.callback.model';
 import {AppService} from '../../../../services/core/app.service';
 import {defacement_filters} from '../../../constants/filters';
-import {Category} from '../../../enums/pages';
-import {SortType} from '../../../constants/enums';
+import {Category} from '../../../constants/pages';
+import {SortType} from '../../../constants/shared-enums';
 import {HelperService} from '../../../services/helper.service';
 
 @Component({
@@ -22,22 +21,21 @@ import {HelperService} from '../../../services/helper.service';
   animations: [fadeInDashboardItem],
 })
 export class DashboardDefacementComponent implements OnInit, AfterViewInit {
-  defacementParamModel: DefacementParamModel = new DefacementParamModel();
+  protected readonly Math = Math;
+  protected readonly defacement_filters = defacement_filters;
+
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
   result_count = 0;
   type = Category.DEFACEMENT
-
   query = '';
   isLoading = false;
   firstTrigger = true;
-  protected readonly Math = Math;
-  protected readonly defacement_filters = defacement_filters;
 
   constructor(protected helperService: HelperService, public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(this.defacementParamModel.mSearchParamPage)
+    this.appService.updatePage(this.dashboardService.consolidatedParamModel.mSearchParamPage)
   }
 
   ngOnInit(): void {
@@ -48,13 +46,13 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
         this.query = params['q'] || '';
-        this.defacementParamModel.q = params['q'] || '';
-        this.defacementParamModel.mSearchParamPage = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1;
-        this.defacementParamModel.mDateRange = params['mDateRange'] || '';
+        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
+        this.dashboardService.consolidatedParamModel.mSearchParamPage = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1;
+        this.dashboardService.consolidatedParamModel.mDateRange = params['mDateRange'] || '';
 
         if (this.firstTrigger && ((this.defacementCallbackModel.Result.length > 0))) {
           this.isLoading = false;
-          this.query = this.defacementParamModel.q
+          this.query = this.dashboardService.consolidatedParamModel.q
         } else {
           this.cdr.detectChanges();
           this.fetchSearchResults()
@@ -64,21 +62,21 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   onUpdateQuery(query: string) {
-    this.defacementParamModel.q = query;
-    this.defacementParamModel.mSearchParamPage = 1;
+    this.dashboardService.consolidatedParamModel.q = query;
+    this.dashboardService.consolidatedParamModel.mSearchParamPage = 1;
     this.fetchSearchResults();
   }
 
   fetchSearchResults(reset = false) {
     let segment = this.route.snapshot.url.at(-1)?.path
     if (segment)
-      this.defacementParamModel.mContentType = segment
+      this.dashboardService.consolidatedParamModel.mContentType = segment
 
     if (reset)
-      this.defacementParamModel.mSearchParamPage = 1
-    if (!this.defacementParamModel.q) {
+      this.dashboardService.consolidatedParamModel.mSearchParamPage = 1
+    if (!this.dashboardService.consolidatedParamModel.q) {
       this.isLoading = false;
-      this.defacementParamModel.q = ""
+      this.dashboardService.consolidatedParamModel.q = ""
 
       this.router.navigate([], {
         queryParams: {},
@@ -91,7 +89,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
     const cleanedParams: any = {};
 
-    Object.entries(this.defacementParamModel).forEach(([key, value]) => {
+    Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       const isDefault =
         (key === 'mSearchParamSafeSearch' && value === false) ||
         (key === 'mNetwork' && value === 'all') ||
@@ -115,7 +113,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     }
 
     this.dashboardService
-      .fetchSearchResults<DefacementCallbackModel>('search/defacement', this.defacementParamModel)
+      .fetchSearchResults<DefacementCallbackModel>('search/defacement', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
@@ -131,28 +129,28 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   onPageChange(step: number) {
-    this.defacementParamModel.mSearchParamPage = step;
+    this.dashboardService.consolidatedParamModel.mSearchParamPage = step;
     this.fetchSearchResults();
   }
 
   resetFilters(_: void) {
-    this.defacementParamModel.mDateRange = "";
-    this.defacementParamModel.mTeam = "";
-    this.defacementParamModel.mAttacker = "";
+    this.dashboardService.consolidatedParamModel.mDateRange = "";
+    this.dashboardService.consolidatedParamModel.mTeam = "";
+    this.dashboardService.consolidatedParamModel.mAttacker = "";
 
     this.fetchSearchResults(true);
   }
 
   reloadFilters(event: Record<string, string | null>) {
-    this.defacementParamModel.mSearchParamPage = 1
+    this.dashboardService.consolidatedParamModel.mSearchParamPage = 1
     if (event['mDateRange']) {
-      this.defacementParamModel.mDateRange = event['mDateRange']
+      this.dashboardService.consolidatedParamModel.mDateRange = event['mDateRange']
     }
     if (event['mTeam'] != null) {
-      this.defacementParamModel.mTeam = event['mTeam'];
+      this.dashboardService.consolidatedParamModel.mTeam = event['mTeam'];
     }
     if (event['mAttacker'] != null) {
-      this.defacementParamModel.mAttacker = event['mAttacker'];
+      this.dashboardService.consolidatedParamModel.mAttacker = event['mAttacker'];
     }
     this.fetchSearchResults();
   }

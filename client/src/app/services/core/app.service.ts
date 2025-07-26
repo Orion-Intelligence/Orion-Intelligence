@@ -1,7 +1,7 @@
-import { Injectable, signal, effect } from '@angular/core';
-import { ApiService } from '../../shared/services/api.service';
-import { ConfigData, ConfigSettings } from '../../shared/model/app/config';
-import { ActivatedRoute, Router } from '@angular/router';
+import {Injectable, signal, effect} from '@angular/core';
+import {ApiService} from '../../shared/services/api.service';
+import {ConfigData, ConfigSettings} from '../../shared/model/app/config';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -47,7 +47,7 @@ export class AppService {
 
   updatePage(newPage: number): void {
     this.page.set(newPage);
-    const currentParams = { ...this.activatedRoute.snapshot.queryParams };
+    const currentParams = {...this.activatedRoute.snapshot.queryParams};
     currentParams['mSearchParamPage'] = newPage;
     this.router.navigate([], {
       relativeTo: this.activatedRoute,

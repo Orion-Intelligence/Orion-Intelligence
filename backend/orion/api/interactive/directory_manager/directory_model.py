@@ -45,11 +45,11 @@ class directory_model:
 
             except Exception as e:
                 pass
-
         else:
             pass
 
         total_count = await self._engine.count(db_url_data_model, query)
+
         data = await self._engine.find(
             db_url_data_model, query, skip=(params.page - 1) * 100, limit=100
         )

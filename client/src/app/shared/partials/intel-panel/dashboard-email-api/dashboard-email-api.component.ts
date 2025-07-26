@@ -1,14 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgForOf, NgIf, NgOptimizedImage } from '@angular/common';
-import { EmptyResultComponent } from '../../empty-result/empty-result.component';
-import { LoadingFormComponent } from '../../loading-form/loading-form.component';
-import { EmptyQueryComponent } from '../../empty-query/empty-query.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { CardData, SearchDynamicEmailCallbackModel } from '../../../model/api/email/search_dynamic_email_callback_model';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { searchDynamicEmailParamModel } from '../../../model/api/email/search_dynamic_email_param_model';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
+import {EmptyResultComponent} from '../../empty-result/empty-result.component';
+import {LoadingFormComponent} from '../../loading-form/loading-form.component';
+import {EmptyQueryComponent} from '../../empty-query/empty-query.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {CardData, SearchDynamicEmailCallbackModel} from '../../../model/api/email/search_dynamic_email_callback_model';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-dashboard-email-api',
@@ -24,7 +23,6 @@ export class DashboardEmailApiComponent implements OnInit {
   breachData: CardData | null = null;
   query_triggered = false;
 
-  emailParambackModel: searchDynamicEmailParamModel = new searchDynamicEmailParamModel();
   emailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
   protected readonly Object = Object;
   protected readonly Array = Array;
@@ -59,16 +57,16 @@ export class DashboardEmailApiComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    this.emailParambackModel.email = this.email;
-    this.emailParambackModel.username = this.username;
+    this.dashboardService.consolidatedParamModel.email = this.email;
+    this.dashboardService.consolidatedParamModel.username = this.username;
     this.emailCallbackbackModel.cards_data = [];
 
     this.router.navigate([], {
-      queryParams: { username: this.username, email: this.email }, queryParamsHandling: 'merge'
+      queryParams: {username: this.username, email: this.email}, queryParamsHandling: 'merge'
     }).then();
 
     this.query_triggered = true;
-    this.dashboardService.fetchSearchResults<SearchDynamicEmailCallbackModel>('dynamic/email', this.emailParambackModel)
+    this.dashboardService.fetchSearchResults<SearchDynamicEmailCallbackModel>('dynamic/email', this.dashboardService.consolidatedParamModel)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {

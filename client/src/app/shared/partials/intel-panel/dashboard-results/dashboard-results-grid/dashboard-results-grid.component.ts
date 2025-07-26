@@ -1,12 +1,12 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, NgForOf, NgIf } from '@angular/common';
-import { SafeHtml } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HelperService } from '../../../../services/helper.service';
-import { GeneralResultItem } from '../../../../model/results/general/general.callback.model';
-import { LeakResultItem } from '../../../../model/results/leak/leak.callback.model';
-import { ScrollService } from '../../../../services/scroll.service';
-import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {CommonModule, DatePipe, NgForOf, NgIf} from '@angular/common';
+import {SafeHtml} from '@angular/platform-browser';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {HelperService} from '../../../../services/helper.service';
+import {GeneralResultItem} from '../../../../model/results/general/general.callback.model';
+import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
+import {ScrollService} from '../../../../services/scroll.service';
+import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-results-grid',
@@ -19,6 +19,7 @@ export class DashboardResultsGridComponent implements AfterViewInit, OnInit {
   @Input() type!: string;
   @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
   @Input() isExpandAble: boolean = false;
+
   currentUrl = '';
   queryParams: any = {};
   isCollapsed = true;

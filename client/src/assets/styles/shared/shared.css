@@ -322,7 +322,6 @@ table a:visited {
 }
 
 .dashboard-general-input {
-  max-width: 750px;
   max-width: 787px;
   min-width: 500px;
   background-color: white !important;
@@ -565,3 +564,21 @@ table a:visited {
     margin-right: 17px;
   }
 }
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+::placeholder {
+  color: #bfbfbf;
+  opacity: 1;
+}
+
+::placeholder {
+  color: #bfbfbf;
+}
+
+::placeholder {
+  color: #bfbfbf;
+}
+

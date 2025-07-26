@@ -4,7 +4,7 @@ interface ConfigSettingsInput {
   version?: string;
   language_allowed?: string;
   logo_url?: string;
-  enable_advanced_tools?: string | boolean; // included but not used
+  enable_advanced_tools?: string | boolean;
 }
 
 export class ConfigSettings {

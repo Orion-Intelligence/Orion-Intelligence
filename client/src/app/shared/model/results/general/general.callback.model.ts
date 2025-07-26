@@ -21,7 +21,6 @@ export class GeneralResultItem {
   m_update_date: string = new Date().toISOString();
   m_hash = "";
   m_creation_date: string = new Date().toISOString();
-  m_index?: string;
 
   constructor(init?: Partial<GeneralResultItem>) {
     Object.assign(this, init);

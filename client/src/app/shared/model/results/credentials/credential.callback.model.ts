@@ -5,7 +5,6 @@ export class StealerLogResultItem {
   username: string = "";
   domain: string = "";
   password: string = "";
-  log_hash: string = "";
   timestamp?: string;
   m_hash?: string;
 

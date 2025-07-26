@@ -1,6 +1,6 @@
-import { Component, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {Component, EventEmitter, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-pro-subscription',
@@ -29,9 +29,7 @@ export class ProSubscriptionComponent {
     const body = encodeURIComponent(
       `Name: ${this.userName}\nPhone: ${this.userPhone}\nEmail: ${this.userEmail}`
     );
-    const mailtoLink = `mailto:support@genesistechnologies.org?subject=${subject}&body=${body}`;
-
-    window.location.href = mailtoLink;
+    window.location.href = `mailto:support@genesistechnologies.org?subject=${subject}&body=${body}`;
 
     this.closePopup();
   }

@@ -1,4 +1,4 @@
-.dropdown-menu input[type="checkbox"] {
+.multiselection_dropdown .dropdown-menu input[type="checkbox"] {
   width: 20px;
   height: 20px;
   border-radius: 6px;
@@ -9,7 +9,7 @@
   position: relative;
 }
 
-.dropdown-menu input[type="checkbox"]:checked::before {
+.multiselection_dropdown .dropdown-menu input[type="checkbox"]:checked::before {
   content: "✔";
   color: blue;
   font-weight: bold;

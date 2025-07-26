@@ -9,7 +9,7 @@ import {NgIf} from '@angular/common';
 import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {getDefaultRuleSet, RuleSet} from "../../shared/model/graph/ruleset_model";
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -25,6 +25,18 @@ interface ExtendedNode extends Node {
 })
 export class GraphComponent implements OnInit {
   @ViewChild('networkContainer', {static: true}) networkContainer!: ElementRef;
+
+  public rawNodes: ExtendedNode[] = [];
+  public rawEdges: Edge[] = [];
+  public nodeSet!: DataSet<ExtendedNode>;
+  public edgeSet!: DataSet<Edge>;
+
+  private groupInfo: Record<string, string[]> = {};
+  private groupExpandedState: Record<string, boolean> = {};
+  private highlightedNodeId: string | null = null;
+  private contextMenuNodeId!: string;
+  private physicsTimeoutId: any = null;
+
   network!: Network;
   selectedType = 'cluster';
   singleInput = 'all';
@@ -33,7 +45,6 @@ export class GraphComponent implements OnInit {
   maxEdge = 1;
   maxDepth = 25;
   loading = false
-
   physicsEnabled = true;
   expandEnabled = false;
   isEmpty = false;
@@ -41,24 +52,14 @@ export class GraphComponent implements OnInit {
   result: any[] = []
   ruleSet: RuleSet = getDefaultRuleSet();
   flattenedDocuments: any[] = []
-
-  public rawNodes: ExtendedNode[] = [];
-  public rawEdges: Edge[] = [];
-  public nodeSet!: DataSet<ExtendedNode>;
-  public edgeSet!: DataSet<Edge>;
   contextMenuNode: ExtendedNode | null = null;
   copied = false;
   copiedX = 0;
   copiedY = 0;
   orignalColor: string | Color = '';
   currentCategory = "";
-  private groupInfo: Record<string, string[]> = {};
-  private groupExpandedState: Record<string, boolean> = {};
-  private highlightedNodeId: string | null = null;
-  private contextMenuNodeId!: string;
-  private physicsTimeoutId: any = null;
 
-  constructor(private api: ApiService, private clipboard: Clipboard, private router: Router, private route: ActivatedRoute) {
+  constructor(private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {

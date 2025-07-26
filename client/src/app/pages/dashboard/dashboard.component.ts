@@ -1,10 +1,10 @@
-import { AfterViewInit, ChangeDetectorRef, Component, Renderer2 } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
-import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
-import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
-import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import {AfterViewInit, ChangeDetectorRef, Component} from '@angular/core';
+import {NgClass, NgIf} from '@angular/common';
+import {Router, RouterOutlet} from '@angular/router';
+import {dashboardGlobalAnimation} from '../../shared/animations/dashboard.global.animations';
+import {DashboardSidebarComponent} from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
+import {DashboardHeaderComponent} from '../../shared/partials/header/dashboard-header/dashboard-header.component';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ProSubscriptionComponent} from '../../shared/partials/pro-subscription/pro-subscription.component';
 import {DashboardService} from '../../services/dashboard/dashboard.service';
 
@@ -27,8 +27,9 @@ export class DashboardComponent implements AfterViewInit {
   isMenuOpen = true;
   animationState: any;
 
-  constructor(protected dashboardService:DashboardService, private cdr: ChangeDetectorRef, public router: Router, private renderer: Renderer2) {
+  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router) {
   }
+
   toggleNavigation() {
     this.isMenuOpen = !this.isMenuOpen;
   }

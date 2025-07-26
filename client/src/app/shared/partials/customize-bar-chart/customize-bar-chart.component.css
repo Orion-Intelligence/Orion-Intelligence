@@ -13,7 +13,7 @@
   font-family: Inter, sans-serif;
 }
 
-.statistics-text {
+.bar-chart-statistics-text {
   position: absolute;
   top: 12px;
   left: 16px;
@@ -22,7 +22,7 @@
   font-weight: 400;
 }
 
-.chart-title {
+.bar-chart-chart-title {
   position: absolute;
   top: 33px;
   left: 16px;
@@ -31,7 +31,7 @@
   font-weight: 700;
 }
 
-.separator-line {
+.bar-chart-separator-line {
   position: absolute;
   top: 70px;
   left: 15px;
@@ -48,7 +48,7 @@
   padding-top: 80px;
 }
 
-.y-axis {
+.bar-chart-y-axis {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -60,13 +60,13 @@
   width: 30px;
 }
 
-.bar-area {
+.bar-chart-bar-area {
   flex-grow: 1;
   position: relative;
   overflow-x: auto;
 }
 
-.bars {
+.bar-chart-bars {
   display: flex;
   padding-left: 20px;
   align-items: flex-end;
@@ -74,14 +74,14 @@
   gap: 30px;
 }
 
-.bar-wrapper {
+.bar-chart-bar-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
 }
 
-.bar-container {
+.bar-chart-bar-container {
   position: relative;
   width: 30px;
   height: 100px;
@@ -92,7 +92,7 @@
   align-items: flex-end;
 }
 
-.bar-container::after {
+.bar-chart-bar-container::after {
   content: '';
   position: absolute;
   top: 0;
@@ -104,17 +104,17 @@
   pointer-events: none;
 }
 
-.bar {
+.bar-chart-bar {
   background-color: #2A5784;
   width: 100%;
   transition: height 0.3s;
 }
 
-.bar :hover {
+.bar-chart-bar :hover {
   background-color: #2A7DCF;
 }
 
-.bar-label {
+.bar-chart-bar-label {
   color: #9CA3AF;
   font-size: 10px;
   margin-top: 6px;
@@ -125,7 +125,7 @@
   text-overflow: ellipsis;
 }
 
-.y-axis-gridlines {
+.bar-chart-y-axis-gridlines {
   position: absolute;
   top: 0;
   left: 0;
@@ -138,7 +138,7 @@
   pointer-events: none;
 }
 
-.grid-line {
+.bar-chart-grid-line {
   margin-top: 7px;
   width: 100%;
   border-top: 1px dashed transparent;
@@ -146,18 +146,18 @@
   height: 0;
 }
 
-.grid-line.no-line {
+.bar-chart-grid-line.no-line {
   border-top: none;
 }
 
-.statistics-text {
+.bar-chart-statistics-text {
   display: flex;
   justify-content: space-between;
   align-items: center;
   right: 16px;
 }
 
-.info-icon {
+.bar-chart-info-icon {
   width: 20px;
   height: 20px;
 }

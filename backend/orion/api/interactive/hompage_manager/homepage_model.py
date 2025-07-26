@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import HTTPException
 from starlette import status
 from orion.management.models.insight_model_comparison import InsightComparisonModel
+from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from orion.services.elastic_manager.elastic_insight_generator import elastic_insight_generator
@@ -40,7 +41,7 @@ class homepage_model:
     async def invoke_analytics():
         results = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_STAT, InsightComparisonModel().model_dump_json(), None])
         if not results:
-            print("Error: No data retrieved from Redis")
+            log.g().ex("Error: No data retrieved from Redis")
             return None
 
         try:
@@ -49,8 +50,8 @@ class homepage_model:
 
 
             return validated_results
-        except json.JSONDecodeError as e:
-            print(f"JSON Decode Error: {e}")
+        except json.JSONDecodeError as ex:
+            log.g().ex(f"JSON Decode Error: {ex}")
             return None
         
     @staticmethod

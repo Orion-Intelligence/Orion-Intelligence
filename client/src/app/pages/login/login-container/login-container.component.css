@@ -113,7 +113,7 @@
   display: none;
 }
 
-@media only screen and (width <=643px) {
+@media only screen and (width <= 643px) {
   .login-box {
     margin: 0 20px;
     padding: 42px 20px;

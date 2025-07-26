@@ -66,21 +66,21 @@
   border-bottom: 10px solid white;
 }
 
-.small-switch {
+.profile-header  .small-switch {
   position: relative;
   display: inline-block;
   width: 30px;
   height: 18px;
-  top:3px
+  top: 3px
 }
 
-.small-switch input {
+.profile-header .small-switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.small-slider {
+.profile-header .small-slider {
   position: absolute;
   cursor: pointer;
   inset: 0;
@@ -89,7 +89,7 @@
   border-radius: 12px;
 }
 
-.small-slider::before {
+.profile-header .small-slider::before {
   content: "";
   position: absolute;
   height: 14px;
@@ -101,18 +101,18 @@
   border-radius: 50%;
 }
 
-.theme-toggle{
+.theme-toggle {
   font-size: 15px;
 }
 
-input:checked+.small-slider {
+.profile-header  input:checked + .small-slider {
   background-color: #4667a0;
 }
 
-input:checked+.small-slider::before {
+.profile-header  input:checked + .small-slider::before {
   transform: translateX(12px);
 }
 
-.small-slider.round {
+.profile-header  .small-slider.round {
   border-radius: 12px;
 }

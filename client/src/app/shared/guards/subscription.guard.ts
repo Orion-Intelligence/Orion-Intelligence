@@ -8,7 +8,7 @@ import {DashboardService} from '../../services/dashboard/dashboard.service';
 })
 export class subscriptionGuard implements CanActivate {
 
-  constructor(private authService: AuthService, private router: Router,protected dashboardService:DashboardService) {
+  constructor(private authService: AuthService, private router: Router, protected dashboardService: DashboardService) {
   }
 
   isAdmin(): boolean {
@@ -16,11 +16,7 @@ export class subscriptionGuard implements CanActivate {
     return currentRole === 'admin';
   }
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean | UrlTree {
-
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
     if (this.isAdmin()) {
       return true;
     }

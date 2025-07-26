@@ -56,7 +56,6 @@ export const directory_filters: FilterModel = {
         { key: "onion", label: "Onion" },
         { key: "i2p", label: "I2P" },
         { key: "clearnet", label: "Clearnet" },
-        { key: "telegram", label: "Telegram" }
       ],
       type: "dropdown",
       tooltip: "Web Layers",

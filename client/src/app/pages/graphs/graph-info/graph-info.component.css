@@ -9,6 +9,16 @@
   margin-right: 8px;
 }
 
+.graph-filters-floating-copied {
+  position: absolute;
+  background-color: #f0f0f0;
+  color: rgb(0 0 0);
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+  z-index: 1000;
+}
+
 .graph-filters__details {
   width: 240px;
   color: #fff;
@@ -32,7 +42,7 @@
   color: #359AFF;
 }
 
-.detail-heading {
+.graph-detail-heading {
   font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 14px;
@@ -41,7 +51,7 @@
   color: #D0D0D0;
 }
 
-.detail-line {
+.graph-detail-line {
   font-family: Roboto, sans-serif;
   font-weight: bold;
   font-size: 15px;
@@ -101,14 +111,14 @@
   }
 }
 
-.chevron.rotate {
+.graph-filters__container .chevron.rotate {
   transform: rotate(180deg);
 }
 
-.group-expand {
+.graph-filters__container .group-expand {
   background: #bf80ff;
 }
 
-.group-collapse {
+.graph-filters__container .group-collapse {
   background: #fff;
 }

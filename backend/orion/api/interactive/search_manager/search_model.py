@@ -47,6 +47,7 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import \
     entity_filter_param_model
+from orion.services.log_manager.log_controller import log
 
 
 class search_model:
@@ -184,7 +185,6 @@ class search_model:
             param.filters,
             self._LEAK_FIELD_MAPPING 
         )
-        print("__________________________search_model___________________________")
         indices, queries = elastic_request_generator().on_search_consolidated_data(param,entity_filter_clauses)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
@@ -293,7 +293,6 @@ class search_model:
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
-        # document, data_filter = elastic_request_generator().on_search_defacement_data(param)
         entity_filter_clauses = self._process_entity_filters_generic(
             param.filters,
             self._DEFACEMENT_FIELD_MAPPING 
@@ -332,7 +331,7 @@ class search_model:
                     else:
                         es_clauses.append({"terms": {es_field_name: tags}})
                 else:
-                    print(f"Warning: No Elasticsearch field mapping found for category ID: {category_id} in the provided context.")
+                    log.g().ex(f"Warning: No Elasticsearch field mapping found for category ID: {category_id} in the provided context.")
         return es_clauses
     
 

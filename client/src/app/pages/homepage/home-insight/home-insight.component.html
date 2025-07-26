@@ -1,36 +1,36 @@
 <div id="analytics">
-  <div class="graph_insight_container mt-lg-5">
+  <div class="home_insight_graph_container mt-lg-5">
     <app-customize-bar-chart *ngFor="let graph of GraphData" [graphModel]="graph"></app-customize-bar-chart>
   </div>
   <div class="home_insight__single">Top Data Leaks</div>
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
     <ng-container *ngIf="i < 1 || last">
       <div class="home_insight__container home_insight__container-top mt-4">
-        <div *ngFor="let item of getResultItems(modelKey);" class="card-container">
-          <div class="header-section">
-            <div class="company-info">
-              <div class="label">Company Name</div>
-              <div class="value">{{ item.title }}</div>
+        <div *ngFor="let item of getResultItems(modelKey);" class="home-insight-card-container">
+          <div class="home-insight-card-header-section">
+            <div class="home-insight-card-company-info">
+              <div class="home-insight-card-label">Company Name</div>
+              <div class="home-insight-card-value">{{ item.title }}</div>
             </div>
-            <div class="attacker-info">
-              <div class="label">Source</div>
-              <div class="value">{{ item.source }}</div>
+            <div class="home-insight-card-attacker-info">
+              <div class="home-insight-card-label">Source</div>
+              <div class="home-insight-card-value">{{ item.source }}</div>
             </div>
           </div>
 
-          <div class="detail-row">
+          <div class="home-insight-detail-row">
             <ng-container *ngIf="item.location; else checkURL">
-              <div class="country-info">
-                <div class="label">Location</div>
-                <div class="value">{{ item.location }}</div>
+              <div class="home-insight-card-country-info">
+                <div class="home-insight-card-label">Location</div>
+                <div class="home-insight-card-value">{{ item.location }}</div>
               </div>
             </ng-container>
 
             <ng-template #checkURL>
               <ng-container *ngIf="item.url; else checkPhone">
-                <div class="country-info">
-                  <div class="label">URL</div>
-                  <div class="value" *ngIf="item.url[0]">
+                <div class="home-insight-card-country-info">
+                  <div class="home-insight-card-label">URL</div>
+                  <div class="home-insight-card-value" *ngIf="item.url[0]">
                     {{ item.url[0].length > 24 ? item.url[0].slice(0, 24) + '...' : item.url[0] }}
                   </div>
                 </div>
@@ -38,26 +38,24 @@
             </ng-template>
 
             <ng-template #checkPhone>
-              <div class="country-info">
-                <div class="label">Phone Number</div>
-                <div class="value">{{ item.phoneNumber || '-'}}</div>
+              <div class="home-insight-card-country-info">
+                <div class="home-insight-card-label">Phone Number</div>
+                <div class="home-insight-card-value">{{ item.phoneNumber || '-' }}</div>
               </div>
             </ng-template>
           </div>
 
-          <div class="detail-row">
-            <div class="date-time-info">
-              <div class="label">Date</div>
-              <div class="value">{{ item.date || '-' }}</div>
+          <div class="home-insight-detail-row">
+            <div class="home-insight-card-date-time-info">
+              <div class="home-insight-card-label">Date</div>
+              <div class="home-insight-card-value">{{ item.date || '-' }}</div>
             </div>
           </div>
 
           <div class="home_insight__divider"></div>
 
-          <div class="footer-section">
-            <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report"
-              [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]"
-              class="view-details-button">View Details</button>
+          <div class="home-insight-card-footer-section">
+            <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report" [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]" class="home-insight-card-view-details-button">View Details</button>
           </div>
         </div>
       </div>
@@ -78,11 +76,11 @@
                    : 'This is the Defacement'
                " class="home_insight__header">
             {{
-            model === 'general'
-            ? 'Generic Index'
-            : model === 'leak'
-            ? 'Leaked Index'
-            : 'Defacement Index'
+              model === 'general'
+                ? 'Generic Index'
+                : model === 'leak'
+                  ? 'Leaked Index'
+                  : 'Defacement Index'
             }}
           </div>
 

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from '@angular/router';
 import {Observable} from 'rxjs';
 import {ApiService} from '../services/api.service';
-import {InsightCallbackModel} from '../model/homepage/insight.model';
+import {InsightCallbackModel} from '../model/homepage/stats_insight.model';
 
 @Injectable({providedIn: 'root'})
 export class InsightResolver implements Resolve<any> {

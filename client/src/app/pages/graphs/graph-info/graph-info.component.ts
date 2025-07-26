@@ -1,11 +1,11 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {NgIf, TitleCasePipe} from '@angular/common';
-import {ListingsComponent} from "../listings/listings.component";
+import {GraphListingsComponent} from "../listings/graph-listings.component";
 import {loadRuleSetFromStorage, RuleSet, saveRuleSetToStorage} from '../../../shared/model/graph/ruleset_model';
 
 @Component({
   selector: 'app-graph-info',
-  imports: [TitleCasePipe, NgIf, ListingsComponent],
+  imports: [TitleCasePipe, NgIf, GraphListingsComponent],
   templateUrl: './graph-info.component.html'
 })
 export class GraphInfoComponent implements OnInit {
@@ -66,7 +66,5 @@ export class GraphInfoComponent implements OnInit {
     if (field == "edgeColor") {
       this.onResetAll.emit()
     }
-
   }
-
 }

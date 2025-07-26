@@ -16,9 +16,9 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
   animations: [appAnimation],
 })
 export class AppComponent {
+  currentRoute = signal('');
   error$: Observable<boolean>;
   isVisible = true;
-  currentRoute = signal('');
 
   constructor(private router: Router, private errorStore: ErrorStoreService, appService: AppService) {
     const theme = localStorage.getItem('theme') || 'dark-theme';

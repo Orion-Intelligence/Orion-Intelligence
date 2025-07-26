@@ -11,6 +11,7 @@ from orion.management.models.insight_model import (
 )
 from orion.management.models.insight_model_comparison import InsightComparisonModel
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
@@ -138,7 +139,7 @@ class insight_job:
                 )
 
         except Exception as ex:
-            print(ex)
+            log.g().ex(ex)
             return
 
     async def update_insights(self):

@@ -39,7 +39,15 @@
         "prefix": "src",
         "style": "camelCase"
       }
-    ]
+    ],
+    "max-len": "off",
+    "object-curly-newline": [
+      "error",
+      {
+        "ImportDeclaration": { "multiline": true, "minProperties": 1000 }
+      }
+    ],
+    "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 10 }]
   },
   "overrides": [
     {

@@ -1,4 +1,4 @@
-.directory-list__status-default-pointer {
+.list__status-default-pointer {
   display: inline-block;
   width: 6px;
   height: 6px;
@@ -7,12 +7,9 @@
   margin-right: 5px;
 }
 
-.directory-list__status-inactive-pointer {
-  background-color: #ffc107;
-}
-
-.directory-list__content-category {
+.list__content-category {
   font-weight: 500;
+  margin-top: 5px;
   color: #D4D4D4;
   border-radius: 100px;
   background: #FCFCFC0D;
@@ -21,45 +18,32 @@
   margin-right: 10px;
 }
 
-.directory-list__container .directory-list__column-id-min {
-  width: 50px !important;
+.list__container .list__column-id-min {
+  width: 100px !important;
 }
 
-.copy_url {
-  cursor: pointer !important;
+.list__column-service-url {
+  width: 30%;
 }
 
-.directory-list__column-service-url {
-  width: 40%;
+.list__column-category {
+  width: 18%;
 }
 
-.directory-list__column-category {
-  width: 15%;
+.list__column-network-type {
+  width: 8%;
 }
 
-.directory-list__column-url-status {
+.list__column-url-status {
   width: 10%;
 }
 
-.directory-list__column-leak-status {
+.list__column-leak-status {
   width: 10%;
-}
-
-.directory-list__table-url {
-}
-
-.stealer-log-table {
-  border: 1px solid #ffffff20;
-  border-radius: 15px !important;
-  overflow: clip;
-}
-
-.stealer-log-table-padding {
-  margin: 30px;
 }
 
 @media only screen and (width <= 943px) {
-  .directory-list__content-category {
+  .list__content-category {
     padding-bottom: 0;
     padding-left: 15px;
     padding-right: 15px;
@@ -67,21 +51,17 @@
     margin-top: 5px;
   }
 
-  .stealer-log-table-padding {
-    margin: 15px;
-  }
-
-  .directory-list__container-result {
+  .list__container-result {
     margin-left: 15px;
     margin-right: 15px;
   }
 
-  .directory-list__container {
+  .list__container {
     padding: 0;
     margin: 50px 0 0 !important;
   }
 
-  .directory-list__table-url {
+  .list__table-url {
     color: #fff;
     font-size: 12px;
     font-weight: 400;
@@ -93,18 +73,18 @@
     text-overflow: ellipsis;
   }
 
-  .directory-list__status-default-pointer {
+  .list__status-default-pointer {
     margin-top: 6px;
     margin-right: 15px;
   }
 }
 
-.directory-list__container-sort {
+.list__container-sort {
   cursor: pointer;
   position: relative;
 }
 
-.directory-list__container-sort::after {
+.list__container-sort::after {
   content: '';
   display: inline-block;
   width: 0;
@@ -112,7 +92,7 @@
   margin-left: 0.255em;
   vertical-align: 0.255em;
   border: 0.5em solid transparent;
-  border-top-color: #00000030;
+  border-top-color: #fff;
   border-bottom-color: #0000;
   position: absolute;
   left: 10px;
@@ -120,19 +100,19 @@
   transform: translateY(-50%);
 }
 
-.directory-list__container-sort.sort-asc::after {
+.list__container-sort.sort-asc::after {
   border-bottom-color: #fff;
   border-top: 0;
   top: 55%;
 }
 
-.directory-list__container-sort.sort-desc::after {
+.list__container-sort.sort-desc::after {
   border-top-color: #fff;
   border-bottom: 0;
   top: 60%;
 }
 
-.directory-list__container-sort:hover::after {
+.list__container-sort:hover::after {
   border-bottom-color: #0000;
 }
 
@@ -140,13 +120,13 @@
   padding-left: 40px !important;
 }
 
-.directory-list__container-sort.sort-asc:hover::after {
+.list__container-sort.sort-asc:hover::after {
   border-bottom-color: #fff;
   border-top: 0;
   top: 55%;
 }
 
-.directory-list__container-sort.sort-desc:hover::after {
+.list__container-sort.sort-desc:hover::after {
   border-top-color: #fff;
   border-bottom: 0;
   top: 60%;

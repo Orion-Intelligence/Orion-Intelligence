@@ -47,7 +47,7 @@
   padding-top: 35px;
 }
 
-@media (max-width: 1299px) {
+@media (width <= 1299px) {
   .dashboard__layout-right {
     display: none;
   }

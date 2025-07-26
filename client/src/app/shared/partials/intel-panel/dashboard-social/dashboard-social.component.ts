@@ -1,18 +1,17 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { AppService } from '../../../../services/core/app.service';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
-import { SocialParamModel } from '../../../model/results/social/social.param.model';
-import { SocialCallbackModel } from '../../../model/results/social/social.callback.model';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AppService} from '../../../../services/core/app.service';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
+import {SocialCallbackModel} from '../../../model/results/social/social.callback.model';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 import {PaginationComponent} from '../../pagination/pagination.component';
 import {NgIf} from '@angular/common';
 import {ResultComponent} from '../../result/result.component';
 import {
   DashboardResultSocialComponent
 } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
-import {SortType} from '../../../constants/enums';
+import {SortType} from '../../../constants/shared-enums';
 import {HelperService} from '../../../services/helper.service';
 
 @Component({
@@ -28,15 +27,14 @@ import {HelperService} from '../../../services/helper.service';
   animations: [fadeInDashboardItem]
 })
 export class DashboardSocialsComponent implements OnInit, AfterViewInit {
-  public socialParamModel: SocialParamModel = new SocialParamModel();
   public socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
+  protected readonly Math = Math;
 
   query = "";
   isLoading = false;
   firstTrigger = true;
   result_count = 0;
   m_platform = ""
-  protected readonly Math = Math;
 
   constructor(
     protected helperService: HelperService,
@@ -45,18 +43,19 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+  }
 
   get currentResultCount(): number {
     return this.socialCallbackModel.Page_Count ?? 0;
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(this.socialParamModel.mSearchParamPage);
+    this.appService.updatePage(this.dashboardService.consolidatedParamModel.mSearchParamPage);
   }
 
   ngOnInit(): void {
-    this.socialCallbackModel = { ...this.dashboardService.socialCallbackModel } as SocialCallbackModel;
+    this.socialCallbackModel = {...this.dashboardService.socialCallbackModel} as SocialCallbackModel;
     this.result_count = this.socialCallbackModel.Result.length;
 
     const lastSegment = this.route.snapshot.url.at(-1)?.path;
@@ -64,19 +63,19 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
         this.query = params['q'];
-        this.socialParamModel.q = params['q'] || '';
-        this.socialParamModel.mSearchParamPage = params['mSearchParamPage'] || '1'
+        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
+        this.dashboardService.consolidatedParamModel.mSearchParamPage = params['mSearchParamPage'] || '1'
         if (lastSegment)
-          this.socialParamModel.mPlatform = lastSegment
-          this.m_platform = this.socialParamModel.mPlatform
-          if (this.dashboardService.socialParamModel.mPlatform != lastSegment){
-            this.dashboardService.socialCallbackModel.Result = []
-            this.firstTrigger = false
-          }
+          this.dashboardService.consolidatedParamModel.mPlatform = lastSegment
+        this.m_platform = this.dashboardService.consolidatedParamModel.mPlatform
+        if (this.dashboardService.consolidatedParamModel.mPlatform != lastSegment) {
+          this.dashboardService.socialCallbackModel.Result = []
+          this.firstTrigger = false
+        }
 
         if (this.firstTrigger && this.socialCallbackModel.Result.length > 0) {
           this.isLoading = false;
-          this.query = this.socialParamModel.q;
+          this.query = this.dashboardService.consolidatedParamModel.q;
         } else {
           this.cdr.detectChanges();
           this.fetchSearchResults();
@@ -86,11 +85,11 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(reset = false): void {
-    if (reset) this.socialParamModel.mSearchParamPage = 1;
+    if (reset) this.dashboardService.consolidatedParamModel.mSearchParamPage = 1;
 
-    if (!this.socialParamModel.q) {
+    if (!this.dashboardService.consolidatedParamModel.q) {
       this.isLoading = false;
-      this.socialParamModel.q = "";
+      this.dashboardService.consolidatedParamModel.q = "";
       this.router.navigate([], {
         queryParams: {},
         queryParamsHandling: ''
@@ -100,8 +99,8 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     const cleanedParams: any = {
-      q: this.socialParamModel.q,
-      mSearchParamPage: this.socialParamModel.mSearchParamPage
+      q: this.dashboardService.consolidatedParamModel.q,
+      mSearchParamPage: this.dashboardService.consolidatedParamModel.mSearchParamPage
     };
 
     this.router.navigate([], {
@@ -118,9 +117,8 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.dashboardService.socialParamModel = this.socialParamModel
     this.dashboardService
-      .fetchSearchResults<SocialCallbackModel>('social', this.socialParamModel)
+      .fetchSearchResults<SocialCallbackModel>('social', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
@@ -135,13 +133,14 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   }
 
   onPageChange(step: number) {
-    this.socialParamModel.mSearchParamPage = step;
+    this.dashboardService.consolidatedParamModel.mSearchParamPage = step;
     this.fetchSearchResults();
   }
 
   onUpdateQuery(query: string) {
-    this.socialParamModel.q = query;
+    this.dashboardService.consolidatedParamModel.q = query;
   }
+
   onToggleSort(sort: SortType) {
     let key;
     let order: 'asc' | 'desc' = 'asc';

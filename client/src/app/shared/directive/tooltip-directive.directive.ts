@@ -7,11 +7,6 @@ export class TooltipDirective implements OnDestroy {
   @Input('appTooltip') tooltipText = '';
   private tooltip: HTMLElement | null = null;
   private showTimeout: any = null;
-  tooltips: { [key: string]: string } = {
-    'Statistics Overview': 'Shows general performance metrics',
-    'Sales Report': 'Detailed view of monthly sales',
-    'User Activity': 'Tracks user engagement over time'
-  };
 
   constructor(private el: ElementRef, private renderer: Renderer2) {
   }
@@ -44,8 +39,8 @@ export class TooltipDirective implements OnDestroy {
   private createTooltip(): void {
     this.removeTooltip();
 
-    this.tooltip = this.renderer.createElement('div');
     const text = this.renderer.createText(this.tooltipText);
+    this.tooltip = this.renderer.createElement('div');
     this.renderer.appendChild(this.tooltip, text);
     this.renderer.addClass(this.tooltip, 'custom-tooltip');
     this.renderer.setStyle(this.tooltip, 'position', 'absolute');

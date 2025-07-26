@@ -1,17 +1,8 @@
-.home-container {
-  background: linear-gradient(to bottom,
-  rgb(18 52 84 / 100%),
-  rgb(41 87 132 / 100%) 50vh,
-  rgb(41 87 132 / 100%) 100%);
-}
-
 .home {
   min-height: 100vh;
   position: relative;
   color: white;
   overflow: hidden;
-
-  /* padding-bottom: 200px; */
 }
 
 .home > * {
@@ -23,10 +14,18 @@
   .home {
     min-height: 100%;
   }
+}
 
-  .app-background {
-    /* width: 175% !important; */
+.home__form {
+  margin-left: 31px !important;
+}
 
-    /* height: 175% !important; */
+@media only screen and (width <=943px) {
+  .home__form {
+    margin-left: 21px !important;
+  }
+
+  #analytics {
+    margin-top: 60px
   }
 }

@@ -1,8 +1,8 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
-import { DefacementResultItem } from '../../../../model/results/defacement/defacement.param.model';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ScrollService } from '../../../../services/scroll.service';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {CommonModule, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ScrollService} from '../../../../services/scroll.service';
+import {DefacementResultItem} from '../../../../model/results/defacement/defacement.callback.model';
 
 @Component({
   selector: 'app-dashboard-result-list',
@@ -28,7 +28,7 @@ export class DashboardResultListComponent implements OnInit, AfterViewInit {
     }
 
     this.route.queryParams.subscribe(_ => {
-      this.queryParams = { ci: 'defacement' };
+      this.queryParams = {ci: 'defacement'};
     });
   }
 

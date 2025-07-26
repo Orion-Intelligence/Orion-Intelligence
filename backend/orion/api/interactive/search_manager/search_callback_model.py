@@ -2,6 +2,8 @@ from typing import Optional
 from pydantic import ValidationError
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.constants.constant import CONSTANTS
+from orion.services.log_manager.log_controller import log
+
 
 class search_callback:
     __instance = None
@@ -99,8 +101,8 @@ class search_callback:
             content_suggestions = p_paged_documents.get('suggest', {}).get('content_suggestion', [])
             return mRelevanceListData, content_suggestions, total_pages
 
-        except Exception as e:
-            print("Error parsing filtered documents:", e)
+        except Exception as ex:
+            log.g().ex("Error parsing filtered documents:", ex)
             return mRelevanceListData, [], total_pages
 
     async def search_handler(self, m_status, m_documents, callback_model, listing_filter=None, p_consolidated=False):

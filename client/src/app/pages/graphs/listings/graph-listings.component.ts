@@ -6,10 +6,10 @@ import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.ani
 @Component({
   selector: 'app-listings',
   imports: [NgFor, NgIf, FormsModule],
-  templateUrl: './listings.component.html',
+  templateUrl: './graph-listings.component.html',
   animations: [fadeInDashboardItem]
 })
-export class ListingsComponent implements OnInit {
+export class GraphListingsComponent implements OnInit {
   @Input() result: any[] = [];
 
   collapseToggle = false;

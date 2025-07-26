@@ -9,7 +9,7 @@
     </div>
 
     <div class="dashboard_container">
-      <div class="dashboard dashboard-content-scroll" id="dashboard-container">
+      <div class="dashboard-sub-container dashboard-content-scroll" id="dashboard-container">
         <app-dashboard-header></app-dashboard-header>
         <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard-body">
           <router-outlet #routerOutlet="outlet"></router-outlet>

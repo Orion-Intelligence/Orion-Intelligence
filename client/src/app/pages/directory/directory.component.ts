@@ -29,12 +29,7 @@ export class DirectoryComponent implements OnInit {
   selectedFilters: Record<string, string | null> = {};
   totalPages = 0;
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private sidebarService: SidebarService,
-    private directoryService: DirectoryService
-  ) {
+  constructor(private router: Router, private route: ActivatedRoute, private sidebarService: SidebarService, private directoryService: DirectoryService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
     this.directoryData$ = this.directoryService.directoryData$;
 
@@ -51,17 +46,24 @@ export class DirectoryComponent implements OnInit {
       const newFilters: any = {};
       const initialSelectedFilters: Record<string, string> = {};
 
-      Object.keys(baseFilters).forEach(key => {
+      for (const key of Object.keys(baseFilters)) {
         const base = baseFilters[key];
-        const value = params[key];
+        const paramValue = params[key];
 
-        if (value && base.options.includes(value)) {
-          newFilters[key] = {...base, selected: value};
-          initialSelectedFilters[key] = value;
+        const match = base.options?.find(
+          (opt: any) => opt.key.toLowerCase() === paramValue?.toLowerCase()
+        );
+
+        if (paramValue && match) {
+          newFilters[key] = {
+            ...base,
+            selected: match.key
+          };
+          initialSelectedFilters[key] = match.key;
         } else {
           newFilters[key] = {...base};
         }
-      });
+      }
 
       this.filterModel = {
         ...this.filterModel,
@@ -69,7 +71,12 @@ export class DirectoryComponent implements OnInit {
       };
 
       this.selectedFilters = initialSelectedFilters;
+      console.log(this.selectedFilters)
 
+      const currentPage = parseInt(params['page'], 10) || 1;
+      this.directoryService.setCurrentPage(currentPage);
+
+      this.reloadDirectory();
     });
   }
 
@@ -83,6 +90,7 @@ export class DirectoryComponent implements OnInit {
 
   applyFilters(filters: Record<string, string | null>) {
     this.selectedFilters = filters;
+    this.updateQueryParams();
     this.reloadDirectory();
   }
 
@@ -93,30 +101,51 @@ export class DirectoryComponent implements OnInit {
       delete (this.filterModel.filters as any)[key].selected;
     });
 
-    const currentUrl = this.router.url.split('?')[0];
-    this.router.navigateByUrl(currentUrl, {replaceUrl: true}).then(() => {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      queryParamsHandling: ''
+    }).then(() => {
       this.reloadDirectory();
     });
   }
 
   onPageChange(currentPage: number) {
     this.directoryService.setCurrentPage(currentPage);
-    this.directoryService.reloadDirectoryData({page: currentPage});
+    const filteredParams = this.getFilteredParams();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        ...filteredParams,
+        page: currentPage
+      },
+      queryParamsHandling: 'merge'
+    }).then(() => {
+      this.directoryService.reloadDirectoryData({...filteredParams, page: currentPage});
+    });
   }
 
-  private reloadDirectory(): void {
-    const filteredParams = Object.fromEntries(
-      Object.entries(this.selectedFilters).filter(
-        ([, value]) => value !== null && value !== ''
-      )
-    );
+  private updateQueryParams(): void {
+    const filteredParams = this.getFilteredParams();
 
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: filteredParams,
-      queryParamsHandling: 'merge',
+      queryParamsHandling: 'merge'
     }).then();
+  }
 
+  private reloadDirectory(): void {
+    const filteredParams = this.getFilteredParams();
     this.directoryService.reloadDirectoryData(filteredParams);
+  }
+
+  private getFilteredParams(): Record<string, string> {
+    return Object.fromEntries(
+      Object.entries(this.selectedFilters).filter(
+        ([, value]) => value !== null && value !== ''
+      )
+    ) as Record<string, string>;
   }
 }

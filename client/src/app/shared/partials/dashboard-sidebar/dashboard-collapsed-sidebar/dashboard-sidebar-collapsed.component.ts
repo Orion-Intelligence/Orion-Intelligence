@@ -3,6 +3,7 @@ import {AsyncPipe, NgClass, NgForOf, NgOptimizedImage} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 import {LowerPipe} from '../../../model/pipes/lower.pipe';
+import {sidebarItemTooltips} from '../../../constants/shared-enums';
 
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
@@ -21,32 +22,6 @@ export class SidebarSectionComponent {
 
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
-  itemTooltips: Record<string, string> = {
-    'All': 'Comprehensive Overview',
-    'General': 'Broad Data Pool',
-    'Forums': 'Forum Intelligence',
-    'News': 'Trending Alerts',
-    'Stolen': 'Stolen Info Logs',
-    'Drugs': 'Narcotics Tracker',
-    'Hacking': 'Hacking Insights',
-    'Marketplaces': 'Trade Monitoring',
-    'Cryptocurrency': 'Crypto Transactions',
-    'Leaks': 'Data Leaks',
-    'Databases': 'Breach Records',
-    'Tracking': 'Breach Tracker',
-    'CVE': 'CVE',
-    'Mitre': 'Mitre',
-    'Listing': 'Listing',
-    'Credential': 'Credential',
-    'Email': 'Email',
-    'Telegram': 'telegram',
-    'Archive': 'archive',
-    'Logs': 'Logs',
-    'Warfare': 'Warfare',
-    'Cloud': 'Cloud',
-    'Tools': 'Tools',
-    'ZeroDay': 'Zero Day',
-  };
 
   selectSection() {
     this.sectionSelected.emit(this.category);
@@ -55,4 +30,6 @@ export class SidebarSectionComponent {
   selectOption(item: string) {
     this.optionSelected.emit(item);
   }
+
+  protected readonly itemTooltips = sidebarItemTooltips;
 }

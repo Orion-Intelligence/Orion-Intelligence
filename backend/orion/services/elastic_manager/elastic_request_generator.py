@@ -1230,14 +1230,30 @@ class elastic_request_generator:
                             "filter": must_clauses,
                             "must_not": must_not_clause,
                             "should": [
-                                query_string_query
-                                ,
+                                query_string_query,
                                 {
                                     "wildcard": {
                                         "m_content.keyword": {
                                             "value": f"*{raw_query}*",
                                             "boost": 1.5,
                                             "case_insensitive": True
+                                        }
+                                    }
+                                },
+                                {
+                                    "wildcard": {
+                                        "m_channel_name": {
+                                            "value": f"*{raw_query}*",
+                                            "boost": 2.0,
+                                            "case_insensitive": True
+                                        }
+                                    }
+                                },
+                                {
+                                    "term": {
+                                        "m_channel_name": {
+                                            "value": raw_query,
+                                            "boost": 5.0
                                         }
                                     }
                                 }

@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {CommonModule, NgFor} from '@angular/common';
 import {GraphModel} from '../../model/charts/charts.model';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {dashboardTooltips} from '../../constants/shared-enums';
 
 @Component({
   selector: 'app-customize-bar-chart',
@@ -10,12 +11,6 @@ import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 })
 export class CustomizeBarChartComponent {
   @Input() graphModel!: GraphModel;
-  tooltips: { [key: string]: string } = {
-    'Top Teams (Leak)': 'Displays the teams most frequently involved in leak incidents.',
-    'Top Teams (Defacement)': 'Highlights teams most affected by website defacements.',
-    'Top Locations (Defacement)': 'Shows geographic regions with the highest number of defacement incidents.',
-    'Top Hashtags (Social)': 'Lists the most used hashtags related to social media activity or incidents.'
-  };
 
   get roundedMaxValue(): number {
     const max = Math.max(...this.graphModel.data.map(d => d.value), 1);
@@ -42,4 +37,5 @@ export class CustomizeBarChartComponent {
     return Math.round(value);
   }
 
+  protected readonly dashboardTooltips = dashboardTooltips;
 }

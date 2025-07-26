@@ -1,6 +1,6 @@
 <div *ngIf="filteredItems.length > 0; else noData" class="search__result-detail-section-content">
   <div class="row p-1 flex-wrap">
-    <li *ngFor="let item of filteredItems; let i = index" (click)="copyText(item, i)" class="copy-item">
+    <li *ngFor="let item of filteredItems; let i = index" (click)="copyText(item, i)" class="search__result-detail-copy-item">
       <span class="tag-item-content">
         {{ item }}<span *ngIf="copiedIndex === i" class="tooltip">Copied!</span>
       </span>

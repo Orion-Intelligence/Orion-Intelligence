@@ -65,7 +65,7 @@ class mongo_controller:
                 )
                 await self.__engine.save(crawler_user)
             except DuplicateKeyError:
-                print("⚠️ Duplicate admin user detected. Skipping insert.")
+                log.g().ex("⚠️ Duplicate admin user detected. Skipping insert.")
 
     def get_admin(self):
         from starlette_admin.contrib.odmantic import Admin, ModelView

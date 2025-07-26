@@ -1,6 +1,7 @@
 import asyncio
 
 from orion.api.server.config_manager.model.config_data import config_data
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 
@@ -41,6 +42,6 @@ class config_controller:
             records = await self._engine.find(db_system_model)
             fresh_config = {record.key.value: record.value for record in records}
             return config_data(settings=fresh_config)
-        except Exception as e:
-            print(f"Error fetching config: {e}")
+        except Exception as ex:
+            log.g().ex(f"Error fetching config: {ex}")
             return config_data(settings={})

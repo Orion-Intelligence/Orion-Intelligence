@@ -3,12 +3,11 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {switchMap, timer, map, distinctUntilChanged, combineLatest} from 'rxjs';
 import {ResultComponent} from '../../../shared/partials/result/result.component';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
-import {CredentialParamModel} from '../../../shared/model/results/credentials/credential.param.model';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {NgIf, NgOptimizedImage} from '@angular/common';
 import {CredentialListComponent} from '../credential-list/credential-list.component';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
-import {SortType} from '../../../shared/constants/enums';
+import {SortType} from '../../../shared/constants/shared-enums';
 import {HelperService} from '../../../shared/services/helper.service';
 import {stealer_filters} from '../../../shared/constants/filters';
 import {FormsModule} from '@angular/forms';
@@ -29,7 +28,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   mUser: any;
   mURL: any;
 
-  credentialParamModel: CredentialParamModel = new CredentialParamModel();
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
 
   constructor(
@@ -47,7 +45,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.stealerlogCallbackModel = {...this.dashboardService.stealerlogCallbackModel};
-    this.credentialParamModel.mFullSearch = false;
+    this.dashboardService.consolidatedParamModel.mFullSearch = false;
 
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
@@ -55,8 +53,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         this.mURL = params['mURL'];
         this.mUser = params['mUser'];
 
-        this.credentialParamModel.mURL = params['mURL'] || '';
-        this.credentialParamModel.mUser = params['mUser'] || '';
+        this.dashboardService.consolidatedParamModel.mURL = params['mURL'] || '';
+        this.dashboardService.consolidatedParamModel.mUser = params['mUser'] || '';
 
         if (this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
           this.isLoading = false;
@@ -73,14 +71,14 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(reset = true): void {
-    this.credentialParamModel.mURL = this.mURL
-    this.credentialParamModel.mUser = this.mUser
+    this.dashboardService.consolidatedParamModel.mURL = this.mURL
+    this.dashboardService.consolidatedParamModel.mUser = this.mUser
     if (this.isLoading) return;
 
     this.isLoading = true;
 
     const cleanedParams: any = {};
-    Object.entries(this.credentialParamModel).forEach(([key, value]) => {
+    Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
         cleanedParams[key] = value;
       }
@@ -90,14 +88,14 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-    if (!this.credentialParamModel.mUser){
-      this.credentialParamModel.mUser = ""
+    if (!this.dashboardService.consolidatedParamModel.mUser){
+      this.dashboardService.consolidatedParamModel.mUser = ""
     }
-    if (!this.credentialParamModel.mURL){
-      this.credentialParamModel.mURL = ""
+    if (!this.dashboardService.consolidatedParamModel.mURL){
+      this.dashboardService.consolidatedParamModel.mURL = ""
     }
 
-    this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.credentialParamModel)
+    this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(300).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
@@ -133,18 +131,18 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   reloadFilters(event: Record<string, string | null>) {
     if (event['mDateRange']) {
-      this.credentialParamModel.mDateRange = event['mDateRange']
+      this.dashboardService.consolidatedParamModel.mDateRange = event['mDateRange']
     }
     this.fetchSearchResults();
   }
 
   resetFilters(_: void) {
-    this.credentialParamModel.mDateRange = "";
+    this.dashboardService.consolidatedParamModel.mDateRange = "";
     this.fetchSearchResults(true);
   }
 
   onToggleAnalyticsTrigger($event: string) {
-    this.credentialParamModel.mFullSearch = $event == "Full Search";
+    this.dashboardService.consolidatedParamModel.mFullSearch = $event == "Full Search";
     this.fetchSearchResults(true);
   }
 }

@@ -11,11 +11,12 @@ export class DumpService {
     parsed_status: 'all'
   };
   private dumpDataSubject = new BehaviorSubject<DumpCallbackModel | null>(null);
-  dumpData$ = this.dumpDataSubject.asObservable();
   private currentPageSubject = new BehaviorSubject<number>(1);
-  currentPage$ = this.currentPageSubject.asObservable();
   private filters: Record<string, string> = {};
   private filterOpenSubject = new BehaviorSubject<boolean>(false);
+
+  dumpData$ = this.dumpDataSubject.asObservable();
+  currentPage$ = this.currentPageSubject.asObservable();
   isFilterOpen$ = this.filterOpenSubject.asObservable();
 
   constructor(private apiService: ApiService) {

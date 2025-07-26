@@ -37,7 +37,7 @@
 }
 
 
-.left-section {
+.pro-subscription-left-section {
   flex: 1;
   background-color: #ECF3F9;
   padding: 30px;
@@ -48,49 +48,49 @@
   justify-content: space-between;
 }
 
-.left-section h2 {
+.pro-subscription-left-section h2 {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 25px;
   color: #000;
 }
 
-.feature-item {
+.pro-subscription-feature-item {
   margin-bottom: 5px;
 }
 
-.feature-item h3 {
+.pro-subscription-feature-item h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 4px;
   color: #165176;
 }
 
-.feature-item p {
+.pro-subscription-feature-item p {
   font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
   color: #78A1BB;
 }
 
-.total-due {
+.pro-subscription-total-due {
   margin-top: 0;
 }
 
-.total-due h3 {
+.pro-subscription-total-due h3 {
   font-size: 15px;
   font-weight: 400;
   margin-bottom: 4px;
   color: #78A1BB;
 }
 
-.total-due p {
+.pro-subscription-total-due p {
   font-size: 30px;
   font-weight: bold;
   color: #000;
 }
 
-.total-due .per-year {
+.pro-subscription-total-due .per-year {
   font-size: 15px;
   font-weight: 400;
   padding-top: 10px;
@@ -98,7 +98,7 @@
   color: #000;
 }
 
-.right-section {
+.pro-subscription-right-section {
   flex: 1.5;
   background-color: #fff;
   padding: 30px;
@@ -107,14 +107,14 @@
   gap: 15px;
 }
 
-.right-section h2 {
+.pro-subscription-right-section h2 {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: -5px;
   color: #10182B;
 }
 
-.right-section p {
+.pro-subscription-right-section p {
   font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
@@ -122,12 +122,12 @@
   color: #787878;
 }
 
-.subscription-options {
+.pro-subscription-subscription-options {
   display: flex;
   gap: 30px;
 }
 
-.subscription-option {
+.pro-subscription-subscription-option {
   flex: 1;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -142,18 +142,18 @@
   max-height: 65px;
 }
 
-.subscription-option:hover {
+.pro-subscription-subscription-option:hover {
   border-color: #007bff;
 }
 
-.subscription-option input[type="radio"] {
+.pro-subscription-subscription-option input[type="radio"] {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.subscription-option input[type="radio"] + .option-content::before {
+.pro-subscription-subscription-option input[type="radio"] + .pro-subscription-option-content::before {
   content: '';
   width: 16px;
   height: 16px;
@@ -163,33 +163,33 @@
   display: inline-block;
 }
 
-.subscription-option input[type="radio"]:checked + .option-content::before {
+.pro-subscription-subscription-option input[type="radio"]:checked + .pro-subscription-option-content::before {
   border-color: #007bff;
   background-color: #007bff;
   box-shadow: inset 0 0 0 3px #fff;
 }
 
-.option-content h4 {
+.pro-subscription-option-content h4 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #000;
 }
 
-.option-content p {
+.pro-subscription-option-content p {
   margin: 4px 0 0;
   font-size: 12px;
   font-weight: 600;
   color: #787878;
 }
 
-.payment-form {
+.pro-subscription-payment-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.form-row {
+.pro-subscription-overlay .form-row {
   display: flex;
   gap: 30px;
 }
@@ -238,7 +238,7 @@
   box-shadow: 0 0 0 3px rgb(0 123 255 / 25%);
 }
 
-.pro-subscription-overlay .btn-proceed {
+.pro-subscription-overlay .pro-subscription-btn-proceed {
   max-width: 478px;
   max-height: 50px;
   background-color: #2272B0;
@@ -252,7 +252,7 @@
   border: none;
 }
 
-.pro-subscription-overlay .btn-close {
+.pro-subscription-overlay .pro-subscription-btn-close {
   max-width: 478px;
   max-height: 50px;
   background-color: #fff;
@@ -267,7 +267,7 @@
 }
 
 @media (width <= 768px) {
-  .pro-subscription-overlay .btn-close {
+  .pro-subscription-overlay .pro-subscription-btn-close {
     background-color: #2272B0;
     color: #fff;
   }
@@ -278,7 +278,7 @@
     max-width: none;
   }
 
-  .subscription-option {
+  .pro-subscription-subscription-option {
     max-width: none;
   }
 
@@ -292,49 +292,46 @@
     position: absolute;
   }
 
-  .righ-section {
-  }
-
-  .left-section {
+  .pro-subscription-left-section {
     display: none;
   }
 
-  .form-row {
+  .pro-subscription-overlay .form-row {
     flex-direction: column;
     gap: 10px;
   }
 
-  .subscription-options {
+  .pro-subscription-subscription-options {
     flex-direction: column;
     gap: 10px;
   }
 
-  .left-section h2 {
+  .pro-subscription-left-section h2 {
     font-size: 1.4em;
   }
 
-  .feature-item h3 {
+  .pro-subscription-feature-item h3 {
     font-size: 1em;
   }
 
-  .feature-item p,
-  .right-section p {
+  .pro-subscription-feature-item p,
+  .pro-subscription-right-section p {
     font-size: 0.8em;
   }
 
-  .total-due p {
+  .pro-subscription-total-due p {
     font-size: 1.5em;
   }
 
-  .right-section h2 {
+  .pro-subscription-right-section h2 {
     font-size: 1.3em;
   }
 
-  .option-content h4 {
+  .pro-subscription-option-content h4 {
     font-size: 0.95em;
   }
 
-  .option-content p {
+  .pro-subscription-option-content p {
     font-size: 0.75em;
   }
 
@@ -347,14 +344,14 @@
     padding: 8px 10px;
   }
 
-  .btn-proceed,
-  .btn-close {
+  .pro-subscription-btn-proceed,
+  .pro-subscription-btn-close {
     font-size: 0.95em;
     padding: 10px 15px;
   }
 }
 
-.option-content {
+.pro-subscription-option-content {
   display: flex;
   align-items: center;
   gap: 10px;

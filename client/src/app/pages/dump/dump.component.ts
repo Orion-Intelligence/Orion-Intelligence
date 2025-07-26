@@ -29,11 +29,7 @@ export class DumpComponent implements OnInit {
   selectedFilters: Record<string, string | null> = {};
   totalPages = 0;
 
-  constructor(
-    private dumpService: DumpService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {
+  constructor(private dumpService: DumpService, private route: ActivatedRoute, private router: Router) {
     this.dumpData$ = this.dumpService.dumpData$;
 
     this.dumpData$.subscribe(data => {
