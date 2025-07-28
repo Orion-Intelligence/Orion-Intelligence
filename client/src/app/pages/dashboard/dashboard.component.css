@@ -3,15 +3,15 @@
   flex: 1;
   height: auto;
   overflow: hidden;
-  background: var(--dashboard-bg);
+  background: var(--color-blue-850);
   max-height: 100%;
   z-index: 1;
 }
 
 .dashboard-sub-container {
   min-height: 100%;
-  padding-bottom: 100px;
-  background-image: var(--dashboard-header);
+  padding-bottom: 200px !important;
+  background-image: var(--color-blue-830);
 }
 
 .dashboard-content-scroll {
@@ -43,7 +43,7 @@
   height: 100vh;
   overflow: hidden visible;
   min-height: 800px;
-  background: var(--dashboard-bg);
+  background: var(--color-blue-850);
 }
 
 .dashboard__menu-toggle {
@@ -57,8 +57,8 @@
   padding: 0;
   height: 100%;
   overflow: hidden auto;
-  background: var(--dasshboard-sidebar-bg);
-  scrollbar-color: var(--sidebar-item-bg) transparent;
+  background: var(----color-gray-900);
+  scrollbar-color: var(--color-blue-880) transparent;
 }
 
 .dashboard__sidebar.collapsed {

@@ -4,7 +4,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: var(--cti-sidebar-bg);
+  background: var(--color-blue-860);
 }
 
 .graph-sidebar__container .filter__label {

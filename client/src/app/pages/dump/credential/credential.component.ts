@@ -131,13 +131,13 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   reloadFilters(event: Record<string, string | null>) {
     if (event['mDateRange']) {
-      this.dashboardService.consolidatedParamModel.mDateRange = event['mDateRange']
+      this.dashboardService.consolidatedParamModel.daterange = event['mDateRange']
     }
     this.fetchSearchResults();
   }
 
   resetFilters(_: void) {
-    this.dashboardService.consolidatedParamModel.mDateRange = "";
+    this.dashboardService.consolidatedParamModel.daterange = "";
     this.fetchSearchResults(true);
   }
 

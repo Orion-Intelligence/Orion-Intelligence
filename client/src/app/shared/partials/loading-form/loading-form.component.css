@@ -17,7 +17,7 @@
   gap: 20px;
   padding: 24px;
   position: relative;
-  background-color: var(--loading-form-bg);
+  background-color: var(--color-blue-780);
   border: 1px solid #fbfbfb12;
   border-radius: 12px;
   margin-right: 50px;
@@ -46,7 +46,7 @@
   position: relative;
   width: 85px;
   height: 24px;
-  background-color: var(--loading-form-divs-bg);
+  background-color: var(--color-blue-770);
   border-radius: 37px;
 }
 
@@ -81,7 +81,7 @@
   flex: 1;
   position: relative;
   height: 16px;
-  background-color: var(--loading-form-divs-bg);
+  background-color: var(--color-blue-770);
   border-radius: 37px;
 }
 
@@ -90,7 +90,7 @@
   position: relative;
   max-width: 95%;
   height: 16px;
-  background-color: var(--loading-form-divs-bg);
+  background-color: var(--color-blue-770);
   border-radius: 37px;
 }
 
@@ -98,7 +98,7 @@
   position: relative;
   width: 182px;
   height: 16px;
-  background-color: var(--loading-form-divs-bg);
+  background-color: var(--color-blue-770);
   border-radius: 37px;
 }
 
@@ -107,7 +107,7 @@
   align-self: stretch;
   width: 100%;
   height: 16px;
-  background-color: var(--loading-form-divs-bg);
+  background-color: var(--color-blue-770);
   border-radius: 37px;
 }
 
@@ -134,7 +134,7 @@
   position: relative;
   width: 85px;
   height: 18px;
-  background-color: var(--loading-form-divs-bg);
+  background-color: var(--color-blue-770);
   border-radius: 37px;
 }
 
@@ -142,13 +142,13 @@
   position: relative;
   width: 109px;
   height: 18px;
-  background-color: var(--loading-form-divs-bg);
+  background-color: var(--color-blue-770);
   border-radius: 37px;
 }
 
 .shimmer {
   animation: shimmer 1.5s infinite linear;
-  background: var(--loading-form-shimmer);
+  background: var(--color-blue-760);
   background-size: 200% 100%;
 }
 

@@ -1,10 +1,10 @@
 <div class="search__result-detail">
   <div (click)="toggle()" class="search__result__section__heading">
     <div class="left-content">
-      Code snippet <img src="/client/src/assets/images/shared/info.svg" alt="Icon" appTooltip="Shows the original exploit code associated with this report.">
+      Code snippet <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Shows the original exploit code associated with this report.">
     </div>
     <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
-      <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon" src="/client/src/assets/images/shared/search_side_dropdown_icon_dark.svg">
+      <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon" src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 

@@ -1,0 +1,93 @@
+<ng-container>
+  <div class="search__result-detail">
+    <div (click)="toggleContent()" class="search__result__section__heading">
+      <div class="left-content">
+        Related reports
+        <img src="/assets/images/shared/info.svg" alt="Icon"
+             appTooltip="list of reports that are either directly or indirectly linked to this document ">
+      </div>
+      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="toggle-btn">
+        <img [ngClass]="{ 'rotated': !isExpanded }" alt="toggle icon"
+          src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+      </div>
+    </div>
+    <div *ngIf="isExpanded" class="content pt-3">
+      <div class="list__container report-mapping">
+        <table class="table table-striped directory-list__table clear-paddings mb-0">
+          <thead *ngIf="loading || filteredItems.length>0 ">
+            <tr>
+              <th class="narrow-col" scope="col">ID</th>
+              <th scope="col">Mapping To</th>
+              <th class="mid-col" scope="col">Mapping On</th>
+              <th scope="col">Mapping Value</th>
+            </tr>
+          </thead>
+          <tbody *ngIf="filteredItems.length>0" @fadeInDashboardItem>
+            <ng-container *ngFor="let item of filteredItems; let i = index">
+              <tr (click)="viewReport(extractId(item.edge._id))" class="cursor-pointer">
+                <td data-label="ID">
+                  {{ (i + 1) }}
+                </td>
+                <td data-label="Service URL">
+                  <a class="list__table-url text-decoration-none text-reset">
+                    {{ extractId(item.edge._id) }}
+                  </a>
+                </td>
+                <td data-label="Category">
+                  <div class="d-flex flex-wrap">
+                    <div class="list__content-category px-2 py-1 text-truncate">
+                      {{ extractProperty(item.edge._id, "key") }}
+                    </div>
+                  </div>
+                </td>
+                <td data-label="Category">
+                  <div class="d-flex flex-wrap">
+                    <div class="list__content-category px-2 py-1 text-truncate">
+                      {{ extractProperty(item.edge._id, "value") }}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+          <tbody *ngIf="loading" @fadeInDashboardItem>
+            <tr>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-100"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-100"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+              <td>
+                <div class="shimmer shimmer-line w-75"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="!loading && filteredItems.length==0">
+        <br>
+        <div class="report-mapping-empty-header">No structured records found!</div>
+        <div class="report-mapping-empty-body">We’re watching this source — new breach or tracking data will appear here
+          once detected.</div>
+      </div>
+    </div>
+  </div>
+</ng-container>

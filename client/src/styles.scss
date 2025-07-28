@@ -25,17 +25,17 @@
 @use 'app/shared/partials/loading-form/loading-form.component.css';
 @use 'assets/styles/shared/report.component.css';
 @use 'app/shared/partials/report/report-defacement/report-defacement.component.css';
-@use 'app/shared/partials/report/report-mapping-list/report-mapping-list.component.css';
+@use 'app/shared/partials/report-mapping/report-mapping.component.css';
 @use 'app/shared/partials/result-components/result-section/result-section.component.css';
 @use 'app/shared/partials/result-components/result-list/result-list.component.css';
 @use 'app/shared/partials/empty-query/empty-query.component.css';
 @use 'app/shared/partials/pro-subscription/pro-subscription.component.css';
 @use 'app/shared/partials/result/result.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-list/dashboard-result-list.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-consolidated/dashboard-consolidated.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-general-list/dashboard-result-general-list.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component.css';
-@use 'app/shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component.css';
-@use 'app/shared/partials/intel-panel/result-insights/result-insights.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-email-api/dashboard-email-api.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-managers/result-insights/result-insights.component.css';
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
 @use 'app/pages/graphs/graphs.component.css';
 @use 'app/pages/graphs/graph-info/graph-info.component.css';
@@ -52,85 +52,82 @@
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
 
 :root {
-	--dasshboard-sidebar-bg: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
-	--dasshboard-sidebar-bg-light: #17223560;
-	--sidebar-item-bg: #2A578459;
-	--sidebar-item-bg-hover: #2A578435;
-	--sidebar-subitem: #2A578459;
-	--cti-sidebar-bg: linear-gradient(to bottom, #0E2D4D, #144170);
-	--dashboard-bg: #0E1626 !important;
-	--dashboard-header-login: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
-	--dashboard-header: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%) !important;
-	--dashboard-search-main-div: #0e2d4d80;
-	--dashboard-search-main-div-hover: #103356;
-	--home-insight-card-bg: #0f335780;
-	--no-result-container-bg: #17406999;
-	--loading-form-bg: #0f335775;
-	--loading-form-divs-bg: #234d79;
-	--loading-form-shimmer: linear-gradient(to right, #234d79 50%, #2d5c91 70%, #234d79 80%, #234d79 100%);
-	--report-menu-option: #143352;
-	--report-menu-option-hover: #0f263e;
-	--search-result-detail: #0E2D4D99;
-	--table-header-bg: #12335450;
-	--table-tr-nth-child-even: #214b75;
-	--table-tr-nth-child-odd: #1e456c;
-	--table-tbody-tr-hover: #3A6A9A;
-	--filter-dashboard-button: #0E2D4D;
-	--filter-dashboard-button-hover: #14335299;
-	--filter-form-bg: linear-gradient(to bottom, #174069, #2A5784);
-	--filter-header: #153454;
-	--filter-submit-button: #2b90ee;
-	--filter-submit-button-hover: #1176d4;
-	--filter-form-dropdown-item-hover: #f2f2f2;
-	--filter-item-hover: #1176d4;
-	--login-footer: #295785;
-	--filter-input: white;
-	--filter-input-text: #3c3c43;
+  --color-blue-900: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
+  --color-blue-890: #17223560;
+  --color-blue-880: #2A578459;
+  --color-blue-870: #2A578435;
+  --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
+  --color-blue-850: #0E1626 !important;
+  --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
+  --color-blue-830: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%) !important;
+  --color-blue-820: #0e2d4d80;
+  --color-blue-810: #103356;
+  --color-blue-800: #0f335780;
+  --color-blue-790: #17406999;
+  --color-blue-780: #0f335775;
+  --color-blue-770: #234d79;
+  --color-blue-760: linear-gradient(to right, #234d79 50%, #2d5c91 70%, #234d79 80%, #234d79 100%);
+  --color-blue-750: #143352;
+  --color-blue-740: #0f263e;
+  --color-blue-730: #0E2D4D99;
+  --color-blue-720: #12335450;
+  --color-blue-710: #214b75;
+  --color-blue-700: #1e456c;
+  --color-blue-690: #3A6A9A;
+  --color-blue-680: #0E2D4D;
+  --color-blue-670: #14335299;
+  --color-blue-660: linear-gradient(to bottom, #174069, #2A5784);
+  --color-blue-650: #153454;
+  --color-blue-640: #2b90ee;
+  --color-blue-630: #1176d4;
+  --color-blue-620: #1176d4;
+  --color-blue-610: #295785;
+
+  --color-gray-100: #f2f2f2;
+  --color-gray-900: #3c3c43;
+
+  --color-white: white;
 }
 
 .dark-theme {
-	--dasshboard-sidebar-bg: #172235;
-	--dasshboard-sidebar-bg-light: #17223550;
-	--sidebar-item-bg: #1D2D47;
-	--sidebar-item-bg-hover: #1D2D47;
-	--sidebar-subitem: #1D2D47;
-	--cti-sidebar-bg: #1D2D47;
-	--dashboard-bg: #0E1626 !important;
-	--dashboard-header: #0E1626;
-	--dashboard-header-login: #0E1626;
-	--dashboard-search-main-div: #172235;
-	--dashboard-search-main-div-hover: #1f2e47;
-	--home-insight-card-bg: #172235;
-	--no-result-container-bg: #172235;
-	--loading-form-bg: #172235;
-	--loading-form-divs-bg: #101A2B;
-	--loading-form-shimmer: linear-gradient(to right,
-			#FCFCFC20 0%,
-			#FCFCFC30 50%,
-			#FCFCFC20 100%);
-	--report-menu-option: #172235;
-	--report-menu-option-hover: #4d5155;
-	--search-result-detail: #172235;
-	--table-header-bg: #131E30;
-	--table-tr-nth-child-even: #172235;
-	--table-tr-nth-child-odd: #131E30;
-	--table-tbody-tr-hover: #1D2A41;
-	--filter-dashboard-button: #1f2e47;
-	--filter-dashboard-button-hover: #172235;
-	--filter-form-bg: #0e1626;
-	--filter-header: #1f2e47;
-	--filter-submit-button: #57A5EB;
-	--filter-submit-button-hover: #1792fe;
-	--filter-form-dropdown-item-hover: #f2f2f2;
-	--filter-item-hover: #0E1626;
-	--login-footer: #0E1626;
-	--filter-input: #172235;
-	--filter-input-text: #A0B8D1;
+  --color-blue-900: #172235;
+  --color-blue-890: #17223550;
+  --color-blue-880: #1D2D47;
+  --color-blue-870: #1D2D47;
+  --color-blue-860: #1D2D47;
+  --color-blue-850: #0E1626 !important;
+  --color-blue-840: #0E1626;
+  --color-blue-830: #0E1626;
+  --color-blue-820: #172235;
+  --color-blue-810: #1f2e47;
+  --color-blue-800: #172235;
+  --color-blue-790: #172235;
+  --color-blue-780: #172235;
+  --color-blue-770: #101A2B;
+  --color-blue-760: linear-gradient(to right, #FCFCFC20 0%, #FCFCFC30 50%, #FCFCFC20 100%);
+  --color-blue-750: #172235;
+  --color-blue-740: #4d5155;
+  --color-blue-730: #172235;
+  --color-blue-720: #131E30;
+  --color-blue-710: #172235;
+  --color-blue-700: #131E30;
+  --color-blue-690: #1D2A41;
+  --color-blue-680: #1f2e47;
+  --color-blue-670: #172235;
+  --color-blue-660: #0e1626;
+  --color-blue-650: #1f2e47;
+  --color-blue-640: #57A5EB;
+  --color-blue-630: #1792fe;
+  --color-blue-620: #0E1626;
+  --color-blue-610: #0E1626;
+
+  --color-gray-100: #f2f2f2;
+  --color-gray-900: #A0B8D1;
+  --color-white: #172235;
 }
 
-
 html {
-	background: var(--dashboard-bg) !important;
+	background: #172235 !important;
 	scrollbar-width: none;
 	overflow-x: hidden;
 	scroll-behavior: smooth;
@@ -138,7 +135,7 @@ html {
 
 body {
 	margin: 0;
-	background: var(--dashboard-bg) !important;
+	background: #172235 !important;
 	height: 100vh;
 	min-height: 100vh;
 	scrollbar-width: none;

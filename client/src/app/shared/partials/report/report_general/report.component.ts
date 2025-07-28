@@ -1,28 +1,28 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { last, Observable } from 'rxjs';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { HelperService } from '../../../services/helper.service';
-import { LeakResultItem } from '../../../model/results/leak/leak.callback.model';
-import { GeneralResultItem } from '../../../model/results/general/general.callback.model';
-import { AppService } from '../../../../services/core/app.service';
-import { Category } from '../../../constants/pages';
-import { ApiService } from '../../../services/api.service';
-import { HttpParams } from '@angular/common/http';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ReportMappingListComponent } from "../report-mapping-list/report-mapping-list.component";
-import { AuthService } from '../../../../services/authetication/auth.service';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {CommonModule} from '@angular/common';
+import {last, Observable} from 'rxjs';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {HelperService} from '../../../services/helper.service';
+import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
+import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
+import {AppService} from '../../../../services/core/app.service';
+import {Category} from '../../../constants/pages';
+import {ApiService} from '../../../services/api.service';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {NgbCollapseModule} from '@ng-bootstrap/ng-bootstrap';
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import {ReportMappingComponent} from "../../report-mapping/report-mapping.component";
+import {AuthService} from '../../../../services/authetication/auth.service';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {ReportHeaderComponent} from '../../report-header/report-header.component';
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, NgOptimizedImage, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingListComponent],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
@@ -37,8 +37,6 @@ export class ReportComponent implements OnInit {
   isImageLoaded = false;
   isImageError = false;
   imageSrc: string | null = null;
-  aiSuggestStatus = false
-  aiSuggestSummary = ""
   isExpandedScreenshoot = true;
   isExpandedMetadata = true
   protected readonly last = last;
@@ -46,7 +44,7 @@ export class ReportComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService:DashboardService, private route: ActivatedRoute, private helperService: HelperService, appService: AppService, protected authService: AuthService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, appService: AppService, protected authService: AuthService) {
     this.lang = appService.getConfig().language_allowed
     this.lang_detected = appService.getConfig().language_allowed
     this.username$ = this.authService.getUsername$();
@@ -65,7 +63,7 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata, type }) => {
+    this.route.data.subscribe(({reportdata, type}) => {
       this.resultItem = reportdata;
       this.type = type;
       this.processResultItem();
@@ -84,9 +82,21 @@ export class ReportComponent implements OnInit {
     });
   }
 
+  langUpdate(result:any) {
+    this.resultItem = result;
+    this.processResultItem();
+
+    if (this.resultItem?.m_screenshot) {
+      this.loadImage(this.resultItem.m_screenshot);
+    }
+
+    this.cdr.detectChanges();
+  }
+
   screenshootToggleContent(): void {
     this.isExpandedScreenshoot = !this.isExpandedScreenshoot;
   }
+
   metaadataToggleContent(): void {
     this.isExpandedMetadata = !this.isExpandedMetadata;
   }
@@ -125,88 +135,6 @@ export class ReportComponent implements OnInit {
       this.listItems = [];
     }
     this.cdr.detectChanges();
-  }
-
-  downloadCSV() {
-    this.helperService.downloadAsCSV(this.resultItem);
-  }
-
-  printPage() {
-    this.helperService.printPage();
-  }
-  isAdmin(): boolean {
-    const currentRole = this.authService.getRole();
-    return currentRole === 'admin';
-  }
-  aiSuggest() {
-    if (!this.isAdmin()) {
-      this.dashboardService.showSubscription.set(true);
-      return;
-    }
-    const apiUrl = 'nlp/summarize/ai';
-
-    this.api.post<{ result: string }>(apiUrl, {
-      data: this.resultItem?.m_content
-    }).subscribe({
-      next: (response) => {
-        this.aiSuggestStatus = true;
-        this.aiSuggestSummary = response.result || 'No summary available';
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Summarization failed', err);
-      }
-    });
-  }
-
-  langUpdate() {
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('lang', this.lang);
-
-    const segments = currentUrl.pathname.split('/').filter(Boolean);
-    const type = segments[segments.length - 3];
-    const reportId = segments[segments.length - 1];
-    const apiUrl = `search/${type}/${reportId}`;
-
-    window.history.pushState({}, '', currentUrl.toString());
-
-    this.api.get<GeneralResultItem | LeakResultItem>(apiUrl, {
-      params: new HttpParams().set('lang', this.lang)
-    }).subscribe({
-      next: (result) => {
-        this.resultItem = result;
-        this.processResultItem();
-
-        if (this.resultItem?.m_screenshot) {
-          this.loadImage(this.resultItem.m_screenshot);
-        }
-
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  shareResult() {
-    this.helperService.shareResult(this.resultItem?.m_url || '');
-  }
-
-  redirectToUrl() {
-    if (this.resultItem && this.resultItem.m_url) {
-      window.open(this.resultItem.m_url, '_blank');
-    }
-  }
-
-  open_graph() {
-    const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
-    const parts = window.location.pathname.split('/');
-    const singleInput = parts[parts.length - 1];
-
-    const params = new URLSearchParams({
-      selectedType: 'document', singleInput: singleInput
-    });
-
-    const fullUrl = `${baseUrl}?${params.toString()}`;
-    window.open(fullUrl, '_blank');
   }
 
   getStatusText(dateString?: string): string {

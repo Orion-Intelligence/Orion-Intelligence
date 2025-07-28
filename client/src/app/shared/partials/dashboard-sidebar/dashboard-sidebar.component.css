@@ -165,11 +165,11 @@
 }
 
 .sidebar__subitem-content:hover {
-  background: var(--sidebar-subitem);
+  background: var(--color-blue-880);
 }
 
 .sidebar__subitem-selected {
-  background: var(--sidebar-subitem);
+  background: var(--color-blue-880);
 }
 
 .sidebar__selected .sidebar__subitem-content::before {
@@ -222,7 +222,7 @@
 }
 
 .sidebar__item-dropdown:hover {
-  background: var(--sidebar-item-bg-hover);
+  background: var(--color-blue-870);
   color: #fff;
 }
 
@@ -231,7 +231,7 @@
 }
 
 .sidebar__items .active {
-  background: var(--sidebar-item-bg);
+  background: var(--color-blue-880);
   color: #fff;
   border: 1px solid #ffffff10;
 }

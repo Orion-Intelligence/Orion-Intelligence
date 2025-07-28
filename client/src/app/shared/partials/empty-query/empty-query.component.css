@@ -1,5 +1,5 @@
 .no-result-container {
-  background: var(--no-result-container-bg);
+  background: var(--color-blue-790);
   width: calc(100% - 66px);
   height: calc(100vh - 66px);
   max-width: 100%;

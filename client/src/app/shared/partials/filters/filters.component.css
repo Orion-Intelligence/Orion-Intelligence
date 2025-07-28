@@ -1,6 +1,6 @@
 .filter__header {
   cursor: pointer;
-  background: var(--filter-header);
+  background: var(--color-blue-650);
   padding: 13px 20px;
   border-bottom: 1px solid #092137;
   border-top-left-radius: 15px;
@@ -31,7 +31,7 @@
   height: 100%;
   padding: 0 20px;
   overflow-y: auto;
-  background: var(--filter-form-bg);
+  background: var(--color-blue-660);
 }
 
 .filter__content {
@@ -66,40 +66,40 @@
 }
 
 .filter__input_date-container .dropdown-menu {
-  width: 275px;
+  width: 300px !important;
   margin-left: -22px !important;
   margin-top: 8px !important;
 }
 
-.filter__input_date-container .ngb-dp-month {
+.ngb-dp-month {
   margin-left: 14px;
   margin-top: 15px;
 }
 
-.filter__overlay .custom-day.range,
-.filter__overlay  .custom-day:hover {
+.custom-day.range,
+.custom-day:hover {
   border-radius: 4px;
 }
 
-.filter__overlay .dropdown-item-custom {
+.dropdown-item-custom {
   cursor: pointer;
   padding: 0;
   margin: 0;
 }
 
-.filter__overlay .ngb-dp-month {
+.ngb-dp-month {
   pointer-events: auto !important;
 }
 
-.filter__overlay .ngb-dp-navigation-select select {
+.ngb-dp-navigation-select select {
   margin-right: 8px;
 }
 
-.filter__overlay .ngb-dp-navigation-select select:last-child {
+.ngb-dp-navigation-select select:last-child {
   margin-right: 0;
 }
 
-.filter__overlay .ngb-dp-week {
+.ngb-dp-week {
   display: flex;
   gap: 2px;
   margin-bottom: 2px
@@ -107,11 +107,11 @@
 
 .filter__input {
   display: block;
-  color: var(--filter-input-text);
+  color: var(--color-gray-900);
   font-size: 12px;
   font-family: Inter, sans-serif;
   font-weight: 500;
-  background-color: var(--filter-input);
+  background-color: var(--color-white);
   padding: 11px 11px 11px 15px;
   border-radius: 7px;
   height: 40px;
@@ -119,29 +119,29 @@
   box-shadow: 0 1px 2px 0 #1018280d;
   border: 1px solid #ffffff12 !important;
   width: 100%;
-  caret-color: var(--filter-input-text);
+  caret-color: var(--color-gray-900);
 }
 
 .filter__overlay .graph-sidebar__container .filter__input {
   display: block;
-  color: var(--filter-input-text);
+  color: var(--color-gray-900);
   font-size: 12px;
   font-family: Inter, sans-serif;
   font-weight: 500;
-  background-color: var(--filter-input);
+  background-color: var(--color-white);
   padding: 11px 11px 11px 15px;
   border-radius: 7px;
   height: 40px;
   text-align: left;
   border: 1px solid rgb(29 45 71) !important;
   width: 100%;
-  caret-color: var(--filter-input-text);
+  caret-color: var(--color-gray-900);
 }
 
 .filter__input:hover {
-  color: var(--filter-input-text);
-  background-color: var(--filter-input);
-  border-color: var(--filter-input);
+  color: var(--color-gray-900);
+  background-color: var(--color-white);
+  border-color: var(--color-white);
 }
 
 
@@ -153,7 +153,7 @@
 }
 
 .filter__submit-button {
-  background: var(--filter-submit-button);
+  background: var(--color-blue-640);
   font-family: Inter, sans-serif;
   color: white;
   border: 0;
@@ -170,7 +170,7 @@
 
 .filter__submit .btn-secondary {
   background: #4EA2F100;
-  border: 2px solid var(--filter-submit-button);
+  border: 2px solid var(--color-blue-640);
 }
 
 .filter__submit .btn-secondary:hover {
@@ -190,7 +190,7 @@
 
 
 .btn-primary:hover {
-  background: var(--filter-submit-button-hover);
+  background: var(--color-blue-630);
 }
 
 .filter__container-disable {
@@ -227,7 +227,7 @@
   z-index: 1000;
   display: block;
   float: left;
-  min-width: 10rem;
+  width: 280px;
   padding: 0.5rem 0;
   margin: 0.125rem 0 0;
   font-size: 1rem;
@@ -236,7 +236,6 @@
   background-clip: padding-box;
   border: 1px solid rgb(0 0 0 / 15%);
   border-radius: 8px;
-  max-height: 400px;
   overflow-y: auto !important;
   overflow-x: hidden;
 }
@@ -246,7 +245,7 @@
 }
 
 .filter__form .dropdown-item:hover {
-  background: var(--filter-form-dropdown-item-hover) !important;
+  background: var(--color-gray-100) !important;
 }
 
 .filter__form .dropdown-select {
@@ -255,7 +254,7 @@
 }
 
 .filter__form .dropdown-select:focus {
-  background: var(--filter-item-hover) !important;
+  background: var(--color-blue-620) !important;
   color: #fff;
 }
 

@@ -8,21 +8,20 @@ import {DashboardComponent} from './pages/dashboard/dashboard.component';
 import {HomepageComponent} from './pages/homepage/homepage.component';
 import {GraphComponent} from './pages/graphs/graphs.component';
 import {DirectoryComponent} from './pages/directory/directory.component';
-import {DashboardEmailApiComponent} from './shared/partials/intel-panel/dashboard-email-api/dashboard-email-api.component';
-import {DashboardChatsComponent} from './shared/partials/intel-panel/dashboard-chats/dashboard-chats.component';
-import {DashboardGeneralComponent} from './shared/partials/intel-panel/dashboard-general/dashboard-general.component';
+import {DashboardEmailApiComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-email-api/dashboard-email-api.component';
+import {DashboardChatsComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-chats/dashboard-chats.component';
+import {DashboardGeneralComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-general/dashboard-general.component';
 import {ReportComponent} from './shared/partials/report/report_general/report.component';
-import {DashboardDefacementComponent} from './shared/partials/intel-panel/dashboard-defacement/dashboard-defacement.component';
+import {DashboardDefacementComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-defacement/dashboard-defacement.component';
 import {ReportDefacementComponent} from './shared/partials/report/report-defacement/report-defacement.component';
 import {ReportChatComponent} from './shared/partials/report/report-chat/report-chat.component';
-import {DashboardExploitComponent} from './shared/partials/intel-panel/dashboard-exploit/dashboard-exploit.component';
-import {ReportExploitComponent} from './shared/partials/report/report-exploit/report-exploit.component';
+import {DashboardExploitComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-exploit/dashboard-exploit.component';
 import {DumpComponent} from './pages/dump/dump.component';
 import {CredentialComponent} from './pages/dump/credential/credential.component';
 import {ErrorHandlerComponent} from './pages/error-handler/error-handler.component';
-import {DashboardConsolidatedComponent} from './shared/partials/intel-panel/dashboard-consolidated/dashboard-consolidated.component';
+import {DashboardConsolidatedComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component';
 import {ReportConsolidatedResolver} from './shared/resolvers/consolidated.resolver';
-import {DashboardSocialsComponent} from './shared/partials/intel-panel/dashboard-social/dashboard-social.component';
+import {DashboardSocialsComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
 import {subscriptionGuard} from './shared/guards/subscription.guard';
 
 export const routes: Routes = [
@@ -281,7 +280,7 @@ export const routes: Routes = [
           },
           {
             path: ':category/:m_hash',
-            component: ReportExploitComponent,
+            component: ReportComponent,
             resolve: {reportdata: ReportResolver},
             data: {type: 'Exploit', animation: 'HashPage'}
           }
@@ -322,7 +321,7 @@ export const routes: Routes = [
           },
           {
             path: 'exploit/:m_hash',
-            component: ReportExploitComponent,
+            component: ReportComponent,
             resolve: {reportdata: ReportConsolidatedResolver},
             data: {type: 'consolidated', animation: 'HashPage'}
           },

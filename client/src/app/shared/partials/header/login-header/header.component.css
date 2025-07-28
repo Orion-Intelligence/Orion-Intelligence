@@ -1,6 +1,6 @@
 .header {
   color: #000;
-  background: var(--dashboard-header-login) !important;
+  background: var(--color-blue-840) !important;
   border-bottom-color: #092137BA;
   border-style: solid;
   border-width: 0 0 1px;

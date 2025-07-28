@@ -1,26 +1,4 @@
-<div class="d-flex justify-content-end">
-  <div class="btn-group report-menu-option-container">
-    <button (click)="downloadCSV()" appTooltip="Download" class="p-0 report-menu-option">
-      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/download.svg" width="25">
-    </button>
-    <div class="vr report-menu-divider"></div>
-    <button (click)="printPage()" appTooltip="Print" class="p-0 report-menu-option">
-      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/print.svg" width="25">
-    </button>
-    <div class="vr report-menu-divider"></div>
-    <button (click)="shareResult()" appTooltip="Share" class="p-0 report-menu-option">
-      <img alt="background" height="22" ngSrc="../../../../../assets/images/shared/share.svg" width="22">
-    </button>
-    <div class="vr report-menu-divider"></div>
-    <button (click)="redirectToUrl()" appTooltip="Open in new Tab" class="p-0 report-menu-option" matTooltipClass="mat-tooltip">
-      <img alt="background" height="25" ngSrc="../../../../../assets/images/shared/redirect.svg" width="15">
-    </button>
-    <div class="vr report-menu-divider"></div>
-    <button (click)="open_graph()" appTooltip="Open CTI Graph" class="p-0 report-menu-option">
-      <img alt="background" height="17" ngSrc="../../../../../assets/images/sidebar/graph.svg" width="17">
-    </button>
-  </div>
-</div>
+<app-report-header [csv_object]="{ m_url: defacementData?.m_url }"  [url]="defacementData?.m_url"></app-report-header>
 <div class="search__result-detail">
   <div class="dashboard__defacement-detail-header-url">
     {{ defacementData?.m_url }}
@@ -54,4 +32,4 @@
   </div>
 </div>
 <app-json-api-viewer [jsonData]="defacementData"></app-json-api-viewer>
-<app-report-mapping-list></app-report-mapping-list>
+<app-report-mapping></app-report-mapping>

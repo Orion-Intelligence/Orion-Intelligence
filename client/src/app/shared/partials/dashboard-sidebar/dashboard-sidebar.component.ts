@@ -75,6 +75,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       this.selectionStore.setSelectedSection("");
       this.selectionStore.setSelectedOption("");
     } else {
+      this.dashboardService.resetParams()
       this.selectionStore.setSelectedSection(section);
       let firstSubcategory: string | undefined;
       switch (section) {
@@ -113,6 +114,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onOptionSelected(option: string) {
+    this.dashboardService.resetParams()
     this.onResetCallback()
     this.selectionStore.setSelectedOption(option);
     if (this.min_detected && this.sidebar_default) {

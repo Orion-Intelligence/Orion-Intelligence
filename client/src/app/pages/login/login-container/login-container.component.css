@@ -104,7 +104,7 @@
 .login-footer {
   position: fixed;
   bottom: 0;
-  background: var(--login-footer);
+  background: var(--color-blue-610);
   height: 48px;
   width: 100%;
 }

@@ -8,18 +8,16 @@ from orion.helper_manager.helper_controller import helper_controller
 
 class search_defacement_param_model(BaseModel,helper_controller):
     q: Optional[str] = Field("", max_length=150)
-    pSearchParamType: Optional[str] = "all"
-    mSearchParamPage: Optional[int] = 1
-    mNetwork: str = "all"
-    mDateRange: Optional[str] = ""
-    mAttacker: Optional[str] = ""
-    mTeam: Optional[str] = ""
-    mContentType: Optional[str] = ""
+    category: Optional[str] = "all"
+    page: Optional[int] = 1
+    network: str = "all"
+    daterange: Optional[str] = ""
+    attacker: Optional[str] = ""
+    team: Optional[str] = ""
+    content: Optional[str] = ""
 
     filters: Optional[List[entity_filter_param_model]] = None   
     filters_json: Optional[str] = Field(None, alias="filters_json")
-    filters: Optional[List[entity_filter_param_model]] = None
-    
     
 
     class Config:

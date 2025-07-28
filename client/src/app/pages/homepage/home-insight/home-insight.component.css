@@ -87,7 +87,7 @@
 }
 
 .home_insight__card {
-  background-color: var(--home-insight-card-bg);
+  background-color: var(--color-blue-800);
   color: white;
   padding: 24px;
   border-radius: 8px;
@@ -127,7 +127,7 @@
 }
 
 .home-insight-card-container {
-  background-color: var(--home-insight-card-bg);
+  background-color: var(--color-blue-800);
   color: #e0e0e0;
   padding: 15px;
   border-radius: 8px;

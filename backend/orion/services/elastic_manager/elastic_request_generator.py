@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from typing import Any, Dict, List
 
+from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
     search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import \
@@ -29,9 +30,9 @@ class elastic_request_generator:
         must_not_clause = []
         should_clauses = []
 
-        m_attacker = p_query_model.mAttacker
-        m_team = p_query_model.mTeam
-        m_date_range = p_query_model.mDateRange
+        m_attacker = p_query_model.attacker
+        m_team = p_query_model.team
+        m_date_range = p_query_model.daterange
 
         if m_date_range:
             parts = m_date_range.split(',')
@@ -60,7 +61,7 @@ class elastic_request_generator:
         if m_attacker:
             must_clauses.append({"term": {"m_attacker": m_attacker}})
 
-        m_content_type = p_query_model.mContentType
+        m_content_type = p_query_model.content
 
         if m_content_type == "phishing":
             must_clauses.append({"terms": {"m_ioc_type": ["phishing"]}})
@@ -245,8 +246,8 @@ class elastic_request_generator:
         if raw_query == "":
             raw_query = "*"
 
-        m_date_range = p_query_model.mDateRange
-        m_network = p_query_model.mNetwork
+        m_date_range = p_query_model.daterange
+        m_network = p_query_model.network
 
         must_clauses = []
 
@@ -372,7 +373,7 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_consolidated_data(p_query_model,entity_filter_clauses: List[Dict[str, Any]]):
-        p_query_model.mMessageDate=p_query_model.mDateRange
+        p_query_model.daterange=p_query_model.daterange
         if p_query_model.q != "*":
             raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
@@ -441,13 +442,13 @@ class elastic_request_generator:
         loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
 
         m_url_query = raw_query
-        m_safe_search = p_query_model.mSearchParamSafeSearch
-        m_page_number = p_query_model.mSearchParamPage
-        m_network = p_query_model.mNetwork
-        m_search_type = p_query_model.mSearchParamType
-        m_date_range = p_query_model.mDateRange
-        m_content_type = p_query_model.mContentType
-        m_entity = p_query_model.mEntity
+        m_safe_search = p_query_model.safe
+        m_page_number = p_query_model.page
+        m_network = p_query_model.network
+        m_search_type = p_query_model.category
+        m_date_range = p_query_model.daterange
+        m_content_type = p_query_model.content
+        m_entity = p_query_model.entity
 
         parsed_url = urlparse(raw_query)
         domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
@@ -722,13 +723,13 @@ class elastic_request_generator:
         loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
 
         m_url_query = raw_query
-        m_safe_search = p_query_model.mSearchParamSafeSearch
-        m_page_number = p_query_model.mSearchParamPage
-        m_network = p_query_model.mNetwork
-        m_search_type = p_query_model.mSearchParamType
-        m_date_range = p_query_model.mDateRange
-        m_content_type = p_query_model.mContentType
-        m_entity = p_query_model.mEntity
+        m_safe_search = p_query_model.safe
+        m_page_number = p_query_model.page
+        m_network = p_query_model.network
+        m_search_type = p_query_model.category
+        m_date_range = p_query_model.daterange
+        m_content_type = p_query_model.content
+        m_entity = p_query_model.entity
 
         parsed_url = urlparse(raw_query)
         domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
@@ -986,11 +987,11 @@ class elastic_request_generator:
 
         must_clauses = []
         must_not_clause = []
-        if p_query_model.mPlatform:
-            must_clauses.append({"term": {"m_platform": p_query_model.mPlatform}})
+        if p_query_model.platform:
+            must_clauses.append({"term": {"m_platform": p_query_model.platform}})
 
-        if p_query_model.mMessageDate:
-            parts = p_query_model.mMessageDate.split(',')
+        if p_query_model.daterange:
+            parts = p_query_model.daterange.split(',')
             if len(parts) == 2:
                 try:
                     from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -1123,20 +1124,21 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_SOCIAL_INDEX, query
 
     @staticmethod
-    def on_search_telegram_data(p_query_model):
+    def on_search_telegram_data(p_query_model:search_chat_param_model):
         raw_query = ""
         if p_query_model.q == "":
             raw_query = "*"
 
-        if p_query_model.q != "*":
-            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
+        if p_query_model.q:
+            if p_query_model.q != "*":
+                raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
 
-        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
-        m_search_type = p_query_model.mContentType
-        m_message_date = p_query_model.mDateRange
-        m_entity = p_query_model.mEntity
-        m_mitryTtp = p_query_model.mMitreTtp
-        m_ctype = getattr(p_query_model, 'ctype', 'all')
+        m_page_number = p_query_model.page
+        m_search_type = p_query_model.content
+        m_message_date = p_query_model.daterange
+        m_entity = p_query_model.entity
+        m_mitryTtp = p_query_model.mitre
+        m_ctype = p_query_model.category
 
         must_clauses = []
         must_not_clause = []
@@ -1474,13 +1476,13 @@ class elastic_request_generator:
             return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
         m_url_query = raw_query
-        m_safe_search = p_query_model.mSearchParamSafeSearch
-        m_search_type = p_query_model.mSearchParamType
-        m_page_number = p_query_model.mSearchParamPage
-        m_network = p_query_model.mNetwork
-        m_date_range = p_query_model.mDateRange
-        m_content_type = p_query_model.mContentType
-        m_entity = p_query_model.mEntity
+        m_safe_search = p_query_model.safe
+        m_search_type = p_query_model.category
+        m_page_number = p_query_model.page
+        m_network = p_query_model.network
+        m_date_range = p_query_model.daterange
+        m_content_type = p_query_model.content
+        m_entity = p_query_model.entity
 
         parsed_url = urlparse(raw_query)
         domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)

@@ -1,18 +1,16 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
-import { HelperService } from '../../../services/helper.service';
-import { CommonModule, NgForOf, NgIf, NgOptimizedImage, SlicePipe, } from '@angular/common';
+import { CommonModule, NgForOf, NgIf, SlicePipe, } from '@angular/common';
 import { ResultListComponent } from '../../result-components/result-list/result-list.component';
 import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { ApiService } from '../../../services/api.service';
 import { last, Observable } from 'rxjs';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import {SocialResultItem} from '../../../model/results/social/social.callback.model';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {ReportHeaderComponent} from '../../report-header/report-header.component';
 
 @Component({
   selector: 'app-report-chat',
@@ -21,33 +19,27 @@ import {DashboardService} from '../../../../services/dashboard/dashboard.service
   imports: [
     NgIf,
     NgForOf,
-    NgOptimizedImage,
     ResultListComponent,
     ResultSectionComponent,
     SlicePipe, CommonModule,
-    JsonApiViewerComponent, TooltipDirective
+    JsonApiViewerComponent, TooltipDirective, ReportHeaderComponent
   ],
   animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit {
+  protected readonly last = last;
+
   resultItem: ChatResultItem | SocialResultItem | null = null;
   arrayKeys: string[] = [];
   listItems: any[] = [];
   activeTab = '';
   content = '';
   summary = '';
-  aiSuggestStatus = false
-  aiSuggestSummary = ""
-  protected readonly last = last;
   isExpandedMetadata = true
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(
-    private helper: HelperService,
-    private dashboardService:DashboardService,
-    private api: ApiService, private cdr: ChangeDetectorRef, private route: ActivatedRoute, protected authService: AuthService
-  ) {
+  constructor(private route: ActivatedRoute, protected authService: AuthService) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
@@ -117,66 +109,8 @@ export class ReportChatComponent implements OnInit {
     }
   }
 
-  downloadCSV() {
-    this.helper.downloadAsCSV(this.resultItem);
-  }
-
-  printPage() {
-    this.helper.printPage();
-  }
-
-  isAdmin(): boolean {
-    const currentRole = this.authService.getRole();
-    return currentRole === 'admin';
-  }
-
-  aiSuggest() {
-    if (!this.isAdmin()) {
-      this.dashboardService.showSubscription.set(true)
-      return;
-    }
-    const apiUrl = 'nlp/summarize/ai';
-
-    this.api.post<{ result: string }>(apiUrl, {
-      data: this.resultItem?.m_content
-    }).subscribe({
-      next: (response) => {
-        this.aiSuggestStatus = true;
-        this.aiSuggestSummary = response.result || 'No summary available';
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Summarization failed', err);
-      }
-    }
-    );
-  }
-
   formatKeyLabel(key: string): string {
     const cleaned = key.replace(/^m_/, '').replace(/[^a-zA-Z0-9]/g, ' ');
     return cleaned.length < 4 ? cleaned.toUpperCase() : cleaned.toLowerCase().replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1));
-  }
-
-  shareResult() {
-    this.helper.shareResult(this.resultItem?.m_message_sharable_link ?? '');
-  }
-
-  open_graph() {
-    const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
-    const parts = window.location.pathname.split('/');
-    const singleInput = parts[parts.length - 1];
-
-    const params = new URLSearchParams({
-      selectedType: 'document', singleInput: singleInput
-    });
-
-    const fullUrl = `${baseUrl}?${params.toString()}`;
-    window.open(fullUrl, '_blank');
-  }
-
-  redirectToUrl() {
-    if (this.resultItem?.m_weblink?.length) {
-      window.open(this.resultItem.m_message_sharable_link, '_blank');
-    }
   }
 }

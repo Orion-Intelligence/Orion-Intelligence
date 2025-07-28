@@ -138,7 +138,7 @@ class crawl_model:
         return {"parsed":"true"}
 
     @staticmethod
-    async def invoke_stealerlogs_index(credential_index: LogBatchModel):
+    async def invoke_stealerlog_index(credential_index: LogBatchModel):
         m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
 
         await elastic_controller.get_instance().index_bulk_data(m_data)
@@ -171,7 +171,7 @@ class crawl_model:
             is_leak_update=False
         )
 
-    async def init_general(self, general_index: GeneralDataModel):
+    async def invoke_generic_index(self, general_index: GeneralDataModel):
         m_data = elastic_request_generator().index_query_general(general_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
@@ -182,7 +182,7 @@ class crawl_model:
             is_leak_update=False
         )
 
-    async def init_exploit(self, exploit_index: ExploitDataModel):
+    async def invoke_exploit_index(self, exploit_index: ExploitDataModel):
         m_data = elastic_request_generator().index_query_exploit(exploit_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
@@ -204,7 +204,7 @@ class crawl_model:
             is_leak_update=True
         )
 
-    async def init_leak(self, leak_index: LeakDataModel):
+    async def invoke_leak_index(self, leak_index: LeakDataModel):
         m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
@@ -215,7 +215,7 @@ class crawl_model:
             is_leak_update=True
         )
 
-    async def init_news(self, leak_index: LeakDataModel):
+    async def invoke_news_index(self, leak_index: LeakDataModel):
         m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
@@ -226,7 +226,7 @@ class crawl_model:
             is_leak_update=True
         )
 
-    async def init_defacement(self, defacement_index: DefacementDataModel):
+    async def invoke_defacement_index(self, defacement_index: DefacementDataModel):
         m_data = elastic_request_generator().index_query_defacement(defacement_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
@@ -238,7 +238,7 @@ class crawl_model:
         )
 
     @staticmethod
-    async def fetch_parser():
+    async def invoke_fetch_parser():
         if os.path.exists(CRAWL_PATHS.M_PARSER_FILE_PATH):
             return FileResponse(CRAWL_PATHS.M_PARSER_FILE_PATH, media_type="application/zip",
                                 filename="parser_files.zip")
@@ -246,7 +246,7 @@ class crawl_model:
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
 
     @staticmethod
-    async def fetch_feeder(index_type):
+    async def invoke_fetch_feeder(index_type):
         if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
             return FileResponse(CRAWL_PATHS.M_FEEDER_FILE_PATH + f"crawl_data_{index_type}.txt",
                                 media_type="text/plain", filename="crawl_data_leak.txt")
@@ -298,7 +298,7 @@ class crawl_model:
 
         return JSONResponse(content={"message": "Logs indexed successfully"}, status_code=200)
 
-    async def index_dump_record(self, dump_model: DumpModel):
+    async def invoke_dump_index(self, dump_model: DumpModel):
         try:
             batch_id = dump_model.id
             if not dump_model.status:

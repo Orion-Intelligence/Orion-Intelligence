@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {franc} from 'franc-min';
 import {LANGUAGE_MAP} from '../constants/shared-enums';
+import {ConsolidatedParamModel} from '../model/results/consolidated/consolidated.param.model';
 
 @Injectable({
   providedIn: 'root'
@@ -35,19 +36,21 @@ export class HelperService {
   }
 
   removeEmptyOrNullValues<T extends Record<string, any>>(params: T): Partial<T> {
+    const defaultParams = new ConsolidatedParamModel();
     const cleanedParams: Partial<T> = {};
 
     for (const key in params) {
       if (!Object.prototype.hasOwnProperty.call(params, key)) continue;
 
       const value = params[key];
+      const defaultValue = (defaultParams as any)[key];
 
-      if (
-        value !== null &&
-        value !== undefined &&
-        !(typeof (value as unknown) === 'string' && (value as string).trim() === '') &&
-        !(Array.isArray(value) && value.length === 0)
-      ) {
+      const isNullOrUndefined = value === null || value === undefined;
+      const isEmptyString = typeof (value as unknown) === 'string' && (value as string).trim() === '';
+      const isEmptyArray = Array.isArray(value) && value.length === 0;
+      const isSameAsDefault = JSON.stringify(value) === JSON.stringify(defaultValue);
+
+      if (!isNullOrUndefined && !isEmptyString && !isEmptyArray && !isSameAsDefault) {
         cleanedParams[key] = value;
       }
     }

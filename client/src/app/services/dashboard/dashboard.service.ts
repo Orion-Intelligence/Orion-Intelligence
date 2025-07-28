@@ -15,6 +15,7 @@ import {EntityFilterService} from '../entityFilter/entity.filter.service';
 import {ConsolidatedParamModel} from '../../shared/model/results/consolidated/consolidated.param.model';
 import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.callback.model';
 import {HelperService} from '../../shared/services/helper.service';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +35,7 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private helperService:HelperService, private apiService: ApiService, private entityFilterService: EntityFilterService) {
+  constructor(private router: Router, private route: ActivatedRoute, private helperService: HelperService, private apiService: ApiService, private entityFilterService: EntityFilterService) {
   }
 
   fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{ success: boolean; isEmpty: boolean; data: T | null }> {
@@ -54,6 +55,14 @@ export class DashboardService {
 
     let baseParams: any = {...paramModel};
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams)
+    console.log(baseParams)
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: baseParams,
+      queryParamsHandling: '',
+      replaceUrl: true
+    }).then();
 
     if (formattedFiltersForApi.length > 0) {
       baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
@@ -173,6 +182,10 @@ export class DashboardService {
         return consolidated;
       })()
     };
+  }
+
+  resetParams() {
+    this.consolidatedParamModel.reset()
   }
 
   private cancelOngoingRequest() {
