@@ -1,30 +1,30 @@
 export const LANGUAGE_MAP: Record<string, { iso1: string, name: string }> = {
-  eng: {iso1: 'en', name: 'English'},
-  fra: {iso1: 'fr', name: 'French'},
-  spa: {iso1: 'es', name: 'Spanish'},
-  deu: {iso1: 'de', name: 'German'},
-  ita: {iso1: 'it', name: 'Italian'},
-  por: {iso1: 'pt', name: 'Portuguese'},
-  rus: {iso1: 'ru', name: 'Russian'},
-  zho: {iso1: 'zh', name: 'Chinese'},
-  jpn: {iso1: 'ja', name: 'Japanese'},
-  kor: {iso1: 'ko', name: 'Korean'},
-  ara: {iso1: 'ar', name: 'Arabic'},
-  hin: {iso1: 'hi', name: 'Hindi'},
-  ben: {iso1: 'bn', name: 'Bengali'},
-  tur: {iso1: 'tr', name: 'Turkish'},
-  nld: {iso1: 'nl', name: 'Dutch'},
-  swe: {iso1: 'sv', name: 'Swedish'},
-  pol: {iso1: 'pl', name: 'Polish'},
-  ces: {iso1: 'cs', name: 'Czech'}
+  eng: { iso1: 'en', name: 'English' },
+  fra: { iso1: 'fr', name: 'French' },
+  spa: { iso1: 'es', name: 'Spanish' },
+  deu: { iso1: 'de', name: 'German' },
+  ita: { iso1: 'it', name: 'Italian' },
+  por: { iso1: 'pt', name: 'Portuguese' },
+  rus: { iso1: 'ru', name: 'Russian' },
+  zho: { iso1: 'zh', name: 'Chinese' },
+  jpn: { iso1: 'ja', name: 'Japanese' },
+  kor: { iso1: 'ko', name: 'Korean' },
+  ara: { iso1: 'ar', name: 'Arabic' },
+  hin: { iso1: 'hi', name: 'Hindi' },
+  ben: { iso1: 'bn', name: 'Bengali' },
+  tur: { iso1: 'tr', name: 'Turkish' },
+  nld: { iso1: 'nl', name: 'Dutch' },
+  swe: { iso1: 'sv', name: 'Swedish' },
+  pol: { iso1: 'pl', name: 'Polish' },
+  ces: { iso1: 'cs', name: 'Czech' }
 };
 
 export const DUMP_SOURCE_MAP: Record<number, { name: string }> = {
-  1: {name: 'Telegram'},
+  1: { name: 'Telegram' },
 };
 
 export const DUMP_GROUP_MAP: Record<number, { name: string }> = {
-  1: {name: 'Dataleak 2025'},
+  1: { name: 'Dataleak 2025' },
 };
 
 export const ChannelTypeKeys = [
@@ -231,4 +231,18 @@ export const DATA_SECTION_TEMPLATE = [
 export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set([
   "tools",
   "zeroday"
+]);
+
+export const search_filter_keys = new Set([
+  'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
+  'm_bitcoin_addresses', 'm_code_snippet', 'm_company_name', 'm_country', 'm_country_name', 'm_platform',
+  'm_credit_card', 'm_cve', 'm_cwe', 'm_document_id', 'm_dumplink', 'm_email', 'm_employee_count',
+  'm_encoded_urls', 'm_event', 'm_fac', 'm_file_path', 'm_file_paths', 'm_gpe', 'm_hashtag', 'm_author',
+  'm_in_aadhaar', 'm_in_pan', 'm_in_passport', 'm_in_vehicle_registration', 'm_in_voter',
+  'm_industry', 'm_ip', 'm_language', 'm_law', 'm_location', 'm_medical_license', 'm_mention',
+  'm_mitre_ttp_name', 'm_mitre_ttp_type', 'm_monero_addresses', 'm_name', 'm_norp', 'm_org',
+  'm_password', 'm_person', 'm_phone_number', 'm_product', 'm_social_media_profiles', 'm_states',
+  'm_team', 'm_title', 'm_uk_nhs', 'm_uk_nino', 'm_url', 'm_us_bank_number', 'm_us_driver_license',
+  'm_us_itin', 'm_us_passport', 'm_us_ssn', 'm_user_agents', 'm_username', 'm_xmpp_addresses',
+  'm_yara_rule', 'm_domain'
 ]);
