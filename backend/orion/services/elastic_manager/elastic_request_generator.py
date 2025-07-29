@@ -43,9 +43,9 @@ class elastic_request_generator:
 
                     must_clauses.append({
                         "range": {
-                            "m_date_of_leak": {
-                                "gte": "2024-01-01",
-                                "lte": "2025-12-31"
+                            "m_leak_date": {
+                                "gte": from_date,
+                                "lte": to_date
                             }
                         }
                     })
@@ -171,13 +171,13 @@ class elastic_request_generator:
                         },
                         {
                             "filter": {
-                                "exists": {"field": "m_date_of_leak"}
+                                "exists": {"field": "m_leak_date"}
                             },
                             "weight": 1
                         },
                         {
                             "gauss": {
-                                "m_date_of_leak": {
+                                "m_leak_date": {
                                     "origin": "now",
                                     "scale": "90d",
                                     "offset": "5d",
@@ -217,13 +217,9 @@ class elastic_request_generator:
             "size": 100,
             "track_total_hits": True,
             "sort": [
-                {"m_date_of_leak": {"order": "desc"}}
+                {"m_leak_date": {"order": "desc"}}
             ]
         }
-
-        print("::::::::::::::::::::::::::::", flush=True)
-        print(query_statement, flush=True)
-        print("::::::::::::::::::::::::::::", flush=True)
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
@@ -1850,6 +1846,10 @@ class elastic_request_generator:
             if not record["m_url"]:
                 continue
 
+            print("::::::::::::::::::::::::::::::::::", flush=True)
+            print(record, flush=True)
+            print("::::::::::::::::::::::::::::::::::", flush=True)
+
             data_hash = helper_controller.generate_data_hash(record["m_url"])
             record["m_hash"] = data_hash
             record["m_update_date"] = current_timestamp
@@ -2171,7 +2171,7 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX,
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
-                    "query": {"range": {"m_date_of_leak": {"gte": "now-5d/d"}}},
+                    "query": {"range": {"m_leak_date": {"gte": "now-5d/d"}}},
                     "aggs": {
                         "Updated 5 Days ago": {"value_count": {"field": "_id"}}
                     },

@@ -123,7 +123,10 @@ class ELASTIC_ENUMS:
         "settings": {
             "number_of_shards": 1,
             "number_of_replicas": 0,
-            "max_result_window": 1000000
+            "max_result_window": 1000000,
+            "blocks": {
+                "read_only_allow_delete": False
+            }
         },
         "mappings": {
             "dynamic_templates": [
@@ -146,7 +149,7 @@ class ELASTIC_ENUMS:
                 "m_url": {"type": "keyword"},
                 "m_ip": {"type": "keyword"},
                 "m_ioc_type": {"type": "keyword"},
-                "m_date_of_leak": {"type": "date", "format": "yyyy-MM-dd"},
+                "m_leak_date": {"type": "date", "format": "yyyy-MM-dd"},
                 "m_web_url": {"type": "keyword"},
                 "m_screenshot": {"type": "keyword"},
                 "m_mirror_links": {"type": "keyword"}
@@ -181,7 +184,7 @@ class ELASTIC_ENUMS:
                 "m_cve_source": {"type": "keyword"},
                 "m_cvss": {"type": "keyword"},
                 "m_cwe": {"type": "keyword"},
-                "m_date_of_leak": {"type": "date", "format": "yyyy-MM-dd"},
+                "m_leak_date": {"type": "date", "format": "yyyy-MM-dd"},
                 "m_exploit_year": {"type": "keyword"},
                 "m_github_links": {"type": "keyword"},
                 "m_hash": {"type": "keyword"},

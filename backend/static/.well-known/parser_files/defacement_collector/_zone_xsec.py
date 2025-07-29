@@ -138,7 +138,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             m_base_url=self.base_url,
                             m_url=extracted_url,
                             m_ioc_type=["hacked"],
-                            m_date_of_leak=datetime.datetime.strptime(date.split()[0], '%Y-%m-%d').date(),
+                            m_leak_date=datetime.datetime.strptime(date.split()[0], '%Y-%m-%d').date(),
                             m_mirror_links=[m_mirror],
                             m_network=helper_method.get_network_type(self.base_url),
                         )

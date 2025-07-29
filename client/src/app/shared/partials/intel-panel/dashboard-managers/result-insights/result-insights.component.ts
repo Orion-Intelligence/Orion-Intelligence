@@ -171,8 +171,8 @@ export class ResultInsightsComponent implements OnInit {
     });
 
     consolidated.defacement_model?.Result?.forEach(item => {
-      addToMap(item.m_url, item.q, item.m_date_of_leak);
-      item.m_source_url?.forEach(link => addToMap(link, item.q, item.m_date_of_leak));
+      addToMap(item.m_url, item.q, item.m_leak_date);
+      item.m_source_url?.forEach(link => addToMap(link, item.q, item.m_leak_date));
     });
 
     consolidated.social_model?.Result?.forEach(item => {
@@ -280,7 +280,7 @@ export class ResultInsightsComponent implements OnInit {
 
     allResults.forEach(item => {
       const rawDate =
-        item.m_update_date || item.m_date_of_leak || item.m_message_date || item.m_leak_date || item.m_creation_date;
+        item.m_update_date || item.m_leak_date || item.m_message_date || item.m_leak_date || item.m_creation_date;
 
       const status = this.getStatusCategory(rawDate);
 

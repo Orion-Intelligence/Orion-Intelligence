@@ -110,7 +110,7 @@ class homepage_model:
         title = item.get("m_title") or item.get("m_name") or item.get("m_caption") or item.get("m_url") or "Untitled"
         display_title = title[:15] + " ..." if len(title) > 20 else title
 
-        date_fields = ["m_update_date", "m_date_of_leak", "m_message_date", "m_leak_date"]
+        date_fields = ["m_update_date", "m_leak_date", "m_message_date", "m_leak_date"]
         raw_date = next((item.get(f) for f in date_fields if item.get(f)), None)
 
         display_date = homepage_model.parse_date_fallback(raw_date)

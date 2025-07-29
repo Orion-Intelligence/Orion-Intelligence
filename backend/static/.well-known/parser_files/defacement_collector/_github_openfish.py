@@ -100,7 +100,7 @@ class _github_openfish(leak_extractor_interface, ABC):
                     m_content="",
                     m_network=helper_method.get_network_type(self.base_url),
                     m_ioc_type=["phishing"],
-                    m_date_of_leak=date.today(),
+                    m_leak_date=date.today(),
                 )
                 entity_data = entity_model(
                     m_team="openphish",

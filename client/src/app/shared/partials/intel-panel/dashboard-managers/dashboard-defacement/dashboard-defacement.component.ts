@@ -136,8 +136,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
   resetFilters(_: void) {
     this.dashboardService.consolidatedParamModel.daterange = "";
-    this.dashboardService.consolidatedParamModel.team = "";
-    this.dashboardService.consolidatedParamModel.attacker = [];
+    this.dashboardService.consolidatedParamModel.network = "all";
 
     this.fetchSearchResults(true);
   }
@@ -157,7 +156,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     let key;
     let order: 'asc' | 'desc' = 'asc';
 
-    key = 'm_date_of_leak';
+    key = 'm_leak_date';
 
     if (sort === SortType.NEWEST_FIRST) {
       order = 'desc';

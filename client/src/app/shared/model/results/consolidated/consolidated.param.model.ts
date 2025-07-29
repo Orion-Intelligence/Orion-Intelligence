@@ -21,7 +21,7 @@ export class ConsolidatedParamModel {
   m_base_url = "";
   m_ip: string[] = [];
   m_location = "";
-  m_date_of_leak?: string;
+  m_leak_date?: string;
   m_web_url: string[] = [];
   m_hash = "";
   m_screenshot?: string;
@@ -49,7 +49,7 @@ export class ConsolidatedParamModel {
     this.m_base_url = "";
     this.m_ip = [];
     this.m_location = "";
-    this.m_date_of_leak = undefined;
+    this.m_leak_date = undefined;
     this.m_web_url = [];
     this.m_hash = "";
     this.safe = false;

@@ -48,7 +48,7 @@ export class DashboardResultGeneralListComponent implements OnInit, AfterViewIni
       let valueA = this.getColumnValue(a, column);
       let valueB = this.getColumnValue(b, column);
 
-      if (column === 'm_date_of_leak') {
+      if (column === 'm_leak_date') {
         if (!valueA || valueA === 'N/A') return this.sortDirection === 'asc' ? 1 : -1;
         if (!valueB || valueB === 'N/A') return this.sortDirection === 'asc' ? -1 : 1;
         valueA = new Date(valueA);

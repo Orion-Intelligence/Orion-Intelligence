@@ -123,7 +123,7 @@ class _tweetfeed(leak_extractor_interface, ABC):
                             m_source_url=[original_tweet_link],
                             m_ioc_type=filtered,
                             m_network=helper_method.get_network_type(self.base_url),
-                            m_date_of_leak=date,
+                            m_leak_date=date,
                         )
 
                         entity_data = entity_model(

@@ -66,7 +66,7 @@ class elastic_insight_generator:
                 "match_all": {}
             },
             "sort": [
-                {"m_date_of_leak": {"order": "desc"}}
+                {"m_leak_date": {"order": "desc"}}
             ],
             "from": from_,
             "size": size,
