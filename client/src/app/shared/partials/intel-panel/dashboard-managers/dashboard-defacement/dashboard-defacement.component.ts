@@ -49,6 +49,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] ? +params['page'] : 1;
         this.dashboardService.consolidatedParamModel.daterange = params['daterange'] || '';
+        this.dashboardService.consolidatedParamModel.network = params['network'] || '';
 
         if (this.firstTrigger && ((this.defacementCallbackModel.Result.length > 0))) {
           this.isLoading = false;
@@ -143,14 +144,11 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
   reloadFilters(event: Record<string, string | null>) {
     this.dashboardService.consolidatedParamModel.page = 1
-    if (event['mDateRange']) {
-      this.dashboardService.consolidatedParamModel.daterange = event['mDateRange']
+    if (event['daterange']) {
+      this.dashboardService.consolidatedParamModel.daterange = event['daterange']
     }
-    if (event['mTeam'] != null) {
-      this.dashboardService.consolidatedParamModel.team = event['mTeam'];
-    }
-    if (event['mAttacker'] != null) {
-      this.dashboardService.consolidatedParamModel.attacker = [event['mAttacker']];
+    if (event['network'] != null) {
+      this.dashboardService.consolidatedParamModel.network = event['network'];
     }
     this.fetchSearchResults();
   }

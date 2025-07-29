@@ -1,5 +1,6 @@
 import hashlib
 import re
+import ipaddress
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from typing import Any, Dict, List
@@ -21,15 +22,13 @@ class elastic_request_generator:
         if not raw_query or raw_query == "":
             raw_query = "*"
 
-        m_page_number = getattr(p_query_model, 'mSearchParamPage', 1)
-        m_network = getattr(p_query_model, 'mNetwork', None)
+        m_page_number = getattr(p_query_model, 'page', 1)
 
         must_clauses = []
         must_not_clause = []
         should_clauses = []
 
-        m_attacker = p_query_model.attacker
-        m_team = p_query_model.team
+        m_network = p_query_model.network
         m_date_range = p_query_model.daterange
 
         if m_date_range:
@@ -37,16 +36,16 @@ class elastic_request_generator:
             if len(parts) == 2:
                 try:
                     from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
-                    from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
+                    from_date = from_date_obj.strftime("%Y-%m-%d")
 
                     to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
-                    to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
+                    to_date = to_date_obj.strftime("%Y-%m-%d")
 
                     must_clauses.append({
                         "range": {
                             "m_date_of_leak": {
-                                "gte": from_date,
-                                "lte": to_date
+                                "gte": "2024-01-01",
+                                "lte": "2025-12-31"
                             }
                         }
                     })
@@ -55,9 +54,6 @@ class elastic_request_generator:
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
-
-        if m_attacker:
-            must_clauses.append({"term": {"m_attacker": m_attacker}})
 
         m_content_type = p_query_model.content
 
@@ -68,13 +64,8 @@ class elastic_request_generator:
         elif m_content_type == "databases":
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
-        if m_team:
-            must_clauses.append({"term": {"m_team": m_team}})
-
         if entity_filter_clauses:
             must_clauses.extend(entity_filter_clauses)
-
-        import ipaddress
 
         try:
             ipaddress.ip_address(raw_query)
@@ -229,6 +220,10 @@ class elastic_request_generator:
                 {"m_date_of_leak": {"order": "desc"}}
             ]
         }
+
+        print("::::::::::::::::::::::::::::", flush=True)
+        print(query_statement, flush=True)
+        print("::::::::::::::::::::::::::::", flush=True)
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 

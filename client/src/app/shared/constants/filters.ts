@@ -369,27 +369,26 @@ export const exploit_filters: FilterModel = {
 
 export const defacement_filters: FilterModel = {
   filters: {
-    mDateRange: {
+    daterange: {
       title: "Date Range",
       options: [],
       type: 'daterange',
       tooltip: "Date Range",
       selected: ""
     },
-    mAttacker: {
-      title: "Attacker Type",
-      options: [],
-      type: 'text',
-      tooltip: "Content Filter",
-      selected: ""
+    network: {
+      title: "Network Type",
+      options: [
+        {key: "all", label: "All"},
+        {key: "onion", label: "Onion"},
+        {key: "i2p", label: "I2P"},
+        {key: "clearnet", label: "Clearnet"}
+      ],
+      type: "dropdown",
+      tooltip: "Web Layers",
+      selected: "all"
     },
-    mTeam: {
-      title: "Team Type",
-      options: [],
-      type: 'text',
-      tooltip: "Entity Filter",
-      selected: ""
-    }
+
   }
 };
 
