@@ -87,10 +87,10 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
       .subscribe(([params, urlSegments]) => {
         this.query = params['q'];
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['mSearchParamPage'] || '1';
-        this.dashboardService.consolidatedParamModel.safe = params['mSearchParamSafeSearch'] === 'true';
-        this.dashboardService.consolidatedParamModel.daterange = params['mDateRange'] || '';
-        this.dashboardService.consolidatedParamModel.network = params['mNetwork'] || 'all';
+        this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
+        this.dashboardService.consolidatedParamModel.safe = params['safe'] === 'true';
+        this.dashboardService.consolidatedParamModel.daterange = params['daterange'] || '';
+        this.dashboardService.consolidatedParamModel.network = params['network'] || 'all';
 
         this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && (this.type == Category.BREACH || this.type == Category.FEED)))) {
@@ -134,8 +134,8 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       const isDefault =
-        (key === 'mSearchParamSafeSearch' && value === false) ||
-        (key === 'mNetwork' && value === 'all') ||
+        (key === 'safe' && value === false) ||
+        (key === 'network' && value === 'all') ||
         (value == null || value === "");
 
       if (!reset || !isDefault) {
@@ -206,19 +206,16 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   reloadFilters(filters: Record<string, string | null>) {
     this.dashboardService.consolidatedParamModel.page = 1
-    if (filters['mNetwork'] != null) {
-      this.dashboardService.consolidatedParamModel.network = filters['mNetwork'];
+    if (filters['network'] != null) {
+      this.dashboardService.consolidatedParamModel.network = filters['network'];
     }
-    if (filters['mDateRange']) {
-      this.dashboardService.consolidatedParamModel.daterange = filters['mDateRange']
+    if (filters['daterange']) {
+      this.dashboardService.consolidatedParamModel.daterange = filters['daterange']
     }
-    if (filters['mContentType'] != null) {
-      this.dashboardService.consolidatedParamModel.content = filters['mContentType'];
+    if (filters['content'] != null) {
+      this.dashboardService.consolidatedParamModel.content = filters['content'];
     }
-    if (filters['mEntity'] != null) {
-      this.dashboardService.consolidatedParamModel.entity = filters['mEntity'];
-    }
-    this.dashboardService.consolidatedParamModel.safe = filters['mSearchParamSafeSearch'] === 'yes';
+    this.dashboardService.consolidatedParamModel.safe = filters['safe'] === 'yes';
     this.fetchSearchResults();
   }
 

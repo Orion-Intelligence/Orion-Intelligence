@@ -266,3 +266,8 @@ export const DATA_SECTION_TEMPLATE = [
   { title: 'Senders', key: 'isSenderExpanded', fieldKey: 'senders' },
   { title: 'Content Types', key: 'isContentTypeExpanded', fieldKey: 'contentTypes' }
 ];
+
+export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set([
+  "tools",
+  "zeroday"
+]);

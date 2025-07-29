@@ -47,8 +47,8 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       .subscribe(([params, _]) => {
         this.query = params['q'] || '';
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['mSearchParamPage'] ? +params['mSearchParamPage'] : 1;
-        this.dashboardService.consolidatedParamModel.daterange = params['mDateRange'] || '';
+        this.dashboardService.consolidatedParamModel.page = params['page'] ? +params['page'] : 1;
+        this.dashboardService.consolidatedParamModel.daterange = params['daterange'] || '';
 
         if (this.firstTrigger && ((this.defacementCallbackModel.Result.length > 0))) {
           this.isLoading = false;
@@ -91,8 +91,8 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       const isDefault =
-        (key === 'mSearchParamSafeSearch' && value === false) ||
-        (key === 'mNetwork' && value === 'all') ||
+        (key === 'safe' && value === false) ||
+        (key === 'network' && value === 'all') ||
         (value == null || value === '');
 
       if (!reset || !isDefault) {

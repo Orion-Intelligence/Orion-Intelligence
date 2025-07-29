@@ -55,7 +55,6 @@ export class DashboardService {
 
     let baseParams: any = {...paramModel};
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams)
-    console.log(baseParams)
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -86,7 +85,10 @@ export class DashboardService {
   fetchConsolidatedRankededResults(apiEndpoint: string, paramModel: any): Observable<{ success: boolean; isEmpty: boolean; data: any[] | null; }> {
     this.cancelOngoingRequest();
 
-    const params = new HttpParams({fromObject: paramModel as any});
+    let baseParams: any = {...paramModel};
+    baseParams = this.helperService.removeEmptyOrNullValues(baseParams)
+    const params = new HttpParams({fromObject: baseParams});
+    console.log(params)
 
     return this.apiService.get<any[]>(apiEndpoint, {params}).pipe(
       takeUntil(this.cancelRequest$),

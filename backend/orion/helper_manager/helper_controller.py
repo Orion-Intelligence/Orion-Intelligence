@@ -125,8 +125,8 @@ class helper_controller:
         quoted_phrases = re.findall(r'"([^"]+)"', text)
         unquoted_part = re.sub(r'"[^"]+"', '', text)
 
-        tokens = re.findall(r'\b\w+\b', unquoted_part)
-        filtered_tokens = [word for word in tokens if word.lower() not in stopword_set]
+        tokens = unquoted_part.split()
+        filtered_tokens = [token for token in tokens if token.lower() not in stopword_set]
 
         result_parts = ['"{}"'.format(p) for p in quoted_phrases] + filtered_tokens
         return ' '.join(result_parts)

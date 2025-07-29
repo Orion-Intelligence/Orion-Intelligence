@@ -134,7 +134,6 @@ class search_model:
         return await self.__search_callback.get_doc(result)
 
     async def search_general_result(self, param: search_general_param_model):
-        # document, data_filter = elastic_request_generator().on_search_general_data(param)
         entity_filter_clauses = self._process_entity_filters_generic(
             param.filters,
             self._GENERAL_FIELD_MAPPING 
@@ -148,7 +147,6 @@ class search_model:
         )
 
     async def search_leak_result(self, param: search_leak_param_model):
-        # document, data_filter = elastic_request_generator().on_search_leakdata(param)
         entity_filter_clauses = self._process_entity_filters_generic(
             param.filters,
             self._LEAK_FIELD_MAPPING 

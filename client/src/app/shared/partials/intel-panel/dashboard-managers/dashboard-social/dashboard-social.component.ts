@@ -64,7 +64,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       .subscribe(([params, _]) => {
         this.query = params['q'];
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['mSearchParamPage'] || '1'
+        this.dashboardService.consolidatedParamModel.page = params['page'] || '1'
         if (lastSegment)
           this.dashboardService.consolidatedParamModel.platform = lastSegment
         this.m_platform = this.dashboardService.consolidatedParamModel.platform
@@ -100,7 +100,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
 
     const cleanedParams: any = {
       q: this.dashboardService.consolidatedParamModel.q,
-      mSearchParamPage: this.dashboardService.consolidatedParamModel.page
+      page: this.dashboardService.consolidatedParamModel.page
     };
 
     this.router.navigate([], {

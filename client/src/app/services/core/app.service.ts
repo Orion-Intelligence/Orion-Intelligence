@@ -17,7 +17,7 @@ export class AppService {
     private router: Router
   ) {
     this.activatedRoute.queryParams.subscribe(params => {
-      const pageParam = params['mSearchParamPage'];
+      const pageParam = params['page'];
       if (pageParam && !isNaN(+pageParam)) {
         this.updatePage(+pageParam);
       }
@@ -48,7 +48,7 @@ export class AppService {
   updatePage(newPage: number): void {
     this.page.set(newPage);
     const currentParams = {...this.activatedRoute.snapshot.queryParams};
-    currentParams['mSearchParamPage'] = newPage;
+    currentParams['page'] = newPage;
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
       queryParams: currentParams,

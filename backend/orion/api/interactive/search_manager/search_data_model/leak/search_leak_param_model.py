@@ -10,18 +10,17 @@ from orion.helper_manager.helper_controller import helper_controller
 
 class search_leak_param_model(BaseModel,helper_controller):
     q: Optional[str] = Field("", max_length=150)
-    mSearchParamType: Optional[str] = "all"
-    mSearchParamPage: Optional[int] = 1
-    mSearchParamSafeSearch: bool = False
-    mNetwork: str = "all"
-    mDateRange: Optional[str] = ""
-    mContentType: Optional[str] = "all"
-    mEntity: Optional[str] = ""
+    category: Optional[str] = "all"
+    page: Optional[int] = 1
+    safe: bool = False
+    network: str = "all"
+    daterange: Optional[str] = ""
+    content: Optional[str] = "all"
+    entity: Optional[str] = ""
 
 
     filters: Optional[List[entity_filter_param_model]] = None   
     filters_json: Optional[str] = Field(None, alias="filters_json")
-    filters: Optional[List[entity_filter_param_model]] = None
 
     class Config:
         allow_population_by_field_name = True

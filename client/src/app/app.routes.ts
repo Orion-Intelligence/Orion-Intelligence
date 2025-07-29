@@ -265,12 +265,12 @@ export const routes: Routes = [
           },
           {
             path: 'tools',
-            component: DashboardChatsComponent,
+            component: DashboardConsolidatedComponent,
             data: {type: 'exploit', animation: 'DataBreach'}
           },
           {
             path: 'zeroday',
-            component: DashboardChatsComponent,
+            component: DashboardConsolidatedComponent,
             data: {type: 'exploit', animation: 'DataBreach'}
           },
           {

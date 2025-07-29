@@ -28,7 +28,6 @@
       <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="respons"></app-result-insights>
     </div>
   </div>
-
   <ng-template #rankedMode>
     <div *ngFor="let item of rankedResult">
       <app-dashboard-results-general-grid *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query" [searchResults]="[item]" [isExpandAble]="false" [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>

@@ -3,13 +3,11 @@ import re
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from typing import Any, Dict, List
-
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import \
-    search_defacement_param_model
-from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import \
-    search_credential_param_model
-from orion.constants.constant import CONSTANTS
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
+from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
@@ -18,7 +16,7 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_I
 class elastic_request_generator:
 
     @staticmethod
-    def on_search_defacement_data(p_query_model: search_defacement_param_model,entity_filter_clauses: List[Dict[str, Any]]):
+    def on_search_defacement_data(p_query_model: search_defacement_param_model, entity_filter_clauses: List[Dict[str, Any]], is_consolidated: bool = False):
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
@@ -85,13 +83,16 @@ class elastic_request_generator:
             is_ip = False
 
         if raw_query == "*":
-            main_query = {
-                "bool": {
-                    "must": [{"match_all": {}}],
-                    "filter": must_clauses,
-                    "must_not": must_not_clause
+            if is_consolidated:
+                main_query = {}
+            else:
+                main_query = {
+                    "bool": {
+                        "must": [{"match_all": {}}],
+                        "filter": must_clauses,
+                        "must_not": must_not_clause
+                    }
                 }
-            }
         else:
             if is_ip:
                 should_clauses.append({"term": {"m_ip": raw_query}})
@@ -239,7 +240,7 @@ class elastic_request_generator:
         return query
 
     @staticmethod
-    def on_search_consolidated_ranked_data(p_query_model):
+    def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model):
         raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else "*"
         raw_query = helper_controller.remove_stopwords_from_string(raw_query) if raw_query != "*" else "*"
 
@@ -357,14 +358,12 @@ class elastic_request_generator:
 
         return [
             ELASTIC_INDEX.S_LEAK_INDEX,
-            ELASTIC_INDEX.S_DEFACEMENT_INDEX,
             ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_EXPLOIT_INDEX,
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX
         ], unified_query, [
             {ELASTIC_INDEX.S_LEAK_INDEX: 2},
-            {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.8},
             {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
             {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4},
             {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
@@ -372,8 +371,8 @@ class elastic_request_generator:
         ]
 
     @staticmethod
-    def on_search_consolidated_data(p_query_model,entity_filter_clauses: List[Dict[str, Any]]):
-        p_query_model.daterange=p_query_model.daterange
+    def on_search_consolidated_data(p_query_model, entity_filter_clauses: List[Dict[str, Any]]):
+        p_query_model.daterange = p_query_model.daterange
         if p_query_model.q != "*":
             raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
@@ -394,12 +393,12 @@ class elastic_request_generator:
         indices = []
 
         m1 = clone_model(p_query_model)
-        i1, q1 = elastic_request_generator.on_search_leakdata(m1,entity_filter_clauses)
+        i1, q1 = elastic_request_generator.on_search_leakdata(m1, entity_filter_clauses)
         queries.append(elastic_request_generator._strip_query(q1))
         indices.append(i1)
 
         m2 = clone_model(p_query_model)
-        i2, q2 = elastic_request_generator.on_search_general_data(m2,entity_filter_clauses)
+        i2, q2 = elastic_request_generator.on_search_general_data(m2, entity_filter_clauses)
         queries.append(elastic_request_generator._strip_query(q2))
         indices.append(i2)
 
@@ -414,7 +413,7 @@ class elastic_request_generator:
         indices.append(i4)
 
         m5 = clone_model(p_query_model)
-        i5, q5 = elastic_request_generator.on_search_defacement_data(m5,entity_filter_clauses)
+        i5, q5 = elastic_request_generator.on_search_defacement_data(m5, entity_filter_clauses, True)
         queries.append(elastic_request_generator._strip_query(q5))
         indices.append(i5)
 
@@ -426,7 +425,7 @@ class elastic_request_generator:
         return indices, queries
 
     @staticmethod
-    def on_search_leakdata(p_query_model,entity_filter_clauses: List[Dict[str, Any]]):
+    def on_search_leakdata(p_query_model, entity_filter_clauses: List[Dict[str, Any]]):
         if p_query_model.q != "*":
             raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
@@ -708,7 +707,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod
-    def on_search_exploitdata(p_query_model):
+    def on_search_exploitdata(p_query_model:search_consolidated_param_model):
         if p_query_model.q != "*":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
@@ -721,12 +720,13 @@ class elastic_request_generator:
 
         exact_phrases = re.findall(r'"([^"]+)"', raw_query)
         loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
+        category = p_query_model.category
 
         m_url_query = raw_query
         m_safe_search = p_query_model.safe
         m_page_number = p_query_model.page
         m_network = p_query_model.network
-        m_search_type = p_query_model.category
+        m_search_type = p_query_model.content
         m_date_range = p_query_model.daterange
         m_content_type = p_query_model.content
         m_entity = p_query_model.entity
@@ -737,6 +737,14 @@ class elastic_request_generator:
 
         must_clauses = []
         must_not_clause = []
+
+        if category and category != "all":
+            category_list = category if isinstance(category, list) else [category]
+            must_clauses.append({
+                "terms": {
+                    "m_content_type": category_list
+                }
+            })
 
         if m_date_range:
             parts = m_date_range.split(',')
@@ -821,7 +829,15 @@ class elastic_request_generator:
         if raw_query == "*":
             content_query = {"match_all": {}}
         else:
-            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+            quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
+            quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+
+            if quoted_value:
+                raw_query = raw_query.strip('"')
+                allowed_keys.discard('m_ip')
+                content_query = {"bool": {"should": [{"terms": {field: [quoted_value], "boost": 3}} for field in allowed_keys], "minimum_should_match": 1, "boost": 5}}
+            else:
+                content_query = {"bool": {"should": [], "minimum_should_match": 1}}
 
             for phrase in exact_phrases:
                 phrase_query = {
@@ -1124,7 +1140,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_SOCIAL_INDEX, query
 
     @staticmethod
-    def on_search_telegram_data(p_query_model:search_chat_param_model):
+    def on_search_telegram_data(p_query_model: search_chat_param_model):
         raw_query = ""
         if p_query_model.q == "":
             raw_query = "*"
@@ -1461,17 +1477,15 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
-    def on_search_general_data(p_query_model,entity_filter_clauses: List[Dict[str, Any]]):
+    def on_search_general_data(p_query_model, entity_filter_clauses: List[Dict[str, Any]]):
         if p_query_model.q != "*":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
             raw_query = "*"
         if raw_query == "":
             raw_query = "data"
-
         if not raw_query or raw_query == "":
             raw_query = "*"
-
         if not raw_query:
             return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
@@ -1490,8 +1504,6 @@ class elastic_request_generator:
 
         must_clauses = []
         must_not_clause = []
-        if p_query_model.q != "*":
-            pass
 
         if m_date_range:
             parts = m_date_range.split(',')
@@ -1499,10 +1511,8 @@ class elastic_request_generator:
                 try:
                     from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
                     from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
-
                     to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
                     to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
-
                     must_clauses.append({
                         "range": {
                             "m_update_date": {
@@ -1530,7 +1540,7 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        if m_safe_search == "True":
+        if m_safe_search:
             must_not_clause.append({"term": {"m_content_type": "adult"}})
 
         if m_search_type != "all":
@@ -1567,21 +1577,27 @@ class elastic_request_generator:
             }
         }
 
-        if '"' in raw_query:
+        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
+        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+
+        if quoted_value:
+            raw_query = raw_query.strip('"')
             content_query = {
-                "query_string": {
-                    "query": raw_query,
-                    "fields": [
-                        "m_title^6",
-                        "m_meta_description^2",
-                        "m_content^1.5",
-                        "m_important_content^1.5",
-                        "m_meta_keywords^1.8"
-                    ],
-                    "default_operator": "OR",
-                    "analyze_wildcard": True,
-                    "boost": 2,
-                    "auto_generate_synonyms_phrase_query": False
+                "bool": {
+                    "should": [
+                                  {"terms": {field: [quoted_value], "boost": 100}}
+                                  for field in allowed_keys
+                              ] + [
+                                  {"terms": {"m_ipv4s": [quoted_value], "boost": 100}},
+                                  {"term": {"m_url.keyword": {"value": quoted_value, "boost": 100}}},
+                                  {"wildcard": {"m_url.keyword": {"value": f"*{quoted_value}*", "boost": 80}}},
+                                  {"wildcard": {"m_base_url.keyword": {"value": f"*{quoted_value}*", "boost": 70}}},
+                                  {"wildcard": {"m_content": {"value": f"*{quoted_value}*", "boost": 60}}},
+                                  {"match_phrase": {"m_title": {"query": quoted_value, "boost": 50}}},
+                                  {"match_phrase": {"m_meta_description": {"query": quoted_value, "boost": 30}}}
+                              ],
+                    "minimum_should_match": 1,
+                    "boost": 5
                 }
             }
         else:

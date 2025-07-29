@@ -91,7 +91,7 @@ export class ResultComponent implements OnInit, OnChanges {
           const base = this.filterModel.filters[key];
           let value = params[key];
 
-          if (key === 'mSearchParamSafeSearch') {
+          if (key === 'safe') {
             if (value === 'true') value = 'yes';
             if (value === 'false') value = 'no';
           }

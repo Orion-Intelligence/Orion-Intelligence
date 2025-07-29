@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import List
+
+from fastapi import APIRouter, Depends, Body
 from fastapi import Request
 from configs.app_dependency import role_required
 from configs.limiter_dependency import limiter_dependency
@@ -96,10 +98,12 @@ async def index_credential_data(request: Request):
     return await crawl_model.getInstance().invoke_credential_index(credential_data_model(**body))
 
 @crawl_routes.post("/api/index/entity", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def index_entity(request: Request):
-    body = await request.json()
-    return await entity_manager.get_instance().create_or_update_entity_nodes(entity_model(**body))
-
+async def index_entities(_: Request, entities: List[entity_model] = Body(...)):
+    results = []
+    for entity in entities:
+        result = await entity_manager.get_instance().create_or_update_entity_nodes(entity)
+        results.append(result)
+    return results
 
 @crawl_routes.post("/api/index/dump", dependencies=[Depends(limiter_dependency)])
 async def index_dump(request: Request):

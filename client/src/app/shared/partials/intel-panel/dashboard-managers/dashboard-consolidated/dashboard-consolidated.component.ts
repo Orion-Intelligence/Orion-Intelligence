@@ -17,6 +17,7 @@ import {TooltipDirective} from '../../../../directive/tooltip-directive.directiv
 import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 import {ResultInsightsComponent} from "../result-insights/result-insights.component";
 import {consolidated_filters} from '../../../../constants/filters';
+import {ALLOWED_CONSOLIDATED_RANKED_SINGLETON} from '../../../../constants/shared-enums';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -70,6 +71,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.query = params['q'];
       this.dashboardService.consolidatedParamModel.q = params['q'] || '';
       this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
+
       this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
 
       if (this.firstTrigger && Object.keys(this.groupedResults).length > 0) {
@@ -110,6 +112,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }).then(() => {
       this.cdr.detectChanges();
     });
+
+    const category = this.route.snapshot.routeConfig?.path;
+    if (category && ALLOWED_CONSOLIDATED_RANKED_SINGLETON.has(category)) {
+      this.isGrouped = true
+      this.dashboardService.consolidatedParamModel.category = category
+    }
 
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
@@ -204,7 +212,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   getTotalResultCount(): number {
-    return Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
+    const groupedCount = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
+    const rankedCount = this.rankedResult?.length || 0;
+    return groupedCount + rankedCount;
   }
 
   onSectionSelected(section: Category) {
@@ -241,7 +251,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
     this.router.navigate([routePrefix], {
-      queryParams: {mSearchParamPage: 1}, queryParamsHandling: 'merge'
+      queryParams: {page: 1}, queryParamsHandling: 'merge'
     }).then();
   }
 

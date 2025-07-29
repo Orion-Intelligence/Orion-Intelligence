@@ -70,8 +70,9 @@ export class FiltersComponent implements OnInit {
   }
 
   getOptionLabel(filterKey: string): string {
-    const selectedKey = this.selectedFilters[filterKey];
+    let selectedKey = this.selectedFilters[filterKey];
     if (!selectedKey) return 'Select ' + this.filterModel.filters[filterKey].title;
+    selectedKey = selectedKey === "true" ? "yes" : selectedKey === "false" ? "no" : selectedKey;
 
     const options = this.filterModel.filters[filterKey].options;
     const option = options.find(opt => opt.key === selectedKey);
