@@ -19,13 +19,15 @@ import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { AppService } from '../../../services/core/app.service';
 import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/search-filters.component";
+import { searchFilterAnimation } from '../../animations/search.filter.animation';
+import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
-  animations: [fadeInDashboardItem],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent],
+  animations: [fadeInDashboardItem, searchFilterAnimation],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
@@ -217,5 +219,11 @@ export class ResultComponent implements OnInit, OnChanges {
   }
   setFilterOverlay(newValue: boolean) {
     this.showFiltersOverlay = newValue;
+  }
+  onfocus() {
+    this.showFiltersOverlay = true;
+  }
+  onClearAllFromBar(): void {
+    this.resetFilters();
   }
 }

@@ -417,7 +417,16 @@ table a:visited {
 .default-input-container .small-switch {
   background: #fff;
   padding: 0 !important;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+  display: inline-block;
+  position: relative;
+}
+
+.default-input-container .small-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
 }
 
 .default-input-container .input-group-text {
@@ -441,20 +450,33 @@ table a:visited {
   margin-right: 12px;
 }
 
-.default-input-container .small-slider::before {
-  height: 12px;
-  width: 12px;
-  margin-bottom: 1px;
-  background: #79747E;
-  margin-left: 1px;
-}
-
 .default-input-container .small-slider {
   background: #e6e0e9;
   border: 1px solid #79747E;
   height: 20px;
   width: 32px;
-  top: -2px;
+  top: 5px;
+  position: relative;
+  display: inline-block;
+  transition: 0.2s;
+}
+
+.default-input-container .small-slider::before {
+  content: "";
+  position: absolute;
+  height: 12px;
+  width: 12px;
+  margin-bottom: 1px;
+  background: #79747E;
+  margin-left: 1px;
+  transition: 0.2s;
+  top: 3px;
+  left: 2px;
+  border-radius: 50%;
+}
+
+.default-input-container .small-slider.round {
+  border-radius: 34px;
 }
 
 .default-input-container input:checked+.small-slider {
@@ -463,6 +485,7 @@ table a:visited {
 
 .default-input-container input:checked+.small-slider::before {
   background-color: #fff !important;
+  transform: translateX(12px);
 }
 
 @media only screen and (width <=550px) {
@@ -581,4 +604,3 @@ table a:visited {
 ::placeholder {
   color: #bfbfbf;
 }
-

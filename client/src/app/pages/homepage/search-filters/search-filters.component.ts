@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { FilterTag, FilterCategory } from '../../../shared/model/filter/filter.model';
 import { debounceTime, distinctUntilChanged, fromEvent, Subject, takeUntil } from 'rxjs';
 import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
-import { NgbSlide } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap/carousel/carousel";
+import { SettingsService } from '../../../services/settings/settings.service';
 @Component({
   selector: 'app-search-filters',
   standalone: true,
@@ -13,18 +13,18 @@ import { NgbSlide } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap
 })
 export class SearchFiltersComponent {
   @Input() showSorting!: boolean;
-  @Output() clossFilters = new EventEmitter<boolean>();
   @Output() searchFiltersChange = new EventEmitter<void>();
   categories: FilterCategory[] = [];
 
   selectedCategoryIndex = 0;
   newValue = '';
-  isExpanded = false;
+  iocExpanded: boolean = true;
+  entityFilterCondition: boolean = false;
   @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
 
   showLeftFade = false;
   showRightFade = false;
-  constructor(private entityFilterService: EntityFilterService) {
+  constructor(private entityFilterService: EntityFilterService, private settingsService: SettingsService) {
   }
   get selectedCategory(): FilterCategory {
     return this.categories[this.selectedCategoryIndex];
@@ -42,14 +42,25 @@ export class SearchFiltersComponent {
       { id: 'company', name: 'Company', tags: [] },
       { id: 'transactions', name: 'Transactions', tags: [] },
       { id: 'article', name: 'Article', tags: [] },
+      { id: 'email', name: 'Email', tags: [] },
+      { id: 'name', name: 'Name', tags: [] },
+      { id: 'content', name: 'Content', tags: [] },
+      { id: 'address', name: 'Address', tags: [] },
+      { id: 'city', name: 'City', tags: [] },
+      { id: 'country', name: 'Country', tags: [] },
+      { id: 'banks', name: 'Banks', tags: [] },
+      { id: 'company', name: 'Company', tags: [] },
+      { id: 'transactions', name: 'Transactions', tags: [] },
+      { id: 'article', name: 'Article', tags: [] },
     ];
 
+    this.iocExpanded = this.settingsService.get('iocExpanded', true) ?? true;
     this.entityFilterService.initializeFilterCategories(defaultCategories);
 
     this.categories = this.entityFilterService.getCurrentFilterCategories();
     const savedCategoryId = this.entityFilterService.getCurrentSelectedCategoryId();
     this.selectedCategoryIndex = this.categories.findIndex(cat => cat.id === savedCategoryId) || 0;
-    this.updateFadeVisibility();
+    setTimeout(() => this.updateFadeVisibility(), 300);
   }
 
 
@@ -68,10 +79,6 @@ export class SearchFiltersComponent {
     const el = this.categoryScroll.nativeElement;
     this.showLeftFade = el.scrollLeft > 0;
     this.showRightFade = el.scrollLeft + el.clientWidth < el.scrollWidth - 5;
-  }
-
-  clossFilter() {
-    this.clossFilters.emit(false);
   }
 
   addTag() {
@@ -110,9 +117,15 @@ export class SearchFiltersComponent {
   }
 
   toggleExpand() {
-    this.isExpanded = !this.isExpanded;
+    this.iocExpanded = !this.iocExpanded;
+    this.settingsService.set('iocExpanded', this.iocExpanded);
   }
-
+  toggleEntityCondition() {
+    this.entityFilterCondition = !this.entityFilterCondition;
+  }
+  hasAnyTags(): boolean {
+    return this.categories.some(category => category.tags.length > 0);
+  }
   get allSelectedTags(): FilterTag[] {
     return this.categories.flatMap(c => c.tags);
   }

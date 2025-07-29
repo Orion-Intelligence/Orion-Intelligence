@@ -1,19 +1,21 @@
-<div class="filter-panel" [ngClass]="{ 'mt-40': showSorting, 'mt-10': !showSorting }">
+<div class="filter-panel" [ngClass]="{ 'mt_40': showSorting, 'mt_10': !showSorting }">
 
     <div class="top-row">
         <div class="title">Filters</div>
         <div class="actions">
             <button class="clear-btn" (click)="clearSelection()">Clear Selection</button>
-            <img src="../../../../assets/images/shared/searchFilter_clossButton.svg" class="close-btn"
-                (click)="clossFilter()" />
-
+            <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="entityFilterCondition" />
+                <span class="slider"></span>
+            </label>
+            <div class="entity-condition">{{ entityFilterCondition ? 'AND' : 'OR ' }}</div>
         </div>
     </div>
 
     <div class="filter-panel__category-scroll-container">
         <div class="fade-left" *ngIf="showLeftFade"></div>
 
-        <div class="scroll-btn" (click)="scrollLeft()">
+        <div class="scroll-btn show" (click)="scrollLeft()">
             <img src="../../../../assets/images/shared/searchFilter_leftButton.svg" />
         </div>
 
@@ -27,7 +29,7 @@
             </div>
         </div>
 
-        <div class="scroll-btn" (click)="scrollRight()">
+        <div class="scroll-btn show" (click)="scrollRight()">
             <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" />
         </div>
 
@@ -36,45 +38,58 @@
     <div class="input-row">
         <input type="text" [(ngModel)]="newValue" placeholder="Enter Value" class="tag-input"
             (keydown.enter)="addTag()" />
-        <button class="add-btn" (click)="addTag()">
+        <div class="add-btn" (click)="addTag()">
             <img src="../../../../assets/images/shared/searchFilter_addButton.svg" />
-        </button>
+        </div>
         <div class="reset-selection" (click)="resetCategorySelection()">Reset Selection</div>
     </div>
 
     <div class="selected-filters">
         <div class="section-title">All Selected Filters</div>
-        <div class="tag-list">
-            <ng-container *ngFor="let category of categories">
-                <div *ngFor="let tag of category.tags" class="filter-tag">
-                    {{ tag.value }}
-                    <div class="remove-x" (click)="removeTag(category, tag.id)">×</div>
-                </div>
-            </ng-container>
-        </div>
+        <ng-container *ngIf="hasAnyTags(); else noFilters">
+            <div class="tag-list">
+                <ng-container *ngFor="let category of categories">
+                    <div *ngFor="let tag of category.tags" class="filter-tag">
+                        {{ tag.value }}
+                        <img src="../../../../assets/images/shared/searchFilter_clossButton.svg" class="remove-x"
+                            (click)="removeTag(category, tag.id)" />
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+        <ng-template #noFilters>
+            <div class="no-filters-text">No filter selected</div>
+        </ng-template>
     </div>
 
     <div class="divider"></div>
 
     <div class="expand-header" (click)="toggleExpand()">
         <div class="expand-label">IOC’s</div>
-        <div class="expand-icon" [ngClass]="{ 'expand': isExpanded }">
+        <div class="expand-icon" [ngClass]="{ 'expand': iocExpanded }">
             <img src="../../../../assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon" />
         </div>
 
     </div>
-    <div *ngIf="isExpanded" class="summary-section">
-        <ng-container *ngFor="let category of categories">
-            <div *ngIf="category.tags.length > 0" class="summary-category">
-                <div class="category-title">{{ category.name }}</div>
-                <div class="tag-list">
-                    <div *ngFor="let tag of category.tags" class="filter-tag">
-                        {{ tag.value }}
-                        <div class="remove-x" (click)="removeTag(category, tag.id)">×</div>
+    <div *ngIf="iocExpanded" class="summary-section">
+        <ng-container *ngIf="hasAnyTags(); else noFilters">
+            <ng-container *ngFor="let category of categories">
+                <div *ngIf="category.tags.length > 0" class="summary-category">
+                    <div class="category-title">{{ category.name }}</div>
+                    <div class="tag-list">
+                        <div *ngFor="let tag of category.tags" class="filter-tag">
+                            {{ tag.value }}
+                            <img src="../../../../assets/images/shared/searchFilter_clossButton.svg" class="remove-x"
+                                (click)="removeTag(category, tag.id)" />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </ng-container>
         </ng-container>
+
+        <ng-template #noFilters>
+            <div class="no-filters-text">No filter selected</div>
+        </ng-template>
     </div>
 
 </div>
