@@ -1,32 +1,33 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
-import {Observable} from 'rxjs';
-import {EmptyResultComponent} from '../empty-result/empty-result.component';
-import {FormsModule} from '@angular/forms';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {LoadingFormComponent} from '../loading-form/loading-form.component';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {SidebarService} from '../../services/sidebar.service';
-import {FiltersComponent} from '../filters/filters.component';
-import {FilterCategory, FilterModel} from '../../model/filter/filter.model';
-import {SortType} from '../../constants/shared-enums';
-import {SuggestionComponent} from '../suggestion/suggestion.component';
-import {EmptyQueryComponent} from '../empty-query/empty-query.component';
-import {Suggestion} from '../../model/results/shared/common-result';
-import {query} from '@angular/animations';
-import {Category} from "../../constants/pages";
-import {ActivatedRoute, RouterLink} from '@angular/router';
-import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {AppService} from '../../../services/core/app.service';
-import {SearchFiltersComponent} from "../../../pages/homepage/search-filters/search-filters.component";
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Observable } from 'rxjs';
+import { EmptyResultComponent } from '../empty-result/empty-result.component';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { LoadingFormComponent } from '../loading-form/loading-form.component';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { SidebarService } from '../../services/sidebar.service';
+import { FiltersComponent } from '../filters/filters.component';
+import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
+import { SortType } from '../../constants/shared-enums';
+import { SuggestionComponent } from '../suggestion/suggestion.component';
+import { EmptyQueryComponent } from '../empty-query/empty-query.component';
+import { Suggestion } from '../../model/results/shared/common-result';
+import { query } from '@angular/animations';
+import { Category } from "../../constants/pages";
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { AppService } from '../../../services/core/app.service';
+import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/search-filters.component";
+import { searchFilterAnimation } from '../../animations/search.filter.animation';
+import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
-  animations: [fadeInDashboardItem],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent],
+  animations: [fadeInDashboardItem, searchFilterAnimation],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
@@ -65,10 +66,10 @@ export class ResultComponent implements OnInit, OnChanges {
   protected readonly Category = Category;
 
   showFiltersOverlay: boolean = false;
-  @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
+  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
-  constructor(private dashboardService:DashboardService, public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute) {
+  constructor(public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -91,16 +92,16 @@ export class ResultComponent implements OnInit, OnChanges {
           const base = this.filterModel.filters[key];
           let value = params[key];
 
-          if (key === 'safe') {
+          if (key === 'mSearchParamSafeSearch') {
             if (value === 'true') value = 'yes';
             if (value === 'false') value = 'no';
           }
 
           if (value && base.options.includes(value)) {
-            newFilters[key] = {...base, selected: value};
+            newFilters[key] = { ...base, selected: value };
             updatedSelectedFilters[key] = value;
           } else {
-            newFilters[key] = {...base};
+            newFilters[key] = { ...base };
           }
         });
 
@@ -115,7 +116,6 @@ export class ResultComponent implements OnInit, OnChanges {
       this.result_triggered = true
     }
   }
-
   searchFiltersChanged() {
     this.applyFilters(this.selectedFilters)
   }
@@ -132,7 +132,6 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onFormSubmit() {
-    this.dashboardService.resetParams()
     let query = "";
     let quoteCount = (this.local_query.match(/"/g) || []).length;
 
@@ -218,8 +217,13 @@ export class ResultComponent implements OnInit, OnChanges {
       this.setFilterOverlay(false);
     }
   }
-
   setFilterOverlay(newValue: boolean) {
     this.showFiltersOverlay = newValue;
+  }
+  onfocus() {
+    this.showFiltersOverlay = true;
+  }
+  onClearAllFromBar(): void {
+    this.resetFilters();
   }
 }

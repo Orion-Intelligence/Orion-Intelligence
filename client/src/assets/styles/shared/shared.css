@@ -27,7 +27,7 @@
 }
 
 .nav-tabs .nav-link.active {
-  background-color: var(--color-blue-820);
+  background-color: var(--dashboard-search-main-div);
   border: 1px solid #ffffff08;
   font-size: 14px;
   font-weight: 500;
@@ -155,7 +155,7 @@
 }
 
 .label-text-dropdown {
-  color: var(--color-gray-900);
+  color: var(--filter-input-text);
   margin-right: 14px;
   margin-bottom: 10px;
   font-family: Roboto, sans-serif;
@@ -168,7 +168,7 @@
 }
 
 table {
-  background: var(--color-blue-720);
+  background: var(--table-header-bg);
   table-layout: fixed;
   margin-bottom: 0;
   border-bottom-left-radius: 8px;
@@ -217,11 +217,11 @@ table tr:not(:first-child) {
 }
 
 table tr:nth-child(even) {
-  background-color: var(--color-blue-710) !important;
+  background-color: var(--table-tr-nth-child-even) !important;
 }
 
 table tbody tr:nth-child(odd) {
-  background-color: var(--color-blue-700) !important;
+  background-color: var(--table-tr-nth-child-odd) !important;
 }
 
 table tr:first-child {
@@ -241,7 +241,7 @@ table tr:not(:first-child, :last-child) {
 }
 
 table tbody tr:hover {
-  background-color: var(--color-blue-690) !important;
+  background-color: var(--table-tbody-tr-hover) !important;
   transition: background-color 0.3s ease-in-out;
 }
 
@@ -270,7 +270,7 @@ table a:visited {
 
 .side-menu-container .filters-button {
   border-radius: 4px;
-  background: var(--color-blue-680);
+  background: var(--filter-dashboard-button);
   border: none;
   padding: 7px 12px;
   display: flex;
@@ -294,7 +294,7 @@ table a:visited {
 }
 
 .filters-button:hover {
-  background: var(--color-blue-670) !important;
+  background: var(--filter-dashboard-button-hover) !important;
 }
 
 .default-notification-banner-icon {
@@ -331,13 +331,13 @@ table a:visited {
   width: 40px;
   height: 40px;
   padding: 5px;
-  background: var(--color-blue-750);
+  background: var(--report-menu-option);
   border: none !important;
   transition: background-color 0.3s ease-in-out;
 }
 
 .report-menu-option:hover {
-  background: var(--color-blue-650);
+  background: var(--report-menu-option-hover);
 }
 
 .report-menu-divider {
@@ -355,7 +355,7 @@ table a:visited {
   border: 1px solid #ffffff15;
   border-radius: 7px;
   margin-right: 35px;
-  background: var(--color-blue-750);
+  background: var(--report-menu-option);
   margin-top: 20px;
   overflow: hidden;
 }
@@ -417,7 +417,16 @@ table a:visited {
 .default-input-container .small-switch {
   background: #fff;
   padding: 0 !important;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+  display: inline-block;
+  position: relative;
+}
+
+.default-input-container .small-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
 }
 
 .default-input-container .input-group-text {
@@ -441,20 +450,33 @@ table a:visited {
   margin-right: 12px;
 }
 
-.default-input-container .small-slider::before {
-  height: 12px;
-  width: 12px;
-  margin-bottom: 1px;
-  background: #79747E;
-  margin-left: 1px;
-}
-
 .default-input-container .small-slider {
   background: #e6e0e9;
   border: 1px solid #79747E;
   height: 20px;
   width: 32px;
-  top: -2px;
+  top: 5px;
+  position: relative;
+  display: inline-block;
+  transition: 0.2s;
+}
+
+.default-input-container .small-slider::before {
+  content: "";
+  position: absolute;
+  height: 12px;
+  width: 12px;
+  margin-bottom: 1px;
+  background: #79747E;
+  margin-left: 1px;
+  transition: 0.2s;
+  top: 3px;
+  left: 2px;
+  border-radius: 50%;
+}
+
+.default-input-container .small-slider.round {
+  border-radius: 34px;
 }
 
 .default-input-container input:checked+.small-slider {
@@ -463,6 +485,7 @@ table a:visited {
 
 .default-input-container input:checked+.small-slider::before {
   background-color: #fff !important;
+  transform: translateX(12px);
 }
 
 @media only screen and (width <=550px) {
@@ -504,7 +527,7 @@ table a:visited {
   }
 
   table tbody tr:hover {
-    background-color: var(--color-blue-690) !important;
+    background-color: var(--table-tbody-tr-hover) !important;
     cursor: pointer;
   }
 
@@ -580,39 +603,4 @@ table a:visited {
 
 ::placeholder {
   color: #bfbfbf;
-}
-
-.small-switch {
-  position: relative;
-  display: inline-block;
-  width: 30px;
-  height: 18px;
-  top: 3px
-}
-
-.small-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.small-slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background-color: #1b60a5;
-  transition: 0.3s;
-  border-radius: 12px;
-}
-
-.small-slider::before {
-  content: "";
-  position: absolute;
-  height: 14px;
-  width: 13px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
 }

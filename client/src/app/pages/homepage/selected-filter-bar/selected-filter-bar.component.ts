@@ -1,40 +1,35 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NgFor, NgIf, CommonModule } from '@angular/common';
 import { FilterCategory, FilterModel, FilterOption } from '../../../shared/model/filter/filter.model';
 import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
 import { Subscription } from 'rxjs';
+import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
 
 
 @Component({
   selector: 'app-selected-filter-bar',
   imports: [NgIf, NgFor, CommonModule],
+  animations: [searchFilterAnimation],
   templateUrl: './selected-filter-bar.component.html'
 })
-export class SelectedFilterBarComponent implements OnInit{
+export class SelectedFilterBarComponent implements OnInit {
   private subscriptions: Subscription[] = [];
 
   @Input() filterModel!: FilterModel;
+  @Input() showSorting!: boolean;
   @Output() clearAll = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
 
-  @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
-  @ViewChild('filterScroll', { static: true }) filterScroll!: ElementRef;
 
   categories: FilterCategory[] = [];
-  selectedCategoryIndex = 0;
-  isFiltersExpanded: boolean = true;
-  isAdvanceSearchExpanded: boolean = true;
-  isIocExpanded: boolean = false;
-  showFilterLeftFade = false;
-  showFilterRightFade = false;
-  showIocRightFade = false;
-  showIocLeftFade = false;
+  isFilterBarExpanded: boolean = false;
+  isFilterExpanded: boolean = true;
+
+  maxVisibleTags = 4;
   Object: any;
 
   constructor(private entityFilterService: EntityFilterService) { }
-  get selectedCategory(): FilterCategory {
-    return this.categories[this.selectedCategoryIndex];
-  }
+
   ngOnInit(): void {
     this.subscriptions.push(
       this.entityFilterService.filterCategories$.subscribe(categories => {
@@ -44,10 +39,7 @@ export class SelectedFilterBarComponent implements OnInit{
   }
 
 
-  clearAdvanceSearchAllFilters(): void {
-    this.entityFilterService.clearPersistedState();
-    this.clearAll.emit();
-  }
+
   clearAllFilters(): void {
     for (const key in this.filterModel.filters) {
       if (this.filterModel.filters.hasOwnProperty(key)) {
@@ -60,23 +52,29 @@ export class SelectedFilterBarComponent implements OnInit{
         }
       }
     }
+    this.entityFilterService.clearPersistedState();
     this.clearAll.emit();
   }
 
 
 
 
-  removeEntityTypeFilterTag(categoryId: string, tagToRemoveId: string) {
+  removeEntityTypeFilterTag(tagToRemoveId: string) {
     const currentCategories = this.entityFilterService.getCurrentFilterCategories();
+
     const updatedCategories = currentCategories.map(category => {
-      if (category.id === categoryId) {
+      const tagExists = category.tags.some(tag => tag.id === tagToRemoveId);
+
+      if (tagExists) {
         return {
           ...category,
           tags: category.tags.filter(tag => tag.id !== tagToRemoveId)
         };
       }
+
       return category;
     });
+
     this.entityFilterService.updateFilterCategories(updatedCategories);
     this.searchFiltersChange.emit();
   }
@@ -92,59 +90,44 @@ export class SelectedFilterBarComponent implements OnInit{
     const found = filterOption.options.find(opt => opt.key === selectedKey);
     return found?.label || '-';
   }
-  getSelectedLabels(filterOption: FilterOption): string[] {
-    if (
-      !filterOption ||
-      !Array.isArray(filterOption.selected) ||
-      !filterOption.options
-    ) {
-      return [];
-    }
 
-    return filterOption.selected
-      .map(key => {
-        const found = filterOption.options.find(opt => opt.key === key);
-        return found?.label || key;
-      })
-      .filter(label => !!label);
+
+  isFilterSelected(filterOption: FilterOption): boolean {
+    if (!filterOption) return false;
+    const label = this.getSelectedLabel(filterOption);
+    return !!label && label !== '-';
+
   }
 
 
-
-
-
-
-  scrollLeft(element: HTMLElement) {
-    element.scrollBy({ left: -150, behavior: 'smooth' });
-    setTimeout(() => this.updateFadeVisibility(), 300);
+  toggleFilterCollapse(): void {
+    this.isFilterExpanded = !this.isFilterExpanded;
+  }
+  toggleFilterBarCollapse(): void {
+    this.isFilterBarExpanded = !this.isFilterBarExpanded;
   }
 
-  scrollRight(element: HTMLElement) {
-    element.scrollBy({ left: 150, behavior: 'smooth' });
-    setTimeout(() => this.updateFadeVisibility(), 300);
+  sidebarFilterCount(): number {
+    if (!this.filterModel?.filters) return 0;
+
+    return Object.values(this.filterModel.filters)
+      .filter(filter => this.isFilterSelected(filter))
+      .length;
+  }
+  entityFiltersCount(): number {
+    return this.categories?.reduce((total, category) => total + category.tags.length, 0) ?? 0;
   }
 
-  @HostListener('window:resize')
-  updateFadeVisibility() {
-    const fs = this.filterScroll.nativeElement;
-    this.showFilterLeftFade = fs.scrollLeft > 0;
-    this.showFilterRightFade = fs.scrollLeft + fs.clientWidth < fs.scrollWidth - 5;
-
-    const cs = this.categoryScroll.nativeElement;
-    this.showIocLeftFade = cs.scrollLeft > 0;
-    this.showIocRightFade = cs.scrollLeft + cs.clientWidth < cs.scrollWidth - 5;
+  getVisibleTags(categories: { tags: any[] }[]): any[] {
+    const allTags = categories.flatMap(category => category.tags);
+    return allTags.slice(0, this.maxVisibleTags);
   }
 
-  toggleIocExpand() {
-    this.isIocExpanded = !this.isIocExpanded;
+  getHiddenTagCount(categories: { tags: any[] }[]): number {
+    const totalTags = categories.reduce((acc, category) => acc + category.tags.length, 0);
+    const hidden = totalTags - this.maxVisibleTags;
+    return hidden > 0 ? hidden : 0;
   }
-  toggleAdvanceSearchCollapse(): void {
-    this.isAdvanceSearchExpanded = !this.isAdvanceSearchExpanded;
-  }
-  toggleFiltersCollapse(): void {
-    this.isFiltersExpanded = !this.isFiltersExpanded;
-  }
-  getNonEmptyCategoryCount(): number {
-    return this.entityFilterService.getNonEmptyCategoryCount()
-  }
+
+
 }
