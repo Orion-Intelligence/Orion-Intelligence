@@ -3,13 +3,11 @@ import { NgFor, NgIf, CommonModule } from '@angular/common';
 import { FilterCategory, FilterModel, FilterOption } from '../../../shared/model/filter/filter.model';
 import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
 import { Subscription } from 'rxjs';
-import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
 
 
 @Component({
   selector: 'app-selected-filter-bar',
   imports: [NgIf, NgFor, CommonModule],
-  animations: [searchFilterAnimation],
   templateUrl: './selected-filter-bar.component.html'
 })
 export class SelectedFilterBarComponent implements OnInit {
@@ -23,7 +21,6 @@ export class SelectedFilterBarComponent implements OnInit {
 
   categories: FilterCategory[] = [];
   isFilterBarExpanded: boolean = false;
-  isFilterExpanded: boolean = true;
 
   maxVisibleTags = 4;
   Object: any;
@@ -99,10 +96,6 @@ export class SelectedFilterBarComponent implements OnInit {
 
   }
 
-
-  toggleFilterCollapse(): void {
-    this.isFilterExpanded = !this.isFilterExpanded;
-  }
   toggleFilterBarCollapse(): void {
     this.isFilterBarExpanded = !this.isFilterBarExpanded;
   }

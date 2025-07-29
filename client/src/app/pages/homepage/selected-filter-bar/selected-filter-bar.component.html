@@ -1,6 +1,6 @@
 <div *ngIf="entityFiltersCount() || sidebarFilterCount()" [ngClass]="{ 'top-space': showSorting, '': !showSorting }">
     <div class="selected-filter-bar left-space">
-        <div class="top-row">
+        <div class="top-row" *ngIf="!isFilterBarExpanded">
             <div class="title">Filters</div>
             <div class="title">Sidebar
                 <div class="filter-count">
@@ -20,22 +20,21 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div *ngIf="isFilterBarExpanded" @searchFilterAnimation>
-        <div class="selected-filter-bar left-space top-space">
+
+        <div *ngIf="isFilterBarExpanded">
             <div class="top-row">
                 <div class="title">Filters</div>
                 <div class="actions">
                     <button class="clear-btn" (click)="clearAllFilters()">Clear Selection</button>
-                    <div class="expand-icon" [ngClass]="{ 'expand': isFilterExpanded }"
-                        (click)="toggleFilterCollapse()">
+                    <div class="expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }"
+                        (click)="toggleFilterBarCollapse()">
                         <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" alt="Toggle Icon" />
                     </div>
                 </div>
             </div>
 
-            <div *ngIf="isFilterExpanded">
-                <div class="primary-filters-wrap">
+            <div class="primary-filters-wrap">
+                <ng-container *ngIf="sidebarFilterCount()>0; else noSidebarFilters">
                     <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
                         <div class="filter-item" *ngIf="isFilterSelected(filterKey.value)">
                             <div class="filter-label-edit">
@@ -46,9 +45,16 @@
                             </span>
                         </div>
                     </ng-container>
-                </div>
-                <div class="divider" *ngIf="entityFiltersCount() && sidebarFilterCount()"></div>
-                <div class="filter-item" *ngIf="entityFiltersCount()">
+                </ng-container>
+                <ng-template #noSidebarFilters>
+                    <div class="no-filters-text">
+                        Sidebar filters are empty. Click the filter icon (top right) to select filters.
+                    </div>
+                </ng-template>
+            </div>
+            <div class="divider"></div>
+            <ng-container *ngIf="entityFiltersCount(); else noSearchFilters">
+                <div class="filter-item">
                     <div class="filter-label-edit">
                         Entity Type
                     </div>
@@ -65,10 +71,13 @@
                             </div>
                         </ng-container>
                     </div>
-
-
                 </div>
-            </div>
+            </ng-container>
+            <ng-template #noSearchFilters>
+                <div class="no-filters-text">
+                    Entity filters are empty. Click the search bar to select filters.
+                </div>
+            </ng-template>
         </div>
     </div>
 </div>

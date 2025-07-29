@@ -220,9 +220,6 @@ export class ResultComponent implements OnInit, OnChanges {
   setFilterOverlay(newValue: boolean) {
     this.showFiltersOverlay = newValue;
   }
-  onfocus() {
-    this.showFiltersOverlay = true;
-  }
   onClearAllFromBar(): void {
     this.resetFilters();
   }

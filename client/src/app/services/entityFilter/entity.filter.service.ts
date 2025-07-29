@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {FilterCategory} from '../../shared/model/filter/filter.model';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { FilterCategory } from '../../shared/model/filter/filter.model';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +21,7 @@ export class EntityFilterService {
 
   updateSelectedCategoryId(id: string): void {
     this._selectedCategoryId.next(id);
+    this.saveStateToLocalStorage();
   }
 
   getCurrentFilterCategories(): FilterCategory[] {
@@ -34,12 +35,18 @@ export class EntityFilterService {
   clearPersistedState(): void {
     this._filterCategories.next([]);
     this._selectedCategoryId.next('email');
+    this.saveStateToLocalStorage();
+
     localStorage.removeItem('appFilterCategories');
   }
 
   private saveStateToLocalStorage(): void {
     try {
-      localStorage.setItem('appFilterCategories', JSON.stringify(this._filterCategories.getValue()));
+      const state = {
+        categories: this._filterCategories.getValue(),
+        selectedCategoryId: this._selectedCategoryId.getValue()
+      };
+      localStorage.setItem('appFilterCategories', JSON.stringify(state));
     } catch (e) {
       console.error('Error saving filter state to localStorage', e);
     }
@@ -47,9 +54,15 @@ export class EntityFilterService {
 
   private loadStateFromLocalStorage(): void {
     try {
-      const savedFilterCategories = localStorage.getItem('appFilterCategories');
-      if (savedFilterCategories) {
-        this._filterCategories.next(JSON.parse(savedFilterCategories));
+      const saved = localStorage.getItem('appFilterCategories');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.categories) {
+          this._filterCategories.next(parsed.categories);
+        }
+        if (parsed.selectedCategoryId) {
+          this._selectedCategoryId.next(parsed.selectedCategoryId);
+        }
       }
     } catch (e) {
       console.error('Error loading filter state from localStorage', e);

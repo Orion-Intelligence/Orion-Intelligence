@@ -12,11 +12,13 @@
 
 .left-space .expand-icon img {
     transition: transform 0.3s ease;
-    transform: rotate(0deg)
+    transform: rotate(0deg);
+    padding: 5px 10px;
 }
 
 .left-space .expand-icon.expand img {
     transform: rotate(90deg);
+    padding: 5px 10px;
 }
 
 

@@ -5,6 +5,7 @@ import { FilterTag, FilterCategory } from '../../../shared/model/filter/filter.m
 import { debounceTime, distinctUntilChanged, fromEvent, Subject, takeUntil } from 'rxjs';
 import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
 import { SettingsService } from '../../../services/settings/settings.service';
+import { search_filter_keys } from '../../../shared/constants/shared-enums';
 @Component({
   selector: 'app-search-filters',
   standalone: true,
@@ -27,39 +28,36 @@ export class SearchFiltersComponent {
   constructor(private entityFilterService: EntityFilterService, private settingsService: SettingsService) {
   }
   get selectedCategory(): FilterCategory {
+    alert(this.selectedCategoryIndex)
     return this.categories[this.selectedCategoryIndex];
   }
 
   ngAfterViewInit() {
-    const defaultCategories: FilterCategory[] = [
-      { id: 'email', name: 'Email', tags: [] },
-      { id: 'name', name: 'Name', tags: [] },
-      { id: 'content', name: 'Content', tags: [] },
-      { id: 'address', name: 'Address', tags: [] },
-      { id: 'city', name: 'City', tags: [] },
-      { id: 'country', name: 'Country', tags: [] },
-      { id: 'banks', name: 'Banks', tags: [] },
-      { id: 'company', name: 'Company', tags: [] },
-      { id: 'transactions', name: 'Transactions', tags: [] },
-      { id: 'article', name: 'Article', tags: [] },
-      { id: 'email', name: 'Email', tags: [] },
-      { id: 'name', name: 'Name', tags: [] },
-      { id: 'content', name: 'Content', tags: [] },
-      { id: 'address', name: 'Address', tags: [] },
-      { id: 'city', name: 'City', tags: [] },
-      { id: 'country', name: 'Country', tags: [] },
-      { id: 'banks', name: 'Banks', tags: [] },
-      { id: 'company', name: 'Company', tags: [] },
-      { id: 'transactions', name: 'Transactions', tags: [] },
-      { id: 'article', name: 'Article', tags: [] },
-    ];
+    this.selectedCategoryIndex = 0;
+    const defaultCategories = Array.from(search_filter_keys).map((key) => {
+      const formattedName = key
+        .replace(/^m_/, '')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
+
+      return {
+        id: key,
+        name: formattedName,
+        tags: []
+      };
+    });
 
     this.iocExpanded = this.settingsService.get('iocExpanded', true) ?? true;
     this.entityFilterService.initializeFilterCategories(defaultCategories);
 
     this.categories = this.entityFilterService.getCurrentFilterCategories();
     const savedCategoryId = this.entityFilterService.getCurrentSelectedCategoryId();
-    this.selectedCategoryIndex = this.categories.findIndex(cat => cat.id === savedCategoryId) || 0;
+    if (!savedCategoryId || savedCategoryId === 'selected') {
+      this.selectedCategoryIndex = 0;
+    } else {
+      const index = this.categories.findIndex(cat => cat.id === savedCategoryId);
+      this.selectedCategoryIndex = index !== -1 ? index : 0;
+    }
     setTimeout(() => this.updateFadeVisibility(), 300);
   }
 
@@ -125,6 +123,10 @@ export class SearchFiltersComponent {
   }
   hasAnyTags(): boolean {
     return this.categories.some(category => category.tags.length > 0);
+  }
+  onCategoryClick(index: number, categoryId: string): void {
+    this.selectedCategoryIndex = index;
+    this.entityFilterService.updateSelectedCategoryId(categoryId);
   }
   get allSelectedTags(): FilterTag[] {
     return this.categories.flatMap(c => c.tags);

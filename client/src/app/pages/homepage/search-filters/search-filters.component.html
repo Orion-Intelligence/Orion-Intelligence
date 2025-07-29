@@ -21,7 +21,7 @@
 
         <div class="filter-panel__category-scroll" #categoryScroll>
             <div *ngFor="let category of categories; let i = index" class="category-tab"
-                [class.selected]="i === selectedCategoryIndex" (click)="selectedCategoryIndex = i">
+                [class.selected]="i === selectedCategoryIndex" (click)="onCategoryClick(i, category.id)">
                 {{ category.name }}
                 <div *ngIf="category.tags.length > 0" class="filter-panel__category-count">
                     {{ category.tags.length }}
