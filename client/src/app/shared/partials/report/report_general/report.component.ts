@@ -22,7 +22,7 @@ import {ReportHeaderComponent} from '../../report-header/report-header.component
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {

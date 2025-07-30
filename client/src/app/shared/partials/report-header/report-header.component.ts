@@ -22,6 +22,7 @@ export class ReportHeaderComponent {
   @Input() url: string | null | undefined = null;
   @Input() lang: string = "";
   @Input() content: string | null | undefined = null;
+  @Input() lang_detected: string = "";
 
   @Output() languageUpdated = new EventEmitter<LeakResultItem | GeneralResultItem>();
 

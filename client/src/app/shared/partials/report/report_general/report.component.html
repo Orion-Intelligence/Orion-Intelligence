@@ -1,4 +1,4 @@
-<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_url" [content]="resultItem?.m_content" [lang]="lang" (languageUpdated)="langUpdate($event)"></app-report-header>
+<app-report-header [csv_object]="resultItem" [lang_detected]="lang_detected" [url]="resultItem?.m_url" [content]="resultItem?.m_content" [lang]="lang" (languageUpdated)="langUpdate($event)"></app-report-header>
 
 <div class="search__result-detail">
   <ng-container *ngIf="resultItem?.m_title as title; else noTitle">

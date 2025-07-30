@@ -456,10 +456,8 @@ class elastic_request_generator:
         must_clauses = []
         must_not_clause = []
 
-        if m_search_type == "news":
-            must_clauses.append({"term": {"m_content_type": "news"}})
-        else:
-            must_not_clause.append({"term": {"m_content_type": "news"}})
+        if m_search_type:
+            must_clauses.append({"term": {"m_content_type": m_search_type}})
 
         if m_date_range:
             parts = m_date_range.split(',')

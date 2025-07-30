@@ -18,9 +18,8 @@ export class HelperService {
     if (iso639_3 === 'und') {
       return "en";
     }
-
     const match = LANGUAGE_MAP[iso639_3];
-    return match ? match.iso1 : "en";
+    return match ? match.iso1 : "fr";
   }
 
   downloadAsCSV(data: any) {
