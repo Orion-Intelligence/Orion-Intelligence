@@ -13,7 +13,7 @@
     padding: 24px 24px 8px 24px;
     font-family: Inter, sans-serif;
     color: white;
-    max-width: 1027px;
+    max-width: 970px;
     box-shadow: 0px 9px 16px 0px rgba(0, 0, 0, 0.25);
     z-index: 1;
 }
@@ -357,4 +357,16 @@ button:focus {
 
 .filter-panel input:checked+.slider:before {
     transform: translateX(10px);
+}
+
+@media only screen and (width <=1320px) {
+    .filter-panel {
+        max-width: 700px;
+    }
+}
+
+@media only screen and (width <=1060px) {
+    .filter-panel {
+        max-width: 475px;
+    }
 }
