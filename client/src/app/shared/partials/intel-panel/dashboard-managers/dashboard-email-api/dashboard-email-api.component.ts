@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {DatePipe, NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
+import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {EmptyResultComponent} from '../../../empty-result/empty-result.component';
 import {LoadingFormComponent} from '../../../loading-form/loading-form.component';
 import {EmptyQueryComponent} from '../../../empty-query/empty-query.component';
@@ -11,7 +11,7 @@ import {DashboardService} from '../../../../../services/dashboard/dashboard.serv
 
 @Component({
   selector: 'app-dashboard-email-api',
-  imports: [FormsModule, NgForOf, NgOptimizedImage, ReactiveFormsModule, NgIf, EmptyResultComponent, LoadingFormComponent, EmptyQueryComponent, DatePipe],
+  imports: [FormsModule, NgForOf, NgOptimizedImage, ReactiveFormsModule, NgIf, EmptyResultComponent, LoadingFormComponent, EmptyQueryComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-email-api.component.html'
 })
