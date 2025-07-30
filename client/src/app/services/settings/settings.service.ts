@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 export type Settings = {
+    advanceSettingToggle?: boolean;
     iocExpanded?: boolean;
 };
 

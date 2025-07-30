@@ -10,6 +10,7 @@ export class EntityFilterService {
   private _selectedCategoryId = new BehaviorSubject<string>('email');
   public filterCategories$: Observable<FilterCategory[]> = this._filterCategories.asObservable();
 
+
   constructor() {
     this.loadStateFromLocalStorage();
   }

@@ -463,6 +463,7 @@ table a:visited {
 
 .default-input-container input:checked+.small-slider::before {
   background-color: #fff !important;
+  transform: translateX(12px);
 }
 
 @media only screen and (width <=550px) {
@@ -595,6 +596,7 @@ table a:visited {
   width: 0;
   height: 0;
 }
+
 
 .small-slider {
   position: absolute;
