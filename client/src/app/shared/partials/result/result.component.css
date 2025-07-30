@@ -54,15 +54,17 @@
 }
 
 .tools {
-  margin-left: 30px;
-  margin-top: 12px;
+  margin-left: 20px;
+  margin-top: 8px;
   font-size: 16px;
   font-weight: 500;
-  color: #ffffff;
-  text-decoration: underline;
+  color: #A0B8D1;
   cursor: pointer;
 }
 
+.tools:hover {
+  color: #fff;
+}
 
 .expand-icon {
   position: relative;
@@ -73,17 +75,19 @@
 .expand-icon::before {
   content: "";
   position: absolute;
-  top: -10px;
-  bottom: -10px;
-  left: -15px;
-  right: -15px;
+  inset: -10px 10px;
   pointer-events: auto;
 }
 
 .expand-icon img {
   transition: transform 0.3s ease;
   transform: rotate(0deg);
-  padding: 5px 10px;
+  padding: 0 10px;
+  margin-top: -1px !important;
+}
+
+.rotate-90 {
+  transform: rotate(90deg) !important;
 }
 
 .expand-icon.expand img {

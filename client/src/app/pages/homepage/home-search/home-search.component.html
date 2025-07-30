@@ -10,7 +10,7 @@
           class="form-control default-input dashboard-general-input" maxlength="150" name="q" placeholder="Search ..."
           type="search" (focus)="setFilterOverlay(true)">
         <input type="hidden" value="1">
-        <span class="input-group-text border-start-0" (click)="onAdvanceSettingToggle()">
+        <span class="input-group-text border-start-0">
           <hr class="vertical-divider" />
           Advance &nbsp;&nbsp;
           <label class="small-switch">
@@ -19,8 +19,7 @@
           </label>
         </span>
       </div>
-      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && advanceSettingToggle"
-        @searchFilterAnimation>
+      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && advanceSettingToggle">
         <app-search-filters [showSorting]="false"></app-search-filters>
       </div>
     </div>

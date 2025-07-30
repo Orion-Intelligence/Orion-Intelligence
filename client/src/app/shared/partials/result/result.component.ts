@@ -201,6 +201,7 @@ export class ResultComponent implements OnInit, OnChanges {
     cfg.settings.enable_advanced_tools = !cfg.settings.enable_advanced_tools;
     this.app_service.configData.set(cfg);
   }
+
   onAdvanceSettingToggle() {
     this.advanceSettingToggle = !this.advanceSettingToggle;
     this.settingsService.set('advanceSettingToggle', this.advanceSettingToggle);

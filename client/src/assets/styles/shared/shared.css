@@ -6,6 +6,18 @@
   margin-right: 32px;
 }
 
+.tools-expanded {
+  display: inherit;
+}
+
+.tools-shrink {
+  display: none !important;
+}
+
+.default-input-container-justify {
+  justify-content: space-between !important
+}
+
 .default-input-container-tab {
   margin-top: 32px;
   margin-left: 32px;
@@ -457,22 +469,22 @@ table a:visited {
   top: -2px;
 }
 
-.default-input-container input:checked+.small-slider {
+.default-input-container input:checked + .small-slider {
   background-color: #79747E !important;
 }
 
-.default-input-container input:checked+.small-slider::before {
+.default-input-container input:checked + .small-slider::before {
   background-color: #fff !important;
   transform: translateX(12px);
 }
 
-@media only screen and (width <=550px) {
+@media only screen and (width <= 550px) {
   .default-input-container {
     display: grid;
   }
 }
 
-@media only screen and (width <=1300px) {
+@media only screen and (width <= 1300px) {
   table thead {
     display: none;
   }
@@ -515,7 +527,7 @@ table a:visited {
 
 }
 
-@media only screen and (width <=943px) {
+@media only screen and (width <= 943px) {
   .label-text {
     margin-left: 15px;
   }
@@ -548,13 +560,21 @@ table a:visited {
   }
 }
 
-@media only screen and (width <=460px) {
+@media only screen and (width <= 460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (width <=700px) {
+@media only screen and (width <= 768px) {
+  .default-input-container-justify {
+    justify-content: flex-start !important
+  }
+
+  .side-menu-container{
+    margin-top: 20px !important;
+  }
+
   .dashboard-general-input {
     min-width: 100px;
     background-color: white !important;
@@ -564,6 +584,16 @@ table a:visited {
     margin-left: 17px;
     margin-right: 17px;
   }
+
+  .tools-expanded {
+    display: none;
+  }
+
+  .tools-shrink {
+    display: inherit !important;
+    padding-right: 10px;
+  }
+
 }
 
 .cursor-pointer {

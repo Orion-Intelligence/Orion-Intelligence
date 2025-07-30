@@ -16,7 +16,11 @@
     </li>
     <li (click)="toggleThemeByClick()">
       <div class="dropdown-item theme-toggle">
-        <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp; Theme &nbsp; <label class="small-switch" (click)="$event.stopPropagation()"> <input type="checkbox" [checked]="isDarkTheme" (click)="$event.stopPropagation()"/> <span class="small-slider round"></span> </label>
+        <img alt="Settings" class="dropdown-open-lift-icon" (click)="toggleThemeByClick()" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp; Theme &nbsp;
+        <label class="small-switch" (click)="toggleThemeByClick()">
+          <input type="checkbox" [checked]="isDarkTheme" (click)="toggleThemeByClick()"/>
+          <span class="small-slider round"></span>
+        </label>
       </div>
     </li>
     <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank"> <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp; Settings</a>

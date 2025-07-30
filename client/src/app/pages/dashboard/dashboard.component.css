@@ -57,7 +57,7 @@
   padding: 0;
   height: 100%;
   overflow: hidden auto;
-  background: var(----color-gray-900);
+  background: var(--color-blue-900);
   scrollbar-color: var(--color-blue-880) transparent;
 }
 

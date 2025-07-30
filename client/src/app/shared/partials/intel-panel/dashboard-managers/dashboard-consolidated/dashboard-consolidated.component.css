@@ -25,6 +25,10 @@
   .consolidated_container {
     margin: 25px 10px;
   }
+
+  .dashboard__layout-wrapper{
+    padding-right: 0 !important;
+  }
 }
 
 
