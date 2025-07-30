@@ -1,18 +1,26 @@
 <form (submit)="onSearchSubmit()" class="home__form default-input-container w-90">
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
     <div class="col-md-12 col-sm-12 col-xs-12">
-      <div #searchInput class="input-group default-input-sub-container">
+      <div class="input-group default-input-sub-container">
         <button class="btn btn-primary default-input-button" type="submit">
           <img alt="Search" height="16" class="search-icon"
             ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
         </button>
-        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
+        <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
           class="form-control default-input dashboard-general-input" maxlength="150" name="q" placeholder="Search ..."
           type="search" (focus)="setFilterOverlay(true)">
-        <span class="input-group-text border-start-0"></span>
         <input type="hidden" value="1">
+        <span class="input-group-text border-start-0" (click)="onAdvanceSettingToggle()">
+          <hr class="vertical-divider" />
+          Advance &nbsp;&nbsp;
+          <label class="small-switch">
+            <input type="checkbox" [checked]="advanceSettingToggle" (change)="onAdvanceSettingToggle()" />
+            <span class="small-slider round"></span>
+          </label>
+        </span>
       </div>
-      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay" @searchFilterAnimation>
+      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && advanceSettingToggle"
+        @searchFilterAnimation>
         <app-search-filters [showSorting]="false"></app-search-filters>
       </div>
     </div>
