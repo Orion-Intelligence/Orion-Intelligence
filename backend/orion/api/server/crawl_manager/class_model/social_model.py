@@ -17,7 +17,7 @@ class social_model(BaseModel):
     m_network: str
 
     model_config = {
-        "arbitrary_types_allowed": True,
+        "extra": "allow",
         "json_encoders": {
             date: lambda v: v.strftime("%Y-%m-%d") if v else None
         }

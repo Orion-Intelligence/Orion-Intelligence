@@ -12,22 +12,12 @@ export class ConsolidatedParamModel {
   team = "";
   attacker: string[] = [];
   platform = "";
-
-
-
-
-
-  m_web_server: string[] = [];
-  m_base_url = "";
-  m_ip: string[] = [];
-  m_location = "";
-  m_leak_date?: string;
-  m_web_url: string[] = [];
-  m_hash = "";
-  m_screenshot?: string;
-  m_url = "";
   email?: string;
   username?: string;
+
+
+
+
   mURL = "";
   mUser = "";
   mFullSearch = false;
@@ -45,16 +35,7 @@ export class ConsolidatedParamModel {
     this.team = "";
     this.attacker = [];
     this.team = "";
-    this.m_web_server = [];
-    this.m_base_url = "";
-    this.m_ip = [];
-    this.m_location = "";
-    this.m_leak_date = undefined;
-    this.m_web_url = [];
-    this.m_hash = "";
     this.safe = false;
-    this.m_screenshot = undefined;
-    this.m_url = "";
     this.email = undefined;
     this.username = undefined;
     this.platform = "";

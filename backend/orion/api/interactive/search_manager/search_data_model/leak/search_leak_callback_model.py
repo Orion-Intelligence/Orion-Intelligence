@@ -15,7 +15,6 @@ class result_item(BaseModel):
     m_crypto_addresses: List[str] = []
     m_attacker: Optional[List[str]] = None
     m_ref_html: Optional[str] = None
-    m_password: Optional[str] = None
     m_title: Optional[str] = None
     m_url: Optional[str] = None
     m_base_url: Optional[str] = None

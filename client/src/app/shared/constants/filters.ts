@@ -164,6 +164,30 @@ export const general_filters: FilterModel = {
   }
 };
 
+export const social_filters: FilterModel = {
+  filters: {
+    network: {
+      title: "Network Type",
+      options: [
+        {key: "all", label: "All"},
+        {key: "onion", label: "Onion"},
+        {key: "i2p", label: "I2P"},
+        {key: "clearnet", label: "Clearnet"}
+      ],
+      type: "dropdown",
+      tooltip: "Web Layers",
+      selected: "all"
+    },
+    daterange: {
+      title: "Creation Date",
+      options: [],
+      type: 'daterange',
+      tooltip: "Creation Date",
+      selected: ""
+    },
+  }
+};
+
 export const chat_filters: FilterModel = {
   filters: {
     mContentType: {

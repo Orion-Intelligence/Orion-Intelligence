@@ -8,11 +8,10 @@ import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animati
 import {PaginationComponent} from '../../../pagination/pagination.component';
 import {NgIf} from '@angular/common';
 import {ResultComponent} from '../../../result/result.component';
-import {
-  DashboardResultSocialComponent
-} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 import {SortType} from '../../../../constants/shared-enums';
 import {HelperService} from '../../../../services/helper.service';
+import {social_filters} from '../../../../constants/filters';
 
 @Component({
   selector: 'app-dashboard-socials',
@@ -29,6 +28,7 @@ import {HelperService} from '../../../../services/helper.service';
 export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   public socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
   protected readonly Math = Math;
+  protected readonly filter = social_filters;
 
   query = "";
   isLoading = false;
@@ -65,6 +65,10 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
         this.query = params['q'];
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1'
+        this.dashboardService.consolidatedParamModel.daterange = params['daterange'] || '';
+        this.dashboardService.consolidatedParamModel.network = params['network'] || 'all';
+
+
         if (lastSegment)
           this.dashboardService.consolidatedParamModel.platform = lastSegment
         this.m_platform = this.dashboardService.consolidatedParamModel.platform
@@ -139,6 +143,25 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string) {
     this.dashboardService.consolidatedParamModel.q = query;
+  }
+
+  resetFilters(_: void) {
+    this.dashboardService.consolidatedParamModel.network = "all";
+    this.dashboardService.consolidatedParamModel.daterange = "";
+
+    this.fetchSearchResults(true);
+  }
+
+  reloadFilters(filters: Record<string, string | null>) {
+    this.dashboardService.consolidatedParamModel.page = 1
+    if (filters['network'] != null) {
+      this.dashboardService.consolidatedParamModel.network = filters['network'];
+    }
+    if (filters['daterange']) {
+      this.dashboardService.consolidatedParamModel.daterange = filters['daterange']
+    }
+    this.dashboardService.consolidatedParamModel.safe = filters['safe'] === 'yes';
+    this.fetchSearchResults();
   }
 
   onToggleSort(sort: SortType) {
