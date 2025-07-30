@@ -14,65 +14,75 @@
 
         <input type="hidden" value="1">
 
-        <span class="input-group-text border-start-0" (click)="onToolToggle($event)">
+        <span class="input-group-text border-start-0" (click)="onAdvanceSettingToggle()">
           <hr class="vertical-divider" />
-          Tools &nbsp;&nbsp;
+          Advance Settings &nbsp;&nbsp;
           <label class="small-switch">
-            <input type="checkbox" [checked]="app_service.configData().settings.enable_advanced_tools" />
+            <input type="checkbox" [checked]="advanceSettingToggle" (change)="onAdvanceSettingToggle()" />
             <span class="small-slider round"></span>
           </label>
         </span>
-      </div>
-      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay" @searchFilterAnimation>
-        <app-search-filters (searchFiltersChange)="searchFiltersChanged()"
-          [showSorting]="app_service.configData().settings.enable_advanced_tools"></app-search-filters>
-      </div>
-      <ng-container *ngIf="app_service.configData().settings.enable_advanced_tools; else emptySpace">
-        <div class="mt-2 d-flex gap-3" @fadeInDashboardItem>
-          <div class="dropdown me-3" *ngIf="showSorting">
-            <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              sort by <b>({{ selectedSortBy }})</b>
-              <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-            </span>
-            <ul class="dropdown-menu mt-3 rounded-4 fade" aria-labelledby="dropdownMenu1">
-              <li><a class="dropdown-item" (click)="onSortChange(SortType.NEWEST_FIRST)">Newest first</a></li>
-              <li>
-                <hr class="dropdown-divider mx-3">
-              </li>
-              <li><a class="dropdown-item" (click)="onSortChange(SortType.OLDEST_FIRST)">Oldest first</a></li>
-            </ul>
-          </div>
-
-          <div class="dropdown">
-            <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              search by <b>({{ selectedSearchBy }})</b>
-              <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-            </span>
-            <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onFormSubmit()"> Match any term
-                  (OR)</a></li>
-              <li>
-                <hr class="dropdown-divider mx-3">
-              </li>
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onFormSubmit()"> Match
-                  indivisual terms (AND)</a></li>
-              <li>
-                <hr class="dropdown-divider mx-3">
-              </li>
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match full query';onFormSubmit()"> Match full
-                  query (AND)</a></li>
-            </ul>
+        <div class="tools" (click)="onToolToggle($event)">Tools
+          <div class="expand-icon" [ngClass]="{ 'expand': app_service.configData().settings.enable_advanced_tools }">
+            <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" alt="Toggle Icon" />
           </div>
         </div>
-      </ng-container>
+        <ng-container *ngIf="app_service.configData().settings.enable_advanced_tools">
+          <div class="mt-2 d-flex gap-3" @fadeInDashboardItem>
+            <div class="dropdown me-3" *ngIf="showSorting">
+              <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                sort by <b>({{ selectedSortBy }})</b>
+                <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16"
+                  height="16">
+              </span>
+              <ul class="dropdown-menu mt-3 rounded-4 fade" aria-labelledby="dropdownMenu1">
+                <li><a class="dropdown-item" (click)="onSortChange(SortType.NEWEST_FIRST)">Newest first</a></li>
+                <li>
+                  <hr class="dropdown-divider mx-3">
+                </li>
+                <li><a class="dropdown-item" (click)="onSortChange(SortType.OLDEST_FIRST)">Oldest first</a></li>
+              </ul>
+            </div>
 
-      <ng-template #emptySpace>
-        <div class="mt-2" style="visibility: hidden;">
-          <span class="label-text-dropdown"></span> <span class="label-text-dropdown"></span>
-        </div>
-      </ng-template>
+            <div class="dropdown margin_left">
+              <ul class="dropdown-menu mt-3 show">
+                <li>
+                  <a class="dropdown-item" (click)="selectedSearchBy = 'Match any term'; onFormSubmit()">
+                    Match any term (OR)
+                  </a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider mx-3">
+                </li>
+                <li>
+                  <a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms'; onFormSubmit()">
+                    Match indivisual terms (AND)
+                  </a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider mx-3">
+                </li>
+                <li>
+                  <a class="dropdown-item" (click)="selectedSearchBy = 'Match full query'; onFormSubmit()">
+                    Match full query (AND)
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </ng-container>
+
+      </div>
+
+      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && advanceSettingToggle"
+        @searchFilterAnimation>
+        <app-search-filters (searchFiltersChange)="searchFiltersChanged()" [showSorting]="false"></app-search-filters>
+      </div>
+      <div class="mt-2" style="visibility: hidden;">
+        <span class="label-text-dropdown"></span> <span class="label-text-dropdown"></span>
+      </div>
 
       <ng-container *ngIf="type == Category.STRATEGIC">
         <div class="default-notification-banner">
@@ -103,8 +113,7 @@
   </div>
 </form>
 <app-selected-filter-bar [filterModel]="filterModel" (clearAll)="onClearAllFromBar()"
-  (searchFiltersChange)="searchFiltersChanged()"
-  [showSorting]="app_service.configData().settings.enable_advanced_tools"></app-selected-filter-bar>
+  (searchFiltersChange)="searchFiltersChanged()" [showSorting]="false"></app-selected-filter-bar>
 <ul *ngIf="showTabs && (analyticsToggle || domain || discussion || consolidated)"
   class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
   <li class="nav-item" *ngIf="!consolidated">

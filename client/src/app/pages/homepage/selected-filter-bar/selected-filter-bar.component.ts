@@ -37,21 +37,28 @@ export class SelectedFilterBarComponent implements OnInit {
 
 
 
-  clearAllFilters(): void {
-    for (const key in this.filterModel.filters) {
-      if (this.filterModel.filters.hasOwnProperty(key)) {
-        const filter = this.filterModel.filters[key];
+  clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
+    if (scope === 'sidebar' || scope === 'all') {
+      for (const key in this.filterModel.filters) {
+        if (this.filterModel.filters.hasOwnProperty(key)) {
+          const filter = this.filterModel.filters[key];
 
-        if (Array.isArray(filter.selected)) {
-          filter.selected = [];
-        } else {
-          filter.selected = null as any;
+          if (Array.isArray(filter.selected)) {
+            filter.selected = [];
+          } else {
+            filter.selected = null as any;
+          }
         }
       }
     }
-    this.entityFilterService.clearPersistedState();
+
+    if (scope === 'entity' || scope === 'all') {
+      this.entityFilterService.clearPersistedState();
+    }
+
     this.clearAll.emit();
   }
+
 
 
 

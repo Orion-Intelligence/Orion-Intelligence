@@ -13,7 +13,7 @@
     padding: 24px 24px 8px 24px;
     font-family: Inter, sans-serif;
     color: white;
-    max-width: 950px;
+    max-width: 1027px;
     box-shadow: 0px 9px 16px 0px rgba(0, 0, 0, 0.25);
     z-index: 1;
 }
@@ -243,7 +243,6 @@
 .filter-panel .expand-header {
     display: flex;
     justify-content: space-between;
-    cursor: pointer;
     margin-bottom: 8px;
 }
 
@@ -253,9 +252,25 @@
     color: #A0B8D1;
 }
 
+.filter-panel .expand-icon {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.filter-panel .expand-icon::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: -15px;
+    right: -15px;
+    pointer-events: auto;
+}
+
 .filter-panel .expand-icon img {
     transition: transform 0.3s ease;
-    transform: rotate(-90deg)
+    transform: rotate(-90deg);
 }
 
 .filter-panel .expand-icon.expand img {
@@ -289,9 +304,10 @@ button:focus {
 }
 
 .filter-panel .entity-condition {
-    font-size: 16px;
+    font-size: 12px;
+    font-weight: 400;
     color: #A0B8D1;
-    width: 30px;
+    width: 80px;
     text-align: center;
     display: inline-block;
 }
@@ -299,9 +315,10 @@ button:focus {
 .filter-panel .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
+    width: 26px;
+    height: 16px;
     margin-top: 6px;
+    margin-left: auto;
 }
 
 .filter-panel .toggle-switch input {
@@ -325,13 +342,13 @@ button:focus {
 .filter-panel .slider:before {
     content: "";
     position: absolute;
-    height: 18px;
-    width: 18px;
+    height: 12px;
+    width: 12px;
     border-radius: 50%;
     background-color: white;
     transition: 0.4s;
-    left: 3px;
-    top: 3px;
+    left: 2px;
+    top: 2px;
 }
 
 .filter-panel input:checked+.slider {
@@ -339,5 +356,5 @@ button:focus {
 }
 
 .filter-panel input:checked+.slider:before {
-    transform: translateX(26px);
+    transform: translateX(10px);
 }

@@ -4,11 +4,6 @@
         <div class="title">Filters</div>
         <div class="actions">
             <button class="clear-btn" (click)="clearSelection()">Clear Selection</button>
-            <label class="toggle-switch">
-                <input type="checkbox" [(ngModel)]="entityFilterCondition" />
-                <span class="slider"></span>
-            </label>
-            <div class="entity-condition">{{ entityFilterCondition ? 'AND' : 'OR ' }}</div>
         </div>
     </div>
 
@@ -41,7 +36,11 @@
         <div class="add-btn" (click)="addTag()">
             <img src="../../../../assets/images/shared/searchFilter_addButton.svg" />
         </div>
-        <div class="reset-selection" (click)="resetCategorySelection()">Reset Selection</div>
+        <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="entityFilterCondition" />
+            <span class="slider"></span>
+        </label>
+        <div class="entity-condition">{{ entityFilterCondition ? 'Exact Match' : 'Partial Match' }}</div>
     </div>
 
     <div class="selected-filters">
@@ -64,9 +63,9 @@
 
     <div class="divider"></div>
 
-    <div class="expand-header" (click)="toggleExpand()">
+    <div class="expand-header">
         <div class="expand-label">IOC’s</div>
-        <div class="expand-icon" [ngClass]="{ 'expand': iocExpanded }">
+        <div class="expand-icon" [ngClass]="{ 'expand': iocExpanded }" (click)="toggleExpand()">
             <img src="../../../../assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon" />
         </div>
 

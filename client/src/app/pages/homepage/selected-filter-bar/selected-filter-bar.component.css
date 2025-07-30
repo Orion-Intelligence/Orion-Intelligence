@@ -10,6 +10,22 @@
     margin-top: 10px;
 }
 
+.left-space .expand-icon {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.left-space .expand-icon::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: -15px;
+    right: -15px;
+    pointer-events: auto;
+}
+
 .left-space .expand-icon img {
     transition: transform 0.3s ease;
     transform: rotate(0deg);
@@ -32,7 +48,7 @@
     padding: 10px 24px 10px 24px;
     font-family: Inter, sans-serif;
     color: white;
-    max-width: 950px;
+    max-width: 1027px;
 }
 
 .selected-filter-bar .top-row {
@@ -76,8 +92,8 @@
     margin-left: 8px;
     cursor: pointer;
     font-size: 12px;
-    width: 7px;
-    height: 7px;
+    width: 9px;
+    height: 9px;
 }
 
 .selected-filter-bar .entity_filter_wrap {
@@ -131,6 +147,24 @@
     color: white;
     align-items: center;
     justify-content: center;
+    align-self: flex-start;
+}
+
+.filter-type {
+    display: flex;
+    align-items: center;
+    background-color: #FCFCFC0D;
+    border: 1px solid #FCFCFC12;
+    border-radius: 5px;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #57A5EB;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    margin-top: 1px;
 }
 
 .more-tag {

@@ -1,10 +1,10 @@
-import {CommonModule} from '@angular/common';
-import {Component, ViewChild, ElementRef, Input, Output, EventEmitter, HostListener, AfterViewInit} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {FilterCategory} from '../../../shared/model/filter/filter.model';
-import {EntityFilterService} from '../../../services/entityFilter/entity.filter.service';
-import {SettingsService} from '../../../services/settings/settings.service';
-import {search_filter_keys} from '../../../shared/constants/shared-enums';
+import { CommonModule } from '@angular/common';
+import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, HostListener, AfterViewInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { FilterCategory } from '../../../shared/model/filter/filter.model';
+import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
+import { SettingsService } from '../../../services/settings/settings.service';
+import { search_filter_keys } from '../../../shared/constants/shared-enums';
 
 @Component({
   selector: 'app-search-filters',
@@ -12,7 +12,7 @@ import {search_filter_keys} from '../../../shared/constants/shared-enums';
   imports: [FormsModule, CommonModule],
   templateUrl: './search-filters.component.html'
 })
-export class SearchFiltersComponent implements AfterViewInit{
+export class SearchFiltersComponent implements AfterViewInit {
   @Input() showSorting!: boolean;
   @Output() searchFiltersChange = new EventEmitter<void>();
   categories: FilterCategory[] = [];
@@ -21,7 +21,7 @@ export class SearchFiltersComponent implements AfterViewInit{
   newValue = '';
   iocExpanded: boolean = true;
   entityFilterCondition: boolean = false;
-  @ViewChild('categoryScroll', {static: true}) categoryScroll!: ElementRef;
+  @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
 
   showLeftFade = false;
   showRightFade = false;
@@ -64,12 +64,12 @@ export class SearchFiltersComponent implements AfterViewInit{
 
 
   scrollLeft() {
-    this.categoryScroll.nativeElement.scrollBy({left: -150, behavior: 'smooth'});
+    this.categoryScroll.nativeElement.scrollBy({ left: -150, behavior: 'smooth' });
     setTimeout(() => this.updateFadeVisibility(), 300);
   }
 
   scrollRight() {
-    this.categoryScroll.nativeElement.scrollBy({left: 150, behavior: 'smooth'});
+    this.categoryScroll.nativeElement.scrollBy({ left: 150, behavior: 'smooth' });
     setTimeout(() => this.updateFadeVisibility(), 300);
   }
 
@@ -103,11 +103,6 @@ export class SearchFiltersComponent implements AfterViewInit{
 
   clearSelection() {
     this.categories.forEach(cat => (cat.tags = []));
-    this.updateService();
-  }
-
-  resetCategorySelection() {
-    this.selectedCategory.tags = [];
     this.updateService();
   }
 

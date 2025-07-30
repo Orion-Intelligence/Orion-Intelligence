@@ -1,19 +1,19 @@
-<div *ngIf="entityFiltersCount() || sidebarFilterCount()" [ngClass]="{ 'top-space': showSorting, '': !showSorting }">
+<div *ngIf="entityFiltersCount() || sidebarFilterCount()" [ngClass]="{ 'top-space': showSorting }">
     <div class="selected-filter-bar left-space">
-        <div class="top-row" *ngIf="!isFilterBarExpanded">
+        <div class="top-row">
             <div class="title">Filters</div>
-            <div class="title">Sidebar
-                <div class="filter-count">
-                    {{sidebarFilterCount()}}
-                </div>
-            </div>
-            <div class="title">Entity
-                <div class="filter-count">
-                    {{entityFiltersCount()}}
-                </div>
-            </div>
             <div class="actions">
-                <button class="clear-btn" (click)="clearAllFilters()">Clear Selection</button>
+                <div class="filter-type">
+                    Sidebar({{sidebarFilterCount()}})
+                    <img src="../../../../assets/images/shared/searchFilter_clossButton.svg" class="remove-x"
+                        (click)="clearFilters('sidebar')" />
+                </div>
+                <div class="filter-type">
+                    Entity({{entityFiltersCount()}})
+                    <img src="../../../../assets/images/shared/searchFilter_clossButton.svg" class="remove-x"
+                        (click)="clearFilters('entity')" />
+                </div>
+                <button class="clear-btn" (click)="clearFilters('all')">Clear Selection</button>
                 <div class="expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }"
                     (click)="toggleFilterBarCollapse()">
                     <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" alt="Toggle Icon" />
@@ -22,19 +22,8 @@
         </div>
 
         <div *ngIf="isFilterBarExpanded">
-            <div class="top-row">
-                <div class="title">Filters</div>
-                <div class="actions">
-                    <button class="clear-btn" (click)="clearAllFilters()">Clear Selection</button>
-                    <div class="expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }"
-                        (click)="toggleFilterBarCollapse()">
-                        <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" alt="Toggle Icon" />
-                    </div>
-                </div>
-            </div>
-
             <div class="primary-filters-wrap">
-                <ng-container *ngIf="sidebarFilterCount()>0; else noSidebarFilters">
+                <ng-container *ngIf="sidebarFilterCount() > 0; else noSidebarFilters">
                     <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
                         <div class="filter-item" *ngIf="isFilterSelected(filterKey.value)">
                             <div class="filter-label-edit">
@@ -52,12 +41,12 @@
                     </div>
                 </ng-template>
             </div>
+
             <div class="divider"></div>
+
             <ng-container *ngIf="entityFiltersCount(); else noSearchFilters">
                 <div class="filter-item">
-                    <div class="filter-label-edit">
-                        Entity Type
-                    </div>
+                    <div class="filter-label-edit">Entity Type</div>
                     <div class="entity_filter_wrap">
                         <ng-container *ngIf="getVisibleTags(categories).length > 0">
                             <div class="filter-tag" *ngFor="let tag of getVisibleTags(categories)">
@@ -65,7 +54,6 @@
                                 <img src="../../../../assets/images/shared/searchFilter_clossButton.svg"
                                     class="remove-x" (click)="removeEntityTypeFilterTag(tag.id)" />
                             </div>
-
                             <div class="filter-tag more-tag" *ngIf="getHiddenTagCount(categories) > 0">
                                 +{{ getHiddenTagCount(categories) }}
                             </div>
@@ -73,11 +61,13 @@
                     </div>
                 </div>
             </ng-container>
+
             <ng-template #noSearchFilters>
                 <div class="no-filters-text">
                     Entity filters are empty. Click the search bar to select filters.
                 </div>
             </ng-template>
         </div>
+
     </div>
 </div>
