@@ -26,8 +26,17 @@
 .dashboard__defacement-detail-header-items {
   display: grid;
   font-weight: 500;
+  max-width: 300px;
+  overflow: hidden;
   font-size: 16px;
   color: #fff;
+}
+
+.dashboard__defacement-truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
 }
 
 .dashboard__defacement-detail-header-items strong {

@@ -24,36 +24,30 @@
   </div>
 </form>
 
-<div *ngIf="!loading && !error && this.emailCallbackbackModel.cards_data.length > 0 && breachData && Object.keys(breachData).length > 0" @fadeInDashboardItem class="dashboard__search-table-container">
-  <div class="dashboard__search-table-header">Data Breach List</div>
-  <table class="dashboard__search-table">
-    <thead>
-    <tr>
-      <th class="column-id">ID</th>
-      <th class="column-key">Key</th>
-      <th class="column-value">Value</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let key of (breachData ? Object.keys(breachData) : []); let i = index">
-      <td class="cell">{{ i + 1 }}</td>
-      <td class="cell">{{ key.replace("m_", "").replace("_", " ").toUpperCase() }}</td>
-      <td class="cell">
-        <ng-container *ngIf="$any(breachData)[key] as value">
-          <ng-container *ngIf="Array.isArray(value); else normalValue">
-            <span *ngFor="let item of value" class="badge-red">{{ item }}</span>
-          </ng-container>
-          <ng-template #normalValue>
-            <a *ngIf="typeof value === 'string' && value.startsWith('http')" [href]="value" target="_blank">{{
-                value
-              }}</a> <span *ngIf="!(typeof value === 'string' && value.startsWith('http'))">{{ value }}</span>
-          </ng-template>
-        </ng-container>
-        <span *ngIf="!$any(breachData)[key]">N/A</span>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+<div class="search__result-detail">
+  <div class="dashboard__defacement-detail-header-url dashboard-header-header">
+    {{ breachData?.m_url }}
+  </div>
+  <hr class="dashboard-header-divider" />
+  <div class="dashboard__defacement-detail-header-items mb-1 dashboard-header-label">
+    Content Type:
+  </div>
+  <span class="text-white">stolen</span>
+
+  <div class="dashboard__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+    Username:
+  </div>
+  <span class="text-white">{{ username }}</span>
+
+  <div class="dashboard__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+    Email Address:
+  </div>
+  <span class="text-white">{{ email && email.trim() !== '' ? email : 'not found' }}</span>
+
+  <div class="dashboard__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">
+    Breaches:
+  </div>
+  <span *ngFor="let item of breachData?.m_dumplink" class="badge-red">{{ item }}</span><
 </div>
 
 <div *ngIf="loading" @fadeInDashboardItem>

@@ -67,6 +67,9 @@ class elastic_request_generator:
         if entity_filter_clauses:
             must_clauses.extend(entity_filter_clauses)
 
+        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
+        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+
         try:
             ipaddress.ip_address(raw_query)
             is_ip = True
@@ -85,7 +88,16 @@ class elastic_request_generator:
                     }
                 }
         else:
-            if is_ip:
+            if quoted_value:
+                raw_query = quoted_value
+                should_clauses.append({
+                    "bool": {
+                        "should": [{"terms": {field: [raw_query], "boost": 3}} for field in allowed_keys],
+                        "minimum_should_match": 1,
+                        "boost": 5
+                    }
+                })
+            elif is_ip:
                 should_clauses.append({"term": {"m_ip": raw_query}})
             else:
                 should_clauses.extend([
@@ -127,8 +139,8 @@ class elastic_request_generator:
                                     "m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
                                 {"wildcard": {
                                     "m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                                {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True,
-                                                                 "boost": 2}}}
+                                {"wildcard": {
+                                    "m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1845,10 +1857,6 @@ class elastic_request_generator:
         for record in p_index_data.get("cards_data", []):
             if not record["m_url"]:
                 continue
-
-            print("::::::::::::::::::::::::::::::::::", flush=True)
-            print(record, flush=True)
-            print("::::::::::::::::::::::::::::::::::", flush=True)
 
             data_hash = helper_controller.generate_data_hash(record["m_url"])
             record["m_hash"] = data_hash

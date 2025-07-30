@@ -35,7 +35,7 @@
             {{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}
           </td>
           <td>
-            <a *ngIf="item.m_source_url && item.m_source_url.length" [href]="item.m_source_url[0]" class="text-decoration-none text-reset"> {{ item.m_source_url[0] }} </a> <span *ngIf="!item.m_source_url || !item.m_source_url.length">Not Found</span>
+            <a *ngIf="item.m_source_url && item.m_source_url.length" [href]="item.m_source_url[0]" class="text-decoration-none text-reset"> {{ item.m_source_url[0] }} </a> <span *ngIf="!item.m_source_url || !item.m_source_url.length">-</span>
           </td>
         </tr>
       </ng-container>

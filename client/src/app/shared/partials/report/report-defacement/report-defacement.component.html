@@ -8,26 +8,26 @@
       <strong>Saved on:</strong>{{
         defacementData?.m_leak_date
           ? (defacementData?.m_leak_date | date: 'MMM d, y')
-          : 'Not found'
+          : '-'
       }}
     </div>
     <div class="dashboard__defacement-detail-header-items">
-      <strong>Defacer:</strong>{{ defacementData?.m_attacker ? defacementData?.m_attacker : 'Not found' }}
+      <strong>Defacer:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
     </div>
     <div class="dashboard__defacement-detail-header-items">
-      <strong>Team:</strong>{{ defacementData?.m_team }}
+      <strong>Team:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_team }}</span>
     </div>
     <div class="dashboard__defacement-detail-header-items">
-      <strong>Web Server:</strong>{{ defacementData?.m_web_server ? defacementData?.m_web_server : 'Not found' }}
+      <strong>Web Server:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
     </div>
     <div class="dashboard__defacement-detail-header-items">
-      <strong>Breach:</strong>{{ defacementData?.m_source_url }}
+      <strong>Breach:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_source_url  ? defacementData?.m_source_url : '-'}}</span>
     </div>
     <div class="dashboard__defacement-detail-header-items">
-      <strong>IP:</strong>{{ defacementData?.m_ip }}
+      <strong>IP:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
     </div>
     <div class="dashboard__defacement-detail-header-items">
-      <strong>Location:</strong>{{ defacementData?.m_location ? defacementData?.m_location : 'Not found' }}
+      <strong>Location:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
     </div>
   </div>
 </div>

@@ -189,7 +189,6 @@ class ELASTIC_ENUMS:
                 "m_github_links": {"type": "keyword"},
                 "m_hash": {"type": "keyword"},
                 "m_ip": {"type": "ip"},
-                "m_leak_date": {"type": "date"},
                 "m_location": {"type": "keyword"},
                 "m_mirror_links": {"type": "keyword"},
                 "m_name": {"type": "keyword"},

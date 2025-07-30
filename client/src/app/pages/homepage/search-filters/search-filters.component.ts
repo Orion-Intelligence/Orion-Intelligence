@@ -1,18 +1,18 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, Input, Output, EventEmitter, HostListener } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FilterTag, FilterCategory } from '../../../shared/model/filter/filter.model';
-import { debounceTime, distinctUntilChanged, fromEvent, Subject, takeUntil } from 'rxjs';
-import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
-import { SettingsService } from '../../../services/settings/settings.service';
-import { search_filter_keys } from '../../../shared/constants/shared-enums';
+import {CommonModule} from '@angular/common';
+import {Component, ViewChild, ElementRef, Input, Output, EventEmitter, HostListener, AfterViewInit} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {FilterCategory} from '../../../shared/model/filter/filter.model';
+import {EntityFilterService} from '../../../services/entityFilter/entity.filter.service';
+import {SettingsService} from '../../../services/settings/settings.service';
+import {search_filter_keys} from '../../../shared/constants/shared-enums';
+
 @Component({
   selector: 'app-search-filters',
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './search-filters.component.html'
 })
-export class SearchFiltersComponent {
+export class SearchFiltersComponent implements AfterViewInit{
   @Input() showSorting!: boolean;
   @Output() searchFiltersChange = new EventEmitter<void>();
   categories: FilterCategory[] = [];
@@ -21,14 +21,15 @@ export class SearchFiltersComponent {
   newValue = '';
   iocExpanded: boolean = true;
   entityFilterCondition: boolean = false;
-  @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
+  @ViewChild('categoryScroll', {static: true}) categoryScroll!: ElementRef;
 
   showLeftFade = false;
   showRightFade = false;
+
   constructor(private entityFilterService: EntityFilterService, private settingsService: SettingsService) {
   }
+
   get selectedCategory(): FilterCategory {
-    alert(this.selectedCategoryIndex)
     return this.categories[this.selectedCategoryIndex];
   }
 
@@ -63,12 +64,12 @@ export class SearchFiltersComponent {
 
 
   scrollLeft() {
-    this.categoryScroll.nativeElement.scrollBy({ left: -150, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: -150, behavior: 'smooth'});
     setTimeout(() => this.updateFadeVisibility(), 300);
   }
 
   scrollRight() {
-    this.categoryScroll.nativeElement.scrollBy({ left: 150, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: 150, behavior: 'smooth'});
     setTimeout(() => this.updateFadeVisibility(), 300);
   }
 
@@ -109,6 +110,7 @@ export class SearchFiltersComponent {
     this.selectedCategory.tags = [];
     this.updateService();
   }
+
   private updateService() {
     this.entityFilterService.updateFilterCategories(this.categories);
     this.entityFilterService.updateSelectedCategoryId(this.selectedCategory.id);
@@ -118,18 +120,13 @@ export class SearchFiltersComponent {
     this.iocExpanded = !this.iocExpanded;
     this.settingsService.set('iocExpanded', this.iocExpanded);
   }
-  toggleEntityCondition() {
-    this.entityFilterCondition = !this.entityFilterCondition;
-  }
+
   hasAnyTags(): boolean {
     return this.categories.some(category => category.tags.length > 0);
   }
+
   onCategoryClick(index: number, categoryId: string): void {
     this.selectedCategoryIndex = index;
     this.entityFilterService.updateSelectedCategoryId(categoryId);
   }
-  get allSelectedTags(): FilterTag[] {
-    return this.categories.flatMap(c => c.tags);
-  }
-
 }
