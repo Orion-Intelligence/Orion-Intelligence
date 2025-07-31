@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 export type Settings = {
     advanceSettingToggle?: boolean;
     iocExpanded?: boolean;
+    sidebarFilters?: Record<string, { title: string; selected: string | string[] }>;
 };
 
 const SETTINGS_KEY = 'appSettings';

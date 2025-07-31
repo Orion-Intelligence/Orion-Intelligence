@@ -3,6 +3,7 @@
     <div class="top-row">
         <div class="title">Filters</div>
         <div class="actions">
+            <input type="text" [(ngModel)]="entitySearch" placeholder="Search entitys..." class="tag-input" />
             <button class="clear-btn" (click)="clearSelection()">Clear Selection</button>
         </div>
     </div>
@@ -15,13 +16,17 @@
         </div>
 
         <div class="filter-panel__category-scroll" #categoryScroll>
-            <div *ngFor="let category of categories; let i = index" class="category-tab"
+            <div *ngIf="searchFilterCategories(entitySearch).length>0; else noEntity"></div>
+            <div *ngFor="let category of searchFilterCategories(entitySearch); let i = index" class="category-tab"
                 [class.selected]="i === selectedCategoryIndex" (click)="onCategoryClick(i, category.id)">
                 {{ category.name }}
                 <div *ngIf="category.tags.length > 0" class="filter-panel__category-count">
                     {{ category.tags.length }}
                 </div>
             </div>
+            <ng-template #noEntity>
+                <div class="no-filters-text">No entity filters available.</div>
+            </ng-template>
         </div>
 
         <div class="scroll-btn show" (click)="scrollRight()">

@@ -9,6 +9,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
 import { ActivatedRoute } from '@angular/router';
+import { SettingsService } from '../../../services/settings/settings.service';
 
 @Component({
   selector: 'app-filters',
@@ -29,13 +30,14 @@ export class FiltersComponent implements OnInit {
   protected readonly Object = Object;
   protected readonly last = last;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private settingsService: SettingsService) {
   }
 
   ngOnInit() {
     this.initialModel = structuredClone(this.filterModel)
     this.initializeFilters();
-    this.readFiltersFromUrl();
+    // this.readFiltersFromUrl();
+    this.loadFiltersFromSettings();
   }
 
   updateFilter(event: { key: string; value: string }) {
@@ -56,6 +58,7 @@ export class FiltersComponent implements OnInit {
 
   applyFilters() {
     this.filterChanged.emit({ ...this.selectedFilters });
+    this.saveFiltersToSettings();
     this.closeFilter();
   }
 
@@ -99,4 +102,34 @@ export class FiltersComponent implements OnInit {
       });
     });
   }
+
+  private saveFiltersToSettings() {
+    const filtersToSave = Object.keys(this.filterModel.filters).reduce((acc, key) => {
+      acc[key] = {
+        title: this.filterModel.filters[key].title,
+        selected: this.filterModel.filters[key].selected
+      };
+      return acc;
+    }, {} as Record<string, { title: string; selected: string | string[] }>);
+
+    this.settingsService.set('sidebarFilters', filtersToSave);
+  }
+  private loadFiltersFromSettings() {
+    const saved = this.settingsService.get('sidebarFilters', {});
+    if (!saved) return;
+
+    for (const key of Object.keys(this.filterModel.filters)) {
+      const current = this.filterModel.filters[key];
+      const savedEntry = saved[key];
+
+      if (savedEntry && savedEntry.title === current.title) {
+        current.selected = savedEntry.selected;
+        if (typeof savedEntry.selected === 'string') {
+          this.selectedFilters[key] = savedEntry.selected;
+        }
+      }
+    }
+  }
+
+
 }
