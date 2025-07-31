@@ -103,7 +103,7 @@ export class ReportChatComponent implements OnInit {
     if (tab === 'm_content' || tab === 'm_summary') {
       this.listItems = [];
     } else if (this.resultItem && Array.isArray((this.resultItem as any)[tab])) {
-      this.listItems = (this.resultItem as any)[tab].slice(0, 3);
+      this.listItems = (this.resultItem as any)[tab].slice(0, 100);
     } else {
       this.listItems = [];
     }

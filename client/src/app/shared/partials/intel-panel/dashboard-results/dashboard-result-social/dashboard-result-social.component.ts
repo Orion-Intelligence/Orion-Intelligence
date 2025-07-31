@@ -5,6 +5,7 @@ import {ScrollService} from '../../../../services/scroll.service';
 import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
 import {SocialResultItem} from '../../../../model/results/social/social.callback.model';
 import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
+import {RemoveEmojisPipe} from '../../../../model/pipes/remove-emojis-pipe.pipe';
 
 @Component({
   selector: 'app-dashboard-result-social',
@@ -16,7 +17,8 @@ import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animati
     SlicePipe,
     RouterLink,
     TooltipDirective,
-    CommonModule
+    CommonModule,
+    RemoveEmojisPipe
   ],
   templateUrl: './dashboard-result-social.component.html',
   animations: [fadeInDashboardItem]

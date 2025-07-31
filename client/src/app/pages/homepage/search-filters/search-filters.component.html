@@ -1,4 +1,4 @@
-<div class="filter-panel" [ngClass]="{ 'mt_40': showSorting, 'mt_10': !showSorting }">
+<div class="filter-panel" [ngClass]="{ 'filter-panel_sorting-extend-margin': showSorting, 'filter-panel_sorting-shrink-margin': !showSorting }">
 
     <div class="top-row">
         <div class="title">Filters</div>
@@ -79,7 +79,7 @@
                         <div *ngFor="let tag of category.tags" class="filter-tag">
                             {{ tag.value }}
                             <img src="../../../../assets/images/shared/searchFilter_clossButton.svg" class="remove-x"
-                                (click)="removeTag(category, tag.id)" />
+                                (click)="removeTag(category, tag.id)"  alt=""/>
                         </div>
                     </div>
                 </div>

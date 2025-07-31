@@ -1008,17 +1008,20 @@ class elastic_request_generator:
             "m_network^1.5"
         ]
 
+        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
+        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+
         if raw_query == "*":
             query_string_query = {"match_all": {}}
-        elif '"' in raw_query:
+        elif quoted_value:
+            quoted_value = quoted_value.strip('"').strip()
+            raw_query = raw_query.strip('"').strip()
+
             query_string_query = {
-                "query_string": {
-                    "query": raw_query,
-                    "fields": search_fields,
-                    "default_operator": "OR",
-                    "analyze_wildcard": False,
-                    "auto_generate_synonyms_phrase_query": False,
-                    "lenient": True
+                "bool": {
+                    "should": [{"terms": {field: [quoted_value], "boost": 3}} for field in allowed_keys],
+                    "minimum_should_match": 1,
+                    "boost": 5
                 }
             }
         else:
@@ -1110,6 +1113,9 @@ class elastic_request_generator:
             "explain": True
         }
 
+        print("::::::::::::::::::::::::::::::", flush=True)
+        print(query, flush=True)
+        print("::::::::::::::::::::::::::::::", flush=True)
         return ELASTIC_INDEX.S_SOCIAL_INDEX, query
 
     @staticmethod

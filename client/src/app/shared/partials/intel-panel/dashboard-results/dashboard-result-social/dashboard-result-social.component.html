@@ -25,7 +25,7 @@
             {{ senderName.substring(1) }}
           </div>
           <ng-template #showTitle>
-            {{ item.m_title ?? 'Untitled' }}
+            {{ item.m_title | removeEmojis }}
           </ng-template>
         </h2>
       </div>
@@ -47,12 +47,14 @@
       </ng-container>
 
       <ng-template #otherSection>
-        <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Section</h5>
-        <p class="dashboard__search-description highlight">
-          <ng-container *ngFor="let line of getContentLines(item); let i = index">
-            {{ i + 1 }}. {{ line }}<br/>
-          </ng-container>
-        </p>
+        <ng-container *ngIf="getContentLines(item).length > 0">
+          <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Section</h5>
+          <p class="dashboard__search-description highlight">
+            <ng-container *ngFor="let line of getContentLines(item).slice(0, 12); let i = index">
+              {{ i + 1 }}. {{ line.length > 150 ? (line | slice:0:150) + '...' : line }}<br/>
+            </ng-container>
+          </p>
+        </ng-container>
       </ng-template>
 
       <ng-container *ngIf="item.m_weblink?.length">

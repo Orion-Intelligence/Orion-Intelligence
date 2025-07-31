@@ -414,6 +414,16 @@ class ELASTIC_ENUMS:
         },
         "mappings": {
             "dynamic": True,
+            "dynamic_templates": [
+                {
+                    "strings_as_keywords": {
+                        "match_mapping_type": "string",
+                        "mapping": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            ],
             "properties": {
                 "m_sender_name": {
                     "type": "keyword"
