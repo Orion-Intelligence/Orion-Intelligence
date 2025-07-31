@@ -34,11 +34,6 @@
   scrollbar-width: none;
   margin-left: -5px;
   padding: 20px;
-  mask-image: linear-gradient(to bottom,
-  #0000 0%,
-  #000F 15px,
-  #000F 93%,
-  #0000 100%);
 }
 
 .sidebar-hotlinks {
