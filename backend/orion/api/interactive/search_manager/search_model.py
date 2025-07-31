@@ -329,7 +329,8 @@ class search_model:
                     else:
                         es_clauses.append({"terms": {es_field_name: tags}})
                 else:
-                    log.g().ex(f"Warning: No Elasticsearch field mapping found for category ID: {category_id} in the provided context.")
+                    print('----------------------------------------------')
+                    # log.g().warning(f"Warning: No Elasticsearch field mapping found for category ID: {category_id} in the provided context.")
         return es_clauses
     
 

@@ -1,23 +1,23 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {AppService} from '../../../../../services/core/app.service';
-import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
-import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
-import {ResultComponent} from '../../../result/result.component';
-import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
-import {ConsolidatedCallbackModel} from '../../../../model/results/consolidated/consolidated.callback.model';
-import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {SortGroupedResultsPipe} from '../../../../model/pipes/sort-grouped-results.pipe';
-import {ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory} from '../../../../constants/pages';
-import {SelectionStoreService} from '../../../../../services/dashboard/selection.service';
-import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
-import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
-import {ResultInsightsComponent} from "../result-insights/result-insights.component";
-import {consolidated_filters} from '../../../../constants/filters';
-import {ALLOWED_CONSOLIDATED_RANKED_SINGLETON} from '../../../../constants/shared-enums';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AppService } from '../../../../../services/core/app.service';
+import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
+import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
+import { ResultComponent } from '../../../result/result.component';
+import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
+import { DashboardResultExploitComponent } from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import { DashboardResultChatComponent } from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { SortGroupedResultsPipe } from '../../../../model/pipes/sort-grouped-results.pipe';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../../constants/pages';
+import { SelectionStoreService } from '../../../../../services/dashboard/selection.service';
+import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
+import { DashboardResultSocialComponent } from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import { ResultInsightsComponent } from "../result-insights/result-insights.component";
+import { consolidated_filters } from '../../../../constants/filters';
+import { ALLOWED_CONSOLIDATED_RANKED_SINGLETON } from '../../../../constants/shared-enums';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -97,7 +97,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!this.dashboardService.consolidatedParamModel.q) {
       this.isLoading = false;
       this.dashboardService.consolidatedParamModel.q = '';
-      this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
+      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
     }
 
     this.isLoading = true;
@@ -251,7 +251,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
     this.router.navigate([routePrefix], {
-      queryParams: {page: 1}, queryParamsHandling: 'merge'
+      queryParams: { page: 1 }, queryParamsHandling: 'merge'
     }).then();
   }
 
