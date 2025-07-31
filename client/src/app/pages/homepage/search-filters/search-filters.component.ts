@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, HostListener, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, HostListener, AfterViewInit, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FilterCategory } from '../../../shared/model/filter/filter.model';
 import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
@@ -12,7 +12,7 @@ import { search_filter_keys } from '../../../shared/constants/shared-enums';
   imports: [FormsModule, CommonModule],
   templateUrl: './search-filters.component.html'
 })
-export class SearchFiltersComponent implements AfterViewInit {
+export class SearchFiltersComponent implements AfterViewInit, OnInit {
   @Input() showSorting!: boolean;
   @Output() searchFiltersChange = new EventEmitter<void>();
   categories: FilterCategory[] = [];
@@ -33,8 +33,7 @@ export class SearchFiltersComponent implements AfterViewInit {
     return this.categories[this.selectedCategoryIndex];
   }
 
-  ngAfterViewInit() {
-    this.selectedCategoryIndex = 0;
+  ngOnInit(): void {
     const defaultCategories = Array.from(search_filter_keys).map((key) => {
       const formattedName = key
         .replace(/^m_/, '')
@@ -59,6 +58,8 @@ export class SearchFiltersComponent implements AfterViewInit {
       const index = this.categories.findIndex(cat => cat.id === savedCategoryId);
       this.selectedCategoryIndex = index !== -1 ? index : 0;
     }
+  }
+  ngAfterViewInit() {
     setTimeout(() => this.updateFadeVisibility(), 300);
   }
 

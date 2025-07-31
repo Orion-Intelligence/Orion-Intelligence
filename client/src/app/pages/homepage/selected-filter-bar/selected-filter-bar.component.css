@@ -127,7 +127,7 @@
 }
 
 
-.filter-tag {
+.selected-filter-bar .filter-tag {
   display: flex;
   background-color: #FCFCFC0D;
   border: 1px solid #FCFCFC12;
@@ -142,7 +142,7 @@
   align-self: flex-start;
 }
 
-.filter-type {
+.selected-filter-bar .filter-type {
   display: flex;
   background-color: #FCFCFC0D;
   border: 1px solid #FCFCFC12;
@@ -158,7 +158,7 @@
   margin-top: 1px;
 }
 
-.more-tag {
+.selected-filter-bar .more-tag {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -169,7 +169,7 @@
   margin-top: 4px;
 }
 
-.filter-scroll-container {
+.selected-filter-bar .filter-scroll-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -178,7 +178,7 @@
   gap: 15px;
 }
 
-.primary-filters-wrap {
+.selected-filter-bar .primary-filters-wrap {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 1.5rem;
@@ -188,12 +188,12 @@
 }
 
 
-.filter-item {
+.selected-filter-bar .filter-item {
   display: flex;
   flex-direction: column;
 }
 
-.filter-label-edit {
+.selected-filter-bar .filter-label-edit {
   display: flex;
   align-items: center;
   color: #A0B8D1;
@@ -203,27 +203,27 @@
 }
 
 
-.filter-value {
+.selected-filter-bar .filter-value {
   color: #fff;
   font-size: 12px;
   font-weight: 500;
 }
 
 
-.custom-scrollbar::-webkit-scrollbar {
+.selected-filter-bar .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.selected-filter-bar .custom-scrollbar::-webkit-scrollbar-track {
   background: #2a63b0;
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
+.selected-filter-bar .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #80aedb;
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+.selected-filter-bar .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #b0d0f0;
 }
