@@ -5,6 +5,7 @@ import { FilterCategory } from '../../../shared/model/filter/filter.model';
 import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
 import { SettingsService } from '../../../services/settings/settings.service';
 import { search_filter_keys } from '../../../shared/constants/shared-enums';
+import { search_filter_labels } from '../../../shared/constants/shared-enums';
 
 @Component({
   selector: 'app-search-filters',
@@ -18,6 +19,7 @@ export class SearchFiltersComponent implements AfterViewInit, OnInit {
   categories: FilterCategory[] = [];
 
   selectedCategoryIndex = 0;
+  entitySearch = '';
   newValue = '';
   iocExpanded: boolean = true;
   entityFilterCondition: boolean = false;
@@ -35,14 +37,9 @@ export class SearchFiltersComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     const defaultCategories = Array.from(search_filter_keys).map((key) => {
-      const formattedName = key
-        .replace(/^m_/, '')
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, char => char.toUpperCase());
-
       return {
         id: key,
-        name: formattedName,
+        name: search_filter_labels[key] || key,
         tags: []
       };
     });
@@ -125,4 +122,18 @@ export class SearchFiltersComponent implements AfterViewInit, OnInit {
     this.selectedCategoryIndex = index;
     this.entityFilterService.updateSelectedCategoryId(categoryId);
   }
+  searchFilterCategories(query: string): FilterCategory[] {
+    if (query === '') {
+      return this.categories;
+    }
+    else {
+      const filtered = this.categories.filter(category =>
+        category.name.toLowerCase().includes(query)
+      );
+      if (filtered.length > 0)
+        this.selectedCategoryIndex = 0;
+      else this.selectedCategoryIndex = -1;
+      return filtered;
+    }
+  };
 }

@@ -13,7 +13,7 @@
     padding: 24px 24px 8px;
     font-family: Inter, sans-serif;
     color: white;
-    max-width: 970px;
+    width: 970px;
     box-shadow: 0 9px 16px 0 rgb(0 0 0 / 25%);
     z-index: 1;
 }
@@ -354,12 +354,12 @@ button:focus {
 
 @media only screen and (width <=1320px) {
     .filter-panel {
-        max-width: 700px;
+        width: 700px;
     }
 }
 
 @media only screen and (width <=1060px) {
     .filter-panel {
-        max-width: 475px;
+        width: 475px;
     }
 }
