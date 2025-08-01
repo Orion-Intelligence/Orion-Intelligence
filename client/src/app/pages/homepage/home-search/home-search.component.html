@@ -14,12 +14,14 @@
           <hr class="vertical-divider" />
           Advance &nbsp;&nbsp;
           <label class="small-switch">
-            <input type="checkbox" [checked]="advanceSettingToggle" (change)="onAdvanceSettingToggle()" />
+            <input type="checkbox" [checked]="app_service.configData().settings.advance_setting_toggle"
+              (change)="onAdvanceSettingToggle()" />
             <span class="small-slider round"></span>
           </label>
         </span>
       </div>
-      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && advanceSettingToggle">
+      <div #filtersWrapper class="filters-overlay search-trigger"
+        *ngIf="showFiltersOverlay && app_service.configData().settings.advance_setting_toggle">
         <app-search-filters [showSorting]="false"></app-search-filters>
       </div>
     </div>

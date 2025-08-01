@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {franc} from 'franc-min';
-import {LANGUAGE_MAP} from '../constants/shared-enums';
-import {ConsolidatedParamModel} from '../model/results/consolidated/consolidated.param.model';
+import { Injectable } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { franc } from 'franc-min';
+import { LANGUAGE_MAP } from '../constants/shared-enums';
+import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,7 @@ export class HelperService {
 
   downloadAsCSV(data: any) {
     const csvContent = this.convertToCSV(data);
-    const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
@@ -96,7 +96,7 @@ export class HelperService {
           const betweenText = text.slice(prevEnd, nextStart);
 
           const wordGap = betweenText
-            .replace(/<[^>]+>/g, '') // remove tags
+            .replace(/<[^>]+>/g, '')
             .trim()
             .split(/\s+/)
             .filter(Boolean).length;
@@ -158,7 +158,7 @@ export class HelperService {
 
       const strA = aVal.toString();
       const strB = bVal.toString();
-      const comparison = strA.localeCompare(strB, undefined, {sensitivity: 'base'});
+      const comparison = strA.localeCompare(strB, undefined, { sensitivity: 'base' });
 
       return order === 'asc' ? comparison : -comparison;
     });

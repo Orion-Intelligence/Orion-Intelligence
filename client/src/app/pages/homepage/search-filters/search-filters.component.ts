@@ -2,10 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, HostListener, AfterViewInit, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FilterCategory } from '../../../shared/model/filter/filter.model';
-import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
-import { SettingsService } from '../../../services/settings/settings.service';
 import { search_filter_keys } from '../../../shared/constants/shared-enums';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
+import { AppService } from '../../../services/core/app.service';
 
 @Component({
   selector: 'app-search-filters',
@@ -18,21 +17,19 @@ export class SearchFiltersComponent implements AfterViewInit, OnInit {
   @Output() searchFiltersChange = new EventEmitter<void>();
   categories: FilterCategory[] = [];
 
-  selectedCategoryIndex = 0;
+  selectedCategoryId = '';
   entitySearch = '';
   newValue = '';
-  iocExpanded: boolean = true;
-  entityFilterCondition: boolean = false;
   @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
 
   showLeftFade = false;
   showRightFade = false;
 
-  constructor(private entityFilterService: EntityFilterService, private settingsService: SettingsService) {
+  constructor(public app_service: AppService) {
   }
 
   get selectedCategory(): FilterCategory {
-    return this.categories[this.selectedCategoryIndex];
+    return this.categories.find(cat => cat.id === this.selectedCategoryId)!;
   }
 
   ngOnInit(): void {
@@ -44,22 +41,23 @@ export class SearchFiltersComponent implements AfterViewInit, OnInit {
       };
     });
 
-    this.iocExpanded = this.settingsService.get('iocExpanded', true) ?? true;
-    this.entityFilterService.initializeFilterCategories(defaultCategories);
+    this.initializeFilterCategories(defaultCategories);
 
-    this.categories = this.entityFilterService.getCurrentFilterCategories();
-    const savedCategoryId = this.entityFilterService.getCurrentSelectedCategoryId();
-    if (!savedCategoryId || savedCategoryId === 'selected') {
-      this.selectedCategoryIndex = 0;
-    } else {
-      const index = this.categories.findIndex(cat => cat.id === savedCategoryId);
-      this.selectedCategoryIndex = index !== -1 ? index : 0;
-    }
+    this.categories = this.app_service.configData().settings.entityfilterCategories;
+    const savedCategoryId = this.app_service.configData().settings.selectedEntityCategoryId;
+    this.selectedCategoryId = savedCategoryId && savedCategoryId !== 'selected'
+      ? savedCategoryId
+      : this.categories[0]?.id || '';
   }
   ngAfterViewInit() {
     setTimeout(() => this.updateFadeVisibility(), 300);
   }
-
+  initializeFilterCategories(defaultCategories: FilterCategory[]): void {
+    const currentCategories = this.app_service.configData().settings.entityfilterCategories;
+    if (!currentCategories || currentCategories.length === 0) {
+      this.app_service.set('entityfilterCategories', defaultCategories);
+    }
+  }
 
   scrollLeft() {
     this.categoryScroll.nativeElement.scrollBy({ left: -150, behavior: 'smooth' });
@@ -105,34 +103,37 @@ export class SearchFiltersComponent implements AfterViewInit, OnInit {
   }
 
   private updateService() {
-    this.entityFilterService.updateFilterCategories(this.categories);
-    this.entityFilterService.updateSelectedCategoryId(this.selectedCategory.id);
+    this.app_service.set('entityfilterCategories', this.categories);
+    this.app_service.set('selectedEntityCategoryId', this.selectedCategory.id);
   }
 
   toggleExpand() {
-    this.iocExpanded = !this.iocExpanded;
-    this.settingsService.set('iocExpanded', this.iocExpanded);
+    this.app_service.set('iocExpanded', !this.app_service.configData().settings.iocExpanded);
   }
-
+  onEntityFilterToggle(newValue: boolean): void {
+    this.app_service.set('entityFilterCondition', newValue);
+  }
   hasAnyTags(): boolean {
     return this.categories.some(category => category.tags.length > 0);
   }
 
-  onCategoryClick(index: number, categoryId: string): void {
-    this.selectedCategoryIndex = index;
-    this.entityFilterService.updateSelectedCategoryId(categoryId);
+  onCategoryClick(categoryId: string): void {
+    this.selectedCategoryId = categoryId;
+    this.app_service.set('selectedEntityCategoryId', categoryId);
   }
   searchFilterCategories(query: string): FilterCategory[] {
     if (query === '') {
       return this.categories;
-    }
-    else {
+    } else {
       const filtered = this.categories.filter(category =>
         category.name.toLowerCase().includes(query)
       );
-      if (filtered.length > 0)
-        this.selectedCategoryIndex = 0;
-      else this.selectedCategoryIndex = -1;
+
+      if (filtered.length > 0 && !filtered.some(cat => cat.id === this.selectedCategoryId)) {
+        this.selectedCategoryId = filtered[0].id;
+        this.app_service.set('selectedEntityCategoryId', filtered[0].id);
+      }
+
       return filtered;
     }
   };

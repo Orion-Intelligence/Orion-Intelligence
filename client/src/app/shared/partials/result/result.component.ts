@@ -21,7 +21,6 @@ import { AppService } from '../../../services/core/app.service';
 import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/search-filters.component";
 import { searchFilterAnimation } from '../../animations/search.filter.animation';
 import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
-import { SettingsService } from '../../../services/settings/settings.service';
 
 @Component({
   selector: 'app-result',
@@ -59,7 +58,6 @@ export class ResultComponent implements OnInit, OnChanges {
   result_triggered = false
   SortType = SortType;
   selectedSortBy: SortType = SortType.DEFAULT;
-  advanceSettingToggle: boolean = true;
 
   local_query = ""
   selectedSearchBy = 'Match any term';
@@ -71,7 +69,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
-  constructor(public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute, private settingsService: SettingsService) {
+  constructor(public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -117,7 +115,6 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true
     }
-    this.advanceSettingToggle = this.settingsService.get('advanceSettingToggle', true) ?? true;
   }
   searchFiltersChanged() {
     this.applyFilters(this.selectedFilters)
@@ -203,8 +200,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onAdvanceSettingToggle() {
-    this.advanceSettingToggle = !this.advanceSettingToggle;
-    this.settingsService.set('advanceSettingToggle', this.advanceSettingToggle);
+    this.app_service.set('advance_setting_toggle', !this.app_service.configData().settings.advance_setting_toggle);
     this.showFiltersOverlay = true;
   }
 

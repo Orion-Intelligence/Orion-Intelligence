@@ -1,8 +1,7 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NgFor, NgIf, CommonModule } from '@angular/common';
 import { FilterCategory, FilterModel, FilterOption } from '../../../shared/model/filter/filter.model';
-import { EntityFilterService } from '../../../services/entityFilter/entity.filter.service';
-import { Subscription } from 'rxjs';
+import { AppService } from '../../../services/core/app.service';
 
 
 @Component({
@@ -11,7 +10,6 @@ import { Subscription } from 'rxjs';
   templateUrl: './selected-filter-bar.component.html'
 })
 export class SelectedFilterBarComponent implements OnInit {
-  private subscriptions: Subscription[] = [];
 
   @Input() filterModel!: FilterModel;
   @Input() showSorting!: boolean;
@@ -25,14 +23,10 @@ export class SelectedFilterBarComponent implements OnInit {
   maxVisibleTags = 4;
   Object: any;
 
-  constructor(private entityFilterService: EntityFilterService) { }
+  constructor(private app_service: AppService) { }
 
   ngOnInit(): void {
-    this.subscriptions.push(
-      this.entityFilterService.filterCategories$.subscribe(categories => {
-        this.categories = categories;
-      })
-    );
+    this.categories = this.app_service.configData().settings.entityfilterCategories;
   }
 
 
@@ -53,7 +47,8 @@ export class SelectedFilterBarComponent implements OnInit {
     }
 
     if (scope === 'entity' || scope === 'all') {
-      this.entityFilterService.clearPersistedState();
+      // this._entityFilterService.clearPersistedState();
+      this.app_service.set('entityfilterCategories', []);
     }
 
     this.clearAll.emit();
@@ -64,8 +59,7 @@ export class SelectedFilterBarComponent implements OnInit {
 
 
   removeEntityTypeFilterTag(tagToRemoveId: string) {
-    const currentCategories = this.entityFilterService.getCurrentFilterCategories();
-
+    const currentCategories = this.app_service.configData().settings.entityfilterCategories;
     const updatedCategories = currentCategories.map(category => {
       const tagExists = category.tags.some(tag => tag.id === tagToRemoveId);
 
@@ -79,7 +73,7 @@ export class SelectedFilterBarComponent implements OnInit {
       return category;
     });
 
-    this.entityFilterService.updateFilterCategories(updatedCategories);
+    this.app_service.set('entityfilterCategories', updatedCategories);
     this.searchFiltersChange.emit();
   }
   getSelectedLabel(filterOption: FilterOption): string {
@@ -115,16 +109,17 @@ export class SelectedFilterBarComponent implements OnInit {
       .length;
   }
   entityFiltersCount(): number {
-    return this.categories?.reduce((total, category) => total + category.tags.length, 0) ?? 0;
+    return this.app_service.configData().settings.entityfilterCategories?.reduce((total, category) => total + category.tags.length, 0) ?? 0;
+
   }
 
-  getVisibleTags(categories: { tags: any[] }[]): any[] {
-    const allTags = categories.flatMap(category => category.tags);
+  getVisibleTags(): any[] {
+    const allTags = this.app_service.configData().settings.entityfilterCategories.flatMap(category => category.tags);
     return allTags.slice(0, this.maxVisibleTags);
   }
 
-  getHiddenTagCount(categories: { tags: any[] }[]): number {
-    const totalTags = categories.reduce((acc, category) => acc + category.tags.length, 0);
+  getHiddenTagCount(): number {
+    const totalTags = this.app_service.configData().settings.entityfilterCategories.reduce((acc, category) => acc + category.tags.length, 0);
     const hidden = totalTags - this.maxVisibleTags;
     return hidden > 0 ? hidden : 0;
   }

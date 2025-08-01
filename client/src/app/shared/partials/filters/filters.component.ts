@@ -9,7 +9,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
 import { ActivatedRoute } from '@angular/router';
-import { SettingsService } from '../../../services/settings/settings.service';
+import { AppService } from '../../../services/core/app.service';
 
 @Component({
   selector: 'app-filters',
@@ -30,7 +30,7 @@ export class FiltersComponent implements OnInit {
   protected readonly Object = Object;
   protected readonly last = last;
 
-  constructor(private route: ActivatedRoute, private settingsService: SettingsService) {
+  constructor(private route: ActivatedRoute, private app_service: AppService) {
   }
 
   ngOnInit() {
@@ -112,10 +112,10 @@ export class FiltersComponent implements OnInit {
       return acc;
     }, {} as Record<string, { title: string; selected: string | string[] }>);
 
-    this.settingsService.set('sidebarFilters', filtersToSave);
+    this.app_service.set('sidebarFilters', filtersToSave);
   }
   private loadFiltersFromSettings() {
-    const saved = this.settingsService.get('sidebarFilters', {});
+    const saved = this.app_service.get('sidebarFilters', {});
     if (!saved) return;
 
     for (const key of Object.keys(this.filterModel.filters)) {

@@ -1,9 +1,9 @@
-import {FormsModule} from '@angular/forms';
-import {Component, Input, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {ConsolidatedCallbackModel} from '../../../../model/results/consolidated/consolidated.callback.model';
-import {UniqueLinkItem} from '../../../../model/homepage/consolidation_insights';
-import {DATA_SECTION_TEMPLATE, FIELDS_MAP} from '../../../../constants/shared-enums';
+import { FormsModule } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
+import { UniqueLinkItem } from '../../../../model/homepage/consolidation_insights';
+import { DATA_SECTION_TEMPLATE, FIELDS_MAP } from '../../../../constants/shared-enums';
 
 
 @Component({
@@ -72,13 +72,13 @@ export class ResultInsightsComponent implements OnInit {
 
   ngOnInit(): void {
     this.uniqueUrls = this.getUniqueLinks(this.consolidatedCallbackModel);
-    const {emails, names} = this.extractNamesAndEmails(this.consolidatedCallbackModel);
+    const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel);
     this.emails = emails;
     this.names = names;
-    this.keywordData.push({value: this.getTotalResultCount(this.consolidatedCallbackModel), label: 'Total Found'})
-    this.keywordData.push({value: this.emails.length + this.names.length, label: 'Documents'})
-    this.keywordData.push({value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel), label: 'Links'})
-    this.keywordData.push({value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages'})
+    this.keywordData.push({ value: this.getTotalResultCount(this.consolidatedCallbackModel), label: 'Total Found' })
+    this.keywordData.push({ value: this.emails.length + this.names.length, label: 'Documents' })
+    this.keywordData.push({ value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel), label: 'Links' })
+    this.keywordData.push({ value: this.getActiveModelCount(this.consolidatedCallbackModel), label: 'Pages' })
     this.getCoverageSummaryFromModels(this.consolidatedCallbackModel);
 
     const extractedData = this.extractMultipleFieldsFromResults(this.results, FIELDS_MAP);
@@ -155,7 +155,7 @@ export class ResultInsightsComponent implements OnInit {
     const addToMap = (url: string | undefined, title: string | undefined, date?: string) => {
       if (url && !linkMap.has(url)) {
         const status = this.getStatus(date);
-        linkMap.set(url, {url, title: title || 'Untitled', status});
+        linkMap.set(url, { url, title: title || 'Untitled', status });
       }
     };
 
@@ -290,10 +290,10 @@ export class ResultInsightsComponent implements OnInit {
     });
 
     this.coverageData = [
-      {value: total, label: 'Total', color: ''},
-      {value: active, label: 'Active', color: '#1ec773'},
-      {value: inactive, label: 'Inactive', color: '#e6534b'},
-      {value: seldom, label: 'Seldom', color: '#f08b36'}
+      { value: total, label: 'Total', color: '' },
+      { value: active, label: 'Active', color: '#1ec773' },
+      { value: inactive, label: 'Inactive', color: '#e6534b' },
+      { value: seldom, label: 'Seldom', color: '#f08b36' }
     ];
   }
 
@@ -361,7 +361,6 @@ export class ResultInsightsComponent implements OnInit {
 
             if (Array.isArray(value)) {
               for (const v of value) {
-                // noinspection SuspiciousTypeOfGuard
                 if (typeof v === 'string' && v.trim()) {
                   resultMap[categoryKey].add(v);
                 }
