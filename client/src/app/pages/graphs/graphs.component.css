@@ -1,24 +1,24 @@
-.graph-container {
+.graph_container {
   width: 100vw;
   height: 100vh;
   padding-left: 251px;
   background-color: #051320;
 }
 
-.graph-container-empty {
+.graph_container-empty {
   height: 90vh;
   position: absolute;
   top: 35%;
   left: 45%;
 }
 
-.graph-notification {
+.graph_notification {
   position: absolute;
   top: 0;
   left: 300px
 }
 
-.graph-context-menu {
+.graph_context-menu {
   position: absolute;
   display: none;
   background: #fff;
@@ -31,43 +31,43 @@
   width: 160px;
 }
 
-.graph-context-menu .dropdown-divider {
+.graph_context-menu .dropdown-divider {
   padding: 0;
   margin: 0;
 }
 
-.graph-context-menu .dropdown-item {
+.graph_context-menu .dropdown-item {
   padding-left: 10px !important;
 }
 
-.graph-context-menu .dropdown-item img {
+.graph_context-menu .dropdown-item img {
   opacity: 0.4;
   margin-right: 15px !important;
 }
 
-.graph-button-content {
+.graph_button-content {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
   text-align: left;
   padding: 8px 12px 8px 15px;
-  color: #000 !important;
+  color: #000;
 }
 
-.graph-button-content:focus {
+.graph_button-content:focus {
   outline: none;
   box-shadow: none;
 }
 
-.graph-button-content:focus,
-.graph-button-content:active {
+.graph_button-content:focus,
+.graph_button-content:active {
   outline: none;
   box-shadow: none;
   background-color: transparent;
 }
 
-.graph-share-wrapper {
+.graph_share-wrapper {
   position: relative;
 }
 

@@ -1,13 +1,13 @@
-.search__result-detail-section-content {
+.result-list_section-content {
   padding: 10px 15px 5px 0;
   border-top: 10px;
 }
 
-.search__result-detail-section-content .row {
+.result-list_section-content .row {
   padding: 10px 0;
 }
 
-.search__result-detail-section-content .grid-list {
+.result-list_section-content .grid-list {
   display: grid;
   width: 100%;
   grid-template-columns: repeat(3, 1fr);
@@ -17,13 +17,13 @@
   margin: 0;
 }
 
-.search__result-detail-section-content .border-bottom-background {
+.result-list_section-content .border-bottom-background {
   border-color: #ffffff15 !important;
   padding-left: 30px;
   padding-right: 30px;
 }
 
-.search__result-detail-section-content li {
+.result-list_section-content li {
   padding: 8px 8px 0;
   font-size: 12px;
   font-weight: 400;
@@ -32,25 +32,25 @@
   align-items: center;
 }
 
-.search__result-detail-item-number {
+.result-list_result-detail-item-number {
   font-weight: 500;
   margin-right: 5px;
   color: #fff;
 }
 
 @media (width <= 768px) {
-  .search__result-detail-section-content .grid-list {
+  .result-list_section-content .grid-list {
     grid-template-columns: repeat(1, 1fr);
   }
 }
 
-.search__result-detail-copy-item {
+.result-list_-detail-copy-item {
   position: relative;
   cursor: pointer;
   display: inline-block;
 }
 
-.search__result-detail-copy-item .item-text {
+.result-list_-detail-copy-item .item-text {
   text-decoration: none;
   position: relative;
   display: inline-flex;
@@ -58,12 +58,27 @@
   transition: text-decoration 0.2s ease, color 0.2s ease;
 }
 
-.search__result-detail-copy-item:hover .item-text {
+.result-list_-detail-copy-item:hover .item-text {
   text-decoration: underline;
 }
 
-.search__result-detail-copy-item:hover .copy-icon {
+.result-list_-detail-copy-item:hover .copy-icon {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.result-list_section-content p {
+  font-size: 14px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.result-list_section-content h3 {
+  font-size: 14px;
+  color: #A0B8D1;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  margin-top: 20px;
+  margin-bottom: 5px;
 }

@@ -1,4 +1,11 @@
-import {Component, HostListener, OnInit, signal} from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  signal
+} from '@angular/core';
 import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
 import {AuthService} from '../../../services/authetication/auth.service';
 import {Observable} from 'rxjs';
@@ -15,12 +22,17 @@ import {TooltipDirective} from '../../directive/tooltip-directive.directive';
   ],
   templateUrl: './profile.component.html'
 })
-export class ProfileComponent implements OnInit{
+export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   username$: Observable<string | null>;
   role$: Observable<string | null>;
 
   dropdownOpen = signal(false);
   isDarkTheme = true;
+
+  private scrollContainer: HTMLElement | null = null;
+  private scrollHandler = () => {
+    this.dropdownOpen.set(false);
+  };
 
   constructor(protected authService: AuthService) {
     this.username$ = this.authService.getUsername$();
@@ -37,6 +49,19 @@ export class ProfileComponent implements OnInit{
     this.applyTheme();
   }
 
+  ngAfterViewInit(): void {
+    this.scrollContainer = document.getElementById('dashboard-container');
+    if (this.scrollContainer) {
+      this.scrollContainer.addEventListener('scroll', this.scrollHandler, {passive: true});
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.scrollContainer) {
+      this.scrollContainer.removeEventListener('scroll', this.scrollHandler);
+    }
+  }
+
   toggleThemeByClick() {
     this.isDarkTheme = !this.isDarkTheme;
     const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';
@@ -48,7 +73,6 @@ export class ProfileComponent implements OnInit{
     const body = document.body;
     body.classList.remove('light-theme', 'dark-theme');
     body.classList.add(this.isDarkTheme ? 'dark-theme' : 'light-theme');
-    this.dropdownOpen.set(false);
   }
 
   isAdmin(): boolean {
@@ -58,7 +82,7 @@ export class ProfileComponent implements OnInit{
 
   toggleDropdown(event: Event) {
     event.stopPropagation();
-    this.dropdownOpen.set(true);
+    this.dropdownOpen.update(v => !v);
   }
 
   logout() {

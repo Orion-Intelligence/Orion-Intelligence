@@ -1,8 +1,8 @@
-<ng-container class="graph-listing-container" *ngIf="showResults">
+<ng-container class="graph-listing_container" *ngIf="showResults">
   <br>
-  <div (click)="toggleCollapse()" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
-    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Listings</span> <img [class.rotate]="collapseToggle" alt="" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+  <div (click)="toggleCollapse()" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
+    <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
+      <span>Listings</span> <img [class.rotate]="collapseToggle" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
     </div>
     <div (click)="$event.stopPropagation()" [class.show]="collapseToggle" class="collapse" id="detailsCollapse">
       <br>
@@ -22,13 +22,13 @@
         <ng-container *ngFor="let doc of onSearchClick(); let last = last">
           <div class="doc-item">
             <div (click)="viewReport(doc.m_document_id, doc.path)" class="left">
-              <div class="graph-listing-doc-line">
-                <span class="graph-listing-doc-id">{{ doc.m_document_id }}</span>
+              <div class="graph-listing_doc-line">
+                <span class="graph-listing_doc-id">{{ doc.m_document_id }}</span>
               </div>
-              <div class="graph-listing-doc-title">
+              <div class="graph-listing_doc-title">
                 {{ formatPropertyName(doc.property) }}
               </div>
-              <div class="graph-listing-doc-cluster">
+              <div class="graph-listing_doc-cluster">
                 Value: {{ doc.value }}
               </div>
             </div>
@@ -40,7 +40,7 @@
       <ng-template #noResults>
         <div class="text-muted opacity-70">No results found.</div>
       </ng-template>
-      <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="graph-filters-floating-copied">Copied!</span>
+      <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="graph-filters_floating-copied">Copied!</span>
     </div>
   </div>
 </ng-container>

@@ -1,15 +1,15 @@
-.graph-filters__container {
+.graph-filters_container {
   position: absolute;
   top: 20px;
   right: 20px;
   z-index: 10;
 }
 
-.graph-filters__listing-margin {
+.graph-filters_listing-margin {
   margin-right: 8px;
 }
 
-.graph-filters-floating-copied {
+.graph-filters_floating-copied {
   position: absolute;
   background-color: #f0f0f0;
   color: rgb(0 0 0);
@@ -19,7 +19,7 @@
   z-index: 1000;
 }
 
-.graph-filters__details {
+.graph-filters_details {
   width: 240px;
   color: #fff;
   background: #08203a;
@@ -29,11 +29,11 @@
   cursor: pointer;
 }
 
-.graph-pointer {
+.graph-filters-pointer {
   cursor: pointer;
 }
 
-.graph-filters__details-header {
+.graph-filters_details-header {
   font-family: Roboto, sans-serif;
   font-weight: 500;
   font-size: 16px;
@@ -42,7 +42,7 @@
   color: #359AFF;
 }
 
-.graph-detail-heading {
+.graph-filters_detail-heading {
   font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 14px;
@@ -51,7 +51,7 @@
   color: #D0D0D0;
 }
 
-.graph-detail-line {
+.graph-filters_detail-line {
   font-family: Roboto, sans-serif;
   font-weight: bold;
   font-size: 15px;
@@ -62,28 +62,28 @@
   text-overflow: ellipsis;
 }
 
-.graph-filters__container .chevron {
+.graph-filters_container .chevron {
   width: 16px;
   height: 16px;
 }
 
-.graph-filters__container .collapsed .chevron {
+.graph-filters_container .collapsed .chevron {
   transform: rotate(180deg);
 }
 
-.graph-filters__container .detail-section {
+.graph-filters_container .detail-section {
   margin-top: 8px;
 }
 
-.graph-filters__container .btn {
+.graph-filters_container .btn {
   height: 40px;
 }
 
-.graph-filters__container .btn-danger-graph {
+.graph-filters_container .btn-danger-graph {
   color: #fff;
 }
 
-.graph-filters__container {
+.graph-filters_container {
   color: #fff;
   max-height: 95vh !important;
   overflow-y: auto !important;
@@ -91,34 +91,34 @@
   scrollbar-color: #124b87 transparent;
 }
 
-.graph-filters__container::-webkit-scrollbar {
+.graph-filters_container::-webkit-scrollbar {
   width: 3px;
 }
 
-.graph-filters__container::-webkit-scrollbar-thumb {
+.graph-filters_container::-webkit-scrollbar-thumb {
   background-color: #124b87;
   border-radius: 50px;
 }
 
-.graph-filters__container::-webkit-scrollbar-track {
+.graph-filters_container::-webkit-scrollbar-track {
   background: transparent;
   border-radius: 50px;
 }
 
 @media (width <= 799px) {
-  .graph-filters__container {
+  .graph-filters_container {
     display: none;
   }
 }
 
-.graph-filters__container .chevron.rotate {
+.graph-filters_container .chevron.rotate {
   transform: rotate(180deg);
 }
 
-.graph-filters__container .group-expand {
+.graph-filters_container .group-expand {
   background: #bf80ff;
 }
 
-.graph-filters__container .group-collapse {
+.graph-filters_container .group-collapse {
   background: #fff;
 }

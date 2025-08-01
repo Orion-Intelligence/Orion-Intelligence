@@ -1,3 +1,36 @@
+.report-menu-option {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  background: var(--color-blue-750);
+  border: none !important;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.report-menu-option:hover {
+  background: var(--color-blue-650);
+}
+
+.report-menu-divider {
+  width: 1px;
+  background: #ffffff10;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.report-icon-top {
+  margin-top: 3px;
+}
+
+.report-menu-option-container {
+  border: 1px solid #ffffff15;
+  border-radius: 7px;
+  margin-right: 35px;
+  background: var(--color-blue-750);
+  margin-top: 20px;
+  overflow: hidden;
+}
+
 .search__result-detail {
   background-color: var(--color-blue-730);
   padding: 15px 19px;

@@ -1,33 +1,33 @@
 <app-report-header [csv_object]="{ m_url: defacementData?.m_url }"  [url]="defacementData?.m_url"></app-report-header>
 <div class="search__result-detail">
-  <div class="dashboard__defacement-detail-header-url">
+  <div class="report__defacement-detail-header-url">
     {{ defacementData?.m_url }}
   </div>
-  <div class="dashboard__defacement-detail-header-row">
-    <div class="dashboard__defacement-detail-header-items">
+  <div class="report__defacement-detail-header-row">
+    <div class="report__defacement-detail-header-items">
       <strong>Saved on:</strong>{{
         defacementData?.m_leak_date
           ? (defacementData?.m_leak_date | date: 'MMM d, y')
           : '-'
       }}
     </div>
-    <div class="dashboard__defacement-detail-header-items">
-      <strong>Defacer:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
+    <div class="report__defacement-detail-header-items">
+      <strong>Defacer:</strong><span class="report__defacement-truncate">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
     </div>
-    <div class="dashboard__defacement-detail-header-items">
-      <strong>Team:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_team }}</span>
+    <div class="report__defacement-detail-header-items">
+      <strong>Team:</strong><span class="report__defacement-truncate">{{ defacementData?.m_team }}</span>
     </div>
-    <div class="dashboard__defacement-detail-header-items">
-      <strong>Web Server:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
+    <div class="report__defacement-detail-header-items">
+      <strong>Web Server:</strong><span class="report__defacement-truncate">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
     </div>
-    <div class="dashboard__defacement-detail-header-items">
-      <strong>Breach:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_source_url  ? defacementData?.m_source_url : '-'}}</span>
+    <div class="report__defacement-detail-header-items">
+      <strong>Breach:</strong><span class="report__defacement-truncate">{{ defacementData?.m_source_url  ? defacementData?.m_source_url : '-'}}</span>
     </div>
-    <div class="dashboard__defacement-detail-header-items">
-      <strong>IP:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
+    <div class="report__defacement-detail-header-items">
+      <strong>IP:</strong><span class="report__defacement-truncate">{{ defacementData?.m_ip ? defacementData?.m_ip : '-' }}</span>
     </div>
-    <div class="dashboard__defacement-detail-header-items">
-      <strong>Location:</strong><span class="dashboard__defacement-truncate">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
+    <div class="report__defacement-detail-header-items">
+      <strong>Location:</strong><span class="report__defacement-truncate">{{ defacementData?.m_location ? defacementData?.m_location : '-' }}</span>
     </div>
   </div>
 </div>

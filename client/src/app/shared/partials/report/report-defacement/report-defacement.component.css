@@ -1,29 +1,29 @@
-.dashboard__defacement-detail-container {
+.report_defacement-detail-container {
   padding: 0;
   margin: 35px;
   color: white;
 }
 
-.dashboard__defacement-detail-header-row {
+.report__defacement-detail-header-row {
   display: flex;
   justify-content: space-between;
 }
 
-.dashboard__defacement-detail-header {
+.report__defacement-detail-header {
   border: 1px solid #FCFCFC12;
   border-radius: 8px;
   padding: 24px;
   background: #17406959;
 }
 
-.dashboard__defacement-detail-header-url {
+.report__defacement-detail-header-url {
   margin-bottom: 32px;
   font-size: 20px;
   font-weight: 500;
   color: #fff;
 }
 
-.dashboard__defacement-detail-header-items {
+.report__defacement-detail-header-items {
   display: grid;
   font-weight: 500;
   max-width: 300px;
@@ -32,25 +32,25 @@
   color: #fff;
 }
 
-.dashboard__defacement-truncate {
+.report__defacement-truncate {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   display: inline-block;
 }
 
-.dashboard__defacement-detail-header-items strong {
+.report__defacement-detail-header-items strong {
   font-weight: 400;
   font-size: 14px;
   color: #D0D0D0;
 }
 
 @media only screen and (width <= 1000px) {
-  .dashboard__defacement-detail-header-row {
+  .report__defacement-detail-header-row {
     display: grid;
   }
 
-  .dashboard__defacement-detail-header-items {
+  .report__defacement-detail-header-items {
     margin-bottom: 20px;
   }
 }

@@ -1,40 +1,40 @@
 <div class="position-fixed">
-  <div #networkContainer class="graph-container d-none d-md-block"></div>
+  <div #networkContainer class="graph_container d-none d-md-block"></div>
 
   <graph-sidebar (filtersApplied)="onSidebarApply($event)" class="d-none d-md-block"></graph-sidebar>
 
   <app-graph-info (expandToggled)="onExpandToggled($event)" (onResetAll)="onResetAll()" (physicsToggled)="onPhysicsToggled($event)" (ruleSetChange)="ruleSetChange($event)" [(ruleSet)]="ruleSet" [expandEnabledTemp]="expandEnabled" [physicsEnabled]=physicsEnabled [propertyType]="propertyType" [propertyValue]="propertyValue" [result]="flattenedDocuments" [selectedType]="selectedType" [singleInput]="singleInput" class="d-none d-md-block"></app-graph-info>
 
 
-  <div class="graph-context-menu" id="customContextMenu">
-    <button (click)="expandGroupNode()" class="dropdown-item graph-button-content">
-      <img alt="" class="graph-filters__listing-margin" height="15" src="assets/images/shared/expand.svg" width="15"> Expand
+  <div class="graph_context-menu" id="customContextMenu">
+    <button (click)="expandGroupNode()" class="dropdown-item graph_button-content">
+      <img alt="expand" class="graph-filters_listing-margin" height="15" src="assets/images/shared/expand.svg" width="15"> Expand
     </button>
 
     <hr class="dropdown-divider mx-3">
 
-    <button (click)="collapseGroupNode()" class="dropdown-item graph-button-content">
-      <img alt="" class="graph-filters__listing-margin" height="15" src="assets/images/shared/collapse.svg" width="15"> Collapse
+    <button (click)="collapseGroupNode()" class="dropdown-item graph_button-content">
+      <img alt="collapse" class="graph-filters_listing-margin" height="15" src="assets/images/shared/collapse.svg" width="15"> Collapse
     </button>
     <hr class="dropdown-divider mx-3">
 
-    <button (click)="openCTI()" class="dropdown-item graph-button-content">
-      <img alt="" class="graph-share-wrapper graph-filters__listing-margin" height="15" src="assets/images/shared/share-black.svg" width="15"> Open CTI
+    <button (click)="openCTI()" class="dropdown-item graph_button-content">
+      <img alt="share" class="graph_share-wrapper graph-filters_listing-margin" height="15" src="assets/images/shared/share-black.svg" width="15"> Open CTI
     </button>
     <hr class="dropdown-divider mx-3">
-    <button (click)="copyNodeLabel($event)" class="dropdown-item graph-button-content">
-      <img alt="" class="graph-share-wrapper graph-filters__listing-margin" height="15" src="assets/images/shared/label.svg" width="15"> Copy Label
+    <button (click)="copyNodeLabel($event)" class="dropdown-item graph_button-content">
+      <img alt="label" class="graph_share-wrapper graph-filters_listing-margin" height="15" src="assets/images/shared/label.svg" width="15"> Copy Label
     </button>
     <hr class="dropdown-divider mx-3">
-    <button (click)="viewReport()" class="dropdown-item graph-button-content">
-      <img alt="" class="graph-share-wrapper graph-filters__listing-margin" height="15" src="assets/images/shared/redirect-black.svg" width="15"> Open Report
+    <button (click)="viewReport()" class="dropdown-item graph_button-content">
+      <img alt="redirect" class="graph_share-wrapper graph-filters_listing-margin" height="15" src="assets/images/shared/redirect-black.svg" width="15"> Open Report
     </button>
 
   </div>
-  <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="graph-filters-floating-copied ">Copied!</span>
+  <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="graph-filters_floating-copied ">Copied!</span>
 
 
-  <div *ngIf="maxEdge>50" class="graph-notification">
+  <div *ngIf="maxEdge>50" class="graph_notification">
     <div class="default-notification-banner default-notification-banner-cti">
     <span>
       <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg">
@@ -45,7 +45,7 @@
     </div>
   </div>
 
-  <div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph-container-empty d-none d-md-block">
+  <div *ngIf="this.isEmpty" @fadeInDashboardItem class="graph_container-empty d-none d-md-block">
     <img *ngIf="loading" alt="No Data" class="img-fluid w-auto" src="assets/images/shared/cti-empty.svg"/> <img *ngIf="!loading" alt="No Data" class="graph-magnify-animation img-fluid w-auto" src="assets/images/shared/magnifying_search.svg"/>
   </div>
 

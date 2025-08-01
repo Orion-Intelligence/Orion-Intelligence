@@ -1,4 +1,4 @@
-.graph-listing-doc-id {
+.graph-listing_doc-id {
   font-size: 14px;
   opacity: 0.7;
   margin-bottom: 4px;
@@ -8,21 +8,21 @@
   text-overflow: ellipsis;
 }
 
-.graph-listing-doc-title {
+.graph-listing_doc-title {
   font-size: 12px;
   font-weight: 500;
   opacity: 1;
   margin-top: -10px;
 }
 
-.graph-listing-doc-cluster {
+.graph-listing_doc-cluster {
   font-size: 12px;
   font-weight: 500;
   opacity: 1;
   margin-top: 0;
 }
 
-.graph-listing-doc-line {
+.graph-listing_doc-line {
   display: flex;
   align-items: center;
   margin-bottom: 4px;
@@ -30,13 +30,13 @@
 
 /* Override */
 
-.graph-listing-container .divider {
+.graph-listing_container .divider {
   height: 1px;
   background-color: rgb(255 255 255 / 10%);
   margin: 12px 0;
 }
 
-.graph-listing-container .left {
+.graph-listing_container .left {
   display: flex;
   flex-direction: column;
 }

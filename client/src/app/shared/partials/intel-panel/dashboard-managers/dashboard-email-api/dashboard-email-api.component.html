@@ -25,26 +25,26 @@
 </form>
 
 <div class="search__result-detail">
-  <div class="dashboard__defacement-detail-header-url dashboard-header-header">
+  <div class="report__defacement-detail-header-url dashboard-header-header">
     {{ breachData?.m_url }}
   </div>
   <hr class="dashboard-header-divider" />
-  <div class="dashboard__defacement-detail-header-items mb-1 dashboard-header-label">
+  <div class="report__defacement-detail-header-items mb-1 dashboard-header-label">
     Content Type:
   </div>
   <span class="text-white">stolen</span>
 
-  <div class="dashboard__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+  <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
     Username:
   </div>
   <span class="text-white">{{ username }}</span>
 
-  <div class="dashboard__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+  <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
     Email Address:
   </div>
   <span class="text-white">{{ email && email.trim() !== '' ? email : 'not found' }}</span>
 
-  <div class="dashboard__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">
+  <div class="report__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">
     Breaches:
   </div>
   <span *ngFor="let item of breachData?.m_dumplink" class="badge-red">{{ item }}</span><

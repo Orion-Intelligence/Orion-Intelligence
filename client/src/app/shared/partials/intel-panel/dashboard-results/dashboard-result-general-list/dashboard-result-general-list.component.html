@@ -41,7 +41,7 @@
       </ng-container>
       </tbody>
     </table>
-    <div class="see-more-wrapper see-more-button" *ngIf="isExpandAble && searchResults.length > 2">
+    <div class="see-more-wrapper list__container-more" *ngIf="isExpandAble && searchResults.length > 2">
       <span class="see-more" (click)="isCollapsed = !isCollapsed">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
     </div>
 

@@ -1,62 +1,62 @@
-<div class="graph-filters__container">
-  <div (click)="toggleAnimation()" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+<div class="graph-filters_container">
+  <div (click)="toggleAnimation()" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="analytics d-flex align-items-center gap-2">
       <input [checked]="physicsEnabled " class="pe-none" id="switch" type="checkbox"> <label class="mb-0 pe-none" for="switch"></label> <span>&nbsp; Toggle Physics</span>
     </div>
   </div>
   <br>
 
-  <div (click)="toggleExpand()" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
+  <div (click)="toggleExpand()" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="analytics d-flex align-items-center gap-2">
       <input [checked]="expandEnabled && expandEnabledTemp" class="pe-none" id="switchExpand" type="checkbox"> <label class="mb-0 pe-none" for="switchExpand"></label> <span>&nbsp; Expand</span>
     </div>
   </div>
   <br>
 
-  <div (click)="toggleCollapse('details')" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
-    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Details</span> <img [class.rotate]="detailsOpen" alt="" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+  <div (click)="toggleCollapse('details')" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
+    <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
+      <span>Details</span> <img [class.rotate]="detailsOpen" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
     </div>
     <div [class.show]="detailsOpen" class="collapse" id="detailsCollapse">
       <br>
       <ng-container *ngIf="selectedType === 'all'">
         <div class="detail-section">
-          <div class="graph-detail-heading">{{ "Data Point Type" | titlecase }}</div>
-          <div class="graph-detail-line">{{ 'no filter' | titlecase }}</div>
+          <div class="graph-filters_detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="graph-filters_detail-line">{{ 'no filter' | titlecase }}</div>
         </div>
       </ng-container>
 
       <ng-container *ngIf="selectedType === 'cluster' || selectedType === 'document'">
         <div class="detail-section">
-          <div class="graph-detail-heading">{{ "Data Point Type" | titlecase }}</div>
-          <div class="graph-detail-line">{{ selectedType | titlecase }}</div>
+          <div class="graph-filters_detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="graph-filters_detail-line">{{ selectedType | titlecase }}</div>
         </div>
         <div class="detail-section mt-4">
-          <div class="graph-detail-heading">{{ "Cluster Type" | titlecase }}</div>
-          <div class="graph-detail-line">{{ singleInput | titlecase }}</div>
+          <div class="graph-filters_detail-heading">{{ "Cluster Type" | titlecase }}</div>
+          <div class="graph-filters_detail-line">{{ singleInput | titlecase }}</div>
         </div>
       </ng-container>
 
       <ng-container *ngIf="selectedType === 'property'">
         <div class="detail-section">
-          <div class="graph-detail-heading">{{ "Data Point Type" | titlecase }}</div>
-          <div class="graph-detail-line">{{ selectedType | titlecase }}</div>
+          <div class="graph-filters_detail-heading">{{ "Data Point Type" | titlecase }}</div>
+          <div class="graph-filters_detail-line">{{ selectedType | titlecase }}</div>
         </div>
         <div class="detail-section mt-4">
-          <div class="graph-detail-heading">{{ "Property Type" | titlecase }}</div>
-          <div class="graph-detail-line">{{ formatPropertyName(propertyType) | titlecase }}</div>
+          <div class="graph-filters_detail-heading">{{ "Property Type" | titlecase }}</div>
+          <div class="graph-filters_detail-line">{{ formatPropertyName(propertyType) | titlecase }}</div>
         </div>
         <div class="detail-section mt-4">
-          <div class="graph-detail-heading">{{ "Property Value" | titlecase }}</div>
-          <div class="graph-detail-line">{{ (propertyValue || 'empty') | titlecase }}</div>
+          <div class="graph-filters_detail-heading">{{ "Property Value" | titlecase }}</div>
+          <div class="graph-filters_detail-line">{{ (propertyValue || 'empty') | titlecase }}</div>
         </div>
       </ng-container>
     </div>
   </div>
   <br>
-  <div (click)="toggleCollapse('indicators')" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
-    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Indicators</span> <img [class.rotate]="indicatorsOpen" alt="" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+  <div (click)="toggleCollapse('indicators')" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
+    <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
+      <span>Indicators</span> <img [class.rotate]="indicatorsOpen" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
     </div>
     <div [class.show]="indicatorsOpen" class="collapse" id="indicatorsCollapse">
       <br>
@@ -95,9 +95,9 @@
   <app-listings [result]="result"></app-listings>
 
   <br>
-  <div (click)="toggleCollapse('ruleset')" class="graph-filters__details graph-pointer cursor-pointer user-select-none">
-    <div class="graph-filters__details-header d-flex justify-content-between align-items-center">
-      <span>Preferences</span> <img [class.rotate]="rulesetOpen" alt="" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+  <div (click)="toggleCollapse('ruleset')" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
+    <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
+      <span>Preferences</span> <img [class.rotate]="rulesetOpen" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
     </div>
     <div (click)="$event.stopPropagation()" [class.show]="rulesetOpen" class="collapse" id="rulesetCollapse">
       <br>
