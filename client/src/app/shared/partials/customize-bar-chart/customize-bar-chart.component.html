@@ -1,34 +1,34 @@
-<div class="bar-chart-container">
-  <div class="bar-chart-statistics-text">
-    <span>Statistics</span> <img src="/assets/images/shared/info.svg" alt="info" class="bar-chart-info-icon" [appTooltip]="dashboardTooltips[graphModel.title!]"/>
+<div class="bar-chart_container">
+  <div class="bar-chart_statistics-text">
+    <span>Statistics</span> <img src="/assets/images/shared/info.svg" alt="info" class="bar-chart_info-icon" [appTooltip]="dashboardTooltips[graphModel.title!]"/>
   </div>
 
-  <div *ngIf="graphModel?.title" class="bar-chart-chart-title">
+  <div *ngIf="graphModel?.title" class="bar-chart_chart-title">
     {{ graphModel.title }}
   </div>
 
-  <div class="bar-chart-separator-line"></div>
+  <div class="bar-chart_separator-line"></div>
 
-  <div class="bar-chart-grid">
-    <div class="bar-chart-y-axis">
-      <div class="y-axis-step" *ngFor="let step of [4, 3, 2, 1, 0]">
+  <div class="bar-chart_grid">
+    <div class="bar-chart_y-axis">
+      <div *ngFor="let step of [4, 3, 2, 1, 0]">
         {{ round((step / 4) * roundedMaxValue).toLocaleString() }}
       </div>
     </div>
 
-    <div class="bar-chart-bar-area">
-      <div class="bar-chart-y-axis-gridlines">
+    <div class="bar-chart_bar-area">
+      <div class="bar-chart_y-axis-gridlines">
         <ng-container *ngFor="let step of [4, 3, 2, 1, 0]">
-          <div class="bar-chart-grid-line" [class.no-line]="step === 0"></div>
+          <div class="bar-chart_grid-line" [class.no-line]="step === 0"></div>
         </ng-container>
       </div>
 
-      <div class="bar-chart-bars">
-        <div class="bar-chart-bar-wrapper" *ngFor="let item of graphModel.data">
-          <div class="bar-chart-bar-container">
-            <div class="bar-chart-bar" [style.height.%]="(item.value / roundedMaxValue) * 100" [appTooltip]="item.name + ': ' + item.value.toLocaleString()" tooltipPosition="top"></div>
+      <div class="bar-chart_bars">
+        <div class="bar-chart_bar-wrapper" *ngFor="let item of graphModel.data">
+          <div class="bar-chart_bar-container">
+            <div class="bar-chart_bar" [style.height.%]="(item.value / roundedMaxValue) * 100" [appTooltip]="item.name + ': ' + item.value.toLocaleString()" tooltipPosition="top"></div>
           </div>
-          <div class="bar-chart-bar-label">
+          <div class="bar-chart_bar-label">
             {{ item.name.length > 10 ? (item.name | slice: 0:10) + '…' : item.name }}
           </div>
         </div>

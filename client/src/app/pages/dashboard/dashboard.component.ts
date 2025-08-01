@@ -1,6 +1,7 @@
 import {AfterViewInit, ChangeDetectorRef, Component} from '@angular/core';
 import {NgClass, NgIf} from '@angular/common';
 import {Router, RouterOutlet} from '@angular/router';
+import {dashboardGlobalAnimation} from '../../shared/animations/dashboard.global.animations';
 import {DashboardSidebarComponent} from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import {DashboardHeaderComponent} from '../../shared/partials/header/dashboard-header/dashboard-header.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
@@ -19,7 +20,8 @@ import {DashboardService} from '../../services/dashboard/dashboard.service';
     NgIf,
     ProSubscriptionComponent
   ],
-  templateUrl: './dashboard.component.html'
+  templateUrl: './dashboard.component.html',
+  animations: [dashboardGlobalAnimation]
 })
 export class DashboardComponent implements AfterViewInit {
   isMenuOpen = true;
