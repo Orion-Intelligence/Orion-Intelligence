@@ -6,7 +6,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { SearchFiltersComponent } from "../search-filters/search-filters.component";
 import { HomeInsightComponent } from "../home-insight/home-insight.component";
-import { SettingsService } from '../../../services/settings/settings.service';
+import { AppService } from '../../../services/core/app.service';
 
 @Component({
   selector: 'app-home-search',
@@ -18,14 +18,12 @@ export class HomeSearchComponent implements OnInit {
   searchQuery = '';
 
   showFiltersOverlay: boolean = false;
-  advanceSettingToggle: boolean = true;
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
-  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, private settingsService: SettingsService) {
+  constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService) {
   }
   ngOnInit(): void {
-    this.advanceSettingToggle = this.settingsService.get('advanceSettingToggle', true) ?? true;
   }
 
   onSearchSubmit(): void {
@@ -58,8 +56,7 @@ export class HomeSearchComponent implements OnInit {
     this.showFiltersOverlay = newValue;
   }
   onAdvanceSettingToggle() {
-    this.advanceSettingToggle = !this.advanceSettingToggle;
-    this.settingsService.set('advanceSettingToggle', this.advanceSettingToggle);
+    this.app_service.set('advance_setting_toggle', !this.app_service.configData().settings.advance_setting_toggle);
     this.showFiltersOverlay = true;
   }
 }

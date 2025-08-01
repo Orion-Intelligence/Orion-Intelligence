@@ -1,57 +1,52 @@
-.mt_40 {
+.filter-panel__top-space-expand {
     margin-top: 40px;
 }
 
-.mt_10 {
+.filter-panel__top-space-shrink {
     margin-top: 10px;
 }
 
 .filter-panel {
-    background-color: #172235;
+    background-color: #ffffff;
     border: 1px solid #FCFCFC12;
     border-radius: 16px;
-    padding: 24px 24px 8px;
+    padding: 24px 24px 8px 24px;
     font-family: Inter, sans-serif;
     color: white;
     width: 970px;
-    box-shadow: 0 9px 16px 0 rgb(0 0 0 / 25%);
     z-index: 1;
 }
 
-.filter-panel .top-row {
+.filter-panel__top-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.filter-panel .title {
+.filter-panel__title {
     font-size: 22px;
     font-weight: 500;
-    color: white;
+    color: #0E1626;
 }
 
-.filter-panel .actions {
+.filter-panel__actions {
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
-.filter-panel .clear-btn {
+.filter-panel__clear-btn {
     width: 118px;
     height: 32px;
-    border: 1px solid #57A5EB;
+    border: none;
     border-radius: 8px;
     background: none;
     color: #57A5EB;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-}
+    text-decoration: underline;
 
-.filter-panel .close-btn {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
 }
 
 .filter-panel__category-scroll-container {
@@ -60,21 +55,22 @@
     align-items: center;
     margin: 16px 0;
     overflow: hidden;
-    gap: 15px;
+    gap: 10px;
+    align-items: center;
 }
 
-.filter-panel .filter-panel__category-scroll-container::after {
+.filter-panel__category-scroll-container::after {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 0;
-    right: 0;
+    left: 0px;
+    right: 0px;
     height: 1px;
-    background-color: #FCFCFC12;
+    background-color: #A0B8D1;
     z-index: 1;
 }
 
-.filter-panel .filter-panel__category-scroll {
+.filter-panel__category-scroll {
     display: flex;
     gap: 16px;
     overflow: hidden;
@@ -82,18 +78,35 @@
     flex: 1;
 }
 
-.filter-panel .scroll-btn {
-    cursor: pointer;
-    padding-bottom: 5px;
+.filter-panel__scroll-btn {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
 }
 
-.filter-panel .show {
+.filter_panel__click-hitbox {
+    margin-bottom: 8px;
+    top: -10px;
+    left: -5px;
+    right: -10px;
+    bottom: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.filter-panel__show {
     z-index: 100;
 }
 
 
-.filter-panel .fade-left,
-.filter-panel .fade-right {
+.filter-panel__fade-left,
+.filter-panel__fade-right {
     position: absolute;
     top: 0;
     width: 100px;
@@ -102,17 +115,17 @@
     pointer-events: none;
 }
 
-.filter-panel .fade-left {
+.filter-panel__fade-left {
     left: 0;
-    background: linear-gradient(to right, #172235, transparent);
+    background: linear-gradient(to right, #ffffff, transparent);
 }
 
-.filter-panel .fade-right {
+.filter-panel__fade-right {
     right: 0;
-    background: linear-gradient(to left, #172235, transparent);
+    background: linear-gradient(to left, #ffffff, transparent);
 }
 
-.filter-panel .filter-panel__category-count {
+.filter-panel__category-count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -129,103 +142,95 @@
 
 
 
-.filter-panel .category-tab {
+.filter-panel__category-tab {
     display: flex;
     font-size: 14px;
     font-weight: 400;
-    color: #A0B8D1;
+    color: #172235;
     cursor: pointer;
     padding-bottom: 6px;
-    border-bottom: 1px solid transparent;
+    border-bottom: 3px solid transparent;
+
     white-space: nowrap;
     align-items: center;
 }
 
-.filter-panel .category-tab.selected {
-    color: white;
-    border-color: rgb(255 255 255);
+.filter-panel__category-tab.selected {
+    color: #0E1626;
+    border-color: #0E1626;
+    font-weight: 600;
 }
 
-.filter-panel .input-row {
+.filter-panel__input-row {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 16px;
 }
 
-.filter-panel .tag-input {
+.filter-panel__tag-input {
     width: 200px;
     height: 34px;
-    border: 1px solid white;
+    border: 1px solid #0E1626;
     border-radius: 5px;
     background: transparent;
-    color: white;
+    color: #172235;
     padding-left: 8px;
     font-size: 12px;
 }
 
-.filter-panel .tag-input::placeholder {
-    color: #A0B8D1;
+.filter-panel__tag-input::placeholder {
+    color: #172235;
     font-weight: 400;
     font-size: 12px;
 }
 
-.filter-panel .add-btn {
+.filter-panel__add-btn {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 1px solid #57A5EB;
-    background-color: #57A5EB33;
+    background-color: #0E1626;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
 }
 
-.filter-panel .add-btn:hover {
-    background-color: #57a6eb69;
+.filter-panel__add-btn:hover {
+    background-color: #0e1626b9;
 }
 
-.filter-panel .reset-selection {
-    margin-left: auto;
-    font-size: 12px;
-    font-weight: 500;
-    color: #57A5EB;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.filter-panel .selected-filters {
+.filter-panel__selected-filters {
     margin-top: 16px;
 }
 
-.filter-panel .section-title {
+.filter-panel__section-title {
     font-size: 14px;
     font-weight: 500;
-    color: #A0B8D1;
+    color: #57A5EB;
 }
 
-.filter-panel .tag-list {
+.filter-panel__tag-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 8px;
 }
 
-.filter-panel .filter-tag {
+.filter-panel__filter-tag {
     display: flex;
     align-items: center;
     background-color: #FCFCFC0D;
-    border: 1px solid #FCFCFC12;
+    border: 1px solid #A0B8D1;
     border-radius: 5px;
     height: 30px;
     padding: 0 10px;
     font-size: 12px;
     font-weight: 400;
-    color: white;
+    color: #0E1626;
 }
 
-.filter-panel .remove-x {
+.filter-panel__remove-x {
     margin-left: 8px;
     cursor: pointer;
     font-size: 12px;
@@ -233,55 +238,58 @@
     height: 7px;
 }
 
-.filter-panel .divider {
+.filter-panel__divider {
     margin: 12px 0;
     height: 1px;
-    background-color: #FCFCFC12;
+    background-color: #A0B8D1;
 }
 
-.filter-panel .expand-header {
+.filter-panel__expand-header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 8px;
 }
 
-.filter-panel .expand-label {
+.filter-panel__expand-label {
     font-size: 14px;
     font-weight: 500;
-    color: #A0B8D1;
+    color: #0E1626;
 }
 
-.filter-panel .expand-icon {
+.filter-panel__expand-icon {
     position: relative;
     display: inline-block;
     cursor: pointer;
 }
 
-.filter-panel .expand-icon::before {
+.filter-panel__expand-icon::before {
     content: "";
     position: absolute;
-    inset: -10px -15px;
+    top: -10px;
+    bottom: -10px;
+    left: -15px;
+    right: -15px;
     pointer-events: auto;
 }
 
-.filter-panel .expand-icon img {
+.filter-panel__expand-icon img {
     transition: transform 0.3s ease;
     transform: rotate(-90deg);
 }
 
-.filter-panel .expand-icon.expand img {
+.filter-panel__expand-icon.expand img {
     transform: rotate(0deg);
 }
 
-.filter-panel .summary-section {
+.filter-panel__summary-section {
     margin-top: 8px;
 }
 
-.filter-panel .summary-category {
+.filter-panel__summary-category {
     margin-bottom: 16px;
 }
 
-.filter-panel .category-title {
+.filter-panel__category-title {
     color: #57A5EB;
     font-size: 14px;
     font-weight: 500;
@@ -292,23 +300,23 @@ button:focus {
     outline: none;
 }
 
-.filter-panel .no-filters-text {
+.filter-panel__no-filters-text {
     font-size: 12px;
     margin-top: 6px;
     margin-bottom: 10px;
-    color: #A0B8D1;
+    color: #1722357d;
 }
 
-.filter-panel .entity-condition {
+.filter-panel__entity-condition {
     font-size: 12px;
     font-weight: 400;
-    color: #A0B8D1;
+    color: #0E1626;
     width: 80px;
     text-align: center;
     display: inline-block;
 }
 
-.filter-panel .toggle-switch {
+.filter-panel__toggle-switch {
     position: relative;
     display: inline-block;
     width: 26px;
@@ -317,22 +325,25 @@ button:focus {
     margin-left: auto;
 }
 
-.filter-panel .toggle-switch input {
+.filter-panel__toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.filter-panel .slider {
+.filter-panel__slider {
     position: absolute;
     cursor: pointer;
     background-color: #ccc;
     transition: 0.4s;
     border-radius: 24px;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
-.filter-panel .slider::before {
+.filter-panel__slider:before {
     content: "";
     position: absolute;
     height: 12px;
@@ -344,11 +355,11 @@ button:focus {
     top: 2px;
 }
 
-.filter-panel input:checked+.slider {
+.filter-panel input:checked+.filter-panel__slider {
     background-color: #57A5EB;
 }
 
-.filter-panel input:checked+.slider::before {
+.filter-panel input:checked+.filter-panel__slider:before {
     transform: translateX(10px);
 }
 
