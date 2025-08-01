@@ -4,13 +4,13 @@
   text-align: center;
 }
 
-.notice-container {
+.notice_container {
   background-image: url("/assets/images/shared/error-page.png");
   margin-left: -5px;
-  height: 100vh !important;
+  height: 100vh;
 }
 
-.notice__header-divider {
+.notice_header-divider {
   width: 150px;
   height: 5px;
   background-color: orange;
@@ -18,18 +18,18 @@
   margin-bottom: 5px;
 }
 
-.notice__action-button {
+.notice_action-button {
   margin-top: 10px;
   width: 300px
 }
 
-.notice__actions {
+.notice_actions {
   margin-top: 15px;
   margin-bottom: 15px;
-  margin-left: 20px !important;
+  margin-left: 20px;
 }
 
-.notice__actions .btn {
+.notice_actions .btn {
   margin-right: 10px;
 }
 
