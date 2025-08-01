@@ -32,8 +32,6 @@ export class DumpResolver implements Resolve<DumpCallbackModel> {
       httpParams = httpParams.set(key, validFilters[key]);
     }
 
-    this.dumpService.setSelectedFilters(validFilters);
-
     return this.apiService.get<DumpCallbackModel>('dumps', {
       params: httpParams
     }).pipe(tap((data) => this.dumpService.setDumpData(data)));

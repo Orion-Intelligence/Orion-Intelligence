@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {Router, NavigationEnd} from '@angular/router';
 import {filter} from 'rxjs/operators';
-import {Location} from '@angular/common';
 import {ScrollService} from '../../shared/services/scroll.service';
 
 @Injectable({
@@ -17,7 +16,7 @@ export class SelectionStoreService {
 
   first_trigger = true
 
-  constructor(private router: Router, private location: Location, private scroll_service: ScrollService) {
+  constructor(private router: Router, private scroll_service: ScrollService) {
     this.setInitialSelectionFromUrl(this.router.url);
 
     this.router.events

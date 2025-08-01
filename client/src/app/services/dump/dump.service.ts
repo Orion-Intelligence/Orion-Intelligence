@@ -12,7 +12,6 @@ export class DumpService {
   };
   private dumpDataSubject = new BehaviorSubject<DumpCallbackModel | null>(null);
   private currentPageSubject = new BehaviorSubject<number>(1);
-  private filters: Record<string, string> = {};
   private filterOpenSubject = new BehaviorSubject<boolean>(false);
 
   dumpData$ = this.dumpDataSubject.asObservable();
@@ -30,10 +29,6 @@ export class DumpService {
     this.apiService.get<DumpCallbackModel>('dumps', {params}).subscribe((data) => {
       this.dumpDataSubject.next(data);
     });
-  }
-
-  setSelectedFilters(filters: Record<string, string>) {
-    this.filters = filters;
   }
 
   setCurrentPage(page: number): void {
