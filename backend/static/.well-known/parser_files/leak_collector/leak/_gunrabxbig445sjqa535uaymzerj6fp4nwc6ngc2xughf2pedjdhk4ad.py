@@ -78,22 +78,19 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
             page.wait_for_selector(".tile", timeout=30000)
-            html = page.content()
-            soup = BeautifulSoup(html, "html.parser")
-
-            company_blocks = soup.select("div.tile")
+            company_blocks = page.query_selector_all("div.tile")
             title_links = []
 
             for block_index, block in enumerate(company_blocks, start=1):
-                title_el = block.select_one("strong > a")
-                title = title_el.text.strip() if title_el else None
-                dumplink = title_el["href"] if title_el and title_el.has_attr("href") else None
+                title_el = block.query_selector("strong > a")
+                title = title_el.inner_text().strip() if title_el else None
+                dumplink = title_el.get_attribute("href") if title_el else None
 
                 industry = location = weblink = None
 
-                info_divs = block.select("div")
+                info_divs = block.query_selector_all("div")
                 for div in info_divs:
-                    text = div.get_text(separator="|", strip=True)
+                    text = div.inner_text().strip()
                     parts = [part.strip() for part in text.split("|") if part.strip()]
                     for part in parts:
                         if part.lower().startswith("industry:"):
@@ -117,8 +114,10 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
                 })
 
             for title_data in title_links:
-
-                ref_html = helper_method.extract_refhtml(title_data["weblink"], self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                ref_html = helper_method.extract_refhtml(
+                    title_data["weblink"], self.invoke_db, REDIS_COMMANDS,
+                    CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS
+                )
 
                 card_data = leak_model(
                     m_ref_html=ref_html,
@@ -140,7 +139,7 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
                     m_country_name=title_data["location"],
                     m_company_name=title_data["title"],
                     m_industry=title_data["industry"],
-                    m_team = "qtox"
+                    m_team="qtox"
                 )
 
                 entity_data = helper_method.extract_entities(title_data["description"], entity_data)

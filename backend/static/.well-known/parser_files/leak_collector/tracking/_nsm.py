@@ -50,7 +50,7 @@ class _nsm(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.NEWS)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:

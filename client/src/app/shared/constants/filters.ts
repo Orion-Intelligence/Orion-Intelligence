@@ -91,6 +91,7 @@ export const directory_filters: FilterModel = {
         {key: "cryptocurrency", label: "Cryptocurrency"},
         {key: "leaks", label: "Leaks"},
         {key: "adult", label: "Adult"},
+        {key: "tracking", label: "Tracking"},
         {key: "chat", label: "Chat"},
         {key: "social", label: "Social"}
       ],

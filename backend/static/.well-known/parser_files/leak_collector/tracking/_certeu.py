@@ -7,7 +7,7 @@ from datetime import datetime
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -50,7 +50,7 @@ class _certeu(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(
-            m_fetch_proxy=FetchProxy.NONE,m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+            m_fetch_proxy=FetchProxy.NONE,m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -163,11 +163,9 @@ class _certeu(leak_extractor_interface, ABC):
 
                     content_elems = page.query_selector_all("main p, article p")
                     paragraphs = [p.inner_text().strip() for p in content_elems if p.inner_text().strip()]
-                    summary = " ".join(paragraphs[:2])
                     full_content = "\n".join(paragraphs)
 
                     leak_obj = leak_model(
-                        m_screenshot="",
                         m_title=title,
                         m_weblink=[url],
                         m_dumplink=[url],

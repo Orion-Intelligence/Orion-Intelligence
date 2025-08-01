@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -54,7 +54,7 @@ class _public_tableau(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_timeout= 157200, m_resoource_block=False, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_timeout= 157200, m_resoource_block=False, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -169,7 +169,6 @@ class _public_tableau(leak_extractor_interface, ABC):
                     m_section=content_parts,
                     m_url="https://public.tableau.com/views/DataBreachChronologyFeatures/ChronologyofDataBreaches?"+company_name,
                     m_base_url=self.base_url,
-                    m_screenshot="",
                     m_content=m_content + " " + self.base_url + " " + page.url,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=m_important,

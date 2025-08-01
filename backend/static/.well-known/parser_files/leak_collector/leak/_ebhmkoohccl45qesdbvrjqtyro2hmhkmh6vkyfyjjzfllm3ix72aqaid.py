@@ -2,8 +2,6 @@ import re
 from abc import ABC
 from typing import List
 from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -100,26 +98,30 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
 
             for block in advert_blocks:
                 try:
-                    soup = BeautifulSoup(block.inner_html(), 'html.parser')
+                    title_el = block.query_selector('div.advert_info_title')
+                    title = title_el.inner_text().strip() if title_el else "No Title"
 
-                    title = soup.select_one('div.advert_info_title').text.strip()
+                    content_el = block.query_selector('div.advert_info_p')
+                    content = content_el.inner_text().strip() if content_el else ""
 
-                    content = soup.select_one('div.advert_info_p').get_text(separator="\n", strip=True)
-
-                    web_url_element = soup.select_one('div.advert_info_p a')
-                    web_url = web_url_element['href'] if web_url_element else None
+                    web_url_el = content_el.query_selector('a') if content_el else None
+                    web_url = web_url_el.get_attribute('href') if web_url_el else None
 
                     image_urls = []
-                    for img in soup.select('div.advert_imgs_block img'):
-                        img_src = img.get('src')
-                        full_img_url = urljoin(self.base_url, img_src)
-                        image_urls.append(full_img_url)
+                    image_els = block.query_selector_all('div.advert_imgs_block img')
+                    for img_el in image_els:
+                        img_src = img_el.get_attribute('src')
+                        if img_src:
+                            full_img_url = urljoin(self.base_url, img_src)
+                            image_urls.append(full_img_url)
 
                     size = None
-                    info_code_div = soup.select_one('div.advert_info_code')
-                    if info_code_div:
-                        size_match = re.search(r'Size:\s*([\d.,]+\s*[A-Z]+)', info_code_div.text)
-                        size = size_match.group(1) if size_match else None
+                    info_code_el = block.query_selector('div.advert_info_code')
+                    if info_code_el:
+                        info_text = info_code_el.inner_text()
+                        size_match = re.search(r'Size:\s*([\d.,]+\s*[A-Z]+)', info_text)
+                        if size_match:
+                            size = size_match.group(1)
 
                     ref_html = helper_method.extract_refhtml(web_url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
@@ -139,7 +141,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_ip=[web_url],
+                        m_ip=[web_url] if web_url else [],
                         m_company_name=title,
                         m_team="interlock"
                     )
@@ -153,7 +155,6 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                     error_count += 1
                     if error_count >= 3:
                         break
-
 
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

@@ -2,10 +2,7 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup
 from playwright.sync_api import Page
-
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -59,7 +56,7 @@ class _cyber(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.NEWS)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -93,11 +90,11 @@ class _cyber(leak_extractor_interface, ABC):
         while True:
             current_url = f"{self.seed_url}?page={page_number}"
             page.goto(current_url, timeout=30000)
-            soup = BeautifulSoup(page.content(), "html.parser")
 
             post_links = []
-            for row in soup.select("div.views-row article.node a[href]"):
-                href = row.get("href")
+            rows = page.query_selector_all("div.views-row article.node a[href]")
+            for row in rows:
+                href = row.get_attribute("href")
                 if href:
                     full_url = urljoin(self.base_url, href)
                     post_links.append(full_url)
@@ -107,24 +104,23 @@ class _cyber(leak_extractor_interface, ABC):
 
             for url in post_links:
                 page.goto(url, timeout=30000)
-                post_soup = BeautifulSoup(page.content(), "html.parser")
 
-                title_tag = post_soup.select_one("h1.node__title")
-                title = title_tag.get_text(strip=True) if title_tag else "No title"
+                title_tag = page.query_selector("h1.node__title")
+                title = title_tag.inner_text().strip() if title_tag else "No title"
                 if title == "No title":
                     continue
 
-                date_tag = post_soup.select_one(".date-wrapper .published-on")
-                date_text = date_tag.get_text(strip=True).replace("Publish the", "").strip() if date_tag else ""
-                date_obj = datetime.strptime(date_text, "%d %B %Y")
+                date_tag = page.query_selector(".date-wrapper .published-on")
+                date_text = date_tag.inner_text().replace("Publish the", "").strip() if date_tag else ""
+                date_obj = datetime.strptime(date_text, "%d %B %Y") if date_text else None
 
-                desc_container = post_soup.select("div.text-riche p")
-                description = "\n".join(p.get_text(strip=True) for p in desc_container if p.get_text(strip=True))
-
+                desc_paragraphs = page.query_selector_all("div.text-riche p")
+                description = "\n".join(p.inner_text().strip() for p in desc_paragraphs if p.inner_text().strip())
 
                 dump_links = []
-                for link in post_soup.select("div.paragraph--type--bouton a.btn"):
-                    href = link.get("href")
+                link_elements = page.query_selector_all("div.paragraph--type--bouton a.btn")
+                for link in link_elements:
+                    href = link.get_attribute("href")
                     if href:
                         dump_links.append(urljoin(self.base_url, href))
 

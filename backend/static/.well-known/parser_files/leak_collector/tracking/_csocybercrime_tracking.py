@@ -14,12 +14,12 @@ from crawler.crawler_services.redis_manager.redis_controller import redis_contro
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _csocybercrime(leak_extractor_interface, ABC):
+class _csocybercrime_tracking(leak_extractor_interface, ABC):
     _instance = None
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
-            cls._instance = super(_csocybercrime, cls).__new__(cls)
+            cls._instance = super(_csocybercrime_tracking, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -54,7 +54,7 @@ class _csocybercrime(leak_extractor_interface, ABC):
             m_fetch_proxy=FetchProxy.NONE,
             m_fetch_config=FetchConfig.PLAYRIGHT,
             m_resoource_block=False,
-            m_threat_type=ThreatType.NEWS
+            m_threat_type=ThreatType.TRACKING
         )
 
     @property
@@ -89,12 +89,8 @@ class _csocybercrime(leak_extractor_interface, ABC):
 
         try:
             page.set_default_timeout(8000)
-            print("🔄 Opening:", self.seed_url)
             page.goto(self.seed_url, wait_until="commit", timeout=10000)
             time.sleep(3)
-            print("✅ Main page loaded")
-
-            print("🔍 Collecting article links...")
             selectors = [
                 "div.river-well.article h3 a",
                 "h3 a[href*='/article/']",
@@ -149,7 +145,6 @@ class _csocybercrime(leak_extractor_interface, ABC):
                     summary = "\n".join(content_text.split('\n')[:2])
 
                     card = leak_model(
-                        m_screenshot="",
                         m_title=title,
                         m_weblink=[link],
                         m_dumplink=[link],
@@ -158,27 +153,20 @@ class _csocybercrime(leak_extractor_interface, ABC):
                         m_content=summary,
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=f"{title}\n{content_text}",
-                        m_content_type=["news"],
+                        m_content_type=["news", "tracking"],
                         m_leak_date=article_date,
                     )
 
-                    entity = entity_model(
+                    entity_data = entity_model(
                         m_team="CSO Cybercrime Section",
                         m_country_name="united kingdom",
                     )
 
-                    print("\n📄 Extracted Article")
-                    print(f"🔗 URL: {link}")
-                    print(f"📰 Title: {title}")
-                    print(f"📅 Date: {article_date}")
-                    print(f"📍 Country: {entity.m_country_name}")
-                    print(f"🧠 Description:\n{summary}")
-                    print("-" * 80)
+                    entity_data = helper_method.extract_entities(summary, entity_data)
+                    self.append_leak_data(card, entity_data)
 
-                    self.append_leak_data(card, entity)
-
-                except Exception as e:
-                    print(f"⚠️ Error processing article: {e}")
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR: {ex} [{self.__class__.__name__}]")
                     continue
 
         except Exception as ex:

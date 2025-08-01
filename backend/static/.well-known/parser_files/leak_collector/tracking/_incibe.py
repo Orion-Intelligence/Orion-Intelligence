@@ -53,7 +53,7 @@ class _incibe(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.NEWS)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -128,7 +128,6 @@ class _incibe(leak_extractor_interface, ABC):
                     m_title=title,
                     m_url=url,
                     m_base_url=self.base_url,
-                    m_screenshot=helper_method.get_screenshot_base64(page, None, self.base_url),
                     m_content=content,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=important_content,

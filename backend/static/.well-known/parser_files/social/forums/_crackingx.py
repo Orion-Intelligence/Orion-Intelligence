@@ -365,7 +365,6 @@ class _crackingx(leak_extractor_interface, ABC):
 
             date_tag = page.locator("time.u-dt").first
             thread_dt = None
-            m_date = ""
 
             if date_tag.count() > 0:
                 datetime_attr = date_tag.get_attribute("datetime")
@@ -375,7 +374,6 @@ class _crackingx(leak_extractor_interface, ABC):
                 else:
                     date_text = date_tag.inner_text()
                     thread_dt = self.parse_date(date_text)
-                    m_date = date_text
 
             bb_wrappers = page.locator("div.bbWrapper")
             wrapper_count = bb_wrappers.count()

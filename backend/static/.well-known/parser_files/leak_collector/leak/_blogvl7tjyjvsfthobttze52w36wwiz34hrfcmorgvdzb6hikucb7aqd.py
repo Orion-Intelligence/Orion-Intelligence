@@ -90,47 +90,45 @@ class _blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd(leak_extractor_i
                 page.goto(url)
                 page.wait_for_load_state("networkidle")
 
-                soup = BeautifulSoup(page.content(), "html.parser")
+                title_tag = page.query_selector('h5.MuiTypography-root.MuiTypography-h5.MuiTypography-alignCenter.css-1pakh3q')
+                title = title_tag.inner_text().strip() if title_tag else "No Title"
 
-                title_tag = soup.find("h5",
-                                      class_="MuiTypography-root MuiTypography-h5 MuiTypography-alignCenter css-1pakh3q")
-                title = title_tag.text.strip() if title_tag else "No Title"
-
-                date_tag = soup.find("p",
-                                     class_="MuiTypography-root MuiTypography-body1 MuiTypography-alignCenter css-1oy63y8")
-                publication_date_raw = date_tag.text.strip() if date_tag else None
+                date_tag = page.query_selector('p.MuiTypography-root.MuiTypography-body1.MuiTypography-alignCenter.css-1oy63y8')
+                publication_date_raw = date_tag.inner_text().strip() if date_tag else None
 
                 publication_date = None
                 if publication_date_raw:
-                    publication_date = datetime.strptime(publication_date_raw.split(':')[-1].strip(), '%d.%m.%Y').date()
+                    try:
+                        publication_date = datetime.strptime(publication_date_raw.split(':')[-1].strip(), '%d.%m.%Y').date()
+                    except Exception:
+                        pass
 
-                image_divs = soup.find_all("div", class_="MuiBox-root css-85t6ji")
+                image_divs = page.query_selector_all('div.MuiBox-root.css-85t6ji')
                 image_urls = []
                 for div in image_divs:
-                    img_tag = div.find("img")
-                    if img_tag and img_tag.get("src"):
-                        image_urls.append(img_tag["src"])
+                    img_tag = div.query_selector("img")
+                    if img_tag and img_tag.get_attribute("src"):
+                        image_urls.append(img_tag.get_attribute("src"))
 
-                description_divs = soup.find_all("div", class_="css-1j63rwj")
+                description_divs = page.query_selector_all("div.css-1j63rwj")
                 descriptions = []
                 weblinks = []
                 revenues = []
 
                 for description_div in description_divs:
-                    p_tags = description_div.find_all("p")
+                    p_tags = description_div.query_selector_all("p")
                     desc_text = []
                     for p in p_tags:
-                        text = p.get_text(strip=True)
+                        text = p.inner_text().strip()
                         lower_text = text.lower()
 
                         if lower_text.startswith("website"):
-                            link_part = text[len("Website"):].lstrip(" :")
-                            links = [link.strip() for link in
-                                     link_part.replace(" / ", ",").replace(" /", ",").split(",") if link]
+                            link_part = text[len("website"):].lstrip(" :")
+                            links = [link.strip() for link in link_part.replace(" / ", ",").replace(" /", ",").split(",") if link]
                             weblinks.extend(links)
 
                         elif lower_text.startswith("revenue"):
-                            revenue_part = text[len("Revenue"):].lstrip(" :")
+                            revenue_part = text[len("revenue"):].lstrip(" :")
                             revenues.append(revenue_part)
 
                         else:
@@ -138,15 +136,15 @@ class _blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd(leak_extractor_i
                     descriptions.append("\n".join(desc_text))
 
                 dump_links = set()
-                dump_divs = soup.find_all("div", class_="MuiBox-root css-0")
+                dump_divs = page.query_selector_all('div.MuiBox-root.css-0')
                 for dump_div in dump_divs:
-                    link_tag = dump_div.find("a")
-                    if link_tag and link_tag.get("href"):
-                        dump_links.add(link_tag.get("href"))
+                    link_tag = dump_div.query_selector("a")
+                    if link_tag and link_tag.get_attribute("href"):
+                        dump_links.add(link_tag.get_attribute("href"))
                 dump_links = list(dump_links)
 
-                ref_html = helper_method.extract_refhtml(weblinks[0], self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
-                important_content = ast.literal_eval(f"{descriptions}")[0]
+                ref_html = helper_method.extract_refhtml(weblinks[0] if weblinks else title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                important_content = descriptions[0] if descriptions else ""
                 m_content = f"{descriptions} {revenues} {weblinks}"
 
                 card_data = leak_model(
@@ -162,7 +160,7 @@ class _blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd(leak_extractor_i
                     m_content_type=["leaks"],
                     m_leak_date=publication_date,
                     m_weblink=weblinks,
-                    m_revenue=f"{revenues}",
+                    m_revenue=str(revenues),
                 )
 
                 entity_data = entity_model(
