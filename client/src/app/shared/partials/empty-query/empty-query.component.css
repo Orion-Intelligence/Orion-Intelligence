@@ -1,4 +1,4 @@
-.no-result-container {
+.empty-query_container {
   background: var(--color-blue-790);
   width: calc(100% - 66px);
   height: calc(100vh - 66px);
@@ -15,11 +15,11 @@
   margin: 31px;
 }
 
-.no-result-container p {
+.empty-query_container p {
   margin: 0;
 }
 
-.no-result-container-header {
+.empty-query_container-header {
   padding-top: 10px;
   font-family: Inter, sans-serif;
   font-size: 20px;
@@ -27,7 +27,7 @@
   color: #fff;
 }
 
-.no-result-container-description {
+.empty-query_container-description {
   font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -35,7 +35,7 @@
 }
 
 @media only screen and (width <= 943px) {
-  .no-result-container {
+  .empty-query_container {
     padding: 15px;
     margin: 15px;
     width: calc(100% - 30px);
