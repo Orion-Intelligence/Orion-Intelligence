@@ -10,13 +10,13 @@
 }
 
 
-.header-logout {
+.header_logout {
   position: absolute;
   right: 8px;
   top: 0;
 }
 
-.header .logo-item {
+.header .header_logo-item {
   height: 60px;
   width: 80px;
   display: flex;
@@ -24,12 +24,12 @@
   justify-content: center;
 }
 
-.logo-item img {
+.header_logo-item img {
   max-height: 100%;
   width: auto;
 }
 
-.header__menu {
+.header_menu {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -37,28 +37,10 @@
   width: 100%;
 }
 
-.header__menu a img {
+.header_menu a img {
   max-height: 100%;
   width: auto;
   object-fit: contain;
-}
-
-.header_form {
-  display: none;
-}
-
-.header_form-user {
-  margin-top: 5px;
-  padding-right: 10px;
-  vertical-align: bottom;
-}
-
-.header_form-user--logout {
-  display: inline;
-}
-
-.header .dropdown-toggle::after {
-  display: none !important;
 }
 
 .header .dropdown-toggle::after {
@@ -75,34 +57,11 @@
   border: none;
 }
 
-.header_form-user--logout_icon {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-
-.header__menu {
+.header_menu {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 0 0 10px;
-}
-
-.header__menu-category svg {
-  fill: white;
-}
-
-.header__menu-category {
-  cursor: pointer;
-  font-size: 14px;
-  padding: 18px 20px 20px;
-}
-
-.header__menu-category:focus {
-  color: #8c8c8c;
-  text-decoration: none;
 }
 
 /* Override */

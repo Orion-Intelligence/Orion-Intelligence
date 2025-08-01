@@ -81,3 +81,34 @@
 .profile-header  .small-slider.round {
   border-radius: 12px;
 }
+
+.header_form-user--logout {
+  display: inline;
+}
+
+.header_form-user--logout_icon {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.header .dropdown-toggle::after {
+  display: none !important;
+}
+
+.header__menu-category svg {
+  fill: white;
+}
+
+.header__menu-category {
+  cursor: pointer;
+  font-size: 14px;
+  padding: 18px 20px 20px;
+}
+
+.header__menu-category:focus {
+  color: #8c8c8c;
+  text-decoration: none;
+}
+
