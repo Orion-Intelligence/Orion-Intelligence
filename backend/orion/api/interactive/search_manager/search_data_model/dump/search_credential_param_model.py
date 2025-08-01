@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class search_credential_param_model(BaseModel):
-    mDateRange: Optional[str] = ""
-    mURL: Optional[str] = ""
-    mUser: Optional[str] = ""
-    mFullSearch: Optional[bool] = False
+    daterange: Optional[str] = ""
+    url: Optional[str] = ""
+    user: Optional[str] = ""
+    fullsearch: Optional[bool] = False

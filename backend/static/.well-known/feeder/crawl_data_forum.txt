@@ -1,1 +1,4 @@
+{"file": "_b1nd", "url": "https://b1nd.net"}
+{"file": "_crackingx", "url": "https://crackingx.com"}
+{"file": "_hacksnation", "url": "https://hacksnation.com"}
 {"file": "_xreactor", "url": "https://xreactor.org"}

@@ -456,7 +456,9 @@ class elastic_request_generator:
         must_clauses = []
         must_not_clause = []
 
-        if m_search_type:
+        if m_search_type == "databases":
+            must_clauses.append({"term": {"m_content_type": "leaks"}})
+        else:
             must_clauses.append({"term": {"m_content_type": m_search_type}})
 
         if m_date_range:
@@ -669,9 +671,6 @@ class elastic_request_generator:
             "explain": True
         }
 
-        print("::::::::::::::::::::::::::::::::::::::::::::::::4", flush=True)
-        print(query_statement, flush=True)
-        print("::::::::::::::::::::::::::::::::::::::::::::::::4", flush=True)
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod
@@ -1113,9 +1112,6 @@ class elastic_request_generator:
             "explain": True
         }
 
-        print("::::::::::::::::::::::::::::::", flush=True)
-        print(query, flush=True)
-        print("::::::::::::::::::::::::::::::", flush=True)
         return ELASTIC_INDEX.S_SOCIAL_INDEX, query
 
     @staticmethod
@@ -1352,13 +1348,13 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model):
-        user_query = p_query_model.mUser.strip() if p_query_model.mUser and p_query_model.mUser != "*" else ""
-        url_query = p_query_model.mURL.strip() if p_query_model.mURL else ""
+        user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
+        url_query = p_query_model.url.strip() if p_query_model.url else ""
         url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
         date_range_filter = {}
 
-        if p_query_model.mDateRange:
-            start_date, end_date = [d.strip() for d in p_query_model.mDateRange.split(",")]
+        if p_query_model.daterange:
+            start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
             date_range_filter = {
                 "range": {
                     "timestamp": {
@@ -1371,7 +1367,7 @@ class elastic_request_generator:
         must_should = []
         should_clauses = []
 
-        if p_query_model.mFullSearch:
+        if p_query_model.fullsearch:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)

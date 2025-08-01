@@ -1,7 +1,6 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-from bs4 import BeautifulSoup
 from playwright.sync_api import Page
 from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
@@ -28,7 +27,6 @@ class _csocybercrime(leak_extractor_interface, ABC):
         self.callback = callback
         self._card_data = []
         self._entity_data = []
-        self.soup = None
         self._redis_instance = redis_controller()
         self._is_crawled = False
         self._initialized = True
@@ -38,20 +36,24 @@ class _csocybercrime(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        # Starting URL for the CSO Cybercrime section (page 1)
         return "https://www.csoonline.com/uk/cybercrime/"
-
-    @property
-    def developer_signature(self) -> str:
-        return "name:signature"
 
     @property
     def base_url(self) -> str:
         return "https://www.csoonline.com"
 
     @property
+    def developer_signature(self) -> str:
+        return "Muhammad Abdullah:owGbwMvMwMEYdOzLoajv79gZTxskMWRU6bi8370/...===weDX"
+
+    @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.NEWS)
+        return RuleModel(
+            m_fetch_proxy=FetchProxy.NONE,
+            m_fetch_config=FetchConfig.PLAYRIGHT,
+            m_resoource_block=False,
+            m_threat_type=ThreatType.NEWS
+        )
 
     @property
     def card_data(self) -> List:
@@ -81,80 +83,88 @@ class _csocybercrime(leak_extractor_interface, ABC):
             self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-        self._is_crawled = False
-
-        page.add_init_script("""(() => {
-               window.addEventListener('DOMContentLoaded', () => {
-                   try {
-                       const modalBtn = document.querySelector("body > div.subscribers-modal-container.aae7b662c59641bfa43e91a5d7a53ef8 > div.subscribers-modal.aae7b662c59641bfa43e91a5d7a53ef8.subscribers-modal-bottom-left > div.subscribers-actions > button.secondary-action.subscribers-no-button");
-                       if (modalBtn) modalBtn.click();
-                   } catch (e) {}
-               });
-           })();""")
-
         all_links = set()
 
+        try:
+            selectors = [
+                "div.river-well.article h3 a",
+                "h3 a[href*='/article/']",
+                "a[href*='/cybercrime/']",
+                ".content-listing a"
+            ]
 
-        for page_num in range(1, 2):
-            page_url = self.seed_url.rstrip('/') + (f"/page/{page_num}/" if page_num > 1 else "")
-            page.goto(page_url, wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_load_state("networkidle")
+            for selector in selectors:
+                try:
+                    elements = page.query_selector_all(selector)
+                    if elements:
+                        for el in elements[:10]:
+                            href = el.get_attribute("href")
+                            if href and "/article/" in href:
+                                all_links.add(urljoin(self.base_url, href))
+                        if all_links:
+                            break
+                except:
+                    continue
 
-            soup = BeautifulSoup(page.content(), "html.parser")
-            for tag in soup.select("a[href*='/article/']"):
-                href = tag.get("href")
-                if href:
-                    full_url = href if href.startswith("http") else urljoin(self.base_url, href)
-                    if "/cybercrime/" in full_url or "/article/" in full_url:
-                        all_links.add(full_url)
+            if not all_links:
+                fallback_links = page.query_selector_all("a[href]")
+                for el in fallback_links:
+                    try:
+                        href = el.get_attribute("href")
+                        if href and "/article/" in href:
+                            all_links.add(urljoin(self.base_url, href))
+                    except:
+                        continue
 
-        for idx, link in enumerate(all_links, 1):
-            try:
-                page.goto(link, wait_until="domcontentloaded", timeout=60000)
-                page.wait_for_selector("article, div.article-body, div.content, section.article__body", timeout=10000)
+            for idx, link in enumerate(list(all_links), 1):
+                try:
+                    page.goto(link, wait_until="commit", timeout=8000)
 
-                soup = BeautifulSoup(page.content(), "html.parser")
-                title_tag = soup.select_one("h1")
-                title = title_tag.get_text(strip=True)
+                    title = "Untitled Article"
+                    h1 = page.query_selector("h1")
+                    if h1:
+                        title = h1.inner_text().strip() or title
 
-                content_tag = soup.select_one("article") or \
-                              soup.select_one("div.article-body") or \
-                              soup.select_one("div.content") or \
-                              soup.select_one("section.article__body")
+                    article_date = datetime.now().date()
 
-                full_text = ""
-                if content_tag:
-                    paragraphs = content_tag.find_all("p")
-                    if paragraphs:
-                        full_text = "\n".join(p.get_text(strip=True) for p in paragraphs)
+                    content_text = "No content found."
+                    paragraphs = page.query_selector_all("p")
+                    text_blocks = [
+                        p.inner_text().strip()
+                        for p in paragraphs[:3]
+                        if p.inner_text().strip() and len(p.inner_text()) > 20
+                    ]
+                    if text_blocks:
+                        content_text = "\n".join(text_blocks)
                     else:
-                        full_text = content_tag.get_text(separator="\n", strip=True)
+                        continue
 
-                lines = [line.strip() for line in full_text.splitlines() if line.strip()]
-                first_two_lines = "\n".join(lines[:2])
-                article_date = datetime.strptime(page.locator('div.card__info.card__info--light span').nth(0).text_content().strip(), '%b %d, %Y').date()
+                    summary = "\n".join(content_text.split('\n')[:2])
 
-                card_data = leak_model(
-                    m_screenshot="",
-                    m_title=title,
-                    m_weblink=[link],
-                    m_dumplink=[link],
-                    m_url=link,
-                    m_base_url=self.base_url,
-                    m_content=first_two_lines,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=f"{title}\n{full_text}",
-                    m_content_type=["news"],
-                    m_leak_date=article_date,
-                )
-                entity_data = entity_model(m_team="CSO Cybercrime Section")
+                    card = leak_model(
+                        m_title=title,
+                        m_weblink=[link],
+                        m_dumplink=[link],
+                        m_url=link,
+                        m_base_url=self.base_url,
+                        m_content=summary,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=f"{title}\n{content_text}",
+                        m_content_type=["news"],
+                        m_leak_date=article_date,
+                    )
 
-                self.append_leak_data(card_data, entity_data)
+                    entity_data = entity_model(
+                        m_team="CSO Cybercrime Section",
+                        m_country_name="united kingdom",
+                    )
 
-            except Exception as e:
-                log.g().e(e)
-                continue
+                    entity_data = helper_method.extract_entities(summary, entity_data)
+                    self.append_leak_data(card, entity_data)
 
-        self._is_crawled = True
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                    continue
 
-
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR: {ex} [{self.__class__.__name__}]")
