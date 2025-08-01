@@ -7,7 +7,7 @@ import {CommonModule} from '@angular/common';
   imports: [CommonModule],
   templateUrl: './json-viewer.component.html'
 })
-export class JsonViewerComponent {
+export class JsonViewerComponent implements OnInit{
   @Input() json: any;
   @Input() level = 0;
   @Input() parentPath = '';

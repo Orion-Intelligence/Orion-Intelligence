@@ -648,3 +648,36 @@ table a:visited {
   transition: 0.3s;
   border-radius: 50%;
 }
+
+.skeleton_shimmer {
+  position: relative;
+  background-color: var(--color-blue-770);
+  overflow: hidden;
+}
+
+.skeleton_shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: var(--color-blue-760);
+  animation: shimmer 1.2s infinite;
+}
+
+.shimmer-line {
+  height: 20px;
+  border-radius: 4px;
+  background-color: var(--color-blue-770);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}

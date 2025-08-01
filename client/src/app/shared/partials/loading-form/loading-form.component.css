@@ -1,15 +1,11 @@
-.skeleton-loader {
+.skeleton_loader {
   max-width: 850px;
   width: 100%;
   margin: 30px 15px 15px 30px;
   overflow: hidden;
 }
 
-.div-expand-hide {
-  visibility: hidden;
-}
-
-.frame {
+.skeleton_frame {
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -23,7 +19,7 @@
   margin-right: 50px;
 }
 
-.frame .div {
+.skeleton_frame .div {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -34,7 +30,7 @@
   flex: 0 0 auto;
 }
 
-.frame .div-2 {
+.skeleton_frame .div-2 {
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -42,7 +38,7 @@
   flex: 0 0 auto;
 }
 
-.frame .div-3 {
+.skeleton_frame .div-3 {
   position: relative;
   width: 85px;
   height: 24px;
@@ -50,13 +46,13 @@
   border-radius: 37px;
 }
 
-.frame .div-4 {
+.skeleton_frame .div-4 {
   position: relative;
   width: 10px;
   height: 10px;
 }
 
-.frame .div-5 {
+.skeleton_frame .div-5 {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -67,7 +63,7 @@
   flex: 0 0 auto;
 }
 
-.frame .frame-wrapper {
+.skeleton_frame .frame-wrapper {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -77,7 +73,7 @@
   flex: 0 0 auto;
 }
 
-.frame .div-6 {
+.skeleton_frame .div-6 {
   flex: 1;
   position: relative;
   height: 16px;
@@ -85,7 +81,7 @@
   border-radius: 37px;
 }
 
-.frame .div-7 {
+.skeleton_frame .div-7 {
   width: 788px;
   position: relative;
   max-width: 95%;
@@ -94,7 +90,7 @@
   border-radius: 37px;
 }
 
-.frame .div-8 {
+.skeleton_frame .div-8 {
   position: relative;
   width: 182px;
   height: 16px;
@@ -102,7 +98,7 @@
   border-radius: 37px;
 }
 
-.frame .div-9 {
+.skeleton_frame .div-9 {
   position: relative;
   align-self: stretch;
   width: 100%;
@@ -111,7 +107,7 @@
   border-radius: 37px;
 }
 
-.frame .div-10 {
+.skeleton_frame .div-10 {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -121,7 +117,7 @@
   flex: 0 0 auto;
 }
 
-.frame .div-11 {
+.skeleton_frame .div-11 {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
@@ -130,7 +126,7 @@
   flex: 0 0 auto;
 }
 
-.frame .div-12 {
+.skeleton_frame .div-12 {
   position: relative;
   width: 85px;
   height: 18px;
@@ -138,7 +134,7 @@
   border-radius: 37px;
 }
 
-.frame .div-13 {
+.skeleton_frame .div-13 {
   position: relative;
   width: 109px;
   height: 18px;
@@ -146,10 +142,29 @@
   border-radius: 37px;
 }
 
-.shimmer {
+.skeleton_shimmer {
   animation: shimmer 1.5s infinite linear;
   background: var(--color-blue-760);
   background-size: 200% 100%;
+}
+
+@media only screen and (width <= 943px) {
+  .skeleton_loader {
+    width: calc(100% - 30px);
+    margin-left: 15px;
+  }
+
+  .div-hide {
+    visibility: hidden;
+  }
+
+  .skeleton_frame {
+    margin-right: 3px !important;
+  }
+
+  .skeleton_frame .div-2 {
+    overflow: hidden;
+  }
 }
 
 @keyframes shimmer {
@@ -159,28 +174,5 @@
 
   100% {
     background-position: 200% 0;
-  }
-}
-
-@media only screen and (width <= 943px) {
-  .skeleton-loader {
-    width: calc(100% - 30px);
-    margin-left: 15px;
-  }
-
-  .div-hide {
-    visibility: hidden;
-  }
-
-  .frame {
-    margin-right: 3px !important;
-  }
-
-  .frame .div-2 {
-    overflow: hidden;
-  }
-
-  .div-expand-hide {
-    visibility: visible !important;
   }
 }

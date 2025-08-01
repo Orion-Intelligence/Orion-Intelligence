@@ -1,36 +1,36 @@
-<div class="pro-subscription-overlay">
-  <div class="pro-subscription-container" (click)="$event.stopPropagation()">
-    <div class="pro-subscription-left-section">
-      <div class="pro-subscription-feature-item">
+<div class="pro-subscription_overlay">
+  <div class="pro-subscription_container" (click)="$event.stopPropagation()">
+    <div class="pro-subscription_left-section">
+      <div class="pro-subscription_feature-item">
         <h3>Dark Web Scanning</h3>
         <p>Continuously monitor the dark web for leaked data tied to your identity, accounts, and sensitive assets.</p>
       </div>
 
-      <div class="pro-subscription-feature-item">
+      <div class="pro-subscription_feature-item">
         <h3>Identity Theft Alerts</h3>
         <p>Receive real-time alerts when your personal or business information is found on underground marketplaces.</p>
       </div>
 
-      <div class="pro-subscription-feature-item">
+      <div class="pro-subscription_feature-item">
         <h3>Credential Monitoring</h3>
         <p>Track exposure of usernames, passwords, and other credentials before they're used maliciously.</p>
       </div>
 
-      <div class="pro-subscription-total-due">
+      <div class="pro-subscription_total-due">
         <h3>Total Due</h3>
         <p>$59.99 <span class="per-year">/year</span></p>
       </div>
     </div>
 
-    <div class="pro-subscription-right-section">
+    <div class="pro-subscription_right-section">
       <h2>Upgrade to Dark Web Shield Pro</h2>
       <p>Gain continuous protection by monitoring the dark web for your compromised information and security breaches.
       </p>
 
-      <div class="pro-subscription-subscription-options">
-        <label class="pro-subscription-subscription-option">
+      <div class="pro-subscription_subscription-options">
+        <label class="pro-subscription_subscription-option">
           <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription" />
-          <div class="pro-subscription-option-content">
+          <div class="pro-subscription_option-content">
             <div class="radio-label">
               <h4>($8.99/month)</h4>
               <p>Billed annually at $130</p>
@@ -38,10 +38,10 @@
           </div>
         </label>
 
-        <label class="pro-subscription-subscription-option">
+        <label class="pro-subscription_subscription-option">
           <input type="radio" name="subscription" value="monthly-highlighted" [(ngModel)]="selectedSubscription"
             checked />
-          <div class="pro-subscription-option-content">
+          <div class="pro-subscription_option-content">
             <div class="radio-label">
               <h4>($8.99/month)</h4>
               <p>Billed annually at $130</p>
@@ -50,7 +50,7 @@
         </label>
       </div>
 
-      <form class="pro-subscription-payment-form" (ngSubmit)="submitForm()" #formRef="ngForm">
+      <form class="pro-subscription_payment-form" (ngSubmit)="submitForm()" #formRef="ngForm">
         <div class="form-row">
           <div class="form-group">
             <label for="name">Your Name</label>
@@ -67,8 +67,8 @@
           <input type="email" id="email" [(ngModel)]="userEmail" name="userEmail" required />
         </div>
 
-        <button type="submit" class="pro-subscription-btn-proceed" [disabled]="formRef.invalid">Proceed to Payment</button>
-        <button type="button" class="pro-subscription-btn-close" (click)="closePopup()">Close</button>
+        <button type="submit" class="pro-subscription_btn-proceed" [disabled]="formRef.invalid">Proceed to Payment</button>
+        <button type="button" class="pro-subscription_btn-close" (click)="closePopup()">Close</button>
       </form>
     </div>
   </div>

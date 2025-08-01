@@ -5,23 +5,23 @@
   color: rgb(211 211 211);
 }
 
-.json-tree__node {
+.json-tree_node {
   position: relative;
 }
 
-.json-tree__line {
+.json-tree_line {
   position: relative;
   margin-bottom: 4px;
   cursor: pointer;
 }
 
-.json-tree__line::before {
+.json-tree_line::before {
   position: absolute;
   left: 0;
   color: rgb(255 255 255 / 30%);
 }
 
-.json-tree__node--last .json-tree__line::before {
+.json-tree__node--last .json-tree_line::before {
   content: '';
   display: inline-block;
   width: 1px;
@@ -32,7 +32,7 @@
   vertical-align: top;
 }
 
-.json-tree__toggle {
+.json-tree_toggle {
   display: inline-block;
   width: 14px;
   text-align: center;
@@ -40,23 +40,23 @@
   margin-right: 4px;
 }
 
-.json-tree__toggle img {
+.json-tree_toggle img {
   width: 24px !important;
   height: 18px !important;
 }
 
-.json-tree__key {
+.json-tree_key {
   margin-left: 13px;
   cursor: pointer;
 }
 
-.json-tree__key--faded {
+.json-tree_key-faded {
   opacity: 0.6;
   font-family: Inter, sans-serif;
   color: #57A5EB;
 }
 
-.json-tree__value {
+.json-tree_value {
   font-family: Inter, sans-serif;
   color: rgb(211 211 211);
   font-size: 12px;
@@ -65,7 +65,7 @@
   align-items: center;
 }
 
-.json-tree__value::before {
+.json-tree_value::before {
   content: '';
   display: inline-block;
   width: 20px;
@@ -77,12 +77,12 @@
 }
 
 
-.json-tree__line--leaf {
+.json-tree_line-leaf {
   font-weight: normal;
 
 }
 
-.json-tree__children {
+.json-tree_children {
   margin-left: 0;
 }
 

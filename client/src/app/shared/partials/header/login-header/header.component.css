@@ -1,6 +1,6 @@
 .header {
   color: #000;
-  background: var(--color-blue-840) !important;
+  background: var(--color-blue-840);
   border-bottom-color: #092137BA;
   border-style: solid;
   border-width: 0 0 1px;

@@ -1,29 +1,24 @@
-<div (click)="toggleDropdown($event)" *ngIf="this.username$|async" class="profile-header header_form-user--logout">
-  <a appTooltip="This is a secure tooltip" class="profile-dropdown-toggle">
-    <div class="header__menu-category header_form-user--logout_icon light-header__menu-category--bold">
+<div *ngIf="this.username$|async" class="profile">
+  <a (click)="toggleDropdown($event)" appTooltip="This is a secure tooltip" class="profile-dropdown-toggle">
+    <div class="profile_category profile_logout_icon">
       <img alt="Logout" height="24" ngSrc="assets/images/shared/profile-icon.svg" priority width="24">
     </div>
   </a>
 
-  <ul [class.show]="dropdownOpen" class="profile-dropdown">
-    <div class="profile-dropdown-arrow"></div>
-    <li><a class="dropdown-item disabled"> <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15"/>{{ username$ | async }}</a></li>
-    <li class="dropdown-item dropdown-item-inline d-flex align-items-center disabled">
-      <span class="bg-success rounded-circle d-inline-block me-2 user-active"></span> &nbsp;&nbsp;active
+  <ul [class.show]="dropdownOpen()" class="profile-dropdown">
+    <li><a class="dropdown-item disabled"> <img alt="Settings" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15"/>{{ username$ | async }}</a></li>
+    <li class="dropdown-item d-flex align-items-center disabled">
+      <span class="bg-success rounded-circle d-inline-block me-2 profile_user-active"></span> &nbsp;&nbsp;active
     </li>
     <li>
       <hr class="dropdown-divider mx-3">
     </li>
     <li (click)="toggleThemeByClick()">
-      <div class="dropdown-item theme-toggle">
-        <img alt="Settings" class="dropdown-open-lift-icon" (click)="toggleThemeByClick()" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp; Theme &nbsp;
-        <label class="small-switch" (click)="toggleThemeByClick()">
-          <input type="checkbox" [checked]="isDarkTheme" (click)="toggleThemeByClick()"/>
-          <span class="small-slider round"></span>
-        </label>
+      <div class="dropdown-item profile_theme-toggle">
+        <img alt="Settings" (click)="toggleThemeByClick()" height="15" ngSrc="assets/images/shared/theme.svg" priority width="15"> &nbsp; Theme &nbsp; <label class="small-switch"> <span [class.active]="isDarkTheme" class="small-slider round"></span> </label>
       </div>
     </li>
-    <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank"> <img alt="Settings" class="dropdown-open-lift-icon" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp; Settings</a>
+    <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank"> <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp; Settings</a>
     </li>
     <li *ngIf="isAdmin()">
       <hr class="dropdown-divider mx-3">

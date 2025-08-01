@@ -1,4 +1,4 @@
-import {Component, HostListener} from '@angular/core';
+import {Component, HostListener, OnInit, signal} from '@angular/core';
 import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
 import {AuthService} from '../../../services/authetication/auth.service';
 import {Observable} from 'rxjs';
@@ -15,15 +15,26 @@ import {TooltipDirective} from '../../directive/tooltip-directive.directive';
   ],
   templateUrl: './profile.component.html'
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit{
   username$: Observable<string | null>;
   role$: Observable<string | null>;
-  dropdownOpen = false;
+
+  dropdownOpen = signal(false);
   isDarkTheme = true;
 
   constructor(protected authService: AuthService) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
+  }
+
+  ngOnInit(): void {
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'dark-theme') {
+      this.isDarkTheme = true;
+    } else if (storedTheme === 'light-theme') {
+      this.isDarkTheme = false;
+    }
+    this.applyTheme();
   }
 
   toggleThemeByClick() {
@@ -37,6 +48,7 @@ export class ProfileComponent {
     const body = document.body;
     body.classList.remove('light-theme', 'dark-theme');
     body.classList.add(this.isDarkTheme ? 'dark-theme' : 'light-theme');
+    this.dropdownOpen.set(false);
   }
 
   isAdmin(): boolean {
@@ -46,19 +58,19 @@ export class ProfileComponent {
 
   toggleDropdown(event: Event) {
     event.stopPropagation();
-    this.dropdownOpen = !this.dropdownOpen;
+    this.dropdownOpen.set(true);
   }
 
   logout() {
     this.authService.logout();
-    this.dropdownOpen = false;
+    this.dropdownOpen.set(false);
   }
 
   @HostListener('document:click', ['$event'])
   closeDropdown(event: Event) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.header_form-user--logout')) {
-      this.dropdownOpen = false;
+    if (!target.closest('.profile')) {
+      this.dropdownOpen.set(false);
     }
   }
 }

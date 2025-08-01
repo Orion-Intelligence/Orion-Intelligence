@@ -1,8 +1,8 @@
-.profile-header .profile-dropdown-toggle::after {
-  display: none !important;
+.profile-dropdown-toggle::after {
+  display: none;
 }
 
-.profile-header .profile-dropdown {
+.profile-dropdown {
   opacity: 0;
   background: #fff;
   padding: 10px 0;
@@ -22,40 +22,40 @@
   margin-right: 0;
 }
 
-.profile-header .profile-dropdown.show {
-  opacity: 1 !important;
-  visibility: visible !important;
+.profile-dropdown.show {
+  opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-.profile-header .header_form-user--logout:focus-within .profile-dropdown {
-  opacity: 1 !important;
-  visibility: visible !important;
+.profile:focus-within .profile-dropdown {
+  opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-.profile-header .profile-dropdown .dropdown-item {
+.profile-dropdown .dropdown-item {
   padding-left: 15px;
   padding-right: 40px;
 }
 
-.profile-header .profile-dropdown .dropdown-item:hover {
+.profile-dropdown .dropdown-item:hover {
   background: #cccccc50;
 }
 
-.profile-header .profile-dropdown .dropdown-item:active {
+.profile-dropdown .dropdown-item:active {
   background: #cccccc80;
   color: #000;
 }
 
-.profile-header .user-active {
+.profile_user-active {
   width: 10px;
   height: 10px;
 }
 
-.profile-header .profile-dropdown-arrow {
+.profile-dropdown-arrow {
   position: absolute;
   top: -10px;
   right: 15px;
@@ -66,49 +66,48 @@
   border-bottom: 10px solid white;
 }
 
-.theme-toggle {
+.profile_theme-toggle {
   font-size: 15px;
 }
 
-.profile-header  input:checked + .small-slider {
+.profile input:checked + .small-slider {
   background-color: #4667a0;
 }
 
-.profile-header  input:checked + .small-slider::before {
+.profile  input:checked + .small-slider::before {
   transform: translateX(12px);
 }
 
-.profile-header  .small-slider.round {
-  border-radius: 12px;
-}
-
-.header_form-user--logout {
+.profile {
   display: inline;
 }
 
-.header_form-user--logout_icon {
+.profile_logout_icon {
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
 }
 
-.header .dropdown-toggle::after {
-  display: none !important;
-}
-
-.header__menu-category svg {
+.profile_category svg {
   fill: white;
 }
 
-.header__menu-category {
+.profile_category {
   cursor: pointer;
   font-size: 14px;
   padding: 18px 20px 20px;
 }
 
-.header__menu-category:focus {
+.profile_category:focus {
   color: #8c8c8c;
   text-decoration: none;
 }
 
+.profile .small-switch{
+  margin: 0;
+}
+
+.profile .small-slider.active::before {
+  left: 15px;
+}

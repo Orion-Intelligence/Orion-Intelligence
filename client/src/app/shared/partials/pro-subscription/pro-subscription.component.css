@@ -1,4 +1,4 @@
-.pro-subscription-overlay {
+.pro-subscription_overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   overflow: auto;
 }
 
-.pro-subscription-container {
+.pro-subscription_container {
   display: flex;
   font-family: Arial, sans-serif;
   max-width: 892px;
@@ -24,20 +24,7 @@
   transform: translateY(-20%) !important;
 }
 
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-
-.pro-subscription-left-section {
+.pro-subscription_left-section {
   flex: 1;
   background-color: #ECF3F9;
   padding: 30px;
@@ -48,49 +35,49 @@
   justify-content: space-between;
 }
 
-.pro-subscription-left-section h2 {
+.pro-subscription_left-section h2 {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 25px;
   color: #000;
 }
 
-.pro-subscription-feature-item {
+.pro-subscription_feature-item {
   margin-bottom: 5px;
 }
 
-.pro-subscription-feature-item h3 {
+.pro-subscription_feature-item h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 4px;
   color: #165176;
 }
 
-.pro-subscription-feature-item p {
+.pro-subscription_feature-item p {
   font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
   color: #78A1BB;
 }
 
-.pro-subscription-total-due {
+.pro-subscription_total-due {
   margin-top: 0;
 }
 
-.pro-subscription-total-due h3 {
+.pro-subscription_total-due h3 {
   font-size: 15px;
   font-weight: 400;
   margin-bottom: 4px;
   color: #78A1BB;
 }
 
-.pro-subscription-total-due p {
+.pro-subscription_total-due p {
   font-size: 30px;
   font-weight: bold;
   color: #000;
 }
 
-.pro-subscription-total-due .per-year {
+.pro-subscription_total-due .per-year {
   font-size: 15px;
   font-weight: 400;
   padding-top: 10px;
@@ -98,7 +85,7 @@
   color: #000;
 }
 
-.pro-subscription-right-section {
+.pro-subscription_right-section {
   flex: 1.5;
   background-color: #fff;
   padding: 30px;
@@ -107,14 +94,14 @@
   gap: 15px;
 }
 
-.pro-subscription-right-section h2 {
+.pro-subscription_right-section h2 {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: -5px;
   color: #10182B;
 }
 
-.pro-subscription-right-section p {
+.pro-subscription_right-section p {
   font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
@@ -122,12 +109,12 @@
   color: #787878;
 }
 
-.pro-subscription-subscription-options {
+.pro-subscription_subscription-options {
   display: flex;
   gap: 30px;
 }
 
-.pro-subscription-subscription-option {
+.pro-subscription_subscription-option {
   flex: 1;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -142,18 +129,18 @@
   max-height: 65px;
 }
 
-.pro-subscription-subscription-option:hover {
+.pro-subscription_subscription-option:hover {
   border-color: #007bff;
 }
 
-.pro-subscription-subscription-option input[type="radio"] {
+.pro-subscription_subscription-option input[type="radio"] {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.pro-subscription-subscription-option input[type="radio"] + .pro-subscription-option-content::before {
+.pro-subscription_subscription-option input[type="radio"] + .pro-subscription_option-content::before {
   content: '';
   width: 16px;
   height: 16px;
@@ -163,58 +150,58 @@
   display: inline-block;
 }
 
-.pro-subscription-subscription-option input[type="radio"]:checked + .pro-subscription-option-content::before {
+.pro-subscription_subscription-option input[type="radio"]:checked + .pro-subscription_option-content::before {
   border-color: #007bff;
   background-color: #007bff;
   box-shadow: inset 0 0 0 3px #fff;
 }
 
-.pro-subscription-option-content h4 {
+.pro-subscription_option-content h4 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #000;
 }
 
-.pro-subscription-option-content p {
+.pro-subscription_option-content p {
   margin: 4px 0 0;
   font-size: 12px;
   font-weight: 600;
   color: #787878;
 }
 
-.pro-subscription-payment-form {
+.pro-subscription_payment-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.pro-subscription-overlay .form-row {
+.pro-subscription_overlay .form-row {
   display: flex;
   gap: 30px;
 }
 
-.pro-subscription-overlay .form-group {
+.pro-subscription_overlay .form-group {
   flex: 1;
   display: flex;
   flex-direction: column;
   margin-bottom: 0;
 }
 
-.pro-subscription-overlay .form-group.full-width {
+.pro-subscription_overlay .form-group.full-width {
   flex: none;
   width: 100%;
 }
 
-.pro-subscription-overlay .form-group label {
+.pro-subscription_overlay .form-group label {
   margin-bottom: 6px;
   font-weight: 500;
   color: #10182B;
   font-size: 12px;
 }
 
-.pro-subscription-overlay .form-group input[type="text"],
-.pro-subscription-overlay .form-group input[type="tel"] {
+.pro-subscription_overlay .form-group input[type="text"],
+.pro-subscription_overlay .form-group input[type="tel"] {
   max-width: 224px;
   max-height: 35px;
   padding: 10px 12px;
@@ -223,7 +210,7 @@
   font-size: 0.9em;
 }
 
-.pro-subscription-overlay .form-group input[type="email"] {
+.pro-subscription_overlay .form-group input[type="email"] {
   max-width: 478px;
   max-height: 35px;
   padding: 10px 12px;
@@ -232,13 +219,13 @@
   font-size: 0.9em;
 }
 
-.pro-subscription-overlay .form-group input:focus {
+.pro-subscription_overlay .form-group input:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgb(0 123 255 / 25%);
 }
 
-.pro-subscription-overlay .pro-subscription-btn-proceed {
+.pro-subscription_overlay .pro-subscription_btn-proceed {
   max-width: 478px;
   max-height: 50px;
   background-color: #2272B0;
@@ -252,7 +239,7 @@
   border: none;
 }
 
-.pro-subscription-overlay .pro-subscription-btn-close {
+.pro-subscription_overlay .pro-subscription_btn-close {
   max-width: 478px;
   max-height: 50px;
   background-color: #fff;
@@ -267,22 +254,22 @@
 }
 
 @media (width <= 768px) {
-  .pro-subscription-overlay .pro-subscription-btn-close {
+  .pro-subscription_overlay .pro-subscription_btn-close {
     background-color: #2272B0;
     color: #fff;
   }
 
-  .pro-subscription-overlay .form-group input[type="text"],
-  .pro-subscription-overlay .form-group input[type="tel"],
-  .pro-subscription-overlay .form-group input[type="email"] {
+  .pro-subscription_overlay .form-group input[type="text"],
+  .pro-subscription_overlay .form-group input[type="tel"],
+  .pro-subscription_overlay .form-group input[type="email"] {
     max-width: none;
   }
 
-  .pro-subscription-subscription-option {
+  .pro-subscription_subscription-option {
     max-width: none;
   }
 
-  .pro-subscription-container {
+  .pro-subscription_container {
     flex-direction: column;
     left: 20px;
     right: 20px;
@@ -292,67 +279,79 @@
     position: absolute;
   }
 
-  .pro-subscription-left-section {
+  .pro-subscription_left-section {
     display: none;
   }
 
-  .pro-subscription-overlay .form-row {
+  .pro-subscription_overlay .form-row {
     flex-direction: column;
     gap: 10px;
   }
 
-  .pro-subscription-subscription-options {
+  .pro-subscription_subscription-options {
     flex-direction: column;
     gap: 10px;
   }
 
-  .pro-subscription-left-section h2 {
+  .pro-subscription_left-section h2 {
     font-size: 1.4em;
   }
 
-  .pro-subscription-feature-item h3 {
+  .pro-subscription_feature-item h3 {
     font-size: 1em;
   }
 
-  .pro-subscription-feature-item p,
-  .pro-subscription-right-section p {
+  .pro-subscription_feature-item p,
+  .pro-subscription_right-section p {
     font-size: 0.8em;
   }
 
-  .pro-subscription-total-due p {
+  .pro-subscription_total-due p {
     font-size: 1.5em;
   }
 
-  .pro-subscription-right-section h2 {
+  .pro-subscription_right-section h2 {
     font-size: 1.3em;
   }
 
-  .pro-subscription-option-content h4 {
+  .pro-subscription_option-content h4 {
     font-size: 0.95em;
   }
 
-  .pro-subscription-option-content p {
+  .pro-subscription_option-content p {
     font-size: 0.75em;
   }
 
-  .pro-subscription-overlay .form-group label {
+  .pro-subscription_overlay .form-group label {
     font-size: 0.8em;
   }
 
-  .pro-subscription-overlay .form-group input {
+  .pro-subscription_overlay .form-group input {
     font-size: 0.85em;
     padding: 8px 10px;
   }
 
-  .pro-subscription-btn-proceed,
-  .pro-subscription-btn-close {
+  .pro-subscription_btn-proceed,
+  .pro-subscription_btn-close {
     font-size: 0.95em;
     padding: 10px 15px;
   }
 }
 
-.pro-subscription-option-content {
+.pro-subscription_option-content {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

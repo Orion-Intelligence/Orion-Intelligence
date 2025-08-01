@@ -1,12 +1,12 @@
 <div class="d-flex justify-content-end">
   <div class="btn-group report-menu-option-container">
     <button (click)="downloadCSV()" appTooltip="Download" class="p-0 report-menu-option">
-      <img alt="Download" height="25" ngSrc="assets/images/shared/download.svg" width="25" />
+      <img alt="Download" height="25" ngSrc="assets/images/shared/download.svg" width="25"/>
     </button>
     <div class="vr report-menu-divider"></div>
 
     <button (click)="printPage()" appTooltip="Print" class="p-0 report-menu-option">
-      <img alt="Print" height="25" ngSrc="assets/images/shared/print.svg" width="25" />
+      <img alt="Print" height="25" ngSrc="assets/images/shared/print.svg" width="25"/>
     </button>
 
     <div class="vr report-menu-divider"></div>
@@ -16,32 +16,31 @@
 
     <div class="vr report-menu-divider"></div>
     <button (click)="aiSuggest()" appTooltip="AI Summary" class="p-0 report-menu-option">
-      <img alt="AI Summary" height="25" ngSrc="assets/images/shared/ai.svg" width="25" />
+      <img alt="AI Summary" height="25" ngSrc="assets/images/shared/ai.svg" width="25"/>
     </button>
     <div class="vr report-menu-divider"></div>
 
     <button (click)="shareResult()" appTooltip="Share" class="p-0 report-menu-option">
-      <img alt="Share" height="22" ngSrc="assets/images/shared/share.svg" width="22" />
+      <img alt="Share" height="22" ngSrc="assets/images/shared/share.svg" width="22"/>
     </button>
     <div class="vr report-menu-divider"></div>
 
     <button (click)="redirectToUrl()" appTooltip="Open in new Tab" class="p-0 report-menu-option">
-      <img alt="Open in new tab" height="16" ngSrc="assets/images/shared/redirect.svg" width="16" />
+      <img alt="Open in new tab" height="16" ngSrc="assets/images/shared/redirect.svg" width="16"/>
     </button>
     <div class="vr report-menu-divider"></div>
 
     <button (click)="open_graph()" appTooltip="Open CTI Graph" class="p-0 report-menu-option">
-      <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" />
+      <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17"/>
     </button>
   </div>
 </div>
 
 <div *ngIf="aiSuggestStatus" @fadeInDashboardItem class="search__result-detail mt-2">
   <div class="d-flex align-items-start">
-    <img alt="AI" class="report-icon-top" height="25" src="assets/images/shared/ai.svg" width="25" />
+    <img alt="AI" class="report-icon-top" height="25" src="assets/images/shared/ai.svg" width="25"/>
     <p class="search__result-detail-heading ms-2"> &nbsp; AI Report</p>
   </div>
   <p class="search__result-detail-description">
-    {{ aiSuggestSummary }}
-  </p>
+    {{ aiSuggestSummary }} </p>
 </div>
