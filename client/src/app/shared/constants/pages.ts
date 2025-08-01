@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 export enum Category {
   STRATEGIC = 'Strategic',
   BREACH = 'Breach',

@@ -1,30 +1,30 @@
-.result-suggestion-header {
-  color: #ffc107;
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.result-suggestion {
+.suggestion {
   display: flex;
   justify-content: space-between;
   padding: 25px 48px 30px 20px;
 }
 
-.result-suggestion-error {
-  margin-left: 15px;
-}
-
-.result-suggestion-select:hover {
-  color: #4EA2F1 !important;
-}
-
-.result-suggestion-header {
+.suggestion_header {
   color: #ffc107;
   font-size: 18px;
   font-weight: 500;
 }
 
-.result-suggestion-info {
+.suggestion_error {
+  margin-left: 15px;
+}
+
+.suggestion_select:hover {
+  color: #4EA2F1 !important;
+}
+
+.suggestion_header {
+  color: #ffc107;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.suggestion_info {
   color: #fff;
   font-size: 17px;
   font-weight: 500;
@@ -32,7 +32,7 @@
   cursor: pointer;
 }
 
-.result-suggestion-info {
+.suggestion_info {
   color: #fff;
   font-size: 17px;
   font-weight: 500;

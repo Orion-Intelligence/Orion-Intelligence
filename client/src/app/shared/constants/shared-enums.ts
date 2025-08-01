@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 export const LANGUAGE_MAP: Record<string, { iso1: string, name: string }> = {
   eng: { iso1: 'en', name: 'English' },
   fra: { iso1: 'fr', name: 'French' },
@@ -17,14 +19,6 @@ export const LANGUAGE_MAP: Record<string, { iso1: string, name: string }> = {
   swe: { iso1: 'sv', name: 'Swedish' },
   pol: { iso1: 'pl', name: 'Polish' },
   ces: { iso1: 'cs', name: 'Czech' }
-};
-
-export const DUMP_SOURCE_MAP: Record<number, { name: string }> = {
-  1: { name: 'Telegram' },
-};
-
-export const DUMP_GROUP_MAP: Record<number, { name: string }> = {
-  1: { name: 'Dataleak 2025' },
 };
 
 export const ChannelTypeKeys = [
