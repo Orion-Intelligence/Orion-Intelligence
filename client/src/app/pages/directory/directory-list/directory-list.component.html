@@ -8,7 +8,7 @@
       <th class="list__column-url-status" scope="col">General</th>
       <th class="list__column-leak-status" scope="col">Leak</th>
       <th class="list__column-network-type" scope="col">Network</th>
-      <th class="directory-list__column-last-updated" scope="col">Last Updated</th>
+      <th scope="col">Last Updated</th>
     </tr>
     </thead>
     <tbody>
@@ -37,12 +37,12 @@
             </ng-template>
           </div>
         </td>
-        <td class="onion__table-leak-status" data-label="General Model Status">
-            <span [class.directory-list__status-inactive-pointer]="!isRecent(item.geneic_model_last_update)" class="list__status-default-pointer">
+        <td data-label="General Model Status">
+            <span class="list__status-default-pointer">
             </span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
         </td>
-        <td class="onion__table-leak-status" data-label="Leak Model Status">
-            <span [class.directory-list__status-inactive-pointer]="!isRecent(item.leak_model_last_update)" class="list__status-default-pointer">
+        <td data-label="Leak Model Status">
+            <span class="list__status-default-pointer">
             </span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
         </td>
         <td data-label="Network Type">

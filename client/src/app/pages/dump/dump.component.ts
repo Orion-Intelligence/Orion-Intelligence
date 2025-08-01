@@ -21,7 +21,7 @@ import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
     FiltersComponent,
     DumpListComponent,
   ],
-  styleUrls: ['../directory/directory.component.css']
+  styleUrls: ['../../../assets/styles/shared/listing/directory.component.css']
 })
 export class DumpComponent implements OnInit {
   dumpData$: Observable<DumpCallbackModel | null>;
