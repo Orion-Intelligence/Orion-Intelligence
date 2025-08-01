@@ -1,18 +1,18 @@
-<div (click)="closeFilter()" *ngIf="isFilterOpen" @filterAnimation class="filter__overlay"></div>
+<div (click)="closeFilter()" *ngIf="isFilterOpen" @filterAnimation class="sidebar_overlay"></div>
 
-<label (click)="closeFilter()" class="filter__header d-flex align-items-center">
+<label (click)="closeFilter()" class="sidebar_header d-flex align-items-center">
   <div class="justify-content-start">
-    <h2 class="filter__heading">Filters</h2>
+    <h2 class="sidebar_heading">Filters</h2>
   </div>
-  <div class="col-12 d-flex justify-content-end filter__close-label">
+  <div class="col-12 d-flex justify-content-end sidebar_close-label">
     <img alt="close" height="16" ngSrc="assets/images/shared/nav-next.svg" priority width="16">
   </div>
 </label>
 
-<form class="filter__form">
-  <div class="filter__content">
+<form class="sidebar_form">
+  <div class="sidebar_content">
     <div *ngFor="let key of Object.keys(filterModel.filters)">
-      <label appTooltip="{{filterModel.filters[key].tooltip}}" class="filter__label"> {{
+      <label appTooltip="{{filterModel.filters[key].tooltip}}" class="sidebar_label"> {{
           filterModel.filters[key].title
         }} </label>
       <ng-container *ngIf="filterModel.filters[key].type === 'daterange'">
@@ -20,10 +20,10 @@
       </ng-container>
       <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
         <div class="dropdown">
-          <button aria-expanded="false" class="btn dropdown-toggle filter__input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdown{{ key }}" type="button">
+          <button aria-expanded="false" class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdown{{ key }}" type="button">
             {{ getOptionLabel(key) }}
           </button>
-          <ul [attr.aria-labelledby]="'dropdown' + key" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow dropdown-animation rounded-3">
+          <ul [attr.aria-labelledby]="'dropdown' + key" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
             <li *ngFor="let option of filterModel.filters[key].options; let last = last">
               <a (click)="onSelectionChange(key, option.key)" class="dropdown-item py-0 d-flex align-items-center"> {{
                   option.label
@@ -40,17 +40,17 @@
       </ng-container>
       <ng-container *ngIf="filterModel.filters[key].type === 'text'">
         <div class="mb-2">
-          <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="filter__input w-100 text-start d-flex justify-content-between align-items-center" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text"/>
+          <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="sidebar_input w-100 text-start d-flex justify-content-between align-items-center" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text"/>
         </div>
       </ng-container>
     </div>
   </div>
 
-  <div class="filter__submit d-flex flex-column">
-    <button (click)="resetFilters()" class="btn btn-secondary mb-4 filter__submit-button" type="button">
+  <div class="sidebar_submit d-flex flex-column">
+    <button (click)="resetFilters()" class="btn btn-secondary mb-4 sidebar_submit-button" type="button">
       Reset
     </button>
-    <button (click)="applyFilters()" class="btn btn-primary filter__submit-button" type="button">
+    <button (click)="applyFilters()" class="btn btn-primary sidebar_submit-button" type="button">
       Apply
     </button>
   </div>

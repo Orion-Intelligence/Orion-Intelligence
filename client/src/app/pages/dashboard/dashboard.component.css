@@ -90,12 +90,12 @@
 
 /* Overrides */
 
-.filters_container {
+.sidebar_container {
   z-index: 3;
 }
 
 @media only screen and (width <=460px) {
-  .filters_container {
+  .sidebar_container {
     display: none !important;
   }
 }

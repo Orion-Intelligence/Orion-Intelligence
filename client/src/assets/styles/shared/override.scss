@@ -186,3 +186,30 @@ ngb-datepicker-month {
 		}
 	}
 }
+
+.ngb-dp-month {
+  margin-left: 14px;
+  margin-top: 15px;
+}
+
+.custom-day.range,
+.custom-day:hover {
+  border-radius: 4px;
+}
+.ngb-dp-month {
+  pointer-events: auto !important;
+}
+
+.ngb-dp-navigation-select select {
+  margin-right: 8px;
+}
+
+.ngb-dp-navigation-select select:last-child {
+  margin-right: 0;
+}
+
+.ngb-dp-week {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 2px
+}

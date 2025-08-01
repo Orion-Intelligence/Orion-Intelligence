@@ -7,11 +7,11 @@
   background: var(--color-blue-860);
 }
 
-.graph-sidebar__container .filter__label {
+.graph-sidebar__container .sidebar_label {
   margin-top: 5px;
 }
 
-.graph-sidebar__container .filter__input {
+.graph-sidebar__container .sidebar_input {
   font-size: 14px;
 }
 
@@ -28,12 +28,12 @@
   margin-top: 20px;
 }
 
-.graph-sidebar__container .filter__form {
+.graph-sidebar__container .sidebar_form {
   background: none;
   padding: 12px 17px 12px 12px;
   height: 90vh;
 }
 
-.graph-sidebar__container .filter__submit {
+.graph-sidebar__container .sidebar_submit {
   margin-bottom: 20px;
 }
