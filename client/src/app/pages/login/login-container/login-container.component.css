@@ -1,8 +1,8 @@
-.login-wrapper {
+.login_wrapper {
   position: relative;
 }
 
-.login-background {
+.login_background {
   position: absolute;
   top: 0;
   right: 0;
@@ -12,7 +12,7 @@
   pointer-events: none;
 }
 
-.login-container {
+.login_container {
   position: relative;
   color: white;
   overflow: hidden;
@@ -25,29 +25,29 @@
   min-width: 300px;
 }
 
-.login-box {
+.login_box {
   background: linear-gradient(90deg, rgb(21 52 84 / 50%) 0%, rgb(22 56 88 / 50%) 100%);
   padding: 42px 32px;
   border-radius: 16px;
   width: 420px;
 }
 
-.login-header {
+.login_header {
   display: flex;
   justify-content: left;
   margin-bottom: 40px;
 }
 
-.login-error-message {
+.login_error-message {
   color: #fc0;
   text-align: center;
 }
 
-.login-form-group {
+.login_form-group {
   display: grid;
 }
 
-.login-input {
+.login_input {
   border: none;
   border-radius: 8px;
   background: #fff url('/assets/images/shared/lock.svg') no-repeat calc(100% - 10px) center;
@@ -58,26 +58,26 @@
   font-size: 15px;
 }
 
-.login-input::placeholder {
+.login_input::placeholder {
   font-family: Inter, sans-serif;
   font-weight: 400;
   font-size: 15px;
   color: #aaa;
 }
 
-.login-input-username {
+.login_input-username {
   background: #fff url('/assets/images/shared/profile.svg') no-repeat calc(100% - 10px) center;
   background-size: 20px 20px;
   margin-bottom: 24px;
 }
 
-.login-input:focus {
+.login_input:focus {
   border: none;
   outline: none;
 }
 
-.login-btn-submit,
-.login-btn-disabled {
+.login_btn-submit,
+.login_btn-disabled {
   display: table;
   color: #fff;
   text-decoration: none;
@@ -93,15 +93,15 @@
   transition: all 300ms ease;
 }
 
-.login-btn-submit:hover {
+.login_btn-submit:hover {
   filter: brightness(88%);
 }
 
-.login-btn-disabled {
+.login_btn-disabled {
   opacity: 0.5;
 }
 
-.login-footer {
+.login_footer {
   position: fixed;
   bottom: 0;
   background: var(--color-blue-610);
@@ -109,19 +109,19 @@
   width: 100%;
 }
 
-.login-hidden-label {
+.login_hidden-label {
   display: none;
 }
 
 @media only screen and (width <= 643px) {
-  .login-box {
+  .login_box {
     margin: 0 20px;
     padding: 42px 20px;
     width: 100%;
   }
 
-  .login-background {
-    width: 175% !important;
-    height: 175% !important;
+  .login_background {
+    width: 175%;
+    height: 175%;
   }
 }
