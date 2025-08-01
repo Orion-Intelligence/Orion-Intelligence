@@ -1,17 +1,17 @@
 <app-pro-subscription *ngIf="dashboardService.showSubscription()" (close)="hideSubscription()"></app-pro-subscription>
 <div *ngIf="!isCtiGraph()">
   <div id="top"></div>
-  <div class="row dashboard__sidebar-main" id="dashboard__sidebar-main">
-    <input class="dashboard__menu-toggle" id="dashboard__menu-toggle" name="menu-input" type="radio">
+  <div class="row dashboard_sidebar-main" id="dashboard__sidebar-main">
+    <input class="dashboard_menu-toggle" id="dashboard__menu-toggle" name="menu-input" type="radio">
 
-    <div [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }" class="dashboard__sidebar">
+    <div [ngClass]="{ 'show-menu': isMenuOpen, 'collapsed': !isMenuOpen }" class="dashboard_sidebar">
       <app-dashboard-sidebar (menuToggle)="toggleNavigation()"></app-dashboard-sidebar>
     </div>
 
     <div class="dashboard_container">
-      <div class="dashboard-sub-container dashboard-content-scroll" id="dashboard-container">
+      <div class="dashboard_sub-container dashboard_content-scroll" id="dashboard-container">
         <app-dashboard-header></app-dashboard-header>
-        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard-body">
+        <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard_body">
           <router-outlet #routerOutlet="outlet"></router-outlet>
         </span>
       </div>

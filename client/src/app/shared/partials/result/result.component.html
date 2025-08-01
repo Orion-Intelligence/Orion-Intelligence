@@ -121,7 +121,7 @@
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
 
-<div *ngIf="filterModel && !shrinkmenu" [class.filter__container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="filters-container">
+<div *ngIf="filterModel && !shrinkmenu" [class.filter__container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="filters_container">
   <app-filters (filterChanged)="applyFilters($event)" (filterClose)="sidebarService.closeSidebar()" (filterReset)="resetFilters()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 <div *ngIf="isLoading" @fadeInDashboardItem>

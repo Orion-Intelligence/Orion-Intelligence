@@ -271,7 +271,7 @@
   overflow: hidden;
 }
 
-.filters-container {
+.filters_container {
   width: 300px;
   position: fixed;
   top: 1px;
@@ -301,7 +301,7 @@
     border-top-left-radius: 0;
   }
 
-  .filters-container {
+  .filters_container {
     width: 100vw;
     transition: right 0.2s ease;
   }
