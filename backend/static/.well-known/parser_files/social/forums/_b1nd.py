@@ -218,7 +218,7 @@ class _b1nd(leak_extractor_interface, ABC):
                                     m_message_sharable_link=info["thread_href"]
                                 )
                                 entity_data = entity_model(
-                                    m_usernames=usernames[:5]
+                                    m_username=usernames[:5]
                                 )
 
                                 entity_data = helper_method.extract_entities(m_content.strip(), entity_data)

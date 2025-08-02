@@ -155,18 +155,10 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                     data_size = data_size_match.group(1).strip() if data_size_match else None
 
 
-                    revenue = None
-                    for element in description_elements:
-                        text = element.inner_text().strip()
-                        if text.startswith("Revenue:"):
-                            revenue = text.split("Revenue: ")[1].strip()
-                            break
-
                     description += f"\n employee no {employees}"
                     ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
                     date_el = page.query_selector("ul.new__el li div.text-muted span.ml-8")
                     date_text = date_el.text_content().strip() if date_el else None
-                    parsed_date = None
                     try:
                         parsed_date = datetime.strptime(date_text, "%d.%m.%Y %H:%M").replace(second=0, microsecond=0) if date_text else None
                     except:
@@ -186,7 +178,6 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                         m_logo_or_images=image_links,
                         m_data_size=data_size,
                         m_leak_date=parsed_date.date(),
-                        m_revenue=revenue,
                     )
                     entity_data = entity_model(
                         m_team="inc ransome",

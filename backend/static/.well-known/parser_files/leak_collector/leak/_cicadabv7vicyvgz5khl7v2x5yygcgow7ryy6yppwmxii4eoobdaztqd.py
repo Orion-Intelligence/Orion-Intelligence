@@ -90,6 +90,8 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
     def parse_leak_data(self, page: Page):
         try:
             page.wait_for_timeout(50000)
+            page.wait_for_load_state('load')
+            page.wait_for_timeout(50000)
             all_hrefs = []
             max_pages = 3
             if self._is_crawled:

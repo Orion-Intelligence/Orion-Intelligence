@@ -52,8 +52,7 @@ class _hacksnation(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,
-                         m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.SOCIAL)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -173,7 +172,7 @@ class _hacksnation(leak_extractor_interface, ABC):
                     m_message_sharable_link=page.url
                 )
                 entity_data = entity_model(
-                    m_usernames=[m_username]
+                    m_username=[m_username]
                 )
                 entity_data = helper_method.extract_entities(m_content, entity_data)
                 self.append_leak_data(card_data, entity_data)
