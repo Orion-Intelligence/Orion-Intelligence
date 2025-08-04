@@ -24,7 +24,7 @@
   </div>
 </form>
 
-<div class="search__result-detail">
+<div class="search__result-detail search__result-detail-extended" *ngIf="query_triggered && !loading && this.emailCallbackbackModel.cards_data.length>0">
   <div class="report__defacement-detail-header-url dashboard-header-header">
     {{ breachData?.m_url }}
   </div>

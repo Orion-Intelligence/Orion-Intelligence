@@ -1,75 +1,69 @@
 <div *ngIf="entityFiltersCount() || sidebarFilterCount()" [ngClass]="{ 'selected-filter-bar__top-space': showSorting }">
-    <div class="selected-filter-bar selected-filter-bar__left-space">
-        <div class="selected-filter-bar__top-row">
-            <div class="selected-filter-bar__title">Filters</div>
-            <div class="selected-filter-bar__actions">
-                <div class="selected-filter-bar__filter-type">
-                    Sidebar({{sidebarFilterCount()}})
-                    <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg"
-                        class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" />
-                </div>
-                <div class="selected-filter-bar__filter-type">
-                    Entity({{entityFiltersCount()}})
-                    <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg"
-                        class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" />
-                </div>
-                <button class="selected-filter-bar__clear-btn" (click)="clearFilters('all')">Clear Selection</button>
-                <div class="selected-filter-bar__expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }"
-                    (click)="toggleFilterBarCollapse()">
-                    <img src="../../../../assets/images/shared/cheveron-right.svg" alt="Toggle Icon" />
-                </div>
-            </div>
+  <div class="selected-filter-bar selected-filter-bar__left-space">
+    <div class="selected-filter-bar__top-row">
+      <div class="selected-filter-bar__title">Filters</div>
+      <div class="selected-filter-bar__actions">
+        <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
+          Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
         </div>
-
-        <div *ngIf="isFilterBarExpanded">
-            <div class="selected-filter-bar__primary-filters-wrap">
-                <ng-container *ngIf="sidebarFilterCount() > 0; else noSidebarFilters">
-                    <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
-                        <div class="selected-filter-bar__filter-item" *ngIf="isFilterSelected(filterKey.value)">
-                            <div class="selected-filter-bar__filter-label-edit">
-                                {{ filterKey.value.title }}
-                            </div>
-                            <span *ngIf="filterKey.value.type !== 'multiSelection'"
-                                class="selected-filter-bar__filter-tag">
-                                {{ getSelectedLabel(filterKey.value) }}
-                            </span>
-                        </div>
-                    </ng-container>
-                </ng-container>
-                <ng-template #noSidebarFilters>
-                    <div class="selected-filter-bar__no-filters-text">
-                        Sidebar filters are empty. Click the filter icon (top right) to select filters.
-                    </div>
-                </ng-template>
-            </div>
-
-            <div class="selected-filter-bar__divider"></div>
-
-            <ng-container *ngIf="entityFiltersCount(); else noSearchFilters">
-                <div class="selected-filter-bar__filter-item">
-                    <div class="selected-filter-bar__filter-label-edit">Entity Type</div>
-                    <div class="selected-filter-bar__entity-filter-wrap">
-                        <ng-container *ngIf="getVisibleTags().length > 0">
-                            <div class="selected-filter-bar__filter-tag" *ngFor="let tag of getVisibleTags()">
-                                {{ tag.value }}
-                                <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg"
-                                    class="selected-filter-bar__remove-x" (click)="removeEntityTypeFilterTag(tag.id)" />
-                            </div>
-                            <div class="selected-filter-bar__filter-tag selected-filter-bar__more-tag"
-                                *ngIf="getHiddenTagCount() > 0">
-                                +{{ getHiddenTagCount() }}
-                            </div>
-                        </ng-container>
-                    </div>
-                </div>
-            </ng-container>
-
-            <ng-template #noSearchFilters>
-                <div class="selected-filter-bar__no-filters-text">
-                    Entity filters are empty. Click the search bar to select filters.
-                </div>
-            </ng-template>
+        <div class="selected-filter-bar__filter-type">
+          Entity({{ entityFiltersCount() }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
         </div>
-
+        <div class="selected-filter-bar__filter-type">
+          Sidebar({{ sidebarFilterCount() }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close"/>
+        </div>
+        <button class="selected-filter-bar__clear-btn" (click)="clearFilters('all')">Clear Selection</button>
+        <div class="selected-filter-bar__expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }" (click)="toggleFilterBarCollapse()">
+          <img src="../../../../assets/images/shared/cheveron-right.svg" alt="Toggle Icon"/>
+        </div>
+      </div>
     </div>
+
+    <div *ngIf="isFilterBarExpanded">
+      <div class="selected-filter-bar__primary-filters-wrap">
+        <ng-container *ngIf="sidebarFilterCount() > 0; else noSidebarFilters">
+          <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
+            <div class="selected-filter-bar__filter-item" *ngIf="isFilterSelected(filterKey.value)">
+              <div class="selected-filter-bar__filter-label-edit">
+                {{ filterKey.value.title }}
+              </div>
+              <span *ngIf="filterKey.value.type !== 'multiSelection'" class="selected-filter-bar__filter-tag">
+                {{ getSelectedLabel(filterKey.value) }}
+              </span>
+            </div>
+          </ng-container>
+        </ng-container>
+        <ng-template #noSidebarFilters>
+          <div class="selected-filter-bar__no-filters-text">
+            Sidebar filters are empty. Click the filter icon (top right) to select filters.
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="selected-filter-bar__divider"></div>
+
+      <ng-container *ngIf="entityFiltersCount(); else noSearchFilters">
+        <div class="selected-filter-bar__filter-item">
+          <div class="selected-filter-bar__filter-label-edit">Entity Type</div>
+          <div class="selected-filter-bar__entity-filter-wrap">
+            <ng-container *ngIf="getVisibleTags().length > 0">
+              <div class="selected-filter-bar__filter-tag" *ngFor="let tag of getVisibleTags()">
+                {{ tag }}<img src="assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="removeEntityTypeFilterTag(tag)" alt="search"/>
+              </div>
+              <div class="selected-filter-bar__filter-tag selected-filter-bar__more-tag" *ngIf="getHiddenTagCount() > 0">
+                +{{ getHiddenTagCount() }}
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #noSearchFilters>
+        <div class="selected-filter-bar__no-filters-text">
+          Entity filters are empty. Click the search bar to select filters.
+        </div>
+      </ng-template>
+    </div>
+
+  </div>
 </div>

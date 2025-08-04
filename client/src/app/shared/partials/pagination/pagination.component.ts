@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {AppService} from '../../../services/core/app.service';
+import {AppService} from '../../../services/core/app/app.service';
 import {max} from 'rxjs';
 
 @Component({

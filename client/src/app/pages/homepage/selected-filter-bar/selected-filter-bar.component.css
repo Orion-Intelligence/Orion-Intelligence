@@ -39,9 +39,11 @@
   border: 1px solid #FCFCFC12;
   border-radius: 8px;
   padding: 10px 24px 15px 17px;
+  margin-left: 0;
   font-family: Inter, sans-serif;
   color: white;
   max-width: 970px;
+  margin-top: 15px;
 }
 
 .selected-filter-bar__top-row {

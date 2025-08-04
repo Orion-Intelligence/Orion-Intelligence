@@ -14,23 +14,23 @@
           <hr class="vertical-divider"/>
           Advance &nbsp;&nbsp;
           <label class="small-switch">
-            <input type="checkbox" [checked]="app_service.configData().settings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
+            <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
             <span class="small-slider round"></span>
           </label>
         </span>
         <div class="tools tools-expanded gc-clear-selection" (click)="onToolToggle($event)">
           Tools
           <div class="expand-icon">
-            <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().settings.enable_advanced_tools" class="transition-transform"/>
+            <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
           </div>
         </div>
       </div>
       <div class="col-md-10 col-sm-12 col-xs-12">
-        <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && app_service.configData().settings.advance_setting_toggle" @searchFilterAnimation>
-          <app-search-filters (searchFiltersChange)="searchFiltersChanged()" [showSorting]="app_service.configData().settings.enable_advanced_tools"></app-search-filters>
+        <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+          <app-search-filters (searchFiltersChange)="searchFiltersChanged()" [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
         </div>
       </div>
-      <ng-container *ngIf="app_service.configData().settings.enable_advanced_tools; else emptySpace">
+      <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools;">
         <div class="mt-2 d-flex gap-3" @fadeInDashboardItem>
           <div class="dropdown me-3" *ngIf="showSorting">
             <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -65,26 +65,7 @@
           </div>
         </div>
       </ng-container>
-      <ng-template #emptySpace>
-        <div class="mt-2" style="visibility: hidden;">
-          <span class="label-text-dropdown"></span> <span class="label-text-dropdown"></span>
-        </div>
-      </ng-template>
-      <ng-container *ngIf="type == Category.STRATEGIC">
-        <div class="default-notification-banner">
-          <span>
-            <img alt="Info Icon" class="default-notification-banner-icon" src="../../../../assets/images/shared/hint.svg">
-            <span>
-              Current results are general and may lack accuracy. For precise insights, open the &nbsp;
-              <u><b>
-                  <a appTooltip="Go to Breach Details" class="cursor-pointer text-reset text-decoration-none" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">
-                    Data Breaches
-                  </a>
-                </b></u> &nbsp; section in sidebar.
-            </span>
-          </span>
-        </div>
-      </ng-container>
+      <app-selected-filter-bar [filterModel]="filterModel" (clearAll)="onClearAllFromBar()" (searchFiltersChange)="searchFiltersChanged()" [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
     </div>
 
     <div *ngIf="!shrinkmenu && filterModel" class="side-menu-container tools-shrink d-flex align-items-start justify-content-start mt-2 gap-3">
@@ -95,9 +76,8 @@
     </div>
   </div>
 </form>
-<app-selected-filter-bar [filterModel]="filterModel" (clearAll)="onClearAllFromBar()" (searchFiltersChange)="searchFiltersChanged()" [showSorting]="app_service.configData().settings.enable_advanced_tools"></app-selected-filter-bar>
 <ul *ngIf="showTabs && (analyticsToggle || domain || discussion || consolidated)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
-  <li class="nav-item" *ngIf="!consolidated">
+  <li class="nav-item" *ngIf="!consolidated && !domain">
     <a class="nav-link cursor-pointer active">Results</a>
   </li>
   <li class="nav-item" *ngIf="discussion">
@@ -140,6 +120,22 @@
     <span> {{ result_count }} Results Found</span>
   </div>
 </div>
+
+<ng-container *ngIf="result_count && !isLoading && !(result_count==0) && type == Category.STRATEGIC">
+  <div class="default-notification-banner">
+    <span>
+      <img alt="Info Icon" class="default-notification-banner-icon" src="../../../../assets/images/shared/hint.svg">
+      <span>
+        Current results are general and may lack accuracy. For precise insights, open the &nbsp;
+        <u><b>
+          <a appTooltip="Go to Breach Details" class="cursor-pointer text-reset text-decoration-none" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">
+            Data Breaches
+          </a>
+        </b></u> &nbsp; section in sidebar.
+      </span>
+    </span>
+  </div>
+</ng-container>
 
 <div *ngIf="!isLoading && result_count>0 && !disableScroll">
   <app-scroll-top></app-scroll-top>

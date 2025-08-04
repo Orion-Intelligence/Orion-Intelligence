@@ -11,6 +11,7 @@ class search_consolidated_param_model(BaseModel,helper_controller):
     category: Optional[str] = "all"
     page: Optional[int] = 1
     safe: bool = False
+    must: bool = False
     network: str = "all"
     daterange: Optional[str] = ""
     content: Optional[str] = "all"

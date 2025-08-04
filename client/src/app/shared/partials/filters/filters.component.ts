@@ -8,8 +8,7 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
-import { ActivatedRoute } from '@angular/router';
-import { AppService } from '../../../services/core/app.service';
+import { AppService } from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-filters',
@@ -30,13 +29,12 @@ export class FiltersComponent implements OnInit {
   protected readonly Object = Object;
   protected readonly last = last;
 
-  constructor(private route: ActivatedRoute, private app_service: AppService) {
+  constructor(private app_service: AppService) {
   }
 
   ngOnInit() {
     this.initialModel = structuredClone(this.filterModel)
     this.initializeFilters();
-    // this.readFiltersFromUrl();
     this.loadFiltersFromSettings();
   }
 
@@ -95,14 +93,6 @@ export class FiltersComponent implements OnInit {
       }, {});
   }
 
-  private readFiltersFromUrl() {
-    this.route.queryParams.subscribe(params => {
-      Object.keys(this.filterModel.filters).forEach(key => {
-        this.selectedFilters[key] = params[key] ?? null;
-      });
-    });
-  }
-
   private saveFiltersToSettings() {
     const filtersToSave = Object.keys(this.filterModel.filters).reduce((acc, key) => {
       acc[key] = {
@@ -115,7 +105,7 @@ export class FiltersComponent implements OnInit {
     this.app_service.set('sidebarFilters', filtersToSave);
   }
   private loadFiltersFromSettings() {
-    const saved = this.app_service.get('sidebarFilters', {});
+    const saved = this.app_service.getConfig().localSettings.sidebarFilters;
     if (!saved) return;
 
     for (const key of Object.keys(this.filterModel.filters)) {

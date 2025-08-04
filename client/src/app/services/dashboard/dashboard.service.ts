@@ -8,19 +8,19 @@ import { GeneralCallbackModel } from '../../shared/model/results/general/general
 import { ChatCallbackModel } from '../../shared/model/results/chat/chat.callback.model';
 import { ExploitCallbackModel } from '../../shared/model/results/exploit/exploit.callback.model';
 import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
-import { StealerLogCallbackModel, } from '../../shared/model/results/credentials/credential.callback.model';
+import { StealerLogCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
 import { SocialCallbackModel } from '../../shared/model/results/social/social.callback.model';
-import { FilterCategory } from '../../shared/model/filter/filter.model';
 import { ConsolidatedParamModel } from '../../shared/model/results/consolidated/consolidated.param.model';
 import { DefacementCallbackModel } from '../../shared/model/results/defacement/defacement.callback.model';
 import { HelperService } from '../../shared/services/helper.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AppService } from '../core/app.service';
+import { AppService } from '../core/app/app.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
+  m_current_route = "";
 
   consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
   generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
@@ -35,26 +35,34 @@ export class DashboardService {
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(private router: Router, private route: ActivatedRoute, private helperService: HelperService, private apiService: ApiService, private app_service: AppService) {
-  }
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private helperService: HelperService,
+    private apiService: ApiService,
+    private app_service: AppService
+  ) {}
 
-  fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(apiEndpoint: string, paramModel: any): Observable<{ success: boolean; isEmpty: boolean; data: T | null }> {
+  fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(
+    apiEndpoint: string,
+    paramModel: any
+  ): Observable<{ success: boolean; isEmpty: boolean; data: T | null }> {
+    const route: string = this.router.url.split('?')[0];
+    this.m_current_route = String(route);
 
     this.cancelOngoingRequest();
-    const currentFilterCategories: FilterCategory[] = this.app_service.configData().settings.entityfilterCategories;
 
-    const categoriesWithTags = currentFilterCategories.filter(
-      category => category.tags && category.tags.length > 0
-    );
-
-    const formattedFiltersForApi = categoriesWithTags.map(category => ({
-      categoryId: category.id,
-      categoryName: category.name,
-      tags: category.tags.map(tag => tag.value),
-    }));
+    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
+    const formattedFiltersForApi = Object.entries(entityCategories)
+      .map(([categoryKey, tags]) => ({
+        categoryId: categoryKey,
+        categoryName: categoryKey,
+        tags: Array.isArray(tags) ? tags : [tags]
+      }))
+      .filter(entry => entry.tags.length > 0);
 
     let baseParams: any = { ...paramModel };
-    baseParams = this.helperService.removeEmptyOrNullValues(baseParams)
+    baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -63,16 +71,19 @@ export class DashboardService {
       replaceUrl: true
     }).then();
 
+    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     if (formattedFiltersForApi.length > 0) {
       baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
     }
+
     const params = new HttpParams({ fromObject: baseParams });
 
     return this.apiService.get<T>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),
       map((response: T) => ({
         success: true,
-        isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
+        isEmpty:
+          response.Result?.length === 0 || response.cards_data?.length === 0,
         data: response
       })),
       catchError((error) => {
@@ -82,19 +93,23 @@ export class DashboardService {
     );
   }
 
-  fetchConsolidatedRankededResults(apiEndpoint: string, paramModel: any): Observable<{ success: boolean; isEmpty: boolean; data: any[] | null; }> {
+  fetchConsolidatedRankededResults(
+    apiEndpoint: string,
+    paramModel: any
+  ): Observable<{ success: boolean; isEmpty: boolean; data: any[] | null }> {
     this.cancelOngoingRequest();
+    const route: string = this.router.url.split('?')[0];
+    this.m_current_route = String(route);
 
     let baseParams: any = { ...paramModel };
-    baseParams = this.helperService.removeEmptyOrNullValues(baseParams)
+    baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
+
     const params = new HttpParams({ fromObject: baseParams });
-    console.log(params)
 
     return this.apiService.get<any[]>(apiEndpoint, { params }).pipe(
       takeUntil(this.cancelRequest$),
       map((response: any[]) => {
         const hasAnyResults = Array.isArray(response) && response.length > 0;
-
         return {
           success: true,
           isEmpty: !hasAnyResults,
@@ -105,27 +120,31 @@ export class DashboardService {
     );
   }
 
-  fetchConsolidatedGroupedResults(apiEndpoint: string, paramModel: any): Observable<{ success: boolean; isEmpty: boolean; data: ConsolidatedCallbackModel | null }> {
+  fetchConsolidatedGroupedResults(
+    apiEndpoint: string,
+    paramModel: any
+  ): Observable<{ success: boolean; isEmpty: boolean; data: ConsolidatedCallbackModel | null }> {
     this.cancelOngoingRequest();
+    const route: string = this.router.url.split('?')[0];
+    this.m_current_route = String(route);
 
-    const currentFilterCategories: FilterCategory[] = this.app_service.configData().settings.entityfilterCategories;
-
-    const categoriesWithTags = currentFilterCategories.filter(
-      category => category.tags && category.tags.length > 0
-    );
-
-    const formattedFiltersForApi = categoriesWithTags.map(category => ({
-      categoryId: category.id,
-      categoryName: category.name,
-      tags: category.tags.map(tag => tag.value),
-    }));
+    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
+    const formattedFiltersForApi = Object.entries(entityCategories)
+      .map(([categoryKey, tags]) => ({
+        categoryId: categoryKey,
+        categoryName: categoryKey,
+        tags: Array.isArray(tags) ? tags : [tags]
+      }))
+      .filter(entry => entry.tags.length > 0);
 
     let baseParams: any = { ...paramModel };
-    baseParams = this.helperService.removeEmptyOrNullValues(baseParams)
+    baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
+    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     if (formattedFiltersForApi.length > 0) {
       baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
     }
+
     const params = new HttpParams({ fromObject: baseParams });
 
     return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, { params }).pipe(
@@ -187,7 +206,7 @@ export class DashboardService {
   }
 
   resetParams() {
-    this.consolidatedParamModel.reset()
+    this.consolidatedParamModel.reset();
   }
 
   private cancelOngoingRequest() {

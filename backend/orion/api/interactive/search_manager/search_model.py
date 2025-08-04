@@ -2,8 +2,6 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException
 from starlette import status
-from datetime import datetime
-
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import \
     search_chat_callback_model as SearchChatCallbackModel, search_chat_callback_model
@@ -45,9 +43,7 @@ from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
-from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import \
-    entity_filter_param_model
-from orion.services.log_manager.log_controller import log
+from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import entity_filter_param_model
 
 
 class search_model:
@@ -178,12 +174,15 @@ class search_model:
         return ranked_results
 
 
-    async def search_consolidated_result(self,param: search_consolidated_param_model):
-        entity_filter_clauses = self._process_entity_filters_generic(
-            param.filters,
-            self._LEAK_FIELD_MAPPING 
-        )
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param,entity_filter_clauses)
+    @staticmethod
+    async def search_consolidated_result(param: search_consolidated_param_model):
+
+        if param.filters:
+            filter_dict = {item.categoryId: item.tags for item in param.filters}
+        else:
+            filter_dict = {}
+
+        indices, queries = elastic_request_generator().on_search_consolidated_data(param,filter_dict)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         leak_data = {}
@@ -328,9 +327,6 @@ class search_model:
                         es_clauses.append({"term": {es_field_name: tags[0]}})
                     else:
                         es_clauses.append({"terms": {es_field_name: tags}})
-                else:
-                    print('----------------------------------------------')
-                    # log.g().warning(f"Warning: No Elasticsearch field mapping found for category ID: {category_id} in the provided context.")
         return es_clauses
     
 

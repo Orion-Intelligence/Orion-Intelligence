@@ -1,78 +1,37 @@
-import { FilterCategory } from "../filter/filter.model";
+export class AppSettingsModel {
+  api_allowed: boolean = false;
+  telegram_allowed: boolean = false;
+  version: string = '1.0.0';
+  language_allowed: string = 'en';
+  logo_url: string = '';
 
-interface ConfigSettingsInput {
-  api_allowed?: string | boolean;
-  telegram_allowed?: string | boolean;
-  version?: string;
-  language_allowed?: string;
-  logo_url?: string;
-  enable_advanced_tools?: string | boolean;
-  advance_setting_toggle?: boolean;
+  constructor(data?: Partial<Record<keyof AppSettingsModel, string | boolean>>) {
+    if (data) {
+      this.api_allowed = data.api_allowed === '1' || data.api_allowed === true;
+      this.telegram_allowed = data.telegram_allowed === '1' || data.telegram_allowed === true;
+      this.version = (data.version as string) || this.version;
+      this.language_allowed = (data.language_allowed as string) || this.language_allowed;
+      this.logo_url = (data.logo_url as string) || this.logo_url;
+    }
+  }
 }
-export interface LocalSettingsInput {
-  advance_setting_toggle?: boolean;
-  iocExpanded?: boolean;
-  entityFilterCondition?: boolean;
-  sidebarFilters?: Record<string, { title: string; selected: string | string[] }>;
-  entityfilterCategories?: FilterCategory[];
-  selectedEntityCategoryId?: string;
-}
-export interface AppSettings extends LocalSettingsInput {
-  api_allowed: boolean;
-  telegram_allowed: boolean;
-  version: string;
-  language_allowed: string;
-  logo_url: string;
-  enable_advanced_tools: boolean;
+
+
+export class LocalSettingsModel {
+  enable_advanced_tools: boolean = false;
+  advance_setting_toggle: boolean = false;
+  iocExpanded: boolean = true;
+  sidebarFilters: Record<string, { title: string; selected: string | string[] }> = {};
+  entityfilterCategories: Record<string, string[]> = {};
+  entityFilterCondition: boolean = false;
 }
 
 export class ConfigSettings {
-  api_allowed: boolean;
-  telegram_allowed: boolean;
-  version: string;
-  language_allowed: string;
-  logo_url: string;
-  enable_advanced_tools: boolean;
+  appSettings: AppSettingsModel;
+  localSettings: LocalSettingsModel;
 
-  advance_setting_toggle: boolean;
-  iocExpanded: boolean;
-  entityFilterCondition: boolean;
-  sidebarFilters: Record<string, { title: string; selected: string | string[] }>;
-  entityfilterCategories: FilterCategory[];
-  selectedEntityCategoryId: string;
-
-  constructor(apiData: ConfigSettingsInput = {}, localData: LocalSettingsInput = {}) {
-    this.api_allowed = apiData.api_allowed === true || apiData.api_allowed === '1';
-    this.telegram_allowed = apiData.telegram_allowed === true || apiData.telegram_allowed === '1';
-    this.version = apiData.version ?? '1.0.0';
-    this.language_allowed = apiData.language_allowed ?? 'en';
-    this.logo_url = apiData.logo_url ?? '';
-    this.enable_advanced_tools = apiData.enable_advanced_tools === true || apiData.enable_advanced_tools === 'true';
-
-    this.advance_setting_toggle = localData.advance_setting_toggle ?? false;
-    this.iocExpanded = localData.iocExpanded ?? false;
-    this.entityFilterCondition = localData.entityFilterCondition ?? false;
-    this.sidebarFilters = localData.sidebarFilters ?? {};
-    this.entityfilterCategories = localData.entityfilterCategories ?? [];
-    this.selectedEntityCategoryId = localData.selectedEntityCategoryId ?? '';
-  }
-}
-
-interface ConfigDataInput {
-  settings?: ConfigSettingsInput;
-}
-
-export class ConfigData {
-  settings: ConfigSettings;
-
-  constructor(data: ConfigDataInput = {}) {
-    this.settings = new ConfigSettings(data.settings ?? {});
-  }
-}
-export class AppConfigData {
-  settings: ConfigSettings;
-
-  constructor(data: ConfigDataInput = {}, localData: LocalSettingsInput = {}) {
-    this.settings = new ConfigSettings(data.settings ?? {}, localData);
+  constructor(appSettings?: Partial<AppSettingsModel>, localSettings?: Partial<LocalSettingsModel>) {
+    this.appSettings = Object.assign(new AppSettingsModel(), appSettings);
+    this.localSettings = Object.assign(new LocalSettingsModel(), localSettings);
   }
 }

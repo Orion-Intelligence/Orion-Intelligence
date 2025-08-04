@@ -1,14 +1,13 @@
-import hashlib
+import copy
 import json
+import hashlib
 import locale
 import re
-from urllib.parse import urlparse, urlunparse
 
+from urllib.parse import urlparse, urlunparse
 from deep_translator import GoogleTranslator
 from starlette.requests import Request
 from stopwords import get_stopwords
-
-import json
 from typing import Any, Dict, List, Optional
 from pydantic import root_validator, validator
 from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import entity_filter_param_model
@@ -49,7 +48,6 @@ class helper_controller:
         else:
             values['filters'] = None
         return values
-
 
     @staticmethod
     def create_template_context(request: Request, response_data: dict) -> dict:
@@ -98,6 +96,10 @@ class helper_controller:
         normalized = parsed._replace(query='', fragment='')
         normalized_url = urlunparse(normalized).rstrip('/')
         return normalized_url
+
+    @staticmethod
+    def clone_model(model):
+        return copy.deepcopy(model)
 
     @staticmethod
     def remove_stopwords_from_string(text: str) -> str:

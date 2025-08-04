@@ -9,7 +9,7 @@
       <img alt="nav-prev" height="16" ngSrc="assets/images/shared/nav-prev.svg" width="16">
     </button>
 
-    <button (click)="onPageChange(page)" *ngFor="let page of getPageRange()" [class.search__navigation--focus]="page === currentPage" class="pagination_search-navigation gc-clear-selection">
+    <button (click)="onPageChange(page)" *ngFor="let page of getPageRange()" [class.search__navigation--focus]="page === currentPage" [class.active]="page === currentPage" class="pagination_search-navigation gc-clear-selection">
       {{ page }}
     </button>
 

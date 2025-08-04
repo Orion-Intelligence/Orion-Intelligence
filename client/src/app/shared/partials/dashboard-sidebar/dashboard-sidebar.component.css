@@ -33,7 +33,7 @@
   min-height: 500px;
   scrollbar-width: none;
   margin-left: -5px;
-  padding: 20px;
+  padding: 20px 20px 100px;
 }
 
 .sidebar-hotlinks {
@@ -281,6 +281,7 @@
 
 .sidebar-collapsed .sidebar__items {
   height: 100vh;
+  padding-bottom: 200px;
 }
 
 .sidebar-collapsed .sidebar__subitems {
@@ -403,7 +404,8 @@
   }
 
   .sidebar-collapsed .sidebar__items {
-    height: calc(100vh - 120px);
+    height: 100vh;
+    padding-bottom: 200px;
   }
 
 }
@@ -422,12 +424,12 @@
 @media only screen and (width <= 600px) {
   .sidebar__content-container {
     max-width: 100vw;
-    height: 100vw;
+    height: 100vh;
   }
 
   .sidebar {
     width: 100vw;
-    height: 100vw;
+    height: 100vh;
   }
 }
 
@@ -441,11 +443,13 @@
   }
 
   .sidebar__items {
-    height: calc(100vh - 30px);
+    height: 100vh;
+    padding-bottom: 200px;
   }
 
   .sidebar-collapsed .sidebar__items {
-    height: calc(100vh - 30px);
+    height: 100vh;
+    padding-bottom: 200px;
   }
 
 }

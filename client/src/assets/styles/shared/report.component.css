@@ -38,12 +38,17 @@
   box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
   margin: 15px 32px;
   min-height: auto;
+  border: 1px solid #ffffff15;
   height: auto !important;
   display: block;
-  max-height: 80vh;
+  max-height: 40vh;
   overflow: auto;
   scrollbar-width: auto;
   scrollbar-color: var(--color-blue-880) transparent;
+}
+
+.search__result-detail-extended{
+  max-height: 60vh;
 }
 
 .search__result-detail::-webkit-scrollbar {
@@ -555,7 +560,7 @@
 }
 
 .dashboard__search-main-div {
-  background-color: var(--color-blue-820);
+  background-color: var(--color-blue-820-light);
   border-radius: 15px;
   width: 100%;
   height: auto;

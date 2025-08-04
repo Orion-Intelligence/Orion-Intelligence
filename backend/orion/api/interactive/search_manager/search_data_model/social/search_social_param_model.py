@@ -1,10 +1,10 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class search_social_param_model(BaseModel):
-    q: Optional[str] = Field("", max_length=150)
+    q: Optional[str] = ""
     page: Optional[int] = 1
     content: Optional[str] = "all"
     category: Optional[str] = "all"

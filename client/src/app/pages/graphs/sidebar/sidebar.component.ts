@@ -2,7 +2,7 @@ import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
-import {AppService} from '../../../services/core/app.service';
+import {AppService} from '../../../services/core/app/app.service';
 import {GraphAllowedPropertyKey, GraphClusterType, GraphType} from '../../../shared/constants/shared-enums';
 
 @Component({

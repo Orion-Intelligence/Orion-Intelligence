@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { AppService } from '../../../../../services/core/app.service';
+import { AppService } from '../../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
@@ -58,6 +58,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
+    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
+      this.ngOnInit()
+    }
   }
 
   ngOnInit(): void {

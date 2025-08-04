@@ -5,7 +5,7 @@ import {Router} from '@angular/router';
 import {AuthService} from '../../../services/authetication/auth.service';
 import {Subscription} from 'rxjs';
 import {HeaderComponent} from '../../../shared/partials/header/login-header/header.component';
-import {AppService} from '../../../services/core/app.service';
+import {AppService} from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-login-container',

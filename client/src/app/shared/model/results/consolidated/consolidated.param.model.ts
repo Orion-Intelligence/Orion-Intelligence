@@ -2,7 +2,6 @@ export class ConsolidatedParamModel {
   q = "";
   page = 1;
   content = "";
-  cat_type = "";
   daterange = "";
   entity = "";
   mitre = "";
@@ -14,13 +13,11 @@ export class ConsolidatedParamModel {
   platform = "";
   email?: string;
   username?: string;
-
-
-
-
+  must=true
   mURL = "";
   mUser = "";
   mFullSearch = false;
+
 
   reset(): void {
     this.q = "";
@@ -31,7 +28,6 @@ export class ConsolidatedParamModel {
     this.content = "";
     this.entity = "";
     this.mitre = "";
-    this.cat_type = "";
     this.team = "";
     this.attacker = [];
     this.team = "";

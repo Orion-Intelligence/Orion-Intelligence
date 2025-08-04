@@ -39,7 +39,7 @@
 }
 
 .nav-tabs .nav-link.active {
-  background-color: var(--color-blue-820);
+  background-color: var(--color-blue-820-light);
   border: 1px solid #ffffff08;
   font-size: 14px;
   font-weight: 500;
@@ -319,13 +319,14 @@ table a:visited {
   display: flex;
   flex-wrap: inherit;
   background: #FFC1071A;
-  max-width: 835px;
+  max-width: 800px;
   padding: 10px;
   font-size: 13px;
-  border-radius: 10px;
+  margin-left: 30px;
+  border-radius: 8px;
   margin-top: 20px;
   color: #fff;
-  margin-bottom: 0;
+  margin-bottom: 10px;
 }
 
 .default-notification-banner-stealer {

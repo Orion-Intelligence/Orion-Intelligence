@@ -8,7 +8,7 @@ import {PaginationComponent} from '../../../pagination/pagination.component';
 import {DashboardResultGeneralListComponent} from '../../dashboard-results/dashboard-result-general-list/dashboard-result-general-list.component';
 import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
 import {DefacementCallbackModel} from '../../../../model/results/defacement/defacement.callback.model';
-import {AppService} from '../../../../../services/core/app.service';
+import {AppService} from '../../../../../services/core/app/app.service';
 import {defacement_filters} from '../../../../constants/filters';
 import {Category} from '../../../../constants/pages';
 import {SortType} from '../../../../constants/shared-enums';

@@ -14,7 +14,7 @@ import {Category} from '../../../../constants/pages';
 import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
 import {ResultComponent} from '../../../result/result.component';
 import {general_filters} from '../../../../constants/filters';
-import {AppService} from '../../../../../services/core/app.service';
+import {AppService} from '../../../../../services/core/app/app.service';
 import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import {ChatCallbackModel} from '../../../../model/results/chat/chat.callback.model';
 import {DiscussionService} from '../../../../services/discussion.service';

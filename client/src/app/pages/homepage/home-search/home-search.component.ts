@@ -6,7 +6,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { SearchFiltersComponent } from "../search-filters/search-filters.component";
 import { HomeInsightComponent } from "../home-insight/home-insight.component";
-import { AppService } from '../../../services/core/app.service';
+import { AppService } from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-home-search',
@@ -27,6 +27,7 @@ export class HomeSearchComponent implements OnInit {
   }
 
   onSearchSubmit(): void {
+    this.searchInputRef?.nativeElement.blur();
     this.dashboardService.consolidatedCallbackModel = new ConsolidatedCallbackModel();
     const queryParams = {
       ...this.route.snapshot.queryParams,
@@ -56,7 +57,7 @@ export class HomeSearchComponent implements OnInit {
     this.showFiltersOverlay = newValue;
   }
   onAdvanceSettingToggle() {
-    this.app_service.set('advance_setting_toggle', !this.app_service.configData().settings.advance_setting_toggle);
+    this.app_service.set('advance_setting_toggle', !this.app_service.configData().localSettings.advance_setting_toggle);
     this.showFiltersOverlay = true;
   }
 }

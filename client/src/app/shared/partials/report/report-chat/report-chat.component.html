@@ -3,13 +3,27 @@
 <div *ngIf="resultItem">
   <div class="search__result-detail">
     <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_name">
-      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:150 }}{{ (resultItem.m_channel_name.length || 'Untitled Channel'.length) > 150 ? '...' : '' }} </p>
+      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_name.length || 'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
 
     <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_url">
-      {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:150 }}{{ (resultItem.m_channel_url.length || 'Untitled Channel'.length) > 150 ? '...' : '' }} </p>
+      {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_url.length || 'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
 
-    <p class="search__result-detail-description">
-      {{ resultItem.m_content || 'No content available' }} </p>
+    <ng-container *ngIf="getContentLines(resultItem).length > 0; else noContent">
+      <div class="result-list_section-content">
+        <ng-container *ngFor="let section of getContentLines(resultItem).slice(0, 12); let i = index">
+          <h3 class="mt-0 pt-0">Section {{ i + 1 }}</h3>
+          <p>{{ section.length > 550 ? (section | slice:0:550) + '...' : section }}</p>
+        </ng-container>
+      </div>
+    </ng-container>
+
+    <ng-template #noContent>
+      <p class="search__result-detail-description">No content available</p>
+    </ng-template>
+
+    <ng-container>
+      <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Report Sharable Link</h5>
+    </ng-container>
 
     <p *ngIf="resultItem.m_message_sharable_link" class="search__result-detail-url-p text-truncate">
       <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank"> {{ resultItem.m_message_sharable_link }} </a>

@@ -8,7 +8,7 @@ import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation'
 import {HelperService} from '../../../services/helper.service';
 import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
 import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
-import {AppService} from '../../../../services/core/app.service';
+import {AppService} from '../../../../services/core/app/app.service';
 import {Category} from '../../../constants/pages';
 import {ApiService} from '../../../services/api.service';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
@@ -45,8 +45,8 @@ export class ReportComponent implements OnInit {
   role$!: Observable<string | null>;
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, appService: AppService, protected authService: AuthService) {
-    this.lang = appService.getConfig().language_allowed
-    this.lang_detected = appService.getConfig().language_allowed
+    this.lang = appService.getConfig().appSettings.language_allowed
+    this.lang_detected = appService.getConfig().appSettings.language_allowed
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }

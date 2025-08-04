@@ -40,7 +40,9 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
 
   getContentLines(item: any): string[] {
     return item?.m_content
-      ? item.m_content.split('\n').filter((line: string) => line.trim())
+      ? item.m_content
+        .split('\n')
+        .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
       : [];
   }
 

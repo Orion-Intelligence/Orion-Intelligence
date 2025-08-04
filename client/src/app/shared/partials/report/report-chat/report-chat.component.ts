@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
-import { CommonModule, NgForOf, NgIf, SlicePipe, } from '@angular/common';
-import { ResultListComponent } from '../../result-components/result-list/result-list.component';
-import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
-import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
-import { last, Observable } from 'rxjs';
-import { AuthService } from '../../../../services/authetication/auth.service';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ChatResultItem} from '../../../model/results/chat/chat.callback.model';
+import {CommonModule, NgForOf, NgIf, SlicePipe,} from '@angular/common';
+import {ResultListComponent} from '../../result-components/result-list/result-list.component';
+import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
+import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
+import {last, Observable} from 'rxjs';
+import {AuthService} from '../../../../services/authetication/auth.service';
 import {SocialResultItem} from '../../../model/results/social/social.callback.model';
 import {ReportHeaderComponent} from '../../report-header/report-header.component';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-report-chat',
@@ -39,13 +40,13 @@ export class ReportChatComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(private route: ActivatedRoute, protected authService: AuthService) {
+  constructor(private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, ) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({ reportdata }) => {
+    this.route.data.subscribe(({reportdata}) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });
@@ -53,6 +54,9 @@ export class ReportChatComponent implements OnInit {
 
   metaadataToggleContent(): void {
     this.isExpandedMetadata = !this.isExpandedMetadata;
+    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
+      this.ngOnInit()
+    }
   }
 
   processResultItem() {
@@ -84,8 +88,29 @@ export class ReportChatComponent implements OnInit {
           addedKeys.add(key);
         }
       });
-      if (this.arrayKeys.length > 0 && !this.activeTab) {
-        this.setActiveTab(this.arrayKeys[0]);
+      if (!this.activeTab) {
+        let selectedTab = '';
+
+        if (this.arrayKeys.includes('m_mitre_ttp_name')) {
+          selectedTab = 'm_mitre_ttp_name';
+        } else if (this.arrayKeys.includes('m_email')) {
+          selectedTab = 'm_email';
+        } else if (this.arrayKeys.includes('m_entity')) {
+          selectedTab = 'm_entity';
+        } else if (this.arrayKeys.includes('m_content_type')) {
+          selectedTab = 'm_content_type';
+        } else if (this.arrayKeys.length > 0) {
+          selectedTab = this.arrayKeys[0];
+        }
+
+        if (selectedTab) {
+          this.setActiveTab(selectedTab);
+          const index = this.arrayKeys.indexOf(selectedTab);
+          if (index > 0) {
+            this.arrayKeys.splice(index, 1);
+            this.arrayKeys.unshift(selectedTab);
+          }
+        }
       }
     }
   }
@@ -107,6 +132,14 @@ export class ReportChatComponent implements OnInit {
     } else {
       this.listItems = [];
     }
+  }
+
+  getContentLines(item: any): string[] {
+    return item?.m_content
+      ? item.m_content
+        .split('\n')
+        .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
+      : [];
   }
 
   formatKeyLabel(key: string): string {

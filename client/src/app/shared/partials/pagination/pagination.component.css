@@ -7,6 +7,12 @@
   height: 50px;
 }
 
+.pagination_search-navigation.active {
+  background-color: var(--color-blue-600);
+  color: white;
+  font-weight: bold;
+}
+
 .pagination_navigation {
   font-size: 13px;
   text-align: center;
@@ -49,7 +55,7 @@
   text-align: center;
   margin-left: 2px;
   height: 35px;
-  border-radius: 10px;
+  border-radius: 8px;
   margin-right: 2px;
   margin-top: -2px;
   color: #fff;
@@ -70,7 +76,7 @@
   background: #102A4685;
 }
 
-.pagination_search-navigation:hover {
+.pagination_search-navigation:hover:not(.active) {
   text-decoration: none;
   color: #fff;
   background: #102A4685;

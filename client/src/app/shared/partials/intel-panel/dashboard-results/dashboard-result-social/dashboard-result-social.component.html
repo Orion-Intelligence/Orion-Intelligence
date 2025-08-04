@@ -48,12 +48,12 @@
 
       <ng-template #otherSection>
         <ng-container *ngIf="getContentLines(item).length > 0">
-          <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Section</h5>
-          <p class="dashboard__search-description highlight">
-            <ng-container *ngFor="let line of getContentLines(item).slice(0, 12); let i = index">
-              {{ i + 1 }}. {{ line.length > 150 ? (line | slice:0:150) + '...' : line }}<br/>
+          <div class="result-list_section-content">
+            <ng-container *ngFor="let section of getContentLines(item).slice(0, 5); let i = index; let isLast = last">
+              <h3 class="mt-0 pt-0">Section {{ i + 1 }}</h3>
+              <p [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
             </ng-container>
-          </p>
+          </div>
         </ng-container>
       </ng-template>
 

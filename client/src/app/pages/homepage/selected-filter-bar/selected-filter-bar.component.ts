@@ -1,7 +1,7 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { NgFor, NgIf, CommonModule } from '@angular/common';
-import { FilterCategory, FilterModel, FilterOption } from '../../../shared/model/filter/filter.model';
-import { AppService } from '../../../services/core/app.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {NgFor, NgIf, CommonModule} from '@angular/common';
+import {FilterModel, FilterOption} from '../../../shared/model/filter/filter.model';
+import {AppService} from '../../../services/core/app/app.service';
 
 
 @Component({
@@ -16,85 +16,65 @@ export class SelectedFilterBarComponent implements OnInit {
   @Output() clearAll = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
 
-
-  categories: FilterCategory[] = [];
+  categories: Record<string, string[]> = {};
   isFilterBarExpanded: boolean = false;
 
-  maxVisibleTags = 4;
+  maxVisibleTags = 8;
   Object: any;
 
-  constructor(private app_service: AppService) { }
-
-  ngOnInit(): void {
-    this.categories = this.app_service.configData().settings.entityfilterCategories;
+  constructor(protected app_service: AppService,) {
   }
 
-
+  ngOnInit(): void {
+    this.categories = this.app_service.configData().localSettings.entityfilterCategories;
+  }
 
   clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
     if (scope === 'sidebar' || scope === 'all') {
       for (const key in this.filterModel.filters) {
         if (this.filterModel.filters.hasOwnProperty(key)) {
           const filter = this.filterModel.filters[key];
-
-          if (Array.isArray(filter.selected)) {
-            filter.selected = [];
-          } else {
-            filter.selected = null as any;
-          }
+          filter.selected = Array.isArray(filter.selected) ? [] : null as any;
         }
       }
     }
 
     if (scope === 'entity' || scope === 'all') {
-      // this._entityFilterService.clearPersistedState();
-      this.app_service.set('entityfilterCategories', []);
+      this.app_service.set('entityfilterCategories', {});
     }
 
     this.clearAll.emit();
   }
 
-
-
-
-
   removeEntityTypeFilterTag(tagToRemoveId: string) {
-    const currentCategories = this.app_service.configData().settings.entityfilterCategories;
-    const updatedCategories = currentCategories.map(category => {
-      const tagExists = category.tags.some(tag => tag.id === tagToRemoveId);
-
-      if (tagExists) {
-        return {
-          ...category,
-          tags: category.tags.filter(tag => tag.id !== tagToRemoveId)
-        };
+    const categories = {...this.app_service.configData().localSettings.entityfilterCategories};
+    for (const key in categories) {
+      const value = categories[key];
+      if (Array.isArray(value)) {
+        categories[key] = value.filter(tag => tag !== tagToRemoveId);
+      } else if (value === tagToRemoveId) {
+        delete categories[key];
       }
+    }
 
-      return category;
-    });
-
-    this.app_service.set('entityfilterCategories', updatedCategories);
+    this.app_service.set('entityfilterCategories', categories);
     this.searchFiltersChange.emit();
   }
-  getSelectedLabel(filterOption: FilterOption): string {
 
-    if (filterOption.selected === 'attack-pattern' || filterOption.selected === 'yes')
-      return '-';
-    if (!filterOption || !filterOption.options || filterOption.options.length === 0) {
+  getSelectedLabel(filterOption: FilterOption): string {
+    if (filterOption.selected === 'attack-pattern' || filterOption.selected === 'yes') return '-';
+    if (!filterOption || !filterOption.options?.length) {
       return typeof filterOption.selected === 'string' ? filterOption.selected || '-' : '-';
     }
 
-    const selectedKey = filterOption.selected;
-    const found = filterOption.options.find(opt => opt.key === selectedKey);
+    const found = filterOption.options.find(opt => opt.key === filterOption.selected);
     return found?.label || '-';
   }
-
 
   isFilterSelected(filterOption: FilterOption): boolean {
     if (!filterOption) return false;
     const label = this.getSelectedLabel(filterOption);
     return !!label && label !== '-';
-
   }
 
   toggleFilterBarCollapse(): void {
@@ -102,27 +82,28 @@ export class SelectedFilterBarComponent implements OnInit {
   }
 
   sidebarFilterCount(): number {
-    if (!this.filterModel?.filters) return 0;
-
-    return Object.values(this.filterModel.filters)
-      .filter(filter => this.isFilterSelected(filter))
-      .length;
+    return Object.values(this.filterModel?.filters || {}).filter(filter => this.isFilterSelected(filter)).length;
   }
+
   entityFiltersCount(): number {
-    return this.app_service.configData().settings.entityfilterCategories?.reduce((total, category) => total + category.tags.length, 0) ?? 0;
-
+    const categories = this.app_service.configData().localSettings.entityfilterCategories;
+    return Object.values(categories).reduce((count, val) => {
+      if (Array.isArray(val)) return count + val.length;
+      return count + 1;
+    }, 0);
   }
 
-  getVisibleTags(): any[] {
-    const allTags = this.app_service.configData().settings.entityfilterCategories.flatMap(category => category.tags);
+  getVisibleTags(): string[] {
+    const allTags = Object.values(this.app_service.configData().localSettings.entityfilterCategories).flat();
     return allTags.slice(0, this.maxVisibleTags);
   }
 
   getHiddenTagCount(): number {
-    const totalTags = this.app_service.configData().settings.entityfilterCategories.reduce((acc, category) => acc + category.tags.length, 0);
-    const hidden = totalTags - this.maxVisibleTags;
-    return hidden > 0 ? hidden : 0;
+    const categories = this.app_service.configData().localSettings.entityfilterCategories;
+    const totalTags = Object.values(categories).reduce((count, val) => {
+      if (Array.isArray(val)) return count + val.length;
+      return count + 1;
+    }, 0);
+    return Math.max(0, totalTags - this.maxVisibleTags);
   }
-
-
 }

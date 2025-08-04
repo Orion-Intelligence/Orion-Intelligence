@@ -1,109 +1,99 @@
-<div class="filter-panel"
-    [ngClass]="{ 'filter-panel__top-space-expand': showSorting, 'filter-panel__top-space-shrink': !showSorting }">
+<div class="filter-panel" [ngClass]="{ 'filter-panel__top-space-expand': showSorting, 'filter-panel__top-space-shrink': !showSorting }" @searchFilterAnimation>
 
-    <div class="filter-panel__top-row">
-        <div class="filter-panel__title">Filters</div>
-        <div class="filter-panel__actions">
-            <input type="text" [(ngModel)]="entitySearch" placeholder="Search entitys..."
-                class="filter-panel__tag-input" />
-            <button class="filter-panel__clear-btn" (click)="clearSelection()">Reset Selection</button>
-        </div>
+  <div class="filter-panel__top-row">
+    <div class="filter-panel__title">Filters</div>
+    <div class="filter-panel__actions">
+      <input type="text" [(ngModel)]="entitySearch" (ngModelChange)="initCategories($event)" placeholder="Search entity..." class="filter-panel__tag-input filter-panel__tag-input-magnifier"/>
+      <!--      <button class="filter-panel__clear-btn" (click)="clearSelection()">Reset Selection</button>-->
+    </div>
+  </div>
+
+  <div class="filter-panel__category-scroll-container">
+    <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
+
+    <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollLeft()">
+      <div class="filter-panel__click-hitbox filter-panel__show">
+        <img src="../../../../assets/images/shared/searchFilter_leftButton.svg" alt="filter icon"/>
+      </div>
     </div>
 
-    <div class="filter-panel__category-scroll-container">
-        <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
-
-        <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollLeft()">
-            <div class="filter-panel__click-hitbox filter-panel__show">
-                <img src="../../../../assets/images/shared/searchFilter_leftButton.svg" />
-            </div>
+    <div class="filter-panel__category-scroll" #categoryScroll>
+      <div *ngIf="filteredCategories.length>0; else noEntity"></div>
+      <div *ngFor="let category of filteredCategories" class="filter-panel__category-tab" [class.selected]="category.id === selectedCategoryId" (click)="$event.stopPropagation();onCategoryClick(category.id)">
+        {{ category.name }}
+        <div *ngIf="(app_service.getConfig().localSettings.entityfilterCategories[category.id]?.length ?? 0) > 0" class="filter-panel__category-count">
+          {{ app_service.getConfig().localSettings.entityfilterCategories[category.id].length }}
         </div>
-
-        <div class="filter-panel__category-scroll" #categoryScroll>
-            <div *ngIf="searchFilterCategories(entitySearch).length>0; else noEntity"></div>
-            <div *ngFor="let category of searchFilterCategories(entitySearch); let i = index"
-                class="filter-panel__category-tab" [class.selected]="category.id === selectedCategoryId"
-                (click)="onCategoryClick(category.id)">
-                {{ category.name }}
-                <div *ngIf="category.tags.length > 0" class="filter-panel__category-count">
-                    {{ category.tags.length }}
-                </div>
-            </div>
-            <ng-template #noEntity>
-                <div class="filter-panel__no-filters-text">No entity filters available.</div>
-            </ng-template>
-        </div>
-
-        <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollRight()">
-            <div class="filter-panel__click-hitbox filter-panel__show">
-                <img src="../../../../assets/images/shared/searchFilter_rightButton.svg" />
-            </div>
-        </div>
-
-        <div class="filter-panel__fade-right" *ngIf="showRightFade"></div>
-    </div>
-    <div class="filter-panel__input-row">
-        <input type="text" [(ngModel)]="newValue" placeholder="Enter Value" class="filter-panel__tag-input"
-            (keydown.enter)="addTag()" />
-        <div class="filter-panel__add-btn" (click)="addTag()">
-            <img src="../../../../assets/images/shared/searchFilter_addButton.svg" />
-        </div>
-        <label class="filter-panel__toggle-switch">
-            <input type="checkbox" [(ngModel)]="app_service.configData().settings.entityFilterCondition"
-                (ngModelChange)="onEntityFilterToggle($event)" />
-            <span class="filter-panel__slider"></span>
-        </label>
-        <div class="filter-panel__entity-condition">{{ app_service.configData().settings.entityFilterCondition ?
-            'ExactMatch' :'Partial Match' }}</div>
+      </div>
+      <ng-template #noEntity>
+        <div class="filter-panel__no-filters-text">No entity filters available.</div>
+      </ng-template>
     </div>
 
-    <div class="filter-panel__selected-filters">
-        <div class="filter-panel__section-title">All Selected Filters</div>
-        <ng-container *ngIf="hasAnyTags(); else noFilters">
-            <div class="filter-panel__tag-list">
-                <ng-container *ngFor="let category of categories">
-                    <div *ngFor="let tag of category.tags" class="filter-panel__filter-tag">
-                        {{ tag.value }}
-                        <img src="../../../../assets/images/shared/searchFilter_clossButton.svg"
-                            class="filter-panel__remove-x" (click)="removeTag(category, tag.id)" />
-                    </div>
-                </ng-container>
-            </div>
+    <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollRight()">
+      <div class="filter-panel__click-hitbox filter-panel__show">
+        <img src="assets/images/shared/searchFilter_rightButton.svg" alt="filter"/>
+      </div>
+    </div>
+
+    <div class="filter-panel__fade-right" *ngIf="showRightFade"></div>
+  </div>
+  <hr class="filter-panel__category-scroll-divider">
+
+  <div class="filter-panel__input-row">
+    <input type="text" [(ngModel)]="newValue" placeholder="Enter Value" class="filter-panel__tag-input" (keydown.enter)="addTag()"/>
+    <div class="filter-panel__add-btn" (click)="addTag()">
+      <img src="assets/images/shared/searchFilter_addButton.svg" alt="filter"/>
+    </div>
+    <label class="filter-panel__toggle-switch"> <input type="checkbox" [(ngModel)]="app_service.configData().localSettings.entityFilterCondition" (ngModelChange)="onEntityFilterToggle($event)"/> <span class="filter-panel__slider"></span> </label>
+    <div class="filter-panel__entity-condition">
+      {{ app_service.configData().localSettings.entityFilterCondition ? 'ExactMatch' : 'Partial Match' }}
+    </div>
+  </div>
+
+  <div class="filter-panel__selected-filters">
+    <div class="filter-panel__section-title">All Selected Filters</div>
+    <ng-container *ngIf="hasAnyTags(); else noFilters">
+      <div class="filter-panel__tag-list">
+        <ng-container *ngFor="let category of filteredCategories">
+          <div *ngFor="let tag of (app_service.getConfig().localSettings.entityfilterCategories[category.id] ?? [])" class="filter-panel__filter-tag">
+            {{ tag }}
+            <img src="assets/images/shared/searchFilter_clossButton.svg" class="filter-panel__remove-x" (click)="removeTag(category.id, tag)" alt="filter"/>
+          </div>
         </ng-container>
-        <ng-template #noFilters>
-            <div class="filter-panel__no-filters-text">No filter selected</div>
-        </ng-template>
+      </div>
+    </ng-container>
+    <ng-template #noFilters>
+      <div class="filter-panel__no-filters-text">No filter selected</div>
+    </ng-template>
+  </div>
+
+  <div class="filter-panel__divider"></div>
+
+  <div class="filter-panel__expand-header">
+    <div class="filter-panel__expand-label">IOC’s</div>
+    <div class="filter-panel__expand-icon" [ngClass]="{ 'expand': app_service.configData().localSettings.iocExpanded }" (click)="toggleExpand()">
+      <img src="assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon"/>
     </div>
+  </div>
 
-    <div class="filter-panel__divider"></div>
-
-    <div class="filter-panel__expand-header">
-        <div class="filter-panel__expand-label">IOC’s</div>
-        <div class="filter-panel__expand-icon" [ngClass]="{ 'expand': app_service.configData().settings.iocExpanded }"
-            (click)="toggleExpand()">
-            <img src="../../../../assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon" />
+  <div *ngIf="app_service.configData().localSettings.iocExpanded" class="filter-panel__summary-section">
+    <ng-container *ngIf="hasAnyTags(); else noFilters">
+      <ng-container *ngFor="let category of categories | keyvalue">
+        <div *ngIf="(getTags(category.key).length > 0)" class="filter-panel__summary-category">
+          <div class="filter-panel__category-title">{{ category.key }}</div>
+          <div class="filter-panel__tag-list">
+            <div *ngFor="let tag of getTags(category.key)" class="filter-panel__filter-tag">
+              {{ tag }}<img src="assets/images/shared/searchFilter_clossButton.svg" class="filter-panel__remove-x" (click)="removeTag(category.key, tag)" alt="filter"/>
+            </div>
+          </div>
         </div>
+      </ng-container>
 
-    </div>
-    <div *ngIf="app_service.configData().settings.iocExpanded" class="filter-panel__summary-section">
-        <ng-container *ngIf="hasAnyTags(); else noFilters">
-            <ng-container *ngFor="let category of categories">
-                <div *ngIf="category.tags.length > 0" class="filter-panel__summary-category">
-                    <div class="filter-panel__category-title">{{ category.name }}</div>
-                    <div class="filter-panel__tag-list">
-                        <div *ngFor="let tag of category.tags" class="filter-panel__filter-tag">
-                            {{ tag.value }}
-                            <img src="../../../../assets/images/shared/searchFilter_clossButton.svg"
-                                class="filter-panel__remove-x" (click)="removeTag(category, tag.id)" />
-                        </div>
-                    </div>
-                </div>
-            </ng-container>
-        </ng-container>
-
-        <ng-template #noFilters>
-            <div class="filter-panel__no-filters-text">No filter selected</div>
-        </ng-template>
-    </div>
+    </ng-container>
+    <ng-template #noFilters>
+      <div class="filter-panel__no-filters-text">No filter selected</div>
+    </ng-template>
+  </div>
 
 </div>

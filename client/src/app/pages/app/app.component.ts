@@ -4,7 +4,7 @@ import {ErrorStoreService} from '../../shared/services/error-store.service';
 import {filter, map, Observable} from 'rxjs';
 import {NgIf} from '@angular/common';
 import {LoaderComponent} from '../../shared/partials/loader/loader.component';
-import {AppService} from '../../services/core/app.service';
+import {AppService} from '../../services/core/app/app.service';
 import {appAnimation} from '../../shared/animations/app.animations';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 

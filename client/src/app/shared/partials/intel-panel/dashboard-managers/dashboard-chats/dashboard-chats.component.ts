@@ -1,5 +1,5 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {AppService} from '../../../../../services/core/app.service';
+import {AppService} from '../../../../../services/core/app/app.service';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
@@ -51,10 +51,10 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     const category = this.route.snapshot.routeConfig?.path;
     let isDiscussion = false
     if (category && ChannelTypeKeys.includes(category.toUpperCase())) {
-      this.dashboardService.consolidatedParamModel.cat_type = category
+      this.dashboardService.consolidatedParamModel.category = category
       isDiscussion = true
     } else {
-      this.dashboardService.consolidatedParamModel.cat_type = "all"
+      this.dashboardService.consolidatedParamModel.category = "all"
     }
 
     combineLatest([this.route.queryParams, this.route.url])

@@ -17,7 +17,7 @@ import {Category} from "../../constants/pages";
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {AppService} from '../../../services/core/app.service';
+import {AppService} from '../../../services/core/app/app.service';
 import {SearchFiltersComponent} from "../../../pages/homepage/search-filters/search-filters.component";
 import {searchFilterAnimation} from '../../animations/search.filter.animation';
 import {SelectedFilterBarComponent} from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
@@ -134,6 +134,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
   onFormSubmit() {
     let query = "";
+    this.searchInputRef?.nativeElement.blur();
     let quoteCount = (this.local_query.match(/"/g) || []).length;
 
     if (this.local_query && quoteCount < 2) {
@@ -196,12 +197,13 @@ export class ResultComponent implements OnInit, OnChanges {
     event.preventDefault();
     event.stopPropagation();
     const cfg = this.app_service.configData();
-    cfg.settings.enable_advanced_tools = !cfg.settings.enable_advanced_tools;
+    cfg.localSettings.enable_advanced_tools = !cfg.localSettings.enable_advanced_tools;
+    this.app_service.set('enable_advanced_tools', this.app_service.configData().localSettings.enable_advanced_tools);
     this.app_service.configData.set(cfg);
   }
 
   onAdvanceSettingToggle() {
-    this.app_service.set('advance_setting_toggle', !this.app_service.configData().settings.advance_setting_toggle);
+    this.app_service.set('advance_setting_toggle', !this.app_service.configData().localSettings.advance_setting_toggle);
     this.showFiltersOverlay = true;
   }
 
@@ -216,6 +218,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
     const clickedInsideFilter =
       this.filtersWrapperRef?.nativeElement.contains(target);
+
     const clickedInput =
       this.searchInputRef?.nativeElement.contains(target);
 

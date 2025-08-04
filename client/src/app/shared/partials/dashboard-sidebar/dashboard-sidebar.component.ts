@@ -17,7 +17,7 @@ import {GeneralCallbackModel} from '../../model/results/general/general.callback
 import {LeakCallbackModel} from '../../model/results/leak/leak.callback.model';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {SelectionStoreService} from '../../../services/dashboard/selection.service';
-import {AppService} from '../../../services/core/app.service';
+import {AppService} from '../../../services/core/app/app.service';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 
 @Component({
