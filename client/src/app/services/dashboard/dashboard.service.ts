@@ -68,7 +68,6 @@ export class DashboardService {
       replaceUrl: true
     }).then();
 
-
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     if (formattedFiltersForApi.length > 0) {
       baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
@@ -99,8 +98,28 @@ export class DashboardService {
     const route: string = this.router.url.split('?')[0];
     this.m_current_route = String(route);
 
-    let baseParams: any = {...paramModel};
+    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
+    const formattedFiltersForApi = Object.entries(entityCategories)
+      .map(([categoryKey, tags]) => ({
+        categoryId: categoryKey,
+        categoryName: categoryKey,
+        tags: Array.isArray(tags) ? tags : [tags]
+      }))
+      .filter(entry => entry.tags.length > 0);
+
+    let baseParams: any = {...paramModel, ...this.selectedFilters()};
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: baseParams,
+      replaceUrl: true
+    }).then();
+
+    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    if (formattedFiltersForApi.length > 0) {
+      baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
+    }
 
     const params = new HttpParams({fromObject: baseParams});
 

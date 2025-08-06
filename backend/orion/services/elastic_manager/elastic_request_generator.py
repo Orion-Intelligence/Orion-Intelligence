@@ -241,13 +241,12 @@ class elastic_request_generator:
         return query
 
     @staticmethod
-    def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model):
+    def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model, pfilter):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
         raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else "*"
         raw_query = helper_controller.remove_stopwords_from_string(raw_query) if raw_query != "*" else "*"
-
         if raw_query == "":
             raw_query = "*"
 
@@ -286,6 +285,19 @@ class elastic_request_generator:
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
+
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
+
+        fixed_must_filter = []
+        for clause in must_filter_clauses:
+            if "term" in clause:
+                for k, v in clause["term"].items():
+                    if isinstance(v, str) and k == "m_gpe":
+                        v = v.title()
+                    fixed_must_filter.append({"term": {k: v}})
+            else:
+                fixed_must_filter.append(clause)
+        must_filter_clauses = fixed_must_filter
 
         if raw_query == "*":
             query_block = {"match_all": {}}
@@ -346,7 +358,9 @@ class elastic_request_generator:
                 "function_score": {
                     "query": {
                         "bool": {
-                            "filter": must_clauses,
+                            "filter": (
+                                    must_clauses + must_filter_clauses
+                            ),
                             "must": query_block
                         }
                     },
@@ -360,7 +374,7 @@ class elastic_request_generator:
             "explain": True
         }
 
-        return [
+        query = [
             ELASTIC_INDEX.S_LEAK_INDEX,
             ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_EXPLOIT_INDEX,
@@ -373,6 +387,14 @@ class elastic_request_generator:
             {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
             {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}
         ]
+
+        print("::::::::::::::::::::::::::", flush=True)
+        print("::::::::::::::::::::::::::", flush=True)
+        print(query, flush=True)
+        print("::::::::::::::::::::::::::", flush=True)
+        print("::::::::::::::::::::::::::", flush=True)
+
+        return query
 
     @staticmethod
     def on_search_consolidated_data(p_query_model, pFilter=None):
@@ -679,11 +701,8 @@ class elastic_request_generator:
         if not raw_query:
             return ELASTIC_INDEX.S_EXPLOIT_INDEX, {"query": {"match_none": {}}, "size": 0}
 
-        exact_phrases = re.findall(r'"([^"]+)"', raw_query)
-        loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
         category = p_query_model.category
 
-        m_url_query = raw_query
         m_safe_search = p_query_model.safe
         m_page_number = p_query_model.page
         m_network = p_query_model.network
@@ -692,9 +711,10 @@ class elastic_request_generator:
         m_content_type = p_query_model.content
         m_entity = p_query_model.entity
 
-        parsed_url = urlparse(raw_query)
-        domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
-        path = parsed_url.path.lstrip("/") or ("/".join(raw_query.split("/")[1:]) if "/" in raw_query else "")
+        exact_phrases = re.findall(r'"([^"]+)"', raw_query)
+        loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
+        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
+        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
 
         must_clauses = []
         must_not_clause = []
@@ -728,11 +748,6 @@ class elastic_request_generator:
                 except ValueError:
                     pass
 
-        filter_clauses = []
-        if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
-            filter_clauses = [{"terms": {k: v}} for k, v in allowed_filtered.items()]
-
         if m_entity:
             entity_list = [
                 e if e.startswith("m_") else f"m_{e}"
@@ -764,99 +779,76 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        url_priority_query = {
-            "bool": {
-                "should": [
-                    {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},
-                    {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},
-                    {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},
-                    {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},
-                    {"match": {"m_url": {"query": raw_query, "boost": 40}}}
-                ],
-                "minimum_should_match": 1,
-                "boost": 10
-            }
-        }
-
-        base_url_query = {
-            "bool": {
-                "should": [
-                    {"term": {
-                        "m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},
-                    {"term": {
-                        "m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},
-                    {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}
-                ],
-                "minimum_should_match": 1,
-                "boost": 5
-            }
-        }
-
         if raw_query == "*":
             content_query = {"match_all": {}}
         else:
-            quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
-            quoted_value = quoted_value_match.group(1) if quoted_value_match else None
-
+            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
             if quoted_value:
                 raw_query = raw_query.strip('"')
-                allowed_keys.discard('m_ip')
-                content_query = {"bool": {"should": [{"terms": {field: [quoted_value], "boost": 3}} for field in allowed_keys], "minimum_should_match": 1, "boost": 5}}
+                for phrase in exact_phrases:
+                    content_query["bool"]["should"].append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
+                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
             else:
                 content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+                for phrase in exact_phrases:
+                    must_clauses.append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
+                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
 
-            for phrase in exact_phrases:
-                phrase_query = {
-                    "bool": {
-                        "should": [
-                            {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
-                            {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-                            {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-                        ],
-                        "minimum_should_match": 1
+                for term in loose_terms:
+                    content_query["bool"]["should"].append({
+                        "query_string": {
+                            "query": term.lower() + "*",
+                            "fields": ["*"],
+                            "default_operator": "OR",
+                            "lenient": True,
+                            "analyze_wildcard": True,
+                            "boost": 2
+                        }
+                    })
+
+                if not exact_phrases and not loose_terms:
+                    content_query = {
+                        "query_string": {
+                            "query": raw_query.lower().rstrip("/") + "*",
+                            "fields": ["*"],
+                            "default_operator": "OR",
+                            "lenient": True,
+                            "analyze_wildcard": True,
+                            "boost": 2
+                        }
                     }
-                }
-                content_query["bool"]["should"].append(phrase_query)
-
-            for term in loose_terms:
-                term_query = {
-                    "query_string": {
-                        "query": term.lower() + "*",
-                        "fields": ["*"],
-                        "default_operator": "OR",
-                        "lenient": True,
-                        "analyze_wildcard": True,
-                        "boost": 2
-                    }
-                }
-                content_query["bool"]["should"].append(term_query)
-
-            if not exact_phrases and not loose_terms:
-                content_query = {
-                    "query_string": {
-                        "query": raw_query.lower().rstrip("/") + "*",
-                        "fields": ["*"],
-                        "default_operator": "OR",
-                        "lenient": True,
-                        "analyze_wildcard": True,
-                        "boost": 2
-                    }
-                }
-
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
         query_statement = {
             "min_score": 0,
             "query": {
                 "function_score": {
                     "query": {
                         "bool": {
-                            "filter": must_clauses + filter_clauses,
-                            "should": [
-                                url_priority_query,
-                                base_url_query,
-                                content_query
-                            ],
-                            "minimum_should_match": 1,
-                            "must_not": must_not_clause
+                            "must": [content_query] if isinstance(content_query, dict) else [],
+                            "filter": must_clauses + must_filter_clauses,
+                            "must_not": must_not_clause,
+                            **({
+                                   "should": should_filter_clauses,
+                                   "minimum_should_match": 1
+                               } if not p_query_model.must and should_filter_clauses else {})
                         }
                     },
                     "functions": [
@@ -1027,29 +1019,46 @@ class elastic_request_generator:
             }
         else:
             query_string_query = {
-                "query_string": {
-                    "query": raw_query + "*",
+                "multi_match": {
+                    "query": raw_query,
                     "fields": search_fields,
-                    "default_operator": "OR",
-                    "analyze_wildcard": True,
-                    "auto_generate_synonyms_phrase_query": False,
-                    "lenient": True
+                    "type": "best_fields",
+                    "operator": "OR"
                 }
             }
-        filter_clauses = []
-        if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
-            filter_clauses = [{"terms": {k: v}} for k, v in allowed_filtered.items()]
 
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
         query = {
             "min_score": 0,
             "query": {
                 "function_score": {
                     "query": {
                         "bool": {
-                            "filter": must_clauses + filter_clauses,
+                            "must": [query_string_query] if isinstance(query_string_query, dict) else [],
+                            "filter": (
+                                    must_clauses +
+                                    must_filter_clauses +
+                                    (
+                                        [{
+                                            "bool": {
+                                                "should": should_filter_clauses.get("bool", {}).get("should", []),
+                                                "minimum_should_match": 1
+                                            }
+                                        }] if not getattr(p_query_model, "must", False) and should_filter_clauses else []
+                                    )
+                            ),
                             "must_not": must_not_clause,
                             "should": [
+                                query_string_query,
+                                {
+                                    "wildcard": {
+                                        "m_content.keyword": {
+                                            "value": f"*{raw_query}*",
+                                            "boost": 1.5,
+                                            "case_insensitive": True
+                                        }
+                                    }
+                                },
                                 query_string_query,
                                 {
                                     "wildcard": {
@@ -1122,6 +1131,9 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_telegram_data(p_query_model: search_chat_param_model, pfilter=None):
+        if p_query_model.matchtype:
+            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+
         raw_query = ""
         if p_query_model.q == "":
             raw_query = "*"
@@ -1191,11 +1203,15 @@ class elastic_request_generator:
             "m_caption^2.5",
             "m_channel_name^2",
             "m_media_caption^2",
-
             "m_forwarded_from^1.2",
+            "m_sender_name^1.1",
+            "m_file_name^1.0",
+            "m_ref_html^0.8"
         ]
 
-        if '"' in raw_query:
+        if raw_query == "*":
+            query_string_query = {"match_all": {}}
+        elif '"' in raw_query:
             query_string_query = {
                 "query_string": {
                     "query": raw_query,
@@ -1208,16 +1224,13 @@ class elastic_request_generator:
             }
         else:
             query_string_query = {
-                "query_string": {
-                    "query": raw_query + "*",
+                "multi_match": {
+                    "query": raw_query,
                     "fields": search_fields,
-                    "default_operator": "OR",
-                    "analyze_wildcard": True,
-                    "auto_generate_synonyms_phrase_query": False,
-                    "lenient": True
+                    "type": "best_fields",
+                    "operator": "OR"
                 }
             }
-
         must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
         query = {
             "min_score": 0,
@@ -1226,7 +1239,18 @@ class elastic_request_generator:
                     "query": {
                         "bool": {
                             "must": [query_string_query] if isinstance(query_string_query, dict) else [],
-                            "filter": must_clauses + must_filter_clauses,
+                            "filter": (
+                                    must_clauses +
+                                    must_filter_clauses +
+                                    (
+                                        [{
+                                            "bool": {
+                                                "should": should_filter_clauses.get("bool", {}).get("should", []),
+                                                "minimum_should_match": 1
+                                            }
+                                        }] if not getattr(p_query_model, "must", False) and should_filter_clauses else []
+                                    )
+                            ),
                             "must_not": must_not_clause,
                             "should": [
                                 query_string_query,
@@ -1257,7 +1281,7 @@ class elastic_request_generator:
                                     }
                                 }
                             ],
-                            "minimum_should_match": 1
+                            "minimum_should_match": 0
                         }
                     },
                     "functions": [

@@ -238,7 +238,15 @@ class ELASTIC_ENUMS:
         "settings": {
             "number_of_shards": 1,
             "number_of_replicas": 0,
-            "max_result_window": 1000000
+            "max_result_window": 1000000,
+            "analysis": {
+                "normalizer": {
+                    "lowercase_normalizer": {
+                        "type": "custom",
+                        "filter": ["lowercase"]
+                    }
+                }
+            }
         },
         "mappings": {
             "dynamic_templates": [
@@ -246,42 +254,80 @@ class ELASTIC_ENUMS:
                     "strings_as_keywords": {
                         "match_mapping_type": "string",
                         "mapping": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "normalizer": "lowercase_normalizer"
                         }
                     }
                 }
             ],
             "properties": {
-                "m_content": {"type": "text"},
-                "m_caption": {"type": "text"},
+                "m_content": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                    }
+                },
+                "m_caption": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                    }
+                },
+                "m_media_caption": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                    }
+                },
+                "m_ref_html": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                    }
+                },
+                "m_forwarded_from": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                    }
+                },
+                "m_sender_name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                    }
+                },
+                "m_channel_name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                    }
+                },
+
                 "m_message_date": {"type": "date"},
-                "m_time": {"type": "keyword"},
-                "m_message_id": {"type": "keyword"},
-                "m_message_sharable_link": {"type": "keyword"},
-                "m_channel_id": {"type": "keyword"},
-                "m_views": {"type": "keyword"},
-                "m_file_name": {"type": "keyword"},
-                "m_file_size": {"type": "keyword"},
-                "m_forwarded_from": {"type": "keyword"},
-                "m_sender_name": {"type": "keyword"},
-                "m_sender_username": {"type": "keyword"},
-                "m_channel_url": {"type": "keyword"},
-                "m_message_type": {"type": "keyword"},
-                "m_media_url": {"type": "keyword"},
-                "m_media_caption": {"type": "text"},
-                "m_reply_to_message_id": {"type": "keyword"},
-                "m_message_status": {"type": "keyword"},
-                "m_file_saved_as": {"type": "keyword"},
-                "m_file_path": {"type": "keyword"},
-                "m_channel_name": {"type": "keyword"},
-                "m_weblink": {"type": "keyword"},
-                "m_users": {"type": "keyword"},
-                "m_ref_html": {"type": "text"},
-                "m_hashtags": {"type": "keyword"},
-                "m_content_type": {"type": "keyword"}
+                "m_time": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_message_id": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_message_sharable_link": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_channel_id": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_views": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_file_size": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_sender_username": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_channel_url": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_message_type": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_media_url": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_reply_to_message_id": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_message_status": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_file_saved_as": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_file_path": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_weblink": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_file_name": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_users": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_hashtags": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"}
             }
         }
     }
+
     mapping_credential_model = {
         "settings": {
             "number_of_shards": 1,

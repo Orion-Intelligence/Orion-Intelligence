@@ -12,6 +12,7 @@ export class ChatResultItem {
   m_views?: string;
   m_file_name: string[] = [];
   m_sender_name?: string;
+  m_sender_username?: string;
   m_media_caption?: string;
   m_file_path?: string;
   m_channel_name?: string;

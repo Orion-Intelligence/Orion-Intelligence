@@ -38,6 +38,10 @@
         <p>Views:</p>
         <span>{{ resultItem.m_views }}</span>
       </div>
+      <div *ngIf="resultItem.m_sender_username" class="search__result-detail-meta-divs">
+        <p>Sender Username:</p>
+        <span>{{ resultItem.m_sender_username }}</span>
+      </div>
       <div *ngIf="resultItem.m_sender_name" class="search__result-detail-meta-divs">
         <p>Sender:</p>
         <span>{{ resultItem.m_sender_name }}</span>
