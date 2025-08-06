@@ -228,7 +228,7 @@ export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set([
 ]);
 
 export const search_filter_keys = new Set([
-  'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
+  'm_search_all', 'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
   'm_bitcoin_addresses', 'm_company_name', 'm_country', 'm_country_name', 'm_platform',
   'm_credit_card', 'm_cve', 'm_cwe', 'm_document_id', 'm_dumplink', 'm_email', 'm_employee_count',
   'm_encoded_urls', 'm_event', 'm_fac', 'm_file_path', 'm_file_paths', 'm_gpe', 'm_hashtag', 'm_author',
@@ -241,6 +241,7 @@ export const search_filter_keys = new Set([
   'm_yara_rule', 'm_domain'
 ]);
 export const search_filter_labels: { [key: string]: string } = {
+  m_search_all: 'Search All',
   m_asns: 'ASNs',
   m_attacker: 'Attacker',
   m_au_abn: 'AU ABN',
@@ -307,5 +308,5 @@ export const search_filter_labels: { [key: string]: string } = {
   m_username: 'Username',
   m_xmpp_addresses: 'XMPP Addresses',
   m_yara_rule: 'YARA Rule',
-  m_domain: 'Domain'
+  m_domain: 'Domain',
 };
