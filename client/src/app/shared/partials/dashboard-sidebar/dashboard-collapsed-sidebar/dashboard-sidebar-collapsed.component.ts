@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {AsyncPipe, NgClass, NgForOf, NgOptimizedImage} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
-import {LowerPipe} from '../../../model/pipes/lower.pipe';
+import {LowerPipe} from '../../../pipes/lower.pipe';
 import {sidebarItemTooltips} from '../../../constants/shared-enums';
 
 @Component({

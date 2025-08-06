@@ -21,7 +21,6 @@ export class LocalSettingsModel {
   enable_advanced_tools: boolean = false;
   advance_setting_toggle: boolean = false;
   iocExpanded: boolean = true;
-  sidebarFilters: Record<string, { title: string; selected: string | string[] }> = {};
   entityfilterCategories: Record<string, string[]> = {};
   entityFilterCondition: boolean = false;
 }

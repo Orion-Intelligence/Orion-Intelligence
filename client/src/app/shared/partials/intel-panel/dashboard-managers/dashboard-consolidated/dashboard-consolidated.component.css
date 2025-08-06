@@ -21,7 +21,7 @@
   color: #A0B8D1;
 }
 
-@media only screen and (width <=768px) {
+@media only screen and (width <=1000px) {
   .consolidated_container {
     margin: 25px 10px;
   }
@@ -30,7 +30,6 @@
     padding-right: 0 !important;
   }
 }
-
 
 .dashboard__layout-wrapper {
   display: flex;

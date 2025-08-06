@@ -15,7 +15,8 @@
   font-family: Inter, sans-serif;
   color: white;
   max-height: 500px;
-  width: 970px;
+  width: 100%;
+  max-width: 870px;
   z-index: 1;
   margin-top: 10px;
   overflow-y: auto;
@@ -376,14 +377,7 @@ button:focus {
   transform: translateX(10px);
 }
 
-@media only screen and (width <= 1320px) {
+@media only screen and (width <= 900px) {
   .filter-panel {
-    width: 700px;
-  }
-}
-
-@media only screen and (width <= 1060px) {
-  .filter-panel {
-    width: 475px;
   }
 }

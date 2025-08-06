@@ -1,9 +1,9 @@
-<app-result (onToggleSort)="onToggleSort($event)" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [filterModel]="chat_filters" [isLoading]="isLoading" [result_count]="Math.ceil(chatCallbackModel.Result.length)" [searchQuery]="query" [showTabs]=false [suggestion]="chatCallbackModel.Suggestions[0]"></app-result>
+<app-result (onToggleSort)="onToggleSort($event)" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [filterModel]="chat_filters" [isLoading]="isResponseLoading()" [result_count]="Math.ceil(chatCallbackModel.Result.length)" [searchQuery]="query" [showTabs]=false [suggestion]="chatCallbackModel.Suggestions[0]"></app-result>
 
-<div *ngIf="!isLoading" @fadeInDashboardItem>
+<div *ngIf="!isResponseLoading()" @fadeInDashboardItem>
   <app-dashboard-result-chat [searchResults]="chatCallbackModel.Result"></app-dashboard-result-chat>
 </div>
 
-<div *ngIf="!isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
+<div *ngIf="!isResponseLoading() && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
   <app-pagination (pageChange)="onPageChange($event)" [currentPage]="this.dashboardService.consolidatedParamModel.page" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
 </div>

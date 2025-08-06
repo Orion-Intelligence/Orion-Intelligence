@@ -1,16 +1,21 @@
-<div *ngIf="entityFiltersCount() || sidebarFilterCount()" [ngClass]="{ 'selected-filter-bar__top-space': showSorting }">
-  <div class="selected-filter-bar selected-filter-bar__left-space">
+<div [ngClass]="{ 'selected-filter-bar__top-space': showSorting }" @fadeInDashboardItem>
+  <div class="selected-filter-bar selected-filter-bar__left-space" *ngIf="!isConsolidatedRoute() && sidebarFilterCount(true)>0 || isConsolidatedRoute()">
     <div class="selected-filter-bar__top-row">
       <div class="selected-filter-bar__title">Filters</div>
       <div class="selected-filter-bar__actions">
-        <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
-          Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
-        </div>
-        <div class="selected-filter-bar__filter-type">
-          Entity({{ entityFiltersCount() }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
-        </div>
-        <div class="selected-filter-bar__filter-type">
+        <ng-container *ngIf="isConsolidatedRoute()">
+          <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
+            Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
+          </div>
+          <div class="selected-filter-bar__filter-type">
+            Entity({{ entityFiltersCount() }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
+          </div>
+        </ng-container>
+        <div class="selected-filter-bar__filter-type" *ngIf="sidebarFilterCount()>0">
           Sidebar({{ sidebarFilterCount() }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close"/>
+        </div>
+        <div class="selected-filter-bar__filter-type" *ngIf="this.dashboardService.selectedFilters()['matchtype'] && this.dashboardService.selectedFilters()['matchtype']!='or'">
+          Search Type ({{ this.dashboardService.selectedFilters()['matchtype'] }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close"/>
         </div>
         <button class="selected-filter-bar__clear-btn" (click)="clearFilters('all')">Clear Selection</button>
         <div class="selected-filter-bar__expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }" (click)="toggleFilterBarCollapse()">
@@ -22,23 +27,25 @@
     <div *ngIf="isFilterBarExpanded">
       <div class="selected-filter-bar__primary-filters-wrap">
         <ng-container *ngIf="sidebarFilterCount() > 0; else noSidebarFilters">
-          <ng-container *ngFor="let filterKey of (filterModel.filters | keyvalue)">
-            <div class="selected-filter-bar__filter-item" *ngIf="isFilterSelected(filterKey.value)">
+          <ng-container *ngFor="let key of sidebarFilters()">
+            <div class="selected-filter-bar__filter-item">
               <div class="selected-filter-bar__filter-label-edit">
-                {{ filterKey.value.title }}
+                {{ filter_mapping[key] || key }}
               </div>
-              <span *ngIf="filterKey.value.type !== 'multiSelection'" class="selected-filter-bar__filter-tag">
-                {{ getSelectedLabel(filterKey.value) }}
+              <span class="selected-filter-bar__filter-tag">
+                {{ selectedFilters[key] }}
               </span>
             </div>
           </ng-container>
         </ng-container>
+
         <ng-template #noSidebarFilters>
-          <div class="selected-filter-bar__no-filters-text">
+          <div class="selected-filter-bar__no-filters">
             Sidebar filters are empty. Click the filter icon (top right) to select filters.
           </div>
         </ng-template>
       </div>
+
 
       <div class="selected-filter-bar__divider"></div>
 

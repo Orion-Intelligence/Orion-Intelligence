@@ -37,12 +37,12 @@
 .selected-filter-bar {
   background-color: #172235;
   border: 1px solid #FCFCFC12;
-  border-radius: 8px;
-  padding: 10px 24px 15px 17px;
+  border-radius: 10px;
+  padding: 10px 24px 12px 17px;
   margin-left: 0;
   font-family: Inter, sans-serif;
   color: white;
-  max-width: 970px;
+  max-width: 870px;
   margin-top: 15px;
 }
 

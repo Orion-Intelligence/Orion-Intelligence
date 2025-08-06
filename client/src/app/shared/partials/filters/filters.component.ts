@@ -1,14 +1,14 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { FilterModel } from '../../model/filter/filter.model';
-import { last } from 'rxjs';
-import { filterAnimation } from '../../animations/filter.animation';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { DatePickerComponent } from './date-picker/date-picker.component';
-import { MultipleSelectionComponent } from './multiple-selection/multiple-selection.component';
-import { AppService } from '../../../services/core/app/app.service';
+import {Component, effect, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {FilterModel} from '../../model/filter/filter.model';
+import {last} from 'rxjs';
+import {filterAnimation} from '../../animations/filter.animation';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {DatePickerComponent} from './date-picker/date-picker.component';
+import {MultipleSelectionComponent} from './multiple-selection/multiple-selection.component';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-filters',
@@ -18,6 +18,7 @@ import { AppService } from '../../../services/core/app/app.service';
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {
+  selectedFilters: Record<string, string | null> = {}
   @Input() filterModel!: FilterModel;
   @Input() isFilterOpen!: boolean | null;
   @Output() filterChanged = new EventEmitter<Record<string, string | null>>();
@@ -25,17 +26,19 @@ export class FiltersComponent implements OnInit {
   @Output() filterClose = new EventEmitter<void>();
 
   initialModel!: FilterModel;
-  selectedFilters: Record<string, string | null> = {};
   protected readonly Object = Object;
   protected readonly last = last;
 
-  constructor(private app_service: AppService) {
+  constructor(protected dashboard: DashboardService) {
+    this.initialModel = structuredClone(this.filterModel)
+    effect(() => {
+      const currentFilters = this.dashboard.selectedFilters();
+      this.selectedFilters = {...currentFilters};
+    });
   }
 
   ngOnInit() {
     this.initialModel = structuredClone(this.filterModel)
-    this.initializeFilters();
-    this.loadFiltersFromSettings();
   }
 
   updateFilter(event: { key: string; value: string }) {
@@ -55,8 +58,8 @@ export class FiltersComponent implements OnInit {
   }
 
   applyFilters() {
-    this.filterChanged.emit({ ...this.selectedFilters });
-    this.saveFiltersToSettings();
+    this.dashboard.selectedFilters.set(this.selectedFilters)
+    this.filterChanged.emit({...this.selectedFilters});
     this.closeFilter();
   }
 
@@ -65,9 +68,9 @@ export class FiltersComponent implements OnInit {
   }
 
   resetFilters() {
+    this.dashboard.selectedFilters.set({})
+    this.filterChanged.emit({...this.selectedFilters});
     this.closeFilter();
-    this.initializeFilters();
-    this.filterReset.emit();
   }
 
   getOptionLabel(filterKey: string): string {
@@ -79,47 +82,4 @@ export class FiltersComponent implements OnInit {
     const option = options.find(opt => opt.key === selectedKey);
     return option ? option.label : 'Select ' + this.filterModel.filters[filterKey].title;
   }
-
-  private initializeFilters() {
-    this.selectedFilters = Object.keys(this.initialModel.filters)
-      .reduce((acc, key) => {
-        const defaultValue = this.initialModel.filters[key].selected;
-        const isDefault = defaultValue === 'all' || defaultValue === '' || (Array.isArray(defaultValue) && defaultValue.length === 0);
-        this.filterModel.filters[key].selected = isDefault ? '' : defaultValue
-        return {
-          ...acc,
-          [key]: isDefault ? null : defaultValue
-        };
-      }, {});
-  }
-
-  private saveFiltersToSettings() {
-    const filtersToSave = Object.keys(this.filterModel.filters).reduce((acc, key) => {
-      acc[key] = {
-        title: this.filterModel.filters[key].title,
-        selected: this.filterModel.filters[key].selected
-      };
-      return acc;
-    }, {} as Record<string, { title: string; selected: string | string[] }>);
-
-    this.app_service.set('sidebarFilters', filtersToSave);
-  }
-  private loadFiltersFromSettings() {
-    const saved = this.app_service.getConfig().localSettings.sidebarFilters;
-    if (!saved) return;
-
-    for (const key of Object.keys(this.filterModel.filters)) {
-      const current = this.filterModel.filters[key];
-      const savedEntry = saved[key];
-
-      if (savedEntry && savedEntry.title === current.title) {
-        current.selected = savedEntry.selected;
-        if (typeof savedEntry.selected === 'string') {
-          this.selectedFilters[key] = savedEntry.selected;
-        }
-      }
-    }
-  }
-
-
 }

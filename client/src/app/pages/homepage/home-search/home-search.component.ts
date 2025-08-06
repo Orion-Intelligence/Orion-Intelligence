@@ -1,12 +1,12 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
-import { SearchFiltersComponent } from "../search-filters/search-filters.component";
-import { HomeInsightComponent } from "../home-insight/home-insight.component";
-import { AppService } from '../../../services/core/app/app.service';
+import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {ConsolidatedCallbackModel} from '../../../shared/model/results/consolidated/consolidated.callback.model';
+import {SearchFiltersComponent} from "../search-filters/search-filters.component";
+import {HomeInsightComponent} from "../home-insight/home-insight.component";
+import {AppService} from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-home-search',
@@ -16,14 +16,23 @@ import { AppService } from '../../../services/core/app/app.service';
 })
 export class HomeSearchComponent implements OnInit {
   searchQuery = '';
+  selectedSearchBy = 'Match any term';
 
   showFiltersOverlay: boolean = false;
-  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService) {
   }
+
   ngOnInit(): void {
+  }
+
+  onSetMatchType(type: string) {
+    this.dashboardService.selectedFilters.set({
+      ...this.dashboardService.selectedFilters(),
+      matchtype: type
+    });
   }
 
   onSearchSubmit(): void {
@@ -40,6 +49,17 @@ export class HomeSearchComponent implements OnInit {
     }).then();
   }
 
+  getMatchType() {
+    const matchtype = this.dashboardService.selectedFilters()["matchtype"];
+    if (matchtype === "full") {
+      return "Match full query";
+    } else if (matchtype === "or") {
+      return "Match any term";
+    } else {
+      return "Match individual terms";
+    }
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -53,11 +73,22 @@ export class HomeSearchComponent implements OnInit {
       this.setFilterOverlay(false);
     }
   }
+
   setFilterOverlay(newValue: boolean) {
     this.showFiltersOverlay = newValue;
   }
+
   onAdvanceSettingToggle() {
     this.app_service.set('advance_setting_toggle', !this.app_service.configData().localSettings.advance_setting_toggle);
     this.showFiltersOverlay = true;
+  }
+
+  onToolToggle(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const cfg = this.app_service.configData();
+    cfg.localSettings.enable_advanced_tools = !cfg.localSettings.enable_advanced_tools;
+    this.app_service.set('enable_advanced_tools', this.app_service.configData().localSettings.enable_advanced_tools);
+    this.app_service.configData.set(cfg);
   }
 }

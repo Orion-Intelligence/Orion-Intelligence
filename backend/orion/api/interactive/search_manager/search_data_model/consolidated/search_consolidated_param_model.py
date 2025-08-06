@@ -14,6 +14,7 @@ class search_consolidated_param_model(BaseModel,helper_controller):
     must: bool = False
     network: str = "all"
     daterange: Optional[str] = ""
+    matchtype: Optional[str] = ""
     content: Optional[str] = "all"
     entity: Optional[str] = ""
     mitre: Optional[str] = ""

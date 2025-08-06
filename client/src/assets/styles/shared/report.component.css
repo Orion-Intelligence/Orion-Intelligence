@@ -449,7 +449,8 @@
   margin-bottom: 12px;
   overflow: hidden;
   margin-top: 10px;
-  word-break: break-all
+  word-break: break-all;
+  user-select: text !important;
 }
 
 .dashboard__search-highlight {

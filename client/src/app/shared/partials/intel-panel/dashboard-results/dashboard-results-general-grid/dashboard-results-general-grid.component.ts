@@ -15,6 +15,8 @@ import {TooltipDirective} from '../../../../directive/tooltip-directive.directiv
   standalone: true
 })
 export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnInit {
+  private highlightCache = new Map<string, SafeHtml>();
+
   @Input() query!: string;
   @Input() type!: string;
   @Input() searchResults: (GeneralResultItem | LeakResultItem)[] = [];
@@ -31,8 +33,13 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
     this.scrollService.scrollToSavedPosition();
   }
 
-  highlightWords(text: string): SafeHtml {
-    return this.helperService.highlightWords(text);
+  highlightWords(text: any): SafeHtml {
+    const key = JSON.stringify(text);
+    if (this.highlightCache.has(key)) return this.highlightCache.get(key)!;
+
+    const result = this.helperService.highlightWords(text);
+    this.highlightCache.set(key, result);
+    return result;
   }
 
   ngOnInit() {

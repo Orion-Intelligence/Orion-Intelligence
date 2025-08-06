@@ -13,7 +13,7 @@ export const dump_filters: FilterModel = {
       tooltip: "Leak origin sources",
       selected: "all"
     },
-    mDateRange: {
+    daterange: {
       title: "Date Range",
       options: [],
       type: "daterange",
@@ -36,7 +36,7 @@ export const dump_filters: FilterModel = {
 
 export const stealer_filters: FilterModel = {
   filters: {
-    mDateRange: {
+    daterange: {
       title: "Date Range",
       options: [],
       type: 'daterange',
@@ -99,7 +99,7 @@ export const directory_filters: FilterModel = {
       tooltip: "",
       selected: "all"
     },
-    mDateRange: {
+    daterange: {
       title: "Date Range",
       options: [],
       type: 'daterange',
@@ -191,7 +191,7 @@ export const social_filters: FilterModel = {
 
 export const chat_filters: FilterModel = {
   filters: {
-    mContentType: {
+    content: {
       title: "Content Type",
       options: [
         {key: "EMAILS", label: "Emails"},
@@ -263,86 +263,14 @@ export const chat_filters: FilterModel = {
       tooltip: "",
       selected: "all"
     },
-    mDateRange: {
+    daterange: {
       title: "Message Date",
       options: [],
       type: 'daterange',
       tooltip: "Message Date",
       selected: ""
     },
-    mEntity: {
-      title: "Entity Type",
-      options: [
-        {key: "EMAILS", label: "Emails"},
-        {key: "HASHES", label: "Hashes"},
-        {key: "IOCS", label: "IOCs"},
-        {key: "IPS", label: "IPs"},
-        {key: "IPV4S", label: "IPv4s"},
-        {key: "IPV6S", label: "IPv6s"},
-        {key: "MD5_HASHES", label: "MD5 Hashes"},
-        {key: "SHA1_HASHES", label: "SHA1 Hashes"},
-        {key: "SHA256_HASHES", label: "SHA256 Hashes"},
-        {key: "SHA512_HASHES", label: "SHA512 Hashes"},
-        {key: "TELEPHONE_NUMS", label: "Telephone Nums"},
-        {key: "UNENCODED_URLS", label: "Unencoded URLs"},
-        {key: "URLS", label: "URLs"},
-        {key: "EMAIL_ADDRESSES_COMPLETE", label: "Email Addresses Complete"},
-        {key: "EMAIL_ADDRESSES", label: "Email Addresses"},
-        {key: "DOMAINS", label: "Domains"},
-        {key: "SHA512S", label: "SHA512s"},
-        {key: "SHA256S", label: "SHA256s"},
-        {key: "SHA1S", label: "SHA1s"},
-        {key: "MD5S", label: "MD5s"},
-        {key: "SSDEEPS", label: "SSDEEPS"},
-        {key: "CVES", label: "CVEs"},
-        {key: "BITCOIN_ADDRESSES", label: "Bitcoin Addresses"},
-        {key: "MAC_ADDRESSES", label: "MAC Addresses"},
-        {key: "API_KEY", label: "API Key"},
-        {key: "AWS_SECRET", label: "AWS Secret"},
-        {key: "AZURE_RESOURCE_ID", label: "Azure Resource ID"},
-        {key: "REGISTRY_KEY", label: "Registry Key"},
-        {key: "FILE_PATH", label: "File Path"},
-        {key: "YARA_RULE", label: "YARA Rule"},
-        {key: "PHONE_NUMBER", label: "Phone Number"},
-        {key: "COUNTRY", label: "Country"},
-        {key: "ORG", label: "Org"},
-        {key: "GPE", label: "GPE"},
-        {key: "NORP", label: "NORP"},
-        {key: "PRODUCT", label: "Product"},
-        {key: "PERSON", label: "Person"},
-        {key: "LOC", label: "LOC"},
-        {key: "LAW", label: "Law"},
-        {key: "CREDIT_CARD", label: "Credit Card"},
-        {key: "IBAN_CODE", label: "IBAN Code"},
-        {key: "IN_AADHAAR", label: "IN Aadhaar"},
-        {key: "AU_ABN", label: "AU ABN"},
-        {key: "AU_TFN", label: "AU TFN"},
-        {key: "IN_VEHICLE_REGISTRATION", label: "IN Vehicle Registration"},
-        {key: "IP_ADDRESS", label: "IP Address"},
-        {key: "IN_PAN", label: "IN PAN"},
-        {key: "LOCATION", label: "Location"},
-        {key: "NRP", label: "NRP"},
-        {key: "SG_NRIC_FIN", label: "SG NRIC FIN"},
-        {key: "US_ITIN", label: "US ITIN"},
-        {key: "IN_VOTER", label: "IN Voter"},
-        {key: "US_DRIVER_LICENSE", label: "US Driver License"},
-        {key: "URL", label: "URL"},
-        {key: "US_SSN", label: "US SSN"},
-        {key: "US_PASSPORT", label: "US Passport"},
-        {key: "IN_PASSPORT", label: "IN Passport"},
-        {key: "US_BANK_NUMBER", label: "US Bank Number"},
-        {key: "USERNAME", label: "Username"},
-        {key: "PASSWORD", label: "Password"},
-        {key: "HASHTAG", label: "Hashtag"},
-        {key: "MENTION", label: "Mention"},
-        {key: "MITRE_TTP_TYPE", label: "MITRE TTP Type"}
-      ]
-      ,
-      type: 'multiSelection',
-      tooltip: "Entity Filter",
-      selected: []
-    },
-    mMitreTtp: {
+    mitre: {
       title: "Mitre TTP",
       options: [
         {key: "attack-pattern", label: "Attack Pattern"},
@@ -419,7 +347,7 @@ export const defacement_filters: FilterModel = {
 
 export const consolidated_filters: FilterModel = {
   filters: {
-    mNetwork: {
+    network: {
       title: "Network Type",
       options: [
         {key: "all", label: "All"},
@@ -431,14 +359,14 @@ export const consolidated_filters: FilterModel = {
       tooltip: "Web Layers",
       selected: "all"
     },
-    mDateRange: {
+    daterange: {
       title: "Creation Date",
       options: [],
       type: 'daterange',
       tooltip: "Creation Date",
       selected: ""
     },
-    mContentType: {
+    content: {
       title: "Mitre TTP",
       options: [
         {key: "attack-pattern", label: "Attack Pattern"},
@@ -459,78 +387,18 @@ export const consolidated_filters: FilterModel = {
       type: 'dropdown',
       tooltip: "Content Filter",
       selected: "attack-pattern"
-    },
-    mEntity: {
-      title: "Entity Type",
-      options: [
-        {key: "EMAILS", label: "Emails"},
-        {key: "HASHES", label: "Hashes"},
-        {key: "IOCS", label: "IOCs"},
-        {key: "IPS", label: "IPs"},
-        {key: "IPV4S", label: "IPv4s"},
-        {key: "IPV6S", label: "IPv6s"},
-        {key: "MD5_HASHES", label: "MD5 Hashes"},
-        {key: "SHA1_HASHES", label: "SHA1 Hashes"},
-        {key: "SHA256_HASHES", label: "SHA256 Hashes"},
-        {key: "SHA512_HASHES", label: "SHA512 Hashes"},
-        {key: "TELEPHONE_NUMS", label: "Telephone Nums"},
-        {key: "UNENCODED_URLS", label: "Unencoded URLs"},
-        {key: "URLS", label: "URLs"},
-        {key: "EMAIL_ADDRESSES_COMPLETE", label: "Email Addresses Complete"},
-        {key: "EMAIL_ADDRESSES", label: "Email Addresses"},
-        {key: "DOMAINS", label: "Domains"},
-        {key: "SHA512S", label: "SHA512s"},
-        {key: "SHA256S", label: "SHA256s"},
-        {key: "SHA1S", label: "SHA1s"},
-        {key: "MD5S", label: "MD5s"},
-        {key: "SSDEEPS", label: "SSDEEPS"},
-        {key: "CVES", label: "CVEs"},
-        {key: "BITCOIN_ADDRESSES", label: "Bitcoin Addresses"},
-        {key: "MAC_ADDRESSES", label: "MAC Addresses"},
-        {key: "API_KEY", label: "API Key"},
-        {key: "AWS_SECRET", label: "AWS Secret"},
-        {key: "AZURE_RESOURCE_ID", label: "Azure Resource ID"},
-        {key: "REGISTRY_KEY", label: "Registry Key"},
-        {key: "FILE_PATH", label: "File Path"},
-        {key: "YARA_RULE", label: "YARA Rule"},
-        {key: "PHONE_NUMBER", label: "Phone Number"},
-        {key: "COUNTRY", label: "Country"},
-        {key: "ORG", label: "Org"},
-        {key: "GPE", label: "GPE"},
-        {key: "NORP", label: "NORP"},
-        {key: "PRODUCT", label: "Product"},
-        {key: "PERSON", label: "Person"},
-        {key: "LOC", label: "LOC"},
-        {key: "LAW", label: "Law"},
-        {key: "CREDIT_CARD", label: "Credit Card"},
-        {key: "IBAN_CODE", label: "IBAN Code"},
-        {key: "IN_AADHAAR", label: "IN Aadhaar"},
-        {key: "AU_ABN", label: "AU ABN"},
-        {key: "AU_TFN", label: "AU TFN"},
-        {key: "IN_VEHICLE_REGISTRATION", label: "IN Vehicle Registration"},
-        {key: "IP_ADDRESS", label: "IP Address"},
-        {key: "IN_PAN", label: "IN PAN"},
-        {key: "LOCATION", label: "Location"},
-        {key: "NRP", label: "NRP"},
-        {key: "SG_NRIC_FIN", label: "SG NRIC FIN"},
-        {key: "US_ITIN", label: "US ITIN"},
-        {key: "IN_VOTER", label: "IN Voter"},
-        {key: "US_DRIVER_LICENSE", label: "US Driver License"},
-        {key: "URL", label: "URL"},
-        {key: "US_SSN", label: "US SSN"},
-        {key: "US_PASSPORT", label: "US Passport"},
-        {key: "IN_PASSPORT", label: "IN Passport"},
-        {key: "US_BANK_NUMBER", label: "US Bank Number"},
-        {key: "USERNAME", label: "Username"},
-        {key: "PASSWORD", label: "Password"},
-        {key: "HASHTAG", label: "Hashtag"},
-        {key: "MENTION", label: "Mention"},
-        {key: "MITRE_TTP_TYPE", label: "MITRE TTP Type"}
-      ]
-      ,
-      type: 'multiSelection',
-      tooltip: "Entity Filter",
-      selected: []
     }
   }
+};
+
+export const filter_mapping: Record<string, string> = {
+  source: "Source",
+  daterange: "Date Range",
+  status: "Status",
+  network: "Network Type",
+  index: "Index Type",
+  content_type: "Content Type",
+  safe: "Safe Search",
+  content: "Mitre TTP",
+  mitre: "Mitre TTP"
 };

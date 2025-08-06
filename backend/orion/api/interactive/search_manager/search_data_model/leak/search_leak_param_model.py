@@ -14,9 +14,11 @@ class search_leak_param_model(BaseModel,helper_controller):
     page: Optional[int] = 1
     safe: bool = False
     network: str = "all"
+    matchtype: Optional[str] = "or"
     daterange: Optional[str] = ""
     content: Optional[str] = "all"
     entity: Optional[str] = ""
+    must: Optional[bool] = False
 
 
     filters: Optional[List[entity_filter_param_model]] = None   

@@ -1,20 +1,20 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable, of, Subject } from 'rxjs';
-import { HttpParams } from '@angular/common/http';
-import { catchError, map, takeUntil } from 'rxjs/operators';
-import { ApiService } from '../../shared/services/api.service';
-import { LeakCallbackModel } from '../../shared/model/results/leak/leak.callback.model';
-import { GeneralCallbackModel } from '../../shared/model/results/general/general.callback.model';
-import { ChatCallbackModel } from '../../shared/model/results/chat/chat.callback.model';
-import { ExploitCallbackModel } from '../../shared/model/results/exploit/exploit.callback.model';
-import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
-import { StealerLogCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
-import { SocialCallbackModel } from '../../shared/model/results/social/social.callback.model';
-import { ConsolidatedParamModel } from '../../shared/model/results/consolidated/consolidated.param.model';
-import { DefacementCallbackModel } from '../../shared/model/results/defacement/defacement.callback.model';
-import { HelperService } from '../../shared/services/helper.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AppService } from '../core/app/app.service';
+import {Injectable, signal} from '@angular/core';
+import {Observable, of, Subject} from 'rxjs';
+import {HttpParams} from '@angular/common/http';
+import {catchError, map, takeUntil} from 'rxjs/operators';
+import {ApiService} from '../../shared/services/api.service';
+import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
+import {GeneralCallbackModel} from '../../shared/model/results/general/general.callback.model';
+import {ChatCallbackModel} from '../../shared/model/results/chat/chat.callback.model';
+import {ExploitCallbackModel} from '../../shared/model/results/exploit/exploit.callback.model';
+import {ConsolidatedCallbackModel} from '../../shared/model/results/consolidated/consolidated.callback.model';
+import {StealerLogCallbackModel} from '../../shared/model/results/credentials/credential.callback.model';
+import {SocialCallbackModel} from '../../shared/model/results/social/social.callback.model';
+import {ConsolidatedParamModel} from '../../shared/model/results/consolidated/consolidated.param.model';
+import {DefacementCallbackModel} from '../../shared/model/results/defacement/defacement.callback.model';
+import {HelperService} from '../../shared/services/helper.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AppService} from '../core/app/app.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,16 +32,13 @@ export class DashboardService {
   consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
   showSubscription = signal<boolean>(false);
+  selectedFilters = signal<Record<string, string | null>>({});
 
   private cancelRequest$ = new Subject<void>();
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private helperService: HelperService,
-    private apiService: ApiService,
-    private app_service: AppService
-  ) {}
+  constructor(private router: Router, private route: ActivatedRoute, private helperService: HelperService, private apiService: ApiService, private app_service: AppService) {
+    this.initializeSideFilters()
+  }
 
   fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(
     apiEndpoint: string,
@@ -61,24 +58,25 @@ export class DashboardService {
       }))
       .filter(entry => entry.tags.length > 0);
 
-    let baseParams: any = { ...paramModel };
+    paramModel.page = this.consolidatedParamModel.page
+    let baseParams: any = {...paramModel, ...this.selectedFilters()};
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: baseParams,
-      queryParamsHandling: '',
       replaceUrl: true
     }).then();
+
 
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     if (formattedFiltersForApi.length > 0) {
       baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
     }
 
-    const params = new HttpParams({ fromObject: baseParams });
+    const params = new HttpParams({fromObject: baseParams});
 
-    return this.apiService.get<T>(apiEndpoint, { params }).pipe(
+    return this.apiService.get<T>(apiEndpoint, {params}).pipe(
       takeUntil(this.cancelRequest$),
       map((response: T) => ({
         success: true,
@@ -88,7 +86,7 @@ export class DashboardService {
       })),
       catchError((error) => {
         console.error('Search API call failed:', error);
-        return of({ success: false, isEmpty: false, data: null });
+        return of({success: false, isEmpty: false, data: null});
       })
     );
   }
@@ -101,12 +99,12 @@ export class DashboardService {
     const route: string = this.router.url.split('?')[0];
     this.m_current_route = String(route);
 
-    let baseParams: any = { ...paramModel };
+    let baseParams: any = {...paramModel};
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
-    const params = new HttpParams({ fromObject: baseParams });
+    const params = new HttpParams({fromObject: baseParams});
 
-    return this.apiService.get<any[]>(apiEndpoint, { params }).pipe(
+    return this.apiService.get<any[]>(apiEndpoint, {params}).pipe(
       takeUntil(this.cancelRequest$),
       map((response: any[]) => {
         const hasAnyResults = Array.isArray(response) && response.length > 0;
@@ -116,7 +114,7 @@ export class DashboardService {
           data: hasAnyResults ? response : null
         };
       }),
-      catchError(() => of({ success: false, isEmpty: false, data: null }))
+      catchError(() => of({success: false, isEmpty: false, data: null}))
     );
   }
 
@@ -137,17 +135,23 @@ export class DashboardService {
       }))
       .filter(entry => entry.tags.length > 0);
 
-    let baseParams: any = { ...paramModel };
+    let baseParams: any = {...paramModel};
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: baseParams,
+      replaceUrl: true
+    }).then();
+
     if (formattedFiltersForApi.length > 0) {
       baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
     }
 
-    const params = new HttpParams({ fromObject: baseParams });
+    const params = new HttpParams({fromObject: baseParams});
 
-    return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, { params }).pipe(
+    return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, {params}).pipe(
       takeUntil(this.cancelRequest$),
       map((response: ConsolidatedCallbackModel) => {
         const hasAnyResults = !!(
@@ -164,7 +168,7 @@ export class DashboardService {
           data: response
         };
       }),
-      catchError(() => of({ success: false, isEmpty: false, data: null }))
+      catchError(() => of({success: false, isEmpty: false, data: null}))
     );
   }
 
@@ -205,8 +209,25 @@ export class DashboardService {
     };
   }
 
+  private initializeSideFilters() {
+    let excludedKeys = Object.keys(new ConsolidatedParamModel());
+    const params = new URLSearchParams(window.location.search);
+    const selected: Record<string, string | null> = {};
+    excludedKeys.push("ci")
+
+    params.forEach((value, key) => {
+      if (!excludedKeys.includes(key)) {
+        selected[key] = value === 'all' || value === '' ? null : value;
+      }
+    });
+
+    this.selectedFilters.set(selected);
+  }
+
   resetParams() {
     this.consolidatedParamModel.reset();
+    this.selectedFilters.set({})
+    this.m_current_route = ""
   }
 
   private cancelOngoingRequest() {

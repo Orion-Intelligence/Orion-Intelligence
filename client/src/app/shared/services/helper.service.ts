@@ -49,7 +49,7 @@ export class HelperService {
       const isEmptyArray = Array.isArray(value) && value.length === 0;
       const isSameAsDefault = JSON.stringify(value) === JSON.stringify(defaultValue);
 
-      if (!isNullOrUndefined && !isEmptyString && !isEmptyArray && !isSameAsDefault) {
+      if (!isNullOrUndefined && !isEmptyString && !isEmptyArray && !isSameAsDefault || key == "q" || key == "page") {
         cleanedParams[key] = value;
       }
     }

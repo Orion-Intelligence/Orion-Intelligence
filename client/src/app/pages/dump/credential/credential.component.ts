@@ -129,15 +129,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  reloadFilters(event: Record<string, string | null>) {
-    if (event['mDateRange']) {
-      this.dashboardService.consolidatedParamModel.daterange = event['mDateRange']
-    }
+  reloadFilters(_: Record<string, string | null>) {
     this.fetchSearchResults();
   }
 
   resetFilters(_: void) {
-    this.dashboardService.consolidatedParamModel.daterange = "";
     this.fetchSearchResults(true);
   }
 

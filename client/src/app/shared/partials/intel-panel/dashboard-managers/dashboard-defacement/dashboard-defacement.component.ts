@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {NgIf} from '@angular/common';
 import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -21,6 +21,8 @@ import {HelperService} from '../../../../services/helper.service';
   animations: [fadeInDashboardItem],
 })
 export class DashboardDefacementComponent implements OnInit, AfterViewInit {
+  public isResponseLoading = signal(false);
+
   protected readonly Math = Math;
   protected readonly defacement_filters = defacement_filters;
 
@@ -28,7 +30,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   result_count = 0;
   type = Category.DEFACEMENT
   query = '';
-  isLoading = false;
   firstTrigger = true;
 
   constructor(protected helperService: HelperService, public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
@@ -36,6 +37,10 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
+    const route: string = this.router.url.split('?')[0];
+    if (String(route) != this.dashboardService.m_current_route) {
+      this.fetchSearchResults()
+    }
   }
 
   ngOnInit(): void {
@@ -48,11 +53,9 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         this.query = params['q'] || '';
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] ? +params['page'] : 1;
-        this.dashboardService.consolidatedParamModel.daterange = params['daterange'] || '';
-        this.dashboardService.consolidatedParamModel.network = params['network'] || '';
 
-        if (this.firstTrigger && ((this.defacementCallbackModel.Result.length > 0))) {
-          this.isLoading = false;
+        if (this.dashboardService.defacementCallbackModel.Result.length > 0) {
+          this.isResponseLoading.set(false);
           this.query = this.dashboardService.consolidatedParamModel.q
         } else {
           this.cdr.detectChanges();
@@ -68,15 +71,9 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     this.fetchSearchResults();
   }
 
-  fetchSearchResults(reset = false) {
-    let segment = this.route.snapshot.url.at(-1)?.path
-    if (segment)
-      this.dashboardService.consolidatedParamModel.content = segment
-
-    if (reset)
-      this.dashboardService.consolidatedParamModel.page = 1
+  fetchSearchResults() {
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isLoading = false;
+      this.isResponseLoading.set(false)
       this.dashboardService.consolidatedParamModel.q = ""
 
       this.router.navigate([], {
@@ -86,33 +83,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
     }
 
-    this.isLoading = true;
-
-    const cleanedParams: any = {};
-
-    Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
-      const isDefault =
-        (key === 'safe' && value === false) ||
-        (key === 'network' && value === 'all') ||
-        (value == null || value === '');
-
-      if (!reset || !isDefault) {
-        if (!isDefault) cleanedParams[key] = value;
-      }
-    });
-
-    this.router.navigate([], {
-      queryParams: cleanedParams,
-      queryParamsHandling: reset ? '' : 'merge',
-      replaceUrl: true,
-      relativeTo: this.route
-    }).then();
-
-    if (reset) {
-      this.isLoading = false;
-      return;
-    }
-
+    this.isResponseLoading.set(true)
     this.dashboardService
       .fetchSearchResults<DefacementCallbackModel>('search/defacement', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
@@ -123,7 +94,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         } else {
           this.defacementCallbackModel = new DefacementCallbackModel();
         }
-        this.isLoading = false;
+        this.isResponseLoading.set(false)
         this.result_count = this.defacementCallbackModel.Result.length;
         this.cdr.detectChanges();
       });
@@ -135,20 +106,11 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   }
 
   resetFilters(_: void) {
-    this.dashboardService.consolidatedParamModel.daterange = "";
-    this.dashboardService.consolidatedParamModel.network = "all";
-
-    this.fetchSearchResults(true);
+    this.fetchSearchResults();
   }
 
-  reloadFilters(event: Record<string, string | null>) {
+  reloadFilters(_: Record<string, string | null>) {
     this.dashboardService.consolidatedParamModel.page = 1
-    if (event['daterange']) {
-      this.dashboardService.consolidatedParamModel.daterange = event['daterange']
-    }
-    if (event['network'] != null) {
-      this.dashboardService.consolidatedParamModel.network = event['network'];
-    }
     this.fetchSearchResults();
   }
 
@@ -163,7 +125,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     } else if (sort === SortType.OLDEST_FIRST) {
       order = 'asc';
     } else if (sort === SortType.DEFAULT) {
-      this.fetchSearchResults(true);
+      this.fetchSearchResults();
       return;
     }
 

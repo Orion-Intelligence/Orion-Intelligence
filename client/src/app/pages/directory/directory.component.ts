@@ -71,7 +71,6 @@ export class DirectoryComponent implements OnInit {
       };
 
       this.selectedFilters = initialSelectedFilters;
-      console.log(this.selectedFilters)
 
       const currentPage = parseInt(params['page'], 10) || 1;
       this.directoryService.setCurrentPage(currentPage);

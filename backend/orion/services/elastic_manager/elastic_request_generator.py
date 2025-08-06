@@ -242,6 +242,9 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model):
+        if p_query_model.matchtype:
+            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+
         raw_query = p_query_model.q if p_query_model.q and p_query_model.q != "*" else "*"
         raw_query = helper_controller.remove_stopwords_from_string(raw_query) if raw_query != "*" else "*"
 
@@ -411,6 +414,9 @@ class elastic_request_generator:
     @staticmethod
     def on_search_leakdata(p_query_model, pfilter=None):
 
+        if p_query_model.matchtype:
+            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+
         if p_query_model.q != "*":
             raw_query = p_query_model.q
             raw_query = helper_controller.remove_stopwords_from_string(raw_query)
@@ -498,19 +504,7 @@ class elastic_request_generator:
         else:
             content_query = {"bool": {"should": [], "minimum_should_match": 1}}
             if quoted_value:
-                quoted_value = quoted_value.strip('"').strip()
                 raw_query = raw_query.strip('"')
-
-                content_query["bool"]["should"].append({
-                    "bool": {
-                        "should": [
-                            {"terms": {field: [quoted_value]}} for field in allowed_keys
-                        ],
-                        "minimum_should_match": 1,
-                        "boost": 5
-                    }
-                })
-            else:
                 for phrase in exact_phrases:
                     content_query["bool"]["should"].append({
                         "bool": {
@@ -518,7 +512,20 @@ class elastic_request_generator:
                                 {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
                                 {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
                                 {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_company_name": {"query": phrase, "boost": 2.5}}},
+                                {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
+            else:
+                content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+                for phrase in exact_phrases:
+                    must_clauses.append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
+                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
                                 {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
                             ],
                             "minimum_should_match": 1
@@ -549,29 +556,20 @@ class elastic_request_generator:
                         }
                     }
 
-        must_filter_clauses = []
-        should_filter_clauses = []
-        if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
-            clauses = [{"term": {k: val}} for k, vals in allowed_filtered.items() for val in vals]
-            if p_query_model.must:
-                must_filter_clauses = clauses
-            else:
-                should_filter_clauses = clauses
-        else:
-            should_filter_clauses = [content_query]
-
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
         query_statement = {
             "min_score": 0,
             "query": {
                 "function_score": {
                     "query": {
                         "bool": {
+                            "must": [content_query] if isinstance(content_query, dict) else [],
                             "filter": must_clauses + must_filter_clauses,
                             "must_not": must_not_clause,
-                            **({"should": should_filter_clauses,
-                                "minimum_should_match": 1
-                            } if not p_query_model.must else {})
+                            **({
+                                   "should": should_filter_clauses,
+                                   "minimum_should_match": 1
+                               } if not p_query_model.must and should_filter_clauses else {})
                         }
                     },
                     "functions": [
@@ -668,6 +666,9 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_exploitdata(p_query_model: search_exploit_param_model, pfilter=None):
+        if p_query_model.matchtype:
+            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+
         if p_query_model.q != "*":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
@@ -954,6 +955,9 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_social_data(p_query_model: search_social_param_model, pfilter=None):
+        if p_query_model.matchtype:
+            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+
         if p_query_model.q != "*":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
@@ -1186,17 +1190,10 @@ class elastic_request_generator:
             "m_content^3",
             "m_caption^2.5",
             "m_channel_name^2",
-            "m_file_name^2",
             "m_media_caption^2",
-            "m_forwarded_from^1.2",
-            "m_hashtags^1.2",
-            "m_users^1.1"
-        ]
 
-        filter_clauses = []
-        if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
-            filter_clauses = [{"terms": {k: v}} for k, v in allowed_filtered.items()]
+            "m_forwarded_from^1.2",
+        ]
 
         if '"' in raw_query:
             query_string_query = {
@@ -1221,13 +1218,15 @@ class elastic_request_generator:
                 }
             }
 
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
         query = {
             "min_score": 0,
             "query": {
                 "function_score": {
                     "query": {
                         "bool": {
-                            "filter": must_clauses + filter_clauses,
+                            "must": [query_string_query] if isinstance(query_string_query, dict) else [],
+                            "filter": must_clauses + must_filter_clauses,
                             "must_not": must_not_clause,
                             "should": [
                                 query_string_query,
@@ -1459,7 +1458,10 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
-    def on_search_general_data(p_query_model, pFilter=None):
+    def on_search_general_data(p_query_model, pfilter=None):
+        if p_query_model.matchtype:
+            p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
+
         if p_query_model.q != "*":
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
@@ -1478,6 +1480,11 @@ class elastic_request_generator:
         m_date_range = p_query_model.daterange
         m_content_type = p_query_model.content
         m_entity = p_query_model.entity
+
+        exact_phrases = re.findall(r'"([^"]+)"', raw_query)
+        loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
+        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
+        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
 
         if p_query_model.category != "general":
             m_search_type = p_query_model.category
@@ -1521,8 +1528,8 @@ class elastic_request_generator:
             })
 
         filter_clauses = []
-        if pFilter:
-            allowed_filtered = {k: v for k, v in pFilter.items() if k in allowed_keys and v}
+        if pfilter:
+            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
             filter_clauses = [{"terms": {k: v}} for k, v in allowed_filtered.items()]
 
         if m_content_type and m_content_type.lower() not in ("", "all"):
@@ -1565,61 +1572,75 @@ class elastic_request_generator:
             }
         }
 
-        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
-        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
-
-        if quoted_value:
-            raw_query = raw_query.strip('"')
-            content_query = {
-                "bool": {
-                    "should": [
-                                  {"terms": {field: [quoted_value], "boost": 100}}
-                                  for field in allowed_keys
-                              ] + [
-                                  {"terms": {"m_ipv4s": [quoted_value], "boost": 100}},
-                                  {"term": {"m_url.keyword": {"value": quoted_value, "boost": 100}}},
-                                  {"wildcard": {"m_url.keyword": {"value": f"*{quoted_value}*", "boost": 80}}},
-                                  {"wildcard": {"m_base_url.keyword": {"value": f"*{quoted_value}*", "boost": 70}}},
-                                  {"wildcard": {"m_content": {"value": f"*{quoted_value}*", "boost": 60}}},
-                                  {"match_phrase": {"m_title": {"query": quoted_value, "boost": 50}}},
-                                  {"match_phrase": {"m_meta_description": {"query": quoted_value, "boost": 30}}}
-                              ],
-                    "minimum_should_match": 1,
-                    "boost": 5
-                }
-            }
+        if raw_query == "*":
+            content_query = {"match_all": {}}
         else:
-            content_query = {
-                "query_string": {
-                    "query": raw_query + "*",
-                    "fields": [
-                        "m_title^6",
-                        "m_meta_description^2",
-                        "m_content^1.5",
-                        "m_important_content^1.5",
-                        "m_meta_keywords^1.8"
-                    ],
-                    "default_operator": "OR",
-                    "analyze_wildcard": True,
-                    "boost": 2,
-                    "auto_generate_synonyms_phrase_query": False
-                }
-            }
+            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+            if quoted_value:
+                raw_query = raw_query.strip('"')
+                for phrase in exact_phrases:
+                    content_query["bool"]["should"].append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
+                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_meta_description": {"query": phrase, "boost": 1.5}}},
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
+            else:
+                content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+                for phrase in exact_phrases:
+                    must_clauses.append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
+                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_meta_description": {"query": phrase, "boost": 1.5}}},
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
 
+                for term in loose_terms:
+                    content_query["bool"]["should"].append({
+                        "query_string": {
+                            "query": term.lower() + "*",
+                            "fields": ["*"],
+                            "default_operator": "OR",
+                            "lenient": True,
+                            "analyze_wildcard": True,
+                            "boost": 2
+                        }
+                    })
+
+                if not exact_phrases and not loose_terms:
+                    content_query = {
+                        "query_string": {
+                            "query": raw_query.lower().rstrip("/") + "*",
+                            "fields": ["*"],
+                            "default_operator": "OR",
+                            "lenient": True,
+                            "analyze_wildcard": True,
+                            "boost": 2
+                        }
+                    }
+
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
         query_statement = {
             "min_score": 0,
             "query": {
                 "function_score": {
                     "query": {
                         "bool": {
-                            "filter": must_clauses + filter_clauses,
-                            "should": [
-                                url_priority_query,
-                                base_url_query,
-                                content_query
-                            ],
-                            "minimum_should_match": 1,
+                            "must": [content_query] if isinstance(content_query, dict) else [],
+                            "filter": must_clauses + must_filter_clauses,
                             "must_not": must_not_clause,
+                            **({
+                                   "should": should_filter_clauses,
+                                   "minimum_should_match": 1
+                               } if not p_query_model.must and should_filter_clauses else {})
                         }
                     },
                     "functions": [

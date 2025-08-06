@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {AppService} from '../../../../../services/core/app/app.service';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -25,10 +25,10 @@ import {HelperService} from '../../../../services/helper.service';
   animations: [fadeInDashboardItem]
 })
 export class DashboardChatsComponent implements OnInit, AfterViewInit {
+  public isResponseLoading = signal(false);
   public chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
 
   query = ""
-  isLoading = false;
   firstTrigger = true
   result_count = 0;
   protected readonly Math = Math;
@@ -65,7 +65,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
 
         if (!isDiscussion && this.firstTrigger && ((this.chatCallbackModel.Result.length > 0))) {
-          this.isLoading = false;
+          this.isResponseLoading.set(false)
           this.query = this.dashboardService.consolidatedParamModel.q
         } else {
           this.cdr.detectChanges();
@@ -75,12 +75,9 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
       });
   }
 
-  fetchSearchResults(reset = false): void {
-    if (reset)
-      this.dashboardService.consolidatedParamModel.page = 1;
-
+  fetchSearchResults(): void {
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isLoading = false;
+      this.isResponseLoading.set(false)
       this.dashboardService.consolidatedParamModel.q = "";
 
       this.router.navigate([], {
@@ -89,36 +86,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
       }).then();
     }
 
-    this.isLoading = true;
-
-    const cleanedParams: any = {};
-
-    Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
-      const isDefault =
-        (key === 'mContentType' && value === 'all') ||
-        (key === 'mDateRange' && value === '') ||
-        (key === 'mEntity' && value === '') ||
-        (key === 'mMitreTtp' && value === '') ||
-        (value == null || value === '');
-
-      if (!reset || !isDefault) {
-        if (!isDefault) cleanedParams[key] = value;
-      }
-    });
-    this.router.navigate([], {
-      queryParams: cleanedParams,
-      queryParamsHandling: reset ? '' : 'merge',
-      replaceUrl: true,
-      relativeTo: this.route
-    }).then(() => {
-      this.cdr.detectChanges();
-    });
-
-    if (reset) {
-      this.isLoading = false;
-      return;
-    }
-
+    this.isResponseLoading.set(true)
     this.dashboardService
       .fetchSearchResults<ChatCallbackModel>('chat/telegram', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
@@ -129,7 +97,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
         } else {
           this.chatCallbackModel = new ChatCallbackModel();
         }
-        this.isLoading = false;
+        this.isResponseLoading.set(false)
         this.result_count = this.chatCallbackModel.Result.length;
       });
   }
@@ -145,26 +113,10 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
 
   resetFilters(_: void) {
     this.dashboardService.consolidatedParamModel.page = 1;
-    this.dashboardService.consolidatedParamModel.content = "all";
-    this.dashboardService.consolidatedParamModel.daterange = "";
-    this.dashboardService.consolidatedParamModel.entity = "";
-    this.dashboardService.consolidatedParamModel.mitre = "";
-    this.fetchSearchResults(true);
+    this.fetchSearchResults();
   }
 
-  reloadFilters(event: Record<string, string | null>) {
-    if (event['content'] != null) {
-      this.dashboardService.consolidatedParamModel.content = event['content'];
-    }
-    if (event['daterange'] != null) {
-      this.dashboardService.consolidatedParamModel.daterange = event['daterange'];
-    }
-    if (event['entity'] != null) {
-      this.dashboardService.consolidatedParamModel.entity = event['entity'];
-    }
-    if (event['mitre'] != null) {
-      this.dashboardService.consolidatedParamModel.mitre = event['mitre'];
-    }
+  reloadFilters(_: Record<string, string | null>) {
     this.fetchSearchResults();
   }
 
@@ -179,7 +131,7 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
     } else if (sort === SortType.OLDEST_FIRST) {
       order = 'asc';
     } else if (sort === SortType.DEFAULT) {
-      this.fetchSearchResults(true);
+      this.fetchSearchResults();
       return;
     }
 

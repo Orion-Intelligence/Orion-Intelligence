@@ -64,6 +64,20 @@ class helper_controller:
         return base_url
 
     @staticmethod
+    def getFilterClause(pfilter, p_query_model, allowed_keys):
+        must_filter_clauses = []
+        should_filter_clauses = []
+        if pfilter:
+            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
+            clauses = [{"term": {k: val}} for k, vals in allowed_filtered.items() for val in vals]
+            if p_query_model.must:
+                must_filter_clauses = clauses
+            else:
+                should_filter_clauses = {"bool": {"should": clauses}}
+        return must_filter_clauses, should_filter_clauses
+
+
+    @staticmethod
     def generate_data_hash(data):
         if isinstance(data, dict):
             data_copy = {key: value for key, value in data.items() if
@@ -100,6 +114,19 @@ class helper_controller:
     @staticmethod
     def clone_model(model):
         return copy.deepcopy(model)
+
+    @staticmethod
+    def transform_query_match(query: str, matchtype: str) -> str:
+        query = " ".join(query.strip().split())
+        if not query or query.count('"') >= 2:
+            return query
+        if matchtype == "or":
+            return query
+        if matchtype == "and":
+            return " ".join(f'"{t}"' for t in query.split())
+        if matchtype == "full":
+            return f'"{query}"'
+        return query
 
     @staticmethod
     def remove_stopwords_from_string(text: str) -> str:

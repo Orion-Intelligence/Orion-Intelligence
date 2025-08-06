@@ -21,6 +21,7 @@ import {AppService} from '../../../services/core/app/app.service';
 import {SearchFiltersComponent} from "../../../pages/homepage/search-filters/search-filters.component";
 import {searchFilterAnimation} from '../../animations/search.filter.animation';
 import {SelectedFilterBarComponent} from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-result',
@@ -32,6 +33,7 @@ import {SelectedFilterBarComponent} from '../../../pages/homepage/selected-filte
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
+  @Input() isTool: boolean = true;
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery = '';
   @Input() analyticsToggle = false;
@@ -53,14 +55,12 @@ export class ResultComponent implements OnInit, OnChanges {
   @Output() onToggleSwitch = new EventEmitter<string>();
   @Output() onToggleSort = new EventEmitter<SortType>();
 
-  selectedFilters: Record<string, string | null> = {};
   isFilterOpen$: Observable<boolean>;
-  result_triggered = false
+  result_triggered = true
   SortType = SortType;
   selectedSortBy: SortType = SortType.DEFAULT;
-
-  local_query = ""
   selectedSearchBy = 'Match any term';
+  local_query = ""
 
   protected readonly query = query;
   protected readonly Category = Category;
@@ -69,7 +69,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
 
-  constructor(public app_service: AppService, public sidebarService: SidebarService, private route: ActivatedRoute) {
+  constructor(public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -79,6 +79,24 @@ export class ResultComponent implements OnInit, OnChanges {
         ?.replace(/"/g, ' ')
         .replace(/\s+/g, ' ')
         .trim() || '';
+    }
+  }
+
+  onSetMatchType(type: string) {
+    this.dashboardService.selectedFilters.set({
+      ...this.dashboardService.selectedFilters(),
+      matchtype: type
+    });
+  }
+
+  getMatchType() {
+    const matchtype = this.dashboardService.selectedFilters()["matchtype"];
+    if (matchtype === "full") {
+      return "Match full query";
+    } else if (matchtype === "and") {
+      return "Match individual terms";
+    } else {
+      return "Match any term";
     }
   }
 
@@ -109,49 +127,16 @@ export class ResultComponent implements OnInit, OnChanges {
         ...this.filterModel,
         filters: newFilters
       };
-
-      this.selectedFilters = updatedSelectedFilters;
     });
     if (this.local_query) {
       this.result_triggered = true
     }
   }
 
-  searchFiltersChanged() {
-    this.applyFilters(this.selectedFilters)
-  }
-
-  applyFilters(filters: Record<string, string | null>) {
-    this.selectedFilters = filters;
-    this.reloadFilters.emit(this.selectedFilters);
-  }
-
-  resetFilters() {
-    this.selectedFilters = {};
-    this.resetFilter.emit()
-    this.result_triggered = true
-  }
-
   onFormSubmit() {
-    let query = "";
+    this.dashboardService.consolidatedParamModel.page = 1
+    let query = this.local_query;
     this.searchInputRef?.nativeElement.blur();
-    let quoteCount = (this.local_query.match(/"/g) || []).length;
-
-    if (this.local_query && quoteCount < 2) {
-      query = this.local_query.replace(/"/g, ' ').replace(/\s+/g, ' ').trim();
-
-      if (this.selectedSearchBy === 'Match full query') {
-        if (query) {
-          query = `"${query}"`;
-        }
-      } else if (this.selectedSearchBy === 'Match indivisual terms') {
-        if (query) {
-          query = query.split(' ').map(t => `"${t}"`).join(' ');
-        }
-      }
-    } else if (this.local_query) {
-      query = this.local_query.replace(/^\s+|\s+$/g, '');
-    }
     this.updateQuery.emit(query);
     this.searchQuery = query;
     this.reloadData.emit();
@@ -202,6 +187,18 @@ export class ResultComponent implements OnInit, OnChanges {
     this.app_service.configData.set(cfg);
   }
 
+  sidebarFilterCount(): number {
+    return Object.keys(this.dashboardService.selectedFilters()).length;
+  }
+
+  entityFiltersCount(): number {
+    const categories = this.app_service.configData().localSettings.entityfilterCategories;
+    return Object.values(categories).reduce((count, val) => {
+      if (Array.isArray(val)) return count + val.length;
+      return count + 1;
+    }, 0);
+  }
+
   onAdvanceSettingToggle() {
     this.app_service.set('advance_setting_toggle', !this.app_service.configData().localSettings.advance_setting_toggle);
     this.showFiltersOverlay = true;
@@ -231,7 +228,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.showFiltersOverlay = newValue;
   }
 
-  onClearAllFromBar(): void {
-    this.resetFilters();
+  reloadFilter() {
+    this.reloadFilters.emit()
   }
 }

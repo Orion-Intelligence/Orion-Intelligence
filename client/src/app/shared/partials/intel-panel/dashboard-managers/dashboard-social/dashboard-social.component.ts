@@ -68,17 +68,15 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
         this.query = params['q'];
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1'
-        this.dashboardService.consolidatedParamModel.daterange = params['daterange'] || '';
-        this.dashboardService.consolidatedParamModel.network = params['network'] || 'all';
 
 
-        if (lastSegment)
-          this.dashboardService.consolidatedParamModel.platform = lastSegment
-        this.m_platform = this.dashboardService.consolidatedParamModel.platform
-        if (this.dashboardService.consolidatedParamModel.platform != lastSegment) {
-          this.dashboardService.socialCallbackModel.Result = []
-          this.firstTrigger = false
-        }
+        // if (lastSegment)
+        //   this.dashboardService.selectedFilters.platform = lastSegment
+        // this.m_platform = this.dashboardService.consolidatedParamModel.platform
+        // if (this.dashboardService.consolidatedParamModel.platform != lastSegment) {
+        //   this.dashboardService.socialCallbackModel.Result = []
+        //   this.firstTrigger = false
+        // }
 
         if (this.firstTrigger && this.socialCallbackModel.Result.length > 0) {
           this.isLoading = false;
@@ -149,21 +147,11 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   }
 
   resetFilters(_: void) {
-    this.dashboardService.consolidatedParamModel.network = "all";
-    this.dashboardService.consolidatedParamModel.daterange = "";
-
     this.fetchSearchResults(true);
   }
 
-  reloadFilters(filters: Record<string, string | null>) {
+  reloadFilters(_: Record<string, string | null>) {
     this.dashboardService.consolidatedParamModel.page = 1
-    if (filters['network'] != null) {
-      this.dashboardService.consolidatedParamModel.network = filters['network'];
-    }
-    if (filters['daterange']) {
-      this.dashboardService.consolidatedParamModel.daterange = filters['daterange']
-    }
-    this.dashboardService.consolidatedParamModel.safe = filters['safe'] === 'yes';
     this.fetchSearchResults();
   }
 

@@ -1,17 +1,20 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {NgFor, NgIf, CommonModule} from '@angular/common';
-import {FilterModel, FilterOption} from '../../../shared/model/filter/filter.model';
 import {AppService} from '../../../services/core/app/app.service';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {filter_mapping} from '../../../shared/constants/filters';
+import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
+import {Router} from '@angular/router';
 
 
 @Component({
   selector: 'app-selected-filter-bar',
   imports: [NgIf, NgFor, CommonModule],
-  templateUrl: './selected-filter-bar.component.html'
+  templateUrl: './selected-filter-bar.component.html',
+  animations: [fadeInDashboardItem],
 })
 export class SelectedFilterBarComponent implements OnInit {
 
-  @Input() filterModel!: FilterModel;
   @Input() showSorting!: boolean;
   @Output() clearAll = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
@@ -22,25 +25,39 @@ export class SelectedFilterBarComponent implements OnInit {
   maxVisibleTags = 8;
   Object: any;
 
-  constructor(protected app_service: AppService,) {
+  get selectedFilters() {
+    return this.dashboardService.selectedFilters();
+  }
+
+  constructor(protected app_service: AppService, protected dashboardService: DashboardService, private router: Router) {
+  }
+
+  isConsolidatedRoute(): boolean {
+    return this.router.url.includes('consolidated');
   }
 
   ngOnInit(): void {
     this.categories = this.app_service.configData().localSettings.entityfilterCategories;
   }
 
+  clearMatchType(): void {
+    this.dashboardService.selectedFilters.update((filters) => {
+      const updated = {...filters};
+      delete updated["matchtype"];
+      return updated;
+    });
+    this.clearAll.emit();
+  }
+
   clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
     if (scope === 'sidebar' || scope === 'all') {
-      for (const key in this.filterModel.filters) {
-        if (this.filterModel.filters.hasOwnProperty(key)) {
-          const filter = this.filterModel.filters[key];
-          filter.selected = Array.isArray(filter.selected) ? [] : null as any;
-        }
-      }
+      this.dashboardService.selectedFilters.set({})
     }
 
     if (scope === 'entity' || scope === 'all') {
-      this.app_service.set('entityfilterCategories', {});
+      if (this.isConsolidatedRoute()) {
+        this.app_service.set('entityfilterCategories', {});
+      }
     }
 
     this.clearAll.emit();
@@ -61,28 +78,24 @@ export class SelectedFilterBarComponent implements OnInit {
     this.searchFiltersChange.emit();
   }
 
-  getSelectedLabel(filterOption: FilterOption): string {
-    if (filterOption.selected === 'attack-pattern' || filterOption.selected === 'yes') return '-';
-    if (!filterOption || !filterOption.options?.length) {
-      return typeof filterOption.selected === 'string' ? filterOption.selected || '-' : '-';
-    }
-
-    const found = filterOption.options.find(opt => opt.key === filterOption.selected);
-    return found?.label || '-';
-  }
-
-  isFilterSelected(filterOption: FilterOption): boolean {
-    if (!filterOption) return false;
-    const label = this.getSelectedLabel(filterOption);
-    return !!label && label !== '-';
-  }
-
   toggleFilterBarCollapse(): void {
     this.isFilterBarExpanded = !this.isFilterBarExpanded;
   }
 
-  sidebarFilterCount(): number {
-    return Object.values(this.filterModel?.filters || {}).filter(filter => this.isFilterSelected(filter)).length;
+  sidebarFilters() {
+    return Object.keys(this.dashboardService.selectedFilters());
+  }
+
+  sidebarFilterCount(all: boolean = false): number {
+    if (all) {
+      return Object.entries(this.dashboardService.selectedFilters())
+        .filter(([key, value]) => key !== 'matchtype' || value !== 'or')
+        .length;
+    } else {
+      return Object.entries(this.dashboardService.selectedFilters())
+        .filter(([key, value]) => key !== 'matchtype' && value !== null)
+        .length;
+    }
   }
 
   entityFiltersCount(): number {
@@ -106,4 +119,6 @@ export class SelectedFilterBarComponent implements OnInit {
     }, 0);
     return Math.max(0, totalTags - this.maxVisibleTags);
   }
+
+  protected readonly filter_mapping = filter_mapping;
 }

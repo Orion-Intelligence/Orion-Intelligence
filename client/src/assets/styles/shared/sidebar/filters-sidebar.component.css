@@ -59,6 +59,10 @@
   border-bottom-right-radius: 0 !important;
 }
 
+.sidebar_input_date::placeholder {
+  color: var(--color-gray-900) !important;
+}
+
 .sidebar_input_date-button {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;

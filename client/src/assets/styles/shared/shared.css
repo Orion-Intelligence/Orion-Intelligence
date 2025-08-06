@@ -65,6 +65,7 @@
 .default-input-sub-container {
   display: flex;
   flex-wrap: inherit;
+  margin-bottom: 8px;
 }
 
 .default-input {
@@ -276,7 +277,7 @@ table a:visited {
   justify-content: end;
   align-items: center;
   padding: 0;
-  margin: 7px 0 0;
+  margin: 2px 0 0;
   position: relative;
 }
 
@@ -335,10 +336,15 @@ table a:visited {
 }
 
 .dashboard-general-input {
-  max-width: 787px;
+  max-width: 687px;
   min-width: 500px;
   background-color: white !important;
 }
+
+.dashboard-general-input-emptyspace {
+  width: 115px;
+}
+
 
 .warninng-font {
   font-size: 15px;
@@ -422,28 +428,29 @@ table a:visited {
 }
 
 .default-input-container .small-slider::before {
-  height: 12px;
-  width: 12px;
-  margin-bottom: 1px;
+  height: 14px;
+  width: 14px;
+  margin-top: 1px;
   background: #79747E;
   margin-left: 1px;
 }
 
 .default-input-container .small-slider {
+  border: 1px solid #e6e0e9;
   background: #e6e0e9;
-  border: 1px solid #79747E;
   height: 20px;
   width: 32px;
   top: -2px;
 }
 
 .default-input-container input:checked + .small-slider {
-  background-color: #79747E !important;
+  border: 1px solid #57A5EB;
+  background-color: #57A5EB !important;
 }
 
 .default-input-container input:checked + .small-slider::before {
   background-color: #fff !important;
-  transform: translateX(12px);
+  transform: translateX(10px);
 }
 
 @media only screen and (width <= 550px) {
@@ -495,7 +502,7 @@ table a:visited {
 
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <= 1000px) {
   .label-text {
     margin-left: 15px;
   }
@@ -528,19 +535,26 @@ table a:visited {
   }
 }
 
+.default-input-container-mobile {
+  width: 100% !important;
+  max-width: 1000px;
+}
+
+@media only screen and (width <= 1000px) {
+  .default-input-container-mobile {
+    width: 100vw !important;
+  }
+}
+
 @media only screen and (width <= 460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (width <= 768px) {
+@media only screen and (width <= 1000px) {
   .default-input-container-justify {
     justify-content: flex-start !important
-  }
-
-  .side-menu-container{
-    margin-top: 20px !important;
   }
 
   .dashboard-general-input {
@@ -560,6 +574,7 @@ table a:visited {
   .tools-shrink {
     display: inherit !important;
     padding-right: 10px;
+    margin-top: 10px;
   }
 
 }

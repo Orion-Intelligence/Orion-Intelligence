@@ -11,6 +11,7 @@ class search_social_param_model(BaseModel):
     network: str = "all"
     daterange: Optional[str] = ""
     entity: Optional[str] = ""
+    matchtype: Optional[str] = "or"
     platform: Optional[str] = ""
     mitre: Optional[str] = ""
     messagedate: Optional[str] = ""

@@ -10,7 +10,7 @@ import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/da
 import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
 import { DashboardResultExploitComponent } from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultChatComponent } from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import { SortGroupedResultsPipe } from '../../../../model/pipes/sort-grouped-results.pipe';
+import { SortGroupedResultsPipe } from '../../../../pipes/sort-grouped-results.pipe';
 import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../../constants/pages';
 import { SelectionStoreService } from '../../../../../services/dashboard/selection.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
@@ -138,28 +138,11 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   resetFilters(_: void) {
-    this.dashboardService.consolidatedParamModel.daterange = "";
-    this.dashboardService.consolidatedParamModel.network = "";
-    this.dashboardService.consolidatedParamModel.entity = "";
-    this.dashboardService.consolidatedParamModel.content = "all";
-
     this.fetchSearchResults(true);
   }
 
-  reloadFilters(event: Record<string, string | null>) {
+  reloadFilters(_: Record<string, string | null>) {
     this.dashboardService.consolidatedParamModel.page = 1
-    if (event['network']) {
-      this.dashboardService.consolidatedParamModel.network = event['network']
-    }
-    if (event['daterange']) {
-      this.dashboardService.consolidatedParamModel.daterange = event['daterange']
-    }
-    if (event['entity'] != null) {
-      this.dashboardService.consolidatedParamModel.entity = event['entity'];
-    }
-    if (event['content'] != null) {
-      this.dashboardService.consolidatedParamModel.content = event['content'];
-    }
     this.fetchSearchResults();
   }
 

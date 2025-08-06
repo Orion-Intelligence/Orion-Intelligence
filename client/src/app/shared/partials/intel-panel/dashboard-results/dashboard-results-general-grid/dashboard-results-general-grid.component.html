@@ -40,7 +40,7 @@
 
       <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
         <span class="dashboard__search-title dashboard__search-title-secondary highlight">Webpage Content</span>
-        <p [innerHTML]="highlightWords(item.m_highlighted)" class="dashboard__search-description dashboard__search-description-light"></p>
+        <div [innerHTML]="highlightWords(item.m_ref_html)" class="dashboard__search-description dashboard__search-description-light"></div>
       </ng-container>
 
       <ng-container *ngIf="item?.m_url as url; else noUrl">

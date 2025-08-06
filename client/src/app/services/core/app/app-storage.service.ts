@@ -10,13 +10,6 @@ export class AppStorageService {
     'advance_setting_toggle',
     'iocExpanded',
     'entityFilterCondition',
-    'sidebarFilters',
-    'entityfilterCategories',
-  ];
-
-  public readonly resetKeys: (keyof LocalSettingsModel)[] = [
-    'entityFilterCondition',
-    'sidebarFilters',
     'entityfilterCategories',
   ];
 
@@ -34,7 +27,6 @@ export class AppStorageService {
       enable_advanced_tools: this.getFromStorage<boolean>('enable_advanced_tools'),
       advance_setting_toggle: this.getFromStorage<boolean>('advance_setting_toggle'),
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
-      sidebarFilters: this.getFromStorage('sidebarFilters', true),
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
     };
@@ -66,9 +58,5 @@ export class AppStorageService {
         }
       });
     });
-  }
-
-  resetLocalStorage(): void {
-    this.resetKeys.forEach(key => localStorage.removeItem(key));
   }
 }
