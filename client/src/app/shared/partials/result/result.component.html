@@ -35,7 +35,7 @@
         </div>
       </div>
       <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools && isTool">
-        <div class="mt-2 d-flex gap-3" @fadeInDashboardItem>
+        <div class="mt-2 d-flex gap-3 dropdown-menu-container" @fadeInDashboardItem>
           <div class="dropdown me-3" *ngIf="showSorting">
             <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown" aria-expanded="false">
               sort by <b>({{ selectedSortBy }})</b>

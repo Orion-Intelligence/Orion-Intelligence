@@ -11,8 +11,9 @@
         Clear Selection</button>
     </div>
   </div>
-  <input type="text" [(ngModel)]="entitySearch" (ngModelChange)="initCategories($event)" placeholder="Search filter"
-    class="filter-panel__tag-input" />
+  <div class="filter-input-wrapper filter-search">
+    <input type="text" (keydown.enter)="$event.preventDefault()" [(ngModel)]="entitySearch" (ngModelChange)="initCategories($event)" placeholder="Search filter" class="filter-panel__tag-input" />
+  </div>
 
   <div class="filter-panel__category-scroll-container">
     <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
@@ -50,10 +51,9 @@
   <hr class="filter-panel__category-scroll-divider">
 
   <div class="filter-panel__input-row">
-    <input type="text" [(ngModel)]="newValue" placeholder="Enter entity" class="filter-panel__tag-input"
-      (keydown.enter)="addTag()" />
-    <div class="filter-panel__add-btn" (click)="addTag()">
-      <img src="assets/images/shared/searchFilter_addButton.svg" alt="filter" />
+    <div class="filter-input-wrapper filter-add">
+      <input type="text" [(ngModel)]="newValue" placeholder="Enter entity" class="filter-panel__tag-input" (keydown.enter)="$event.preventDefault();addTag()" />
+      <span class="filter-add__icon" (click)="addTag()"></span>
     </div>
     <label class="filter-panel__toggle-switch"> <input type="checkbox"
         [(ngModel)]="app_service.configData().localSettings.entityFilterCondition"
@@ -72,7 +72,7 @@
             class="filter-panel__filter-tag">
             {{ tag }}
             <img src="assets/images/shared/searchFilter_clossButton.svg" class="filter-panel__remove-x"
-              (click)="removeTag(category.id, tag)" alt="filter" />
+              (click)="removeTag($event, category.id, tag)" alt="filter" />
           </div>
         </ng-container>
       </div>
@@ -91,16 +91,15 @@
       <img src="assets/images/shared/searchFilter_expand.svg" alt="Toggle Icon" />
     </div>
   </div>
-
   <div *ngIf="app_service.configData().localSettings.iocExpanded" class="filter-panel__summary-section">
     <ng-container *ngIf="hasAnyTags(); else noFilters">
       <ng-container *ngFor="let category of categories | keyvalue">
         <div *ngIf="(getTags(category.key).length > 0)" class="filter-panel__summary-category">
-          <div class="filter-panel__category-title">{{ category.key }}</div>
+          <div class="filter-panel__category-title">{{ search_filter_labels[category.key] }}</div>
           <div class="filter-panel__tag-list">
             <div *ngFor="let tag of getTags(category.key)" class="filter-panel__filter-tag">
               {{ tag }}<img src="assets/images/shared/searchFilter_clossButton.svg" class="filter-panel__remove-x"
-                (click)="removeTag(category.key, tag)" alt="filter" />
+                (click)="removeTag($event, category.key, tag)" alt="filter" />
             </div>
           </div>
         </div>

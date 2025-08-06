@@ -7,6 +7,10 @@ stop_docker() {
     rm -rf staticfiles
     docker stop trusted-web-nginx 2>/dev/null || true
     docker rm trusted-web-nginx 2>/dev/null || true
+    if [ "$1" = "stop" ]; then
+        echo "Crawler service stopped"
+        exit 0
+    fi
 }
 
 create_parser_zip() {
@@ -21,6 +25,15 @@ create_parser_zip() {
     if [ -d "$PARSER_DIR" ]; then
         (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .) || exit 1
     fi
+}
+
+build_resources() {
+    if ! nc -z localhost 9400; then
+        echo "Error: Server is not running on port 9400"
+        exit 1
+    fi
+    echo "Resource build completed"
+    exit 0
 }
 
 client_build() {
@@ -42,17 +55,6 @@ use_compose_file() {
     fi
 }
 
-# --- MAIN LOGIC ---
-
-stop_docker
-
-if [ "$1" = "stop" ]; then
-    echo "Crawler service stopped"
-    exit 0
-fi
-
-create_parser_zip
-
 COMMAND=$1
 FLAG=$2
 
@@ -61,21 +63,31 @@ if [ "$COMMAND" = "build" ]; then
     docker volume prune -f
 
     case "$FLAG" in
+        -r)
+            build_resources
+            exit 0
+            ;;
         -c)
             client_build "$FLAG"
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
         -b)
+            stop_docker
+            create_parser_zip
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
         -d)
+            stop_docker
+            create_parser_zip
             client_build "$FLAG"
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
         -p)
+            stop_docker
+            create_parser_zip
             client_build "$FLAG"
 
             use_compose_file "production"
@@ -96,6 +108,8 @@ else
     use_compose_file "default"
 fi
 
-docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
-echo "Server started"
+if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-r" ]; then
+    docker network create --driver bridge shared_bridge 2>/dev/null || true
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up &
+    echo "Server started"
+fi

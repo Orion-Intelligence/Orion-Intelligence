@@ -3,6 +3,16 @@
 	font-size: 14px;
 }
 
+.dropdown-menu-container{
+  min-width: 400px;
+}
+
+.table thead th{
+  font-size: 14px;
+  color: #76b7ef !important;
+  border-bottom: 2px solid #57A5EB60 !important;
+}
+
 .dropdown-menu::before {
 	content: "";
 	position: absolute;

@@ -24,7 +24,7 @@ class CONSTANTS:
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 allowed_keys = {
-    'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
+    'm_search_all', 'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
     'm_bitcoin_addresses', 'm_company_name', 'm_country', 'm_country_name', 'm_platform'
                                                                                               'm_credit_card', 'm_cve',
     'm_cwe', 'm_document_id', 'm_dumplink', 'm_email', 'm_employee_count',

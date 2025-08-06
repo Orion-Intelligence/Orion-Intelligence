@@ -45,15 +45,14 @@
 
 .filter-panel__clear-btn {
   width: auto;
-  height: 26px;
+  height: 32px;
   border: none;
   border-radius: 5px;
-  background: none;
   color: #0E1626;
   font-size: 12px;
   font-weight: 400;
   cursor: pointer;
-  background-color: #A0B8D11F;
+  background: #a0b8d140 none;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -63,7 +62,7 @@
 }
 
 .filter-panel__clear-btn:hover {
-  background-color: #A0B8D13D;
+  background-color: #a0b8d160;
 }
 
 .filter-panel__clear-btn__icon {
@@ -81,7 +80,7 @@
 }
 
 .filter-panel__category-scroll-divider {
-  background-color: #A0B8D1;
+  background-color: #A0B8D140;
   margin-top: -17px;
 }
 
@@ -205,6 +204,53 @@
   background: transparent url('../../../../assets/images/shared/magnifyingglassblack.svg') no-repeat right 8px center;
 }
 
+.filter-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-panel__tag-input {
+  padding-right: 32px;
+  box-sizing: border-box;
+  height: 36px;
+  font-size: 14px;
+}
+
+.filter-add__icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-image: url('../../../../assets/images/shared/plus.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.filter-input-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.filter-input-wrapper.filter-search::after {
+  background-image: url('../../../../assets/images/shared/magnifyingglassfilter.svg');
+}
+
+.filter-input-wrapper.filter-add::after {
+  background-image: url('../../../../assets/images/shared/plus.svg');
+}
+
 .filter-panel__tag-input:focus {
   border: 1px solid #0E1626;
   background-color: #f8f8f8;
@@ -269,17 +315,17 @@
 }
 
 .filter-panel__remove-x {
-  margin-left: 8px;
   cursor: pointer;
   font-size: 12px;
-  width: 7px;
-  height: 7px;
+  padding: 6px 0 6px 6px;
+  width: 21px;
+  height: 21px;
 }
 
 .filter-panel__divider {
   margin: 12px 0;
   height: 1px;
-  background-color: #A0B8D1;
+  background-color: #A0B8D160;
 }
 
 .filter-panel__expand-header {

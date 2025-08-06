@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { search_filter_keys, search_filter_labels } from '../../../shared/constants/shared-enums';
-import { AppService } from '../../../services/core/app/app.service';
-import { FilterCategory } from '../../../shared/model/filter/filter.model';
-import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
+import {CommonModule} from '@angular/common';
+import {Component, ViewChild, ElementRef, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {search_filter_keys, search_filter_labels} from '../../../shared/constants/shared-enums';
+import {AppService} from '../../../services/core/app/app.service';
+import {FilterCategory} from '../../../shared/model/filter/filter.model';
+import {searchFilterAnimation} from '../../../shared/animations/search.filter.animation';
 
 @Component({
   selector: 'app-search-filters',
@@ -17,7 +17,7 @@ import { searchFilterAnimation } from '../../../shared/animations/search.filter.
 export class SearchFiltersComponent implements OnInit {
   @Input() showSorting!: boolean;
   @Output() searchFiltersChange = new EventEmitter<void>();
-  @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
+  @ViewChild('categoryScroll', {static: true}) categoryScroll!: ElementRef;
 
   filteredCategories: FilterCategory[] = [];
   categories: Record<string, string[]> = {};
@@ -53,11 +53,11 @@ export class SearchFiltersComponent implements OnInit {
   }
 
   scrollLeft() {
-    this.categoryScroll.nativeElement.scrollBy({ left: -150, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: -150, behavior: 'smooth'});
   }
 
   scrollRight() {
-    this.categoryScroll.nativeElement.scrollBy({ left: 150, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: 150, behavior: 'smooth'});
   }
 
   addTag() {
@@ -78,7 +78,9 @@ export class SearchFiltersComponent implements OnInit {
     return value ?? [];
   }
 
-  removeTag(categoryId: string, tag: string): void {
+  removeTag(event: MouseEvent, categoryId: string, tag: string): void {
+    event.stopPropagation();
+    event.preventDefault();
     const value = this.app_service.getConfig().localSettings.entityfilterCategories[categoryId];
     if (Array.isArray(value)) {
       this.app_service.getConfig().localSettings.entityfilterCategories[categoryId] = value.filter(t => t !== tag);
@@ -114,57 +116,66 @@ export class SearchFiltersComponent implements OnInit {
     this.selectedCategoryId = categoryId;
   }
 
-  initCategories(query: string): void {
-    const queryLower = query.toLowerCase();
+initCategories(query: string): void {
+  const queryLower = query.toLowerCase();
 
-    if (queryLower === '') {
-      const allKeys = Object.keys(this.categories);
+  const isDefaultSelection = !this.selectedCategoryId;
 
-      const sortedKeys = allKeys.sort(
-        (a, b) => this.getTags(b).length - this.getTags(a).length
-      );
-      if (!this.selectedCategoryId && sortedKeys.length > 0) {
-        this.selectedCategoryId = sortedKeys[0];
-      }
+  if (queryLower === '') {
+    const allKeys = Object.keys(this.categories);
 
-      this.filteredCategories = sortedKeys.map(key => ({
-        id: key,
-        name: search_filter_labels[key] || key,
-        tags: this.getTags(key).map(val => ({
-          id: `${key}-${val}`,
-          value: val,
-          type: key
-        }))
-      }));
+    const sortedKeys = allKeys
+      .filter(k => k !== 'm_search_all')
+      .sort((a, b) => this.getTags(b).length - this.getTags(a).length);
+
+    if (isDefaultSelection) {
+      this.selectedCategoryId = 'm_search_all';
     }
-    else {
-      const matchedKeys = Object.keys(this.categories).filter(categoryKey =>
-        (search_filter_labels[categoryKey] || categoryKey).toLowerCase().includes(queryLower)
-      );
-      if (!this.selectedCategoryId || !matchedKeys.includes(this.selectedCategoryId)) {
-        this.selectedCategoryId = matchedKeys[0] || '';
-      }
 
-      const selected = this.selectedCategoryId;
-      const rest = matchedKeys.filter(k => k !== selected);
-
-      const sortedRest = rest.sort(
-        (a, b) => this.getTags(b).length - this.getTags(a).length
-      );
-
-      const sortedKeys = matchedKeys.includes(selected)
-        ? [selected, ...sortedRest]
-        : sortedRest;
-
-      this.filteredCategories = sortedKeys.map(key => ({
-        id: key,
-        name: search_filter_labels[key] || key,
-        tags: this.getTags(key).map(val => ({
-          id: `${key}-${val}`,
-          value: val,
-          type: key
-        }))
-      }));
+    const finalSortedKeys = ['m_search_all', ...sortedKeys.filter(k => k !== this.selectedCategoryId)];
+    if (this.selectedCategoryId !== 'm_search_all') {
+      finalSortedKeys.splice(1, 0, this.selectedCategoryId);
     }
+
+    this.filteredCategories = finalSortedKeys.map(key => ({
+      id: key,
+      name: search_filter_labels[key] || key,
+      tags: this.getTags(key).map(val => ({
+        id: `${key}-${val}`,
+        value: val,
+        type: key
+      }))
+    }));
+  } else {
+    const matchedKeys = Object.keys(this.categories).filter(categoryKey =>
+      (search_filter_labels[categoryKey] || categoryKey).toLowerCase().includes(queryLower)
+    );
+
+    const rest = matchedKeys.filter(k => k !== 'm_search_all' && k !== this.selectedCategoryId);
+    const sortedRest = rest.sort((a, b) => this.getTags(b).length - this.getTags(a).length);
+
+    // Set default if no selection yet
+    if (isDefaultSelection) {
+      this.selectedCategoryId = matchedKeys.includes('m_search_all') ? 'm_search_all' : matchedKeys[0] || '';
+    }
+
+    const finalSortedKeys = ['m_search_all', ...sortedRest];
+    if (this.selectedCategoryId && this.selectedCategoryId !== 'm_search_all') {
+      finalSortedKeys.splice(1, 0, this.selectedCategoryId);
+    }
+
+    this.filteredCategories = finalSortedKeys.map(key => ({
+      id: key,
+      name: search_filter_labels[key] || key,
+      tags: this.getTags(key).map(val => ({
+        id: `${key}-${val}`,
+        value: val,
+        type: key
+      }))
+    }));
   }
+}
+
+
+  protected readonly search_filter_labels = search_filter_labels;
 }

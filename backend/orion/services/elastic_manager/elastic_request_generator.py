@@ -398,12 +398,6 @@ class elastic_request_generator:
             {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}
         ]
 
-        print("::::::::::::::::::::::::::", flush=True)
-        print("::::::::::::::::::::::::::", flush=True)
-        print(query, flush=True)
-        print("::::::::::::::::::::::::::", flush=True)
-        print("::::::::::::::::::::::::::", flush=True)
-
         return query
 
     @staticmethod
@@ -430,11 +424,6 @@ class elastic_request_generator:
         i4, q4 = elastic_request_generator.on_search_telegram_data(m4, pFilter)
         queries.append(elastic_request_generator._strip_query(q4))
         indices.append(i4)
-
-        # m5 = helper_controller.clone_model(p_query_model)
-        # i5, q5 = elastic_request_generator.on_search_defacement_data(m5, pFilter, True)
-        # queries.append(elastic_request_generator._strip_query(q5))
-        # indices.append(i5)
 
         m6 = helper_controller.clone_model(p_query_model)
         i6, q6 = elastic_request_generator.on_search_social_data(m6, pFilter)
@@ -1038,6 +1027,7 @@ class elastic_request_generator:
             }
 
         must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
+
         query = {
             "min_score": 0,
             "query": {

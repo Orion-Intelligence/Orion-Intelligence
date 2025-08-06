@@ -67,15 +67,30 @@ class helper_controller:
     def getFilterClause(pfilter, p_query_model, allowed_keys):
         must_filter_clauses = []
         should_filter_clauses = []
+
         if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
-            clauses = [{"term": {k: val}} for k, vals in allowed_filtered.items() for val in vals]
+            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys or k == "m_search_all"}
+            clauses = []
+
+            for k, vals in allowed_filtered.items():
+                if k == "m_search_all":
+                    for val in vals:
+                        search_all_clause = {
+                            "bool": {
+                                "should": [{"term": {field: val}} for field in allowed_keys],
+                                "minimum_should_match": 1
+                            }
+                        }
+                        clauses.append(search_all_clause)
+                else:
+                    clauses.extend([{"term": {k: val}} for val in vals])
+
             if p_query_model.must:
                 must_filter_clauses = clauses
             else:
                 should_filter_clauses = {"bool": {"should": clauses}}
-        return must_filter_clauses, should_filter_clauses
 
+        return must_filter_clauses, should_filter_clauses
 
     @staticmethod
     def generate_data_hash(data):
