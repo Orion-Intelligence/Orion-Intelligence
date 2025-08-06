@@ -52,9 +52,7 @@
   <div class="filter-panel__input-row">
     <input type="text" [(ngModel)]="newValue" placeholder="Enter entity" class="filter-panel__tag-input"
       (keydown.enter)="addTag()" />
-    <div class="filter-panel__add-btn" (click)="addTag()">
-      <img src="assets/images/shared/searchFilter_addButton.svg" alt="filter" />
-    </div>
+
     <label class="filter-panel__toggle-switch"> <input type="checkbox"
         [(ngModel)]="app_service.configData().localSettings.entityFilterCondition"
         (ngModelChange)="onEntityFilterToggle($event)" /> <span class="filter-panel__slider"></span> </label>
