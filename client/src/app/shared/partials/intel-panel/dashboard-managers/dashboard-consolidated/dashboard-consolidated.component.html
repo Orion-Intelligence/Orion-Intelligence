@@ -1,4 +1,8 @@
-<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false" (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query" [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)"></app-result>
+<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false"
+  (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
+  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query"
+  [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)"
+  (resetFilter)="resetFilters($event)"></app-result>
 <div *ngIf="!isLoading" @fadeInDashboardItem>
   <div class="dashboard__layout-wrapper">
     <div class="dashboard__layout-left">
@@ -16,24 +20,38 @@
                 </button>
               </span>
             </div>
-            <app-dashboard-results-general-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'" @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true" [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
-            <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-exploit>
-            <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-social>
-            <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-chat>
+            <app-dashboard-results-general-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'"
+              @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
+              [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
+            <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem
+              [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-exploit>
+            <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem [isExpandAble]="true"
+              [searchResults]="index.value"></app-dashboard-result-social>
+            <app-dashboard-result-chat *ngIf="index.key === 'chat_model'" @fadeInDashboardItem [isExpandAble]="true"
+              [searchResults]="index.value"></app-dashboard-result-chat>
           </div>
         </ng-container>
       </ng-container>
     </div>
     <div class="dashboard__layout-right" *ngIf="getTotalResultCount()>0">
-      <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="respons"></app-result-insights>
+      <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="respons"
+        [rankedResults]="rankedResult" [isGrouped]="isGrouped"></app-result-insights>
     </div>
   </div>
   <ng-template #rankedMode>
     <div *ngFor="let item of rankedResult">
-      <app-dashboard-results-general-grid *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query" [searchResults]="[item]" [isExpandAble]="false" [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
-      <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-exploit>
-      <app-dashboard-result-social *ngIf="item.rank_index === 'social_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-social>
-      <app-dashboard-result-chat *ngIf="item.rank_index === 'chat_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-chat>
+      <div class="dashboard__ranked-layout">
+        <app-dashboard-results-general-grid
+          *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query"
+          [searchResults]="[item]" [isExpandAble]="false"
+          [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
+        <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false"
+          [searchResults]="[item]"></app-dashboard-result-exploit>
+        <app-dashboard-result-social *ngIf="item.rank_index === 'social_model'" [isExpandAble]="false"
+          [searchResults]="[item]"></app-dashboard-result-social>
+        <app-dashboard-result-chat *ngIf="item.rank_index === 'chat_model'" [isExpandAble]="false"
+          [searchResults]="[item]"></app-dashboard-result-chat>
+      </div>
     </div>
   </ng-template>
 </div>
