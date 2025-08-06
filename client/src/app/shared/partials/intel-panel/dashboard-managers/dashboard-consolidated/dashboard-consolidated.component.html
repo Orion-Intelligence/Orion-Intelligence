@@ -8,6 +8,7 @@
     <div class="dashboard__layout-left">
       <ng-container *ngIf="isGrouped; else rankedMode">
         <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
+          <app-defacement-results></app-defacement-results>
           <div class="consolidated_container">
             <div class="category-heading-enforced">
               <span class="left-text">

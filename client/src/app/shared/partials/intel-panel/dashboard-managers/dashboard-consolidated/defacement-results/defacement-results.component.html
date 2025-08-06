@@ -1,0 +1,50 @@
+<div class="home-defacement-result">
+    <div class="home-defacement-result__top-row">
+        <div class="home-defacement-result__title">Results</div>
+        <div class="home-defacement-result__actions">
+            <div class="home-defacement-result__filter-type">
+                Defacement({{ 10 }})
+            </div>
+            <div class="home-defacement-result__expand-icon" [ngClass]="{ 'expand': isResultsBarExpanded }"
+                (click)="toggleResultsBarCollapse()">
+                <img src="../../../../assets/images/shared/cheveron-right.svg" alt="Toggle Icon" />
+            </div>
+        </div>
+    </div>
+    <ng-container *ngIf="isResultsBarExpanded">
+
+        <div class="home_defacement_result__container mt-4">
+            <ng-container *ngFor="let item of results">
+                <div class="home-defacement-result-card-container">
+                    <div class="home-defacement-result-card-header-section">
+                        <div class="home-defacement-result-card-company-info">
+                            <div class="home-defacement-result-card-label">Company Name</div>
+                            <div class="home-defacement-result-card-value">{{ item.companyName }}</div>
+                        </div>
+                        <div class="home-defacement-result-card-attacker-info">
+                            <div class="home-defacement-result-card-label">Source</div>
+                            <div class="home-defacement-result-card-value">{{ item.source }}</div>
+                        </div>
+                    </div>
+
+                    <div class="home-defacement-result-detail-row" *ngIf="item.url">
+                        <div class="home-defacement-result-card-country-info">
+                            <div class="home-defacement-result-card-label">URL</div>
+                            <div class="home-defacement-result-card-value">
+                                {{ item.url.length > 24 ? item.url.slice(0, 24) + '...' : item.url }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="home-defacement-result-detail-row">
+                        <div class="home-defacement-result-card-date-time-info">
+                            <div class="home-defacement-result-card-label">Date</div>
+                            <div class="home-defacement-result-card-value">{{ item.date || '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </ng-container>
+
+</div>

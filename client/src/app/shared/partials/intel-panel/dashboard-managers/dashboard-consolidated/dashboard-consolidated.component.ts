@@ -18,11 +18,12 @@ import { DashboardResultSocialComponent } from '../../dashboard-results/dashboar
 import { ResultInsightsComponent } from "../result-insights/result-insights.component";
 import { consolidated_filters } from '../../../../constants/filters';
 import { ALLOWED_CONSOLIDATED_RANKED_SINGLETON } from '../../../../constants/shared-enums';
+import { DefacementResultsComponent } from "./defacement-results/defacement-results.component";
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, DefacementResultsComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -58,7 +59,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
-    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
+    if (this.router.url.split('?')[0] != this.dashboardService.m_current_route) {
       this.ngOnInit()
     }
   }
@@ -200,9 +201,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   getTotalResultCount(): number {
     const groupedCount = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
     const rankedCount = this.rankedResult?.length || 0;
-    if(this.isGrouped){
+    if (this.isGrouped) {
       return groupedCount
-    }else {
+    } else {
       return rankedCount
     }
   }
@@ -273,4 +274,5 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.fetchRanked()
     }
   }
+
 }
