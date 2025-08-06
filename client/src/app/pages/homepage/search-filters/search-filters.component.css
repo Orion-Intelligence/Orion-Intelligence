@@ -266,17 +266,6 @@
   font-size: 12px;
 }
 
-.filter-panel__add-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #0E1626;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
 .filter-panel__add-btn:hover {
   background-color: #0e1626b9;
 }
