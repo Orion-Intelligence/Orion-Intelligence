@@ -200,7 +200,11 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   getTotalResultCount(): number {
     const groupedCount = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
     const rankedCount = this.rankedResult?.length || 0;
-    return groupedCount + rankedCount;
+    if(this.isGrouped){
+      return groupedCount
+    }else {
+      return rankedCount
+    }
   }
 
   onSectionSelected(section: Category) {

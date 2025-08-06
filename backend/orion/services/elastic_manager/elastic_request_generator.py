@@ -352,6 +352,16 @@ class elastic_request_generator:
                 }
             }
 
+        combined_filter = must_clauses + must_filter_clauses
+
+        if not getattr(p_query_model, "must", False) and should_filter_clauses:
+            combined_filter.append({
+                "bool": {
+                    "should": should_filter_clauses["bool"]["should"],
+                    "minimum_should_match": 1
+                }
+            })
+
         unified_query = {
             "min_score": 0,
             "query": {
@@ -359,7 +369,7 @@ class elastic_request_generator:
                     "query": {
                         "bool": {
                             "filter": (
-                                    must_clauses + must_filter_clauses
+                                    combined_filter
                             ),
                             "must": query_block
                         }
