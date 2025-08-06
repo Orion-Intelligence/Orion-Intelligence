@@ -191,8 +191,9 @@
 .filter-panel__tag-input {
   width: 200px;
   height: 34px;
-  border: 1px solid #a6a6a6;
+  border: 1px solid #00000012;
   border-radius: 7px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
   color: #172235;
   padding-left: 8px;
   font-size: 12px;

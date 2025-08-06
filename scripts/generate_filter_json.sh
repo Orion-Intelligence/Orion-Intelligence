@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ELASTIC_URL="http://localhost:9400"
-INDEX_NAME="_all"  # or specific index
+INDEX_NAME="_all"
 OUTPUT_FILE="filter.json"
 
 search_filter_keys=(
@@ -34,10 +34,10 @@ for key in "${search_filter_keys[@]}"; do
 EOF
 )
 
-  values=$(echo "$response" | jq -r '.aggregations.unique_values.buckets | map(.key)')
+  filtered_values=$(echo "$response" | jq -r '[.aggregations.unique_values.buckets[].key] | unique | map(select(length < 30 and test("^[\\u0000-\\u007F]+$")))')
 
-  if [ "$values" != "null" ]; then
-    result["$key"]="$values"
+  if [ "$filtered_values" != "null" ]; then
+    result["$key"]="$filtered_values"
   else
     result["$key"]="[]"
   fi
@@ -51,4 +51,4 @@ done
   echo "}"
 } > "$OUTPUT_FILE"
 
-echo "filter.json generated with unique keywords."
+echo "filter.json generated with unique ASCII values less than 30 characters."
