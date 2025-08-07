@@ -431,6 +431,40 @@ button:focus {
   transform: translateX(10px);
 }
 
+.filter-panel__input-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 200px;
+}
+
+.filter-panel__suggestion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  color: #0E1626;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-panel__suggestion-list li {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.filter-panel__suggestion-list li:hover {
+  background-color: #f0f0f0;
+}
+
 @media only screen and (width <=900px) {
   .filter-panel {}
 }

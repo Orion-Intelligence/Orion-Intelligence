@@ -15,25 +15,33 @@ export class DefacementResultsComponent implements OnInit {
   ngOnInit(): void {
     this.results = [
       {
-        companyName: 'Acme Corp',
+        thretType: 'Data leaks',
+        threatCategory: 'Phishing',
+        count: 5,
         source: 'HackerNews',
         url: 'http://example.com/acme-leak',
         date: '2025-08-06'
       },
       {
-        companyName: 'Globex Inc',
+        thretType: 'Data leaks',
+        threatCategory: 'Phishing',
+        count: 5,
         source: 'DarkWeb Forum',
         url: 'http://example.com/globex-leak',
         date: '2025-08-05'
       },
       {
-        companyName: 'Soylent Corp',
+        thretType: 'Data leaks',
+        threatCategory: 'Phishing',
+        count: 5,
         source: 'Defaced.io',
         url: 'http://example.com/soylent-leak',
         date: '2025-08-04'
       },
       {
-        companyName: 'Globex Inc',
+        thretType: 'Data leaks',
+        threatCategory: 'Phishing',
+        count: 5,
         source: 'DarkWeb Forum',
         url: 'http://example.com/globex-leak',
         date: '2025-08-05'
