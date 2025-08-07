@@ -1,0 +1,62 @@
+{
+  "version": "8.0.0",
+  "name": "ng2-charts",
+  "description": "Reactive, responsive, beautiful charts for Angular based on Chart.js",
+  "peerDependencies": {
+    "@angular/platform-browser": ">=19.0.0",
+    "@angular/common": ">=19.0.0",
+    "@angular/core": ">=19.0.0",
+    "@angular/cdk": ">=19.0.0",
+    "chart.js": "^3.4.0 || ^4.0.0",
+    "rxjs": "^6.5.3 || ^7.4.0"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.15",
+    "tslib": "^2.3.0"
+  },
+  "author": "Dmitriy Shekhovtsov <valorkin@gmail.com>",
+  "contributors": [
+    {
+      "name": "Marco Santarelli",
+      "email": "",
+      "url": "https://github.com/santam85"
+    },
+    {
+      "name": "Aviad Pineles",
+      "email": ""
+    },
+    {
+      "name": "Dmitriy Shekhovtsov",
+      "email": "valorkin@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/valor-software/ng2-charts.git"
+  },
+  "schematics": "./schematics/src/collection.json",
+  "ng-add": {
+    "save": "dependencies"
+  },
+  "keywords": [
+    "chart.js",
+    "angular"
+  ],
+  "bugs": {
+    "url": "https://github.com/valor-software/ng2-charts/issues"
+  },
+  "homepage": "https://github.com/valor-software/ng2-charts#readme",
+  "module": "fesm2022/ng2-charts.mjs",
+  "typings": "index.d.ts",
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./fesm2022/ng2-charts.mjs"
+    }
+  },
+  "sideEffects": false
+}
