@@ -1,0 +1,7 @@
+{
+  "name": "ng2-charts-schematics",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "types": "./src/ng-add/index.d.ts",
+  "main": "./src/ng-add/index.js"
+}

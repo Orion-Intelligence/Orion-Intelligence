@@ -1,0 +1,127 @@
+<div class="container">
+    <div class="report-section">
+        <h3 class="section-title">Security Scan Report for <a [href]="scanData.url">{{ scanData.host }}</a></h3>
+        <div class="divider"></div>
+
+        <div class="scan-meta-grid">
+            <div class="meta-card">
+                <p class="meta-label">URL</p>
+                <p class="meta-value">{{ scanData.url }}</p>
+            </div>
+
+            <div class="meta-card">
+                <p class="meta-label">Host</p>
+                <p class="meta-value">{{ scanData.host }}</p>
+            </div>
+
+            <div class="meta-card">
+                <p class="meta-label">Port</p>
+                <p class="meta-value">{{ scanData.port }} <span class="ssl-tag">SSL</span></p>
+            </div>
+
+            <div class="meta-card">
+                <p class="meta-label">Scanned on (date)</p>
+                <p class="meta-value">{{ scanData.scanDate }}</p>
+            </div>
+
+            <div class="meta-card">
+                <p class="meta-label">Scanned by</p>
+                <p class="meta-value">{{ scanData.scannedBy }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="posture-grid">
+        <div class="posture-card">
+            <h3 class="section-title">Overall Security Posture</h3>
+            <div class="divider"></div>
+
+            <div class="posture-content">
+                <div class="risk-gauge">
+                    <div style="width: 250px; margin: auto;">
+                        <canvas baseChart [data]="meterChartData" [type]="'doughnut'" [options]="meterChartOptions"
+                            [plugins]="chartPlugins">
+                        </canvas>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="posture-card">
+            <h3 class="section-title">Risk Breakdown</h3>
+            <div class="divider"></div>
+            <div style="display: block; max-width: 400px;">
+                <canvas baseChart [data]="riskChartData" [type]="'doughnut'" [options]="chartOptions"></canvas>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <h3 class="section-title">Identified Security Findings ({{ findings.length }})</h3>
+        <div class="divider"></div>
+
+        <div class="findings-list">
+            @for (finding of findings; track finding.id) {
+            <div class="finding-card" [class.expanded]="finding.expanded">
+                <div class="finding-header">
+                    <h4 class="finding-title">
+                        <span class="bullet" [class.medium]="finding.severity.includes('Medium')"
+                            [class.low]="finding.severity.includes('Low')">•</span>
+                        {{ finding.title }}
+                    </h4>
+                </div>
+
+                <p class="finding-description">{{ finding.description }}</p>
+                <p class="finding-note">{{ finding.note }}</p>
+
+                <div class="finding-meta">
+                    <span class="severity-badge" [class.medium]="finding.severity.includes('Medium')"
+                        [class.low]="finding.severity.includes('Low')">
+                        {{ finding.severity }} ({{ finding.confidence }})
+                    </span>
+                    <span class="instances">Instances: <strong>{{ finding.instances }}</strong></span>
+                </div>
+
+                <div class="divider-light"></div>
+
+                <div class="finding-actions">
+                    <button class="action-btn expand" (click)="toggleExpand(finding)">
+                        {{ finding.expanded ? 'Collapse' : 'Expand' }}
+                    </button>
+                </div>
+
+                @if (finding.expanded && finding.details.length) {
+                <div class="finding-details">
+                    <p class="details-title"><strong>Technical Details & Affected Locations:</strong></p>
+                    <p class="technical-info">
+                        This alert was found on {{ finding.technicalDetails.foundOn }}.
+                        Below are the {{ finding.technicalDetails.instancesCount }} instances:
+                        <br>
+                        {{ finding.technicalDetails.cweId }} | {{ finding.technicalDetails.wascId }}
+                    </p>
+
+                    <div class="instances-table">
+                        <div class="table-header">
+                            <span>Instance ID</span>
+                            <span>Script URL</span>
+                        </div>
+                        @for (detail of finding.details; track detail.id) {
+                        <div class="table-row">
+                            <span>{{ detail.id }}</span>
+                            <span>{{ detail.url }}</span>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="export-section">
+                        <button class="action-btn export">Export to Shosts</button>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+</div>

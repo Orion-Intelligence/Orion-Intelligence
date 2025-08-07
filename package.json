@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "chartjs-plugin-annotation": "^3.1.0",
+    "chartjs-plugin-datalabels": "^2.2.0",
+    "ng2-charts": "^8.0.0"
+  }
+}

@@ -1,0 +1,33 @@
+<div class="chat-support" [class.open]="chatOpen">
+    @if (!chatOpen) {
+    <div class="chat-toggle" (click)="chatOpen = true">
+        <span>💬</span>
+    </div>
+    }
+    @if (chatOpen) {
+    <div class="chat-window">
+        <div class="chat-header">
+            Support Bot
+            <span class="close-btn" (click)="chatOpen = false">✖️</span>
+        </div>
+
+        <div class="chat-messages">
+            @for (msg of chatMessages; track msg.id) {
+            <div class="chat-msg" [class.user]="msg.sender === 'user'" [class.bot]="msg.sender === 'bot'">
+                <p class="chat-text">{{ msg.text }}</p>
+                <span class="timestamp">{{ msg.time | date: 'shortTime' }}</span>
+            </div>
+            }
+            @if (isBotTyping) {
+            <div class="chat-msg bot typing-indicator">
+                <p class="chat-text">Typing...</p>
+            </div>
+            }
+        </div>
+        <form class="chat-input" (submit)="sendMessage($event)">
+            <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Ask something..." required />
+            <button type="submit">➤</button>
+        </form>
+    </div>
+    }
+</div>
