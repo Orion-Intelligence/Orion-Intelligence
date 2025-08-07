@@ -13,20 +13,29 @@
     </div>
     <ng-container *ngIf="isResultsBarExpanded">
 
-        <div class="home_defacement_result__container mt-4">
-            <ng-container *ngFor="let item of results">
+        <ng-container *ngFor="let item of results; let last=last">
+            <div class="home_defacement_result__container mt-4">
                 <div class="home-defacement-result-card-container">
                     <div class="home-defacement-result-card-header-section">
                         <div class="home-defacement-result-card-company-info">
-                            <div class="home-defacement-result-card-label">Company Name</div>
-                            <div class="home-defacement-result-card-value">{{ item.companyName }}</div>
+                            <div class="home-defacement-result-card-label">Threat Type Defacement</div>
+                            <div class="home-defacement-result-card-value">{{ item.thretType }}</div>
                         </div>
                         <div class="home-defacement-result-card-attacker-info">
                             <div class="home-defacement-result-card-label">Source</div>
                             <div class="home-defacement-result-card-value">{{ item.source }}</div>
                         </div>
                     </div>
-
+                    <div class="home-defacement-result-card-header-section">
+                        <div class="home-defacement-result-card-company-info">
+                            <div class="home-defacement-result-card-label">Threat Category</div>
+                            <div class="home-defacement-result-card-value">{{ item.threatCategory }}</div>
+                        </div>
+                        <div class="home-defacement-result-card-attacker-info">
+                            <div class="home-defacement-result-card-label">Count</div>
+                            <div class="home-defacement-result-card-value">{{ item.count }}</div>
+                        </div>
+                    </div>
                     <div class="home-defacement-result-detail-row" *ngIf="item.url">
                         <div class="home-defacement-result-card-country-info">
                             <div class="home-defacement-result-card-label">URL</div>
@@ -43,8 +52,9 @@
                         </div>
                     </div>
                 </div>
-            </ng-container>
-        </div>
+            </div>
+            <div class="home-defacement-result-divider" *ngIf="!last"></div>
+        </ng-container>
     </ng-container>
 
 </div>

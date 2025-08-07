@@ -229,7 +229,7 @@ export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set([
 
 export const search_filter_keys = new Set([
   'm_search_all', 'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
-  'm_bitcoin_addresses', 'm_company_name', 'm_country', 'm_country_name', 'm_platform',
+  'm_bitcoin_addresses', 'm_company_name', 'm_country', 'm_platform',
   'm_credit_card', 'm_cve', 'm_cwe', 'm_document_id', 'm_dumplink', 'm_email', 'm_employee_count',
   'm_encoded_urls', 'm_event', 'm_fac', 'm_file_path', 'm_file_paths', 'm_gpe', 'm_hashtag', 'm_author',
   'm_in_aadhaar', 'm_in_pan', 'm_in_passport', 'm_in_vehicle_registration', 'm_in_voter',
@@ -253,7 +253,6 @@ export const search_filter_labels: { [key: string]: string } = {
   m_bitcoin_addresses: 'Bitcoin Addresses',
   m_company_name: 'Company Name',
   m_country: 'Country',
-  m_country_name: 'Country Name',
   m_platform: 'Platform',
   m_credit_card: 'Credit Card',
   m_cve: 'CVE',
