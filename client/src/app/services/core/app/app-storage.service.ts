@@ -25,7 +25,7 @@ export class AppStorageService {
   getLocalSettings(): Partial<LocalSettingsModel> {
     return {
       enable_advanced_tools: this.getFromStorage<boolean>('enable_advanced_tools'),
-      advance_setting_toggle: this.getFromStorage<boolean>('advance_setting_toggle'),
+      advance_setting_toggle: this.getFromStorage<boolean>('advance_setting_toggle') || true,
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},

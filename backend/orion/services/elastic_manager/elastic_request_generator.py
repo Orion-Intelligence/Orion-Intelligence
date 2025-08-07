@@ -20,12 +20,6 @@ class elastic_request_generator:
     @staticmethod
     def on_bulk_domain_lookup(p_query_model, pFilter=None):
 
-        print(":::::::::::::::::::::::::::::::", flush=True)
-        print(p_query_model, flush=True)
-        print(":::::::::::::::::::::::::::::::", flush=True)
-        print(pFilter, flush=True)
-        print(":::::::::::::::::::::::::::::::", flush=True)
-
         domain_aggs = {}
         must_clauses = []
         domains = helper_controller.extract_domains_from_text(p_query_model.q)
@@ -50,11 +44,33 @@ class elastic_request_generator:
 
             domain_aggs[agg_name] = {
                 "filter": {
-                    "wildcard": {
-                        "m_url.raw": {
-                            "value": f"*{domain_part}*",
-                            "case_insensitive": True
-                        }
+                    "bool": {
+                        "should": [
+                            {
+                                "wildcard": {
+                                    "m_url.raw": {
+                                        "value": f"*{domain_part}*",
+                                        "case_insensitive": True
+                                    }
+                                }
+                            },
+                            {
+                                "wildcard": {
+                                    "m_domain.raw": {
+                                        "value": f"*{domain_part}*",
+                                        "case_insensitive": True
+                                    }
+                                }
+                            },
+                            {
+                                "wildcard": {
+                                    "m_ip.raw": {
+                                        "value": f"*{domain_part}*",
+                                        "case_insensitive": True
+                                    }
+                                }
+                            }
+                        ]
                     }
                 },
                 "aggs": {

@@ -5,6 +5,8 @@ export class DefacementResultItem {
   m_attacker: string[] = [];
   m_team = "";
   m_web_server: string[] = [];
+  m_ioc_type: string[] = [];
+  ioc: string[] = [];
   m_base_url = "";
   m_ip: string[] = [];
   m_location = ""

@@ -19,7 +19,7 @@ export class AppSettingsModel {
 
 export class LocalSettingsModel {
   enable_advanced_tools: boolean = false;
-  advance_setting_toggle: boolean = false;
+  advance_setting_toggle: boolean = true;
   iocExpanded: boolean = true;
   entityfilterCategories: Record<string, string[]> = {};
   entityFilterCondition: boolean = false;

@@ -51,7 +51,6 @@ export class DashboardService {
 
     paramModel.page = this.consolidatedParamModel.page
     let baseParams: any = {...paramModel, ...this.selectedFilters()};
-    baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -60,7 +59,8 @@ export class DashboardService {
     }).then();
 
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    const params = new HttpParams({fromObject: baseParams});
+    baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
+    let params = new HttpParams({fromObject: baseParams});
 
     return this.apiService.get<T>(apiEndpoint, {params}).pipe(
       takeUntil(this.cancelRequest$),

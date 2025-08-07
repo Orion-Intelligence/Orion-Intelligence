@@ -108,6 +108,7 @@ class helper_controller:
     def clone_model(model):
         return copy.deepcopy(model)
 
+
     @staticmethod
     def extract_domains_from_text(text: str) -> list[str]:
         url_regex = re.compile(
