@@ -3,12 +3,14 @@
   [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query"
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)"
   (resetFilter)="resetFilters($event)"></app-result>
+
+<app-defacement-results *ngIf="!isLoading && getTotalResultCount()>0"></app-defacement-results>
+
 <div *ngIf="!isLoading" @fadeInDashboardItem>
   <div class="dashboard__layout-wrapper">
     <div class="dashboard__layout-left">
       <ng-container *ngIf="isGrouped; else rankedMode">
         <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
-          <app-defacement-results></app-defacement-results>
           <div class="consolidated_container">
             <div class="category-heading-enforced">
               <span class="left-text">

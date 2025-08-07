@@ -105,6 +105,7 @@ class search_callback:
             log.g().ex("Error parsing filtered documents:", ex)
             return mRelevanceListData, [], total_pages
 
+
     async def search_handler(self, m_status, m_documents, callback_model, listing_filter=None, p_consolidated=False):
         if not m_status:
             return callback_model(Result=[], Suggestions=[], Page_Count=0)

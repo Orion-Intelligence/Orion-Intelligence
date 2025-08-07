@@ -193,7 +193,7 @@
   height: 34px;
   border: 1px solid #00000012;
   border-radius: 7px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+  box-shadow: rgb(0 0 0 / 10%) 0 1px 3px 0, rgb(0 0 0 / 6%) 0 1px 2px 0;
   color: #172235;
   padding-left: 8px;
   font-size: 12px;
@@ -253,7 +253,7 @@
 }
 
 .filter-panel__tag-input:focus {
-  border: 1px solid #0E1626;
+  border: 1px solid #00000032;
   background-color: #f8f8f8;
   background-repeat: no-repeat;
   background-position: right 8px center;

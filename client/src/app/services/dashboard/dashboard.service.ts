@@ -49,15 +49,6 @@ export class DashboardService {
 
     this.cancelOngoingRequest();
 
-    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
-    const formattedFiltersForApi = Object.entries(entityCategories)
-      .map(([categoryKey, tags]) => ({
-        categoryId: categoryKey,
-        categoryName: categoryKey,
-        tags: Array.isArray(tags) ? tags : [tags]
-      }))
-      .filter(entry => entry.tags.length > 0);
-
     paramModel.page = this.consolidatedParamModel.page
     let baseParams: any = {...paramModel, ...this.selectedFilters()};
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
@@ -69,10 +60,6 @@ export class DashboardService {
     }).then();
 
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    if (formattedFiltersForApi.length > 0) {
-      baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
-    }
-
     const params = new HttpParams({fromObject: baseParams});
 
     return this.apiService.get<T>(apiEndpoint, {params}).pipe(
@@ -99,31 +86,23 @@ export class DashboardService {
     this.m_current_route = String(route);
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
-    const formattedFiltersForApi = Object.entries(entityCategories)
-      .map(([categoryKey, tags]) => ({
-        categoryId: categoryKey,
-        categoryName: categoryKey,
-        tags: Array.isArray(tags) ? tags : [tags]
-      }))
-      .filter(entry => entry.tags.length > 0);
 
     let baseParams: any = {...paramModel, ...this.selectedFilters()};
+    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    if (entityCategories) {
+      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
+    }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
+    const queryParamsForNav = {...baseParams};
+    delete queryParamsForNav['entity_filter'];
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: baseParams,
+      queryParams: queryParamsForNav,
       replaceUrl: true
     }).then();
 
-    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    if (formattedFiltersForApi.length > 0) {
-      baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
-    }
-
-    const params = new HttpParams({fromObject: baseParams});
-
-    return this.apiService.get<any[]>(apiEndpoint, {params}).pipe(
+    return this.apiService.post<any[]>(apiEndpoint, baseParams).pipe(
       takeUntil(this.cancelRequest$),
       map((response: any[]) => {
         const hasAnyResults = Array.isArray(response) && response.length > 0;
@@ -146,31 +125,26 @@ export class DashboardService {
     this.m_current_route = String(route);
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
-    const formattedFiltersForApi = Object.entries(entityCategories)
-      .map(([categoryKey, tags]) => ({
-        categoryId: categoryKey,
-        categoryName: categoryKey,
-        tags: Array.isArray(tags) ? tags : [tags]
-      }))
-      .filter(entry => entry.tags.length > 0);
 
-    let baseParams: any = {...paramModel};
-    baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
+    let payload: any = {...paramModel, ...this.selectedFilters()};
+    payload['must'] = this.app_service.configData().localSettings.entityFilterCondition;
 
-    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    if (entityCategories) {
+      payload['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
+    }
+    payload = this.helperService.removeEmptyOrNullValues(payload);
+
+    const queryParamsForNav = {...payload};
+    delete queryParamsForNav['entity_filter'];
+
+
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: baseParams,
+      queryParams: queryParamsForNav,
       replaceUrl: true
     }).then();
 
-    if (formattedFiltersForApi.length > 0) {
-      baseParams['filters_json'] = JSON.stringify(formattedFiltersForApi);
-    }
-
-    const params = new HttpParams({fromObject: baseParams});
-
-    return this.apiService.get<ConsolidatedCallbackModel>(apiEndpoint, {params}).pipe(
+    return this.apiService.post<ConsolidatedCallbackModel>(apiEndpoint, payload).pipe(
       takeUntil(this.cancelRequest$),
       map((response: ConsolidatedCallbackModel) => {
         const hasAnyResults = !!(

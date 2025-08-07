@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class search_chat_param_model(BaseModel):
     q: Optional[str] = ""

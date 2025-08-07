@@ -124,8 +124,25 @@ class ELASTIC_ENUMS:
             "number_of_shards": 1,
             "number_of_replicas": 0,
             "max_result_window": 1000000,
-            "blocks": {
-                "read_only_allow_delete": False
+            "analysis": {
+                "tokenizer": {
+                    "dot_split_tokenizer": {
+                        "type": "pattern",
+                        "pattern": "[./:_?=&-]+"
+                    }
+                },
+                "analyzer": {
+                    "custom_url_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "uax_url_email",
+                        "filter": ["lowercase"]
+                    },
+                    "dot_split_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "dot_split_tokenizer",
+                        "filter": ["lowercase"]
+                    }
+                }
             }
         },
         "mappings": {
@@ -145,17 +162,90 @@ class ELASTIC_ENUMS:
                 "m_team": {"type": "keyword"},
                 "m_web_server": {"type": "keyword"},
                 "m_network": {"type": "keyword"},
-                "m_base_url": {"type": "keyword"},
-                "m_url": {"type": "keyword"},
-                "m_ip": {"type": "keyword"},
+                "m_base_url": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {"type": "keyword"},
+                        "analyzed": {
+                            "type": "text",
+                            "analyzer": "custom_url_analyzer"
+                        },
+                        "split": {
+                            "type": "text",
+                            "analyzer": "dot_split_analyzer"
+                        }
+                    }
+                },
+                "m_url": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {"type": "keyword"},
+                        "analyzed": {
+                            "type": "text",
+                            "analyzer": "custom_url_analyzer"
+                        },
+                        "split": {
+                            "type": "text",
+                            "analyzer": "dot_split_analyzer"
+                        }
+                    }
+                },
+                "m_ip": {
+                    "type": "keyword"
+                },
                 "m_ioc_type": {"type": "keyword"},
-                "m_leak_date": {"type": "date", "format": "yyyy-MM-dd"},
-                "m_web_url": {"type": "keyword"},
+                "m_leak_date": {
+                    "type": "date",
+                    "format": "yyyy-MM-dd"
+                },
+                "m_web_url": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {"type": "keyword"},
+                        "analyzed": {
+                            "type": "text",
+                            "analyzer": "custom_url_analyzer"
+                        },
+                        "split": {
+                            "type": "text",
+                            "analyzer": "dot_split_analyzer"
+                        }
+                    }
+                },
                 "m_screenshot": {"type": "keyword"},
-                "m_mirror_links": {"type": "keyword"}
+                "m_mirror_links": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {"type": "keyword"},
+                        "analyzed": {
+                            "type": "text",
+                            "analyzer": "custom_url_analyzer"
+                        },
+                        "split": {
+                            "type": "text",
+                            "analyzer": "dot_split_analyzer"
+                        }
+                    }
+                },
+                "m_creation_date": {
+                    "type": "date"
+                },
+                "m_update_date": {
+                    "type": "date"
+                },
+                "m_hash": {
+                    "type": "keyword"
+                },
+                "m_source_url": {
+                    "type": "keyword"
+                },
+                "m_domain": {
+                    "type": "keyword"
+                }
             }
         }
     }
+
     mapping_exploit_model = {
         "settings": {
             "number_of_shards": 1,

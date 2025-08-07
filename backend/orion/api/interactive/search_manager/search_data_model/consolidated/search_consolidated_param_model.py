@@ -1,12 +1,9 @@
-from typing import List, Optional
-
-from pydantic import BaseModel, Field
-from orion.api.interactive.search_manager.search_data_model.entity_filters.entity_filter_param_model import \
-    entity_filter_param_model
-from orion.helper_manager.helper_controller import helper_controller
+from typing import Optional, List, Dict
+from pydantic import BaseModel, root_validator
+import json
 
 
-class search_consolidated_param_model(BaseModel,helper_controller):
+class search_consolidated_param_model(BaseModel):
     q: Optional[str] = ""
     category: Optional[str] = "all"
     page: Optional[int] = 1
@@ -22,8 +19,17 @@ class search_consolidated_param_model(BaseModel,helper_controller):
     team: Optional[List[str]] = []
     platform: Optional[str] = ""
 
-    filters: Optional[List[entity_filter_param_model]] = None   
-    filters_json: Optional[str] = Field(None, alias="filters_json")
+    entity_filter: Optional[Dict[str, List[str]]] = None
 
     class Config:
         allow_population_by_field_name = True
+
+    @root_validator(pre=True)
+    def parse_entity_filter(cls, values):
+        raw = values.get("entity_filter")
+        if isinstance(raw, str):
+            try:
+                values["entity_filter"] = json.loads(raw)
+            except json.JSONDecodeError:
+                values["entity_filter"] = {}
+        return values

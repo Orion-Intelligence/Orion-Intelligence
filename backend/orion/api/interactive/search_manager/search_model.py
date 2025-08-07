@@ -130,11 +130,7 @@ class search_model:
         return await self.__search_callback.get_doc(result)
 
     async def search_general_result(self, param: search_general_param_model):
-        entity_filter_clauses = self._process_entity_filters_generic(
-            param.filters,
-            self._GENERAL_FIELD_MAPPING 
-        )
-        document, data_filter = elastic_request_generator().on_search_general_data(param,entity_filter_clauses)
+        document, data_filter = elastic_request_generator().on_search_general_data(param, {})
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -143,11 +139,7 @@ class search_model:
         )
 
     async def search_leak_result(self, param: search_leak_param_model):
-        entity_filter_clauses = self._process_entity_filters_generic(
-            param.filters,
-            self._LEAK_FIELD_MAPPING 
-        )
-        document, data_filter = elastic_request_generator().on_search_leakdata(param,entity_filter_clauses)
+        document, data_filter = elastic_request_generator().on_search_leakdata(param, {})
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -157,8 +149,8 @@ class search_model:
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model):
-        if param.filters:
-            filter_dict = {item.categoryId: item.tags for item in param.filters}
+        if param.entity_filter:
+            filter_dict = param.entity_filter
         else:
             filter_dict = {}
 
@@ -178,16 +170,15 @@ class search_model:
 
         return ranked_results
 
-
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
 
-        if param.filters:
-            filter_dict = {item.categoryId: item.tags for item in param.filters}
+        if param.entity_filter:
+            filter_dict = param.entity_filter
         else:
             filter_dict = {}
 
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param,filter_dict)
+        indices, queries = elastic_request_generator().on_search_consolidated_data(param, filter_dict)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         leak_data = {}
@@ -198,8 +189,23 @@ class search_model:
         social_data = {}
 
         for index, res in zip(indices, responses):
-            hits = res.get("hits", {}).get("hits", []) if res else []
-            data = {"Result": [hit["_source"] for hit in hits], "Suggestions": [], "Page_Count": len(hits)}
+            data = {"Result": [], "Suggestions": [], "Page_Count": 0}
+
+            if not res:
+                continue
+
+            if index == "defacement_model" and "aggregations" in res:
+                for domain_key, domain_value in res["aggregations"].items():
+                    buckets = domain_value.get("by_ioc_type", {}).get("buckets", [])
+                    for bucket in buckets:
+                        hits = bucket.get("top_hits_per_type", {}).get("hits", {}).get("hits", [])
+                        data["Result"].extend([hit["_source"] for hit in hits])
+                data["Page_Count"] = len(data["Result"])
+
+            else:
+                hits = res.get("hits", {}).get("hits", [])
+                data["Result"] = [hit["_source"] for hit in hits]
+                data["Page_Count"] = len(hits)
 
             if index == "leak_model":
                 leak_data = data
@@ -295,11 +301,7 @@ class search_model:
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
-        entity_filter_clauses = self._process_entity_filters_generic(
-            param.filters,
-            self._DEFACEMENT_FIELD_MAPPING 
-        )
-        document, data_filter = elastic_request_generator().on_search_defacement_data(param,entity_filter_clauses)
+        document, data_filter = elastic_request_generator().on_search_defacement_data(param, {})
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(
@@ -308,9 +310,9 @@ class search_model:
             []
         )
     
+    @staticmethod
     def _process_entity_filters_generic(
-        self,
-        filters: Optional[List[entity_filter_param_model]],
+            filters: Optional[List[entity_filter_param_model]],
         field_mapping: Dict[str, str] 
     ) -> List[Dict[str, Any]]:
         es_clauses = []

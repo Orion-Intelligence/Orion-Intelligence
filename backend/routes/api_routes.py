@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi import Depends, Query
 
 from configs.app_dependency import role_required
@@ -75,16 +75,13 @@ async def search_telegram(param: search_credential_param_model = Depends()):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
 
-@api_routes.get("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
-                description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
-async def search_consolidated(param: search_consolidated_param_model = Depends()):
+@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
+async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     return await search_model.getInstance().search_consolidated_result(param)
 
 
-@api_routes.get("/api/search/consolidated/ranked",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
-                description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
-async def search_consolidated(param: search_consolidated_param_model = Depends()):
+@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
+async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     return await search_model.getInstance().search_consolidated_ranked_result(param)
 
 

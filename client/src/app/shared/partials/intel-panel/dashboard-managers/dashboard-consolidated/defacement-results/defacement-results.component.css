@@ -3,12 +3,11 @@
     border: 1px solid #FCFCFC12;
     border-radius: 10px;
     padding: 10px 24px 12px 17px;
-    margin-left: 0;
     font-family: Inter, sans-serif;
     color: white;
+    margin: 40px 0 -20px 35px;
     max-width: 800px;
     min-width: 150px;
-    margin: 35px;
 }
 
 .home-defacement-result__top-row {
@@ -18,7 +17,7 @@
 }
 
 .home-defacement-result__title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
     color: white;
     display: flex;

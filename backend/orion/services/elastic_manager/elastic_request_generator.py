@@ -1,8 +1,7 @@
 import hashlib
 import re
 import ipaddress
-from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
+from datetime import timedelta, timezone
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
@@ -13,12 +12,104 @@ from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
+from datetime import datetime
 
 
 class elastic_request_generator:
 
     @staticmethod
-    def on_search_defacement_data(p_query_model: search_defacement_param_model, pFilter=None, is_consolidated: bool = False):
+    def on_bulk_domain_lookup(p_query_model, pFilter=None):
+
+        print(":::::::::::::::::::::::::::::::", flush=True)
+        print(p_query_model, flush=True)
+        print(":::::::::::::::::::::::::::::::", flush=True)
+        print(pFilter, flush=True)
+        print(":::::::::::::::::::::::::::::::", flush=True)
+
+        domain_aggs = {}
+        must_clauses = []
+        domains = helper_controller.extract_domains_from_text(p_query_model.q)
+
+        if pFilter:
+            if "m_url" in pFilter:
+                domains.extend(pFilter["m_url"])
+            if "m_domain" in pFilter:
+                domains.extend(pFilter["m_domain"])
+            if "m_ip" in pFilter:
+                domains.extend(pFilter["m_ip"])
+
+        for idx, domain in enumerate(domains):
+            domain = domain.lower()
+            parts = domain.split('/')
+            valid_parts = [p for p in parts if '.' in p]
+
+            if not valid_parts:
+                continue
+            domain_part = valid_parts[-1]
+            agg_name = f"domain_{idx}"
+
+            domain_aggs[agg_name] = {
+                "filter": {
+                    "wildcard": {
+                        "m_url.raw": {
+                            "value": f"*{domain_part}*",
+                            "case_insensitive": True
+                        }
+                    }
+                },
+                "aggs": {
+                    "by_ioc_type": {
+                        "terms": {
+                            "field": "m_ioc_type",
+                            "size": 10
+                        },
+                        "aggs": {
+                            "top_hits_per_type": {
+                                "top_hits": {
+                                    "size": 4,
+                                    "sort": [
+                                        {"m_leak_date": {"order": "desc"}}
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        if p_query_model.daterange:
+            parts = p_query_model.daterange.split(',')
+            if len(parts) == 2:
+                try:
+                    from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
+                    to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
+
+                    must_clauses.append({
+                        "range": {
+                            "m_leak_date": {
+                                "gte": from_date_obj.strftime("%Y-%m-%d"),
+                                "lte": to_date_obj.strftime("%Y-%m-%d")
+                            }
+                        }
+                    })
+                except ValueError:
+                    pass
+
+        query_statement = {
+            "size": 0,
+            "query": {
+                "bool": {
+                    "must": must_clauses if must_clauses else [{"match_all": {}}]
+                }
+            },
+            "aggs": domain_aggs,
+            "track_total_hits": False
+        }
+
+        return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
+
+    @staticmethod
+    def on_search_defacement_data(p_query_model: search_defacement_param_model, _=None, is_consolidated: bool = False):
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
@@ -97,12 +188,23 @@ class elastic_request_generator:
                 })
             elif is_ip:
                 should_clauses.append({"term": {"m_ip": raw_query}})
+                should_clauses.append({
+                    "wildcard": {
+                        "m_ip": {
+                            "value": f"*{raw_query}*",
+                            "case_insensitive": True,
+                            "boost": 2
+                        }
+                    }
+                })
             else:
                 should_clauses.extend([
                     {"match": {"m_location": {"query": raw_query, "boost": 50}}},
                     {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
                     {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
-                    {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
+                    {"match": {"m_url": {"query": raw_query, "boost": 50}}},
+                    {"match": {"m_base_url": {"query": raw_query, "boost": 50}}},
+                    {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},  # NEW
                     {
                         "multi_match": {
                             "query": raw_query,
@@ -110,8 +212,9 @@ class elastic_request_generator:
                                 "m_location^5",
                                 "m_web_url^5",
                                 "m_base_url^5",
+                                "m_url^5",
                                 "m_web_server^3",
-                                "m_attacker^5",
+                                "m_attacker^5",  # NEW
                                 "m_team^5",
                                 "m_network^3",
                                 "m_mirror_links^5"
@@ -123,22 +226,15 @@ class elastic_request_generator:
                     {
                         "bool": {
                             "should": [
-                                {"wildcard": {
-                                    "m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {
-                                    "m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {
-                                    "m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {
-                                    "m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                                {"wildcard": {
-                                    "m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {
-                                    "m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {
-                                    "m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                                {"wildcard": {
-                                    "m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
+                                {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                                {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                                {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                                {"wildcard": {"m_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                                {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
+                                {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},  # NEW
+                                {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
+                                {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
+                                {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -201,34 +297,10 @@ class elastic_request_generator:
                     "boost_mode": "multiply"
                 }
             },
-            "suggest": {
-                "attacker_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_attacker",
-                        "min_word_length": 3,
-                        "max_term_freq": 0.05,
-                        "sort": "score",
-                        "string_distance": "levenshtein"
-                    }
-                },
-                "web_url_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_web_url",
-                        "min_word_length": 3,
-                        "max_term_freq": 0.05,
-                        "sort": "score",
-                        "string_distance": "levenshtein"
-                    }
-                }
-            },
             "from": max(0, (m_page_number - 1) * 100),
             "size": 100,
             "track_total_hits": True,
-            "sort": [
-                {"m_leak_date": {"order": "desc"}}
-            ]
+            "sort": [{"m_leak_date": {"order": "desc"}}]
         }
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
@@ -400,35 +472,38 @@ class elastic_request_generator:
 
         return query
 
-    @staticmethod
-    def on_search_consolidated_data(p_query_model, pFilter=None):
+    def on_search_consolidated_data(self,p_query_model, pFilter=None):
         queries = []
         indices = []
 
         m1 = helper_controller.clone_model(p_query_model)
-        i1, q1 = elastic_request_generator.on_search_leakdata(m1, pFilter)
-        queries.append(elastic_request_generator._strip_query(q1))
+        i1, q1 = self.on_search_leakdata(m1, pFilter)
+        queries.append(self._strip_query(q1))
         indices.append(i1)
 
         m2 = helper_controller.clone_model(p_query_model)
-        i2, q2 = elastic_request_generator.on_search_general_data(m2, pFilter)
-        queries.append(elastic_request_generator._strip_query(q2))
+        i2, q2 = self.on_search_general_data(m2, pFilter)
+        queries.append(self._strip_query(q2))
         indices.append(i2)
 
         m3 = helper_controller.clone_model(p_query_model)
-        i3, q3 = elastic_request_generator.on_search_exploitdata(m3, pFilter)
-        queries.append(elastic_request_generator._strip_query(q3))
+        i3, q3 = self.on_search_exploitdata(m3, pFilter)
+        queries.append(self._strip_query(q3))
         indices.append(i3)
 
         m4 = helper_controller.clone_model(p_query_model)
-        i4, q4 = elastic_request_generator.on_search_telegram_data(m4, pFilter)
-        queries.append(elastic_request_generator._strip_query(q4))
+        i4, q4 = self.on_search_telegram_data(m4, pFilter)
+        queries.append(self._strip_query(q4))
         indices.append(i4)
 
         m6 = helper_controller.clone_model(p_query_model)
-        i6, q6 = elastic_request_generator.on_search_social_data(m6, pFilter)
-        queries.append(elastic_request_generator._strip_query(q6))
+        i6, q6 = self.on_search_social_data(m6, pFilter)
+        queries.append(self._strip_query(q6))
         indices.append(i6)
+
+        domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
+        queries.append(domain_query)
+        indices.append(domain_query_index)
 
         return indices, queries
 
@@ -1497,7 +1572,6 @@ class elastic_request_generator:
         if not raw_query:
             return ELASTIC_INDEX.S_GENERIC_INDEX, {"query": {"match_none": {}}, "size": 0}
 
-        m_url_query = raw_query
         m_safe_search = p_query_model.safe
         m_page_number = p_query_model.page
         m_network = p_query_model.network
@@ -1514,10 +1588,6 @@ class elastic_request_generator:
             m_search_type = p_query_model.category
         else:
             m_search_type = "all"
-
-        parsed_url = urlparse(raw_query)
-        domain = parsed_url.netloc or (raw_query.split("/")[0] if "/" in raw_query else raw_query)
-        path = parsed_url.path.lstrip("/") or ("/".join(raw_query.split("/")[1:]) if "/" in raw_query else "")
 
         must_clauses = []
         must_not_clause = []
@@ -1551,11 +1621,6 @@ class elastic_request_generator:
                 }
             })
 
-        filter_clauses = []
-        if pfilter:
-            allowed_filtered = {k: v for k, v in pfilter.items() if k in allowed_keys and v}
-            filter_clauses = [{"terms": {k: v}} for k, v in allowed_filtered.items()]
-
         if m_content_type and m_content_type.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})
 
@@ -1568,33 +1633,6 @@ class elastic_request_generator:
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
-        url_priority_query = {
-            "bool": {
-                "should": [
-                    {"term": {"m_url.keyword": {"value": m_url_query, "boost": 100, "case_insensitive": True}}},
-                    {"wildcard": {"m_url.keyword": {"value": "*" + m_url_query + "*", "boost": 80}}},
-                    {"wildcard": {"m_url.keyword": {"value": domain + "/*" + path, "boost": 70}}},
-                    {"wildcard": {"m_url.keyword": {"value": "*" + path, "boost": 60}}},
-                    {"match": {"m_url": {"query": raw_query, "boost": 40}}}
-                ],
-                "minimum_should_match": 1,
-                "boost": 10
-            }
-        }
-
-        base_url_query = {
-            "bool": {
-                "should": [
-                    {"term": {
-                        "m_base_url.keyword": {"value": "https://" + domain, "boost": 50, "case_insensitive": True}}},
-                    {"term": {
-                        "m_base_url.keyword": {"value": "http://" + domain, "boost": 50, "case_insensitive": True}}},
-                    {"wildcard": {"m_base_url.keyword": {"value": "*" + domain + "*", "boost": 30}}}
-                ],
-                "minimum_should_match": 1,
-                "boost": 5
-            }
-        }
 
         if raw_query == "*":
             content_query = {"match_all": {}}
