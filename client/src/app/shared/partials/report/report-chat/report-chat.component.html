@@ -68,26 +68,29 @@
           Metadata <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Metadata">
         </div>
         <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/search_side_dropdown_icon.svg">
+          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
         </div>
       </div>
-      <div class="tabs d-flex align-items-center search__result-detail-container">
-        <ng-container *ngFor="let key of arrayKeys; let last = last">
-          <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
-            {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
-          </button>
-          <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
-        </ng-container>
-      </div>
+      <ng-container *ngIf="isExpandedMetadata">
+        <div class="tabs d-flex align-items-center search__result-detail-container">
+          <ng-container *ngFor="let key of arrayKeys; let last = last">
+            <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
+              {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
+            </button>
+            <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
+          </ng-container>
+        </div>
 
-      <div class="search__result-tabs-line"></div>
-      <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
-      <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
-        Names of people, organizations, and entities are handled separately, but may overlap in the results.
-      </div>
-      <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+        <div class="search__result-tabs-line"></div>
+        <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
+        <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
+          Names of people, organizations, and entities are handled separately, but may overlap in the results.
+        </div>
+        <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+      </ng-container>
     </div>
   </div>
 
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 </div>
+<app-chat-widget *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>

@@ -12,6 +12,8 @@ import {AuthService} from '../../../../services/authetication/auth.service';
 import {SocialResultItem} from '../../../model/results/social/social.callback.model';
 import {ReportHeaderComponent} from '../../report-header/report-header.component';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {ChatWidgetComponent} from '../../chat-widget/chat-widget.component';
+import {AppService} from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-report-chat',
@@ -23,7 +25,7 @@ import {DashboardService} from '../../../../services/dashboard/dashboard.service
     ResultListComponent,
     ResultSectionComponent,
     SlicePipe, CommonModule,
-    JsonApiViewerComponent, TooltipDirective, ReportHeaderComponent
+    JsonApiViewerComponent, TooltipDirective, ReportHeaderComponent, ChatWidgetComponent
   ],
   animations: [fadeInDashboardItem]
 })
@@ -40,7 +42,7 @@ export class ReportChatComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, ) {
+  constructor(protected appService:AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, ) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }

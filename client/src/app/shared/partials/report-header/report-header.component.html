@@ -14,10 +14,12 @@
       <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25">
     </button>
 
-    <div class="vr report-menu-divider"></div>
-    <button (click)="aiSuggest()" appTooltip="AI Summary" class="p-0 report-menu-option">
-      <img alt="AI Summary" height="25" ngSrc="assets/images/shared/ai.svg" width="25"/>
-    </button>
+    <ng-container *ngIf="appService.getConfig().appSettings.ai_endpoint">
+      <div class="vr report-menu-divider"></div>
+      <button (click)="aiSuggest()" appTooltip="AI Summary" class="p-0 report-menu-option">
+        <img alt="AI Summary" height="25" ngSrc="assets/images/shared/ai.svg" width="25"/>
+      </button>
+    </ng-container>
     <div class="vr report-menu-divider"></div>
 
     <button (click)="shareResult()" appTooltip="Share" class="p-0 report-menu-option">

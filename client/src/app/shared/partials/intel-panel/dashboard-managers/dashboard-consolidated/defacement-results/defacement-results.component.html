@@ -28,19 +28,19 @@
               </span>
             </div>
           </div>
-          <div class="home-defacement-result-card-header-section">
 
+          <div class="home-defacement-result-card-header-section">
             <div class="home-defacement-result-card-company-info">
               <div class="home-defacement-result-card-label">Web Server</div>
               <div class="home-defacement-result-card-value">
-                {{ item.m_web_server?.join(', ') || '-' }}
+                {{ item.m_web_server ? item.m_web_server.join(', ') : '-' }}
               </div>
             </div>
 
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">Attacker</div>
               <div class="home-defacement-result-card-value">
-                {{ item.m_attacker?.join(', ') || '-' }}
+                {{ item.m_attacker ? item.m_attacker.join(', ') : '-' }}
               </div>
             </div>
           </div>
@@ -52,10 +52,11 @@
                 {{ item.m_team || '-' }}
               </div>
             </div>
+
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">IP(s)</div>
               <div class="home-defacement-result-card-value">
-                {{ item.m_ip?.join(', ') || '-' }}
+                {{ item.m_ip ? item.m_ip.join(', ') : '-' }}
               </div>
             </div>
           </div>

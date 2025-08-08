@@ -113,6 +113,7 @@ class crawl_model:
                     json={"data": model.data},
                     timeout=200
                 )
+                text_body = await response.aread()
                 return response.json()
         except Exception as ex:
             return {"error": str(ex)}

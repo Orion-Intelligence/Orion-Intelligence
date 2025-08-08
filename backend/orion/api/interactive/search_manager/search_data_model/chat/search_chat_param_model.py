@@ -6,7 +6,7 @@ class search_chat_param_model(BaseModel):
     page: Optional[int] = 1
     content: Optional[str] = "all"
     category: Optional[str] = "all"
-    must: Optional[str] = False
+    must: Optional[bool] = False
     matchtype: Optional[str] = "or"
     daterange: Optional[str] = ""
     entity: Optional[str] = ""

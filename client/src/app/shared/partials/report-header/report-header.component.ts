@@ -9,6 +9,7 @@ import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {GeneralResultItem} from '../../model/results/general/general.callback.model';
 import {LeakResultItem} from '../../model/results/leak/leak.callback.model';
 import {HttpParams} from '@angular/common/http';
+import {AppService} from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-report-header',
@@ -32,6 +33,7 @@ export class ReportHeaderComponent {
   constructor(
     private helperService: HelperService,
     private api: ApiService,
+    protected appService: AppService,
     private authService: AuthService,
     private dashboardService: DashboardService,
     private cdr: ChangeDetectorRef
@@ -81,12 +83,13 @@ export class ReportHeaderComponent {
     }
 
     this.api.post<{ result: string }>('nlp/summarize/ai', {
-      data: this.content
+      data: [this.content]
     }).subscribe({
       next: (response) => {
         this.aiSuggestStatus = true;
         this.aiSuggestSummary = response.result || 'No summary available';
         this.cdr.detectChanges();
+        console.log(response.result)
       },
       error: (err) => {
         console.error('Summarization failed', err);

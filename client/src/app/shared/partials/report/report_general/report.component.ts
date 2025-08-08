@@ -18,11 +18,12 @@ import {ReportMappingComponent} from "../../report-mapping/report-mapping.compon
 import {AuthService} from '../../../../services/authetication/auth.service';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 import {ReportHeaderComponent} from '../../report-header/report-header.component';
+import {ChatWidgetComponent} from '../../chat-widget/chat-widget.component';
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
@@ -44,7 +45,7 @@ export class ReportComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, appService: AppService, protected authService: AuthService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService,protected appService: AppService, protected authService: AuthService) {
     this.lang = appService.getConfig().appSettings.language_allowed
     this.lang_detected = appService.getConfig().appSettings.language_allowed
     this.username$ = this.authService.getUsername$();

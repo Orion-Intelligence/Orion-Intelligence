@@ -127,3 +127,4 @@
 
 <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 <app-report-mapping></app-report-mapping>
+<app-chat-widget *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>
