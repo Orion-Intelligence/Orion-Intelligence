@@ -18,6 +18,7 @@ from orion.api.server.crawl_manager.class_model.general_model import GeneralData
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.class_model.log_model import LogModel, LogBatchModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
+from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.class_model.social_model import social_data_model
 from orion.api.server.crawl_manager.crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 from orion.helper_manager.helper_controller import helper_controller
@@ -113,20 +114,20 @@ class crawl_model:
                     json={"data": model.data},
                     timeout=200
                 )
-                text_body = await response.aread()
                 return response.json()
         except Exception as ex:
             return {"error": str(ex)}
 
     @staticmethod
-    async def parse_chat_ai(model: nlp_data_model):
+    async def parse_chat_ai(model: ReportChatRequest):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://168.231.86.34:8010/nlp/parse/ai",
-                    json={"data": model.data},
-                    timeout=10
+                    "http://168.231.86.34:8010/nlp/chat/report",
+                    json=model.model_dump(),
+                    timeout=200
                 )
+                response.raise_for_status()
                 return response.json()
         except Exception as ex:
             return {"error": str(ex)}

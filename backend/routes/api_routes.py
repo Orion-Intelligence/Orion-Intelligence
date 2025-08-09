@@ -5,6 +5,7 @@ from fastapi import APIRouter, Body
 from fastapi import Depends, Query
 
 from configs.app_dependency import role_required
+from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.dump_manager.dump_model import dump_model
@@ -26,6 +27,7 @@ from orion.api.interactive.search_manager.search_data_model.social.search_social
     search_social_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
+from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
@@ -94,6 +96,11 @@ async def search_telegram(param: search_chat_param_model = Depends()):
 async def search_discussion(param: search_general_param_model = Depends()):
     return await search_model.getInstance().search_discussion_result(param)
 
+
+@api_routes.post("/api/nlp/chat/report",  dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+async def chat_report(payload: ReportChatRequest):
+    response = await crawl_model.getInstance().parse_chat_ai(payload)
+    return response
 
 @api_routes.get("/api/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_twitter(param: search_social_param_model = Depends()):

@@ -13,6 +13,7 @@
 
   <ng-container *ngIf="isExpandable && results">
     <ng-container *ngFor="let item of results.Result.slice(0,10); let last = last">
+      <div class="home-defacement-result-divider" *ngIf="!last"></div>
       <div class="home_defacement_result__container mt-4">
         <div class="home-defacement-result-card-container">
           <div class="d-flex justify-content-between w-100 mb-2">
@@ -56,7 +57,7 @@
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">IP(s)</div>
               <div class="home-defacement-result-card-value">
-                {{ item.m_ip ? item.m_ip.join(', ') : '-' }}
+                {{ item.m_ip ? item.m_ip.join(', ').slice(0,30) : '-' }}
               </div>
             </div>
           </div>
@@ -65,7 +66,7 @@
             <div class="home-defacement-result-card-country-info">
               <div class="home-defacement-result-card-label">URL</div>
               <div class="home-defacement-result-card-value">
-                {{ item.m_url.length > 24 ? (item.m_url | slice:0:80) + '...' : item.m_url }}
+                {{ item.m_url.length > 24 ? (item.m_url | slice:0:30) + '...' : item.m_url }}
               </div>
             </div>
           </div>
@@ -80,7 +81,6 @@
           </div>
         </div>
       </div><br>
-
       <div class="home-defacement-result-divider" *ngIf="!last"></div>
     </ng-container>
     <br>
