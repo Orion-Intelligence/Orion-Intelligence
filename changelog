@@ -410,3 +410,245 @@ ADDITIONAL
    - Expanded configuration options, allowing administrators to modify settings with minimal effort.
  • **Comprehensive /doc Endpoint**
    - Offers detailed API documentation for easy reference by developers and integrators.
+
+Version 1.0.2.8 — Changelog
+
+OVERVIEW
+ • IOC everywhere: IOC extraction + matching now runs across all scripts/collectors. Includes advanced IOC filtering (30–50 IOC types), with explicit Partial (≥1 IOC) and Full (all IOCs) match modes to fit triage vs. confirmation workflows.
+ • New collection surfaces: Added Clearweb forums, Darkweb forums, Twitter, Reddit, and Telegram News. Collectors normalize content into a shared schema (source, actor, indicators, artifacts, confidence).
+ • Analyst-first UX: Multiple subsections, richer filters, Boolean AND/OR operators, and result sorting. Consolidated search ranks across indices and shows keyword/IOC insights + category flags (phishing/defacement/hacking).
+ • Go-anywhere access: Orion mobile app launched on Play Store, giving multi-layer access (Clearweb, Onion, I2P) with privacy-focused controls and a path for future swarm feeders.
+ • Operational visibility: Orion Directory Manager surfaces active/inactive pipeline health; GET param/pagination handling ensures truly fresh searches.
+ • Depth enhancements: Stealer Logs faster and more precise; Exploit module can compile zero-day tools & CVEs (for analysis/testing); Defacement gains broader categories.
+ • Built-in analysis & safety: OLAMA LLM embedded in each report for chat-style Q&A; domain-triggered scans auto-check CSP/CORS/ports/console issues.
+ • Delivery footprint: GitHub auto-scanning pipelines integrated; client-facing web app released.
+ • Under the hood: Broad code restructuring, cleaner module boundaries, and shared utilities.
+
+ADDED
+    IOC Everywhere
+      • IOC pass integrated into all scripts and collectors.
+      • Advanced IOC filtering evaluates 30–50 types. Examples: IPs, domains, URLs, email addresses, hashes (MD5/SHA1/SHA256), file paths, wallet addresses, C2 hostnames, malware family names, registry keys, phone numbers.
+      • Partial vs. Full: quick signal vs. strict confirmation—configurable per view.
+
+    New Collection Channels
+      • Clearweb & Darkweb forums: threads/posts ingested with author, timestamp, topic, outbound links.
+      • Twitter & Reddit: post/author/engagement + extracted IOCs from text/media/links.
+      • Telegram News: channel posts with media/link expansion and IOC extraction.
+
+    Mobile App (Play Store)
+      • One-tap pivots across Clearweb / Onion / I2P.
+      • Privacy-oriented routing and minimal on-device footprint.
+      • UI tuned for quick triage (long-press actions, saved filters); groundwork for swarm feeders.
+
+    Search & Filtering Toolkit
+      • Boolean: (keyword1 AND keyword2) OR "exact phrase" -exclude.
+      • Sort by recency, source weight, IOC density.
+      • Subsections (e.g., News, Forums, Stolen, Hacking) to jump straight to context.
+
+    Consolidated Search
+      • Cross-index ranking uses signals like recency, source trust, IOC density, keyword proximity.
+      • Keyword insight (top tokens), coverage (which indices matched), cross-index threat actor lookups, and a collected IOC list.
+      • Category flags if hits include phishing/defacement/hacking.
+      • Up to 4 results/section with Explore More for depth.
+
+    Dashboard — Threat Landscape
+      • Expanded cards for actor activity, trending IOCs, top sources, and pipeline status.
+
+    OLAMA LLM (Per-Report Chat)
+      • Ask clarifying questions on a report; get summaries, entity extraction, and pivot suggestions inline.
+
+    Security Scans (Domain-Triggered)
+      • Auto-runs when a domain is detected; outputs structured findings for CSP, CORS, open/compromised ports, console/network errors with quick links.
+
+    Stealer Logs Enhancements
+      • Advanced filtering (date ranges, source, artifact type).
+      • Domain/username search + fast domain lookup; full wildcard for broader digs.
+      • Backend tuned for snappier results on large dumps.
+
+    Exploit Module
+      • Can compile/analyze zero-day tooling and CVE artifacts (POCs, scripts) to aid validation and detection engineering.
+
+    Defacement Module
+      • New categories: hacked website, phishing, plus more granular tags (mirror, archive, actor claim).
+
+    Multi-Theme UI
+      • Theme switcher for accessibility, low-light ops, and preference fit.
+
+    GitHub Auto-Scanning Pipelines
+      • Monitors org/user repos for exposed secrets, tokens, sensitive paths; triage-ready findings.
+
+    Client-Facing Web Application
+      • Customer-ready portal exposing curated search, dashboards, and exports.
+
+CHANGED
+
+    Overall Code Restructuring
+      • Shared utilities for parsing, normalization, IOC extraction; clearer module boundaries to simplify maintenance and testing.
+
+    Collector Classification
+      • Orion collectors grouped into neat, navigable categories; faster discovery and ownership handoff.
+
+    Telegram Batch Updates
+      • Batch sizes and scheduling tuned; fewer stalls, smoother catch-up on high-volume channels.
+
+    Active Orion Directory Manager
+      • Health view clarifies which pipelines are active, last run times, and quick actions to pause/resume.
+
+    GET Param & Pagination Handling
+      • Fresh searches reset pagination and clean URL params to avoid stale contexts and hidden filters.
+
+    Filter Visibility
+      • UI now shows selected filters and IOC criteria at all times to prevent misapplied queries.
+
+FIXED
+  • Pagination and GET param resets eliminate cross-query bleed-through.
+  • Always-visible active filters + IOC chips reduce accidental exclusions and missed hits.
+  • Alignment, spacing, and control states standardized across new subsections.
+  • Indexing and lookup paths optimized for faster returns on large datasets.
+
+ADDITIONAL
+
+    Matching Semantics (recap)
+    • Partial = match any selected IOC; Full = match all selected IOCs. Use Partial for discovery, Full for confirmations/workflows.
+
+    Analyst Ergonomics
+    • Saved filters, clearer category jumps, and ranked consolidated results reduce pivot time.
+
+    Ops Readiness
+    • Directory health + batch improvements + restructuring increase reliability during peak intake.
+
+Added Scripts news
+    _bleepingcomputer.py
+    _csocybercrime.py
+    _hackread.py
+    _infosecuritymagazine.py
+    _krebsonsecurity.py
+    _postswigger.py
+    _schneier.py
+    _securityweek.py
+    _thehackernews.py
+    _therecord.py
+
+Added Scripts social
+    _b1nd.py
+    _crackingx.py
+    _hacksnation.py
+    _xreactor.py
+    _reddit.py
+    _twitter.py
+
+Added Scripts defacement
+    _github_mthcht_awesome_lists.py
+    _github_openfish.py
+    _phishunt.py
+    _zone_xsec.py
+    _tweetfeed.py
+
+Added Scripts exploit
+    _0dayfans.py
+    _anyrun_malwaretrends.py
+    _cisa.py
+    _cxsecurity.py
+    _cybergcca.py
+    _exploitdb.py
+    _github_trickest_cve.py
+    _inthewild.py
+    _kb_cert.py
+    _rapid7.py
+    _sploitus.py
+    _talosintelligence.py
+
+Added Scripts api
+    _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd.py
+
+Added Scripts tracking
+    _acn.py
+    _cert.py
+    _certeu.py
+    _certgovua.py
+    _csocybercrime_tracking.py
+    _cyber.py
+    _cybernewsksa.py
+    _idsirtii.py
+    _incibe.py
+    _msb.py
+    _ncsc.py
+    _ncsc_swed.py
+    _ncscuk.py
+    _nsm.py
+    _nukibgovcz.py
+    _public_tableau.py
+    _thaicert.py
+
+Added Scripts leak
+    _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.py
+    _5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid.py
+    _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.py
+    _34o4m3f26ucyeddzpf53bksy76wd737nf2fytslovwd3viac3by5chad.py
+    _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd.py
+    _akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad.py
+    _arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd.py
+    _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd.py
+    _bertblogsoqmm4ow7nqyh5ik7etsmefdbf25stauecytvwy7tkgizhad.py
+    _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd.py
+    _blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd.py
+    _business_data_leaks.py
+    _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd.py
+    _csidb.py
+    _darkfeed.py
+    _darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd.py
+    _dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid.py
+    _ddosecrets.py
+    _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid.py
+    _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.py
+    _github_doormanbreach.py
+    _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad.py
+    _handala_hack.py
+    _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd.py
+    _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd.py
+    _ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd.py
+    _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid.py
+    _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad.py
+    _intelrepository.py
+    _j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.py
+    _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad.py
+    _k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd.py
+    _kawasa2qo7345dt7ogxmx7qmn6z2hnwaoi3h5aeosupozkddqwp6lqqd.py
+    _krakenccj3wr23452a4ibkbkuph4d6soyx2xgjoogtuamc3m7u7wemad.py
+    _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.py
+    _leak_lookup.py
+    _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.py
+    _lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd.py
+    _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd.py
+    _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid.py
+    _monitor_mozilla.py
+    _mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id.py
+    _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad.py
+    _netleaks.py
+    _nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd.py
+    _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd.py
+    _om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.py
+    _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd.py
+    _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id.py
+    _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd.py
+    _ransom.py
+    _ransomed.py
+    _ransomlook.py
+    _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.py
+    _ransomware_live.py
+    _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad.py
+    _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad.py
+    _rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad.py
+    _sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.py
+    _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid.py
+    _tp5cwh6d2b5hekcg6jlhoe6mawa7dlwiv47epvnfmzuaaur2dnaa3uid.py
+    _twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad.py
+    _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.py
+    _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd.py
+    _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd.py
+    _worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid.py
+    _xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd.py
+    _yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd.py
+    _z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid.py
+    _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad.py
+    _zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid.py

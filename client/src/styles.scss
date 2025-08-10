@@ -9,6 +9,8 @@
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
+@use 'app/shared/partials/chat-widget/chat-widget.component.css';
+@use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
 @use 'app/pages/login/login-container/login-container.component.css';
 @use 'assets/styles/shared/listing/list.component.css';
 @use 'assets/styles/shared/sidebar/filters-sidebar.component.css';
