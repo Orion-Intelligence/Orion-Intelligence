@@ -285,7 +285,7 @@ table a:visited {
   border-radius: 4px;
   background: var(--color-blue-680);
   border: none;
-  padding: 7px 12px;
+  padding: 9px 12px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -316,7 +316,7 @@ table a:visited {
   margin-top: -4px;
 }
 
-#dashboard-container{
+#dashboard-container {
   min-width: 400px !important;
 }
 
@@ -361,21 +361,21 @@ table a:visited {
   border: 1px solid #ffffff12;
 }
 
-.dashboard-general-scan-header{
+.dashboard-general-scan-header {
   margin-top: 4px;
   font-size: 13px;
   width: 100%;
   line-height: 13px;
 }
 
-.dashboard-general-scan-desc .notify{
+.dashboard-general-scan-desc .notify {
   width: 8px;
   height: 8px;
   margin-right: 3px;
   background-color: var(--color-blue-640) !important;
 }
 
-.dashboard-general-scan-desc{
+.dashboard-general-scan-desc {
   font-size: 11px;
   line-height: 13px;
   margin-top: 3px;
@@ -439,6 +439,10 @@ table a:visited {
   background: #fff;
   padding: 0 !important;
   margin-bottom: 5px;
+}
+
+.scan-shrink {
+  display: inherit;
 }
 
 .default-input-container .input-group-text {
@@ -579,7 +583,7 @@ table a:visited {
     width: 100vw !important;
   }
 
-  .default-notification-banner{
+  .default-notification-banner {
     margin-bottom: 10px;
     margin-left: 15px;
   }
@@ -616,6 +620,9 @@ table a:visited {
     margin-top: 10px;
   }
 
+  .scan-shrink {
+    display: none !important;
+  }
 }
 
 .cursor-pointer {
