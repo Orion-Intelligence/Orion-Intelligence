@@ -1,6 +1,6 @@
 <div class="chat-support" [class.open]="chatOpen">
   <div *ngIf="!chatOpen" class="chat-toggle" (click)="openChat()">
-    <span>💬</span>
+    <span><img src="assets/images/shared/chat.svg" alt="chat" /></span>
   </div>
 
   <div *ngIf="chatOpen" class="chat-window">
@@ -22,7 +22,7 @@
 
     <form class="chat-input" (submit)="sendMessage($event)">
       <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Ask something..." required />
-      <button type="submit">➤</button>
+      <button type="submit"><img src="assets/images/shared/chat_small.svg" alt="chat"></button>
     </form>
   </div>
 </div>

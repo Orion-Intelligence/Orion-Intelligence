@@ -1,5 +1,6 @@
 import asyncio
 from orion.management.jobs.insight_job import insight_job
+from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
 class cronjob_manager:
@@ -19,8 +20,15 @@ class cronjob_manager:
             cronjob_manager.__instance = self
 
     @staticmethod
+    async def purge_loop():
+        while True:
+            await elastic_controller.get_instance().purge_old_records()
+            await asyncio.sleep(86400)
+
+    @staticmethod
     async def __init_handles():
         asyncio.create_task(insight_job.get_instance().update_insights())
 
     async def init_jobs(self):
+        asyncio.create_task(cronjob_manager.purge_loop())
         await self.__init_handles()

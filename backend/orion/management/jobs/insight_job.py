@@ -50,12 +50,11 @@ class insight_job:
             old_model_daily = getattr(insight_old_daily, section)
             new_model = getattr(insight_new, section)
             comparison_model = getattr(comparison, section)
-            # Select the appropriate mapping based on section
             if section == "general":
                 mapping = REVERSE_GENERIC_MAPPING
             elif section == "leak":
                 mapping = REVERSE_LEAK_MAPPING
-            else:  # section == "defacement"
+            else:
                 mapping = REVERSE_DEFACEMENT_MAPPING
 
             for field in new_model.__dict__:
@@ -143,9 +142,7 @@ class insight_job:
             return
 
     async def update_insights(self):
-        await redis_controller.getInstance().invoke_trigger(
-            REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None]
-        )
+        await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.INSIGHT_OLD_DAY, None, None])
         await self.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
         day_counter = 0
         while True:

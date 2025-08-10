@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from string import capwords
 from elasticsearch import AsyncElasticsearch
+
+from orion.constants.constant import CONSTANTS
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -70,6 +72,18 @@ class elastic_controller:
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
+
+    async def purge_old_records(self):
+        m_request = {"query": {"range": {"timestamp": {"lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"}}}}
+        try:
+            await self.__m_connection.delete_by_query(
+                index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
+                body=m_request,
+                ignore=[404],
+                request_timeout=300
+            )
+        except Exception as ex:
+            log.g().e(f"Failed to delete old records: {str(ex)}")
 
     async def get_doc(self, index, doc_id: str):
         try:
