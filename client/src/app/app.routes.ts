@@ -23,6 +23,7 @@ import {DashboardConsolidatedComponent} from './shared/partials/intel-panel/dash
 import {ReportConsolidatedResolver} from './shared/resolvers/consolidated.resolver';
 import {DashboardSocialsComponent} from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
 import {subscriptionGuard} from './shared/guards/subscription.guard';
+import {SecurityScanResultsComponent} from './shared/partials/security-scan-results/security-scan-results.component';
 
 export const routes: Routes = [
   {
@@ -51,6 +52,11 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'home',
         pathMatch: 'full'
+      },
+      {
+        path: 'scan',
+        component: SecurityScanResultsComponent,
+        data: {animation: 'HomePage'}
       },
       {
         path: 'home',

@@ -14,7 +14,7 @@ import {EmptyQueryComponent} from '../empty-query/empty-query.component';
 import {Suggestion} from '../../model/results/shared/common-result';
 import {query} from '@angular/animations';
 import {Category} from "../../constants/pages";
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 import {AppService} from '../../../services/core/app/app.service';
@@ -22,6 +22,7 @@ import {SearchFiltersComponent} from "../../../pages/homepage/search-filters/sea
 import {searchFilterAnimation} from '../../animations/search.filter.animation';
 import {SelectedFilterBarComponent} from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {HelperService} from '../../services/helper.service';
 
 @Component({
   selector: 'app-result',
@@ -61,6 +62,8 @@ export class ResultComponent implements OnInit, OnChanges {
   selectedSortBy: SortType = SortType.DEFAULT;
   selectedSearchBy = 'Match any term';
   local_query = ""
+  showScans = false;
+  scandomains: string[] = [];
 
   protected readonly query = query;
   protected readonly Category = Category;
@@ -69,7 +72,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
 
-  constructor(public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
+  constructor(private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -80,6 +83,7 @@ export class ResultComponent implements OnInit, OnChanges {
         .replace(/\s+/g, ' ')
         .trim() || '';
     }
+    this.init_domains()
   }
 
   onSetMatchType(type: string) {
@@ -141,6 +145,8 @@ export class ResultComponent implements OnInit, OnChanges {
     this.searchQuery = query;
     this.reloadData.emit();
     this.result_triggered = true;
+    this.init_domains()
+    this.showScans = false;
   }
 
 
@@ -212,16 +218,13 @@ export class ResultComponent implements OnInit, OnChanges {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
+    const clickedInsideFilter = this.filtersWrapperRef?.nativeElement.contains(target);
+    const clickedInput = this.searchInputRef?.nativeElement.contains(target);
+    const clickedInsideScan = target.closest('.dashboard-general-scan');
 
-    const clickedInsideFilter =
-      this.filtersWrapperRef?.nativeElement.contains(target);
+    if (!clickedInsideFilter && !clickedInput) this.setFilterOverlay(false);
 
-    const clickedInput =
-      this.searchInputRef?.nativeElement.contains(target);
-
-    if (!clickedInsideFilter && !clickedInput) {
-      this.setFilterOverlay(false);
-    }
+    this.showScans = !!(clickedInsideScan && this.showScans);
   }
 
   setFilterOverlay(newValue: boolean) {
@@ -231,4 +234,27 @@ export class ResultComponent implements OnInit, OnChanges {
   reloadFilter() {
     this.reloadFilters.emit()
   }
+
+  init_domains() {
+    let domain = this.helperService.extractLinks(this.searchQuery)
+    if (domain) {
+      this.scandomains = domain
+    } else {
+      this.scandomains = []
+    }
+  }
+
+  toggleScan() {
+    this.showScans = !this.showScans;
+  }
+
+  onScanSelected(domain: string) {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/dashboard/scan'], {
+        queryParams: {domain}
+      })
+    );
+    window.open(url, '_blank');
+  }
+
 }

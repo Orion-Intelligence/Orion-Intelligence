@@ -1,186 +1,112 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { BaseChartDirective } from 'ng2-charts';
-import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
-import annotationPlugin from 'chartjs-plugin-annotation';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { ScanData, SecurityPosture, Finding } from '../../model/security-scan/security.scan.results.model';
-Chart.register(ArcElement, Tooltip, Legend, ChartDataLabels, annotationPlugin);
+import {CommonModule} from '@angular/common';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {finalize} from 'rxjs/operators';
+import {ApiService} from '../../services/api.service';
+import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
+import {UrlScanMeta, UrlScanResponse, UrlScanThreatItem} from '../../model/security-scan/security.scan.results.model';
 
 @Component({
   selector: 'app-security-scan-results',
-  imports: [CommonModule, BaseChartDirective],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './security-scan-results.component.html',
-  styleUrl: './security-scan-results.component.css'
+  styleUrl: './security-scan-results.component.css',
+  animations: [fadeInDashboardItem]
 })
 export class SecurityScanResultsComponent implements OnInit {
-  chartType = 'doughnut';
-  meterChartType = 'doughnut';
-  chartPlugins = [ChartDataLabels];
+  meta: UrlScanMeta | null = null;
+  categories: { name: string; total: number; items: UrlScanThreatItem[] }[] = [];
+  requestedUrl = '';
+  requestedDomain = '';
+  isLoading = true;
+  hasError = false;
+  errorMessage = '';
+  skeletonCards = Array.from({ length: 3 });
 
-  scanData: ScanData = {
-    url: 'https://bbc.com',
-    host: 'BBC.com',
-    port: 443,
-    scanDate: 'July 19, 2025',
-    scannedBy: 'Orion Intelligence'
-  };
-
-  securityPosture: SecurityPosture = {
-    riskAppetite: 'Medium Risk Found',
-    score: 65,
-    riskBreakdown: {
-      total: 11,
-      medium: 3,
-      low: 1,
-      informational: 7
-    }
-  };
-
-  findings: Finding[] = [
-    {
-      id: 1,
-      title: 'Content Security Policy (CSP) Header Not Set',
-      description: 'CSP is an added layer of security that helps mitigate certain types of attacks...',
-      note: '*The page includes script files from a third-party domain.',
-      severity: 'Medium Risk',
-      confidence: 'High Confidence',
-      instances: '12 Found',
-      expanded: false,
-      details: [],
-      technicalDetails: {
-        foundOn: 'https://bbc.com (GET request)',
-        instancesCount: 12,
-        cweId: 'CWE-ID: 829',
-        wascId: 'WASC-ID: 15'
-      }
-    },
-    {
-      id: 2,
-      title: 'Cross-Domain JavaScript Source File Inclusion',
-      description: 'CSP helps mitigate XSS and injection attacks...',
-      note: '*Page includes third-party script files.',
-      severity: 'Low Risk',
-      confidence: 'Medium Confidence',
-      instances: '12 Found',
-      expanded: false,
-      details: [
-        { id: 1, url: 'https://cdn.getHistory.com/pub13c/46210413674/bbcv_prod.js' },
-        { id: 2, url: 'https://cdn.ithypress.com/api/ithypress.min.js' },
-        { id: 3, url: 'https://emp.bbci.co.uk/emp/hump-4/hump-4.js' }
-      ],
-      technicalDetails: {
-        foundOn: 'https://bbc.com (GET request)',
-        instancesCount: 19,
-        cweId: 'CWE-ID: 829',
-        wascId: 'WASC-ID: 15'
-      }
-    }
-  ];
-
-  meterChartData: any;
-  meterChartOptions: any;
-
-  riskChartData: any;
-  chartOptions: any;
+  constructor(private api: ApiService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.meterChartData = {
-      labels: ['Risk Score', 'Remaining'],
-      datasets: [
-        {
-          data: [this.securityPosture.score, 100 - this.securityPosture.score],
-          backgroundColor: ['#4285F4', '#e0e0e0'],
-          borderWidth: 0,
-          circumference: 180,
-          rotation: 270,
-          cutout: '80%'
-        }
-      ]
-    };
+    const rawParam = this.route.snapshot.queryParamMap.get('domain') || '';
+    this.requestedUrl = this.resolveRequestedUrl(rawParam) || window.location.href;
+    this.requestedDomain = this.extractHost(this.requestedUrl) || window.location.hostname || 'localhost';
+    this.load();
+  }
 
-    this.meterChartOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-        annotation: {
-          annotations: {
-            label1: {
-              type: 'doughnutLabel',
-              content: 'Risk Appetite:',
-              position: {
-                x: '50%',
-                y: '100%'
-              },
-              font: {
-                size: 16,
-              },
-              color: 'gray'
-            },
-            label2: {
-              type: 'doughnutLabel',
-              content: this.securityPosture.riskAppetite,
-              position: {
-                x: '50%',
-                y: '0%'
-              },
-              font: {
-                size: 16,
-                weight: 'bold',
-
-              },
-              color: '#ffffff'
-            }
+  private load(): void {
+    this.isLoading = true;
+    this.hasError = false;
+    this.errorMessage = '';
+    this.meta = null;
+    this.categories = [];
+    this.api.post<UrlScanResponse>('urlscan/domain', { domain: this.requestedUrl })
+      .pipe(finalize(() => { this.isLoading = false; }))
+      .subscribe({
+        next: (res) => {
+          const safe = !!(res && res.result && res.result.meta);
+          if (!safe) {
+            this.hasError = true;
+            this.errorMessage = 'No data received from scanner.';
+            return;
           }
+          const m = res.result.meta;
+          this.meta = {
+            ...m,
+            Host: (m?.Host && m.Host.trim()) || this.extractHost(m?.URL) || this.requestedDomain,
+            URL: m?.URL || this.requestedUrl
+          };
+          this.categories = Object.entries(res.result.threats || {})
+            .map(([name, items]) => {
+              const seen = new Set<string>();
+              const uniqueItems = (items || []).filter(it => {
+                const key = (it.header || '').trim().toLowerCase();
+                if (!key || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+              });
+              return { name, total: (items || []).length, items: uniqueItems };
+            })
+            .filter(c => c.items.length > 0);
         },
-        doughnutlabel: {
-          labels: [
-            {
-              text: `${this.securityPosture.score}%`,
-              font: { size: '20' }
-            },
-            {
-              text: 'Overall'
-            }
-          ]
+        error: (err) => {
+          this.hasError = true;
+          this.errorMessage = (err && (err.error?.detail || err.message)) || 'Failed to fetch security scan results.';
         }
-      }
-    };
-
-    this.riskChartData = {
-      labels: ['Low', 'Medium', 'Informational'],
-      datasets: [
-        {
-          data: [this.securityPosture.riskBreakdown.low, this.securityPosture.riskBreakdown.medium, this.securityPosture.riskBreakdown.informational], // Adjusted total for demo
-          backgroundColor: ['#00BCD4', '#FFC107', '#FF5722'],
-          borderWidth: 0
-        }
-      ]
-    };
-
-    this.chartOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' },
-        doughnutlabel: {
-          labels: [
-            {
-              text: this.securityPosture.riskBreakdown.total.toString(),
-              font: { size: '20' }
-            },
-            {
-              text: 'Risks'
-            }
-          ]
-        }
-      }
-    };
+      });
   }
 
-  toggleExpand(finding: any): void {
-    finding.expanded = !finding.expanded;
+  private resolveRequestedUrl(input: string): string {
+    const v = decodeURIComponent(input || '').trim();
+    if (!v) return '';
+    try {
+      const u = new URL(v.match(/^https?:\/\//i) ? v : `https://${v.replace(/^\/+/, '')}`);
+      return u.toString();
+    } catch {
+      return `https://${v.replace(/^https?:\/\//i, '').replace(/^\/+/, '')}`;
+    }
   }
+
+  private extractHost(url?: string): string {
+    try { return url ? new URL(url).hostname : ''; } catch { return ''; }
+  }
+
+  get displayHost(): string {
+    return this.meta?.Host || this.extractHost(this.meta?.URL) || this.requestedDomain;
+  }
+
+  get displayPort(): string {
+    if (!this.meta?.Port) return '';
+    return this.meta.Port.replace(/\s*SSL/i, '').trim();
+  }
+
+  get hasSSL(): boolean {
+    return !!this.meta?.Port && /ssl/i.test(this.meta.Port);
+  }
+
+  retry(): void {
+    this.load();
+  }
+
+  trackByCategory = (_: number, c: { name: string }) => c.name;
+  trackByItem = (i: number) => i;
 }

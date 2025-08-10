@@ -350,6 +350,36 @@ table a:visited {
   width: 115px;
 }
 
+.dashboard-general-scan {
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 6px;
+  padding: 3px 13px;
+  text-align: left;
+  background-color: var(--color-blue-900);
+  border: 1px solid #ffffff12;
+}
+
+.dashboard-general-scan-header{
+  margin-top: 4px;
+  font-size: 13px;
+  width: 100%;
+  line-height: 13px;
+}
+
+.dashboard-general-scan-desc .notify{
+  width: 8px;
+  height: 8px;
+  margin-right: 3px;
+  background-color: var(--color-blue-640) !important;
+}
+
+.dashboard-general-scan-desc{
+  font-size: 11px;
+  line-height: 13px;
+  margin-top: 3px;
+}
 
 .warninng-font {
   font-size: 15px;
@@ -418,7 +448,6 @@ table a:visited {
   color: #292828;
   font-family: Roboto, sans-serif;
   font-weight: 400;
-  cursor: pointer;
   border-radius: 0 8px 8px 0;
 }
 

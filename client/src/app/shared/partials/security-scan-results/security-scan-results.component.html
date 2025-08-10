@@ -1,127 +1,141 @@
-<div class="container">
-    <div class="report-section">
-        <h3 class="section-title">Security Scan Report for <a [href]="scanData.url">{{ scanData.host }}</a></h3>
-        <div class="divider"></div>
-
-        <div class="scan-meta-grid">
-            <div class="meta-card">
-                <p class="meta-label">URL</p>
-                <p class="meta-value">{{ scanData.url }}</p>
-            </div>
-
-            <div class="meta-card">
-                <p class="meta-label">Host</p>
-                <p class="meta-value">{{ scanData.host }}</p>
-            </div>
-
-            <div class="meta-card">
-                <p class="meta-label">Port</p>
-                <p class="meta-value">{{ scanData.port }} <span class="ssl-tag">SSL</span></p>
-            </div>
-
-            <div class="meta-card">
-                <p class="meta-label">Scanned on (date)</p>
-                <p class="meta-value">{{ scanData.scanDate }}</p>
-            </div>
-
-            <div class="meta-card">
-                <p class="meta-label">Scanned by</p>
-                <p class="meta-value">{{ scanData.scannedBy }}</p>
-            </div>
-        </div>
+<div class="security-scan scan_container">
+  <div class="scan_report-section" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
+    <div class="scan_alert">
+      <div class="scan_alert-title">Scan Failed</div>
+      <div class="scan_alert-text">{{ errorMessage }}</div>
+      <ul class="scan_alert-reasons">
+        <li>The server may be temporarily unavailable</li>
+        <li>The target website may not be reachable</li>
+        <li>An unexpected error occurred during scanning</li>
+      </ul>
+      <br>
+      <button class="scan_btn scan_btn-primary" (click)="retry()">Scan Again</button>
     </div>
+  </div>
 
-    <div class="posture-grid">
-        <div class="posture-card">
-            <h3 class="section-title">Overall Security Posture</h3>
-            <div class="divider"></div>
+  <div class="scan_report-section" *ngIf="!hasError">
+    <h3 class="scan_section-title">
+      <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton">
+        Security Scan Report for 〡 <a [href]="meta.URL">{{ displayHost }}</a>
+      </ng-container>
+    </h3>
+    <div class="scan_divider"></div>
 
-            <div class="posture-content">
-                <div class="risk-gauge">
-                    <div style="width: 250px; margin: auto;">
-                        <canvas baseChart [data]="meterChartData" [type]="'doughnut'" [options]="meterChartOptions"
-                            [plugins]="chartPlugins">
-                        </canvas>
-                    </div>
-
-                </div>
-            </div>
+    <ng-container *ngIf="!isLoading && meta; else metaGridSkeleton">
+      <div class="scan_scan-meta-grid" @fadeInDashboardItem>
+        <div class="scan_meta-card">
+          <p class="scan_meta-label">URL</p>
+          <p class="scan_meta-value">{{ meta.URL }}</p>
         </div>
-
-        <div class="posture-card">
-            <h3 class="section-title">Risk Breakdown</h3>
-            <div class="divider"></div>
-            <div style="display: block; max-width: 400px;">
-                <canvas baseChart [data]="riskChartData" [type]="'doughnut'" [options]="chartOptions"></canvas>
-
-            </div>
+        <div class="scan_meta-card">
+          <p class="scan_meta-label">Host</p>
+          <p class="scan_meta-value">{{ displayHost }}</p>
         </div>
+        <div class="scan_meta-card">
+          <p class="scan_meta-label">Port</p>
+          <p class="scan_meta-value">
+            {{ displayPort }} <span *ngIf="hasSSL" class="scan_ssl-tag">SSL</span>
+          </p>
+        </div>
+        <div class="scan_meta-card">
+          <p class="scan_meta-label">Scanned on (date)</p>
+          <p class="scan_meta-value">{{ meta.Scanned_on_date }}</p>
+        </div>
+        <div class="scan_meta-card">
+          <p class="scan_meta-label">Scanned by</p>
+          <p class="scan_meta-value">{{ meta.Scanned_by }}</p>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !hasError; else categoriesSkeleton">
+    <ng-container *ngIf="categories.length">
+      <div class="scan_report-section" *ngFor="let cat of categories; trackBy: trackByCategory" @fadeInDashboardItem>
+        <h3 class="scan_section-title">{{ cat.name }} Findings ({{ cat.total }})</h3>
+        <div class="scan_divider"></div>
+        <div class="scan_findings-list">
+          <div class="scan_finding-card" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
+            <div class="scan_finding-header">
+              <h4 class="scan_finding-title">
+                <span class="scan_status-dot" [ngClass]="{
+                    'scan_high': item.risk.toLowerCase() === 'high',
+                    'scan_medium': item.risk.toLowerCase() === 'medium',
+                    'scan_low': item.risk.toLowerCase() === 'low',
+                    'scan_info': item.risk.toLowerCase() === 'informational'
+                  }"></span>{{ item.header }} </h4>
+            </div>
+            <p class="scan_finding-description">{{ item.description }}</p>
+            <div class="scan_finding-meta">
+              <span class="scan_severity-badge" [ngClass]="{
+                  'scan_high': item.risk.toLowerCase() === 'high',
+                  'scan_medium': item.risk.toLowerCase() === 'medium',
+                  'scan_low': item.risk.toLowerCase() === 'low',
+                  'scan_info': item.risk.toLowerCase() === 'informational'
+                }">
+                {{ item.risk }} ({{ item.confidence }})
+              </span>
+            </div>
+            <div class="scan_divider-light"></div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <div class="scan_report-section" *ngIf="!categories.length && meta" @fadeInDashboardItem>
+      <div class="scan_empty">
+        <div class="scan_empty-title">No Findings</div>
+        <div class="scan_empty-text">No issues were detected for this target.</div>
+        <button class="scan_btn" (click)="retry()">Rescan</button>
+      </div>
     </div>
+  </ng-container>
 
-    <div class="report-section">
-        <h3 class="section-title">Identified Security Findings ({{ findings.length }})</h3>
-        <div class="divider"></div>
+  <ng-template #metaTitleSkeleton>
+    <div class="skeleton skeleton-title shimmer"></div>
+  </ng-template>
 
-        <div class="findings-list">
-            @for (finding of findings; track finding.id) {
-            <div class="finding-card" [class.expanded]="finding.expanded">
-                <div class="finding-header">
-                    <h4 class="finding-title">
-                        <span class="bullet" [class.medium]="finding.severity.includes('Medium')"
-                            [class.low]="finding.severity.includes('Low')">•</span>
-                        {{ finding.title }}
-                    </h4>
-                </div>
-
-                <p class="finding-description">{{ finding.description }}</p>
-                <p class="finding-note">{{ finding.note }}</p>
-
-                <div class="finding-meta">
-                    <span class="severity-badge" [class.medium]="finding.severity.includes('Medium')"
-                        [class.low]="finding.severity.includes('Low')">
-                        {{ finding.severity }} ({{ finding.confidence }})
-                    </span>
-                    <span class="instances">Instances: <strong>{{ finding.instances }}</strong></span>
-                </div>
-
-                <div class="divider-light"></div>
-
-                <div class="finding-actions">
-                    <button class="action-btn expand" (click)="toggleExpand(finding)">
-                        {{ finding.expanded ? 'Collapse' : 'Expand' }}
-                    </button>
-                </div>
-
-                @if (finding.expanded && finding.details.length) {
-                <div class="finding-details">
-                    <p class="details-title"><strong>Technical Details & Affected Locations:</strong></p>
-                    <p class="technical-info">
-                        This alert was found on {{ finding.technicalDetails.foundOn }}.
-                        Below are the {{ finding.technicalDetails.instancesCount }} instances:
-                        <br>
-                        {{ finding.technicalDetails.cweId }} | {{ finding.technicalDetails.wascId }}
-                    </p>
-
-                    <div class="instances-table">
-                        <div class="table-header">
-                            <span>Instance ID</span>
-                            <span>Script URL</span>
-                        </div>
-                        @for (detail of finding.details; track detail.id) {
-                        <div class="table-row">
-                            <span>{{ detail.id }}</span>
-                            <span>{{ detail.url }}</span>
-                        </div>
-                        }
-                    </div>
-
-                    <div class="export-section">
-                        <button class="action-btn export">Export to Shosts</button>
-                    </div>
-                </div>
-                }
-            </div>
-            }
-        </div>
+  <ng-template #metaGridSkeleton>
+    <div class="scan_scan-meta-grid" *ngIf="isLoading">
+      <div class="scan_meta-card">
+        <div class="skeleton skeleton-label shimmer"></div>
+        <div class="skeleton skeleton-text shimmer"></div>
+      </div>
+      <div class="scan_meta-card">
+        <div class="skeleton skeleton-label shimmer"></div>
+        <div class="skeleton skeleton-text shimmer"></div>
+      </div>
+      <div class="scan_meta-card">
+        <div class="skeleton skeleton-label shimmer"></div>
+        <div class="skeleton skeleton-text shimmer"></div>
+      </div>
+      <div class="scan_meta-card">
+        <div class="skeleton skeleton-label shimmer"></div>
+        <div class="skeleton skeleton-text shimmer"></div>
+      </div>
+      <div class="scan_meta-card">
+        <div class="skeleton skeleton-label shimmer"></div>
+        <div class="skeleton skeleton-text shimmer"></div>
+      </div>
     </div>
+  </ng-template>
+
+  <ng-template #categoriesSkeleton>
+    <ng-container *ngIf="isLoading">
+      <div class="scan_report-section" *ngFor="let i of skeletonCards; index as idx" @fadeInDashboardItem>
+        <div class="skeleton skeleton-section-title shimmer"></div>
+        <div class="scan_divider"></div>
+        <div class="scan_findings-list">
+          <div class="scan_finding-card" *ngFor="let j of skeletonCards; index as jdx">
+            <div class="scan_finding-header">
+              <div class="skeleton skeleton-dot shimmer"></div>
+              <div class="skeleton skeleton-subtitle shimmer" style="width: 70%;"></div>
+            </div>
+            <div class="skeleton skeleton-paragraph shimmer"></div>
+            <div class="skeleton skeleton-badge shimmer"></div>
+            <div class="scan_divider-light"></div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-template>
 </div>

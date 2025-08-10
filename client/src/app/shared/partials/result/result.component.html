@@ -6,10 +6,7 @@
           <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
         </button>
 
-        <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/>
-        <input type="hidden" value="1">
-
-        <span class="input-group-text border-start-0">
+        <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1"> <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
           <ng-container *ngIf="consolidated">
             <hr class="vertical-divider"/>
             Advance &nbsp;&nbsp;
@@ -17,16 +14,27 @@
               <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
               <span class="small-slider round"></span>
             </label>
+            <ng-container>
+              <hr class="vertical-divider ml-3"/>
+              <span (click)="onToolToggle($event)">
+                Tools
+                <div class="expand-icon">
+                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
+                </div>
+              </span>
+            </ng-container>
           </ng-container>
           <ng-container *ngIf="!consolidated">
             <div class="dashboard-general-input-emptyspace"></div>
           </ng-container>
         </span>
-        <div class="tools tools-expanded gc-clear-selection" (click)="onToolToggle($event)" *ngIf="isTool">
-          Tools
-          <div class="expand-icon">
-            <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
-          </div>
+        <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown" *ngIf="scandomains.length > 0" (click)="toggleScan()">
+          <span class="dashboard-general-scan-header">Run Scan</span> <small class="dashboard-general-scan-desc text-muted dropdown-toggle"> <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found </small>
+          <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
+            <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
+              <a class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</a>
+            </li>
+          </ul>
         </div>
       </div>
       <div class="col-md-12 col-sm-12 col-xs-12" *ngIf="consolidated">
@@ -55,22 +63,22 @@
               search by <b>({{ getMatchType() }})</b>
               <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
             </span>
-          <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
+            <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
 
-            <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();"> Match any term (OR)</a></li>
-            <li>
-              <hr class="dropdown-divider mx-3">
-            </li>
-            <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onFormSubmit();"> Match indivisual terms (AND)</a></li>
-            <li>
-              <hr class="dropdown-divider mx-3">
-            </li>
-            <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onFormSubmit();"> Match full query (AND)</a></li>
-          </ul>
+              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();"> Match any term (OR)</a></li>
+              <li>
+                <hr class="dropdown-divider mx-3">
+              </li>
+              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onFormSubmit();"> Match indivisual terms (AND)</a></li>
+              <li>
+                <hr class="dropdown-divider mx-3">
+              </li>
+              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onFormSubmit();"> Match full query (AND)</a></li>
+            </ul>
           </div>
         </div>
       </ng-container>
-      <app-selected-filter-bar *ngIf="entityFiltersCount() || sidebarFilterCount()"  (clearAll)="reloadFilter()" [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
+      <app-selected-filter-bar *ngIf="entityFiltersCount() || sidebarFilterCount()" (clearAll)="reloadFilter()" [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
     </div>
 
     <div *ngIf="!shrinkmenu && filterModel" class="side-menu-container tools-shrink d-flex align-items-start justify-content-start mt-2 gap-3">

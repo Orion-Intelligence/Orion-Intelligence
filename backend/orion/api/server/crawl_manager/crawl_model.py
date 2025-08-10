@@ -119,6 +119,16 @@ class crawl_model:
             return {"error": str(ex)}
 
     @staticmethod
+    async def scan_domain(model):
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "http://trusted-micros-api:8010/urlscan/domain",
+                json=model.model_dump(),
+                timeout=200
+            )
+            return response.json()
+
+    @staticmethod
     async def parse_chat_ai(model: ReportChatRequest):
         try:
             async with httpx.AsyncClient() as client:

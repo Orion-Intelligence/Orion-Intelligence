@@ -7,6 +7,7 @@ from configs.limiter_dependency import limiter_dependency
 from orion.api.server.crawl_manager.class_model.chat_model import chat_data_model
 from orion.api.server.crawl_manager.class_model.credential_model import credential_data_model
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
 from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
 from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
@@ -84,6 +85,10 @@ async def parse_text(payload: nlp_data_model):
 @crawl_routes.post("/api/nlp/summarize/ai", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def parse_text(payload: nlp_data_model):
     return await crawl_model.getInstance().parse_summarize_ai(payload)
+
+@crawl_routes.post("/api/urlscan/domain", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+async def parse_text(payload: DomainScanRequest):
+    return await crawl_model.getInstance().scan_domain(payload)
 
 
 @crawl_routes.post("/api/index/chat", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])

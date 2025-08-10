@@ -32,6 +32,19 @@ export class HelperService {
       .split('#')[0];
   }
 
+  extractLinks(input: string): string[] {
+    if (!input) return [];
+    const matches = input.match(/\b(?:https?:\/\/)?[a-z0-9.-]+\.[a-z]{2,}(?:\/\S*)?/gi) || [];
+    return matches.map(v => {
+      const url = /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '');
+      try {
+        return `https://${new URL(url).hostname.replace(/^www\./i, '')}`;
+      } catch {
+        return null;
+      }
+    }).filter((v): v is string => !!v);
+  }
+
   downloadAsCSV(data: any) {
     const csvContent = this.convertToCSV(data);
     const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});

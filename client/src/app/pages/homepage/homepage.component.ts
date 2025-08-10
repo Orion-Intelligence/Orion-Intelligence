@@ -2,12 +2,11 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HomeSearchComponent } from './home-search/home-search.component';
-import { ChatWidgetComponent } from "../../shared/partials/chat-widget/chat-widget.component";
 
 @Component({
   selector: 'app-index',
   standalone: true,
-  imports: [HomeSearchComponent, ChatWidgetComponent],
+  imports: [HomeSearchComponent],
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {
