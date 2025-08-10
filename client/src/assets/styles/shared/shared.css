@@ -341,13 +341,13 @@ table a:visited {
 }
 
 .dashboard-general-input {
-  max-width: 687px;
-  min-width: 500px;
+  max-width: 593px;
+  min-width: 30vw !important;
   background-color: white !important;
 }
 
 .dashboard-general-input-emptyspace {
-  width: 115px;
+  width: 208px;
 }
 
 .dashboard-general-scan {
