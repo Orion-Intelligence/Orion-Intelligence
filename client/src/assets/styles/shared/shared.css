@@ -359,6 +359,10 @@ table a:visited {
   text-align: left;
   background-color: var(--color-blue-900);
   border: 1px solid #ffffff12;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
 }
 
 .dashboard-general-scan-header {
@@ -379,6 +383,23 @@ table a:visited {
   font-size: 11px;
   line-height: 13px;
   margin-top: 3px;
+}
+
+.dashboard-general-scan-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-general-scan-arrow-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+}
+
+.dashboard-general-scan-arrow-icon.rotated {
+  transform: rotate(90deg);
+  width: 12px;
+  height: 12px;
 }
 
 .warninng-font {
@@ -481,23 +502,23 @@ table a:visited {
   top: -2px;
 }
 
-.default-input-container input:checked + .small-slider {
+.default-input-container input:checked+.small-slider {
   border: 1px solid #57A5EB;
   background-color: #57A5EB !important;
 }
 
-.default-input-container input:checked + .small-slider::before {
+.default-input-container input:checked+.small-slider::before {
   background-color: #fff !important;
   transform: translateX(10px);
 }
 
-@media only screen and (width <= 550px) {
+@media only screen and (width <=550px) {
   .default-input-container {
     display: grid;
   }
 }
 
-@media only screen and (width <= 1300px) {
+@media only screen and (width <=1300px) {
   table thead {
     display: none;
   }
@@ -540,7 +561,7 @@ table a:visited {
 
 }
 
-@media only screen and (width <= 1000px) {
+@media only screen and (width <=1000px) {
   .label-text {
     margin-left: 15px;
   }
@@ -578,7 +599,7 @@ table a:visited {
   max-width: 1000px;
 }
 
-@media only screen and (width <= 1000px) {
+@media only screen and (width <=1000px) {
   .default-input-container-mobile {
     width: 100vw !important;
   }
@@ -589,13 +610,13 @@ table a:visited {
   }
 }
 
-@media only screen and (width <= 460px) {
+@media only screen and (width <=460px) {
   .side-menu-container {
     display: none !important;
   }
 }
 
-@media only screen and (width <= 1000px) {
+@media only screen and (width <=1000px) {
   .default-input-container-justify {
     justify-content: flex-start !important
   }

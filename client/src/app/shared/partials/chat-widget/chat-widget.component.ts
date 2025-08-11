@@ -1,10 +1,10 @@
-import {CommonModule} from '@angular/common';
-import {Component, OnInit, Input} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {ApiService} from '../../services/api.service';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {AuthService} from '../../../services/authetication/auth.service';
-
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, Input } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../services/api.service';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { AuthService } from '../../../services/authetication/auth.service';
+import { chatBotAnimation } from '../../animations/chat.bot.animation';
 type ChatApiResponse = {
   result?: string;
   reply?: string;
@@ -18,7 +18,8 @@ type ChatApiResponse = {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './chat-widget.component.html',
-  styleUrls: ['./chat-widget.component.css']
+  styleUrls: ['./chat-widget.component.css'],
+  animations: [chatBotAnimation]
 })
 export class ChatWidgetComponent implements OnInit {
   @Input() reportText: string | undefined;
@@ -51,7 +52,7 @@ export class ChatWidgetComponent implements OnInit {
     const text = this.newMessage.trim();
     if (!text) return;
 
-    this.chatMessages.push({id: this.sessionId, sender: 'user', text, time: new Date()});
+    this.chatMessages.push({ id: this.sessionId, sender: 'user', text, time: new Date() });
     this.newMessage = '';
     this.isBotTyping = true;
     this.aiSuggest(text);
@@ -81,25 +82,36 @@ export class ChatWidgetComponent implements OnInit {
         const reply =
           (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim() ||
           'Something unexpected happened';
-        this.chatMessages.push({id: this.sessionId, sender: 'bot', text: reply, time: new Date()});
+        this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: reply, time: new Date() });
         this.isBotTyping = false;
       },
       error: () => {
-        this.chatMessages.push({id: this.sessionId, sender: 'bot', text: 'Something unexpected happened', time: new Date()});
+        this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: 'Something unexpected happened', time: new Date() });
         this.isBotTyping = false;
       }
     });
   }
 
-  openChat(){
+  openChat() {
     if (this.authService.getRole() !== 'admin') {
       this.dashboardService.showSubscription.set(true);
       return;
     }
-    this.chatOpen = true
-  }
+    setTimeout(() => {
+      this.chatOpen = true
+    }, 100);
 
+  }
+  closeChat() {
+    setTimeout(() => {
+      this.chatOpen = false;
+    }, 100);
+  }
   trackByIndex(index: number): number {
     return index;
+  }
+  pushButton(btn: HTMLButtonElement) {
+    btn.classList.add('chat-bot-push-anim');
+    setTimeout(() => btn.classList.remove('chat-bot-push-anim'), 150);
   }
 }
