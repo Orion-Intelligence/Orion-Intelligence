@@ -155,7 +155,7 @@ class _ransomware_live(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
-                    m_country_name=country,
+                    m_country=[country],
                     m_team=group
                 )
 

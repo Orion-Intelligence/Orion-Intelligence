@@ -130,7 +130,7 @@ class _nukibgovcz(leak_extractor_interface, ABC):
 
                 entity_data = entity_model(
                     m_team="nukib-gov-cz",
-                    m_country_name="czech"
+                    m_country=["czech"]
                 )
 
                 entity_data = helper_method.extract_entities(content, entity_data)

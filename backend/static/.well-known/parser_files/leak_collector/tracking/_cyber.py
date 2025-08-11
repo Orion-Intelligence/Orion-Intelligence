@@ -140,7 +140,7 @@ class _cyber(leak_extractor_interface, ABC):
                 entity_data = entity_model(
                     m_team="ANSSI - Agence nationale de la sécurité des systèmes d'information",
                     m_author=["ANSSI Web Team"],
-                    m_country_name="France"
+                    m_country=["France"]
                 )
 
                 entity_data = helper_method.extract_entities(m_content, entity_data)

@@ -163,7 +163,7 @@ class _thaicert(leak_extractor_interface, ABC):
                 entity_data = entity_model(
                     m_team="ThaiCERT - Thailand Computer Emergency Response Team",
                     m_author=["ThaiCERT"],
-                    m_country_name="Thailand"
+                    m_country=["Thailand"]
                 )
 
                 entity_data = helper_method.extract_entities(m_content, entity_data)

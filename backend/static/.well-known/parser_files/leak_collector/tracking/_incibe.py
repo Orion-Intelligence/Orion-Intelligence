@@ -138,7 +138,7 @@ class _incibe(leak_extractor_interface, ABC):
                 entity_data = entity_model(
                     m_team="incibe-cert",
                     m_author=[author],
-                    m_country_name="spain"
+                    m_country=["spain"]
                 )
 
                 entity_data = helper_method.extract_entities(content, entity_data)

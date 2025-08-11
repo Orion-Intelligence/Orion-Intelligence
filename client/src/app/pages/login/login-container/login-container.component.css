@@ -13,13 +13,14 @@
 }
 
 .login_container {
+	background: var(--color-blue-830);
+  height: 100vh;
   position: relative;
   color: white;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 70vh;
   min-height: 400px;
   width: 100%;
   min-width: 300px;
@@ -29,7 +30,16 @@
   background: linear-gradient(90deg, rgb(21 52 84 / 50%) 0%, rgb(22 56 88 / 50%) 100%);
   padding: 42px 32px;
   border-radius: 16px;
+  border: 1px solid #ffffff15;
   width: 420px;
+  margin-top: -30vh;
+}
+
+.login-error-message {
+  color: #fc0;
+  text-align: left;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
 }
 
 .login_header {

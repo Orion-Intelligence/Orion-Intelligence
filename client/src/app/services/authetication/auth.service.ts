@@ -43,7 +43,7 @@ export class AuthService {
             username: null,
             role: null,
             isAuthenticated: false,
-            error: 'Access denied! Not enough credentials'
+            error: 'Access denied!'
           });
           return
         }
@@ -51,7 +51,7 @@ export class AuthService {
         this.startTokenRefresh();
       }, error: (_) => {
         this.authState.next({
-          token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied! Invalid credentials'
+          token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied!'
         });
       }
     }));

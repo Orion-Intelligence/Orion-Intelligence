@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
@@ -8,7 +9,6 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
-from dateutil import parser
 from playwright.sync_api import Page
 
 
@@ -136,7 +136,7 @@ class _csidb(leak_extractor_interface, ABC):
 
                 entity = entity_model(
                     m_company_name=p_title,
-                    m_country_name=p_country,
+                    m_country=[p_country],
                     m_location=[p_country],
                     m_team="csidb"
                 )
@@ -165,7 +165,8 @@ class _csidb(leak_extractor_interface, ABC):
 
                     websites = [a.get_attribute("href") for a in page.query_selector_all("td.align-middle a") if
                                 a.get_attribute("href").startswith("http")]
-                    date_val = parser.parse(date.inner_text().strip()).date() if date else None
+                    date_str = date.inner_text().strip()
+                    date_obj = datetime.strptime(date_str, '%B %d, %Y').date()
                     desc_text = desc_el.inner_text().strip() if desc_el else ""
 
                     location_label = page.query_selector("h5:has-text('Location:')")
@@ -173,7 +174,7 @@ class _csidb(leak_extractor_interface, ABC):
                         "el => el.nextElementSibling.textContent.trim()") if location_label else None
 
                     build_card(title.inner_text().strip() if title else None, incident_url, desc_text, desc_text,
-                               websites, date_val, "leaks", country)
+                               websites, date_obj, "leaks", country)
 
                 except Exception as ex:
                     log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

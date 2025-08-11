@@ -54,14 +54,14 @@
 
 :root {
   --color-blue-900: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
-  --color-blue-890: #17223560;
+  --color-blue-890: #0e2d4d70;
   --color-blue-880: #2A578459;
   --color-blue-870: #2A578435;
   --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
   --color-blue-850: #0E1626;
   --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
-  --color-blue-830: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%);
-  --color-blue-820: #0e2d4d;
+  --color-blue-830: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 100%);
+  --color-blue-820: #10335699;
   --color-blue-820-light: #0e2d4d70;
   --color-blue-810: #103356;
   --color-blue-800: #0f335780;
@@ -137,7 +137,7 @@ html {
 
 body {
 	margin: 0;
-	background: #172235;
+	background: #00000000;
 	height: 100vh;
 	min-height: 100vh;
 	scrollbar-width: none;

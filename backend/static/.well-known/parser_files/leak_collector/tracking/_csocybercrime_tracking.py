@@ -159,7 +159,7 @@ class _csocybercrime_tracking(leak_extractor_interface, ABC):
 
                     entity_data = entity_model(
                         m_team="CSO Cybercrime Section",
-                        m_country_name="united kingdom",
+                        m_country=["united kingdom"],
                     )
 
                     entity_data = helper_method.extract_entities(summary, entity_data)

@@ -178,7 +178,7 @@ class _k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_country_name=country_name,
+                        m_country=[country_name],
                         m_ip=[weblink],
                         m_location=[country_name],
                         m_team="play news"

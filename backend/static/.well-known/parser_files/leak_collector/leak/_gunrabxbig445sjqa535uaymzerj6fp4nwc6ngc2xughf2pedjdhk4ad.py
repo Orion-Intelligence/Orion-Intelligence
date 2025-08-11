@@ -1,6 +1,5 @@
 from abc import ABC
 from typing import List
-from bs4 import BeautifulSoup
 from playwright.sync_api import Page
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
@@ -136,7 +135,7 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
 
                 entity_data = entity_model(
                     m_location=[title_data["location"]] if title_data["location"] else [],
-                    m_country_name=title_data["location"],
+                    m_country=[title_data["location"]],
                     m_company_name=title_data["title"],
                     m_industry=title_data["industry"],
                     m_team="qtox"

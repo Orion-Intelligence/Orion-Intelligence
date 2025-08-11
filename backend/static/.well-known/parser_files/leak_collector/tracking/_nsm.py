@@ -144,7 +144,7 @@ class _nsm(leak_extractor_interface, ABC):
                     )
                     entity_data = entity_model(
                         m_team="nsm",
-                        m_country_name="norway"
+                        m_country=["norway"]
                     )
 
                     entity_data = helper_method.extract_entities(content, entity_data)

@@ -162,7 +162,7 @@ class _msb(leak_extractor_interface, ABC):
                     )
                     entity_data = entity_model(
                         m_team="msb",
-                        m_country_name="Sweden",
+                        m_country=["Sweden"],
                     )
 
                     entity_data = helper_method.extract_entities(content, entity_data)

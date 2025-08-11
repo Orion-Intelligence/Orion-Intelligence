@@ -158,7 +158,7 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
                     entity_data = entity_model(
                         m_company_name=title,
                         m_ip=[title],
-                        m_country_name=country,
+                        m_country=[country],
                         m_location=[country],
                         m_team="underground"
                     )

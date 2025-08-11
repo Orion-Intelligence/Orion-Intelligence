@@ -158,7 +158,7 @@ class _cert(leak_extractor_interface, ABC):
                     )
                     entity_data = entity_model(
                         m_team="cert",
-                        m_country_name="iran",
+                        m_country=["iran"],
                     )
                     entity_data = helper_method.extract_entities(content[:500], entity_data)
                     self.append_leak_data(card_data, entity_data)
