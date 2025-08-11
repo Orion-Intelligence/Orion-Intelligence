@@ -370,7 +370,6 @@ export class ResultInsightsComponent implements OnInit {
     fieldsMap: Record<string, string[]>,
     isGrouped: boolean
   ): Record<string, string[]> {
-    console.log(groupData.length)
     const resultMap: Record<string, Set<string>> = {};
 
     for (const [categoryKey, fields] of Object.entries(fieldsMap)) {

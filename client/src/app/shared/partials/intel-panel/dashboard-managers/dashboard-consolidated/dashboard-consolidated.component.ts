@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {AppService} from '../../../../../services/core/app/app.service';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -41,7 +41,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   isGrouped = true
   query = '';
-  isLoading = false;
+  isLoading = signal(false);
   firstTrigger = true;
   result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
@@ -79,7 +79,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
 
       if (this.firstTrigger && Object.keys(this.groupedResults).length > 0) {
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.query = this.dashboardService.consolidatedParamModel.q;
       } else {
         this.cdr.detectChanges();
@@ -96,15 +96,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       return
     }
 
-    if (this.isLoading) return;
+    if (this.isLoading()) return;
 
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
       this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const cleanedParams: any = {};
 
@@ -134,7 +134,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         this.groupedResults = {};
       }
 
-      this.isLoading = false;
+      this.isLoading.set(false);
     });
   }
 
@@ -148,13 +148,13 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchRanked() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.rankedResult = []
     this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.rankedResult = response.data;
       }
-      this.isLoading = false;
+      this.isLoading.set(false);
     });
   }
 
@@ -282,5 +282,4 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.fetchRanked()
     }
   }
-
 }

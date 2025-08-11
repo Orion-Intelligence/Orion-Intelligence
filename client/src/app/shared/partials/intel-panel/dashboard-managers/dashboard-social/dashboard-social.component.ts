@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {AppService} from '../../../../../services/core/app/app.service';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -31,7 +31,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   protected readonly filter = social_filters;
 
   query = "";
-  isLoading = false;
+  isLoading = signal(false);
   firstTrigger = true;
   result_count = 0;
   m_platform = ""
@@ -61,7 +61,6 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     this.socialCallbackModel = {...this.dashboardService.socialCallbackModel} as SocialCallbackModel;
     this.result_count = this.socialCallbackModel.Result.length;
 
-    const lastSegment = this.route.snapshot.url.at(-1)?.path;
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
@@ -69,17 +68,12 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1'
 
-
-        // if (lastSegment)
-        //   this.dashboardService.selectedFilters.platform = lastSegment
-        // this.m_platform = this.dashboardService.consolidatedParamModel.platform
-        // if (this.dashboardService.consolidatedParamModel.platform != lastSegment) {
-        //   this.dashboardService.socialCallbackModel.Result = []
-        //   this.firstTrigger = false
-        // }
+        const lastSegment = this.route.snapshot.url.at(-1)?.path;
+        if (lastSegment)
+          this.dashboardService.consolidatedParamModel.platform = lastSegment
 
         if (this.firstTrigger && this.socialCallbackModel.Result.length > 0) {
-          this.isLoading = false;
+          this.isLoading.set(false);
           this.query = this.dashboardService.consolidatedParamModel.q;
         } else {
           this.cdr.detectChanges();
@@ -93,7 +87,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     if (reset) this.dashboardService.consolidatedParamModel.page = 1;
 
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = "";
       this.router.navigate([], {
         queryParams: {},
@@ -101,7 +95,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       }).then();
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const cleanedParams: any = {
       q: this.dashboardService.consolidatedParamModel.q,
@@ -118,7 +112,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     });
 
     if (reset) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       return;
     }
 
@@ -132,7 +126,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
         } else {
           this.socialCallbackModel = new SocialCallbackModel();
         }
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.result_count = this.socialCallbackModel.Result.length;
       });
   }

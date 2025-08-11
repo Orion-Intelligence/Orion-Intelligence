@@ -89,7 +89,6 @@ export class ReportHeaderComponent {
         this.aiSuggestStatus = true;
         this.aiSuggestSummary = response.result || 'No summary available';
         this.cdr.detectChanges();
-        console.log(response.result)
       },
       error: (err) => {
         console.error('Summarization failed', err);

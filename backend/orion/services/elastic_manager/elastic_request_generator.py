@@ -1059,8 +1059,16 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
+        print(":::::::::::::::::::::::::::", flush=True)
+        print(p_query_model.platform, flush=True)
+        print(":::::::::::::::::::::::::::", flush=True)
+
         if p_query_model.platform:
             must_clauses.append({"term": {"m_platform": p_query_model.platform}})
+
+        print(":::::::::::::::::::::::::::", flush=True)
+        print(p_query_model.platform, flush=True)
+        print(":::::::::::::::::::::::::::", flush=True)
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(',')

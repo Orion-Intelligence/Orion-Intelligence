@@ -37,10 +37,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
-    const route: string = this.router.url.split('?')[0];
-    if (String(route) != this.dashboardService.m_current_route) {
-      this.fetchSearchResults()
-    }
   }
 
   ngOnInit(): void {
@@ -53,6 +49,15 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         this.query = params['q'] || '';
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] ? +params['page'] : 1;
+
+        const route: string = this.router.url.split('?')[0];
+        if (String(route) != this.dashboardService.m_current_route) {
+          this.isResponseLoading.set(false)
+          this.dashboardService.defacementCallbackModel = new DefacementCallbackModel()
+          this.fetchSearchResults()
+          return
+        }
+
 
         if (this.dashboardService.defacementCallbackModel.Result.length > 0) {
           this.isResponseLoading.set(false);
@@ -80,8 +85,11 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
         queryParams: {},
         queryParamsHandling: ''
       }).then();
-
     }
+
+    const lastSegment = this.route.snapshot.url.at(-1)?.path;
+    if (lastSegment)
+      this.dashboardService.consolidatedParamModel.content = lastSegment
 
     this.isResponseLoading.set(true)
     this.dashboardService
