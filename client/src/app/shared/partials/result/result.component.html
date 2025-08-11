@@ -1,53 +1,74 @@
-<form (submit)="onFormSubmit()" @fadeInDashboardItem class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
+<form (submit)="onFormSubmit()" @fadeInDashboardItem
+  class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
   <div class="d-flex align-items-start default-input-container-justify w-100 flex-wrap">
     <div class="col-sm-12 col-xs-12 default-input-container-mobile">
       <div class="input-group default-input-sub-container">
         <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
-          <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
+          <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority
+            width="16">
         </button>
 
-        <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1"> <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
-          <ng-container>
-            <ng-container *ngIf="consolidated">
-              <hr class="vertical-divider"/>
-              <span>Advance &nbsp;&nbsp;</span>
-              <label class="small-switch">
-                <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
-                <span class="small-slider round"></span>
-              </label>
-            </ng-container>
-            <ng-container *ngIf="!consolidated">
-              <div class="dashboard-general-input-emptyspace"></div>
-            </ng-container>
+        <input #searchInput class="search-trigger form-control default-input dashboard-general-input"
+          [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q"
+          placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" /> <input type="hidden" value="1">
+        <span class="input-group-text border-start-0 gc-clear-selection"
+          [style.cursor]="consolidated ? 'pointer' : 'default'">
+          <ng-container *ngIf="consolidated">
+            <hr class="vertical-divider" />
+            Advance &nbsp;&nbsp;
+            <label class="small-switch">
+              <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle"
+                (change)="onAdvanceSettingToggle()" />
+              <span class="small-slider round"></span>
+            </label>
             <ng-container>
-              <hr class="vertical-divider ml-3" *ngIf="consolidated"/>
+              <hr class="vertical-divider ml-3" />
               <span (click)="onToolToggle($event)">
                 Tools
                 <div class="expand-icon">
-                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
+                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon"
+                    [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools"
+                    class="transition-transform" />
                 </div>
               </span>
             </ng-container>
           </ng-container>
+          <ng-container *ngIf="!consolidated">
+            <div class="dashboard-general-input-emptyspace"></div>
+          </ng-container>
         </span>
-        <div class="gc-clear-selection d-flex flex-column align-items-center scan-shrink dashboard-general-scan dropdown" *ngIf="scandomains.length > 0" (click)="toggleScan()">
-          <span class="dashboard-general-scan-header">Run Scan</span> <small class="dashboard-general-scan-desc text-muted dropdown-toggle"> <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found </small>
+        <div class="gc-clear-selection d-flex align-items-center scan-shrink dashboard-general-scan dropdown"
+          *ngIf="scandomains.length > 0" (click)="toggleScan()">
+          <div class="dashboard-general-scan-text">
+            <span class="dashboard-general-scan-header">Run Scan</span>
+            <small class="dashboard-general-scan-desc text-muted dropdown-toggle">
+              <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }}
+              Resources
+              Found </small>
+          </div>
+          <img src="../../../../assets/images/shared/security-scan-arrow.svg" alt="arrow"
+            class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans" />
           <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
+            <div class="selected-urls">Select</div>
             <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
+              <span class="bullet"></span>
               <a class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</a>
             </li>
           </ul>
         </div>
       </div>
       <div class="col-md-12 col-sm-12 col-xs-12" *ngIf="consolidated">
-        <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
-          <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-search-filters>
+        <div #filtersWrapper class="filters-overlay search-trigger"
+          *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+          <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
+            (checkDomain)="init_domains()"></app-search-filters>
         </div>
       </div>
       <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools && isTool">
         <div class="mt-2 d-flex gap-3 dropdown-menu-container" @fadeInDashboardItem>
           <div class="dropdown me-3" *ngIf="showSorting">
-            <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown"
+              aria-expanded="false">
               sort by <b>({{ selectedSortBy }})</b>
               <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
             </span>
@@ -61,34 +82,51 @@
           </div>
 
           <div class="dropdown">
-            <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
+              aria-expanded="false">
               search by <b>({{ getMatchType() }})</b>
               <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
             </span>
             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
 
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();"> Match any term (OR)</a></li>
+              <li><a class="dropdown-item"
+                  (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();"> Match any term
+                  (OR)</a></li>
               <li>
                 <hr class="dropdown-divider mx-3">
               </li>
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onFormSubmit();"> Match indivisual terms (AND)</a></li>
+              <li><a class="dropdown-item"
+                  (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onFormSubmit();"> Match
+                  indivisual terms (AND)</a></li>
               <li>
                 <hr class="dropdown-divider mx-3">
               </li>
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onFormSubmit();"> Match full query (AND)</a></li>
+              <li><a class="dropdown-item"
+                  (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onFormSubmit();"> Match full
+                  query (AND)</a></li>
             </ul>
           </div>
         </div>
       </ng-container>
-      <app-selected-filter-bar *ngIf="entityFiltersCount() || sidebarFilterCount()" (clearAll)="reloadFilter()" [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
+      <app-selected-filter-bar *ngIf="entityFiltersCount() || sidebarFilterCount()" (clearAll)="reloadFilter()"
+        [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
     </div>
 
-    <div *ngIf="!shrinkmenu && filterModel" class="side-menu-container d-flex align-items-start justify-content-start gap-3">
-      <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="filters-button d-flex align-items-center"> <img alt="Filter Icon" height="24" ngSrc="../../../../assets/images/shared/filter_icon.svg" priority width="24"> <span class="ms-2">Filter</span> </label>
+    <div *ngIf="!shrinkmenu && filterModel"
+      class="side-menu-container d-flex align-items-start justify-content-start gap-3">
+      <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results"
+        class="filters-button d-flex align-items-center"> <img alt="Filter Icon" height="24"
+          ngSrc="../../../../assets/images/shared/filter_icon.svg" priority width="24"> <span class="ms-2">Filter</span>
+      </label>
     </div>
-    <div *ngIf="!shrinkmenu" class="side-menu-container tools-shrink d-flex align-items-start justify-content-start mt-2 gap-3">
-      <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown" *ngIf="scandomains.length > 0" (click)="toggleScan()">
-        <span class="dashboard-general-scan-header">Run Scan</span> <small class="dashboard-general-scan-desc text-muted dropdown-toggle"> <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found </small>
+    <div *ngIf="!shrinkmenu"
+      class="side-menu-container tools-shrink d-flex align-items-start justify-content-start mt-2 gap-3">
+      <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown"
+        *ngIf="scandomains.length > 0" (click)="toggleScan()">
+        <span class="dashboard-general-scan-header">Run Scan</span> <small
+          class="dashboard-general-scan-desc text-muted dropdown-toggle"> <span
+            class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found
+        </small>
         <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
           <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
             <a class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</a>
@@ -98,7 +136,8 @@
     </div>
   </div>
 </form>
-<ul *ngIf="showTabs && (analyticsToggle || domain || discussion || consolidated)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
+<ul *ngIf="showTabs && (analyticsToggle || domain || discussion || consolidated)"
+  class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
   <li class="nav-item" *ngIf="!consolidated && !domain">
     <a class="nav-link cursor-pointer active">Results</a>
   </li>
@@ -123,17 +162,22 @@
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
 
-<div *ngIf="filterModel && !shrinkmenu" [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
-  <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+<div *ngIf="filterModel && !shrinkmenu" [class.sidebar_container-disable]="!(isFilterOpen$ | async)"
+  [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
+  <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilter()"
+    [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 <div *ngIf="isLoading" @fadeInDashboardItem>
   <app-loading-form></app-loading-form>
 </div>
-<div *ngIf="!entityFiltersCount() && !sidebarFilterCount() && !this.result_triggered && !isLoading && !result_count" @fadeInDashboardItem>
+<div *ngIf="!entityFiltersCount() && !sidebarFilterCount() && !this.result_triggered && !isLoading && !result_count"
+  @fadeInDashboardItem>
   <app-empty-query></app-empty-query>
 </div>
 
-<div *ngIf="(this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0) && !isLoading && result_count==0" @fadeInDashboardItem>
+<div
+  *ngIf="(this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0) && !isLoading && result_count==0"
+  @fadeInDashboardItem>
   <app-empty-result [searchQuery]="local_query"></app-empty-result>
 </div>
 
@@ -150,10 +194,11 @@
       <span>
         Current results are general and may lack accuracy. For precise insights, open the &nbsp;
         <u><b>
-          <a appTooltip="Go to Breach Details" class="cursor-pointer text-reset text-decoration-none" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">
-            Data Breaches
-          </a>
-        </b></u> &nbsp; section in sidebar.
+            <a appTooltip="Go to Breach Details" class="cursor-pointer text-reset text-decoration-none"
+              queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">
+              Data Breaches
+            </a>
+          </b></u> &nbsp; section in sidebar.
       </span>
     </span>
   </div>

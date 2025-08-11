@@ -17,6 +17,7 @@ import { SuggestionService } from '../../../services/entity_filter_suggestions/s
 })
 export class SearchFiltersComponent implements OnInit {
   @Input() showSorting!: boolean;
+  @Output() checkDomain = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
   @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
 
@@ -80,6 +81,8 @@ export class SearchFiltersComponent implements OnInit {
     this.newValue = '';
     this.filteredSuggestions = [];
     this.showSuggestions = false;
+    if (this.checkDomain)
+      this.checkDomain.emit();
   }
 
   getTags(key: string): string[] {

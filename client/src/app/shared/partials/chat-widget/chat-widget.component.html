@@ -1,28 +1,46 @@
 <div class="chat-support">
-  <div *ngIf="!chatOpen" class="chat-toggle" (click)="openChat()">
+  <button #chatBtn *ngIf="!chatOpen" class="chat-toggle chat-bot-push" (click)="openChat()"
+    (click)="pushButton(chatBtn)" type="button">
     <span><img src="assets/images/shared/chat.svg" alt="chat" /></span>
-  </div>
+  </button>
 
-  <div *ngIf="chatOpen" class="chat-window">
+
+  <div *ngIf="chatOpen" class="chat-window" @chatBotAnimation>
     <div class="chat-header">
-      Support Bot
-      <span class="close-btn" (click)="chatOpen = false">✖️</span>
+      <div class="main-avatar"><img src="assets/images/shared/chat-icon.svg" />
+        <span class="status-indicator"></span>
+      </div>
+      <div class="chat-text">
+        Orion Analyst</div>
+      <span class="close-btn" (click)="closeChat()">✖️</span>
     </div>
 
     <div class="chat-messages">
-      <div *ngFor="let msg of chatMessages; trackBy: trackByIndex" class="chat-msg" [class.user]="msg.sender === 'user'" [class.bot]="msg.sender === 'bot'">
-        <p class="chat-text">{{ msg.text }}</p>
-        <span class="timestamp">{{ msg.time | date: 'shortTime' }}</span>
+
+      <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
+        <div style="display: flex; flex-direction: row; gap: 10px;">
+          <div class="chat-avatar">
+            <div *ngIf="msg.sender === 'bot'"><img src="assets/images/shared/chat-icon.svg" /></div>
+            <div *ngIf="msg.sender === 'user'"><img src="assets/images/shared/user-icon.svg" /></div>
+          </div>
+          <div class="chat-msg" [class.user]="msg.sender === 'user'" [class.bot]="msg.sender === 'bot'">
+            <p class="chat-text">{{ msg.text }}</p>
+          </div>
+        </div>
       </div>
 
       <div *ngIf="isBotTyping" class="chat-msg bot typing-indicator">
-        <p class="chat-text">Typing...</p>
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
     </div>
 
     <form class="chat-input" (submit)="sendMessage($event)">
-      <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Ask something..." required />
-      <button type="submit"><img src="assets/images/shared/chat_small.svg" alt="chat"></button>
+      <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" required />
+      <button #submitBtn type="submit" class="chat-bot-push" (click)="pushButton(submitBtn)">
+        <img src="assets/images/shared/chat_small.svg" alt="chat">
+      </button>
     </form>
   </div>
 </div>

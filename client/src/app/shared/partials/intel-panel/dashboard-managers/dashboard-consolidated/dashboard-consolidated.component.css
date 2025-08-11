@@ -55,7 +55,18 @@
 }
 
 @media (width <=1299px) {
+  .dashboard__layout-wrapper {
+    flex-direction: column;
+    padding-right: 50;
+  }
+
   .dashboard__layout-right {
-    display: none;
+    max-width: 100%;
+    padding-top: 20px;
+    order: 2;
+  }
+
+  .dashboard__layout-left {
+    order: 1;
   }
 }

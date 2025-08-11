@@ -192,3 +192,16 @@
   border-radius: 50%;
   display: inline-block;
 }
+
+@media (width <=1299px) {
+  .insight-card {
+    margin: 35px;
+    width: auto;
+  }
+}
+
+@media only screen and (width <=1000px) {
+  .insight-card {
+    margin: 25px 10px;
+  }
+}
