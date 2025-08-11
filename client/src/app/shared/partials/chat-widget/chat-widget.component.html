@@ -1,6 +1,6 @@
 <div class="chat-support">
-  <button #chatBtn *ngIf="!chatOpen" class="chat-toggle chat-bot-push" (click)="openChat()"
-    (click)="pushButton(chatBtn)" type="button">
+  <button #chatBtn *ngIf="!chatOpen" class="chat-toggle chat-bot-push"
+    (click)="openChat()" type="button">
     <span><img src="assets/images/shared/chat.svg" alt="chat" /></span>
   </button>
 
@@ -12,7 +12,7 @@
       </div>
       <div class="chat-text">
         Orion Analyst</div>
-      <span class="close-btn" (click)="closeChat()">✖️</span>
+      <img class="close-btn mr-2" (click)="closeChat()" src="assets/images/shared/cross.svg" width="15" height="15" alt="close">️
     </div>
 
     <div class="chat-messages">

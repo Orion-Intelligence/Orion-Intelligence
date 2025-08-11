@@ -32,13 +32,13 @@
         </span>
         <div class="gc-clear-selection d-flex align-items-center scan-shrink dashboard-general-scan dropdown" *ngIf="scandomains.length > 0" (click)="toggleScan()">
           <div class="dashboard-general-scan-text">
-            <span class="dashboard-general-scan-header">Run Scan</span> <small class="dashboard-general-scan-desc text-muted dropdown-toggle"> <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }}Resources Found </small>
+            <span class="dashboard-general-scan-header">Run Scan</span> <small class="dashboard-general-scan-desc text-muted"> <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found </small>
           </div>
           <img src="../../../../assets/images/shared/security-scan-arrow.svg" alt="arrow" class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans"/>
           <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
-            <div class="selected-urls">Select</div>
+            <div class="selected-urls"></div>
             <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
-              <span class="bullet"></span> <a class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</a>
+              <span class="bullet"></span> <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</span>
             </li>
           </ul>
         </div>
@@ -92,10 +92,10 @@
     </div>
     <div *ngIf="!shrinkmenu" class="side-menu-container tools-shrink d-flex align-items-start justify-content-start mt-2 gap-3">
       <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown" *ngIf="scandomains.length > 0" (click)="toggleScan()">
-        <span class="dashboard-general-scan-header">Run Scan</span> <small class="dashboard-general-scan-desc text-muted dropdown-toggle"> <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found </small>
+        <span class="dashboard-general-scan-header">Run Scan</span> <small class="dashboard-general-scan-desc text-muted"> <span class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources Found </small>
         <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
           <li *ngFor="let domain of scandomains" @fadeInDashboardItem>
-            <a class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</a>
+            <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain }}</span>
           </li>
         </ul>
       </div>

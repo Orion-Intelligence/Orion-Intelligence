@@ -106,7 +106,6 @@
 
 .dropdown-menu {
   background: #172235;
-  /* dark panel background */
   border-radius: 12px;
   padding: 7px 12px;
   width: 170px;
@@ -115,7 +114,7 @@
 
 .dropdown-menu .selected-urls {
   font-weight: 400;
-  margin-bottom: 2px;
+  margin-bottom: 0;
   color: #fff;
   font-size: 12px;
   font-family: 'Segoe UI', sans-serif;
@@ -141,14 +140,14 @@
 }
 
 .dropdown-menu .dropdown-item {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgb(255 255 255 / 90%);
   text-decoration: none;
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 300;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0px;
+  padding: 0;
 }
 
 .dropdown-menu .dropdown-item:hover {

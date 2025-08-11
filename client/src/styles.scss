@@ -71,7 +71,7 @@
   --color-blue-760: linear-gradient(to right, #234d79 50%, #2d5c91 70%, #234d79 80%, #234d79 100%);
   --color-blue-750: #143352;
   --color-blue-740: #0f263e;
-  --color-blue-730: #15385C;
+  --color-blue-730: #143352;
   --color-blue-720: #12335450;
   --color-blue-710: #214b75;
   --color-blue-700: #1e456c;
@@ -88,6 +88,7 @@
   --color-gray-100: #f2f2f2;
   --color-gray-900: #3c3c43;
   --color-white: white;
+  --color-divider: #ffffff15;
 }
 
 .dark-theme {
@@ -126,6 +127,7 @@
   --color-gray-100: #f2f2f2;
   --color-gray-900: #A0B8D1;
   --color-white: #172235;
+  --color-divider: #1f3043b6;
 }
 
 html {

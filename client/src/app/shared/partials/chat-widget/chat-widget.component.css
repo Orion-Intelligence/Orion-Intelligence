@@ -13,10 +13,9 @@
   .chat-toggle {
     background-color: var(--color-blue-680);
     color: #fff;
-    padding: 14px 15px;
+    padding: 12px 13px;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
     border: none;
     outline: none;
   }
@@ -31,28 +30,22 @@
     flex-direction: column;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 0 10px rgb(0 0 0 / 30%);
     margin-top: 10px;
 
     .chat-header {
-      background: var(--color-blue-900);
+      background: var(--color-blue-820);
       height: 60px;
       padding: 0 10px;
       text-align: left;
-
       position: relative;
       display: flex;
       align-items: center;
-
-
-
-
 
       .chat-text {
         margin-left: 20px;
         font-weight: 500;
         tab-size: 16px;
-        font-family: 'Avenir', sans-serif;
+        font-family: Avenir, sans-serif;
       }
 
       .close-btn {
@@ -75,7 +68,7 @@
     }
 
     .chat-messages p {
-      margin: 0px;
+      margin: 0;
     }
 
     .chat-msg {
@@ -90,9 +83,9 @@
 
       &.user {
         align-self: flex-start;
-        background: #172235;
+        background: #273959;
         color: white;
-        border-radius: 8px 0 8px 8px;
+        border-radius: 8px;
       }
 
       &.bot {
@@ -128,7 +121,7 @@
       }
 
       ::placeholder {
-        color: #172235;
+        color: #17223570;
       }
 
       button {
@@ -161,7 +154,7 @@
   height: 36px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #ffffff;
+  border: 2px solid #fff;
   display: inline-block;
   box-sizing: border-box;
 }
@@ -170,6 +163,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
+  margin-top: 15px;
   overflow: hidden;
   border: 3px solid #EBF0F4;
   display: inline-block;
@@ -220,7 +214,6 @@
 }
 
 @keyframes typing-bounce {
-
   0%,
   80%,
   100% {

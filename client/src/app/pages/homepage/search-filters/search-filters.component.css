@@ -9,7 +9,7 @@
 .filter-panel {
   background-color: #fff;
   border: 1px solid #FCFCFC12;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 16px 16px 8px;
   box-shadow: rgb(0 0 0 / 16%) 0 3px 6px, rgb(0 0 0 / 23%) 0 3px 6px;
   font-family: Inter, sans-serif;
@@ -18,7 +18,7 @@
   width: 100%;
   max-width: 870px;
   z-index: 1;
-  margin-top: 10px;
+  margin-top: 0;
   overflow-y: auto;
 }
 

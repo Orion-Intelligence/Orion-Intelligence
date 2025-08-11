@@ -307,7 +307,7 @@ table a:visited {
 }
 
 .filters-button:hover {
-  background: var(--color-blue-670) !important;
+  background: var(--color-blue-750) !important;
 }
 
 .default-notification-banner-icon {
@@ -350,12 +350,28 @@ table a:visited {
   width: 71px;
 }
 
+.dashboard-general-scan .dropdown-menu .dropdown-item {
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.dashboard-general-scan .dropdown-menu{
+  margin-top: 5px !important;
+  border-radius: 5px;
+}
+
+.dashboard-general-scan .dropdown-menu::before{
+	border-left: 0 solid transparent;
+	border-right: 0 solid transparent;
+	border-bottom: 0 solid white;
+}
+
 .dashboard-general-scan {
   color: #fff;
   cursor: pointer;
   margin-left: 10px;
   border-radius: 6px;
-  padding: 3px 13px;
+  padding: 3px 13px 3px 10px;
   text-align: left;
   background-color: var(--color-blue-900);
   border: 1px solid #ffffff12;
@@ -366,7 +382,7 @@ table a:visited {
 }
 
 .dashboard-general-scan-header {
-  margin-top: 4px;
+  margin-top: 0;
   font-size: 13px;
   width: 100%;
   line-height: 13px;
@@ -382,7 +398,7 @@ table a:visited {
 .dashboard-general-scan-desc {
   font-size: 11px;
   line-height: 13px;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .dashboard-general-scan-text {
