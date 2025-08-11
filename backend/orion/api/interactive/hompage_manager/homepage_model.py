@@ -26,13 +26,13 @@ class homepage_model:
         redis_instance = redis_controller.getInstance()
         redis_key = f"{REDIS_KEYS.GRAPH_INSIGHT_STAT}"
         result = await elastic_controller.get_instance().generate_graph()
-        # cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
-        #
-        # if cached:
-        #     try:
-        #         return json.loads(cached)
-        #     except Exception as _:
-        #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+
+        if cached:
+            try:
+                return json.loads(cached)
+            except Exception as _:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(result), 86400])
         return result

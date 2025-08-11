@@ -2006,18 +2006,9 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX,
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
-                    "query": {
-                        "term": {
-                            "m_content_type": "leaks"
-                        }
-                    },
+                    "query": {"term": {"m_content_type": "leaks"}},
                     "aggs": {
-                        "Top Teams (Leak)": {
-                            "terms": {
-                                "field": "m_team",
-                                "size": 4
-                            }
-                        }
+                        "Top Teams (Leak)": {"terms": {"field": "m_team.keyword", "size": 4}}
                     }
                 }
             },
@@ -2026,12 +2017,7 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
                     "aggs": {
-                        "Top Teams (Defacement)": {
-                            "terms": {
-                                "field": "m_team",
-                                "size": 4
-                            }
-                        }
+                        "Top Teams (Defacement)": {"terms": {"field": "m_team.keyword", "size": 4}}
                     }
                 }
             },
@@ -2040,12 +2026,7 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
                     "aggs": {
-                        "Top Locations (Defacement)": {
-                            "terms": {
-                                "field": "m_location",
-                                "size": 4
-                            }
-                        }
+                        "Top Locations (Defacement)": {"terms": {"field": "m_location.keyword", "size": 4}}
                     }
                 }
             },
@@ -2054,17 +2035,11 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
                     "aggs": {
-                        "Top Hashtags (Social)": {
-                            "terms": {
-                                "field": "m_hashtags",
-                                "size": 4
-                            }
-                        }
+                        "Top Hashtags (Social)": {"terms": {"field": "m_hashtags.keyword", "size": 4}}
                     }
                 }
             }
         ]
-
         return queries
 
     @staticmethod
