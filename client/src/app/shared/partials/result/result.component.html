@@ -7,15 +7,20 @@
         </button>
 
         <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1"> <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
-          <ng-container *ngIf="consolidated">
-            <hr class="vertical-divider"/>
-            Advance &nbsp;&nbsp;
-            <label class="small-switch">
-              <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
-              <span class="small-slider round"></span>
-            </label>
+          <ng-container>
+            <ng-container *ngIf="consolidated">
+              <hr class="vertical-divider"/>
+              <span>Advance &nbsp;&nbsp;</span>
+              <label class="small-switch">
+                <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
+                <span class="small-slider round"></span>
+              </label>
+            </ng-container>
+            <ng-container *ngIf="!consolidated">
+              <div class="dashboard-general-input-emptyspace"></div>
+            </ng-container>
             <ng-container>
-              <hr class="vertical-divider ml-3"/>
+              <hr class="vertical-divider ml-3" *ngIf="consolidated"/>
               <span (click)="onToolToggle($event)">
                 Tools
                 <div class="expand-icon">
@@ -23,9 +28,6 @@
                 </div>
               </span>
             </ng-container>
-          </ng-container>
-          <ng-container *ngIf="!consolidated">
-            <div class="dashboard-general-input-emptyspace"></div>
           </ng-container>
         </span>
         <div class="gc-clear-selection d-flex flex-column align-items-center scan-shrink dashboard-general-scan dropdown" *ngIf="scandomains.length > 0" (click)="toggleScan()">
