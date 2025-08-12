@@ -97,15 +97,10 @@ export class ChatWidgetComponent implements OnInit {
       this.dashboardService.showSubscription.set(true);
       return;
     }
-    setTimeout(() => {
-      this.chatOpen = true
-    }, 100);
-
+    this.chatOpen = true
   }
   closeChat() {
-    setTimeout(() => {
-      this.chatOpen = false;
-    }, 100);
+    this.chatOpen = false;
   }
   trackByIndex(index: number): number {
     return index;

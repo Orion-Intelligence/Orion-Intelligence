@@ -133,7 +133,7 @@ class crawl_model:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://168.231.86.34:8010/nlp/chat/report",
+                    "http://144.76.157.34:8010/nlp/chat/report",
                     json=model.model_dump(),
                     timeout=200
                 )
