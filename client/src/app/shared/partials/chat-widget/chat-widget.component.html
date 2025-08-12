@@ -11,23 +11,44 @@
           <span class="chat-support__status-indicator"></span>
         </div>
         <div class="chat-support__header-text">Orion Analyst</div>
-        <img class="chat-support__close-btn mr-2" (click)="closeChat()" src="assets/images/shared/cross.svg" width="15"
-          height="15" alt="close">
+        <div class="chat-support__close-btn" (click)="closeChat()">
+          <img src="assets/images/shared/cross.svg" alt="close">
+        </div>
       </div>
 
       <div class="chat-support__messages">
         <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
-          <div class="chat-support__message-container">
-            <div class="chat-support__chat-avatar">
-              <div *ngIf="msg.sender === 'bot'"><img src="assets/images/shared/chat-icon.svg" /></div>
-              <div *ngIf="msg.sender === 'user'"><img src="assets/images/shared/user-icon.svg" /></div>
+          <ng-container [ngSwitch]="msg.sender">
+            <div *ngSwitchCase="'user'" class="chat-support__message-container">
+              <div class="chat-support__chat-avatar">
+                <img src="assets/images/shared/user-icon.svg" />
+              </div>
+              <div class="chat-support__msg chat-support__msg--user">
+                <p>{{ msg.text }}</p>
+              </div>
             </div>
-            <div class="chat-support__msg" [class.chat-support__msg--user]="msg.sender === 'user'"
-              [class.chat-support__msg--bot]="msg.sender === 'bot'">
-              <p>{{ msg.text }}</p>
+            <div *ngSwitchCase="'bot'" class="chat-support__message-container">
+              <div class="chat-support__chat-avatar">
+                <img src="assets/images/shared/chat-icon.svg" />
+              </div>
+              <div class="chat-support__msg chat-support__msg--bot">
+                <p>{{ msg.text }}</p>
+              </div>
             </div>
-          </div>
+
+            <div *ngSwitchCase="'error'">
+              <div class="chat-support__error-box">
+                <p>{{ msg.text }}</p>
+                <button *ngIf="msg.retryPayload" class="chat-support__retry-btn"
+                  (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
+                  <img src="assets/images/shared/chat-support-retry.svg" alt="Retry" />
+                </button>
+              </div>
+            </div>
+
+          </ng-container>
         </div>
+
 
         <div *ngIf="isBotTyping" class="chat-support__msg chat-support__msg--bot chat-support__typing">
           <span class="chat-support__typing-dot"></span>

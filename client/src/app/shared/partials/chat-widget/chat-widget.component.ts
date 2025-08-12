@@ -23,7 +23,7 @@ type ChatApiResponse = {
 })
 export class ChatWidgetComponent implements OnInit {
   @Input() reportText: string | undefined;
-  chatMessages: { id: string; sender: 'user' | 'bot'; text: string; time: Date }[] = [];
+  chatMessages: { id: string; sender: 'user' | 'bot' | 'error'; text: string; time: Date; retryPayload?: { message: string; report?: string }; }[] = [];
   isBotTyping = false;
   newMessage = '';
   chatOpen = false;
@@ -60,14 +60,7 @@ export class ChatWidgetComponent implements OnInit {
 
   aiSuggest(userMessage: string): void {
     if (this.authService.getRole() !== 'admin') {
-      this.dashboardService.showSubscription.set(true);
-      this.chatMessages.push({
-        id: this.sessionId,
-        sender: 'bot',
-        text: 'Something unexpected happened',
-        time: new Date()
-      });
-      this.isBotTyping = false;
+      this.showErrorMessage(userMessage);
       return;
     }
 
@@ -80,17 +73,36 @@ export class ChatWidgetComponent implements OnInit {
     this.api.post<ChatApiResponse>('nlp/chat/report', payload).subscribe({
       next: (response) => {
         const reply =
-          (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim() ||
-          'Something unexpected happened';
-        this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: reply, time: new Date() });
+          (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
+
+        if (!reply) {
+          this.showErrorMessage(userMessage);
+        } else {
+          this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: reply, time: new Date() });
+        }
         this.isBotTyping = false;
       },
       error: () => {
-        this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: 'Something unexpected happened', time: new Date() });
+        this.showErrorMessage(userMessage);
         this.isBotTyping = false;
       }
     });
   }
+
+  private showErrorMessage(originalMessage: string): void {
+    this.chatMessages.push({
+      id: this.sessionId,
+      sender: 'error',
+      text: 'Something went wrong. Please try again.',
+      time: new Date(),
+      retryPayload: { message: originalMessage, report: this.reportText }
+    });
+  }
+  retryMessage(payload: { message: string; report?: string }): void {
+    this.isBotTyping = true;
+    this.aiSuggest(payload.message);
+  }
+
 
   openChat() {
     if (this.authService.getRole() !== 'admin') {

@@ -29,13 +29,13 @@
   white-space: normal;
 }
 
-@media (width <= 500px) {
+@media (width <=500px) {
   .home_insight__text-secondary {
     font-size: 10px;
   }
 }
 
-@media (width <= 420px) {
+@media (width <=420px) {
   .home_insight__text-secondary {
     font-size: 8px;
   }
