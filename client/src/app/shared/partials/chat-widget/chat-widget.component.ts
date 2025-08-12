@@ -93,7 +93,7 @@ export class ChatWidgetComponent implements OnInit {
     this.chatMessages.push({
       id: this.sessionId,
       sender: 'error',
-      text: 'Something went wrong. Please try again.',
+      text: 'Something went wrong. try again.',
       time: new Date(),
       retryPayload: { message: originalMessage, report: this.reportText }
     });

@@ -50,11 +50,11 @@
 
 .chat-support__close-btn {
   position: absolute;
-  right: 10px;
-  top: 50%;
+  top: 28px;
+  right: 0;
   transform: translateY(-50%);
   cursor: pointer;
-  padding: 8px;
+  padding: 18px;
 }
 
 .chat-support__close-btn img {
@@ -273,15 +273,15 @@
 
 .chat-support__error-box {
   background: #fff3f3;
-  border: 1px solid #ffcccc;
+  border: 1px solid #fcc;
   border-radius: 6px;
   padding: 8px 12px;
-  margin: 8px 0;
   color: #d9534f;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 14px;
+  margin: 4px 25px 0 45px;
 }
 
 .chat-support__retry-btn {
@@ -294,12 +294,12 @@
 }
 
 .chat-support__retry-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgb(0 0 0 / 5%);
 }
 
 .chat-support__retry-btn img {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
