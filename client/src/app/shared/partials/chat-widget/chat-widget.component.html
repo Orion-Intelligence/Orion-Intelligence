@@ -1,46 +1,49 @@
-<div class="chat-support">
-  <button #chatBtn *ngIf="!chatOpen" class="chat-toggle chat-bot-push"
-    (click)="openChat()" type="button">
+<div class="chat-support" [class.chat-support--open]="chatOpen">
+  <button #chatBtn *ngIf="!chatOpen" class="chat-support__toggle chat-support__push" (click)="openChat()" type="button">
     <span><img src="assets/images/shared/chat.svg" alt="chat" /></span>
   </button>
 
-
-  <div *ngIf="chatOpen" class="chat-window" @chatBotAnimation>
-    <div class="chat-header">
-      <div class="main-avatar"><img src="assets/images/shared/chat-icon.svg" />
-        <span class="status-indicator"></span>
+  <div *ngIf="chatOpen" class="chat-support__overlay">
+    <div class="chat-support__window" @chatBotAnimation>
+      <div class="chat-support__header">
+        <div class="chat-support__main-avatar">
+          <img src="assets/images/shared/chat-icon.svg" />
+          <span class="chat-support__status-indicator"></span>
+        </div>
+        <div class="chat-support__header-text">Orion Analyst</div>
+        <img class="chat-support__close-btn mr-2" (click)="closeChat()" src="assets/images/shared/cross.svg" width="15"
+          height="15" alt="close">
       </div>
-      <div class="chat-text">
-        Orion Analyst</div>
-      <img class="close-btn mr-2" (click)="closeChat()" src="assets/images/shared/cross.svg" width="15" height="15" alt="close">️
-    </div>
 
-    <div class="chat-messages">
+      <div class="chat-support__messages">
+        <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
+          <div class="chat-support__message-container">
+            <div class="chat-support__chat-avatar">
+              <div *ngIf="msg.sender === 'bot'"><img src="assets/images/shared/chat-icon.svg" /></div>
+              <div *ngIf="msg.sender === 'user'"><img src="assets/images/shared/user-icon.svg" /></div>
+            </div>
+            <div class="chat-support__msg" [class.chat-support__msg--user]="msg.sender === 'user'"
+              [class.chat-support__msg--bot]="msg.sender === 'bot'">
+              <p>{{ msg.text }}</p>
+            </div>
+          </div>
+        </div>
 
-      <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
-        <div style="display: flex; flex-direction: row; gap: 10px;">
-          <div class="chat-avatar">
-            <div *ngIf="msg.sender === 'bot'"><img src="assets/images/shared/chat-icon.svg" /></div>
-            <div *ngIf="msg.sender === 'user'"><img src="assets/images/shared/user-icon.svg" /></div>
-          </div>
-          <div class="chat-msg" [class.user]="msg.sender === 'user'" [class.bot]="msg.sender === 'bot'">
-            <p class="chat-text">{{ msg.text }}</p>
-          </div>
+        <div *ngIf="isBotTyping" class="chat-support__msg chat-support__msg--bot chat-support__typing">
+          <span class="chat-support__typing-dot"></span>
+          <span class="chat-support__typing-dot"></span>
+          <span class="chat-support__typing-dot"></span>
         </div>
       </div>
 
-      <div *ngIf="isBotTyping" class="chat-msg bot typing-indicator">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+      <form class="chat-support__input" (submit)="sendMessage($event)">
+        <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message"
+          class="chat-support__input-field" required />
+        <button #submitBtn type="submit" class="chat-support__send-btn chat-support__push"
+          (click)="pushButton(submitBtn)">
+          <img src="assets/images/shared/chat_small.svg" alt="chat">
+        </button>
+      </form>
     </div>
-
-    <form class="chat-input" (submit)="sendMessage($event)">
-      <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" required />
-      <button #submitBtn type="submit" class="chat-bot-push" (click)="pushButton(submitBtn)">
-        <img src="assets/images/shared/chat_small.svg" alt="chat">
-      </button>
-    </form>
   </div>
 </div>

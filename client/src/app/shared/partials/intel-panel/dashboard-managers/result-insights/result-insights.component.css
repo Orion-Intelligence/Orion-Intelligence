@@ -156,7 +156,7 @@
   max-height: 250px;
   overflow-y: auto;
   padding-right: 0.5rem;
-  mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 7%, black 90%, transparent);
   mask-size: 100% 100%;
   mask-repeat: no-repeat;
 }
