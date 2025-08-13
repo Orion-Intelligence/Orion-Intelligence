@@ -3,12 +3,14 @@ import {CommonModule} from '@angular/common';
 import {Observable} from 'rxjs';
 import {DirectoryCallbackModel} from '../../../shared/model/directory/directory.model';
 import {DirectoryService} from '../../../services/directory/directory.service';
+import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-directory-list',
   templateUrl: './directory-list.component.html',
   standalone: true,
   imports: [CommonModule],
+  animations: [fadeInDashboardItem]
 })
 export class DirectoryListComponent {
   directoryData$: Observable<DirectoryCallbackModel | null>;

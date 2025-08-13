@@ -1,58 +1,101 @@
 <div class="list__container">
-  <table class="table table-striped directory-list__table clear-paddings">
-    <thead>
-    <tr>
-      <th class="list__column-id-min" scope="col">ID</th>
-      <th class="list__column-service-url" scope="col">Service URL</th>
-      <th class="list__column-category" scope="col">Category</th>
-      <th class="list__column-url-status" scope="col">General</th>
-      <th class="list__column-leak-status" scope="col">Leak</th>
-      <th class="list__column-network-type" scope="col">Network</th>
-      <th scope="col">Last Updated</th>
-    </tr>
-    </thead>
-    <tbody>
-    <ng-container *ngFor="let item of (directoryData$ | async)?.mDirectoryCallbackLinks; let i = index">
-      <tr *ngIf="item.url?.trim()">
-        <td data-label="ID">
-          {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
-        </td>
-        <td data-label="Service URL">
-          <ng-container *ngIf="item.network_type === 'telegram'">
-            <a class="list__table-url text-decoration-none text-reset"> {{ item.name?.toLowerCase() }} </a>
-          </ng-container>
-          <ng-container *ngIf="item.network_type !== 'telegram'">
-            <a class="list__table-url text-decoration-none text-reset"> {{ item.url }} </a>
-          </ng-container>
-        </td>
-        <td data-label="Category">
-          <div class="d-flex flex-wrap">
-            <ng-container *ngIf="item.content_type.length; else noCategory">
-              <div *ngFor="let category of item.content_type | slice:0:2" class="list__content-category px-2 py-1">
-                {{ category | titlecase }}
+  <ng-container *ngIf="(directoryData$ | async) as data; else loadingTpl">
+    <table class="table table-striped directory-list__table clear-paddings">
+      <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
+        <tr>
+          <th class="list__column-id-min" scope="col">ID</th>
+          <th class="list__column-service-url" scope="col">Service URL</th>
+          <th class="list__column-category" scope="col">Category</th>
+          <th class="list__column-url-status" scope="col">General</th>
+          <th class="list__column-leak-status" scope="col">Leak</th>
+          <th class="list__column-network-type" scope="col">Network</th>
+          <th scope="col">Last Updated</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
+        <ng-container *ngFor="let item of data.mDirectoryCallbackLinks; let i = index">
+          <tr *ngIf="item.url?.trim()">
+            <td data-label="ID">
+              {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
+            </td>
+            <td data-label="Service URL">
+              <ng-container *ngIf="item.network_type === 'telegram'; else nonTg">
+                <a class="list__table-url text-decoration-none text-reset">{{ item.name?.toLowerCase() }}</a>
+              </ng-container>
+              <ng-template #nonTg>
+                <a class="list__table-url text-decoration-none text-reset">{{ item.url }}</a>
+              </ng-template>
+            </td>
+            <td data-label="Category">
+              <div class="d-flex flex-wrap">
+                <ng-container *ngIf="item.content_type?.length; else noCategory">
+                  <div *ngFor="let category of item.content_type | slice:0:2" class="list__content-category px-2 py-1">
+                    {{ category | titlecase }}
+                  </div>
+                </ng-container>
+                <ng-template #noCategory>
+                  <div class="list__content-category px-2 py-1">No categories available</div>
+                </ng-template>
               </div>
-            </ng-container>
-            <ng-template #noCategory>
-              <div class="list__content-category px-2 py-1">No categories available</div>
-            </ng-template>
-          </div>
-        </td>
-        <td data-label="General Model Status">
-            <span class="list__status-default-pointer">
-            </span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
-        </td>
-        <td data-label="Leak Model Status">
-            <span class="list__status-default-pointer">
-            </span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
-        </td>
-        <td data-label="Network Type">
-          {{ item.network_type ? item.network_type : 'Unknown' }}
-        </td>
-        <td data-label="Last Updated">
-          {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}
-        </td>
-      </tr>
-    </ng-container>
-    </tbody>
-  </table>
+            </td>
+            <td data-label="General Model Status">
+              <span class="list__status-default-pointer"></span>
+              {{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}
+            </td>
+            <td data-label="Leak Model Status">
+              <span class="list__status-default-pointer"></span>
+              {{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}
+            </td>
+            <td data-label="Network Type">
+              {{ item.network_type ? item.network_type : 'Unknown' }}
+            </td>
+            <td data-label="Last Updated">
+              {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+    <div *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) === 0" class="pt-3">
+      <div class="report-mapping-empty-header">No links found!</div>
+      <div class="report-mapping-empty-body">
+        We’re watching this source — new links will appear here once detected.
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #loadingTpl>
+    <table class="table table-striped directory-list__table clear-paddings">
+      <thead>
+        <tr>
+          <th class="list__column-id-min" scope="col">ID</th>
+          <th class="list__column-service-url" scope="col">Service URL</th>
+          <th class="list__column-category" scope="col">Category</th>
+          <th class="list__column-url-status" scope="col">General</th>
+          <th class="list__column-leak-status" scope="col">Leak</th>
+          <th class="list__column-network-type" scope="col">Network</th>
+          <th scope="col">Last Updated</th>
+        </tr>
+      </thead>
+      <tbody @fadeInDashboardItem>
+        <tr>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        </tr>
+        <tr>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-template>
 </div>
