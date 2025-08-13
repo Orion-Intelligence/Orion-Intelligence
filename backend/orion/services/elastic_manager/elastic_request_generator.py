@@ -138,6 +138,9 @@ class elastic_request_generator:
             parts = [p.strip() for p in str(p_query_model.url).split(" ") if p.strip()]
             url_query.extend(parts)
 
+        domains = helper_controller.extract_domains_from_text(p_query_model.q)
+        url_query.extend(domains)
+
         if isinstance(pFilter, dict):
             if pFilter.get('m_username'):
                 if isinstance(pFilter['m_username'], list):
