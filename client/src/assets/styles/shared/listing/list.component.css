@@ -19,7 +19,7 @@
 }
 
 .list__container .list__column-id-min {
-  width: 4% !important;
+  width: 6% !important;
 }
 
 .list__column-service-url {
@@ -42,7 +42,7 @@
   width: 10%;
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .list__content-category {
     padding-bottom: 0;
     padding-left: 15px;

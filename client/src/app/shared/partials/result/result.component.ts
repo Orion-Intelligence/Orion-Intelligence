@@ -45,8 +45,9 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() consolidated = false;
   @Input() domain = false;
   @Input() showTabs = true;
-  @Input() filterModel!: FilterModel
-  @Input() showSorting: boolean = true
+  @Input() filterModel!: FilterModel;
+  @Input() showSorting: boolean = true;
+  @Input() showSelectedFilters: boolean = false;
 
   @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();

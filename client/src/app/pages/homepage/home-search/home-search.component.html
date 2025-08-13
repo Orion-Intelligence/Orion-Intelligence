@@ -11,18 +11,21 @@
           type="search" (focus)="setFilterOverlay(true)"> <input type="hidden" value="1">
         <span class="input-group-text border-start-0 gc-clear-selection cursor-pointer">
           <ng-container>
-            <hr class="vertical-divider"/>
+            <hr class="vertical-divider" />
             Advance &nbsp;&nbsp;
             <label class="small-switch">
-              <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
+              <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle"
+                (change)="onAdvanceSettingToggle()" />
               <span class="small-slider round"></span>
             </label>
             <ng-container>
-              <hr class="vertical-divider ml-3"/>
+              <hr class="vertical-divider ml-3" />
               <span (click)="onToolToggle($event)">
                 Tools
-                <div class="expand-icon" >
-                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
+                <div class="expand-icon">
+                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon"
+                    [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools"
+                    class="transition-transform" />
                 </div>
               </span>
             </ng-container>
@@ -31,7 +34,7 @@
       </div>
       <div #filtersWrapper class="filters-overlay search-trigger"
         *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
-        <app-search-filters [showSorting]="false"></app-search-filters>
+        <app-search-filters [showSorting]="false" [homePage]="true"></app-search-filters>
       </div>
       <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools;">
         <div class="dropdown mt-2">

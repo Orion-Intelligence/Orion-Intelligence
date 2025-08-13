@@ -17,6 +17,7 @@ import { SuggestionService } from '../../../services/entity_filter_suggestions/s
 })
 export class SearchFiltersComponent implements OnInit {
   @Input() showSorting!: boolean;
+  @Input() homePage: Boolean = false;
   @Output() checkDomain = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
   @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
