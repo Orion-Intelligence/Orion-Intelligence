@@ -66,6 +66,7 @@
   display: flex;
   flex-wrap: inherit;
   margin-bottom: 8px;
+  width: calc(100vw - 365px);
 }
 
 .default-input {
@@ -482,6 +483,12 @@ table a:visited {
   display: inherit;
 }
 
+@media (width <=460px) {
+  .default-input-container .input-group-text {
+    width: 0 !important;
+  }
+}
+
 .default-input-container .input-group-text {
   background: #fff;
   border: 0;
@@ -583,6 +590,10 @@ table a:visited {
     margin-left: 15px;
   }
 
+  .default-input-sub-container {
+    width: 100% !important;
+  }
+
   .default-notification-banner-cti {
     display: none;
   }
@@ -631,6 +642,11 @@ table a:visited {
   .side-menu-container {
     display: none !important;
   }
+
+  .default-input-sub-container {
+    width: calc(100% - 95px) !important;
+  }
+
 }
 
 @media only screen and (width <=1000px) {

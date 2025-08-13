@@ -213,7 +213,7 @@
   }
 
   .home_insight__card {
-    width: 300px;
+    width: calc(100vw - 85px);
     margin: 0 auto;
   }
 
@@ -226,7 +226,7 @@
   }
 
   .home-insight-card-container {
-    width: 300px;
+    width: calc(100vw - 85px);
   }
 
   .home_insight_graph_container {

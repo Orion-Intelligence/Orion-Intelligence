@@ -29,6 +29,10 @@
   color: white;
   font-size: 18px;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100% - 32px);
 }
 
 .bar-chart_separator-line {
@@ -164,7 +168,6 @@
 
 @media (width <=460px) {
   .bar-chart_container {
-    width: 300px;
+    width: calc(100vw - 85px);
   }
-
 }

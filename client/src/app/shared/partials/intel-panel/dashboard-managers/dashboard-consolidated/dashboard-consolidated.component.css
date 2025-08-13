@@ -8,6 +8,12 @@
   padding: 0 20px 5px;
 }
 
+@media only screen and (width <=460px) {
+  .consolidated_container {
+    width: calc(100vw - 90px) !important;
+  }
+}
+
 .consolidated_container-main .label-text {
   margin-top: 20px !important;
 }
@@ -41,6 +47,7 @@
 .dashboard__layout-left {
   flex: 3;
   min-width: 0;
+  width: 100%;
 }
 
 .dashboard__layout-right {
@@ -57,7 +64,7 @@
 @media (width <=1299px) {
   .dashboard__layout-wrapper {
     flex-direction: column;
-    padding-right: 50;
+    padding-right: 50px;
   }
 
   .dashboard__layout-right {
