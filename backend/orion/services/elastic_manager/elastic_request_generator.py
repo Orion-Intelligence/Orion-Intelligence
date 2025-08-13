@@ -221,12 +221,6 @@ class elastic_request_generator:
             "track_total_hits": False
         }
 
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(query_statement, flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
-
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_statement
 
     @staticmethod
@@ -1686,6 +1680,12 @@ class elastic_request_generator:
             "sort": [{"timestamp": {"order": "desc"}}],
             "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
         }
+
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(query, flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
