@@ -217,6 +217,8 @@ class search_model:
                 chat_data = data
             elif index == "social_model":
                 social_data = data
+            elif index == "stealer_model":
+                stealer_data = data
             elif index == "defacement_model":
                 defacement_data = data
 
@@ -226,7 +228,8 @@ class search_model:
             chat_model=search_chat_callback_model(**chat_data),
             generic_model=search_general_callback_model(**general_data),
             defacement_model=search_defacement_callback_model(**defacement_data),
-            social_model=search_social_callback_model(**social_data)
+            social_model=search_social_callback_model(**social_data),
+            stealer_model = search_stealerlog_callback_model(**stealer_data)
         )
 
     async def search_exploit_result(self, param: search_exploit_param_model):
