@@ -595,6 +595,11 @@ class elastic_request_generator:
         queries.append(self._strip_query(q6))
         indices.append(i6)
 
+        m8 = helper_controller.clone_model(p_query_model)
+        i8, q8 = self.on_search_stealer_alert(m8, pFilter)
+        queries.append(self._strip_query(q8))
+        indices.append(i8)
+
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)
