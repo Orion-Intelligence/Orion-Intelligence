@@ -31,6 +31,8 @@ class elastic_request_generator:
                 domains.extend(pFilter["m_domain"])
             if "m_ip" in pFilter:
                 domains.extend(pFilter["m_ip"])
+            if "m_search_all" in pFilter:
+                domains.extend([v for v in pFilter["m_search_all"] if re.search(r'(https?://|[a-z0-9.-]+\.[a-z]{2,})', str(v), re.I)])
 
         for idx, domain in enumerate(domains):
             domain = domain.lower()
