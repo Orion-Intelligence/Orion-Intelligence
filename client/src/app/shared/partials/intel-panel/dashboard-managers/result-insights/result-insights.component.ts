@@ -295,7 +295,7 @@ export class ResultInsightsComponent implements OnInit {
     });
 
     this.coverageData = [
-      { value: total, label: 'Total', color: '' },
+      { value: total, label: 'Total Found', color: '' },
       { value: active, label: 'Active', color: '#1ec773' },
       { value: inactive, label: 'Inactive', color: '#e6534b' },
       { value: seldom, label: 'Seldom', color: '#f08b36' }
