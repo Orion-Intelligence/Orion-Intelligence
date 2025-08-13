@@ -125,103 +125,82 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     @staticmethod
-    def on_bulk_stealer_lookup(p_query_model, pFilter=None):
+    def on_search_stealer_alert(p_query_model: search_consolidated_param_model):
+        user_query = ""
+        url_query = "wish.com"
+        date_range_filter = {}
 
-        field_aggs = {}
-        must_clauses = []
-        search_terms = []
-
-        search_terms.extend(helper_controller.extract_domains_from_text(p_query_model.q))
-
-        if pFilter:
-            if "url" in pFilter:
-                search_terms.extend(pFilter["url"])
-            if "username" in pFilter:
-                search_terms.extend(pFilter["username"])
-
-        for idx, term in enumerate(search_terms):
-            term = term.lower()
-            parts = term.split('/')
-            valid_parts = [p for p in parts if '.' in p or len(p) > 2]
-
-            if not valid_parts:
-                continue
-            term_part = valid_parts[-1]
-            agg_name = f"term_{idx}"
-
-            field_aggs[agg_name] = {
-                "filter": {
-                    "bool": {
-                        "should": [
-                            {
-                                "wildcard": {
-                                    "url.raw": {
-                                        "value": f"*{term_part}*",
-                                        "case_insensitive": True
-                                    }
-                                }
-                            },
-                            {
-                                "wildcard": {
-                                    "username": {
-                                        "value": f"*{term_part}*",
-                                        "case_insensitive": True
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-                "aggs": {
-                    "by_field_type": {
-                        "terms": {
-                            "field": "username",
-                            "size": 10
-                        },
-                        "aggs": {
-                            "top_hits_per_type": {
-                                "top_hits": {
-                                    "size": 4,
-                                    "sort": [
-                                        {"timestamp": {"order": "desc"}}
-                                    ]
-                                }
-                            }
-                        }
+        if p_query_model.daterange:
+            start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
+            date_range_filter = {
+                "range": {
+                    "timestamp": {
+                        "gte": start_date,
+                        "lte": end_date
                     }
                 }
             }
 
-        if p_query_model.daterange:
-            parts = p_query_model.daterange.split(',')
-            if len(parts) == 2:
-                try:
-                    from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
-                    to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
+        must_should = []
+        should_clauses = []
 
-                    must_clauses.append({
-                        "range": {
-                            "timestamp": {
-                                "gte": from_date_obj.strftime("%Y-%m-%d"),
-                                "lte": to_date_obj.strftime("%Y-%m-%d")
-                            }
-                        }
-                    })
-                except ValueError:
-                    pass
+        # Only the exact/phrase search path remains (fullsearch removed)
+        if user_query:
+            user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
+            terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
 
-        query_statement = {
-            "size": 0,
-            "query": {
-                "bool": {
-                    "must": must_clauses if must_clauses else [{"match_all": {}}]
+            for quoted, unquoted in terms:
+                term = quoted or unquoted
+                clause = {
+                    "bool": {
+                        "should": [
+                            {"term": {"username": term}},
+                            {"term": {"domain": term}},
+                            {"term": {"url.raw": term}},
+                            {"match_phrase": {"url": term.lower()}}
+                        ],
+                        "minimum_should_match": 1
+                    }
                 }
-            },
-            "aggs": field_aggs,
-            "track_total_hits": False
+                must_should.append(clause)
+
+        if url_query:
+            url_clause = {
+                "bool": {
+                    "should": [
+                        {"term": {"url.raw": url_query}},
+                        {"match_phrase": {"url": url_query.lower()}}
+                    ],
+                    "minimum_should_match": 1
+                }
+            }
+            should_clauses.append(url_clause)
+
+        bool_query = {}
+        if must_should:
+            bool_query["must"] = must_should
+        if should_clauses:
+            bool_query["should"] = should_clauses
+            bool_query["minimum_should_match"] = 1
+        if date_range_filter:
+            bool_query.setdefault("filter", []).append(date_range_filter)
+
+        query = {
+            "query": {"bool": bool_query},
+            "from": 0,
+            "size": 100,
+            "track_total_hits": True,
+            "sort": [{"timestamp": {"order": "desc"}}],
+            "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
         }
 
-        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_statement
+        print(":::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::", flush=True)
+        print(query, flush=True)
+        print(":::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::", flush=True)
+
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
     def on_search_defacement_data(p_query_model: search_defacement_param_model, _=None, is_consolidated: bool = False):
@@ -620,13 +599,10 @@ class elastic_request_generator:
         queries.append(domain_query)
         indices.append(domain_query_index)
 
-        stealer_query_index, stealer_query = self.on_search_stealerlogs_data(p_query_model, pFilter)
-        queries.append(stealer_query)
-        indices.append(stealer_query_index)
+        stealer_query_index, stealer_query = self.on_bulk_stealer_lookup(p_query_model, pFilter)
+        queries.append(stealer_query_index)
+        indices.append(stealer_query)
 
-        print("4:::::::::::::::::::::::::::::", flush=True)
-        print(stealer_query, flush=True)
-        print("4:::::::::::::::::::::::::::::", flush=True)
         return indices, queries
 
     @staticmethod
@@ -1165,8 +1141,16 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
+        print(":::::::::::::::::::::::::::", flush=True)
+        print(p_query_model.platform, flush=True)
+        print(":::::::::::::::::::::::::::", flush=True)
+
         if p_query_model.platform:
             must_clauses.append({"term": {"m_platform": p_query_model.platform}})
+
+        print(":::::::::::::::::::::::::::", flush=True)
+        print(p_query_model.platform, flush=True)
+        print(":::::::::::::::::::::::::::", flush=True)
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(',')
@@ -1574,15 +1558,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter):
-
-        print("xx :::::::::::::::::::::::::::::", flush=True)
-        print("xx :::::::::::::::::::::::::::::", flush=True)
-        print(p_query_model.user, flush=True)
-        print(p_query_model.url, flush=True)
-        print("xx :::::::::::::::::::::::::::::", flush=True)
-        print("xx :::::::::::::::::::::::::::::", flush=True)
-
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model):
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         url_query = p_query_model.url.strip() if p_query_model.url else ""
         url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
