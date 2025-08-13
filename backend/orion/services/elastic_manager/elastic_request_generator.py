@@ -125,6 +125,105 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     @staticmethod
+    def on_bulk_stealer_lookup(p_query_model, pFilter=None):
+
+        field_aggs = {}
+        must_clauses = []
+        search_terms = []
+
+        search_terms.extend(helper_controller.extract_domains_from_text(p_query_model.q))
+
+        if pFilter:
+            if "url" in pFilter:
+                search_terms.extend(pFilter["url"])
+            if "username" in pFilter:
+                search_terms.extend(pFilter["username"])
+
+        for idx, term in enumerate(search_terms):
+            term = term.lower()
+            parts = term.split('/')
+            valid_parts = [p for p in parts if '.' in p or len(p) > 2]
+
+            if not valid_parts:
+                continue
+            term_part = valid_parts[-1]
+            agg_name = f"term_{idx}"
+
+            field_aggs[agg_name] = {
+                "filter": {
+                    "bool": {
+                        "should": [
+                            {
+                                "wildcard": {
+                                    "url.raw": {
+                                        "value": f"*{term_part}*",
+                                        "case_insensitive": True
+                                    }
+                                }
+                            },
+                            {
+                                "wildcard": {
+                                    "username": {
+                                        "value": f"*{term_part}*",
+                                        "case_insensitive": True
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "aggs": {
+                    "by_field_type": {
+                        "terms": {
+                            "field": "username",
+                            "size": 10
+                        },
+                        "aggs": {
+                            "top_hits_per_type": {
+                                "top_hits": {
+                                    "size": 4,
+                                    "sort": [
+                                        {"timestamp": {"order": "desc"}}
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        if p_query_model.daterange:
+            parts = p_query_model.daterange.split(',')
+            if len(parts) == 2:
+                try:
+                    from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
+                    to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
+
+                    must_clauses.append({
+                        "range": {
+                            "timestamp": {
+                                "gte": from_date_obj.strftime("%Y-%m-%d"),
+                                "lte": to_date_obj.strftime("%Y-%m-%d")
+                            }
+                        }
+                    })
+                except ValueError:
+                    pass
+
+        query_statement = {
+            "size": 0,
+            "query": {
+                "bool": {
+                    "must": must_clauses if must_clauses else [{"match_all": {}}]
+                }
+            },
+            "aggs": field_aggs,
+            "track_total_hits": False
+        }
+
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_statement
+
+    @staticmethod
     def on_search_defacement_data(p_query_model: search_defacement_param_model, _=None, is_consolidated: bool = False):
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
@@ -457,7 +556,7 @@ class elastic_request_generator:
                     "query": {
                         "bool": {
                             "filter": (
-                                    combined_filter
+                                combined_filter
                             ),
                             "must": query_block
                         }
@@ -488,7 +587,7 @@ class elastic_request_generator:
 
         return query
 
-    def on_search_consolidated_data(self,p_query_model, pFilter=None):
+    def on_search_consolidated_data(self, p_query_model, pFilter=None):
         queries = []
         indices = []
 
@@ -520,6 +619,10 @@ class elastic_request_generator:
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)
+
+        stealer_query_index, stealer_query = self.on_bulk_stealer_lookup(p_query_model, pFilter)
+        queries.append(stealer_query_index)
+        indices.append(stealer_query)
 
         return indices, queries
 
@@ -1656,7 +1759,6 @@ class elastic_request_generator:
 
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-
 
         if raw_query == "*":
             content_query = {"match_all": {}}

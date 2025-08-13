@@ -59,13 +59,13 @@ class homepage_model:
         redis_instance = redis_controller.getInstance()
         redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}"
         
-        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+        # cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
         
-        if cached and 1!=1:
-            try:
-                return json.loads(cached)
-            except Exception as _:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        # if cached and 1!=1:
+        #     try:
+        #         return json.loads(cached)
+        #     except Exception as _:
+        #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         indices, queries = elastic_insight_generator().on_insight_consolidated_data()
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)

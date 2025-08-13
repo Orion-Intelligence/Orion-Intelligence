@@ -194,7 +194,7 @@ class search_model:
             if not res:
                 continue
 
-            if index == "defacement_model" and "aggregations" in res:
+            if (index == "defacement_model" or index=="stealer_model") and "aggregations" in res:
                 for domain_key, domain_value in res["aggregations"].items():
                     buckets = domain_value.get("by_ioc_type", {}).get("buckets", [])
                     for bucket in buckets:
