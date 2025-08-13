@@ -621,8 +621,8 @@ class elastic_request_generator:
         indices.append(domain_query_index)
 
         stealer_query_index, stealer_query = self.on_search_stealerlogs_data(p_query_model, pFilter)
-        queries.append(stealer_query_index)
-        indices.append(stealer_query)
+        queries.append(stealer_query)
+        indices.append(stealer_query_index)
 
         return indices, queries
 
@@ -1580,6 +1580,12 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter):
+
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         url_query = p_query_model.url.strip() if p_query_model.url else ""
         url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
