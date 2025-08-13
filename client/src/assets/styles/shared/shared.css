@@ -169,7 +169,7 @@
 }
 
 .label-text-dropdown {
-  color: var(--color-gray-900);
+  color: var(--color-gray-100);
   margin-right: 14px;
   margin-bottom: 10px;
   font-family: Roboto, sans-serif;
@@ -645,6 +645,10 @@ table a:visited {
 
   .default-input-sub-container {
     width: calc(100% - 95px) !important;
+  }
+
+  .home__form .default-input-sub-container {
+    width: calc(100% - 65px) !important;
   }
 
 }
