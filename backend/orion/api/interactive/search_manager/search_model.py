@@ -187,6 +187,7 @@ class search_model:
         chat_data = {}
         defacement_data = {}
         social_data = {}
+        stealer_data = {}
 
         for index, res in zip(indices, responses):
             data = {"Result": [], "Suggestions": [], "Page_Count": 0}
