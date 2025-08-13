@@ -476,6 +476,9 @@ class ELASTIC_ENUMS:
     }
     mapping_stealer_log_model = {
         "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1000000,
             "analysis": {
                 "analyzer": {
                     "custom_log_analyzer": {
