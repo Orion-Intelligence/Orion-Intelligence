@@ -127,7 +127,7 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealer_alert(p_query_model: search_consolidated_param_model, pFilter):
         user_query = []
-        url_query = [] 
+        url_query = []
         date_range_filter = {}
 
         if p_query_model.user:
@@ -138,18 +138,18 @@ class elastic_request_generator:
             parts = [p.strip() for p in str(p_query_model.url).split(" ") if p.strip()]
             url_query.extend(parts)
 
-        if isinstance(pFilter, dict):
-            if pFilter.get('m_username'):
-                if isinstance(pFilter['m_username'], list):
-                    user_query.extend([v for v in pFilter['m_username'] if v])
-                else:
-                    user_query.append(pFilter['m_username'])
-            for key in ('m_url', 'm_domain'):
-                if pFilter.get(key):
-                    if isinstance(pFilter[key], list):
-                        url_query.extend([v for v in pFilter[key] if v])
-                    else:
-                        url_query.append(pFilter[key])
+        # if isinstance(pFilter, dict):
+        #     if pFilter.get('m_username'):
+        #         if isinstance(pFilter['m_username'], list):
+        #             user_query.extend([v for v in pFilter['m_username'] if v])
+        #         else:
+        #             user_query.append(pFilter['m_username'])
+        #     for key in ('m_url', 'm_domain'):
+        #         if pFilter.get(key):
+        #             if isinstance(pFilter[key], list):
+        #                 url_query.extend([v for v in pFilter[key] if v])
+        #             else:
+        #                 url_query.append(pFilter[key])
 
         if p_query_model.daterange:
             start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
