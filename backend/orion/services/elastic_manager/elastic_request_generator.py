@@ -612,9 +612,9 @@ class elastic_request_generator:
         queries.append(self._strip_query(q8))
         indices.append(i8)
 
-        domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
-        queries.append(domain_query)
-        indices.append(domain_query_index)
+        # domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
+        # queries.append(domain_query)
+        # indices.append(domain_query_index)
 
         return indices, queries
 
