@@ -69,6 +69,10 @@
   width: calc(100vw - 365px);
 }
 
+.dashboard__api-search-input-div .default-input-sub-container{
+  width: auto !important;
+}
+
 .default-input {
   align-self: center;
   border-radius: 0 !important;
