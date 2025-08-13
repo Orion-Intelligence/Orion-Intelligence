@@ -130,26 +130,26 @@ class elastic_request_generator:
         url_query = []
         date_range_filter = {}
 
-        # if p_query_model.user:
-        #     parts = [p.strip() for p in str(p_query_model.user).split(" ") if p.strip()]
-        #     user_query.extend(parts)
-        #
-        # if p_query_model.url:
-        #     parts = [p.strip() for p in str(p_query_model.url).split(" ") if p.strip()]
-        #     url_query.extend(parts)
+        if p_query_model.user:
+            parts = [p.strip() for p in str(p_query_model.user).split(" ") if p.strip()]
+            user_query.extend(parts)
 
-        # if isinstance(pFilter, dict):
-        #     if pFilter.get('m_username'):
-        #         if isinstance(pFilter['m_username'], list):
-        #             user_query.extend([v for v in pFilter['m_username'] if v])
-        #         else:
-        #             user_query.append(pFilter['m_username'])
-        #     for key in ('m_url', 'm_domain'):
-        #         if pFilter.get(key):
-        #             if isinstance(pFilter[key], list):
-        #                 url_query.extend([v for v in pFilter[key] if v])
-        #             else:
-        #                 url_query.append(pFilter[key])
+        if p_query_model.url:
+            parts = [p.strip() for p in str(p_query_model.url).split(" ") if p.strip()]
+            url_query.extend(parts)
+
+        if isinstance(pFilter, dict):
+            if pFilter.get('m_username'):
+                if isinstance(pFilter['m_username'], list):
+                    user_query.extend([v for v in pFilter['m_username'] if v])
+                else:
+                    user_query.append(pFilter['m_username'])
+            for key in ('m_url', 'm_domain'):
+                if pFilter.get(key):
+                    if isinstance(pFilter[key], list):
+                        url_query.extend([v for v in pFilter[key] if v])
+                    else:
+                        url_query.append(pFilter[key])
 
         if p_query_model.daterange:
             start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
@@ -178,8 +178,7 @@ class elastic_request_generator:
                                 {"term": {"domain": term}},
                                 {"term": {"url.raw": term}},
                                 {"match_phrase": {"url": term.lower()}}
-                            ],
-                            "minimum_should_match": 1
+                            ]
                         }
                     }
                     must_should.append(clause)
@@ -191,8 +190,7 @@ class elastic_request_generator:
                         "should": [
                             {"term": {"url.raw": uq}},
                             {"match_phrase": {"url": uq.lower()}}
-                        ],
-                        "minimum_should_match": 1
+                        ]
                     }
                 }
                 should_clauses.append(url_clause)
@@ -202,7 +200,6 @@ class elastic_request_generator:
             bool_query["must"] = must_should
         if should_clauses:
             bool_query["should"] = should_clauses
-            bool_query["minimum_should_match"] = 1
         if date_range_filter:
             bool_query.setdefault("filter", []).append(date_range_filter)
 
