@@ -18,6 +18,9 @@ class search_consolidated_param_model(BaseModel):
     attacker: Optional[str] = ""
     team: Optional[List[str]] = []
     platform: Optional[str] = ""
+    url: Optional[str] = ""
+    user: Optional[str] = ""
+    fullsearch: Optional[bool] = False
 
     entity_filter: Optional[Dict[str, List[str]]] = None
 
