@@ -183,9 +183,15 @@
 
 .filter-panel__input-row {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 16px;
+}
+
+.filter-panel__match-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .filter-panel__tag-input {
@@ -470,15 +476,31 @@ button:focus {
     width: 300px;
   }
 
-  .filter-panel__input-row {
-    display: block;
-    margin-bottom: 16px;
-  }
-
   .filter-panel__top-row {
     display: block;
     justify-content: space-between;
     align-items: center;
     padding-bottom: 8px;
   }
+
+  .filter-panel__input-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .filter-panel__input-wrapper {
+    width: 100%;
+  }
+
+  .filter-panel__tag-input {
+    width: 100%;
+  }
+
+  .filter-panel__match-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
 }
