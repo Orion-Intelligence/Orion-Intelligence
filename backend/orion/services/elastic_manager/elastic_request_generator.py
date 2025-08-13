@@ -127,7 +127,7 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealer_alert(p_query_model: search_consolidated_param_model, pFilter):
         user_query = ""
-        url_query = "wish.com"
+        url_query = "globaltestmarket.com"
         date_range_filter = {}
 
         if p_query_model.daterange:
