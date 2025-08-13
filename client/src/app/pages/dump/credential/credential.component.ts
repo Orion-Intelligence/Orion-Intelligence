@@ -25,8 +25,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   isLoading: boolean = false;
   firstTrigger: boolean = true;
-  mUser: any;
-  mURL: any;
+  user: any;
+  url: any;
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
 
@@ -50,8 +50,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params]) => {
-        this.mURL = params['url'];
-        this.mUser = params['user'];
+        this.url = params['url'];
+        this.user = params['user'];
 
         this.dashboardService.consolidatedParamModel.url = params['url'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
@@ -71,8 +71,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(reset = true): void {
-    this.dashboardService.consolidatedParamModel.url = this.mURL
-    this.dashboardService.consolidatedParamModel.user = this.mUser
+    this.dashboardService.consolidatedParamModel.url = this.url
+    this.dashboardService.consolidatedParamModel.user = this.user
     if (this.isLoading) return;
 
     this.isLoading = true;
