@@ -126,8 +126,8 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealer_alert(p_query_model: search_consolidated_param_model, pFilter):
-        user_query = ""
-        url_query = "globaltestmarket.com"
+        user_query = []
+        url_query = ["globaltestmarket.com"]
         date_range_filter = {}
 
         if p_query_model.daterange:
@@ -144,37 +144,37 @@ class elastic_request_generator:
         must_should = []
         should_clauses = []
 
-        # Only the exact/phrase search path remains (fullsearch removed)
         if user_query:
-            user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
-            terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
+            for uq in user_query:
+                uq = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), uq)
+                terms = re.findall(r'"([^"]+)"|(\S+)', uq)
+                for quoted, unquoted in terms:
+                    term = quoted or unquoted
+                    clause = {
+                        "bool": {
+                            "should": [
+                                {"term": {"username": term}},
+                                {"term": {"domain": term}},
+                                {"term": {"url.raw": term}},
+                                {"match_phrase": {"url": term.lower()}}
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    }
+                    must_should.append(clause)
 
-            for quoted, unquoted in terms:
-                term = quoted or unquoted
-                clause = {
+        if url_query:
+            for uq in url_query:
+                url_clause = {
                     "bool": {
                         "should": [
-                            {"term": {"username": term}},
-                            {"term": {"domain": term}},
-                            {"term": {"url.raw": term}},
-                            {"match_phrase": {"url": term.lower()}}
+                            {"term": {"url.raw": uq}},
+                            {"match_phrase": {"url": uq.lower()}}
                         ],
                         "minimum_should_match": 1
                     }
                 }
-                must_should.append(clause)
-
-        if url_query:
-            url_clause = {
-                "bool": {
-                    "should": [
-                        {"term": {"url.raw": url_query}},
-                        {"match_phrase": {"url": url_query.lower()}}
-                    ],
-                    "minimum_should_match": 1
-                }
-            }
-            should_clauses.append(url_clause)
+                should_clauses.append(url_clause)
 
         bool_query = {}
         if must_should:
@@ -193,12 +193,6 @@ class elastic_request_generator:
             "sort": [{"timestamp": {"order": "desc"}}],
             "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
         }
-
-        print(":::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::", flush=True)
-        print(query, flush=True)
-        print(":::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::", flush=True)
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
