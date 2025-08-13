@@ -611,19 +611,25 @@ class elastic_request_generator:
         queries.append(self._strip_query(q4))
         indices.append(i4)
 
+        print("1:::::::::::::::::::::::::::::", flush=True)
         m6 = helper_controller.clone_model(p_query_model)
         i6, q6 = self.on_search_social_data(m6, pFilter)
         queries.append(self._strip_query(q6))
         indices.append(i6)
+        print("2:::::::::::::::::::::::::::::", flush=True)
 
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)
+        print("3:::::::::::::::::::::::::::::", flush=True)
 
         stealer_query_index, stealer_query = self.on_search_stealerlogs_data(p_query_model, pFilter)
         queries.append(stealer_query)
         indices.append(stealer_query_index)
 
+        print("4:::::::::::::::::::::::::::::", flush=True)
+        print(stealer_query, flush=True)
+        print("4:::::::::::::::::::::::::::::", flush=True)
         return indices, queries
 
     @staticmethod
