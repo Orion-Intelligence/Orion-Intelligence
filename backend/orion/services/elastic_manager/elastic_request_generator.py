@@ -599,7 +599,7 @@ class elastic_request_generator:
         queries.append(domain_query)
         indices.append(domain_query_index)
 
-        stealer_query_index, stealer_query = self.on_search_stealer_alert(p_query_model, pFilter)
+        stealer_query_index, stealer_query = self.on_search_stealer_alert(p_query_model)
         queries.append(stealer_query_index)
         indices.append(stealer_query)
 
