@@ -23,8 +23,8 @@
   border: 1px solid #ffffff15;
   background: #1e293b;
   color: #e2e8f0;
-  width: 370px;
-  height: 530px;
+  width: 390px;
+  height: 600px;
   display: flex;
   flex-direction: column;
   border-radius: 12px;
@@ -69,7 +69,7 @@
   background: #fff;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 10px 230px;
+  padding: 10px 10px 360px;
   word-break: break-word;
 }
 

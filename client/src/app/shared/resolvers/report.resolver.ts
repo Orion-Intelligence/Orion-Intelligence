@@ -17,10 +17,13 @@ export class ReportResolver implements Resolve<any> {
     const hash = route.paramMap.get('m_hash');
     const lang = route.queryParamMap.get('lang');
 
-
     let apiUrl = '';
     switch (category_1) {
       case 'breach':
+        apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
+        if (category_2 == "warfare" || category_2 == "cloud" || category_2 == "logs" || category_2 == "email")
+          apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
+        else
         apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
         break;
       case 'strategic':

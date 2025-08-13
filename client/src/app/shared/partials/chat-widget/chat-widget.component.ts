@@ -5,6 +5,7 @@ import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { chatBotAnimation } from '../../animations/chat.bot.animation';
+
 type ChatApiResponse = {
   result?: string;
   reply?: string;
@@ -18,7 +19,6 @@ type ChatApiResponse = {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './chat-widget.component.html',
-  styleUrls: ['./chat-widget.component.css'],
   animations: [chatBotAnimation]
 })
 export class ChatWidgetComponent implements OnInit {
@@ -29,11 +29,9 @@ export class ChatWidgetComponent implements OnInit {
   chatOpen = false;
   private sessionId = '';
 
-  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService) {
-  }
+  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
-
     this.authService.getUsername$().subscribe(u => {
       this.sessionId = (u || '').trim() || crypto.randomUUID();
       if (this.chatMessages.length === 0) {
@@ -51,9 +49,9 @@ export class ChatWidgetComponent implements OnInit {
     event.preventDefault();
     const text = this.newMessage.trim();
     if (!text) return;
-
     this.chatMessages.push({ id: this.sessionId, sender: 'user', text, time: new Date() });
     this.newMessage = '';
+    this.scrollToNewMessage();
     this.isBotTyping = true;
     this.aiSuggest(text);
   }
@@ -74,11 +72,11 @@ export class ChatWidgetComponent implements OnInit {
       next: (response) => {
         const reply =
           (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
-
-        if (!reply) {
+        if (!reply || response.message?.includes("went wrong")) {
           this.showErrorMessage(userMessage);
         } else {
           this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: reply, time: new Date() });
+          this.scrollToNewMessage();
         }
         this.isBotTyping = false;
       },
@@ -97,28 +95,51 @@ export class ChatWidgetComponent implements OnInit {
       time: new Date(),
       retryPayload: { message: originalMessage, report: this.reportText }
     });
+    this.scrollToNewMessage();
   }
+
   retryMessage(payload: { message: string; report?: string }): void {
     this.isBotTyping = true;
     this.aiSuggest(payload.message);
   }
-
 
   openChat() {
     if (this.authService.getRole() !== 'admin') {
       this.dashboardService.showSubscription.set(true);
       return;
     }
-    this.chatOpen = true
+    this.chatOpen = true;
   }
+
   closeChat() {
     this.chatOpen = false;
   }
+
   trackByIndex(index: number): number {
     return index;
   }
+
   pushButton(btn: HTMLButtonElement) {
     btn.classList.add('chat-bot-push-anim');
     setTimeout(() => btn.classList.remove('chat-bot-push-anim'), 150);
+  }
+
+  private relativeTop(el: HTMLElement, container: HTMLElement): number {
+    let top = 0;
+    let node: HTMLElement | null = el;
+    while (node && node !== container) {
+      top += node.offsetTop;
+      node = node.offsetParent as HTMLElement | null;
+    }
+    return top;
+  }
+
+  private scrollToNewMessage(): void {
+    const container = document.querySelector('.chat-support__messages') as HTMLElement | null;
+    if (!container) return;
+    const lastMsg = container.querySelector('.chat-support__message-container:last-of-type') as HTMLElement | null;
+    if (!lastMsg) return;
+    const relTop = this.relativeTop(lastMsg, container);
+    container.scrollTo({ top: relTop, behavior: 'smooth' });
   }
 }
