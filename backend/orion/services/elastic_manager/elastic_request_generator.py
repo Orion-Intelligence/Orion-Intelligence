@@ -125,7 +125,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     @staticmethod
-    def on_search_stealer_alert(p_query_model: search_consolidated_param_model):
+    def on_search_stealer_alert(p_query_model: search_consolidated_param_model, pFilter):
         user_query = ""
         url_query = "wish.com"
         date_range_filter = {}
@@ -595,13 +595,14 @@ class elastic_request_generator:
         queries.append(self._strip_query(q6))
         indices.append(i6)
 
+        m6 = helper_controller.clone_model(p_query_model)
+        i8, q8 = self.on_search_stealer_alert(m6, pFilter)
+        queries.append(self._strip_query(q8))
+        indices.append(i8)
+
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)
-
-        stealer_query_index, stealer_query = self.on_search_stealer_alert(p_query_model)
-        queries.append(stealer_query_index)
-        indices.append(stealer_query)
 
         return indices, queries
 
