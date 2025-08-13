@@ -326,7 +326,7 @@ table a:visited {
   flex-wrap: inherit;
   background: #FFC1071A;
   max-width: 800px;
-  width: calc(100% - 30px);
+  width: calc(100% - 60px);
   padding: 10px;
   font-size: 13px;
   margin-left: 30px;
@@ -586,6 +586,10 @@ table a:visited {
 }
 
 @media only screen and (width <=1000px) {
+  .default-notification-banner{
+    width: calc(100% - 30px) !important;
+  }
+
   .label-text {
     margin-left: 15px;
   }
