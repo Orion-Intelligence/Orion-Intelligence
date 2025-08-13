@@ -535,7 +535,7 @@ class elastic_request_generator:
                     "query": {
                         "bool": {
                             "filter": (
-                                combined_filter
+                                    combined_filter
                             ),
                             "must": query_block
                         }
@@ -566,7 +566,7 @@ class elastic_request_generator:
 
         return query
 
-    def on_search_consolidated_data(self, p_query_model, pFilter=None):
+    def on_search_consolidated_data(self,p_query_model, pFilter=None):
         queries = []
         indices = []
 
@@ -594,11 +594,6 @@ class elastic_request_generator:
         i6, q6 = self.on_search_social_data(m6, pFilter)
         queries.append(self._strip_query(q6))
         indices.append(i6)
-
-        m6 = helper_controller.clone_model(p_query_model)
-        i8, q8 = self.on_search_stealer_alert(m6, pFilter)
-        queries.append(self._strip_query(q8))
-        indices.append(i8)
 
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
@@ -1142,16 +1137,8 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        print(":::::::::::::::::::::::::::", flush=True)
-        print(p_query_model.platform, flush=True)
-        print(":::::::::::::::::::::::::::", flush=True)
-
         if p_query_model.platform:
             must_clauses.append({"term": {"m_platform": p_query_model.platform}})
-
-        print(":::::::::::::::::::::::::::", flush=True)
-        print(p_query_model.platform, flush=True)
-        print(":::::::::::::::::::::::::::", flush=True)
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(',')
@@ -1739,6 +1726,7 @@ class elastic_request_generator:
 
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
+
 
         if raw_query == "*":
             content_query = {"match_all": {}}
