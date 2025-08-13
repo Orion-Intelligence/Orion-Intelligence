@@ -317,7 +317,7 @@ table a:visited {
 }
 
 #dashboard-container {
-  min-width: 400px !important;
+  min-width: 200px !important;
 }
 
 .default-notification-banner {
@@ -342,7 +342,7 @@ table a:visited {
 
 .dashboard-general-input {
   max-width: 593px;
-  min-width: 30vw !important;
+  min-width: 20vw !important;
   background-color: white !important;
 }
 
@@ -531,6 +531,7 @@ table a:visited {
 @media only screen and (width <=550px) {
   .default-input-container {
     display: grid;
+    margin-left: 10px !important;
   }
 }
 

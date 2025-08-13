@@ -110,7 +110,7 @@ class crawl_model:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://168.231.86.34:8010/nlp/summarize/ai",
+                    "http://trusted-micros-api:8010/nlp/summarize/ai",
                     json={"data": model.data},
                     timeout=200
                 )
@@ -133,7 +133,7 @@ class crawl_model:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://144.76.157.34:8010/nlp/chat/report",
+                    "http://trusted-micros-api:8010/nlp/chat/report",
                     json=model.model_dump(),
                     timeout=200
                 )
