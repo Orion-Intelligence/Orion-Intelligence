@@ -143,18 +143,14 @@ class elastic_request_generator:
 
         if isinstance(pFilter, dict):
             if pFilter.get('m_username'):
-                if isinstance(pFilter['m_username'], list):
-                    user_query.extend([v for v in pFilter['m_username'] if v])
-                else:
-                    user_query.append(pFilter['m_username'])
-            for key in ('m_url', 'm_domain'):
+                user_query.extend([v for v in pFilter['m_username'] if v])
+            for key in ('m_url', 'm_domain', 'm_search_all'):
                 if pFilter.get(key):
-                    if isinstance(pFilter[key], list):
-                        url_query.extend([v for v in pFilter[key] if v])
+                    if key == 'm_search_all':
+                        url_query.extend([v for v in pFilter[key] if re.search(r'(https?://|[a-z0-9.-]+\.[a-z]{2,})', str(v), re.I)])
                     else:
-                        url_query.append(pFilter[key])
+                        url_query.extend([v for v in pFilter[key] if v])
 
-        # ✅ New check — if both lists are empty, return no-match query
         if not user_query and not url_query:
             return ELASTIC_INDEX.S_STEALERLOGS_INDEX, {
                 "query": {"bool": {"must_not": [{"match_all": {}}]}},
