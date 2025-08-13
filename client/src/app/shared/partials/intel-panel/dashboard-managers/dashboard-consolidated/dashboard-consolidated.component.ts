@@ -18,12 +18,12 @@ import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-
 import {ResultInsightsComponent} from "../result-insights/result-insights.component";
 import {consolidated_filters} from '../../../../constants/filters';
 import {ALLOWED_CONSOLIDATED_RANKED_SINGLETON} from '../../../../constants/shared-enums';
-import {DefacementResultsComponent} from "./defacement-results/defacement-results.component";
+import {ThreatResultsComponent} from "./defacement-results/threat-results.component";
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, DefacementResultsComponent],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -125,8 +125,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
-        this.respons = response.data;
-        this.consolidatedCallbackModel = response.data;
+        this.respons = {"leak_model":{"Result":[],"Suggestions":[],"Page_Count":0.0},"exploit_model":{"Result":[],"Suggestions":[],"Page_Count":0.0},"chat_model":{"Result":[],"Suggestions":[],"Page_Count":0.0},"generic_model":{"Result":[],"Suggestions":[],"Page_Count":0.0},"defacement_model":{"Result":[],"Suggestions":[],"Page_Count":0.0},"social_model":{"Result":[],"Suggestions":[],"Page_Count":0.0},"stealer_model":{"Result":[{"url":"globaltestmarket.com","username":"queiroga84","domain":"hotmail.com","password":"alex0784","log_hash":"8b45cad06365762cd0c2a935ef6f8e4f53767e1fb35c47c4531ba94c18517e33","timestamp":"2025-08-13T14:03:26.642074+00:00","m_hash":"8b45cad06365762cd0c2a935ef6f8e4f53767e1fb35c47c4531ba94c18517e33"},{"url":"globaltestmarket.com","username":"cintamancheno","domain":"hotmail.com","password":"33AK4Q","log_hash":"a9f1941456c3f77a2afc651f36a2d1edb39d2d5d8026ebc822c6e8f855753df1","timestamp":"2025-08-13T13:53:31.556355+00:00","m_hash":"a9f1941456c3f77a2afc651f36a2d1edb39d2d5d8026ebc822c6e8f855753df1"},{"url":"globaltestmarket.com","username":"djcarlogujilde","domain":"gmail.com","password":"G789456123g","log_hash":"21c0926cdcee70c8237fbd4b1a1ecc9f365ebd6322fc5302f585b57f1ef47d42","timestamp":"2025-08-13T13:09:19.460697+00:00","m_hash":"21c0926cdcee70c8237fbd4b1a1ecc9f365ebd6322fc5302f585b57f1ef47d42"},{"url":"globaltestmarket.com","username":"surajgowardipe3","domain":"gmail.com","password":"smita123","log_hash":"f4ffafa66a8912bfcf35802fa306ffdbc39b8df0b07bef76d287dae4a9709033","timestamp":"2025-08-13T13:06:51.712923+00:00","m_hash":"f4ffafa66a8912bfcf35802fa306ffdbc39b8df0b07bef76d287dae4a9709033"},{"url":"globaltestmarket.com","username":"drowling.king","domain":"gmail.com","password":"h0us3d","log_hash":"569377a4329bc86a86a4cafbcddb8cfe64037b7a7dadc54c3cb90767cb430cab","timestamp":"2025-08-13T13:02:38.456354+00:00","m_hash":"569377a4329bc86a86a4cafbcddb8cfe64037b7a7dadc54c3cb90767cb430cab"}],"Suggestions":[],"Page_Count":5.0}};
+        this.consolidatedCallbackModel = this.respons;
         this.dashboardService.consolidatedCallbackModel = this.consolidatedCallbackModel;
         this.populateGroupedResults();
       } else {
@@ -191,6 +191,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.groupedResults['social_model'] = this.consolidatedCallbackModel['social_model'].Result;
       this.pageCounts['social_model'] = this.consolidatedCallbackModel['social_model'].Page_Count ?? 0;
     }
+
+    if (this.consolidatedCallbackModel['stealer_model']?.Result?.length) {
+      this.groupedResults['stealer_model'] = this.consolidatedCallbackModel['stealer_model'].Result;
+      this.pageCounts['stealer_model'] = this.consolidatedCallbackModel['stealer_model'].Page_Count ?? 0;
+    }
+
     this.result_count = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
   }
 

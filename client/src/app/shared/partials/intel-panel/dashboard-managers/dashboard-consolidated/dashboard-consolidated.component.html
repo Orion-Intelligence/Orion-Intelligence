@@ -9,10 +9,11 @@
     <div class="dashboard__layout-left">
       <ng-container *ngIf="isGrouped; else rankedMode">
         <app-defacement-results [isExpandable]="isIpReportExpandable()"
-          [results]="consolidatedCallbackModel.defacement_model"
-          *ngIf="!isLoading() && getTotalResultCount()>0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0) > 0"></app-defacement-results>
+          [results_defacement]="consolidatedCallbackModel.defacement_model" [results_stealerlog]="consolidatedCallbackModel.stealer_model"
+          *ngIf="!isLoading() && getTotalResultCount()>0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || consolidatedCallbackModel.stealer_model?.Result?.length ?? 0) > 0"></app-defacement-results>
+
         <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
-          <div class="consolidated_container" *ngIf="index.key !== 'defacement_model'">
+          <div class="consolidated_container" *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
             <div class="category-heading-enforced">
               <span class="left-text">
                 <div>{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>

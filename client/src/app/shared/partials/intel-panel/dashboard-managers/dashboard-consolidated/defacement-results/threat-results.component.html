@@ -1,18 +1,20 @@
 <div class="home-defacement-result">
   <div class="home-defacement-result__top-row" (click)="toggleResultsBarCollapse()">
-    <div class="home-defacement-result__title">IP Threat Report</div>
+    <div class="home-defacement-result__title">
+      {{ results_defacement ? 'IP Threat Report' : 'Stealer Log Report' }}
+    </div>
     <div class="home-defacement-result__actions">
       <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue">
         {{ type.key | titlecase }} ({{ type.value }})
       </div>
       <div class="home-defacement-result__expand-icon" [ngClass]="{ 'expand': isExpandable }">
-        <img src="assets/images/shared/cheveron-right.svg" alt="Toggle Icon"/>
+        <img src="../../../../../../../assets/images/shared/cheveron-right.svg" alt="Toggle Icon"/>
       </div>
     </div>
   </div>
 
-  <ng-container *ngIf="isExpandable && results">
-    <ng-container *ngFor="let item of results.Result.slice(0,10); let last = last">
+  <ng-container *ngIf="isExpandable && results_defacement">
+    <ng-container *ngFor="let item of results_defacement.Result.slice(0,10); let last = last">
       <div class="home-defacement-result-divider" *ngIf="!last"></div>
       <div class="home_defacement_result__container mt-4">
         <div class="home-defacement-result-card-container">
@@ -76,6 +78,81 @@
               <div class="home-defacement-result-card-label">Date</div>
               <div class="home-defacement-result-card-value">
                 {{ item.m_leak_date || '-' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><br>
+      <div class="home-defacement-result-divider" *ngIf="!last"></div>
+    </ng-container>
+    <br>
+  </ng-container>
+
+  <ng-container *ngIf="isExpandable && results_stealerlog">
+    <ng-container *ngFor="let item of results_stealerlog.Result.slice(0,3); let last = last">
+      <div class="home-defacement-result-divider" *ngIf="!last"></div>
+      <div class="home_defacement_result__container mt-4">
+        <div class="home-defacement-result-card-container">
+          <div class="d-flex justify-content-between w-100 mb-2">
+            <div>
+              <b>Log Type | {{ item.domain ? (item.domain | titlecase) : 'Unknown' }}</b>
+            </div>
+            <div (click)="exploreStealer(item.url, item.username)">
+              <span class="right-content home-defacement-explore cursor-pointer">
+                Explore
+                <button appTooltip="Open Page" class="p-0 expand-toggle-btn">
+                  <img alt="background" height="20" src="/assets/images/shared/explore_icon.svg" width="20">
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <div class="home-defacement-result-card-header-section">
+            <div class="home-defacement-result-card-company-info">
+              <div class="home-defacement-result-card-label">Username</div>
+              <div class="home-defacement-result-card-value">
+                {{ item.username || '-' }}
+              </div>
+            </div>
+
+            <div class="home-defacement-result-card-attacker-info">
+              <div class="home-defacement-result-card-label">Password</div>
+              <div class="home-defacement-result-card-value">
+                {{ item.password || '-' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="home-defacement-result-card-header-section">
+            <div class="home-defacement-result-card-company-info">
+              <div class="home-defacement-result-card-label">Domain</div>
+              <div class="home-defacement-result-card-value">
+                {{ item.domain || '-' }}
+              </div>
+            </div>
+
+            <div class="home-defacement-result-card-attacker-info">
+              <div class="home-defacement-result-card-label">Hash</div>
+              <div class="home-defacement-result-card-value">
+                {{ item.m_hash || '-' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="home-defacement-result-detail-row" *ngIf="item.url">
+            <div class="home-defacement-result-card-country-info">
+              <div class="home-defacement-result-card-label">URL</div>
+              <div class="home-defacement-result-card-value">
+                {{ item.url.length > 24 ? (item.url | slice:0:30) + '...' : item.url }}
+              </div>
+            </div>
+          </div>
+
+          <div class="home-defacement-result-detail-row">
+            <div class="home-defacement-result-card-date-time-info">
+              <div class="home-defacement-result-card-label">Date</div>
+              <div class="home-defacement-result-card-value">
+                {{ item.timestamp || '-' }}
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import {ChatCallbackModel} from '../chat/chat.callback.model';
 import { GeneralCallbackModel } from '../general/general.callback.model';
 import {SocialCallbackModel} from '../social/social.callback.model';
 import {DefacementCallbackModel} from '../defacement/defacement.callback.model';
+import {StealerLogCallbackModel} from '../credentials/credential.callback.model';
 
 export class ConsolidatedCallbackModel {
   leak_model?: LeakCallbackModel;
@@ -12,6 +13,7 @@ export class ConsolidatedCallbackModel {
   generic_model?: GeneralCallbackModel;
   social_model?: SocialCallbackModel;
   defacement_model?: DefacementCallbackModel;
+  stealer_model?: StealerLogCallbackModel;
 
   constructor(init?: Partial<ConsolidatedCallbackModel>) {
     if (init) {
@@ -20,7 +22,7 @@ export class ConsolidatedCallbackModel {
       this.chat_model = init.chat_model ? new ChatCallbackModel(init.chat_model) : undefined;
       this.generic_model = init.generic_model ? new GeneralCallbackModel(init.generic_model) : undefined;
       this.social_model = init.social_model ? new SocialCallbackModel(init.social_model) : undefined;
-      this.defacement_model = init.defacement_model ? new DefacementCallbackModel(init.defacement_model) : undefined;
+      this.stealer_model = init.stealer_model ? new StealerLogCallbackModel(init.stealer_model) : undefined;
     }
   }
 }
