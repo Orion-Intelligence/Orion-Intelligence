@@ -12,7 +12,7 @@
           <th scope="col">Last Updated</th>
         </tr>
       </thead>
-      <tbody *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
+      <tbody *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0" @fadeInDashboardItem>
         <ng-container *ngFor="let item of data.mDirectoryCallbackLinks; let i = index">
           <tr *ngIf="item.url?.trim()">
             <td data-label="ID">
