@@ -45,11 +45,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   updateStealerTypeCounts(results: StealerLogResultItem[]) {
-    this.threatTypeCounts = {};
-    results.forEach(item => {
-      const type = item.domain || 'Unknown';
-      this.threatTypeCounts[type] = (this.threatTypeCounts[type] || 0) + 1;
-    });
+      this.threatTypeCounts["stealerlog"] = results.length;
   }
 
   explore(route: string, q: string) {

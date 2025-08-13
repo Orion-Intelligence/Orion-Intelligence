@@ -4,16 +4,18 @@
       {{ results_defacement ? 'IP Threat Report' : 'Stealer Log Report' }}
     </div>
     <div class="home-defacement-result__actions">
-      <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue">
-        {{ type.key | titlecase }} ({{ type.value }})
-      </div>
+      <ng-container *ngIf="results_defacement && (threatTypeCounts | keyvalue).length > 0">
+        <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue">
+          {{ type.key | titlecase }} ({{ type.value }})
+        </div>
+      </ng-container>
       <div class="home-defacement-result__expand-icon" [ngClass]="{ 'expand': isExpandable }">
         <img src="../../../../../../../assets/images/shared/cheveron-right.svg" alt="Toggle Icon"/>
       </div>
     </div>
   </div>
 
-  <ng-container *ngIf="isExpandable && results_defacement">
+  <ng-container *ngIf="isExpandable && results_defacement && results_defacement.Result">
     <ng-container *ngFor="let item of results_defacement.Result.slice(0,10); let last = last">
       <div class="home-defacement-result-divider" *ngIf="!last"></div>
       <div class="home_defacement_result__container mt-4">
@@ -59,7 +61,7 @@
             <div class="home-defacement-result-card-attacker-info">
               <div class="home-defacement-result-card-label">IP(s)</div>
               <div class="home-defacement-result-card-value">
-                {{ item.m_ip ? item.m_ip.join(', ').slice(0,30) : '-' }}
+                {{ item.m_ip ? item.m_ip.join(', ').slice(0, 30) : '-' }}
               </div>
             </div>
           </div>
@@ -82,13 +84,14 @@
             </div>
           </div>
         </div>
-      </div><br>
+      </div>
+      <br>
       <div class="home-defacement-result-divider" *ngIf="!last"></div>
     </ng-container>
     <br>
   </ng-container>
 
-  <ng-container *ngIf="isExpandable && results_stealerlog">
+  <ng-container *ngIf="isExpandable && results_stealerlog && results_stealerlog.Result">
     <ng-container *ngFor="let item of results_stealerlog.Result.slice(0,3); let last = last">
       <div class="home-defacement-result-divider" *ngIf="!last"></div>
       <div class="home_defacement_result__container mt-4">
@@ -157,7 +160,8 @@
             </div>
           </div>
         </div>
-      </div><br>
+      </div>
+      <br>
       <div class="home-defacement-result-divider" *ngIf="!last"></div>
     </ng-container>
     <br>
