@@ -151,6 +151,14 @@ class elastic_request_generator:
                     else:
                         url_query.append(pFilter[key])
 
+        # ✅ New check — if both lists are empty, return no-match query
+        if not user_query and not url_query:
+            return ELASTIC_INDEX.S_STEALERLOGS_INDEX, {
+                "query": {"bool": {"must_not": [{"match_all": {}}]}},
+                "from": 0,
+                "size": 0
+            }
+
         if p_query_model.daterange:
             start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
             date_range_filter = {
@@ -612,9 +620,9 @@ class elastic_request_generator:
         queries.append(self._strip_query(q8))
         indices.append(i8)
 
-        # domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
-        # queries.append(domain_query)
-        # indices.append(domain_query_index)
+        domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
+        queries.append(domain_query)
+        indices.append(domain_query_index)
 
         return indices, queries
 
