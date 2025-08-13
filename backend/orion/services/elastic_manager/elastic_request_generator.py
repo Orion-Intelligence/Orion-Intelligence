@@ -130,13 +130,13 @@ class elastic_request_generator:
         url_query = []
         date_range_filter = {}
 
-        if p_query_model.user:
-            parts = [p.strip() for p in str(p_query_model.user).split(" ") if p.strip()]
-            user_query.extend(parts)
-
-        if p_query_model.url:
-            parts = [p.strip() for p in str(p_query_model.url).split(" ") if p.strip()]
-            url_query.extend(parts)
+        # if p_query_model.user:
+        #     parts = [p.strip() for p in str(p_query_model.user).split(" ") if p.strip()]
+        #     user_query.extend(parts)
+        #
+        # if p_query_model.url:
+        #     parts = [p.strip() for p in str(p_query_model.url).split(" ") if p.strip()]
+        #     url_query.extend(parts)
 
         # if isinstance(pFilter, dict):
         #     if pFilter.get('m_username'):
