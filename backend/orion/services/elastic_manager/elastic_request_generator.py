@@ -221,6 +221,12 @@ class elastic_request_generator:
             "track_total_hits": False
         }
 
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(query_statement, flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::::::", flush=True)
+
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_statement
 
     @staticmethod
