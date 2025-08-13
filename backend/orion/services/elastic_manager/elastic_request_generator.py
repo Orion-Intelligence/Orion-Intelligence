@@ -611,17 +611,14 @@ class elastic_request_generator:
         queries.append(self._strip_query(q4))
         indices.append(i4)
 
-        print("1:::::::::::::::::::::::::::::", flush=True)
         m6 = helper_controller.clone_model(p_query_model)
         i6, q6 = self.on_search_social_data(m6, pFilter)
         queries.append(self._strip_query(q6))
         indices.append(i6)
-        print("2:::::::::::::::::::::::::::::", flush=True)
 
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)
-        print("3:::::::::::::::::::::::::::::", flush=True)
 
         stealer_query_index, stealer_query = self.on_search_stealerlogs_data(p_query_model, pFilter)
         queries.append(stealer_query)
@@ -1168,16 +1165,8 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        print(":::::::::::::::::::::::::::", flush=True)
-        print(p_query_model.platform, flush=True)
-        print(":::::::::::::::::::::::::::", flush=True)
-
         if p_query_model.platform:
             must_clauses.append({"term": {"m_platform": p_query_model.platform}})
-
-        print(":::::::::::::::::::::::::::", flush=True)
-        print(p_query_model.platform, flush=True)
-        print(":::::::::::::::::::::::::::", flush=True)
 
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(',')
@@ -1587,10 +1576,12 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter):
 
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
+        print("xx :::::::::::::::::::::::::::::", flush=True)
+        print("xx :::::::::::::::::::::::::::::", flush=True)
+        print(p_query_model.user, flush=True)
+        print(p_query_model.url, flush=True)
+        print("xx :::::::::::::::::::::::::::::", flush=True)
+        print("xx :::::::::::::::::::::::::::::", flush=True)
 
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         url_query = p_query_model.url.strip() if p_query_model.url else ""
@@ -1692,12 +1683,6 @@ class elastic_request_generator:
             "sort": [{"timestamp": {"order": "desc"}}],
             "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
         }
-
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(query, flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::", flush=True)
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
