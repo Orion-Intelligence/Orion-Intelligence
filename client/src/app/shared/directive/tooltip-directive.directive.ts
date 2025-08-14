@@ -1,14 +1,26 @@
-import {Directive, ElementRef, HostListener, Input, OnDestroy, Renderer2} from '@angular/core';
+import {Directive, ElementRef, HostListener, Input, OnDestroy, AfterViewInit, Renderer2} from '@angular/core';
 
 @Directive({
   selector: '[appTooltip]'
 })
-export class TooltipDirective implements OnDestroy {
+export class TooltipDirective implements AfterViewInit, OnDestroy {
   @Input('appTooltip') tooltipText = '';
   private tooltip: HTMLElement | null = null;
   private showTimeout: any = null;
+  private removeContainerScroll?: () => void;
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {
+  constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+  ngAfterViewInit(): void {
+    const container = document.getElementById('dashboard-container');
+    if (container) {
+      this.removeContainerScroll = this.renderer.listen(container, 'scroll', () => this.hideNow());
+    }
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.hideNow();
   }
 
   @HostListener('mouseenter')
@@ -22,18 +34,26 @@ export class TooltipDirective implements OnDestroy {
 
   @HostListener('mouseleave')
   onMouseLeave(): void {
+    this.hideNow();
+  }
+
+  ngOnDestroy(): void {
+    if (this.removeContainerScroll) {
+      this.removeContainerScroll();
+      this.removeContainerScroll = undefined;
+    }
+    this.hideNow();
+  }
+
+  private hideNow(): void {
     if (this.showTimeout) {
       clearTimeout(this.showTimeout);
       this.showTimeout = null;
     }
-    this.removeTooltip();
-  }
-
-  ngOnDestroy(): void {
-    if (this.showTimeout) {
-      clearTimeout(this.showTimeout);
+    if (this.tooltip) {
+      this.renderer.removeChild(document.body, this.tooltip);
+      this.tooltip = null;
     }
-    this.removeTooltip();
   }
 
   private createTooltip(): void {
@@ -72,15 +92,13 @@ export class TooltipDirective implements OnDestroy {
         top = hostRect.bottom + margin;
       }
 
-      if (left < margin) {
-        left = margin;
-      } else if (left + tooltipRect.width > window.innerWidth - margin) {
+      if (left < margin) left = margin;
+      else if (left + tooltipRect.width > window.innerWidth - margin) {
         left = window.innerWidth - tooltipRect.width - margin;
       }
 
-      if (top < margin) {
-        top = margin;
-      } else if (top + tooltipRect.height > window.innerHeight - margin) {
+      if (top < margin) top = margin;
+      else if (top + tooltipRect.height > window.innerHeight - margin) {
         top = window.innerHeight - tooltipRect.height - margin;
       }
 
