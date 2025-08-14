@@ -79,8 +79,6 @@ export class SearchFiltersComponent implements OnInit {
       if((this.selectedCategoryId=="m_domain" || this.selectedCategoryId=="m_url" || this.selectedCategoryId=="m_search_all") && (trimmed.startsWith("www") || trimmed.includes("http"))){
         trimmed = this.helperService.extractDomain(trimmed)
       }
-      alert(trimmed)
-
       this.categories[this.selectedCategoryId] = [...this.selectedCategoryTags, trimmed];
       this.updateService();
     }
