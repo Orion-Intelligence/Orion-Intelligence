@@ -6,6 +6,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { FilterCategory } from '../../../shared/model/filter/filter.model';
 import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
 import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import {HelperService} from '../../../shared/services/helper.service';
 
 @Component({
   selector: 'app-search-filters',
@@ -34,7 +35,7 @@ export class SearchFiltersComponent implements OnInit {
   showLeftFade = false;
   showRightFade = false;
 
-  constructor(public app_service: AppService, private suggestionService: SuggestionService) {
+  constructor(public helperService:HelperService, public app_service: AppService, private suggestionService: SuggestionService) {
   }
 
   get selectedCategoryTags() {
@@ -70,11 +71,16 @@ export class SearchFiltersComponent implements OnInit {
   }
 
   addTag() {
-    const trimmed = this.newValue.trim();
+    let trimmed = this.newValue.trim();
     const allTags = Object.values(this.categories).flat();
     const alreadyExists = allTags.some(tag => tag.toLowerCase() === trimmed.toLowerCase());
 
     if (trimmed && !alreadyExists) {
+      if((this.selectedCategoryId=="m_domain" || this.selectedCategoryId=="m_url" || this.selectedCategoryId=="m_search_all") && (trimmed.startsWith("www") || trimmed.includes("http"))){
+        trimmed = this.helperService.extractDomain(trimmed)
+      }
+      alert(trimmed)
+
       this.categories[this.selectedCategoryId] = [...this.selectedCategoryTags, trimmed];
       this.updateService();
     }
