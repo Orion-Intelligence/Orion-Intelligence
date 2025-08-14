@@ -64,6 +64,16 @@ export class ScrollService {
     }
   }
 
+
+  public scrollToTop(behavior: ScrollBehavior = 'auto'): void {
+    const el = (document.scrollingElement || document.documentElement) as HTMLElement;
+    if (el && typeof (el as any).scrollTo === 'function') {
+      el.scrollTo({top: 0, left: 0, behavior});
+    } else {
+      window.scrollTo({top: 0, left: 0, behavior});
+    }
+  }
+
   private isScrollable(element: HTMLElement): boolean {
     const style = window.getComputedStyle(element);
     const overflowY = style.overflowY;

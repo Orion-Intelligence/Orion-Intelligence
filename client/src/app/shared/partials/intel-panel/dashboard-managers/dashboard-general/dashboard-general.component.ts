@@ -19,6 +19,7 @@ import {DiscussionService} from '../../../../services/discussion.service';
 import {HelperService} from '../../../../services/helper.service';
 import {SortType} from '../../../../constants/shared-enums';
 import {ConsolidatedParamModel} from '../../../../model/results/consolidated/consolidated.param.model';
+import {ScrollService} from '../../../../services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-general',
