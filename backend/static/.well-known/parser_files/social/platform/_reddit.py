@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta, UTC
 from abc import ABC
 from typing import List
+
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method as helerservice
 from crawler.crawler_instance.genbot_service.helpers.reddit.reddit_helper_method import RedditHelperMethod
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
@@ -97,8 +99,9 @@ class _reddit(leak_extractor_interface, ABC):
             return
 
         self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
+        is_parsed = bool(self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, subreddit_url + self.__class__.__name__, False))
 
-        if not self.is_crawled:
+        if not is_parsed:
             desired_posts = 1000
             max_comments = 5
             one_year_ago = datetime.now(UTC) - timedelta(days=365)
@@ -112,6 +115,7 @@ class _reddit(leak_extractor_interface, ABC):
                 page, subreddit_name, desired_posts, max_scrolls=30
             )
 
+        self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, subreddit_url + self.__class__.__name__, True)
         for post in posts:
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
             post['comments'] = comments
