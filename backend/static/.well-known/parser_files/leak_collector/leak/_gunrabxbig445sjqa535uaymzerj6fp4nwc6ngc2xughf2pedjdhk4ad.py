@@ -141,7 +141,7 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
                     m_team="qtox"
                 )
 
-                entity_data = helper_method.extract_entities(title_data["description"], entity_data)
+                entity_data = helper_method.extract_entities(title_data["description"] + ref_html, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
         except Exception as ex:

@@ -147,7 +147,7 @@ class _hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd(leak_extractor_i
                     m_team="chaos"
                 )
 
-                entity_data = helper_method.extract_entities(description, entity_data)
+                entity_data = helper_method.extract_entities(description + ref_html, entity_data)
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 

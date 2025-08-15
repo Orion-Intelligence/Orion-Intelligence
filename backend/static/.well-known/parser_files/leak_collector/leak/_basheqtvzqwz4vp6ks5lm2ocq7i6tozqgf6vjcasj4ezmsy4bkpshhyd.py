@@ -160,7 +160,7 @@ class _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd(leak_extractor_i
                     m_ip=[title],
                     m_team="bashe"
                 )
-                entity_data = helper_method.extract_entities(description, entity_data)
+                entity_data = helper_method.extract_entities(description + ref_html, entity_data)
 
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0

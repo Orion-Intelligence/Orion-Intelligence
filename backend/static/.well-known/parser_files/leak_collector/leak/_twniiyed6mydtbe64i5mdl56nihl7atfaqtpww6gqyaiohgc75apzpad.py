@@ -175,7 +175,7 @@ class _twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad(leak_extractor_i
                     m_team="J Group"
                 )
 
-                entity_data = helper_method.extract_entities(description, entity_data)
+                entity_data = helper_method.extract_entities(description + ref_html, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
             except Exception as ex:

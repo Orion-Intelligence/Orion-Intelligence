@@ -5,8 +5,9 @@
         <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
           <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
         </button>
-
-        <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1"> <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
+        <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1">
+        <button *ngIf="consolidated" type="button" class="btn input-cross" aria-label="Clear" (click)="local_query=''; searchInput.focus();onFormSubmit()"><img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [style.visibility]="local_query ? 'visible' : 'hidden'"></button>
+        <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
           <ng-container>
             <ng-container *ngIf="consolidated">
               <hr class="vertical-divider"/>
@@ -21,6 +22,7 @@
             </ng-container>
             <ng-container class="cursor-pointer">
               <hr class="vertical-divider ml-3" *ngIf="consolidated"/>
+              <span *ngIf="!consolidated" type="button" class="btn input-cross" aria-label="Clear" (click)="local_query=''; searchInput.focus();onFormSubmit()"><img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [style.visibility]="local_query ? 'visible' : 'hidden'"></span>
               <span class="cursor-pointer">
                 <span (click)="onToolToggle($event)">
                   Tools

@@ -63,11 +63,10 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
         this.query = params['q'];
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
-
         if (!isDiscussion && this.firstTrigger && ((this.chatCallbackModel.Result.length > 0))) {
           this.isResponseLoading.set(false)
           this.query = this.dashboardService.consolidatedParamModel.q
-        } else {
+        } else if(this.dashboardService.chatCallbackModel.Result.length==0){
           this.cdr.detectChanges();
           this.fetchSearchResults()
         }

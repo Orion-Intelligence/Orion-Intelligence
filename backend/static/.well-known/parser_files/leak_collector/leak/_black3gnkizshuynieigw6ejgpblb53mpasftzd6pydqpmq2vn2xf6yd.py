@@ -3,8 +3,6 @@ from datetime import datetime
 from time import sleep
 from typing import List
 from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -164,7 +162,7 @@ class _black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd(leak_extractor_i
                         m_ip=[title],
                         m_team="blackout"
                     )
-                    entity_data = helper_method.extract_entities(description, entity_data)
+                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
 
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0

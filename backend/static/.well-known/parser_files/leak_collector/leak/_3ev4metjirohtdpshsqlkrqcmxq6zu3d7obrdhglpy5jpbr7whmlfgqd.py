@@ -2,8 +2,6 @@ import re
 from abc import ABC
 from time import sleep
 from typing import List
-
-from bs4 import BeautifulSoup
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -163,7 +161,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
                     m_team="abyss"
                 )
 
-                entity_data = helper_method.extract_entities(full_text, entity_data)
+                entity_data = helper_method.extract_entities(full_text + ref_html, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
                 page.locator(".modal .btn-close").click()

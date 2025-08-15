@@ -32,7 +32,8 @@ export class ScrollService {
     }
   }
 
-  openCTI(itemId: string): void {
+  openCTI(event: MouseEvent, itemId: string): void {
+    event.stopPropagation()
     if (itemId) {
       const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
       const singleInput = itemId;

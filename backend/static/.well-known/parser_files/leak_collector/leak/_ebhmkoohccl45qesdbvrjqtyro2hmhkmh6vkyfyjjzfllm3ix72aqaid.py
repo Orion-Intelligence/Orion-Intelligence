@@ -145,7 +145,7 @@ class _ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid(leak_extractor_i
                         m_company_name=title,
                         m_team="interlock"
                     )
-                    entity_data = helper_method.extract_entities(content, entity_data)
+                    entity_data = helper_method.extract_entities(content + ref_html, entity_data)
 
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0

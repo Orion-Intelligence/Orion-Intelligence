@@ -200,6 +200,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     } else if (sort === SortType.DEFAULT) {
 
       this.fetchSearchResults();
+      alert("dsa")
       return;
     }
 

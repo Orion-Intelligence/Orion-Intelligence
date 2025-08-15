@@ -14,7 +14,7 @@
       <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25">
     </button>
 
-    <ng-container *ngIf="appService.getConfig().appSettings.ai_endpoint">
+    <ng-container *ngIf="appService.getConfig().appSettings.ai_endpoint && content">
       <div class="vr report-menu-divider"></div>
       <button (click)="aiSuggest()" appTooltip="AI Summary" class="p-0 report-menu-option">
         <img alt="AI Summary" height="25" ngSrc="assets/images/shared/ai.svg" width="25"/>
@@ -27,8 +27,8 @@
     </button>
     <div class="vr report-menu-divider"></div>
 
-    <button (click)="redirectToUrl()" appTooltip="Open in new Tab" class="p-0 report-menu-option">
-      <img alt="Open in new tab" height="16" ngSrc="assets/images/shared/redirect.svg" width="16"/>
+    <button (click)="redirectToUrl()" appTooltip="Open Breach Link" class="p-0 report-menu-option">
+      <img alt="Open Breach Link" height="16" ngSrc="assets/images/shared/redirect.svg" width="16"/>
     </button>
     <div class="vr report-menu-divider"></div>
 

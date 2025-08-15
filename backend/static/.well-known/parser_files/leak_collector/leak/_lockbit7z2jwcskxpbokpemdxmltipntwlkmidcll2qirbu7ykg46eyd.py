@@ -144,7 +144,7 @@ class _lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd(leak_extractor_i
                         m_team="lockbit"
                     )
 
-                    entity_data = helper_method.extract_entities(leak_content, entity_data)
+                    entity_data = helper_method.extract_entities(leak_content + ref_html, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                     error_count = 0

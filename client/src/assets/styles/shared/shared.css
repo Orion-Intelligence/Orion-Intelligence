@@ -67,6 +67,7 @@
   flex-wrap: inherit;
   margin-bottom: 8px;
   width: calc(100vw - 365px);
+  height: 42px;
 }
 
 .dashboard__api-search-input-div .default-input-sub-container{
@@ -511,6 +512,15 @@ table a:visited {
   margin-top: 3px;
   margin-bottom: 3px;
   margin-right: 12px;
+}
+
+.input-cross{
+  background: #fff !important;
+  border-radius: 0;
+}
+
+.input-cross img {
+  margin-top: -3px;
 }
 
 .default-input-container .small-slider::before {
