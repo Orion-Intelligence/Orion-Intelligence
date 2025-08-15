@@ -17,13 +17,13 @@
                 <span class="small-slider round"></span>
               </label>
             </ng-container>
-            <ng-container *ngIf="!consolidated">
-              <div class="dashboard-general-input-emptyspace"></div>
+            <ng-container *ngIf="!consolidated || !isTool">
+              <div class="dashboard-general-input-emptyspace" [ngClass]="{ 'dashboard-general-input-emptyspace-extended': !isTool }"></div>
             </ng-container>
             <ng-container class="cursor-pointer">
               <hr class="vertical-divider ml-3" *ngIf="consolidated"/>
               <span *ngIf="!consolidated" type="button" class="btn input-cross" aria-label="Clear" (click)="local_query=''; searchInput.focus();onFormSubmit()"><img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [style.visibility]="local_query ? 'visible' : 'hidden'"></span>
-              <span class="cursor-pointer">
+              <span class="cursor-pointer" *ngIf="isTool">
                 <span (click)="onToolToggle($event)">
                   Tools
                   <div class="expand-icon">

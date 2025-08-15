@@ -134,10 +134,10 @@ export const general_filters: FilterModel = {
       selected: "yes"
     },
     daterange: {
-      title: "Creation Date",
+      title: "Creation Date Range",
       options: [],
       type: 'daterange',
-      tooltip: "Creation Date",
+      tooltip: "Creation Date Range",
       selected: ""
     },
     content: {
@@ -180,10 +180,10 @@ export const social_filters: FilterModel = {
       selected: "all"
     },
     daterange: {
-      title: "Creation Date",
+      title: "Creation Date Range",
       options: [],
       type: 'daterange',
-      tooltip: "Creation Date",
+      tooltip: "Creation Date Range",
       selected: ""
     },
   }
@@ -360,10 +360,10 @@ export const consolidated_filters: FilterModel = {
       selected: "all"
     },
     daterange: {
-      title: "Creation Date",
+      title: "Creation Date Range",
       options: [],
       type: 'daterange',
-      tooltip: "Creation Date",
+      tooltip: "Creation Date Range",
       selected: ""
     },
     content: {

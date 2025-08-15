@@ -353,7 +353,11 @@ table a:visited {
 }
 
 .dashboard-general-input-emptyspace {
-  width: 71px;
+  width: 140px;
+}
+
+.dashboard-general-input-emptyspace-extended {
+  width: 207px !important;
 }
 
 .dashboard-general-scan .dropdown-menu .dropdown-item {

@@ -140,15 +140,17 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onFormSubmit() {
-    this.dashboardService.consolidatedParamModel.page = 1
-    let query = this.local_query;
-    this.searchInputRef?.nativeElement.blur();
-    this.updateQuery.emit(query);
-    this.searchQuery = query;
-    this.reloadData.emit();
-    this.result_triggered = true;
-    this.init_domains()
-    this.showScans = false;
+    if(this.local_query){
+      this.dashboardService.consolidatedParamModel.page = 1
+      let query = this.local_query;
+      this.searchInputRef?.nativeElement.blur();
+      this.searchQuery = query;
+      this.result_triggered = true;
+      this.showScans = false;
+      this.updateQuery.emit(query);
+      this.reloadData.emit();
+      this.init_domains()
+    }
   }
 
 

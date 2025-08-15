@@ -10,7 +10,10 @@
           <div class="home-insight-card-header-section">
             <div class="home-insight-card-company-info">
               <div class="home-insight-card-label">Company Name</div>
-              <div class="home-insight-card-value">{{ item.title }}</div>
+              <div class="home-insight-card-value">
+                {{item.title.slice(0, 25)}}
+                <span *ngIf="item.title.length > 25">…</span>
+              </div>
             </div>
             <div class="home-insight-card-attacker-info">
               <div class="home-insight-card-label">Source</div>
@@ -55,7 +58,7 @@
           <div class="home_insight__divider"></div>
 
           <div class="home-insight-card-footer-section">
-            <button (click)="scrollService.saveSession(item.hash)" appTooltip="Open Report" [queryParams]="getQueryParams(modelKey)" [routerLink]="[getModelRoute(modelKey), item.hash]" class="home-insight-card-view-details-button">View Details</button>
+            <p appTooltip="Open Report" (click)="openReport(modelKey, item.hash, item.title)" class="home-insight-card-view-details-button">View Details</p>
           </div>
         </div>
       </div>
