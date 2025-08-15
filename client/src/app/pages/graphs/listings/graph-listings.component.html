@@ -1,17 +1,26 @@
-<ng-container class="graph-listing_container" *ngIf="showResults">
+<ng-container class="graph-listing_container" *ngIf="showResults && result.length > 0">
   <br>
   <div (click)="toggleCollapse()" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
-      <span>Listings</span> <img [class.rotate]="collapseToggle" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+      <div class="graph-filters_detail-header-left d-flex align-items-center">
+        <img src="/assets/images/shared/info.svg" alt="icon" class="graph-filters_detail-header-left-icon"
+          appTooltip="View graph listing" />
+        <span>Details</span>
+      </div>
+      <img [class.rotate]="collapseToggle" alt="icon" class="chevron"
+        src="/assets/images/shared/search_side_dropdown_icon.svg" />
     </div>
     <div (click)="$event.stopPropagation()" [class.show]="collapseToggle" class="collapse" id="detailsCollapse">
       <br>
       <div class="row filter__input_date-container">
         <div class="col-12">
           <div class="d-flex align-items-center">
-            <input [(ngModel)]="searchText" class="sidebar_input sidebar_input_date text-start justify-content-between align-items-center" placeholder="Search..."/>
-            <button (click)="onSearchClick()" class="btn date_picker_button_bg ms-2 sidebar_input_date-button" type="button">
-              <img alt="Search" class="date_picker_button_image" src="assets/images/shared/magnifyingglassblack.svg"/>
+            <input [(ngModel)]="searchText"
+              class="sidebar_input sidebar_input_date text-start justify-content-between align-items-center"
+              placeholder="Search..." />
+            <button (click)="onSearchClick()" class="btn date_picker_button_bg ms-2 sidebar_input_date-button"
+              type="button">
+              <img alt="Search" class="date_picker_button_image" src="assets/images/shared/magnifyingglassblack.svg" />
             </button>
           </div>
         </div>
@@ -21,7 +30,7 @@
       <ng-container *ngIf="onSearchClick().length > 0; else noResults">
         <ng-container *ngFor="let doc of onSearchClick(); let last = last">
           <div class="doc-item">
-            <div (click)="viewReport(doc.m_document_id, doc.path)" class="left">
+            <div (click)="viewReport(doc.m_document_id, doc.path)" class="graph-listing_left">
               <div class="graph-listing_doc-line">
                 <span class="graph-listing_doc-id">{{ doc.m_document_id }}</span>
               </div>
@@ -33,14 +42,15 @@
               </div>
             </div>
           </div>
-          <div *ngIf="!last" class="divider"></div>
+          <div *ngIf="!last" class="graph-listing_divider"></div>
         </ng-container>
       </ng-container>
 
       <ng-template #noResults>
         <div class="text-muted opacity-70">No results found.</div>
       </ng-template>
-      <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }" class="graph-filters_floating-copied">Copied!</span>
+      <span *ngIf="copied" [style]="{ top: copiedY + 'px', left: copiedX + 'px' }"
+        class="graph-filters_floating-copied">Copied!</span>
     </div>
   </div>
 </ng-container>

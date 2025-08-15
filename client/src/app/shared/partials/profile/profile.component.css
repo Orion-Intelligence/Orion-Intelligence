@@ -70,11 +70,11 @@
   font-size: 15px;
 }
 
-.profile input:checked + .small-slider {
-  background-color: #4667a0;
+.profile input:checked+.small-slider {
+  background-color: #000000;
 }
 
-.profile  input:checked + .small-slider::before {
+.profile input:checked+.small-slider::before {
   transform: translateX(12px);
 }
 
@@ -104,7 +104,7 @@
   text-decoration: none;
 }
 
-.profile .small-switch{
+.profile .small-switch {
   margin: 0;
 }
 

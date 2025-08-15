@@ -1,5 +1,5 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
-import {AsyncPipe, NgClass, NgIf, NgOptimizedImage} from '@angular/common';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { AsyncPipe, NgClass, NgIf, NgOptimizedImage } from '@angular/common';
 import {
   ApiSubCategory,
   BreachSubCategory,
@@ -9,16 +9,16 @@ import {
   GeneralSubCategory, FeedSubCategory,
   SocialSubCategory, StealerlogsSubCategory
 } from '../../constants/pages';
-import {NavigationEnd, Router, RouterLink} from '@angular/router';
-import {filter} from 'rxjs';
-import {DashboardSidebarItemsComponent} from './dashboard-sidebar-items/dashboard-sidebar-items.component';
-import {SidebarSectionComponent} from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
-import {GeneralCallbackModel} from '../../model/results/general/general.callback.model';
-import {LeakCallbackModel} from '../../model/results/leak/leak.callback.model';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {SelectionStoreService} from '../../../services/dashboard/selection.service';
-import {AppService} from '../../../services/core/app/app.service';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
+import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
+import { GeneralCallbackModel } from '../../model/results/general/general.callback.model';
+import { LeakCallbackModel } from '../../model/results/leak/leak.callback.model';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { SelectionStoreService } from '../../../services/dashboard/selection.service';
+import { AppService } from '../../../services/core/app/app.service';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-sidebar',

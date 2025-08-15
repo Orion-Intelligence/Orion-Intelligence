@@ -1,25 +1,25 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NgIf} from '@angular/common';
-import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
-import {PaginationComponent} from '../../../pagination/pagination.component';
-import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
-import {Analytics} from '../../../../model/analytics/analytics.model';
-import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
-import {GeneralCallbackModel, GeneralResultItem} from '../../../../model/results/general/general.callback.model';
-import {LeakCallbackModel, LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
-import {Category} from '../../../../constants/pages';
-import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {ResultComponent} from '../../../result/result.component';
-import {general_filters} from '../../../../constants/filters';
-import {AppService} from '../../../../../services/core/app/app.service';
-import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {ChatCallbackModel} from '../../../../model/results/chat/chat.callback.model';
-import {DiscussionService} from '../../../../services/discussion.service';
-import {HelperService} from '../../../../services/helper.service';
-import {SortType} from '../../../../constants/shared-enums';
-import {ConsolidatedParamModel} from '../../../../model/results/consolidated/consolidated.param.model';
-import {ScrollService} from '../../../../services/scroll.service';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgIf } from '@angular/common';
+import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import { PaginationComponent } from '../../../pagination/pagination.component';
+import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
+import { Analytics } from '../../../../model/analytics/analytics.model';
+import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
+import { GeneralCallbackModel, GeneralResultItem } from '../../../../model/results/general/general.callback.model';
+import { LeakCallbackModel, LeakResultItem } from '../../../../model/results/leak/leak.callback.model';
+import { Category } from '../../../../constants/pages';
+import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { ResultComponent } from '../../../result/result.component';
+import { general_filters } from '../../../../constants/filters';
+import { AppService } from '../../../../../services/core/app/app.service';
+import { DashboardResultChatComponent } from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { ChatCallbackModel } from '../../../../model/results/chat/chat.callback.model';
+import { DiscussionService } from '../../../../services/discussion.service';
+import { HelperService } from '../../../../services/helper.service';
+import { SortType } from '../../../../constants/shared-enums';
+import { ConsolidatedParamModel } from '../../../../model/results/consolidated/consolidated.param.model';
+import { ScrollService } from '../../../../services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-general',
@@ -73,7 +73,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
     const route: string = this.router.url.split('?')[0];
-    if (String(route) != this.dashboardService.m_current_route){
+    if (String(route) != this.dashboardService.m_current_route) {
       this.fetchSearchResults()
     }
   }
@@ -81,8 +81,8 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.type = this.route.snapshot.data['type'];
 
-    this.generalCallbackModel = {...this.dashboardService.generalCallbackModel} as GeneralCallbackModel;
-    this.leakCallbackModel = {...this.dashboardService.leakCallbackModel} as LeakCallbackModel;
+    this.generalCallbackModel = { ...this.dashboardService.generalCallbackModel } as GeneralCallbackModel;
+    this.leakCallbackModel = { ...this.dashboardService.leakCallbackModel } as LeakCallbackModel;
 
     this.initAnalytics()
     combineLatest([this.route.queryParams, this.route.url])

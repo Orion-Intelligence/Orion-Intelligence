@@ -365,15 +365,15 @@ table a:visited {
   font-size: 13px;
 }
 
-.dashboard-general-scan .dropdown-menu{
+.dashboard-general-scan .dropdown-menu {
   margin-top: 5px !important;
   border-radius: 5px;
 }
 
-.dashboard-general-scan .dropdown-menu::before{
-	border-left: 0 solid transparent;
-	border-right: 0 solid transparent;
-	border-bottom: 0 solid white;
+.dashboard-general-scan .dropdown-menu::before {
+  border-left: 0 solid transparent;
+  border-right: 0 solid transparent;
+  border-bottom: 0 solid white;
 }
 
 .dashboard-general-scan {
@@ -741,9 +741,13 @@ table a:visited {
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background-color: #1b60a5;
+  background-color: #58a9ff;
   transition: 0.3s;
   border-radius: 12px;
+}
+
+.small-slider.active {
+  background-color: #1b60a5;
 }
 
 .small-slider::before {

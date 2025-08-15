@@ -1,8 +1,8 @@
-import {Component, OnInit} from '@angular/core';
-import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
-import {Observable} from 'rxjs';
-import {DumpService} from '../../../services/dump/dump.service';
-import {DumpCallbackModel} from '../../../shared/model/dump/dump.mode';
+import { Component, OnInit } from '@angular/core';
+import { AsyncPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
+import { map, Observable } from 'rxjs';
+import { DumpService } from '../../../services/dump/dump.service';
+import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
 
 @Component({
   selector: 'dump-list',
@@ -27,7 +27,18 @@ export class DumpListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.dumpData$ = this.dumpService.dumpData$;
+    this.dumpData$ = this.dumpService.dumpData$.pipe(
+      map(data => {
+        if (!data) return null;
+        return {
+          ...data,
+          DumpCallbackModel: data.mDumpCallbackLinks.filter(item => {
+            const url = (item.leak_url || '').trim();
+            return url !== '' && !/^\/+$/.test(url);
+          })
+        };
+      })
+    );
   }
 
   copyRowData(item: any): void {
