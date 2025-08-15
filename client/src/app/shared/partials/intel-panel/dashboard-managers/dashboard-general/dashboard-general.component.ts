@@ -74,7 +74,6 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
     const route: string = this.router.url.split('?')[0];
     if (String(route) != this.dashboardService.m_current_route){
-      alert("5")
       this.fetchSearchResults()
     }
   }
@@ -162,12 +161,10 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   onPageChange(step: number) {
     this.dashboardService.consolidatedParamModel.page = step;
-    alert("1")
     this.fetchSearchResults();
   }
 
   reloadFilters(_: Record<string, string | null>) {
-    alert("2")
     this.fetchSearchResults();
   }
 
@@ -202,7 +199,6 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
       order = 'asc';
     } else if (sort === SortType.DEFAULT) {
 
-      alert("3")
       this.fetchSearchResults();
       return;
     }

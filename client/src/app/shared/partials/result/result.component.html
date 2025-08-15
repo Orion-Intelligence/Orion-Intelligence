@@ -6,7 +6,7 @@
           <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
         </button>
 
-        <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query"  autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1"> <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
+        <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1"> <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
           <ng-container>
             <ng-container *ngIf="consolidated">
               <hr class="vertical-divider"/>
@@ -19,13 +19,15 @@
             <ng-container *ngIf="!consolidated">
               <div class="dashboard-general-input-emptyspace"></div>
             </ng-container>
-            <ng-container>
+            <ng-container class="cursor-pointer">
               <hr class="vertical-divider ml-3" *ngIf="consolidated"/>
-              <span (click)="onToolToggle($event)">
-                Tools
-                <div class="expand-icon">
-                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
-                </div>
+              <span class="cursor-pointer">
+                <span (click)="onToolToggle($event)">
+                  Tools
+                  <div class="expand-icon">
+                    <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
+                  </div>
+                </span>
               </span>
             </ng-container>
           </ng-container>
