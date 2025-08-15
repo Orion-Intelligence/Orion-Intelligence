@@ -28,15 +28,13 @@
   margin-bottom: 4px;
 }
 
-/* Override */
-
-.graph-listing_container .divider {
+.graph-listing_divider {
   height: 1px;
   background-color: rgb(255 255 255 / 10%);
   margin: 12px 0;
 }
 
-.graph-listing_container .left {
+.graph-listing_left {
   display: flex;
   flex-direction: column;
 }

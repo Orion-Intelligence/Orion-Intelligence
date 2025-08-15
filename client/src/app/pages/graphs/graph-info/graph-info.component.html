@@ -1,21 +1,30 @@
 <div class="graph-filters_container">
   <div (click)="toggleAnimation()" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="analytics d-flex align-items-center gap-2">
-      <input [checked]="physicsEnabled " class="pe-none" id="switch" type="checkbox"> <label class="mb-0 pe-none" for="switch"></label> <span>&nbsp; Toggle Physics</span>
+      <input [checked]="physicsEnabled " class="pe-none" id="switch" type="checkbox"> <label
+        class="mb-0 pe-none"></label> <span>&nbsp; Toggle Physics</span>
     </div>
   </div>
   <br>
 
   <div (click)="toggleExpand()" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="analytics d-flex align-items-center gap-2">
-      <input [checked]="expandEnabled && expandEnabledTemp" class="pe-none" id="switchExpand" type="checkbox"> <label class="mb-0 pe-none" for="switchExpand"></label> <span>&nbsp; Expand</span>
+      <input [checked]="expandEnabled && expandEnabledTemp" class="pe-none" id="switchExpand" type="checkbox"> <label
+        class="mb-0 pe-none"></label> <span>&nbsp; Expand</span>
     </div>
   </div>
   <br>
 
-  <div (click)="toggleCollapse('details')" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
+  <div (click)="toggleCollapse('details')"
+    class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
-      <span>Details</span> <img [class.rotate]="detailsOpen" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+      <div class="graph-filters_detail-header-left d-flex align-items-center">
+        <img src="/assets/images/shared/info.svg" alt="icon" class="graph-filters_detail-header-left-icon"
+          appTooltip="View Graph Details" />
+        <span>Details</span>
+      </div>
+      <img [class.rotate]="detailsOpen" alt="icon" class="chevron"
+        src="/assets/images/shared/search_side_dropdown_icon.svg" />
     </div>
     <div [class.show]="detailsOpen" class="collapse" id="detailsCollapse">
       <br>
@@ -54,9 +63,16 @@
     </div>
   </div>
   <br>
-  <div (click)="toggleCollapse('indicators')" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
+  <div (click)="toggleCollapse('indicators')"
+    class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
-      <span>Indicators</span> <img [class.rotate]="indicatorsOpen" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+      <div class="graph-filters_detail-header-left d-flex align-items-center">
+        <img src="/assets/images/shared/info.svg" alt="icon" class="graph-filters_detail-header-left-icon"
+          appTooltip="View Indicator Details" />
+        <span>Indicators</span>
+      </div>
+      <img [class.rotate]="indicatorsOpen" alt="icon" class="chevron"
+        src="/assets/images/shared/search_side_dropdown_icon.svg" />
     </div>
     <div [class.show]="indicatorsOpen" class="collapse" id="indicatorsCollapse">
       <br>
@@ -95,22 +111,32 @@
   <app-listings [result]="result"></app-listings>
 
   <br>
-  <div (click)="toggleCollapse('ruleset')" class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
+  <div (click)="toggleCollapse('ruleset')"
+    class="graph-filters_details graph-filters-pointer cursor-pointer user-select-none">
     <div class="graph-filters_details-header d-flex justify-content-between align-items-center">
-      <span>Preferences</span> <img [class.rotate]="rulesetOpen" alt="icon" class="chevron" src="/assets/images/shared/search_side_dropdown_icon.svg"/>
+      <div class="graph-filters_detail-header-left d-flex align-items-center">
+        <img src="/assets/images/shared/info.svg" alt="icon" class="graph-filters_detail-header-left-icon"
+          appTooltip="Set Preference for better results" />
+        <span>Preferences</span>
+      </div>
+      <img [class.rotate]="rulesetOpen" alt="icon" class="chevron"
+        src="/assets/images/shared/search_side_dropdown_icon.svg" />
     </div>
     <div (click)="$event.stopPropagation()" [class.show]="rulesetOpen" class="collapse" id="rulesetCollapse">
       <br>
       <div (click)="onRuleToggle('edgePointers', true)" class="analytics d-flex align-items-center gap-2 mt-2">
-        <input [checked]="ruleSet.edgePointers" class="pe-none" type="checkbox"> <label class="mb-0 pe-none"></label> <span>&nbsp; Edge Pointers</span>
+        <input [checked]="ruleSet.edgePointers" class="pe-none" type="checkbox"> <label class="mb-0 pe-none"></label>
+        <span>&nbsp; Edge Pointers</span>
       </div>
       <br>
       <div (click)="onRuleToggle('edgeHighlight', true)" class="analytics d-flex align-items-center gap-2">
-        <input [checked]="ruleSet.edgeHighlight" class="pe-none" type="checkbox"> <label class="mb-0 pe-none"></label> <span>&nbsp; Edge Highlight</span>
+        <input [checked]="ruleSet.edgeHighlight" class="pe-none" type="checkbox"> <label class="mb-0 pe-none"></label>
+        <span>&nbsp; Edge Highlight</span>
       </div>
       <br>
       <div (click)="onRuleToggle('edgeColor', true)" class="analytics d-flex align-items-center gap-2">
-        <input [checked]="ruleSet.edgeColor" class="pe-none" type="checkbox"> <label class="mb-0 pe-none"></label> <span>&nbsp; Edge Color</span>
+        <input [checked]="ruleSet.edgeColor" class="pe-none" type="checkbox"> <label class="mb-0 pe-none"></label>
+        <span>&nbsp; Edge Color</span>
       </div>
     </div>
   </div>

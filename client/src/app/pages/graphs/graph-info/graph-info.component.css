@@ -51,6 +51,17 @@
   color: #D0D0D0;
 }
 
+.graph-filters_detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.graph-filters_detail-header-left-icon {
+  width: 16px;
+  height: 16px;
+}
+
 .graph-filters_detail-line {
   font-family: Roboto, sans-serif;
   font-weight: bold;
@@ -77,6 +88,10 @@
 
 .graph-filters_container .btn {
   height: 40px;
+  background-color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.0705882353) !important;
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
 }
 
 .graph-filters_container .btn-danger-graph {
@@ -105,7 +120,7 @@
   border-radius: 50px;
 }
 
-@media (width <= 799px) {
+@media (width <=799px) {
   .graph-filters_container {
     display: none;
   }
