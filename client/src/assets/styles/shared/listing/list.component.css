@@ -18,6 +18,10 @@
   margin-right: 10px;
 }
 
+.list__container .list__empty-padding {
+  padding: 18px;
+}
+
 .list__container .list__column-id-min {
   width: 6% !important;
 }

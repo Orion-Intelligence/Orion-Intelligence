@@ -70,6 +70,7 @@ export class FiltersComponent implements OnInit {
   resetFilters() {
     this.dashboard.selectedFilters.set({})
     this.filterChanged.emit({...this.selectedFilters});
+    this.filterReset.emit()
     this.closeFilter();
   }
 
