@@ -195,6 +195,7 @@
   cursor: pointer;
   width: 265px;
   position: relative;
+  text-underline: none !important;
 }
 
 .sidebar__dropdown-icon {
