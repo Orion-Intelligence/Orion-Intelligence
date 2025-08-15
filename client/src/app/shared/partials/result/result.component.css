@@ -113,7 +113,7 @@
   border-top: 1px solid #ffffff12 !important;
 }
 
-.dropdown-item {
+.dashboard-general-scan .dropdown-item {
   position: relative;
   padding-right: 1.25rem
 }

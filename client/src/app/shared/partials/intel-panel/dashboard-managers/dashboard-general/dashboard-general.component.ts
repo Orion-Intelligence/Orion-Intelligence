@@ -74,6 +74,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
     const route: string = this.router.url.split('?')[0];
     if (String(route) != this.dashboardService.m_current_route){
+      alert("5")
       this.fetchSearchResults()
     }
   }
@@ -94,6 +95,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
         this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && (this.type == Category.BREACH || this.type == Category.FEED)))) {
+
           this.isResponseLoading.set(false);
           if (this.dashboardService.consolidatedParamModel.q)
             this.query = this.dashboardService.consolidatedParamModel.q
@@ -160,10 +162,12 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   onPageChange(step: number) {
     this.dashboardService.consolidatedParamModel.page = step;
+    alert("1")
     this.fetchSearchResults();
   }
 
   reloadFilters(_: Record<string, string | null>) {
+    alert("2")
     this.fetchSearchResults();
   }
 
@@ -197,6 +201,8 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     } else if (sort === SortType.OLDEST_FIRST) {
       order = 'asc';
     } else if (sort === SortType.DEFAULT) {
+
+      alert("3")
       this.fetchSearchResults();
       return;
     }
