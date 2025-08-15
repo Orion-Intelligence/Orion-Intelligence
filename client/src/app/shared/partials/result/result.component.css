@@ -113,12 +113,12 @@
   border-top: 1px solid #ffffff12 !important;
 }
 
-.dashboard-general-scan .dropdown-item {
+.dropdown-item {
   position: relative;
   padding-right: 1.25rem
 }
 
-.dropdown-item::after {
+.dashboard-general-scan .dropdown-item::after {
   content: "›";
   position: absolute;
   font-size: 25px;
