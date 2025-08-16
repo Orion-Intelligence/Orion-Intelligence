@@ -110,13 +110,11 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onResetCallback() {
-    alert("x1")
     this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
     this.dashboardService.leakCallbackModel = new LeakCallbackModel()
   }
 
   onOptionSelected(option: string) {
-    alert("x2")
     this.dashboardService.resetParams()
     this.onResetCallback()
     this.selectionStore.setSelectedOption(option);
@@ -126,7 +124,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onToggleSidebar(mobile_menu_status: boolean = false) {
-    alert("x1")
     this.menuToggle.emit();
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status
