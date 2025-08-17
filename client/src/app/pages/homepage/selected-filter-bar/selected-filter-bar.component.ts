@@ -33,7 +33,7 @@ export class SelectedFilterBarComponent implements OnInit {
   }
 
   isConsolidatedRoute(): boolean {
-    return this.router.url.includes('consolidated');
+    return !this.router.url.includes('defacement');
   }
 
   ngOnInit(): void {

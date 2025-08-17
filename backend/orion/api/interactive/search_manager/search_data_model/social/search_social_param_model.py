@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, List
 
 from pydantic import BaseModel
 
@@ -15,3 +15,5 @@ class search_social_param_model(BaseModel):
     platform: Optional[str] = ""
     mitre: Optional[str] = ""
     messagedate: Optional[str] = ""
+
+    entity_filter: Optional[Dict[str, List[str]]] = None

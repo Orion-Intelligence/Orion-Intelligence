@@ -130,7 +130,7 @@ class search_model:
         return await self.__search_callback.get_doc(result)
 
     async def search_general_result(self, param: search_general_param_model):
-        document, data_filter = elastic_request_generator().on_search_general_data(param, {})
+        document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -139,7 +139,7 @@ class search_model:
         )
 
     async def search_leak_result(self, param: search_leak_param_model):
-        document, data_filter = elastic_request_generator().on_search_leakdata(param, {})
+        document, data_filter = elastic_request_generator().on_search_leakdata(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -234,7 +234,7 @@ class search_model:
         )
 
     async def search_exploit_result(self, param: search_exploit_param_model):
-        document, data_filter = elastic_request_generator().on_search_exploitdata(param)
+        document, data_filter = elastic_request_generator().on_search_exploitdata(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -243,7 +243,7 @@ class search_model:
         )
 
     async def search_telegram_result(self, param: search_chat_param_model):
-        document, data_filter = elastic_request_generator().on_search_telegram_data(param)
+        document, data_filter = elastic_request_generator().on_search_telegram_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(
@@ -254,7 +254,7 @@ class search_model:
 
     @staticmethod
     async def search_discussion_result(param: search_general_param_model):
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param)
+        indices, queries = elastic_request_generator().on_search_consolidated_data(param, param.entity_filter)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         chat_data = {}
@@ -275,7 +275,7 @@ class search_model:
         )
     
     async def search_social_result(self, param: search_social_param_model):
-        document, data_filter = elastic_request_generator().on_search_social_data(param)
+        document, data_filter = elastic_request_generator().on_search_social_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(
@@ -305,7 +305,7 @@ class search_model:
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
-        document, data_filter = elastic_request_generator().on_search_defacement_data(param, {})
+        document, data_filter = elastic_request_generator().on_search_defacement_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(

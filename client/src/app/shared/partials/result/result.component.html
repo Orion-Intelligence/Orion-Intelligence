@@ -6,10 +6,10 @@
           <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
         </button>
         <input #searchInput class="search-trigger form-control default-input dashboard-general-input" [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="150" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)"/> <input type="hidden" value="1">
-        <button *ngIf="consolidated" type="button" class="btn input-cross" aria-label="Clear" (click)="local_query=''; searchInput.focus();onFormSubmit()"><img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [style.visibility]="local_query ? 'visible' : 'hidden'"></button>
+        <button type="button" class="btn input-cross" aria-label="Clear" (click)="local_query=''; searchInput.focus();onFormSubmit()"><img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [style.visibility]="local_query ? 'visible' : 'hidden'"></button>
         <span class="input-group-text border-start-0 gc-clear-selection" [style.cursor]="consolidated ? 'pointer' : 'default'">
           <ng-container>
-            <ng-container *ngIf="consolidated">
+            <ng-container>
               <hr class="vertical-divider"/>
               Advance &nbsp;&nbsp;
               <label class="small-switch">
@@ -17,12 +17,8 @@
                 <span class="small-slider round"></span>
               </label>
             </ng-container>
-            <ng-container *ngIf="!consolidated || !isTool">
-              <div class="dashboard-general-input-emptyspace" [ngClass]="{ 'dashboard-general-input-emptyspace-extended': !isTool }"></div>
-            </ng-container>
             <ng-container class="cursor-pointer">
-              <hr class="vertical-divider ml-3" *ngIf="consolidated"/>
-              <span *ngIf="!consolidated" type="button" class="btn input-cross" aria-label="Clear" (click)="local_query=''; searchInput.focus();onFormSubmit()"><img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [style.visibility]="local_query ? 'visible' : 'hidden'"></span>
+              <hr class="vertical-divider ml-3" *ngIf="isTool"/>
               <span class="cursor-pointer" *ngIf="isTool">
                 <span (click)="onToolToggle($event)">
                   Tools
@@ -50,7 +46,7 @@
           </ul>
         </div>
       </div>
-      <div class="col-md-12 col-sm-12 col-xs-12" *ngIf="consolidated">
+      <div class="col-md-12 col-sm-12 col-xs-12">
         <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
           <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools" (checkDomain)="init_domains()"></app-search-filters>
         </div>

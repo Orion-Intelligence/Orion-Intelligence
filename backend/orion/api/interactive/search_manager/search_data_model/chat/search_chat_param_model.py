@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, List
 from pydantic import BaseModel
 
 class search_chat_param_model(BaseModel):
@@ -11,3 +11,4 @@ class search_chat_param_model(BaseModel):
     daterange: Optional[str] = ""
     entity: Optional[str] = ""
     mitre: Optional[str] = ""
+    entity_filter: Optional[Dict[str, List[str]]] = None

@@ -205,9 +205,11 @@ export class SearchFiltersComponent implements OnInit {
       this.showSuggestions = false;
     }
   }
-  onSuggestionClick(value: string): void {
+  onSuggestionClick(event: MouseEvent, value: string): void {
     this.newValue = value;
     this.addTag();
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   protected readonly search_filter_labels = search_filter_labels;

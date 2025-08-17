@@ -47,7 +47,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() showTabs = true;
   @Input() filterModel!: FilterModel;
   @Input() showSorting: boolean = true;
-  @Input() showSelectedFilters: boolean = false;
+  @Input() showSelectedFilters: boolean = true;
 
   @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
@@ -140,17 +140,17 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onFormSubmit() {
-    if(this.local_query){
-      this.dashboardService.consolidatedParamModel.page = 1
-      let query = this.local_query;
-      this.searchInputRef?.nativeElement.blur();
-      this.searchQuery = query;
-      this.result_triggered = true;
-      this.showScans = false;
-      this.updateQuery.emit(query);
-      this.reloadData.emit();
-      this.init_domains()
+    if (this.local_query) {
     }
+    this.dashboardService.consolidatedParamModel.page = 1
+    let query = this.local_query;
+    this.searchInputRef?.nativeElement.blur();
+    this.searchQuery = query;
+    this.result_triggered = true;
+    this.showScans = false;
+    this.updateQuery.emit(query);
+    this.reloadData.emit();
+    this.init_domains()
   }
 
 

@@ -60,7 +60,7 @@
         <span class="filter-add__icon" (click)="addTag()"></span>
 
         <ul *ngIf="showSuggestions && filteredSuggestions.length > 0" class="filter-panel__suggestion-list">
-          <li *ngFor="let suggestion of filteredSuggestions" (click)="onSuggestionClick(suggestion)">
+          <li *ngFor="let suggestion of filteredSuggestions" (click)="onSuggestionClick($event, suggestion)">
             {{ suggestion }}
           </li>
         </ul>
