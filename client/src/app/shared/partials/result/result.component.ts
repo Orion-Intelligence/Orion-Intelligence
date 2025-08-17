@@ -23,6 +23,7 @@ import {searchFilterAnimation} from '../../animations/search.filter.animation';
 import {SelectedFilterBarComponent} from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
 import {HelperService} from '../../services/helper.service';
+import {ScrollService} from '../../services/scroll.service';
 
 @Component({
   selector: 'app-result',
@@ -73,7 +74,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
 
-  constructor(private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
+  constructor(protected scrollService:ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -140,6 +141,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onFormSubmit() {
+    this.scrollService.resetOnReload()
     if (this.local_query) {
     }
     this.dashboardService.consolidatedParamModel.page = 1

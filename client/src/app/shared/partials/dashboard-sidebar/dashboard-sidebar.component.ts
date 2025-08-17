@@ -19,6 +19,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import {ScrollService} from '../../services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -44,7 +45,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   stealerlogsCategories = Object.values(StealerlogsSubCategory);
   category = Category;
 
-  constructor(protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
+  constructor(protected scrollService:ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
   }
 
   ngOnInit() {
@@ -107,6 +108,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         }
       }
     }
+    this.scrollService.resetOnReload()
   }
 
   onResetCallback() {
@@ -121,6 +123,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.min_detected && this.sidebar_default) {
       this.onToggleSidebar();
     }
+    this.scrollService.resetOnReload()
   }
 
   onToggleSidebar(mobile_menu_status: boolean = false) {

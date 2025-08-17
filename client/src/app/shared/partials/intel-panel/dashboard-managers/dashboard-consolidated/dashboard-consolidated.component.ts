@@ -254,7 +254,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (firstSubcategory) {
       this.selectionStore.setSelectedOption(firstSubcategory);
     }
-    const routePrefix = '/dashboard/consolidated/' + section.toLowerCase() + '/' + second_category;
+    const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
     this.router.navigate([routePrefix], {
       queryParams: {page: 1}, queryParamsHandling: 'merge'
     }).then();
