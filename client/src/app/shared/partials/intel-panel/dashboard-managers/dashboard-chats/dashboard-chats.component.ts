@@ -42,7 +42,10 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
+    this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
+    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
+      this.fetchSearchResults()
+    }
   }
 
   ngOnInit(): void {

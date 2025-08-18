@@ -97,27 +97,27 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'databases',
+            redirectTo: 'all',
             pathMatch: 'full'
           },
           {
             path: 'email',
-            component: DashboardChatsComponent,
+            component: DashboardGeneralComponent,
             data: { type: 'Breach', animation: 'DataBreach' }
           },
           {
             path: 'logs',
-            component: DashboardChatsComponent,
+            component: DashboardGeneralComponent,
             data: { type: 'Breach', animation: 'DataBreach' }
           },
           {
             path: 'cloud',
-            component: DashboardChatsComponent,
+            component: DashboardGeneralComponent,
             data: { type: 'Breach', animation: 'DataBreach' }
           },
           {
             path: 'warfare',
-            component: DashboardChatsComponent,
+            component: DashboardGeneralComponent,
             data: { type: 'Breach', animation: 'DataBreach' }
           },
           {
@@ -185,8 +185,13 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'hacked',
+            redirectTo: 'all',
             pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            component: DashboardDefacementComponent,
+            data: { type: 'exploit', animation: 'DataBreach' }
           },
           {
             path: ':category',
@@ -207,7 +212,17 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'telegram',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
+            path: 'telegram',
+            component: DashboardChatsComponent,
             pathMatch: 'full'
           },
           {
@@ -266,17 +281,22 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'cve',
+            redirectTo: 'all',
             pathMatch: 'full'
           },
           {
+            path: 'all',
+            component: DashboardExploitComponent,
+            data: { type: 'exploit', animation: 'DataBreach' }
+          },
+          {
             path: 'tools',
-            component: DashboardConsolidatedComponent,
+            component: DashboardExploitComponent,
             data: { type: 'exploit', animation: 'DataBreach' }
           },
           {
             path: 'zeroday',
-            component: DashboardConsolidatedComponent,
+            component: DashboardExploitComponent,
             data: { type: 'exploit', animation: 'DataBreach' }
           },
           {

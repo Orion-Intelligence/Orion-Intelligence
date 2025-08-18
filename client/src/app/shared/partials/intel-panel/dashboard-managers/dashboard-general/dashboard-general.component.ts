@@ -1,29 +1,30 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NgIf } from '@angular/common';
-import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
-import { PaginationComponent } from '../../../pagination/pagination.component';
-import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
-import { Analytics } from '../../../../model/analytics/analytics.model';
-import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
-import { GeneralCallbackModel, GeneralResultItem } from '../../../../model/results/general/general.callback.model';
-import { LeakCallbackModel, LeakResultItem } from '../../../../model/results/leak/leak.callback.model';
-import { Category } from '../../../../constants/pages';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
-import { ResultComponent } from '../../../result/result.component';
-import { general_filters } from '../../../../constants/filters';
-import { AppService } from '../../../../../services/core/app/app.service';
-import { DashboardResultChatComponent } from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import { ChatCallbackModel } from '../../../../model/results/chat/chat.callback.model';
-import { DiscussionService } from '../../../../services/discussion.service';
-import { HelperService } from '../../../../services/helper.service';
-import { SortType } from '../../../../constants/shared-enums';
-import { ConsolidatedParamModel } from '../../../../model/results/consolidated/consolidated.param.model';
-import { ScrollService } from '../../../../services/scroll.service';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NgForOf, NgIf} from '@angular/common';
+import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import {PaginationComponent} from '../../../pagination/pagination.component';
+import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
+import {Analytics} from '../../../../model/analytics/analytics.model';
+import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
+import {GeneralCallbackModel, GeneralResultItem} from '../../../../model/results/general/general.callback.model';
+import {LeakCallbackModel, LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
+import {Category} from '../../../../constants/pages';
+import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
+import {ResultComponent} from '../../../result/result.component';
+import {general_filters} from '../../../../constants/filters';
+import {AppService} from '../../../../../services/core/app/app.service';
+import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import {ChatCallbackModel} from '../../../../model/results/chat/chat.callback.model';
+import {DiscussionService} from '../../../../services/discussion.service';
+import {HelperService} from '../../../../services/helper.service';
+import {SortType} from '../../../../constants/shared-enums';
+import {ConsolidatedParamModel} from '../../../../model/results/consolidated/consolidated.param.model';
+import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 
 @Component({
   selector: 'app-dashboard-general',
-  imports: [NgIf, PaginationComponent, DashboardResultsGeneralGridComponent, ResultComponent, DashboardResultChatComponent],
+  imports: [NgIf, PaginationComponent, DashboardResultsGeneralGridComponent, ResultComponent, DashboardResultChatComponent, DashboardResultExploitComponent, DashboardResultSocialComponent, NgForOf],
   templateUrl: './dashboard-general.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -40,6 +41,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   query = ""
   analyticsData = {} as Analytics;
+  rankedResult: any[] = [];
   type = Category.STRATEGIC
   discussionLoaded = false
 
@@ -55,11 +57,19 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   }
 
   get currentParamModel(): ConsolidatedParamModel {
-    return this.type === Category.STRATEGIC ? this.dashboardService.consolidatedParamModel : this.dashboardService.consolidatedParamModel;
+    return this.dashboardService.consolidatedParamModel;
   }
 
   get currentResultCount(): number {
-    return this.currentCallbackModel?.Result?.length ?? 0;
+    if (this.getRoute() == 'all') {
+      return this.discussionCallbackModel.Result.length
+    } else {
+      return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
+    }
+  }
+
+  getRoute() {
+    return this.router.url.split('?')[0].split('/')[3]
   }
 
   get currentSearchResults(): (GeneralResultItem | LeakResultItem)[] {
@@ -81,8 +91,8 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.type = this.route.snapshot.data['type'];
 
-    this.generalCallbackModel = { ...this.dashboardService.generalCallbackModel } as GeneralCallbackModel;
-    this.leakCallbackModel = { ...this.dashboardService.leakCallbackModel } as LeakCallbackModel;
+    this.generalCallbackModel = {...this.dashboardService.generalCallbackModel} as GeneralCallbackModel;
+    this.leakCallbackModel = {...this.dashboardService.leakCallbackModel} as LeakCallbackModel;
 
     this.initAnalytics()
     combineLatest([this.route.queryParams, this.route.url])
@@ -114,6 +124,11 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
+  isConsolidatedResult(){
+    const lastSegment = this.route.snapshot.url.at(-1)?.path;
+    return !!(lastSegment && ["all", "email", "logs", "warfare", "cloud"].includes(lastSegment));
+  }
+
   fetchSearchResults() {
     if (this.isResponseLoading()) return;
 
@@ -123,23 +138,38 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
     this.isResponseLoading.set(true);
 
-    const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
-    this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.dashboardService.consolidatedParamModel)
-      .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
-      .subscribe(response => {
+    this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
+    this.rankedResult = []
+    if (this.isConsolidatedResult()) {
+      const lastSegment = this.route.snapshot.url.at(-1)?.path;
+      if(lastSegment){
+        this.dashboardService.consolidatedParamModel.category = lastSegment
+      }
+      this.dashboardService.fetchConsolidatedRankededResults('search/breach', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
         if (response.success && response.data) {
-          if (this.type === Category.STRATEGIC) {
-            this.generalCallbackModel = response.data as GeneralCallbackModel;
-            this.dashboardService.generalCallbackModel = response.data as GeneralCallbackModel;
-          } else {
-            this.leakCallbackModel = response.data as LeakCallbackModel;
-            this.dashboardService.leakCallbackModel = response.data as LeakCallbackModel;
-          }
+          this.rankedResult = response.data;
         }
-
-        this.isResponseLoading.set(false)
-        this.initAnalytics();
+        this.isResponseLoading.set(false);
       });
+    } else {
+      const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
+      this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.dashboardService.consolidatedParamModel)
+        .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
+        .subscribe(response => {
+          if (response.success && response.data) {
+            if (this.type === Category.STRATEGIC) {
+              this.generalCallbackModel = response.data as GeneralCallbackModel;
+              this.dashboardService.generalCallbackModel = response.data as GeneralCallbackModel;
+            } else {
+              this.leakCallbackModel = response.data as LeakCallbackModel;
+              this.dashboardService.leakCallbackModel = response.data as LeakCallbackModel;
+            }
+          }
+
+          this.isResponseLoading.set(false)
+          this.initAnalytics();
+        });
+    }
   }
 
   fetchSuggestion() {

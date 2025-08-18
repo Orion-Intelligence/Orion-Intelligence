@@ -31,6 +31,7 @@ from orion.api.server.crawl_manager.class_model.report_chat_data_model import Re
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 api_routes = APIRouter()
@@ -97,7 +98,14 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
 
 @api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
-    return await search_model.getInstance().search_consolidated_ranked_result(param)
+    base_index = [
+        ELASTIC_INDEX.S_LEAK_INDEX,
+        ELASTIC_INDEX.S_GENERIC_INDEX,
+        ELASTIC_INDEX.S_EXPLOIT_INDEX,
+        ELASTIC_INDEX.S_CHATS_INDEX,
+        ELASTIC_INDEX.S_SOCIAL_INDEX
+    ]
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [])
 
 
 @api_routes.post("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
@@ -105,9 +113,24 @@ async def search_telegram(param: search_chat_param_model = Body(...)):
     return await search_model.getInstance().search_telegram_result(param)
 
 
-@api_routes.post("/api/social/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+@api_routes.post("/api/exploit/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_discussion(param: search_general_param_model = Body(...)):
-    return await search_model.getInstance().search_discussion_result(param)
+    base_index = [
+        ELASTIC_INDEX.S_CHATS_INDEX
+    ]
+    if param.category in ['all']:
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ['cve', 'tools', 'zeroday'])
+    else:
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [param.category])
+
+
+@api_routes.post("/api/social/all", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
+async def search_discussion(param: search_general_param_model = Body(...)):
+    base_index = [
+        ELASTIC_INDEX.S_CHATS_INDEX,
+        ELASTIC_INDEX.S_SOCIAL_INDEX
+    ]
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [])
 
 @api_routes.post("/api/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_twitter(param: search_social_param_model = Body(...)):
@@ -117,7 +140,19 @@ async def search_twitter(param: search_social_param_model = Body(...)):
 @api_routes.post("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_leak(param: search_leak_param_model = Body(...)):
-    return await search_model.getInstance().search_leak_result(param)
+    if param.category in ['all']:
+        base_index = [
+            ELASTIC_INDEX.S_LEAK_INDEX,
+            ELASTIC_INDEX.S_CHATS_INDEX
+        ]
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ["email", "logs", "warfare", "cloud"])
+    elif param.category in ["email", "logs", "warfare", "cloud"]:
+        base_index = [
+            ELASTIC_INDEX.S_CHATS_INDEX
+        ]
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [param.category])
+    else:
+        return await search_model.getInstance().search_leak_result(param)
 
 
 @api_routes.post("/api/search/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],

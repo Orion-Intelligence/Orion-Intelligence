@@ -13,14 +13,11 @@ export class DiscussionService {
   }
 
   fetchSuggestions<T extends { Result?: any[]; cards_data?: any[] }>(query: string, type: string): Observable<{ success: boolean; isEmpty: boolean; data: T | null }> {
-    const params = new HttpParams()
-      .set('q', query || '')
-      .set('ctype', type);
-
-    return this.api.get<T>('chat/telegram', {params}).pipe(
+    const body = {q: query || '', category: type};
+    return this.api.post<T>('social/discussion', body).pipe(
       map((response: T) => ({
         success: true,
-        isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
+        isEmpty: (response.Result?.length ?? 0) === 0 && (response.cards_data?.length ?? 0) === 0,
         data: response
       })),
       catchError(() => of({success: false, isEmpty: false, data: null}))

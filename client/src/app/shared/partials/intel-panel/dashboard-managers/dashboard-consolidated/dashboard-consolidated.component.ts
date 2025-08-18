@@ -246,8 +246,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         firstSubcategory = this.newsCategories[0];
         break;
       case Category.SOCIAL:
-        firstSubcategory = this.socialCategories[1];
-        second_category = this.socialCategories[1].toLowerCase()
+        firstSubcategory = this.socialCategories[0];
+        second_category = this.socialCategories[0].toLowerCase()
         break;
     }
 

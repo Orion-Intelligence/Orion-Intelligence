@@ -148,13 +148,13 @@ class search_model:
         )
 
     @staticmethod
-    async def search_consolidated_ranked_result(param: search_consolidated_param_model):
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, allowed_categories):
         if param.entity_filter:
             filter_dict = param.entity_filter
         else:
             filter_dict = {}
 
-        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict)
+        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict, base_index, allowed_categories)
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
 
         ranked_results = []
@@ -253,8 +253,8 @@ class search_model:
         )
 
     @staticmethod
-    async def search_discussion_result(param: search_general_param_model):
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param, param.entity_filter)
+    async def search_discussion_result(param: search_consolidated_param_model):
+        indices, queries = elastic_request_generator().on_search_discussion_data(param, param.entity_filter)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         chat_data = {}

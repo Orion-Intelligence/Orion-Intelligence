@@ -1,7 +1,7 @@
 import {LeakCallbackModel} from '../leak/leak.callback.model';
 import {ExploitCallbackModel} from '../exploit/exploit.callback.model';
 import {ChatCallbackModel} from '../chat/chat.callback.model';
-import { GeneralCallbackModel } from '../general/general.callback.model';
+import {GeneralCallbackModel} from '../general/general.callback.model';
 import {SocialCallbackModel} from '../social/social.callback.model';
 import {DefacementCallbackModel} from '../defacement/defacement.callback.model';
 import {StealerLogCallbackModel} from '../credentials/credential.callback.model';
