@@ -35,7 +35,7 @@
 }
 
 .selected-filter-bar {
-  background-color: #172235;
+  background-color: var(--color-blue-890);
   border: 1px solid #FCFCFC08;
   border-radius: 8px;
   padding: 8px 24px 8px 17px;
