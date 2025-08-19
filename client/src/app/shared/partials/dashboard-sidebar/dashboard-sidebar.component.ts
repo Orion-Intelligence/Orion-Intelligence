@@ -7,7 +7,8 @@ import {
   DefacementSubCategory, DumpSubCategory,
   ExploitSubCategory,
   GeneralSubCategory, FeedSubCategory,
-  SocialSubCategory, StealerlogsSubCategory
+  SocialSubCategory, StealerlogsSubCategory,
+  TenantSubCategory
 } from '../../constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
@@ -19,7 +20,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import {ScrollService} from '../../services/scroll.service';
+import { ScrollService } from '../../services/scroll.service';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -43,9 +44,10 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
   stealerlogsCategories = Object.values(StealerlogsSubCategory);
+  tenantCategories = Object.values(TenantSubCategory);
   category = Category;
 
-  constructor(protected scrollService:ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
+  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router) {
   }
 
   ngOnInit() {
@@ -98,6 +100,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           break;
         case Category.FEED:
           firstSubcategory = this.newsCategories[0];
+          break;
+        case Category.TENANT:
+          firstSubcategory = this.tenantCategories[0];
           break;
       }
 

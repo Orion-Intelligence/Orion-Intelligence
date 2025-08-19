@@ -23,6 +23,8 @@ import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.reso
 import { DashboardSocialsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
 import { subscriptionGuard } from './shared/guards/subscription.guard';
 import { SecurityScanResultsComponent } from './shared/partials/security-scan-results/security-scan-results.component';
+import { ViewTenantComponent } from './pages/tenant-management/view-tenant/view-tenant.component';
+import { AddTenantComponent } from './pages/tenant-management/add-tenant/add-tenant.component';
 
 export const routes: Routes = [
   {
@@ -395,6 +397,28 @@ export const routes: Routes = [
             path: 'credential',
             component: CredentialComponent,
             data: { type: 'credential', animation: 'CategoryPage' }
+          }
+        ]
+      },
+      {
+        path: 'tenant',
+        canActivate: [subscriptionGuard],
+        data: { animation: 'TenantPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'view',
+            pathMatch: 'full'
+          },
+          {
+            path: 'view',
+            component: ViewTenantComponent,
+            data: { type: 'view', animation: 'CategoryPage' }
+          },
+          {
+            path: 'add',
+            component: AddTenantComponent,
+            data: { type: 'add', animation: 'CategoryPage' }
           }
         ]
       }

@@ -9,6 +9,8 @@
 @use 'app/pages/homepage/home-insight/home-insight.component.css';
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
+@use 'app/pages/tenant-management/view-tenant/view-tenant.component.css';
+@use 'app/pages/tenant-management/add-tenant/add-tenant.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
 @use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
 @use 'app/pages/login/login-container/login-container.component.css';
@@ -132,37 +134,37 @@
 }
 
 html {
-	background: #172235;
-	scrollbar-width: none;
-	overflow-x: hidden;
-	scroll-behavior: smooth;
+  background: #172235;
+  scrollbar-width: none;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
-	margin: 0;
-	background: #00000000;
-	height: 100vh;
-	min-height: 100vh;
-	scrollbar-width: none;
+  margin: 0;
+  background: #00000000;
+  height: 100vh;
+  min-height: 100vh;
+  scrollbar-width: none;
 }
 
 body.dark-theme {
-	background-color: #0E1626;
+  background-color: #0E1626;
 }
 
 body.light-theme {
-	background-color: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%);
+  background-color: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%);
 }
 
 body::-webkit-scrollbar,
 html::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 .gc-clear-selection {
-	-webkit-touch-callout: none;
-	user-select: none;
-	outline: none;
-	text-decoration: none;
-	text-underline: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  outline: none;
+  text-decoration: none;
+  text-underline: none;
 }

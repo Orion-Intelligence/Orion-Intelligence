@@ -1,0 +1,27 @@
+<div class="list__container">
+    <table class="table table-striped directory-list__table clear-paddings">
+        <thead>
+            <tr>
+                <th class="list__column-id-min">ID</th>
+                <th class="list__column-service-url">Name</th>
+                <th class="list__column-category">Contect</th>
+                <th class="list__column-url-status">User Status</th>
+                <th class="list__column-leak-status">System Status</th>
+            </tr>
+        </thead>
+        <!-- <tbody *ngIf="(dumpData$ | async) as dumpData">
+    <tr *ngFor="let item of dumpData.mDumpCallbackLinks; let i = index">
+      <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
+      <td (click)="copyRowData(item.leak_url)" class="cursor-pointer">{{ item.leak_url }}</td>
+      <td>{{ item.source }}</td>
+      <td>{{ item.group }}</td>
+      <td>
+          <span [class.directory-list__status-inactive-pointer]="!item.parsed_status"
+                class="list__status-default-pointer">
+          </span>{{ item.parsed_status ? 'parsed' : 'unparsed' }}
+      </td>
+      <td>{{ item.created_at | date: 'MMM yyyy' }}</td>
+    </tr>
+    </tbody> -->
+    </table>
+</div>

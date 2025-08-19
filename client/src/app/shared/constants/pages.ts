@@ -13,6 +13,7 @@ export enum Category {
   FEED = 'Feed',
   CONSOLIDATED = 'Consolidated',
   STEALERLOGS = 'Stealerlogs',
+  TENANT = 'Tenant'
 }
 
 export enum GeneralSubCategory {
@@ -73,4 +74,8 @@ export enum DumpSubCategory {
 
 export enum StealerlogsSubCategory {
   CREDENTIAL = 'Credential',
+}
+export enum TenantSubCategory {
+  VIEW = 'View',
+  ADD = 'Add',
 }
