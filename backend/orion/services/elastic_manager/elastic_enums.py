@@ -1,6 +1,15 @@
 from orion.helper_manager.env_handler import env_handler
 
 
+class ELASTIC_SEMANTIC_INDEX:
+    S_GENERIC_INDEX = "generic_model"
+    S_LEAK_INDEX = "leak_model"
+    S_DEFACEMENT_INDEX = "defacement_model"
+    S_CHATS_INDEX = "chat_model"
+    S_EXPLOIT_INDEX = "exploit_model"
+    S_SOCIAL_INDEX = "social_model"
+
+
 class ELASTIC_INDEX:
     S_GENERIC_INDEX = "generic_model"
     S_LEAK_INDEX = "leak_model"
@@ -10,6 +19,12 @@ class ELASTIC_INDEX:
     S_CREDENTIAL_INDEX = "credential_model"
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
+
+
+class ELASTIC_SEMANTIC:
+    S_INFERENCE_ID = "orion-e5-small"
+    S_EMBED_FIELD = "m_embedding"
+    S_EMBED_DIMS = 384
 
 
 class ELASTIC_CONNECTIONS:
@@ -51,9 +66,7 @@ class ELASTIC_ENUMS:
                 {
                     "strings_as_keywords": {
                         "match_mapping_type": "string",
-                        "mapping": {
-                            "type": "keyword"
-                        }
+                        "mapping": {"type": "keyword"}
                     }
                 }
             ],
@@ -83,7 +96,15 @@ class ELASTIC_ENUMS:
                 "m_country_name": {"type": "keyword"},
                 "m_revenue": {"type": "keyword"},
                 "m_update_date": {"type": "date"},
-                "m_creation_date": {"type": "date"}
+                "m_creation_date": {"type": "date"},
+
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 384,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }

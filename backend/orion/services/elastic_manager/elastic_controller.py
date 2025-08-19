@@ -7,6 +7,7 @@ from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATI
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.log_manager.log_controller import log
+from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
 
 
 class elastic_controller:
@@ -32,6 +33,8 @@ class elastic_controller:
             f"{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
             http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
         await self.__initialize_mappings()
+
+        await elastic_semantic_controller.get_instance().init(self.__m_connection)
 
     def get_connection(self):
         return self.__m_connection
@@ -196,6 +199,8 @@ class elastic_controller:
 
     async def index_data(self, p_data):
         try:
+            p_data = await elastic_semantic_controller.get_instance().enrich_for_semantic(p_data)
+
             def ensure_creation_date(p_entry):
                 data = p_entry[ELASTIC_KEYS.S_VALUE]
 

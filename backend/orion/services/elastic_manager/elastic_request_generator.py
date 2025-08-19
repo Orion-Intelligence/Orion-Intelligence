@@ -10,9 +10,12 @@ from orion.api.interactive.search_manager.search_data_model.exploit.search_explo
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
 from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.constants.enum import ChannelTypeEnum
+from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
+from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC
 from datetime import datetime
+
+from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
 
 
 class elastic_request_generator:
@@ -525,7 +528,6 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_leakdata(p_query_model, pfilter=None):
-
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -571,7 +573,6 @@ class elastic_request_generator:
                     from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
                     to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
                     to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
-
                     must_clauses.append({
                         "range": {
                             "m_leak_date": {
@@ -611,7 +612,9 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        if raw_query == "*":
+        if p_query_model.matchtype == "semantic":
+            content_query = {"match_all": {}}
+        elif raw_query == "*":
             content_query = {"match_all": {}}
         else:
             content_query = {"bool": {"should": [], "minimum_should_match": 1}}
@@ -643,7 +646,6 @@ class elastic_request_generator:
                             "minimum_should_match": 1
                         }
                     })
-
                 for term in loose_terms:
                     content_query["bool"]["should"].append({
                         "query_string": {
@@ -655,7 +657,6 @@ class elastic_request_generator:
                             "boost": 2
                         }
                     })
-
                 if not exact_phrases and not loose_terms:
                     content_query = {
                         "query_string": {
@@ -669,20 +670,23 @@ class elastic_request_generator:
                     }
 
         must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
+
+        base_bool_query = {
+            "must": [content_query] if isinstance(content_query, dict) else [],
+            "filter": must_clauses + must_filter_clauses,
+            "must_not": must_not_clause
+        }
+
+        if not p_query_model.must and should_filter_clauses:
+            base_bool_query["should"] = should_filter_clauses
+            base_bool_query["minimum_should_match"] = 1
+
         query_statement = {
             "min_score": 0,
             "query": {
                 "function_score": {
                     "query": {
-                        "bool": {
-                            "must": [content_query] if isinstance(content_query, dict) else [],
-                            "filter": must_clauses + must_filter_clauses,
-                            "must_not": must_not_clause,
-                            **({
-                                   "should": should_filter_clauses,
-                                   "minimum_should_match": 1
-                               } if not p_query_model.must and should_filter_clauses else {})
-                        }
+                        "bool": base_bool_query
                     },
                     "functions": [
                         {
@@ -773,6 +777,22 @@ class elastic_request_generator:
             "track_total_hits": True,
             "explain": True
         }
+
+        if raw_query != "*" and str(getattr(p_query_model, "matchtype", "")).lower() == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+            try:
+                qvec = elastic_semantic_controller.get_instance().embed_query_sync(raw_query)
+                if qvec:
+                    knn_clause = {
+                        "knn": {
+                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+                            "num_candidates": 1000,
+                            "query_vector": qvec
+                        }
+                    }
+                    query_statement["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+            except Exception:
+                pass
 
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
@@ -2077,7 +2097,7 @@ class elastic_request_generator:
                     "aggs": {
                         "Document Count": {
                             "value_count": {
-                                "field": "_id"
+                                "field": "m_hash"
                             }
                         }
                     }
@@ -2103,7 +2123,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}},
                     "aggs": {
-                        "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 5 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2113,7 +2133,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}},
                     "aggs": {
-                        "Updated 9 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 9 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2185,7 +2205,7 @@ class elastic_request_generator:
                     "aggs": {
                         "Document Count": {
                             "value_count": {
-                                "field": "_id"
+                                "field": "m_hash"
                             }
                         }
                     }
@@ -2222,7 +2242,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}},
                     "aggs": {
-                        "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 5 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2232,7 +2252,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}},
                     "aggs": {
-                        "Updated 9 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 9 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2255,7 +2275,7 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
                     "aggs": {
-                        "Document Count": {"value_count": {"field": "_id"}}
+                        "Document Count": {"value_count": {"field": "m_hash"}}
                     }
                 }
             },
@@ -2265,7 +2285,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_leak_date": {"gte": "now-5d/d"}}},
                     "aggs": {
-                        "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 5 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },

@@ -228,6 +228,7 @@ class crawl_model:
         )
 
     async def invoke_news_index(self, leak_index: LeakDataModel):
+        print(":::::::::::::::::::::2", flush=True)
         m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(

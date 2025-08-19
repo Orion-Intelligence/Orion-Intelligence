@@ -76,47 +76,9 @@ services:
     environment:
       - ENABLE_BROTLI=1
 
-  traefik:
-    image: traefik:v2.10
-    container_name: trusted-web-traefik
-    ports:
-      - "9090:9090"
-      - "9443:9443"
-    command:
-      - "--entrypoints.web.address=:9090"
-      - "--entrypoints.websecure.address=:9443"
-      - "--providers.file.directory=/etc/traefik"
-      - "--providers.docker=true"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./dockerFiles/traefik:/etc/traefik
-    restart: unless-stopped
-    networks:
-      - backend
-    healthcheck:
-      test: [ "CMD-SHELL", "exit 0" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  dozzle:
-    container_name: trusted-web-dozzle
-    image: amir20/dozzle:latest
-    networks:
-      - backend
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dozzle.rule=Host(`dozzle.localhost`)"
-      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
-      - "traefik.http.routers.dozzle.middlewares=auth@file"
-    restart: unless-stopped
-
   elasticsearch:
     container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.20
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
     environment:
       - discovery.type=single-node
       - network.host=0.0.0.0
@@ -151,7 +113,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 30G
 
 
   redis_server:

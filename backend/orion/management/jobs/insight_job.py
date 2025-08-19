@@ -138,7 +138,7 @@ class insight_job:
                 )
 
         except Exception as ex:
-            log.g().ex(ex)
+            log.g().e(ex)
             return
 
     async def update_insights(self):
