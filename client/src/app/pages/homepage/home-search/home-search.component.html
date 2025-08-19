@@ -11,18 +11,21 @@
           type="search" (focus)="setFilterOverlay(true)"> <input type="hidden" value="1">
         <span class="input-group-text border-start-0 gc-clear-selection cursor-pointer">
           <ng-container>
-            <hr class="vertical-divider"/>
+            <hr class="vertical-divider" />
             Advance &nbsp;&nbsp;
             <label class="small-switch">
-              <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()"/>
+              <input type="checkbox" [checked]="app_service.configData().localSettings.advance_setting_toggle"
+                (change)="onAdvanceSettingToggle()" />
               <span class="small-slider round"></span>
             </label>
             <ng-container>
-              <hr class="vertical-divider ml-3"/>
+              <hr class="vertical-divider ml-3" />
               <span (click)="onToolToggle($event)">
                 Tools
-                <div class="expand-icon" >
-                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="transition-transform"/>
+                <div class="expand-icon">
+                  <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon"
+                    [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools"
+                    class="transition-transform" />
                 </div>
               </span>
             </ng-container>
@@ -56,6 +59,12 @@
             <li><a class="dropdown-item"
                 (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();"> Match full
                 query (AND)</a></li>
+            <li>
+              <hr class="dropdown-divider mx-3">
+            </li>
+            <li><a class="dropdown-item"
+                (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('semantic');onSearchSubmit();">
+                Match semantic query (semantic)</a></li>
           </ul>
         </div>
       </ng-container>

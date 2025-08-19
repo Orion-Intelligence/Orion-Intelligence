@@ -24,6 +24,8 @@ export class LocalSettingsModel {
   iocExpanded: boolean = true;
   entityfilterCategories: Record<string, string[]> = {};
   entityFilterCondition: boolean = false;
+  matchType: string = "";
+  sortType: string = "";
 }
 
 export class ConfigSettings {

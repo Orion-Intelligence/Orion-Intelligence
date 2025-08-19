@@ -1,12 +1,12 @@
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {ActivatedRoute, Router} from '@angular/router';
-import {FormsModule} from '@angular/forms';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {ConsolidatedCallbackModel} from '../../../shared/model/results/consolidated/consolidated.callback.model';
-import {SearchFiltersComponent} from "../search-filters/search-filters.component";
-import {HomeInsightComponent} from "../home-insight/home-insight.component";
-import {AppService} from '../../../services/core/app/app.service';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
+import { SearchFiltersComponent } from "../search-filters/search-filters.component";
+import { HomeInsightComponent } from "../home-insight/home-insight.component";
+import { AppService } from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-home-search',
@@ -19,13 +19,16 @@ export class HomeSearchComponent implements OnInit {
   selectedSearchBy = 'Match any term';
 
   showFiltersOverlay: boolean = false;
-  @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
+  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService) {
   }
 
   ngOnInit(): void {
+    const cfg = this.app_service.configData();
+    const matchtype = cfg.localSettings.matchType;
+    this.onSetMatchType(matchtype)
   }
 
   onSetMatchType(type: string) {
@@ -33,6 +36,7 @@ export class HomeSearchComponent implements OnInit {
       ...this.dashboardService.selectedFilters(),
       matchtype: type
     });
+    this.app_service.set('matchType', type);
   }
 
   onSearchSubmit(): void {
@@ -51,10 +55,13 @@ export class HomeSearchComponent implements OnInit {
 
   getMatchType() {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
+
     if (matchtype === "full") {
       return "Match full query";
     } else if (matchtype === "or") {
       return "Match any term";
+    } else if (matchtype === "semantic") {
+      return "Match semantic query";
     } else {
       return "Match individual terms";
     }

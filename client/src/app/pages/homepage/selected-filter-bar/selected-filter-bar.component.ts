@@ -1,10 +1,10 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {NgFor, NgIf, CommonModule} from '@angular/common';
-import {AppService} from '../../../services/core/app/app.service';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {filter_mapping} from '../../../shared/constants/filters';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
-import {Router} from '@angular/router';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { NgFor, NgIf, CommonModule } from '@angular/common';
+import { AppService } from '../../../services/core/app/app.service';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { filter_mapping } from '../../../shared/constants/filters';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -42,11 +42,12 @@ export class SelectedFilterBarComponent implements OnInit {
 
   clearMatchType(): void {
     this.dashboardService.selectedFilters.update((filters) => {
-      const updated = {...filters};
+      const updated = { ...filters };
       delete updated["matchtype"];
       return updated;
     });
     this.clearAll.emit();
+    this.app_service.set('matchType', "");
   }
 
   clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
@@ -64,7 +65,7 @@ export class SelectedFilterBarComponent implements OnInit {
   }
 
   removeEntityTypeFilterTag(tagToRemoveId: string) {
-    const categories = {...this.app_service.configData().localSettings.entityfilterCategories};
+    const categories = { ...this.app_service.configData().localSettings.entityfilterCategories };
     for (const key in categories) {
       const value = categories[key];
       if (Array.isArray(value)) {
