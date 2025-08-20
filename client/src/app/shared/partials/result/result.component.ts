@@ -94,16 +94,6 @@ export class ResultComponent implements OnInit, OnChanges {
     this.app_service.set('matchType', type);
   }
 
-  // getMatchType() {
-  //   const matchtype = this.dashboardService.selectedFilters()["matchtype"];
-  //   if (matchtype === "full") {
-  //     return "Match full query";
-  //   } else if (matchtype === "and") {
-  //     return "Match individual terms";
-  //   } else {
-  //     return "Match any term";
-  //   }
-  // }
   getMatchType() {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
     if (matchtype === "full") {
