@@ -167,7 +167,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
                 entity_data = entity_model(
                     m_attacker=[sources],
                     m_location=countries,
-                    m_country_name=country,
+                    m_country=[country],
                     m_team="ddosecret"
                 )
                 entity_data = helper_method.extract_entities(content_text, entity_data)

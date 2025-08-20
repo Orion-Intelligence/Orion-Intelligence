@@ -295,7 +295,7 @@ export class ResultInsightsComponent implements OnInit {
     });
 
     this.coverageData = [
-      { value: total, label: 'Total', color: '' },
+      { value: total, label: 'Total Found', color: '' },
       { value: active, label: 'Active', color: '#1ec773' },
       { value: inactive, label: 'Inactive', color: '#e6534b' },
       { value: seldom, label: 'Seldom', color: '#f08b36' }
@@ -370,7 +370,6 @@ export class ResultInsightsComponent implements OnInit {
     fieldsMap: Record<string, string[]>,
     isGrouped: boolean
   ): Record<string, string[]> {
-    console.log(groupData.length)
     const resultMap: Record<string, Set<string>> = {};
 
     for (const [categoryKey, fields] of Object.entries(fieldsMap)) {

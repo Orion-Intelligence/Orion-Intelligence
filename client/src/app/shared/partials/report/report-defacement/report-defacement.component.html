@@ -11,15 +11,22 @@
           : '-'
       }}
     </div>
-    <div class="report__defacement-detail-header-items">
+    <div class="report__defacement-detail-header-items" *ngIf="!defacementData?.m_ioc_type?.length">
       <strong>Defacer:</strong><span class="report__defacement-truncate">{{ defacementData?.m_attacker ? defacementData?.m_attacker : '-' }}</span>
     </div>
     <div class="report__defacement-detail-header-items">
       <strong>Team:</strong><span class="report__defacement-truncate">{{ defacementData?.m_team }}</span>
     </div>
-    <div class="report__defacement-detail-header-items">
+
+    <div class="report__defacement-detail-header-items" *ngIf="!defacementData?.m_ioc_type?.length; else iocTypeTpl">
       <strong>Web Server:</strong><span class="report__defacement-truncate">{{ defacementData?.m_web_server ? defacementData?.m_web_server : '-' }}</span>
     </div>
+    <ng-template #iocTypeTpl>
+      <div class="report__defacement-detail-header-items">
+        <strong>IOC Type:</strong><span class="report__defacement-truncate">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
+      </div>
+    </ng-template>
+
     <div class="report__defacement-detail-header-items">
       <strong>Breach:</strong><span class="report__defacement-truncate">{{ defacementData?.m_source_url  ? defacementData?.m_source_url : '-'}}</span>
     </div>

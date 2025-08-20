@@ -29,6 +29,7 @@ export enum GeneralSubCategory {
 }
 
 export enum BreachSubCategory {
+  ALL = 'All',
   DATABASES = 'Databases',
   TRACKING = 'Tracking',
   EMAIL = 'Email',
@@ -38,6 +39,7 @@ export enum BreachSubCategory {
 }
 
 export enum DefacementSubCategory {
+  ALL = 'All',
   HACKED = 'Hacked',
   PHISHING = 'Phishing',
   DATABASES = 'Databases',
@@ -48,6 +50,7 @@ export enum ApiSubCategory {
 }
 
 export enum SocialSubCategory {
+  ALL = 'All',
   TELEGRAM = 'Telegram',
   TWITTER = 'Twitter',
   FORUM = 'Forum',
@@ -55,6 +58,7 @@ export enum SocialSubCategory {
 }
 
 export enum ExploitSubCategory {
+  ALL = 'All',
   CVE = 'CVE',
   TOOLS = 'Tools',
   ZERODAY = 'ZeroDay',

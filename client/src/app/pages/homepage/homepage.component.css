@@ -22,8 +22,20 @@
 
 @media only screen and (width <=943px) {
   .home__form {
-    margin-left: 21px !important;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
   }
+
+  .home_insight_graph_container{
+    gap: 10px !important;
+    margin-right: 0 !important;
+  }
+
+  .home_insight__container{
+    margin-right: 0 !important;
+    gap: 10px !important;
+  }
+
 
   #analytics {
     margin-top: 60px

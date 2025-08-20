@@ -144,7 +144,7 @@ class _ransomlook(leak_extractor_interface, ABC):
                         m_team="ransom look"
                     )
 
-                    entity_data = helper_method.extract_entities(m_content, entity_data)
+                    entity_data = helper_method.extract_entities(m_content + ref_html, entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
                 except Exception as ex:

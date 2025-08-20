@@ -170,8 +170,8 @@ class _tp5cwh6d2b5hekcg6jlhoe6mawa7dlwiv47epvnfmzuaaur2dnaa3uid(leak_extractor_i
 
             entity_data = entity_model(
                 m_team="team xxx",
-                m_country_name=country
+                m_country=[country]
             )
 
-            entity_data = helper_method.extract_entities(description, entity_data)
+            entity_data = helper_method.extract_entities(description + ref_html, entity_data)
             self.append_leak_data(card_data, entity_data)

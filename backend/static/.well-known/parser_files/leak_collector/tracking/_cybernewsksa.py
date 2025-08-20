@@ -132,7 +132,7 @@ class _cybernewsksa(leak_extractor_interface, ABC):
 
                     entity_data = entity_model(
                         m_company_name="National Cybersecurity Authority",
-                        m_country_name="Saudi Arabia",
+                        m_country=["Saudi Arabia"],
                         m_team="NCA KSA Cyber"
                     )
 

@@ -136,7 +136,7 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
 
                     full_text = f"Title: {title} | Revenue: {revenue} | Country: {country} | Date: {leak_date_raw} | Size: {size} | {description}"
 
-                    ref_html = helper_method.extract_refhtml(title, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                    ref_html = helper_method.extract_refhtml(title , self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
                     card_data = leak_model(
                         m_ref_html=ref_html,
@@ -158,11 +158,11 @@ class _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd(leak_extractor_i
                     entity_data = entity_model(
                         m_company_name=title,
                         m_ip=[title],
-                        m_country_name=country,
+                        m_country=[country],
                         m_location=[country],
                         m_team="underground"
                     )
-                    entity_data = helper_method.extract_entities(full_text, entity_data)
+                    entity_data = helper_method.extract_entities(full_text + ref_html, entity_data)
 
                     self.append_leak_data(card_data, entity_data)
 

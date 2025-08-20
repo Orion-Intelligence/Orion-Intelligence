@@ -223,3 +223,13 @@ ngb-datepicker-month {
   gap: 2px;
   margin-bottom: 2px
 }
+
+a,
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active,
+:any-link {
+  text-decoration: none !important;
+}

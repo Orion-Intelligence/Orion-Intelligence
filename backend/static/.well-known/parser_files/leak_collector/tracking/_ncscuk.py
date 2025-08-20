@@ -139,7 +139,7 @@ class _ncscuk(leak_extractor_interface, ABC):
 
                     entity_data = entity_model(
                         m_team="NCSC Cyber",
-                        m_country_name="United Kingdom"
+                        m_country=["United Kingdom"]
                     )
 
                     entity_data = helper_method.extract_entities(full_content, entity_data)

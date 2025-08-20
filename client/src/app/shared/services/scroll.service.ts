@@ -32,7 +32,8 @@ export class ScrollService {
     }
   }
 
-  openCTI(itemId: string): void {
+  openCTI(event: MouseEvent, itemId: string): void {
+    event.stopPropagation()
     if (itemId) {
       const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
       const singleInput = itemId;
@@ -61,6 +62,16 @@ export class ScrollService {
       } else {
         window.scrollTo({top: position, behavior: 'auto'});
       }
+    }
+  }
+
+
+  public scrollToTop(behavior: ScrollBehavior = 'auto'): void {
+    const el = (document.scrollingElement || document.documentElement) as HTMLElement;
+    if (el && typeof (el as any).scrollTo === 'function') {
+      el.scrollTo({top: 0, left: 0, behavior});
+    } else {
+      window.scrollTo({top: 0, left: 0, behavior});
     }
   }
 

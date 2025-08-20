@@ -121,6 +121,12 @@ export class DirectoryComponent implements OnInit {
       },
       queryParamsHandling: 'merge'
     }).then(() => {
+      const container = document.getElementById('dashboard-container');
+      if (container) {
+        container.scrollTo({top: 0, left: 0});
+      } else {
+        window.scrollTo({top: 0, left: 0});
+      }
       this.directoryService.reloadDirectoryData({...filteredParams, page: currentPage});
     });
   }

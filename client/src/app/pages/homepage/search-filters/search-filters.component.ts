@@ -6,6 +6,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { FilterCategory } from '../../../shared/model/filter/filter.model';
 import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
 import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import {HelperService} from '../../../shared/services/helper.service';
 
 @Component({
   selector: 'app-search-filters',
@@ -17,6 +18,8 @@ import { SuggestionService } from '../../../services/entity_filter_suggestions/s
 })
 export class SearchFiltersComponent implements OnInit {
   @Input() showSorting!: boolean;
+  @Input() homePage: Boolean = false;
+  @Output() checkDomain = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
   @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
 
@@ -32,7 +35,7 @@ export class SearchFiltersComponent implements OnInit {
   showLeftFade = false;
   showRightFade = false;
 
-  constructor(public app_service: AppService, private suggestionService: SuggestionService) {
+  constructor(public helperService:HelperService, public app_service: AppService, private suggestionService: SuggestionService) {
   }
 
   get selectedCategoryTags() {
@@ -68,11 +71,14 @@ export class SearchFiltersComponent implements OnInit {
   }
 
   addTag() {
-    const trimmed = this.newValue.trim();
+    let trimmed = this.newValue.trim();
     const allTags = Object.values(this.categories).flat();
     const alreadyExists = allTags.some(tag => tag.toLowerCase() === trimmed.toLowerCase());
 
     if (trimmed && !alreadyExists) {
+      if((this.selectedCategoryId=="m_domain" || this.selectedCategoryId=="m_url" || this.selectedCategoryId=="m_search_all") && (trimmed.startsWith("www") || trimmed.includes("http"))){
+        trimmed = this.helperService.extractDomain(trimmed)
+      }
       this.categories[this.selectedCategoryId] = [...this.selectedCategoryTags, trimmed];
       this.updateService();
     }
@@ -80,6 +86,8 @@ export class SearchFiltersComponent implements OnInit {
     this.newValue = '';
     this.filteredSuggestions = [];
     this.showSuggestions = false;
+    if (this.checkDomain)
+      this.checkDomain.emit();
   }
 
   getTags(key: string): string[] {
@@ -197,9 +205,11 @@ export class SearchFiltersComponent implements OnInit {
       this.showSuggestions = false;
     }
   }
-  onSuggestionClick(value: string): void {
+  onSuggestionClick(event: MouseEvent, value: string): void {
     this.newValue = value;
     this.addTag();
+    event.stopPropagation();
+    event.preventDefault();
   }
 
   protected readonly search_filter_labels = search_filter_labels;

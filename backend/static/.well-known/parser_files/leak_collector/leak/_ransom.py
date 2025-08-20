@@ -170,7 +170,7 @@ class _ransom(leak_extractor_interface, ABC):
                     m_team="ransom wiki"
                 )
 
-                entity_data = helper_method.extract_entities(description or "", entity_data)
+                entity_data = helper_method.extract_entities((description or "") + ref_html, entity_data)
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 

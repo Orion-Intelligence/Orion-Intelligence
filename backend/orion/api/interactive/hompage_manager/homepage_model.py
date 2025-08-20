@@ -28,11 +28,11 @@ class homepage_model:
         result = await elastic_controller.get_instance().generate_graph()
         cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
 
-        if cached:
-            try:
-                return json.loads(cached)
-            except Exception as _:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        # if cached:
+        #     try:
+        #         return json.loads(cached)
+        #     except Exception as _:
+        #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(result), 86400])
         return result
@@ -59,13 +59,13 @@ class homepage_model:
         redis_instance = redis_controller.getInstance()
         redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}"
         
-        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+        # cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
         
-        if cached and 1!=1:
-            try:
-                return json.loads(cached)
-            except Exception as _:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        # if cached and 1!=1:
+        #     try:
+        #         return json.loads(cached)
+        #     except Exception as _:
+        #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         indices, queries = elastic_insight_generator().on_insight_consolidated_data()
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
@@ -108,7 +108,7 @@ class homepage_model:
         m_hash = item["m_hash"] or item.get("m_message_id")
 
         title = item.get("m_title") or item.get("m_name") or item.get("m_caption") or item.get("m_url") or "Untitled"
-        display_title = title[:15] + " ..." if len(title) > 20 else title
+        display_title = title if len(title) > 20 else title
 
         date_fields = ["m_update_date", "m_leak_date", "m_message_date", "m_leak_date"]
         raw_date = next((item.get(f) for f in date_fields if item.get(f)), None)
@@ -129,9 +129,9 @@ class homepage_model:
                     locations = [loc.strip() for loc in item["m_country_name"].split(",")]
 
         location_summary = ", ".join(locations)
-        location_summary = location_summary[:24] + "..." if len(location_summary) > 24 else location_summary
+        location_summary = location_summary if len(location_summary) > 24 else location_summary
 
-        phoneNumber= phoneNumbers[:24] + "..." if len(phoneNumbers) > 24 else phoneNumbers
+        phoneNumber= phoneNumbers if len(phoneNumbers) > 24 else phoneNumbers
 
         if "m_url" in item:
             urls.append(item["m_url"])

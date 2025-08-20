@@ -1,28 +1,29 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Observable } from 'rxjs';
-import { EmptyResultComponent } from '../empty-result/empty-result.component';
-import { FormsModule } from '@angular/forms';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { LoadingFormComponent } from '../loading-form/loading-form.component';
-import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
-import { SidebarService } from '../../services/sidebar.service';
-import { FiltersComponent } from '../filters/filters.component';
-import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
-import { SortType } from '../../constants/shared-enums';
-import { SuggestionComponent } from '../suggestion/suggestion.component';
-import { EmptyQueryComponent } from '../empty-query/empty-query.component';
-import { Suggestion } from '../../model/results/shared/common-result';
-import { query } from '@angular/animations';
-import { Category } from "../../constants/pages";
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import { AppService } from '../../../services/core/app/app.service';
-import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/search-filters.component";
-import { searchFilterAnimation } from '../../animations/search.filter.animation';
-import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { HelperService } from '../../services/helper.service';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Observable} from 'rxjs';
+import {EmptyResultComponent} from '../empty-result/empty-result.component';
+import {FormsModule} from '@angular/forms';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {LoadingFormComponent} from '../loading-form/loading-form.component';
+import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
+import {SidebarService} from '../../services/sidebar.service';
+import {FiltersComponent} from '../filters/filters.component';
+import {FilterCategory, FilterModel} from '../../model/filter/filter.model';
+import {SortType} from '../../constants/shared-enums';
+import {SuggestionComponent} from '../suggestion/suggestion.component';
+import {EmptyQueryComponent} from '../empty-query/empty-query.component';
+import {Suggestion} from '../../model/results/shared/common-result';
+import {query} from '@angular/animations';
+import {Category} from "../../constants/pages";
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {AppService} from '../../../services/core/app/app.service';
+import {SearchFiltersComponent} from "../../../pages/homepage/search-filters/search-filters.component";
+import {searchFilterAnimation} from '../../animations/search.filter.animation';
+import {SelectedFilterBarComponent} from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {HelperService} from '../../services/helper.service';
+import {ScrollService} from '../../services/scroll.service';
 
 @Component({
   selector: 'app-result',
@@ -45,8 +46,9 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() consolidated = false;
   @Input() domain = false;
   @Input() showTabs = true;
-  @Input() filterModel!: FilterModel
-  @Input() showSorting: boolean = true
+  @Input() filterModel!: FilterModel;
+  @Input() showSorting: boolean = true;
+  @Input() showSelectedFilters: boolean = true;
 
   @Output() reloadSearchFilters = new EventEmitter<FilterCategory[]>();
   @Output() reloadFilters = new EventEmitter<Record<string, string | null>>();
@@ -69,10 +71,10 @@ export class ResultComponent implements OnInit, OnChanges {
   protected readonly Category = Category;
 
   showFiltersOverlay: boolean = false;
-  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
 
-  constructor(private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
+  constructor(protected scrollService:ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -86,34 +88,22 @@ export class ResultComponent implements OnInit, OnChanges {
     this.init_domains()
   }
 
+
   onSetMatchType(type: string) {
     this.dashboardService.selectedFilters.set({
       ...this.dashboardService.selectedFilters(),
       matchtype: type
     });
-    this.app_service.set('matchType', type);
   }
 
-  // getMatchType() {
-  //   const matchtype = this.dashboardService.selectedFilters()["matchtype"];
-  //   if (matchtype === "full") {
-  //     return "Match full query";
-  //   } else if (matchtype === "and") {
-  //     return "Match individual terms";
-  //   } else {
-  //     return "Match any term";
-  //   }
-  // }
   getMatchType() {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
     if (matchtype === "full") {
       return "Match full query";
-    } else if (matchtype === "or") {
-      return "Match any term";
-    } else if (matchtype === "semantic") {
-      return "Match semantic query";
-    } else {
+    } else if (matchtype === "and") {
       return "Match individual terms";
+    } else {
+      return "Match any term";
     }
   }
 
@@ -133,10 +123,10 @@ export class ResultComponent implements OnInit, OnChanges {
           }
 
           if (value && base.options.includes(value)) {
-            newFilters[key] = { ...base, selected: value };
+            newFilters[key] = {...base, selected: value};
             updatedSelectedFilters[key] = value;
           } else {
-            newFilters[key] = { ...base };
+            newFilters[key] = {...base};
           }
         });
 
@@ -148,21 +138,21 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true
     }
-    const cfg = this.app_service.configData();
-    const matchtype = cfg.localSettings.matchType || 'and';
-    this.onSetMatchType(matchtype)
   }
 
   onFormSubmit() {
+    this.scrollService.resetOnReload()
+    if (this.local_query) {
+    }
     this.dashboardService.consolidatedParamModel.page = 1
     let query = this.local_query;
     this.searchInputRef?.nativeElement.blur();
-    this.updateQuery.emit(query);
     this.searchQuery = query;
-    this.reloadData.emit();
     this.result_triggered = true;
-    this.init_domains()
     this.showScans = false;
+    this.updateQuery.emit(query);
+    this.reloadData.emit();
+    this.init_domains()
   }
 
 
@@ -252,12 +242,13 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   init_domains() {
-    let domain = this.helperService.extractLinks(this.searchQuery)
-    if (domain) {
-      this.scandomains = domain
-    } else {
-      this.scandomains = []
-    }
+    const filters = this.app_service.configData().localSettings.entityfilterCategories;
+    let queryDomains = this.helperService.extractLinks(this.searchQuery) || [];
+    let filterDomains = Array.isArray(filters['m_domain'])
+      ? filters['m_domain'].map(domain => `https://${domain}`)
+      : [];
+    this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
+
   }
 
   toggleScan() {
@@ -267,10 +258,9 @@ export class ResultComponent implements OnInit, OnChanges {
   onScanSelected(domain: string) {
     const url = this.router.serializeUrl(
       this.router.createUrlTree(['/dashboard/scan'], {
-        queryParams: { domain }
+        queryParams: {domain}
       })
     );
     window.open(url, '_blank');
   }
-
 }

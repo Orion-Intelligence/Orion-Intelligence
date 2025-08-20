@@ -1,23 +1,24 @@
 <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false"
   (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
-  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading" [searchQuery]="query"
+  [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading()" [searchQuery]="query"
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)"
-  (resetFilter)="resetFilters($event)"></app-result>
+  (resetFilter)="resetFilters($event)" [showSelectedFilters]="true"></app-result>
 
-
-<div *ngIf="!isLoading" @fadeInDashboardItem>
+<div *ngIf="!isLoading()" @fadeInDashboardItem>
   <div class="dashboard__layout-wrapper">
     <div class="dashboard__layout-left">
       <ng-container *ngIf="isGrouped; else rankedMode">
-        <app-defacement-results [isExpandable]="isIpReportExpandable()" [results]="consolidatedCallbackModel.defacement_model" *ngIf="!isLoading && getTotalResultCount()>0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0) > 0"></app-defacement-results>
+        <app-defacement-results [isExpandable]="isIpReportExpandable()"
+          [results_defacement]="consolidatedCallbackModel.defacement_model" [results_stealerlog]="consolidatedCallbackModel.stealer_model"
+          *ngIf="!isLoading() && getTotalResultCount()>0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || consolidatedCallbackModel.stealer_model?.Result?.length ?? 0) > 0"></app-defacement-results>
+
         <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
-          <div class="consolidated_container" *ngIf="index.key !== 'defacement_model'">
+          <div class="consolidated_container" *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
             <div class="category-heading-enforced">
               <span class="left-text">
                 <div>{{ (index.key.split('_').join(' ')).replace('model', 'Results') | titlecase }}</div>
                 <div class="left-text-small">Result count {{ pageCounts[index.key] }}</div>
-              </span>
-              <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content">
+              </span> <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="right-content">
                 Explore
                 <button appTooltip="Open Page" class="p-0 expand-toggle-btn">
                   <img alt="background" height="20" src="/assets/images/shared/explore_icon.svg" width="20">
@@ -38,7 +39,7 @@
       </ng-container>
     </div>
     <div class="dashboard__layout-right" *ngIf="getTotalResultCount()>0">
-      <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="respons"
+      <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="response"
         [rankedResults]="rankedResult" [isGrouped]="isGrouped"></app-result-insights>
     </div>
   </div>

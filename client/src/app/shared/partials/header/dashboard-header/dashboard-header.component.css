@@ -57,6 +57,9 @@
 .header-bar_left-arrow.disabled {
   cursor: not-allowed;
   opacity: 0.5;
+  visibility: hidden;
+  width: 0;
+  margin-left: -14px;
 }
 
 .breadcrumb-item.disabled {

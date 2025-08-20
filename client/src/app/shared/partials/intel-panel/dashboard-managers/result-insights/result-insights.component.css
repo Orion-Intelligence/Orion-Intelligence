@@ -156,7 +156,7 @@
   max-height: 250px;
   overflow-y: auto;
   padding-right: 0.5rem;
-  mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 7%, black 90%, transparent);
   mask-size: 100% 100%;
   mask-repeat: no-repeat;
 }
@@ -191,4 +191,17 @@
   height: 8px;
   border-radius: 50%;
   display: inline-block;
+}
+
+@media (width <=1299px) {
+  .insight-card {
+    margin: 35px;
+    width: auto;
+  }
+}
+
+@media only screen and (width <=1000px) {
+  .insight-card {
+    margin: 25px 10px;
+  }
 }

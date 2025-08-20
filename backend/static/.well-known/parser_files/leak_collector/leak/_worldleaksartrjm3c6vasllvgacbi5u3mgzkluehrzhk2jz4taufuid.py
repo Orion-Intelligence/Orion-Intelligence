@@ -166,7 +166,7 @@ class _worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid(leak_extractor_i
                     m_company_name=title_name if title_name else None,
                     m_team="worldleak",
                     m_employee_count=employees,
-                    m_country_name=country,
+                    m_country=[country],
                 )
 
                 entity_data = helper_method.extract_entities(description, entity_data)

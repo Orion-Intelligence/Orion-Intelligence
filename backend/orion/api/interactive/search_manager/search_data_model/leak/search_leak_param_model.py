@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, List
 from pydantic import BaseModel, Field
 from orion.helper_manager.helper_controller import helper_controller
 
@@ -15,6 +15,7 @@ class search_leak_param_model(BaseModel,helper_controller):
     content: Optional[str] = "all"
     entity: Optional[str] = ""
     must: Optional[bool] = False
+    entity_filter: Optional[Dict[str, List[str]]] = None
 
     class Config:
         allow_population_by_field_name = True

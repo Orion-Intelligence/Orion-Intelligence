@@ -25,8 +25,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   isLoading: boolean = false;
   firstTrigger: boolean = true;
-  mUser: any;
-  mURL: any;
+  user: any;
+  url: any;
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
 
@@ -45,16 +45,16 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.stealerlogCallbackModel = {...this.dashboardService.stealerlogCallbackModel};
-    this.dashboardService.consolidatedParamModel.mFullSearch = false;
+    this.dashboardService.consolidatedParamModel.fullsearch = false;
 
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params]) => {
-        this.mURL = params['mURL'];
-        this.mUser = params['mUser'];
+        this.url = params['url'];
+        this.user = params['user'];
 
-        this.dashboardService.consolidatedParamModel.mURL = params['mURL'] || '';
-        this.dashboardService.consolidatedParamModel.mUser = params['mUser'] || '';
+        this.dashboardService.consolidatedParamModel.url = params['url'] || '';
+        this.dashboardService.consolidatedParamModel.user = params['user'] || '';
 
         if (this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
           this.isLoading = false;
@@ -71,8 +71,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(reset = true): void {
-    this.dashboardService.consolidatedParamModel.mURL = this.mURL
-    this.dashboardService.consolidatedParamModel.mUser = this.mUser
+    this.dashboardService.consolidatedParamModel.url = this.url
+    this.dashboardService.consolidatedParamModel.user = this.user
     if (this.isLoading) return;
 
     this.isLoading = true;
@@ -88,11 +88,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-    if (!this.dashboardService.consolidatedParamModel.mUser){
-      this.dashboardService.consolidatedParamModel.mUser = ""
+    if (!this.dashboardService.consolidatedParamModel.user){
+      this.dashboardService.consolidatedParamModel.user = ""
     }
-    if (!this.dashboardService.consolidatedParamModel.mURL){
-      this.dashboardService.consolidatedParamModel.mURL = ""
+    if (!this.dashboardService.consolidatedParamModel.url){
+      this.dashboardService.consolidatedParamModel.url = ""
     }
 
     this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.dashboardService.consolidatedParamModel)
@@ -138,7 +138,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   onToggleAnalyticsTrigger($event: string) {
-    this.dashboardService.consolidatedParamModel.mFullSearch = $event == "Full Search";
+    this.dashboardService.consolidatedParamModel.fullsearch = $event == "Full Search";
     this.fetchSearchResults(true);
   }
 }

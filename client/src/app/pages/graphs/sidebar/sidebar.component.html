@@ -61,9 +61,9 @@
         <label class="sidebar_label mt-1">Document ID</label> <input [(ngModel)]="singleInput" class="form-control sidebar_input" name="singleInput" placeholder="Enter ID" type="text"/>
       </ng-container>
 
-      <label class="sidebar_label mt-1">Maximum Nodes</label> <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" class="form-control sidebar_input" max="800" min="20" name="maxNodes" placeholder="Enter maximum nodes" required type="number"/>
+      <label class="sidebar_label mt-1">Maximum Nodes (max 5)</label> <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" class="form-control sidebar_input" max="800" min="20" name="maxNodes" placeholder="Enter maximum nodes" required type="number"/>
 
-      <label class="sidebar_label mt-3">Maximum Depth</label> <input (blur)="validateMaxDepth()" [(ngModel)]="maxDepth" class="form-control sidebar_input" max="5" min="1" name="maxDepth" placeholder="Enter maximum depth" required type="number"/>
+      <label class="sidebar_label mt-3">Maximum Depth (max 800)</label> <input (blur)="validateMaxDepth()" [(ngModel)]="maxDepth" class="form-control sidebar_input" max="5" min="1" name="maxDepth" placeholder="Enter maximum depth" required type="number"/>
 
       <div class="sidebar_submit">
         <div class="sidebar_submit d-flex flex-column mt-4">

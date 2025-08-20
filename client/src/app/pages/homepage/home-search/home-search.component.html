@@ -2,13 +2,16 @@
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
     <div class="col-md-12 col-sm-12 col-xs-12">
       <div class="input-group default-input-sub-container">
-        <button class="btn btn-primary default-input-button" type="submit">
-          <img alt="Search" height="16" class="search-icon"
-            ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
+        <button class="btn btn-primary default-input-button" (click)="onSearchSubmit()" type="submit">
+          <img alt="Search" height="16" class="search-icon" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
         </button>
-        <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
-          class="form-control default-input dashboard-general-input" maxlength="150" name="q" placeholder="Search ..."
-          type="search" (focus)="setFilterOverlay(true)"> <input type="hidden" value="1">
+
+        <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input dashboard-general-input" maxlength="150" name="q" placeholder="Search ..." type="search" (focus)="setFilterOverlay(true)"> <input type="hidden" value="1">
+
+        <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()">
+          <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14" [style.visibility]="searchQuery ? 'visible' : 'hidden'">
+        </button>
+
         <span class="input-group-text border-start-0 gc-clear-selection cursor-pointer">
           <ng-container>
             <hr class="vertical-divider" />
@@ -32,27 +35,23 @@
           </ng-container>
         </span>
       </div>
-      <div #filtersWrapper class="filters-overlay search-trigger"
-        *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
-        <app-search-filters [showSorting]="false"></app-search-filters>
+
+      <div #filtersWrapper class="filters-overlay search-trigger" *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
+        <app-search-filters [showSorting]="false" [homePage]="true"></app-search-filters>
       </div>
+
       <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools;">
         <div class="dropdown mt-2">
-          <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
-            aria-expanded="false">
+          <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
             search by <b>({{ getMatchType() }})</b>
             <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
           </span>
           <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
-            <li><a class="dropdown-item"
-                (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();"> Match any term
-                (OR)</a></li>
+            <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();">Match any term (OR)</a></li>
             <li>
               <hr class="dropdown-divider mx-3">
             </li>
-            <li><a class="dropdown-item"
-                (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();"> Match
-                indivisual terms (AND)</a></li>
+            <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();">Match indivisual terms (AND)</a></li>
             <li>
               <hr class="dropdown-divider mx-3">
             </li>
@@ -68,6 +67,7 @@
           </ul>
         </div>
       </ng-container>
+
       <app-home-insight></app-home-insight>
     </div>
   </div>

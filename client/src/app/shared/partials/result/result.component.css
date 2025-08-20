@@ -34,12 +34,11 @@
   transition: 0.3s;
 }
 
-.analytics input:checked+label {
-  background: #1e6cb7;
-  ;
+.analytics input:checked + label {
+  background: #1e6cb7;;
 }
 
-.analytics input:checked+label::after {
+.analytics input:checked + label::after {
   left: calc(100% - 2px);
   transform: translateX(-100%);
 }
@@ -100,4 +99,90 @@
 
 .margin_left {
   margin-left: -150px;
+}
+
+.dashboard-general-scan .dropdown-menu {
+  background: #172235;
+  border-radius: 7px;
+  padding: 7px 12px;
+  width: 210px;
+  border: 1px solid #ffffff15;
+}
+
+.dashboard-general-scan .dropdown-divider {
+  border-top: 1px solid #ffffff12 !important;
+}
+
+.dropdown-item {
+  position: relative;
+  padding-right: 1.25rem
+}
+
+.dashboard-general-scan .dropdown-item::after {
+  content: "›";
+  position: absolute;
+  font-size: 25px;
+  right: .25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity .15s ease
+}
+
+.dropdown-item:hover::after, .dropdown-item:focus::after {
+  opacity: 1
+}
+
+.dashboard-general-scan .dropdown-menu .selected-urls {
+  font-weight: 400;
+  margin-bottom: 0;
+  color: #fff;
+  font-size: 12px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.dashboard-general-scan .dropdown-menu li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-general-scan .dropdown-menu li:last-child {
+  margin-bottom: 0;
+}
+
+.dashboard-general-scan .dropdown-menu .bullet {
+  width: 6px;
+  height: 6px;
+  background-color: #4da6ff;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dashboard-general-scan .dropdown-menu .dropdown-item {
+  color: rgb(255 255 255 / 90%);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 300;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 3px;
+
+}
+
+.dashboard-general-scan .dropdown-menu .dropdown-item:hover {
+  background: transparent;
+  color: #fff;
+}
+
+.dashboard-general-scan .dropdown-menu .dropdown-item:active{
+  background: transparent !important;
+}
+
+.dashboard-general-scan .dropdown-menu::before {
+  display: none;
 }

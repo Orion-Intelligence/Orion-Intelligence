@@ -4,11 +4,13 @@
 @use 'assets/styles/fonts.scss';
 @use 'app/pages/error-handler/error-handler.component.css';
 @use 'app/pages/homepage/homepage.component.css';
+@use 'app/shared/partials/chat-widget/chat-widget.component.css';
 @use 'app/shared/partials/header/login-header/header.component.css';
 @use 'app/pages/homepage/home-insight/home-insight.component.css';
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
+@use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
 @use 'app/pages/login/login-container/login-container.component.css';
 @use 'assets/styles/shared/listing/list.component.css';
 @use 'assets/styles/shared/sidebar/filters-sidebar.component.css';
@@ -35,6 +37,7 @@
 @use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-email-api/dashboard-email-api.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/result-insights/result-insights.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/defacement-results/threat-results.component.css';
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
 @use 'app/pages/graphs/graphs.component.css';
 @use 'app/pages/graphs/graph-info/graph-info.component.css';
@@ -52,14 +55,14 @@
 
 :root {
   --color-blue-900: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
-  --color-blue-890: #17223560;
+  --color-blue-890: #0e2d4d70;
   --color-blue-880: #2A578459;
   --color-blue-870: #2A578435;
   --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
   --color-blue-850: #0E1626;
   --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
-  --color-blue-830: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 20vh, rgb(41 87 132 / 100%) 100%);
-  --color-blue-820: #0e2d4d;
+  --color-blue-830: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 100%);
+  --color-blue-820: #10335699;
   --color-blue-820-light: #0e2d4d70;
   --color-blue-810: #103356;
   --color-blue-800: #0f335780;
@@ -69,7 +72,7 @@
   --color-blue-760: linear-gradient(to right, #234d79 50%, #2d5c91 70%, #234d79 80%, #234d79 100%);
   --color-blue-750: #143352;
   --color-blue-740: #0f263e;
-  --color-blue-730: #15385C;
+  --color-blue-730: #143352;
   --color-blue-720: #12335450;
   --color-blue-710: #214b75;
   --color-blue-700: #1e456c;
@@ -86,6 +89,7 @@
   --color-gray-100: #f2f2f2;
   --color-gray-900: #3c3c43;
   --color-white: white;
+  --color-divider: #ffffff15;
 }
 
 .dark-theme {
@@ -124,6 +128,7 @@
   --color-gray-100: #f2f2f2;
   --color-gray-900: #A0B8D1;
   --color-white: #172235;
+  --color-divider: #1f3043b6;
 }
 
 html {
@@ -135,7 +140,7 @@ html {
 
 body {
 	margin: 0;
-	background: #172235;
+	background: #00000000;
 	height: 100vh;
 	min-height: 100vh;
 	scrollbar-width: none;

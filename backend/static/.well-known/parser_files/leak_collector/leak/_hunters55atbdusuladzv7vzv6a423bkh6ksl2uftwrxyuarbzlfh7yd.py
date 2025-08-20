@@ -154,7 +154,7 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
                     m_company_name=title_name if title_name else None,
                     m_team="hunter",
                     m_employee_count = str(employees),
-                    m_country_name = country,
+                    m_country= [country],
                 )
                 self.append_leak_data(card_data, entity_data)
 
@@ -199,7 +199,7 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
                     entity_data = entity_model(
                         m_company_name=disclosure_title,
                         m_team="hunter",
-                        m_country_name=country,
+                        m_country=[country],
                     )
 
                     entity_data = helper_method.extract_entities(full_text, entity_data)

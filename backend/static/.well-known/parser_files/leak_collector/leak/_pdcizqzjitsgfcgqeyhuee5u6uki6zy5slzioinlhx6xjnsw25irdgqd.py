@@ -1,7 +1,5 @@
-import re
 from abc import ABC
 from typing import List
-
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -125,7 +123,7 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                         m_team="StormouS"
                     )
 
-                    entity_data = helper_method.extract_entities(description, entity_data)
+                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 

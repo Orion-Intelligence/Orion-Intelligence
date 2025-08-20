@@ -139,7 +139,7 @@ class _certgovua(leak_extractor_interface, ABC):
 
                     entity_data = entity_model(
                         m_team="CERT-UA",
-                        m_country_name="ukraine"
+                        m_country=["ukraine"]
                     )
                     entity_data = helper_method.extract_entities(content, entity_data)
                     self.append_leak_data(card_data, entity_data)

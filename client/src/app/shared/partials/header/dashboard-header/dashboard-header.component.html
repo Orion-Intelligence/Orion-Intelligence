@@ -8,7 +8,7 @@
       </span>
 
       <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
-        Details
+        {{ crumb.label | titlecase }}
       </span>
     </span>
   </div>

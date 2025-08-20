@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, EventEmitter, inject, Input, OnChanges, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, inject} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {NgbDate, NgbDateParserFormatter, NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
@@ -21,41 +21,36 @@ export class DatePickerComponent implements OnChanges {
   fromDate: NgbDate | null = null;
   toDate: NgbDate | null = null;
 
+  finalValue = '';
+  hiddenValue = '';
+
   onDateSelection(date: NgbDate): void {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
-      this.emitDateChange();
-    } else if (this.fromDate && !this.toDate && date.after(this.fromDate)) {
+      this.hiddenValue = this.formatter.format(this.fromDate);
+      this.finalValue = '';
+      return;
+    } else if (this.fromDate && !this.toDate && (date.equals(this.fromDate) || date.after(this.fromDate))) {
       this.toDate = date;
-      this.emitDateChange();
+      const v = `${this.formatter.format(this.fromDate)},${this.formatter.format(this.toDate)}`;
+      this.hiddenValue = v;
+      this.finalValue = v;
+      this.mSelectedFilters[this.key] = v;
+      this.selectedFiltersChange.emit({ key: this.key, value: v });
+      this.dateSelected.emit({ key: this.key, value: v });
+      return;
     } else {
       this.fromDate = date;
       this.toDate = null;
-      this.emitDateChange();
+      this.hiddenValue = this.formatter.format(this.fromDate);
+      this.finalValue = '';
+      return;
     }
   }
 
-  emitDateChange(): void {
-    const value = this.toDate
-      ? `${this.formatter.format(this.fromDate!)},${this.formatter.format(this.toDate)}`
-      : this.fromDate
-        ? this.formatter.format(this.fromDate)
-        : '';
-    this.mSelectedFilters[this.key] = value;
-    this.selectedFiltersChange.emit({key: this.key, value});
-    this.dateSelected.emit({key: this.key, value});
-  }
-
   isHovered(date: NgbDate) {
-    return (
-      this.fromDate &&
-      !this.toDate &&
-      this.hoveredDate &&
-      date.after(this.fromDate) &&
-      date.before(this.hoveredDate)
-    );
+    return this.fromDate && !this.toDate && this.hoveredDate && date.after(this.fromDate) && date.before(this.hoveredDate);
   }
-
 
   isInside(date: NgbDate) {
     return this.fromDate && this.toDate && date.after(this.fromDate) && date.before(this.toDate);
@@ -68,6 +63,8 @@ export class DatePickerComponent implements OnChanges {
       this.fromDate = null;
       this.toDate = null;
       this.hoveredDate = null;
+      this.hiddenValue = '';
+      this.finalValue = '';
       return;
     }
 
@@ -81,6 +78,9 @@ export class DatePickerComponent implements OnChanges {
 
     this.fromDate = parseDate(startStr);
     this.toDate = parseDate(endStr);
+
+    this.hiddenValue = rawValue;
+    this.finalValue = this.fromDate && this.toDate ? rawValue : '';
   }
 
   isRange(date: NgbDate) {

@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {AppService} from '../../../../../services/core/app/app.service';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -18,12 +18,12 @@ import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-
 import {ResultInsightsComponent} from "../result-insights/result-insights.component";
 import {consolidated_filters} from '../../../../constants/filters';
 import {ALLOWED_CONSOLIDATED_RANKED_SINGLETON} from '../../../../constants/shared-enums';
-import {DefacementResultsComponent} from "./defacement-results/defacement-results.component";
+import {ThreatResultsComponent} from "./defacement-results/threat-results.component";
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, DefacementResultsComponent],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -36,12 +36,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public groupedResults: { [index: string]: any[] } = {};
-  public respons: any;
+  public response: any;
   public pageCounts: { [key: string]: number } = {};
 
   isGrouped = true
   query = '';
-  isLoading = false;
+  isLoading = signal(false);
   firstTrigger = true;
   result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
@@ -79,7 +79,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
 
       if (this.firstTrigger && Object.keys(this.groupedResults).length > 0) {
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.query = this.dashboardService.consolidatedParamModel.q;
       } else {
         this.cdr.detectChanges();
@@ -96,15 +96,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       return
     }
 
-    if (this.isLoading) return;
+    if (this.isLoading()) return;
 
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
       this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const cleanedParams: any = {};
 
@@ -125,8 +125,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
-        this.respons = response.data;
-        this.consolidatedCallbackModel = response.data;
+        this.response = response.data
+        this.consolidatedCallbackModel = this.response;
         this.dashboardService.consolidatedCallbackModel = this.consolidatedCallbackModel;
         this.populateGroupedResults();
       } else {
@@ -134,7 +134,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         this.groupedResults = {};
       }
 
-      this.isLoading = false;
+      this.isLoading.set(false);
     });
   }
 
@@ -148,13 +148,13 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchRanked() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.rankedResult = []
     this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.rankedResult = response.data;
       }
-      this.isLoading = false;
+      this.isLoading.set(false);
     });
   }
 
@@ -191,6 +191,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.groupedResults['social_model'] = this.consolidatedCallbackModel['social_model'].Result;
       this.pageCounts['social_model'] = this.consolidatedCallbackModel['social_model'].Page_Count ?? 0;
     }
+
+    if (this.consolidatedCallbackModel['stealer_model']?.Result?.length) {
+      this.groupedResults['stealer_model'] = this.consolidatedCallbackModel['stealer_model'].Result;
+      this.pageCounts['stealer_model'] = this.consolidatedCallbackModel['stealer_model'].Page_Count ?? 0;
+    }
+
     this.result_count = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
   }
 
@@ -240,8 +246,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         firstSubcategory = this.newsCategories[0];
         break;
       case Category.SOCIAL:
-        firstSubcategory = this.socialCategories[1];
-        second_category = this.socialCategories[1].toLowerCase()
+        firstSubcategory = this.socialCategories[0];
+        second_category = this.socialCategories[0].toLowerCase()
         break;
     }
 
@@ -282,5 +288,4 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.fetchRanked()
     }
   }
-
 }

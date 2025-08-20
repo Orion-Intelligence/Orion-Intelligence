@@ -144,14 +144,14 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
                             m_company_name=company,
                             m_ip=[domain],
                             m_location=[country],
-                            m_country_name=country,
+                            m_country=[country],
                             m_team="crypto74"
                         )
                         button = page.query_selector('div.popup button')
                         if button and button.is_visible():
                             button.click()
 
-                        entity_data = helper_method.extract_entities(content_text, entity_data)
+                        entity_data = helper_method.extract_entities(content_text + ref_html, entity_data)
 
                         self.append_leak_data(card_data, entity_data)
                         processed_entries.add(entry_id)

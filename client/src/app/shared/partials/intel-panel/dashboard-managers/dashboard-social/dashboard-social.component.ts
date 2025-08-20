@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {AppService} from '../../../../../services/core/app/app.service';
 import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -6,12 +6,15 @@ import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
 import {SocialCallbackModel} from '../../../../model/results/social/social.callback.model';
 import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
 import {PaginationComponent} from '../../../pagination/pagination.component';
-import {NgIf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {ResultComponent} from '../../../result/result.component';
 import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 import {SortType} from '../../../../constants/shared-enums';
 import {HelperService} from '../../../../services/helper.service';
 import {social_filters} from '../../../../constants/filters';
+import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
 
 @Component({
   selector: 'app-dashboard-socials',
@@ -20,21 +23,25 @@ import {social_filters} from '../../../../constants/filters';
     PaginationComponent,
     NgIf,
     ResultComponent,
-    DashboardResultSocialComponent
+    DashboardResultSocialComponent,
+    DashboardResultChatComponent,
+    DashboardResultExploitComponent,
+    DashboardResultsGeneralGridComponent,
+    NgForOf
   ],
   templateUrl: './dashboard-social.component.html',
   animations: [fadeInDashboardItem]
 })
 export class DashboardSocialsComponent implements OnInit, AfterViewInit {
-  public socialCallbackModel: SocialCallbackModel = new SocialCallbackModel();
   protected readonly Math = Math;
   protected readonly filter = social_filters;
 
   query = "";
-  isLoading = false;
+  isLoading = signal(false);
   firstTrigger = true;
   result_count = 0;
   m_platform = ""
+  rankedResult: any[] = [];
 
   constructor(
     protected helperService: HelperService,
@@ -47,21 +54,21 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   }
 
   get currentResultCount(): number {
-    return this.socialCallbackModel.Page_Count ?? 0;
+    if (this.getRoute() == 'all') {
+      return this.rankedResult.length
+    } else {
+      return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
+    }
   }
 
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
-    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
-      this.ngOnInit()
-    }
   }
 
   ngOnInit(): void {
-    this.socialCallbackModel = {...this.dashboardService.socialCallbackModel} as SocialCallbackModel;
-    this.result_count = this.socialCallbackModel.Result.length;
+    this.dashboardService.socialCallbackModel = {...this.dashboardService.socialCallbackModel} as SocialCallbackModel;
+    this.result_count = this.dashboardService.socialCallbackModel.Result.length;
 
-    const lastSegment = this.route.snapshot.url.at(-1)?.path;
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params, _]) => {
@@ -69,17 +76,14 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1'
 
+        const lastSegment = this.route.snapshot.url.at(-1)?.path;
+        if (lastSegment)
+          this.dashboardService.consolidatedParamModel.platform = lastSegment
 
-        // if (lastSegment)
-        //   this.dashboardService.selectedFilters.platform = lastSegment
-        // this.m_platform = this.dashboardService.consolidatedParamModel.platform
-        // if (this.dashboardService.consolidatedParamModel.platform != lastSegment) {
-        //   this.dashboardService.socialCallbackModel.Result = []
-        //   this.firstTrigger = false
-        // }
-
-        if (this.firstTrigger && this.socialCallbackModel.Result.length > 0) {
-          this.isLoading = false;
+        if (this.router.url.split('?')[0] != this.dashboardService.m_current_route) {
+          this.fetchSearchResults()
+        } else if (this.firstTrigger && this.dashboardService.socialCallbackModel.Result.length > 0) {
+          this.isLoading.set(false);
           this.query = this.dashboardService.consolidatedParamModel.q;
         } else {
           this.cdr.detectChanges();
@@ -89,11 +93,16 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       });
   }
 
+  getRoute() {
+    return this.router.url.split('?')[0].split('/')[3]
+  }
+
+
   fetchSearchResults(reset = false): void {
     if (reset) this.dashboardService.consolidatedParamModel.page = 1;
 
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = "";
       this.router.navigate([], {
         queryParams: {},
@@ -101,7 +110,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       }).then();
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const cleanedParams: any = {
       q: this.dashboardService.consolidatedParamModel.q,
@@ -118,23 +127,33 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     });
 
     if (reset) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       return;
     }
 
-    this.dashboardService
-      .fetchSearchResults<SocialCallbackModel>('social', this.dashboardService.consolidatedParamModel)
-      .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
-      .subscribe(response => {
+    const lastSegment = this.route.snapshot.url.at(-1)?.path;
+    if (lastSegment == "all") {
+      this.dashboardService.fetchConsolidatedRankededResults('social/all', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
         if (response.success && response.data) {
-          this.socialCallbackModel = response.data as SocialCallbackModel;
-          this.dashboardService.socialCallbackModel = response.data as SocialCallbackModel;
-        } else {
-          this.socialCallbackModel = new SocialCallbackModel();
+          this.rankedResult = response.data;
         }
-        this.isLoading = false;
-        this.result_count = this.socialCallbackModel.Result.length;
+        this.isLoading.set(false);
       });
+    } else {
+      this.dashboardService
+        .fetchSearchResults<SocialCallbackModel>('social', this.dashboardService.consolidatedParamModel)
+        .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
+        .subscribe(response => {
+          if (response.success && response.data) {
+            this.dashboardService.socialCallbackModel = response.data as SocialCallbackModel;
+            this.dashboardService.socialCallbackModel = response.data as SocialCallbackModel;
+          } else {
+            this.dashboardService.socialCallbackModel = new SocialCallbackModel();
+          }
+          this.isLoading.set(false);
+          this.result_count = this.dashboardService.socialCallbackModel.Result.length;
+        });
+    }
   }
 
   onPageChange(step: number) {
@@ -170,8 +189,8 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.socialCallbackModel.Result = this.helperService.sortByKey<any>(
-      this.socialCallbackModel.Result,
+    this.dashboardService.socialCallbackModel.Result = this.helperService.sortByKey<any>(
+      this.dashboardService.socialCallbackModel.Result,
       key,
       order
     );

@@ -130,7 +130,7 @@ class search_model:
         return await self.__search_callback.get_doc(result)
 
     async def search_general_result(self, param: search_general_param_model):
-        document, data_filter = elastic_request_generator().on_search_general_data(param, {})
+        document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -139,7 +139,7 @@ class search_model:
         )
 
     async def search_leak_result(self, param: search_leak_param_model):
-        document, data_filter = elastic_request_generator().on_search_leakdata(param, {})
+        document, data_filter = elastic_request_generator().on_search_leakdata(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -148,13 +148,13 @@ class search_model:
         )
 
     @staticmethod
-    async def search_consolidated_ranked_result(param: search_consolidated_param_model):
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, allowed_categories):
         if param.entity_filter:
             filter_dict = param.entity_filter
         else:
             filter_dict = {}
 
-        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict)
+        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict, base_index, allowed_categories)
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
 
         ranked_results = []
@@ -187,6 +187,7 @@ class search_model:
         chat_data = {}
         defacement_data = {}
         social_data = {}
+        stealer_data = {}
 
         for index, res in zip(indices, responses):
             data = {"Result": [], "Suggestions": [], "Page_Count": 0}
@@ -194,7 +195,7 @@ class search_model:
             if not res:
                 continue
 
-            if index == "defacement_model" and "aggregations" in res:
+            if (index == "defacement_model") and "aggregations" in res:
                 for domain_key, domain_value in res["aggregations"].items():
                     buckets = domain_value.get("by_ioc_type", {}).get("buckets", [])
                     for bucket in buckets:
@@ -217,6 +218,8 @@ class search_model:
                 chat_data = data
             elif index == "social_model":
                 social_data = data
+            elif index == "stealer_model":
+                stealer_data = data
             elif index == "defacement_model":
                 defacement_data = data
 
@@ -226,11 +229,12 @@ class search_model:
             chat_model=search_chat_callback_model(**chat_data),
             generic_model=search_general_callback_model(**general_data),
             defacement_model=search_defacement_callback_model(**defacement_data),
-            social_model=search_social_callback_model(**social_data)
+            social_model=search_social_callback_model(**social_data),
+            stealer_model = search_stealerlog_callback_model(**stealer_data)
         )
 
     async def search_exploit_result(self, param: search_exploit_param_model):
-        document, data_filter = elastic_request_generator().on_search_exploitdata(param)
+        document, data_filter = elastic_request_generator().on_search_exploitdata(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
@@ -239,7 +243,7 @@ class search_model:
         )
 
     async def search_telegram_result(self, param: search_chat_param_model):
-        document, data_filter = elastic_request_generator().on_search_telegram_data(param)
+        document, data_filter = elastic_request_generator().on_search_telegram_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(
@@ -249,8 +253,8 @@ class search_model:
         )
 
     @staticmethod
-    async def search_discussion_result(param: search_general_param_model):
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param)
+    async def search_discussion_result(param: search_consolidated_param_model):
+        indices, queries = elastic_request_generator().on_search_discussion_data(param, param.entity_filter)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         chat_data = {}
@@ -271,7 +275,7 @@ class search_model:
         )
     
     async def search_social_result(self, param: search_social_param_model):
-        document, data_filter = elastic_request_generator().on_search_social_data(param)
+        document, data_filter = elastic_request_generator().on_search_social_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(
@@ -301,7 +305,7 @@ class search_model:
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
-        document, data_filter = elastic_request_generator().on_search_defacement_data(param, {})
+        document, data_filter = elastic_request_generator().on_search_defacement_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         return await self.__search_callback.search_handler(

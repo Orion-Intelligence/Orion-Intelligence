@@ -4,7 +4,6 @@ from datetime import datetime
 from time import sleep
 from typing import List
 from playwright.sync_api import Page
-
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -184,7 +183,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                         m_company_name=title,
                         m_industry=industry,
                     )
-                    entity_data = helper_method.extract_entities(description, entity_data)
+                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
 

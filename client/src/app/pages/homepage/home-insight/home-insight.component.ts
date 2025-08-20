@@ -1,12 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {NgClass, NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
-import {
-  DefacementModel,
-  GenericModel,
-  InsightCallbackModel,
-  LeakModel
-} from '../../../shared/model/homepage/stats_insight.model';
+import {DefacementModel, GenericModel, InsightCallbackModel, LeakModel} from '../../../shared/model/homepage/stats_insight.model';
 import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
 import {ScrollService} from '../../../shared/services/scroll.service';
 import {CustomizeBarChartComponent} from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
@@ -17,7 +12,7 @@ import {LatestDocument, LatestDocumentCallbackModel} from '../../../shared/model
 @Component({
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
-  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, TooltipDirective, RouterLink, CustomizeBarChartComponent],
+  imports: [NgForOf, NgIf, NgOptimizedImage, NgClass, TooltipDirective, CustomizeBarChartComponent],
   standalone: true
 })
 export class HomeInsightComponent implements OnInit {
@@ -74,25 +69,21 @@ export class HomeInsightComponent implements OnInit {
     return Array.isArray(model) ? model.slice(0, 4) : [];
   }
 
-  getQueryParams(modelKey: string): any {
-    let model = this.formatModelKey(modelKey).toLowerCase();
-    if (model === 'generic')
-      model = 'general'
-    return {
-      ci: model || 'general'
-    };
+  openReport(modelKey: string, hash: string, title:string) {
+    const route = this.getModelRoute(modelKey, hash, title);
+    this.router.navigateByUrl(route).then();
   }
 
-  getModelRoute(modelKey: string): string {
+  getModelRoute(modelKey: string, hash: string, title:string): string {
     let model = this.formatModelKey(modelKey).toLowerCase();
-    if (model === 'generic')
-      model = 'general'
+    if (model === 'generic') {
+      model = 'general';
+    }
     const base = this.router.url.split('?')[0];
     const segments = base.split('/');
     segments.pop();
     const newBase = segments.join('/');
-    return `${newBase}/consolidated/${model}`;
-
+    return `${newBase}/consolidated/${model}/${hash}?ci=${model}&q=${title}`;
   }
 
   protected readonly String = String;

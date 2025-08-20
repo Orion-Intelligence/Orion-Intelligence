@@ -1,6 +1,6 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgIf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
 import {PaginationComponent} from '../../../pagination/pagination.component';
 import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
@@ -19,10 +19,12 @@ import {DiscussionService} from '../../../../services/discussion.service';
 import {HelperService} from '../../../../services/helper.service';
 import {SortType} from '../../../../constants/shared-enums';
 import {ConsolidatedParamModel} from '../../../../model/results/consolidated/consolidated.param.model';
+import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 
 @Component({
   selector: 'app-dashboard-general',
-  imports: [NgIf, PaginationComponent, DashboardResultsGeneralGridComponent, ResultComponent, DashboardResultChatComponent],
+  imports: [NgIf, PaginationComponent, DashboardResultsGeneralGridComponent, ResultComponent, DashboardResultChatComponent, DashboardResultExploitComponent, DashboardResultSocialComponent, NgForOf],
   templateUrl: './dashboard-general.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -39,6 +41,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   query = ""
   analyticsData = {} as Analytics;
+  rankedResult: any[] = [];
   type = Category.STRATEGIC
   discussionLoaded = false
 
@@ -54,11 +57,19 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   }
 
   get currentParamModel(): ConsolidatedParamModel {
-    return this.type === Category.STRATEGIC ? this.dashboardService.consolidatedParamModel : this.dashboardService.consolidatedParamModel;
+    return this.dashboardService.consolidatedParamModel;
   }
 
   get currentResultCount(): number {
-    return this.currentCallbackModel?.Result?.length ?? 0;
+    if (this.getRoute() == 'all') {
+      return this.discussionCallbackModel.Result.length
+    } else {
+      return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
+    }
+  }
+
+  getRoute() {
+    return this.router.url.split('?')[0].split('/')[3]
   }
 
   get currentSearchResults(): (GeneralResultItem | LeakResultItem)[] {
@@ -72,7 +83,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
     const route: string = this.router.url.split('?')[0];
-    if (String(route) != this.dashboardService.m_current_route){
+    if (String(route) != this.dashboardService.m_current_route) {
       this.fetchSearchResults()
     }
   }
@@ -93,6 +104,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
         this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         if (this.firstTrigger && ((this.generalCallbackModel.Result.length > 0 && this.type == Category.STRATEGIC) || (this.leakCallbackModel.Result.length > 0 && (this.type == Category.BREACH || this.type == Category.FEED)))) {
+
           this.isResponseLoading.set(false);
           if (this.dashboardService.consolidatedParamModel.q)
             this.query = this.dashboardService.consolidatedParamModel.q
@@ -112,6 +124,11 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
+  isConsolidatedResult(){
+    const lastSegment = this.route.snapshot.url.at(-1)?.path;
+    return !!(lastSegment && ["all", "email", "logs", "warfare", "cloud"].includes(lastSegment));
+  }
+
   fetchSearchResults() {
     if (this.isResponseLoading()) return;
 
@@ -121,23 +138,38 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
     this.isResponseLoading.set(true);
 
-    const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
-    this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.dashboardService.consolidatedParamModel)
-      .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
-      .subscribe(response => {
+    this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
+    this.rankedResult = []
+    if (this.isConsolidatedResult()) {
+      const lastSegment = this.route.snapshot.url.at(-1)?.path;
+      if(lastSegment){
+        this.dashboardService.consolidatedParamModel.category = lastSegment
+      }
+      this.dashboardService.fetchConsolidatedRankededResults('search/breach', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
         if (response.success && response.data) {
-          if (this.type === Category.STRATEGIC) {
-            this.generalCallbackModel = response.data as GeneralCallbackModel;
-            this.dashboardService.generalCallbackModel = response.data as GeneralCallbackModel;
-          } else {
-            this.leakCallbackModel = response.data as LeakCallbackModel;
-            this.dashboardService.leakCallbackModel = response.data as LeakCallbackModel;
-          }
+          this.rankedResult = response.data;
         }
-
-        this.isResponseLoading.set(false)
-        this.initAnalytics();
+        this.isResponseLoading.set(false);
       });
+    } else {
+      const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
+      this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.dashboardService.consolidatedParamModel)
+        .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
+        .subscribe(response => {
+          if (response.success && response.data) {
+            if (this.type === Category.STRATEGIC) {
+              this.generalCallbackModel = response.data as GeneralCallbackModel;
+              this.dashboardService.generalCallbackModel = response.data as GeneralCallbackModel;
+            } else {
+              this.leakCallbackModel = response.data as LeakCallbackModel;
+              this.dashboardService.leakCallbackModel = response.data as LeakCallbackModel;
+            }
+          }
+
+          this.isResponseLoading.set(false)
+          this.initAnalytics();
+        });
+    }
   }
 
   fetchSuggestion() {
@@ -196,6 +228,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     } else if (sort === SortType.OLDEST_FIRST) {
       order = 'asc';
     } else if (sort === SortType.DEFAULT) {
+
       this.fetchSearchResults();
       return;
     }

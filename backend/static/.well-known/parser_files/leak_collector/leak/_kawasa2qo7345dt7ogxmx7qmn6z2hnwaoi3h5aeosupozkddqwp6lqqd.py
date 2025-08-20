@@ -156,7 +156,7 @@ class _kawasa2qo7345dt7ogxmx7qmn6z2hnwaoi3h5aeosupozkddqwp6lqqd(leak_extractor_i
                 m_team="Kawa4096"
             )
 
-            entity_data = helper_method.extract_entities(description_text[:500], entity_data)
+            entity_data = helper_method.extract_entities(description_text[:500] + ref_html, entity_data)
             self.append_leak_data(card_data, entity_data)
 
         self._is_crawled = True

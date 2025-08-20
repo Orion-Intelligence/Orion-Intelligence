@@ -178,13 +178,13 @@ class _k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
-                        m_country_name=country_name,
+                        m_country=[country_name],
                         m_ip=[weblink],
                         m_location=[country_name],
                         m_team="play news"
                     )
 
-                    entity_data = helper_method.extract_entities(description, entity_data)
+                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 

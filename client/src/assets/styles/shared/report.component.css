@@ -269,7 +269,7 @@
 }
 
 .search__result-tabs-line {
-  background-color: #1f3043b6;
+  background-color: var(--color-divider);
   height: 1px;
   width: 100%;
 }
@@ -301,7 +301,7 @@
 .search__result-tabs:hover,
 .search__result-tabs.active {
   color: #fff !important;
-  border-bottom: 3px solid #fff !important;
+  border-bottom: 2px solid #fff !important;
 }
 
 

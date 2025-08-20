@@ -42,7 +42,10 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.appService.updatePage(this.dashboardService.consolidatedParamModel.page)
+    this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
+    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
+      this.fetchSearchResults()
+    }
   }
 
   ngOnInit(): void {
@@ -63,11 +66,10 @@ export class DashboardChatsComponent implements OnInit, AfterViewInit {
         this.query = params['q'];
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
-
         if (!isDiscussion && this.firstTrigger && ((this.chatCallbackModel.Result.length > 0))) {
           this.isResponseLoading.set(false)
           this.query = this.dashboardService.consolidatedParamModel.q
-        } else {
+        } else if(this.dashboardService.chatCallbackModel.Result.length==0){
           this.cdr.detectChanges();
           this.fetchSearchResults()
         }

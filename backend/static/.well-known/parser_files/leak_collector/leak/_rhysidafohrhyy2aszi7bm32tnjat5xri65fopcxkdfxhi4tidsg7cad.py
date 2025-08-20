@@ -131,7 +131,7 @@ class _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad(leak_extractor_i
                         m_team="rhysida"
                     )
 
-                    entity_data = helper_method.extract_entities(content, entity_data)
+                    entity_data = helper_method.extract_entities(content + ref_html, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                     error_count = 0

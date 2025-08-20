@@ -1,6 +1,5 @@
 import {Injectable, signal} from '@angular/core';
 import {Observable, of, Subject} from 'rxjs';
-import {HttpParams} from '@angular/common/http';
 import {catchError, map, takeUntil} from 'rxjs/operators';
 import {ApiService} from '../../shared/services/api.service';
 import {LeakCallbackModel} from '../../shared/model/results/leak/leak.callback.model';
@@ -58,11 +57,21 @@ export class DashboardService {
       replaceUrl: true
     }).then();
 
+    const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    if (entityCategories) {
+      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
+    }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
-    let params = new HttpParams({fromObject: baseParams});
+    const queryParamsForNav = {...baseParams};
+    delete queryParamsForNav['entity_filter'];
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: queryParamsForNav,
+      replaceUrl: true
+    }).then();
 
-    return this.apiService.get<T>(apiEndpoint, {params}).pipe(
+    return this.apiService.post<T>(apiEndpoint, baseParams).pipe(
       takeUntil(this.cancelRequest$),
       map((response: T) => ({
         success: true,

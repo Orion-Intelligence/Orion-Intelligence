@@ -140,7 +140,7 @@ class _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd(leak_extractor_i
                     m_team="brain cipher"
                 )
 
-                entity_data = helper_method.extract_entities(m_content, entity_data)
+                entity_data = helper_method.extract_entities(m_content + ref_html, entity_data)
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 

@@ -6,7 +6,7 @@
   background-color: var(--color-blue-800);
   border-radius: 10px;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%),
-  0 4px 6px -2px rgb(0 0 0 / 5%);
+    0 4px 6px -2px rgb(0 0 0 / 5%);
   padding: 24px 24px 24px 18px;
   position: relative;
   border: 1px solid #ffffff20;
@@ -29,6 +29,10 @@
   color: white;
   font-size: 18px;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100% - 32px);
 }
 
 .bar-chart_separator-line {
@@ -160,4 +164,10 @@
 .bar-chart_info-icon {
   width: 20px;
   height: 20px;
+}
+
+@media (width <=460px) {
+  .bar-chart_container {
+    width: calc(100vw - 85px);
+  }
 }

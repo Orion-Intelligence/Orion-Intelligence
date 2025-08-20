@@ -5,7 +5,7 @@
   <div class="filter-panel__top-row">
     <div class="filter-panel__title">Filters</div>
     <div class="filter-panel__actions">
-      <button class="filter-panel__clear-btn" (click)="clearSelection()">
+      <button class="filter-panel__clear-btn" (click)="clearSelection()" [type]="homePage ? 'button' : 'submit'">
         <img src="../../../../assets/images/shared/searchFIlter_clearSelaction.svg" alt="Clear"
           class="filter-panel__clear-btn__icon" />
         Clear Selection</button>
@@ -54,21 +54,25 @@
   <div class="filter-panel__input-row">
     <div class="filter-panel__input-wrapper">
       <div class="filter-input-wrapper filter-add">
-        <input type="text" [(ngModel)]="newValue" (input)="onFilterInputChange()" (keydown.enter)="$event.preventDefault();addTag()" placeholder="Enter entity" class="filter-panel__tag-input" />
-          <span class="filter-add__icon" (click)="addTag()"></span>
+        <input type="text" [(ngModel)]="newValue" (input)="onFilterInputChange()"
+          (keydown.enter)="$event.preventDefault();addTag()" placeholder="Enter entity"
+          class="filter-panel__tag-input" />
+        <span class="filter-add__icon" (click)="addTag()"></span>
 
-          <ul *ngIf="showSuggestions && filteredSuggestions.length > 0" class="filter-panel__suggestion-list">
-          <li *ngFor="let suggestion of filteredSuggestions" (click)="onSuggestionClick(suggestion)">
+        <ul *ngIf="showSuggestions && filteredSuggestions.length > 0" class="filter-panel__suggestion-list">
+          <li *ngFor="let suggestion of filteredSuggestions" (click)="onSuggestionClick($event, suggestion)">
             {{ suggestion }}
           </li>
         </ul>
       </div>
     </div>
-    <label class="filter-panel__toggle-switch"> <input type="checkbox"
-        [(ngModel)]="app_service.configData().localSettings.entityFilterCondition"
-        (ngModelChange)="onEntityFilterToggle($event)" /> <span class="filter-panel__slider"></span> </label>
-    <div class="filter-panel__entity-condition">
-      {{ app_service.configData().localSettings.entityFilterCondition ? 'Exact Match' : 'Partial Match' }}
+    <div class="filter-panel__match-row">
+      <label class="filter-panel__toggle-switch"> <input type="checkbox"
+          [(ngModel)]="app_service.configData().localSettings.entityFilterCondition"
+          (ngModelChange)="onEntityFilterToggle($event)" /> <span class="filter-panel__slider"></span> </label>
+      <div class="filter-panel__entity-condition">
+        {{ app_service.configData().localSettings.entityFilterCondition ? 'Exact Match' : 'Partial Match' }}
+      </div>
     </div>
   </div>
 

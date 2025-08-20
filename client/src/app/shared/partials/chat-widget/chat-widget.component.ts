@@ -1,9 +1,10 @@
-import {CommonModule} from '@angular/common';
-import {Component, OnInit, Input} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {ApiService} from '../../services/api.service';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {AuthService} from '../../../services/authetication/auth.service';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, Input } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../services/api.service';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { AuthService } from '../../../services/authetication/auth.service';
+import { chatBotAnimation } from '../../animations/chat.bot.animation';
 
 type ChatApiResponse = {
   result?: string;
@@ -18,21 +19,19 @@ type ChatApiResponse = {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './chat-widget.component.html',
-  styleUrls: ['./chat-widget.component.css']
+  animations: [chatBotAnimation]
 })
 export class ChatWidgetComponent implements OnInit {
   @Input() reportText: string | undefined;
-  chatMessages: { id: string; sender: 'user' | 'bot'; text: string; time: Date }[] = [];
+  chatMessages: { id: string; sender: 'user' | 'bot' | 'error'; text: string; time: Date; retryPayload?: { message: string; report?: string }; }[] = [];
   isBotTyping = false;
   newMessage = '';
   chatOpen = false;
   private sessionId = '';
 
-  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService) {
-  }
+  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
-
     this.authService.getUsername$().subscribe(u => {
       this.sessionId = (u || '').trim() || crypto.randomUUID();
       if (this.chatMessages.length === 0) {
@@ -50,23 +49,16 @@ export class ChatWidgetComponent implements OnInit {
     event.preventDefault();
     const text = this.newMessage.trim();
     if (!text) return;
-
-    this.chatMessages.push({id: this.sessionId, sender: 'user', text, time: new Date()});
+    this.chatMessages.push({ id: this.sessionId, sender: 'user', text, time: new Date() });
     this.newMessage = '';
+    this.scrollToNewMessage();
     this.isBotTyping = true;
     this.aiSuggest(text);
   }
 
   aiSuggest(userMessage: string): void {
     if (this.authService.getRole() !== 'admin') {
-      this.dashboardService.showSubscription.set(true);
-      this.chatMessages.push({
-        id: this.sessionId,
-        sender: 'bot',
-        text: 'Something unexpected happened',
-        time: new Date()
-      });
-      this.isBotTyping = false;
+      this.showErrorMessage(userMessage);
       return;
     }
 
@@ -79,27 +71,75 @@ export class ChatWidgetComponent implements OnInit {
     this.api.post<ChatApiResponse>('nlp/chat/report', payload).subscribe({
       next: (response) => {
         const reply =
-          (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim() ||
-          'Something unexpected happened';
-        this.chatMessages.push({id: this.sessionId, sender: 'bot', text: reply, time: new Date()});
+          (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
+        if (!reply || response.message?.includes("went wrong")) {
+          this.showErrorMessage(userMessage);
+        } else {
+          this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: reply, time: new Date() });
+          this.scrollToNewMessage();
+        }
         this.isBotTyping = false;
       },
       error: () => {
-        this.chatMessages.push({id: this.sessionId, sender: 'bot', text: 'Something unexpected happened', time: new Date()});
+        this.showErrorMessage(userMessage);
         this.isBotTyping = false;
       }
     });
   }
 
-  openChat(){
+  private showErrorMessage(originalMessage: string): void {
+    this.chatMessages.push({
+      id: this.sessionId,
+      sender: 'error',
+      text: 'Something went wrong. try again.',
+      time: new Date(),
+      retryPayload: { message: originalMessage, report: this.reportText }
+    });
+    this.scrollToNewMessage();
+  }
+
+  retryMessage(payload: { message: string; report?: string }): void {
+    this.isBotTyping = true;
+    this.aiSuggest(payload.message);
+  }
+
+  openChat() {
     if (this.authService.getRole() !== 'admin') {
       this.dashboardService.showSubscription.set(true);
       return;
     }
-    this.chatOpen = true
+    this.chatOpen = true;
+  }
+
+  closeChat() {
+    this.chatOpen = false;
   }
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  pushButton(btn: HTMLButtonElement) {
+    btn.classList.add('chat-bot-push-anim');
+    setTimeout(() => btn.classList.remove('chat-bot-push-anim'), 150);
+  }
+
+  private relativeTop(el: HTMLElement, container: HTMLElement): number {
+    let top = 0;
+    let node: HTMLElement | null = el;
+    while (node && node !== container) {
+      top += node.offsetTop;
+      node = node.offsetParent as HTMLElement | null;
+    }
+    return top;
+  }
+
+  private scrollToNewMessage(): void {
+    const container = document.querySelector('.chat-support__messages') as HTMLElement | null;
+    if (!container) return;
+    const lastMsg = container.querySelector('.chat-support__message-container:last-of-type') as HTMLElement | null;
+    if (!lastMsg) return;
+    const relTop = this.relativeTop(lastMsg, container);
+    container.scrollTo({ top: relTop, behavior: 'smooth' });
   }
 }

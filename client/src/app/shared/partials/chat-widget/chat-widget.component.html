@@ -1,28 +1,70 @@
-<div class="chat-support" [class.open]="chatOpen">
-  <div *ngIf="!chatOpen" class="chat-toggle" (click)="openChat()">
+<div class="chat-support" [class.chat-support--open]="chatOpen">
+  <button #chatBtn *ngIf="!chatOpen" class="chat-support__toggle chat-support__push" (click)="openChat()" type="button">
     <span><img src="assets/images/shared/chat.svg" alt="chat" /></span>
-  </div>
+  </button>
 
-  <div *ngIf="chatOpen" class="chat-window">
-    <div class="chat-header">
-      Support Bot
-      <span class="close-btn" (click)="chatOpen = false">✖️</span>
-    </div>
-
-    <div class="chat-messages">
-      <div *ngFor="let msg of chatMessages; trackBy: trackByIndex" class="chat-msg" [class.user]="msg.sender === 'user'" [class.bot]="msg.sender === 'bot'">
-        <p class="chat-text">{{ msg.text }}</p>
-        <span class="timestamp">{{ msg.time | date: 'shortTime' }}</span>
+  <div *ngIf="chatOpen" class="chat-support__overlay">
+    <div class="chat-support__window" @chatBotAnimation>
+      <div class="chat-support__header">
+        <div class="chat-support__main-avatar">
+          <img src="assets/images/shared/chat-icon.svg" />
+          <span class="chat-support__status-indicator"></span>
+        </div>
+        <div class="chat-support__header-text">Orion Analyst</div>
+        <div class="chat-support__close-btn" (click)="closeChat()">
+          <img src="assets/images/shared/cross.svg" alt="close">
+        </div>
       </div>
 
-      <div *ngIf="isBotTyping" class="chat-msg bot typing-indicator">
-        <p class="chat-text">Typing...</p>
-      </div>
-    </div>
+      <div class="chat-support__messages">
+        <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
+          <ng-container [ngSwitch]="msg.sender">
+            <div *ngSwitchCase="'user'" class="chat-support__message-container">
+              <div class="chat-support__chat-avatar">
+                <img src="assets/images/shared/user-icon.svg" />
+              </div>
+              <div class="chat-support__msg chat-support__msg--user">
+                <p>{{ msg.text }}</p>
+              </div>
+            </div>
+            <div *ngSwitchCase="'bot'" class="chat-support__message-container">
+              <div class="chat-support__chat-avatar">
+                <img src="assets/images/shared/chat-icon.svg" />
+              </div>
+              <div class="chat-support__msg chat-support__msg--bot">
+                <p>{{ msg.text }}</p>
+              </div>
+            </div>
 
-    <form class="chat-input" (submit)="sendMessage($event)">
-      <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Ask something..." required />
-      <button type="submit"><img src="assets/images/shared/chat_small.svg" alt="chat"></button>
-    </form>
+            <div *ngSwitchCase="'error'">
+              <div class="chat-support__error-box">
+                <p>{{ msg.text }}</p>
+                <button *ngIf="msg.retryPayload" class="chat-support__retry-btn"
+                  (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
+                  <img src="assets/images/shared/chat-support-retry.svg" alt="Retry" />
+                </button>
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+
+
+        <div *ngIf="isBotTyping" class="chat-support__msg chat-support__msg--bot chat-support__typing">
+          <span class="chat-support__typing-dot"></span>
+          <span class="chat-support__typing-dot"></span>
+          <span class="chat-support__typing-dot"></span>
+        </div>
+      </div>
+
+      <form class="chat-support__input" (submit)="sendMessage($event)">
+        <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message"
+          class="chat-support__input-field" required />
+        <button #submitBtn type="submit" class="chat-support__send-btn chat-support__push"
+          (click)="pushButton(submitBtn)">
+          <img src="assets/images/shared/chat_small.svg" alt="chat">
+        </button>
+      </form>
+    </div>
   </div>
 </div>

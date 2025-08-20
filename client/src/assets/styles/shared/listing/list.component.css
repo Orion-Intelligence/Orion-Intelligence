@@ -18,8 +18,12 @@
   margin-right: 10px;
 }
 
+.list__container .list__empty-padding {
+  padding: 18px;
+}
+
 .list__container .list__column-id-min {
-  width: 4% !important;
+  width: 6% !important;
 }
 
 .list__column-service-url {
@@ -42,7 +46,11 @@
   width: 10%;
 }
 
-@media only screen and (width <= 943px) {
+.list__cell-arrow {
+  display: none;
+}
+
+@media only screen and (width <=1300px) {
   .list__content-category {
     padding-bottom: 0;
     padding-left: 15px;
@@ -76,6 +84,25 @@
   .list__status-default-pointer {
     margin-top: 6px;
     margin-right: 15px;
+  }
+
+  .list-container thead th:last-child,
+  .list-container tbody td:last-child {
+    display: none;
+  }
+
+  .list__cell-id {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 8px;
+  }
+
+  .list__cell-arrow {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-left: 8px;
   }
 }
 

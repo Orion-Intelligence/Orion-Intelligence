@@ -228,7 +228,7 @@ class _nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd(leak_extractor_i
                         m_team="nitrogen"
                     )
 
-                    entity_data = helper_method.extract_entities(m_description, entity_data)
+                    entity_data = helper_method.extract_entities(m_description + ref_html, entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 

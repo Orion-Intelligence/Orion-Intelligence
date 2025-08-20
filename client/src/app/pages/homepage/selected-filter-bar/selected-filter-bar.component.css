@@ -36,14 +36,14 @@
 
 .selected-filter-bar {
   background-color: #172235;
-  border: 1px solid #FCFCFC12;
-  border-radius: 10px;
-  padding: 10px 24px 12px 17px;
+  border: 1px solid #FCFCFC08;
+  border-radius: 8px;
+  padding: 8px 24px 8px 17px;
   margin-left: 0;
   min-width: 500px;
   font-family: Inter, sans-serif;
   color: white;
-  max-width: 870px;
+  max-width: 912px;
   margin-top: 15px;
 }
 
@@ -164,6 +164,7 @@
 .selected-filter-bar__filter-item {
   display: flex;
   flex-direction: column;
+  padding-bottom: 8px;
 }
 
 .selected-filter-bar__filter-label-edit {

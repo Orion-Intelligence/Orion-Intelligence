@@ -1,9 +1,20 @@
-<app-result (onToggleSort)="onToggleSort($event)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" [filterModel]="filter" (reloadData)="fetchSearchResults()" (updateQuery)="onUpdateQuery($event)" [isLoading]="isLoading" [result_count]="Math.ceil(socialCallbackModel.Result.length)" [searchQuery]="query" [showTabs]="false" [suggestion]="socialCallbackModel.Suggestions[0]"></app-result>
+<app-result (onToggleSort)="onToggleSort($event)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" [filterModel]="filter" (reloadData)="fetchSearchResults()" (updateQuery)="onUpdateQuery($event)" [isLoading]="isLoading()" [result_count]="Math.ceil(this.dashboardService.socialCallbackModel.Result.length+rankedResult.length)" [searchQuery]="query" [showTabs]="false" [suggestion]="this.dashboardService.socialCallbackModel.Suggestions[0]"></app-result>
 
-<div *ngIf="!isLoading" @fadeInDashboardItem>
-  <app-dashboard-result-social [searchResults]="socialCallbackModel.Result"></app-dashboard-result-social>
+<div *ngIf="!isLoading() && getRoute()!='all'" @fadeInDashboardItem>
+  <app-dashboard-result-social [searchResults]="this.dashboardService.socialCallbackModel.Result"></app-dashboard-result-social>
 </div>
 
-<div *ngIf="!isLoading && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
+<div *ngIf="!isLoading() && getRoute()=='all' " @fadeInDashboardItem>
+  <div *ngFor="let item of rankedResult">
+    <div class="dashboard__ranked-layout">
+      <app-dashboard-results-general-grid *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query" [searchResults]="[item]" [isExpandAble]="false" [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
+      <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-exploit>
+      <app-dashboard-result-social *ngIf="item.rank_index === 'social_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-social>
+      <app-dashboard-result-chat *ngIf="item.rank_index === 'chat_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-chat>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!isLoading() && currentResultCount > 0" @fadeInDashboardItem class="pagination-margin">
   <app-pagination (pageChange)="onPageChange($event)" [currentPage]="this.dashboardService.consolidatedParamModel.page" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
 </div>

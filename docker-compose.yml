@@ -41,7 +41,7 @@ services:
     ports:
       - "8529:8529"
     volumes:
-      - arangodb:/var/lib/arangodb3
+      - arangodb:/var/lib/arangodbx
     networks:
       backend:
         ipv4_address: 172.20.1.15

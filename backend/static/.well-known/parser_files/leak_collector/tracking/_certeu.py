@@ -180,7 +180,7 @@ class _certeu(leak_extractor_interface, ABC):
 
                     entity_data = entity_model(
                         m_team=team,
-                        m_country_name=country
+                        m_country=[country]
                     )
 
                     entity_data = helper_method.extract_entities(full_content, entity_data)
