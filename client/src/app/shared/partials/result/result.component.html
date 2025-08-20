@@ -68,16 +68,31 @@
           </div>
 
           <div class="dropdown">
-            <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-              search by <b>({{ getMatchType() }})</b>
-              <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-            </span>
+          <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
+            search by <b>({{ getMatchType() }})</b>
+            <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
+          </span>
             <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
-
-              <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();"> Match any term (OR)</a></li>
-              <li>
-                <hr class="dropdown-divider mx-3">
-              </li>
+              <ng-container *ngIf="app_service.getConfig().appSettings.search_type == 'semantic'; else notSemantic">
+                <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match Semantic';onSetMatchType('semantic');onFormSubmit();"> Match Semantic</a></li>
+                <li>
+                  <hr class="dropdown-divider mx-3">
+                </li>
+                <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();"> Match any term (OR)</a></li>
+                <li>
+                  <hr class="dropdown-divider mx-3">
+                </li>
+              </ng-container>
+              <ng-template #notSemantic>
+                <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();"> Match any term (OR)</a></li>
+                <li>
+                  <hr class="dropdown-divider mx-3">
+                </li>
+                <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match Semantic';onSetMatchType('semantic');onFormSubmit();"> Match Semantic</a></li>
+                <li>
+                  <hr class="dropdown-divider mx-3">
+                </li>
+              </ng-template>
               <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onFormSubmit();"> Match indivisual terms (AND)</a></li>
               <li>
                 <hr class="dropdown-divider mx-3">

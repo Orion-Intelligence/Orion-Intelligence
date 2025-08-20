@@ -1,8 +1,7 @@
-import asyncio
+import httpx
+
 from typing import List, Dict, Any, Optional
-
 from elasticsearch import AsyncElasticsearch
-
 from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_SEMANTIC, ELASTIC_SEMANTIC_INDEX
@@ -12,8 +11,6 @@ class elastic_semantic_controller:
     __instance: Optional["elastic_semantic_controller"] = None
     __m_connection: Optional[AsyncElasticsearch] = None
     __indices: List[str] = []
-    __embed_model = None
-    __embed_model_name = "intfloat/multilingual-e5-small"
 
     @staticmethod
     def get_instance() -> "elastic_semantic_controller":
@@ -29,7 +26,6 @@ class elastic_semantic_controller:
             self.__m_connection = connection
             self.__indices = indices if indices else self.__collect_indices()
             await self.__post_init_semantic()
-            self.__load_model_sync()
 
     def get_connection(self) -> AsyncElasticsearch:
         return self.__m_connection
@@ -71,19 +67,16 @@ class elastic_semantic_controller:
         except Exception as ex:
             log.g().e(f"Failed to add vector field on {index_name}: {str(ex)}")
 
-    def __load_model_sync(self):
-        if self.__embed_model is None:
-            try:
-                from sentence_transformers import SentenceTransformer
-            except Exception as ex:
-                log.g().e(f"sentence-transformers not available: {str(ex)}")
-                raise
-            self.__embed_model = SentenceTransformer(self.__embed_model_name)
-
-    async def __embed_texts(self, texts: List[str], input_type: str = "INGEST") -> List[List[float]]:
+    @staticmethod
+    async def __embed_texts(texts: List[str]) -> List[List[float]]:
+        base = env_handler.get_instance().env("EMBED_API_BASE") or "http://trusted-micros-api:8010"
         try:
-            vecs = await asyncio.to_thread(self.__embed_model.encode, texts, normalize_embeddings=True)
-            return vecs.tolist() if hasattr(vecs, "tolist") else [v for v in vecs]
+            async with httpx.AsyncClient(timeout=200) as client:
+                r = await client.post(f"{base}/nlp/embed", json={"texts": texts, "normalize": True})
+                r.raise_for_status()
+                data = r.json()
+                embs = data.get("embeddings") or []
+                return embs
         except Exception as ex:
             log.g().e(f"Embedding failed: {str(ex)}")
             return []
@@ -91,20 +84,23 @@ class elastic_semantic_controller:
     async def embed_query(self, text: str) -> Optional[List[float]]:
         try:
             q = ("query: " + (text or "").strip())
-            out = await self.__embed_texts([q], input_type="QUERY")
+            out = await self.__embed_texts([q])
             return out[0] if out else None
         except Exception as ex:
             log.g().e(f"Query embedding failed: {str(ex)}")
             return None
 
-    def embed_query_sync(self, text: str) -> Optional[List[float]]:
+    @staticmethod
+    def embed_query_sync(text: str) -> Optional[List[float]]:
+        base = "http://trusted-micros-api:8010"
         try:
             q = ("query: " + (text or "").strip())
-            vec = self.__embed_model.encode([q], normalize_embeddings=True)
-            if hasattr(vec, "tolist"):
-                lst = vec.tolist()
-                return lst[0] if lst else None
-            return vec[0] if isinstance(vec, list) and vec else None
+            with httpx.Client(timeout=200) as client:
+                r = client.post(f"{base}/nlp/embed", json={"texts": [q], "normalize": True})
+                r.raise_for_status()
+                data = r.json()
+                embs = data.get("embeddings") or []
+                return embs[0] if embs else None
         except Exception as ex:
             log.g().e(f"Query embedding (sync) failed: {str(ex)}")
             return None
@@ -120,7 +116,7 @@ class elastic_semantic_controller:
             text = "\n".join([t for t in (title, important, content) if t]).strip()
             if not text:
                 return None
-            vecs = await self.__embed_texts([f"passage: {text}"], input_type="INGEST")
+            vecs = await self.__embed_texts([f"passage: {text}"])
             return vecs[0] if vecs else None
 
         if isinstance(p_data, list):

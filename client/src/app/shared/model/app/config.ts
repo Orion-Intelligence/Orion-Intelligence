@@ -5,9 +5,11 @@ export class AppSettingsModel {
   version: string = '1.0.0';
   language_allowed: string = 'en';
   logo_url: string = '';
+  search_type: string = 'semantic';
 
   constructor(data?: Partial<Record<keyof AppSettingsModel, string | boolean>>) {
     if (data) {
+      this.search_type = (data.logo_url as string) || 'semantic';
       this.api_allowed = data.api_allowed === '1' || data.api_allowed === true;
       this.ai_endpoint = (data.ai_endpoint as string) || this.ai_endpoint;
       this.telegram_allowed = data.telegram_allowed === '1' || data.telegram_allowed === true;

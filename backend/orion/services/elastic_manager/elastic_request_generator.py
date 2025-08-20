@@ -770,7 +770,9 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
+        print(":::::::::::::::::::::::::::::::::: 0", flush=True)
         if p_query_model.matchtype == "semantic":
+            print(":::::::::::::::::::::::::::::::::: 1", flush=True)
             content_query = {"match_all": {}}
         elif raw_query == "*":
             content_query = {"match_all": {}}
@@ -936,10 +938,12 @@ class elastic_request_generator:
             "explain": True
         }
 
-        if raw_query != "*" and str(getattr(p_query_model, "matchtype", "")).lower() == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
             try:
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(raw_query)
+                print(":::::::::::::::::::::::::::::::::: 2", flush=True)
                 if qvec:
+                    print(":::::::::::::::::::::::::::::::::: 3", flush=True)
                     knn_clause = {
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
@@ -949,9 +953,12 @@ class elastic_request_generator:
                         }
                     }
                     query_statement["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+                    print(":::::::::::::::::::::::::::::::::: 3", flush=True)
             except Exception:
+                print(":::::::::::::::::::::::::::::::::: 4", flush=True)
                 pass
 
+        print(":::::::::::::::::::::::::::::::::: 5", flush=True)
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod
