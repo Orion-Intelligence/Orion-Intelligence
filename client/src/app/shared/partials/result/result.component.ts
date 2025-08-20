@@ -151,6 +151,7 @@ export class ResultComponent implements OnInit, OnChanges {
     const cfg = this.app_service.configData();
     const matchtype = cfg.localSettings.matchType || 'and';
     this.onSetMatchType(matchtype)
+    this.selectedSortBy = (cfg.localSettings.sortType as SortType) || SortType.DEFAULT;
   }
 
   onFormSubmit() {
@@ -227,6 +228,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onSortChange(type: SortType): void {
+    this.app_service.set('sortType', type);
     this.selectedSortBy = type;
     this.onToggleSort.emit(type);
   }
