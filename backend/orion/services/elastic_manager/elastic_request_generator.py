@@ -656,42 +656,62 @@ class elastic_request_generator:
     def on_search_consolidated_data(self, p_query_model, pFilter=None):
         queries = []
         indices = []
+        labels = []
 
         m1 = helper_controller.clone_model(p_query_model)
         i1, q1 = self.on_search_leakdata(m1, pFilter)
         queries.append(self._strip_query(q1))
         indices.append(i1)
+        labels.append("leak_model")
 
         m2 = helper_controller.clone_model(p_query_model)
         i2, q2 = self.on_search_general_data(m2, pFilter)
         queries.append(self._strip_query(q2))
         indices.append(i2)
+        labels.append("generic_model")
 
         m3 = helper_controller.clone_model(p_query_model)
         i3, q3 = self.on_search_exploitdata(m3, pFilter)
         queries.append(self._strip_query(q3))
         indices.append(i3)
+        labels.append("exploit_model")
 
         m4 = helper_controller.clone_model(p_query_model)
         i4, q4 = self.on_search_telegram_data(m4, pFilter)
         queries.append(self._strip_query(q4))
         indices.append(i4)
+        labels.append("chat_model")
 
         m6 = helper_controller.clone_model(p_query_model)
         i6, q6 = self.on_search_social_data(m6, pFilter)
         queries.append(self._strip_query(q6))
         indices.append(i6)
+        labels.append("social_model")
 
         m8 = helper_controller.clone_model(p_query_model)
         i8, q8 = self.on_search_stealer_alert(m8, pFilter)
         queries.append(self._strip_query(q8))
         indices.append(i8)
+        labels.append("stealer_model")
 
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)
+        labels.append("defacement_model")
 
-        return indices, queries
+        m1.category='tracking'
+        i9, q9 = self.on_search_leakdata(m1, pFilter)
+        queries.append(self._strip_query(q9))
+        indices.append(i9)
+        labels.append("tracking_model")
+
+        m1.category='news'
+        i10, q10 = self.on_search_leakdata(m1, pFilter)
+        queries.append(self._strip_query(q10))
+        indices.append(i10)
+        labels.append("news_model")
+
+        return indices, queries, labels
 
     @staticmethod
     def on_search_leakdata(p_query_model, pfilter=None):
@@ -921,7 +941,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod
-    def on_search_exploitdata(p_query_model, pfilter=None):
+    def on_search_exploitdata(p_query_model: search_exploit_param_model, pfilter=None):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 

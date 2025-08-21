@@ -1,9 +1,9 @@
 .filter-panel__top-space-expand {
-  margin-top: 40px;
+  margin-top: 40px !important;
 }
 
 .filter-panel__top-space-shrink {
-  margin-top: 10px;
+  margin-top: 0px !important;
 }
 
 .filter-panel {
