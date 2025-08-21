@@ -14,6 +14,7 @@ class search_social_param_model(BaseModel):
     matchtype: Optional[str] = "or"
     platform: Optional[str] = ""
     mitre: Optional[str] = ""
+    must: Optional[bool] = False
     messagedate: Optional[str] = ""
 
     entity_filter: Optional[Dict[str, List[str]]] = None

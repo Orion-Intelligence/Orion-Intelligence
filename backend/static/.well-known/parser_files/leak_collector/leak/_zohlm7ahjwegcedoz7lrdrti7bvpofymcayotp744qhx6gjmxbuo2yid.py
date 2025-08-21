@@ -182,7 +182,7 @@ class _zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid(leak_extractor_i
                     m_social_media_profiles=social_links,
                 )
 
-                entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                 self.append_leak_data(card_data, entity_data)
 
             except Exception as ex:

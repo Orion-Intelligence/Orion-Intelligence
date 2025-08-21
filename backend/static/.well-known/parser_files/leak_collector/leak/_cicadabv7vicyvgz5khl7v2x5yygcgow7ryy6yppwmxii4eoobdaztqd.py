@@ -171,7 +171,7 @@ class _cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd(leak_extractor_i
                         m_ip=[website],
                         m_team="cicada"
                     )
-                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                    entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 

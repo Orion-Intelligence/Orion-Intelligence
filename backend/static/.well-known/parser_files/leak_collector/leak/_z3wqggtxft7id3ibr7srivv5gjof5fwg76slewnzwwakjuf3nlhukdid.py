@@ -160,7 +160,7 @@ class _z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid(leak_extractor_i
                             m_company_name=title,
                         )
 
-                        entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                        entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                         self.append_leak_data(card_data, entity_data)
 
                     except Exception as ex:

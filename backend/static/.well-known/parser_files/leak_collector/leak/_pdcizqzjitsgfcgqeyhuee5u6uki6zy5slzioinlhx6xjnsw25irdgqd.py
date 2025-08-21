@@ -123,7 +123,7 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                         m_team="StormouS"
                     )
 
-                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                    entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 

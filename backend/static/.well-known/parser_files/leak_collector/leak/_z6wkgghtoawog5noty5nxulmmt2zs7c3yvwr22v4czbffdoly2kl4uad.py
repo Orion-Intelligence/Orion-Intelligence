@@ -179,7 +179,7 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
                             m_team="ransomeware"
                         )
 
-                        entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                        entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                         self.append_leak_data(card_data, entity_data)
                         error_count = 0
 

@@ -141,7 +141,7 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                             m_team="Hacked databases store"
                         )
 
-                        entity_data = helper_method.extract_entities(content + ref_html, entity_data)
+                        entity_data = helper_method.extract_entities(content + (ref_html or ""), entity_data)
                         self.append_leak_data(card_data, entity_data)
 
                         buy_page.close()

@@ -161,7 +161,7 @@ class _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd(leak_extractor_i
                     m_team="abyss"
                 )
 
-                entity_data = helper_method.extract_entities(full_text + ref_html, entity_data)
+                entity_data = helper_method.extract_entities(full_text + (ref_html or ""), entity_data)
                 self.append_leak_data(card_data, entity_data)
 
                 page.locator(".modal .btn-close").click()

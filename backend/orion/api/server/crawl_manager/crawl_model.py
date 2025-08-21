@@ -47,8 +47,7 @@ class crawl_model:
         else:
             crawl_model.__instance = self
 
-    async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list,
-                                      network_type: str, is_leak_update: bool, name: str = None):
+    async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list,network_type: str, is_leak_update: bool, name: str = None):
         normalized_url = base_url
         if network_type != "telegram":
             normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
@@ -228,7 +227,6 @@ class crawl_model:
         )
 
     async def invoke_news_index(self, leak_index: LeakDataModel):
-        print(":::::::::::::::::::::2", flush=True)
         m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(

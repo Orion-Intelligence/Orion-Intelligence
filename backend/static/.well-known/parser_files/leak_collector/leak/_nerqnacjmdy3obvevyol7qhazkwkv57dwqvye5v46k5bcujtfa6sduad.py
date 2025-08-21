@@ -162,7 +162,7 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                     m_team="kairos"
                 )
 
-                entity_data = helper_method.extract_entities(content + ref_html, entity_data)
+                entity_data = helper_method.extract_entities(content + (ref_html or ""), entity_data)
                 self.append_leak_data(card_data, entity_data)
 
                 page.go_back()

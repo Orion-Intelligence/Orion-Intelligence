@@ -151,7 +151,7 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
                         if button and button.is_visible():
                             button.click()
 
-                        entity_data = helper_method.extract_entities(content_text + ref_html, entity_data)
+                        entity_data = helper_method.extract_entities(content_text + (ref_html or ""), entity_data)
 
                         self.append_leak_data(card_data, entity_data)
                         processed_entries.add(entry_id)

@@ -141,6 +141,7 @@ class search_model:
     async def search_leak_result(self, param: search_leak_param_model):
         document, data_filter = elastic_request_generator().on_search_leakdata(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+        print(m_documents)
         return await self.__search_callback.search_handler(
             m_status, m_documents,
             search_leak_callback_model,
@@ -148,13 +149,13 @@ class search_model:
         )
 
     @staticmethod
-    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, allowed_categories):
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories):
         if param.entity_filter:
             filter_dict = param.entity_filter
         else:
             filter_dict = {}
 
-        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict, base_index, allowed_categories)
+        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict, base_index, blocked_categories, allowed_categories)
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
 
         ranked_results = []
@@ -252,28 +253,6 @@ class search_model:
             {}
         )
 
-    @staticmethod
-    async def search_discussion_result(param: search_consolidated_param_model):
-        indices, queries = elastic_request_generator().on_search_discussion_data(param, param.entity_filter)
-        responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
-
-        chat_data = {}
-        social_data = {}
-
-        for index, res in zip(indices, responses):
-            hits = res.get("hits", {}).get("hits", []) if res else []
-            data = {"Result": [hit["_source"] for hit in hits], "Suggestions": [], "Page_Count": len(hits)}
-
-            if index == "chat_model":
-                chat_data = data
-            elif index == "social_model":
-                social_data = data
-
-        return grouped_consolidated_search_callback_model(
-            chat_model=search_chat_callback_model(**chat_data),
-            social_model=search_social_callback_model(**social_data)
-        )
-    
     async def search_social_result(self, param: search_social_param_model):
         document, data_filter = elastic_request_generator().on_search_social_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)

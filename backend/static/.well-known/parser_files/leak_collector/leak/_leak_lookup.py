@@ -174,7 +174,7 @@ class _leak_lookup(leak_extractor_interface, ABC):
                                 m_team="leak lookup"
                             )
 
-                            entity_data = helper_method.extract_entities(modal_content_cleaned + ref_html, entity_data)
+                            entity_data = helper_method.extract_entities(modal_content_cleaned + (ref_html or ""), entity_data)
                             self.append_leak_data(card_data, entity_data)
                             error_count = 0
 

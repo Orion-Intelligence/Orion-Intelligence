@@ -190,7 +190,7 @@ class _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd(leak_extractor_i
                         m_team="dunghill leak"
                     )
 
-                    entity_data = helper_method.extract_entities(content_text + ref_html, entity_data)
+                    entity_data = helper_method.extract_entities(content_text + (ref_html or ""), entity_data)
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0
 

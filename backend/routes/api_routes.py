@@ -84,7 +84,14 @@ async def chat_report(payload: ReportChatRequest):
 @api_routes.post("/api/search/strategic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search strategic intelligence reports using filters like category, title, date, or hash.")
 async def search_general(param: search_general_param_model = Body(...)):
-    return await search_model.getInstance().search_general_result(param)
+
+    if param.category in ['all']:
+        base_index = [
+            ELASTIC_INDEX.S_GENERIC_INDEX,
+        ]
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+    else:
+        return await search_model.getInstance().search_general_result(param)
 
 @api_routes.get("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_telegram(param: search_credential_param_model = Depends()):
@@ -105,7 +112,7 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX
     ]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [])
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index,[], [])
 
 
 @api_routes.post("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
@@ -119,9 +126,9 @@ async def search_discussion(param: search_general_param_model = Body(...)):
         ELASTIC_INDEX.S_CHATS_INDEX
     ]
     if param.category in ['all']:
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ['cve', 'tools', 'zeroday'])
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], ['cve', 'tools', 'zeroday'])
     else:
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [param.category])
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
 
 
 @api_routes.post("/api/social/all", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
@@ -130,7 +137,7 @@ async def search_discussion(param: search_general_param_model = Body(...)):
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX
     ]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [])
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
 
 @api_routes.post("/api/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))])
 async def search_twitter(param: search_social_param_model = Body(...)):
@@ -145,12 +152,12 @@ async def search_leak(param: search_leak_param_model = Body(...)):
             ELASTIC_INDEX.S_LEAK_INDEX,
             ELASTIC_INDEX.S_CHATS_INDEX
         ]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ["email", "logs", "warfare", "cloud"])
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ['news'], ["leaks","tracking", "email", "logs", "warfare", "cloud"])
     elif param.category in ["email", "logs", "warfare", "cloud"]:
         base_index = [
             ELASTIC_INDEX.S_CHATS_INDEX
         ]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [param.category])
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
     else:
         return await search_model.getInstance().search_leak_result(param)
 

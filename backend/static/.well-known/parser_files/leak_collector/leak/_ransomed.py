@@ -118,5 +118,5 @@ class _ransomed(leak_extractor_interface, ABC):
                 m_team="RansomedVC",
             )
 
-            entity_data = helper_method.extract_entities((description or "") + ref_html, entity_data)
+            entity_data = helper_method.extract_entities((description or "") + (ref_html or ""), entity_data)
             self.append_leak_data(card_data, entity_data)

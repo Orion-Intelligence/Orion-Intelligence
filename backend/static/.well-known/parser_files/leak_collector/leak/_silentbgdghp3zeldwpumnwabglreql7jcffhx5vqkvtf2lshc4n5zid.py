@@ -134,6 +134,6 @@ class _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid(leak_extractor_i
                 m_team="Silent Blog"
             )
 
-            entity_data = helper_method.extract_entities(m_content + ref_html, entity_data)
+            entity_data = helper_method.extract_entities(m_content + (ref_html or ""), entity_data)
             self.append_leak_data(card_data, entity_data)
 

@@ -183,7 +183,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                         m_company_name=title,
                         m_industry=industry,
                     )
-                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                    entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                     self.append_leak_data(card_data, entity_data)
 
 

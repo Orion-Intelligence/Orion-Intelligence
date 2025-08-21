@@ -154,7 +154,7 @@ class _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad(leak_extractor_i
                     m_team="everest group"
                 )
 
-                entity_data = helper_method.extract_entities(content + ref_html, entity_data)
+                entity_data = helper_method.extract_entities(content + (ref_html or ""), entity_data)
                 self.append_leak_data(card_data, entity_data)
                 error_count = 0
 

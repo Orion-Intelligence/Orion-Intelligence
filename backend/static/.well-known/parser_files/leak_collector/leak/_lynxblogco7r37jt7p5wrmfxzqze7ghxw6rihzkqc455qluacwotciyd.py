@@ -189,7 +189,7 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
                                 m_team="lynx"
                             )
 
-                            entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                            entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                             self.append_leak_data(card_data, entity_data)
                             new_cards_found = True
 

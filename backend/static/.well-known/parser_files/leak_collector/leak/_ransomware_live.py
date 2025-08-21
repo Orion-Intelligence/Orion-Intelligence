@@ -159,7 +159,7 @@ class _ransomware_live(leak_extractor_interface, ABC):
                     m_team=group
                 )
 
-                entity_data = helper_method.extract_entities(complete_description + ref_html, entity_data) or entity_data
+                entity_data = helper_method.extract_entities(complete_description + (ref_html or ""), entity_data) or entity_data
 
                 self.append_leak_data(card_data, entity_data)
 

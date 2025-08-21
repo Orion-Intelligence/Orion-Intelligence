@@ -126,5 +126,5 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
                 m_team="imn crew",
             )
 
-            entity_data = helper_method.extract_entities(m_content + ref_html, entity_data)
+            entity_data = helper_method.extract_entities(m_content + (ref_html or ""), entity_data)
             self.append_leak_data(card_data, entity_data)

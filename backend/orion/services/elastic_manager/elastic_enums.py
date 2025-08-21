@@ -24,7 +24,7 @@ class ELASTIC_INDEX:
 class ELASTIC_SEMANTIC:
     S_INFERENCE_ID = "orion-e5-small"
     S_EMBED_FIELD = "m_embedding"
-    S_EMBED_DIMS = 384
+    S_EMBED_DIMS = 1024
 
 
 class ELASTIC_CONNECTIONS:
@@ -100,7 +100,7 @@ class ELASTIC_ENUMS:
 
                 "m_embedding": {
                     "type": "dense_vector",
-                    "dims": 384,
+                    "dims": 1024,
                     "element_type": "float",
                     "similarity": "cosine",
                     "index": True
@@ -135,7 +135,15 @@ class ELASTIC_ENUMS:
                 "m_content": {"type": "text"},
                 "m_update_date": {"type": "date"},
                 "m_creation_date": {"type": "date"},
-                "m_content_type": {"type": "keyword"}
+                "m_content_type": {"type": "keyword"},
+
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }
@@ -340,7 +348,14 @@ class ELASTIC_ENUMS:
                         "keyword": {"type": "keyword"}
                     }
                 },
-                "m_mitre_ttp_type": {"type": "keyword"}
+                "m_mitre_ttp_type": {"type": "keyword"},
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }
@@ -434,7 +449,14 @@ class ELASTIC_ENUMS:
                 "m_file_name": {"type": "keyword", "normalizer": "lowercase_normalizer"},
                 "m_users": {"type": "keyword", "normalizer": "lowercase_normalizer"},
                 "m_hashtags": {"type": "keyword", "normalizer": "lowercase_normalizer"},
-                "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }
@@ -614,6 +636,13 @@ class ELASTIC_ENUMS:
                 },
                 "m_platform": {
                     "type": "keyword"
+                },
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
                 }
             }
         }

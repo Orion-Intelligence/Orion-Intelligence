@@ -22,10 +22,9 @@ class elastic_semantic_controller:
         elastic_semantic_controller.__instance = self
 
     async def init(self, connection: AsyncElasticsearch, indices: Optional[List[str]] = None) -> None:
-        if env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
-            self.__m_connection = connection
-            self.__indices = indices if indices else self.__collect_indices()
-            await self.__post_init_semantic()
+        self.__m_connection = connection
+        self.__indices = indices if indices else self.__collect_indices()
+        await self.__post_init_semantic()
 
     def get_connection(self) -> AsyncElasticsearch:
         return self.__m_connection
@@ -36,6 +35,7 @@ class elastic_semantic_controller:
                 await self.__m_connection.close()
         except Exception as ex:
             log.g().w(f"ES close warning: {str(ex)}")
+            raise
 
     @staticmethod
     def __collect_indices() -> List[str]:
@@ -66,20 +66,26 @@ class elastic_semantic_controller:
             )
         except Exception as ex:
             log.g().e(f"Failed to add vector field on {index_name}: {str(ex)}")
+            raise
 
     @staticmethod
     async def __embed_texts(texts: List[str]) -> List[List[float]]:
         base = env_handler.get_instance().env("EMBED_API_BASE") or "http://trusted-micros-api:8010"
         try:
             async with httpx.AsyncClient(timeout=200) as client:
-                r = await client.post(f"{base}/nlp/embed", json={"texts": texts, "normalize": True})
+                r = await client.post(f"{base}/nlp/embed/index", json={"data": texts, "normalize": True})
                 r.raise_for_status()
                 data = r.json()
-                embs = data.get("embeddings") or []
+                payload = data.get("result", data) or {}
+                if not payload:
+                    raise ValueError("Empty embedding payload")
+                embs = payload.get("embeddings") or []
+                if not embs:
+                    raise ValueError("No embeddings in payload")
                 return embs
         except Exception as ex:
             log.g().e(f"Embedding failed: {str(ex)}")
-            return []
+            raise
 
     async def embed_query(self, text: str) -> Optional[List[float]]:
         try:
@@ -88,7 +94,7 @@ class elastic_semantic_controller:
             return out[0] if out else None
         except Exception as ex:
             log.g().e(f"Query embedding failed: {str(ex)}")
-            return None
+            raise
 
     @staticmethod
     def embed_query_sync(text: str) -> Optional[List[float]]:
@@ -96,39 +102,46 @@ class elastic_semantic_controller:
         try:
             q = ("query: " + (text or "").strip())
             with httpx.Client(timeout=200) as client:
-                r = client.post(f"{base}/nlp/embed", json={"texts": [q], "normalize": True})
+                r = client.post(f"{base}/nlp/embed", json={"data": [q], "normalize": True})
                 r.raise_for_status()
                 data = r.json()
-                embs = data.get("embeddings") or []
-                return embs[0] if embs else None
+                payload = data.get("result", data) or {}
+                if not payload:
+                    raise ValueError("Empty embedding payload")
+                embs = payload.get("embeddings")
+                if isinstance(embs, list) and embs:
+                    first = embs[0]
+                    return first if isinstance(first, list) else None
+                emb = payload.get("embedding")
+                if isinstance(emb, list) and emb:
+                    return emb
+                raise ValueError(f"No embeddings in payload: {data}")
         except Exception as ex:
             log.g().e(f"Query embedding (sync) failed: {str(ex)}")
+            raise
+
+    async def compute_vec(self, doc: Dict[str, Any]) -> Optional[List[float]]:
+        title = (doc.get("m_title") or "").strip()
+        important = (doc.get("m_important_content") or "").strip()
+        content = (doc.get("m_content") or "").strip()
+        text = "\n".join([t for t in (title, important, content) if t]).strip()
+        if not text:
             return None
+        vecs = await self.__embed_texts([f"passage: {text}"])
+        return vecs[0] if vecs else None
 
     async def enrich_for_semantic(self, p_data: Any) -> Any:
-        if env_handler.get_instance().env("SEMANTIC_ENABLED") == "0":
-            return p_data
-
-        async def compute_vec(doc: Dict[str, Any]) -> Optional[List[float]]:
-            title = (doc.get("m_title") or "").strip()
-            important = (doc.get("m_important_content") or "").strip()
-            content = (doc.get("m_content") or "").strip()
-            text = "\n".join([t for t in (title, important, content) if t]).strip()
-            if not text:
-                return None
-            vecs = await self.__embed_texts([f"passage: {text}"])
-            return vecs[0] if vecs else None
-
         if isinstance(p_data, list):
             out = []
             for entry in p_data:
                 doc = entry.get(ELASTIC_KEYS.S_VALUE, {})
                 try:
-                    vec = await compute_vec(doc)
+                    vec = await self.compute_vec(doc)
                     if vec:
                         doc[ELASTIC_SEMANTIC.S_EMBED_FIELD] = vec
                 except Exception as ex:
                     log.g().w(f"Embedding skipped (batch item): {str(ex)}")
+                    raise
                 entry[ELASTIC_KEYS.S_VALUE] = doc
                 out.append(entry)
             return out
@@ -136,10 +149,11 @@ class elastic_semantic_controller:
             entry = p_data
             doc = entry.get(ELASTIC_KEYS.S_VALUE, {})
             try:
-                vec = await compute_vec(doc)
+                vec = await self.compute_vec(doc)
                 if vec:
                     doc[ELASTIC_SEMANTIC.S_EMBED_FIELD] = vec
             except Exception as ex:
                 log.g().w(f"Embedding skipped (single item): {str(ex)}")
+                raise
             entry[ELASTIC_KEYS.S_VALUE] = doc
             return entry

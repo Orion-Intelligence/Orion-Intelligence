@@ -146,7 +146,7 @@ class _7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd(leak_extractor_i
                         m_location=location.split(",") if location else None,
                         m_team="diaxin"
                     )
-                    entity_data = helper_method.extract_entities(description + ref_html, entity_data)
+                    entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
 
                     self.append_leak_data(card_data, entity_data)
                     error_count = 0

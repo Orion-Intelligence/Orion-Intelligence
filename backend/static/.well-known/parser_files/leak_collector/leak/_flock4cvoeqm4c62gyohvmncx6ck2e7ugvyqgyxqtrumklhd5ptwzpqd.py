@@ -150,7 +150,7 @@ class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_i
                                 m_ip=[title_text],
                                 m_team="fsociety"
                             )
-                            entity_data = helper_method.extract_entities(content_text.strip() + ref_html, entity_data)
+                            entity_data = helper_method.extract_entities(content_text.strip() + (ref_html or ""), entity_data)
 
                             self.append_leak_data(card_data, entity_data)
 
