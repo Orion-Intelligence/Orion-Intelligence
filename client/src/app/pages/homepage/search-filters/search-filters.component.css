@@ -1,9 +1,5 @@
-.filter-panel__top-space-expand {
-  margin-top: 40px !important;
-}
-
 .filter-panel__top-space-shrink {
-  margin-top: 0px !important;
+  margin-top: 0 !important;
 }
 
 .filter-panel {
@@ -16,7 +12,7 @@
   color: white;
   max-height: 500px;
   width: 100%;
-  max-width: 870px;
+  max-width: 910px;
   z-index: 1;
   margin-top: 0;
   overflow-y: auto;

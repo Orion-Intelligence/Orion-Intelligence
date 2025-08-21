@@ -46,8 +46,8 @@ export class SelectedFilterBarComponent implements OnInit {
       delete updated["matchtype"];
       return updated;
     });
+    this.app_service.set('matchType', "semantic");
     this.clearAll.emit();
-    this.app_service.set('matchType', "");
   }
 
   clearFilters(scope: 'sidebar' | 'entity' | 'all'): void {
@@ -60,7 +60,7 @@ export class SelectedFilterBarComponent implements OnInit {
         this.app_service.set('entityfilterCategories', {});
       }
     }
-
+    this.app_service.set('matchType', "semantic");
     this.clearAll.emit();
   }
 
@@ -90,7 +90,7 @@ export class SelectedFilterBarComponent implements OnInit {
   sidebarFilterCount(all: boolean = false): number {
     if (all) {
       return Object.entries(this.dashboardService.selectedFilters())
-        .filter(([key, value]) => key !== 'matchtype' || value !== 'or')
+        .filter(([key, value]) => key !== 'matchtype' || value !== 'semantic')
         .length;
     } else {
       return Object.entries(this.dashboardService.selectedFilters())

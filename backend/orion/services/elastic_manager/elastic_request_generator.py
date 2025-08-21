@@ -1,22 +1,18 @@
 import hashlib
 import re
 import ipaddress
+
 from datetime import timedelta, timezone
-from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
-from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
-from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
 from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC
 from datetime import datetime
-
 from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
-
 
 class elastic_request_generator:
 
@@ -643,6 +639,23 @@ class elastic_request_generator:
             "explain": True
         }
 
+        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+            try:
+                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+                if qvec:
+                    knn_clause = {
+                        "knn": {
+                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+                            "num_candidates": 1000,
+                            "query_vector": qvec
+                        }
+                    }
+                    unified_query["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+                    unified_query["min_score"] = 29
+            except Exception:
+                pass
+
         query = base_index, unified_query, [b for b in [
             {ELASTIC_INDEX.S_LEAK_INDEX: 2},
             {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
@@ -941,7 +954,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod
-    def on_search_exploitdata(p_query_model: search_exploit_param_model, pfilter=None):
+    def on_search_exploitdata(p_query_model, pfilter=None):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -1616,7 +1629,6 @@ class elastic_request_generator:
             try:
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
                 if qvec:
-                    print(":::::::::::::::::::::::::: 0", flush=True)
                     knn_clause = {
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
@@ -1625,11 +1637,9 @@ class elastic_request_generator:
                             "query_vector": qvec
                         }
                     }
-                    print(":::::::::::::::::::::::::: 1", flush=True)
                     query["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
                     # query_statement["min_score"] = 29
             except Exception as ex:
-                print(":::::::::::::::::::::::::: 2", flush=True)
                 pass
 
         return ELASTIC_INDEX.S_CHATS_INDEX, query

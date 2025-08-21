@@ -13,15 +13,12 @@ class AllowedKeys(str, Enum):
     TELEGRAM_ALLOWED = "telegram_allowed"
     LOGO_URL = "logo_url"
     AI_ENDPOINT = "ai_endpoint"
-    SEARCH_TYPE = "search_type"
 
 
 VALID_LANGUAGE_CODES = {
     "en", "fr", "es", "de", "it", "pt", "ru", "zh", "ja", "ko",
     "ar", "hi", "bn", "tr", "nl", "sv", "pl", "cs"
 }
-
-VALID_SEARCH_TYPES = {"semantic", "and", "or", "full"}
 
 IMAGE_URL_REGEX = re.compile(r"^https?://.+\.(png|jpg|jpeg|svg|webp)$", re.IGNORECASE)
 ENDPOINT_URL_REGEX = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)
@@ -35,9 +32,6 @@ class db_system_model(Model):
     def validate_value(cls, value: str, info: Any):
         key = info.data.get("key")
 
-        if key == AllowedKeys.SEARCH_TYPE and not value.strip():
-            value = "semantic"
-
         validators = {
             AllowedKeys.API_ALLOWED: lambda v: v in ("0", "1"),
             AllowedKeys.TELEGRAM_ALLOWED: lambda v: v in ("0", "1"),
@@ -45,7 +39,6 @@ class db_system_model(Model):
             AllowedKeys.LANGUAGE_ALLOWED: lambda v: v in VALID_LANGUAGE_CODES,
             AllowedKeys.LOGO_URL: lambda v: v == "" or bool(IMAGE_URL_REGEX.match(v)),
             AllowedKeys.AI_ENDPOINT: lambda v: v == "" or bool(ENDPOINT_URL_REGEX.match(v)),
-            AllowedKeys.SEARCH_TYPE: lambda v: v in VALID_SEARCH_TYPES,
         }
 
         error_messages = {
@@ -55,7 +48,6 @@ class db_system_model(Model):
             AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}",
             AllowedKeys.LOGO_URL: "LOGO_URL must be a valid image URL ending with .png, .jpg, .svg, etc., or be empty",
             AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty",
-            AllowedKeys.SEARCH_TYPE: f"SEARCH_TYPE must be one of: {', '.join(sorted(VALID_SEARCH_TYPES))}",
         }
 
         if key in validators and not validators[key](value):

@@ -31,7 +31,7 @@ export class AppStorageService {
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
-      matchType: this.getFromStorage<string>('matchType'),
+      matchType: this.getFromStorage<string>('matchType') || 'semantic',
       sortType: this.getFromStorage<string>('sortType'),
     };
   }
