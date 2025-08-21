@@ -26,9 +26,6 @@
                 </button>
               </span>
             </div>
-            <!-- <app-dashboard-results-general-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'"
-              @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
-              [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid> -->
             <app-dashboard-results-general-grid
               *ngIf="index.key === 'leak_model' || index.key === 'generic_model' || index.key === 'tracking_model' || index.key === 'news_model'"
               @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
