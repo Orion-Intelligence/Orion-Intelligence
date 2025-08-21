@@ -9,7 +9,8 @@
     <div class="dashboard__layout-left">
       <ng-container *ngIf="isGrouped; else rankedMode">
         <app-defacement-results [isExpandable]="isIpReportExpandable()"
-          [results_defacement]="consolidatedCallbackModel.defacement_model" [results_stealerlog]="consolidatedCallbackModel.stealer_model"
+          [results_defacement]="consolidatedCallbackModel.defacement_model"
+          [results_stealerlog]="consolidatedCallbackModel.stealer_model"
           *ngIf="!isLoading() && getTotalResultCount()>0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || consolidatedCallbackModel.stealer_model?.Result?.length ?? 0) > 0"></app-defacement-results>
 
         <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
@@ -25,9 +26,14 @@
                 </button>
               </span>
             </div>
-            <app-dashboard-results-general-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'"
+            <!-- <app-dashboard-results-general-grid *ngIf="index.key === 'leak_model' || index.key === 'generic_model'"
               @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
-              [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
+              [type]="index.key === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid> -->
+            <app-dashboard-results-general-grid
+              *ngIf="index.key === 'leak_model' || index.key === 'generic_model' || index.key === 'tracking_model' || index.key === 'news_model'"
+              @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
+              [type]="index.key === 'leak_model' ? 'leak' : index.key === 'tracking_model' ? 'tracking' : index.key === 'news_model' ? 'news' : 'general'">
+            </app-dashboard-results-general-grid>
             <app-dashboard-result-exploit *ngIf="index.key === 'exploit_model'" @fadeInDashboardItem
               [isExpandAble]="true" [searchResults]="index.value"></app-dashboard-result-exploit>
             <app-dashboard-result-social *ngIf="index.key === 'social_model'" @fadeInDashboardItem [isExpandAble]="true"

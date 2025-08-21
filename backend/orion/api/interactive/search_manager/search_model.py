@@ -178,7 +178,7 @@ class search_model:
         else:
             filter_dict = {}
 
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param, filter_dict)
+        indices, queries, labels = elastic_request_generator().on_search_consolidated_data(param, filter_dict)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         leak_data = {}
@@ -188,8 +188,10 @@ class search_model:
         defacement_data = {}
         social_data = {}
         stealer_data = {}
+        tracking_data={}
+        news_data={}
 
-        for index, res in zip(indices, responses):
+        for index, res,label in zip(indices, responses,labels):
             data = {"Result": [], "Suggestions": [], "Page_Count": 0}
 
             if not res:
@@ -208,20 +210,24 @@ class search_model:
                 data["Result"] = [hit["_source"] for hit in hits]
                 data["Page_Count"] = len(hits)
 
-            if index == "leak_model":
+            if label == "leak_model":
                 leak_data = data
-            elif index == "generic_model":
+            elif label == "generic_model":
                 general_data = data
-            elif index == "exploit_model":
+            elif label == "exploit_model":
                 exploit_data = data
-            elif index == "chat_model":
+            elif label == "chat_model":
                 chat_data = data
-            elif index == "social_model":
+            elif label == "social_model":
                 social_data = data
-            elif index == "stealer_model":
+            elif label == "stealer_model":
                 stealer_data = data
-            elif index == "defacement_model":
+            elif label == "defacement_model":
                 defacement_data = data
+            elif label == "tracking_model":
+                tracking_data = data
+            elif label == "news_model":
+                news_data = data
 
         return grouped_consolidated_search_callback_model(
             leak_model=search_leak_callback_model(**leak_data),
@@ -230,7 +236,9 @@ class search_model:
             generic_model=search_general_callback_model(**general_data),
             defacement_model=search_defacement_callback_model(**defacement_data),
             social_model=search_social_callback_model(**social_data),
-            stealer_model = search_stealerlog_callback_model(**stealer_data)
+            stealer_model = search_stealerlog_callback_model(**stealer_data),
+            tracking_model=search_leak_callback_model(**tracking_data),
+            news_model=search_leak_callback_model(**news_data)
         )
 
     async def search_exploit_result(self, param: search_exploit_param_model):
