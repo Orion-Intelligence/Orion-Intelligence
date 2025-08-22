@@ -1,11 +1,12 @@
+
 export interface TenantModel {
-    id: string;
+    id?: string;
     name: string;
     email: string;
-    userStatus: UserStatus;
-    systemStatus: SystemStatus;
-    verificationToken: string;
-    createdAt: Date;
+    userStatus?: UserStatus;
+    systemStatus?: SystemStatus;
+    verificationToken?: string;
+    createdAt?: Date;
     updatedAt?: Date;
 }
 

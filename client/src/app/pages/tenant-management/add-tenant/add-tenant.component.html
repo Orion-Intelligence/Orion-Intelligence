@@ -1,1 +1,41 @@
-<p>add-tenant works!</p>
+<div class="add-tenant-container">
+    <h2 class="add-tenant-container__title">Add Tenant</h2>
+
+    <form [formGroup]="tenantForm" (ngSubmit)="onSubmit()" class="add-tenant-container__form">
+
+        <div class="add-tenant-container__form-group">
+            <label for="name" class="add-tenant-container__label">Name</label>
+            <input id="name" type="text" formControlName="name" class="add-tenant-container__input" />
+        </div>
+
+        <div class="add-tenant-container__form-group">
+            <label for="email" class="add-tenant-container__label">Email</label>
+            <input id="email" type="email" formControlName="email" class="add-tenant-container__input" />
+        </div>
+
+        <div class="add-tenant-container__form-group">
+            <label for="userStatus" class="add-tenant-container__label">User Status</label>
+            <select id="userStatus" formControlName="userStatus" class="add-tenant-container__select">
+                <option *ngFor="let status of userStatuses" [value]="status">{{ status }}</option>
+            </select>
+        </div>
+
+        <div class="add-tenant-container__form-group">
+            <label for="systemStatus" class="add-tenant-container__label">System Status</label>
+            <select id="systemStatus" formControlName="systemStatus" class="add-tenant-container__select">
+                <option *ngFor="let status of systemStatuses" [value]="status">{{ status }}</option>
+            </select>
+        </div>
+
+        <div class="add-tenant-container__actions">
+            <button type="submit" class="add-tenant-container__button add-tenant-container__button--primary"
+                [disabled]="tenantForm.invalid">
+                Add Tenant
+            </button>
+            <button type="button" class="add-tenant-container__button add-tenant-container__button--secondary"
+                (click)="onReset()">
+                Reset
+            </button>
+        </div>
+    </form>
+</div>
