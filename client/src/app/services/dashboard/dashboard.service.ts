@@ -41,7 +41,8 @@ export class DashboardService {
 
   fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(
     apiEndpoint: string,
-    paramModel: any
+    paramModel: any,
+    semantic=""
   ): Observable<{ success: boolean; isEmpty: boolean; data: T | null }> {
     const route: string = this.router.url.split('?')[0];
     this.m_current_route = String(route);
@@ -58,7 +59,11 @@ export class DashboardService {
     }).then();
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
-    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    if (semantic){
+      baseParams['matchtype'] = semantic;
+    }else {
+      baseParams['matchtype'] = this.app_service.configData().localSettings.matchType;
+    }
     if (entityCategories) {
       baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
     }

@@ -64,7 +64,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     if (this.getRoute() == 'all') {
       return this.discussionCallbackModel.Result.length
     } else {
-      return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
+      return this.dashboardService.generalCallbackModel.Page_Count ?? 0;
     }
   }
 

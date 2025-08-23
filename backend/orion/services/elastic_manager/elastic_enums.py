@@ -154,6 +154,12 @@ class ELASTIC_ENUMS:
             "number_of_replicas": 0,
             "max_result_window": 1000000,
             "analysis": {
+                "normalizer": {
+                    "lowercase_normalizer": {
+                        "type": "custom",
+                        "filter": ["lowercase"]
+                    }
+                },
                 "tokenizer": {
                     "dot_split_tokenizer": {
                         "type": "pattern",
@@ -203,6 +209,12 @@ class ELASTIC_ENUMS:
                             "type": "text",
                             "analyzer": "dot_split_analyzer"
                         }
+                    }
+                },
+                "m_content": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
                     }
                 },
                 "m_url": {
@@ -270,6 +282,13 @@ class ELASTIC_ENUMS:
                 },
                 "m_domain": {
                     "type": "keyword"
+                },
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
                 }
             }
         }

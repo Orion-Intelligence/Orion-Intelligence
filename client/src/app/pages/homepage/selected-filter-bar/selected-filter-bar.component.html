@@ -1,5 +1,5 @@
 <div [ngClass]="{ 'selected-filter-bar__top-space': showSorting }" @fadeInDashboardItem>
-  <div class="selected-filter-bar selected-filter-bar__left-space" *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.dashboardService.selectedFilters()['matchtype']!='semantic'">
+  <div class="selected-filter-bar selected-filter-bar__left-space" *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0">
     <div class="selected-filter-bar__top-row">
       <div class="selected-filter-bar__title">Filters</div>
       <div class="selected-filter-bar__actions">

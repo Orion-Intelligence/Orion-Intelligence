@@ -1,13 +1,11 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from string import capwords
 from elasticsearch import AsyncElasticsearch
 from fastapi import HTTPException
-
 from orion.constants.constant import CONSTANTS
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
-from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
 from orion.services.log_manager.log_controller import log
 
 
@@ -80,14 +78,40 @@ class elastic_controller:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
     async def purge_old_records(self):
-        m_request = {"query": {"range": {"timestamp": {"lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"}}}}
         try:
+            m_request_stealer = {
+                "query": {
+                    "range": {
+                        "timestamp": {
+                            "lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"
+                        }
+                    }
+                }
+            }
             await self.__m_connection.delete_by_query(
                 index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
-                body=m_request,
+                body=m_request_stealer,
                 ignore=[404],
                 request_timeout=300
             )
+
+            days_15_seconds = int(timedelta(days=15).total_seconds())
+            m_request_defacement = {
+                "query": {
+                    "range": {
+                        "timestamp": {
+                            "m_leak_date": f"now-{days_15_seconds}s"
+                        }
+                    }
+                }
+            }
+            await self.__m_connection.delete_by_query(
+                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+                body=m_request_defacement,
+                ignore=[404],
+                request_timeout=300
+            )
+
         except Exception as ex:
             log.g().e(f"Failed to delete old records: {str(ex)}")
 
@@ -200,7 +224,7 @@ class elastic_controller:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, None
 
-    async def index_data(self, p_data):
+    async def index_data(self, p_data, bypass_empty_embedding = False):
         try:
             def ensure_creation_date(p_entry):
                 data = p_entry[ELASTIC_KEYS.S_VALUE]
@@ -235,7 +259,7 @@ class elastic_controller:
                     index = entry[ELASTIC_KEYS.S_DOCUMENT]
                     exists = await self.__m_connection.exists(index=index, id=doc_id)
 
-                    if not exists:
+                    if not exists or bypass_empty_embedding:
                         emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
                         if not (isinstance(emb, list) and len(emb) > 0):
                             log.g().w(f"Skipping insert without non-empty embedding: {doc_id}")

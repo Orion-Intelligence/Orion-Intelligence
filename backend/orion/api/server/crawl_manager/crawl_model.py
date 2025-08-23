@@ -250,7 +250,7 @@ class crawl_model:
 
     async def invoke_defacement_index(self, defacement_index: DefacementDataModel):
         m_data = elastic_request_generator().index_query_defacement(defacement_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await elastic_controller.get_instance().index_data(m_data, True)
         return await self._update_or_create_model(
             base_url=defacement_index.base_url,
             new_content_type=['defacement'],

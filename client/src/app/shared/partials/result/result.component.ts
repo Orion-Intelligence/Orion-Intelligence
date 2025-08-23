@@ -39,6 +39,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery = '';
   @Input() analyticsToggle = false;
+  @Input() list_grid = false;
   @Input() shrinkmenu = false;
   @Input() disableScroll = false;
   @Input() type!: Category;
@@ -101,7 +102,7 @@ export class ResultComponent implements OnInit, OnChanges {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
     if (matchtype === "full") return "Match full query";
     if (matchtype === "and") return "Match individual terms";
-    if (matchtype === "or") return "Matchss any term";
+    if (matchtype === "or") return "Match any term";
     return "Match semantic query";
   });
 

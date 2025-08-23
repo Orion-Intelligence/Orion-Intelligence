@@ -223,12 +223,10 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
-    def on_search_defacement_data(p_query_model: search_defacement_param_model, _=None, is_consolidated: bool = False):
+    def on_search_defacement_data(p_query_model: search_defacement_param_model, pfilter=None, is_consolidated: bool = False):
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
-
-        m_page_number = getattr(p_query_model, 'page', 1)
 
         must_clauses = []
         must_not_clause = []
@@ -243,17 +241,10 @@ class elastic_request_generator:
                 try:
                     from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
                     from_date = from_date_obj.strftime("%Y-%m-%d")
-
                     to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
                     to_date = to_date_obj.strftime("%Y-%m-%d")
-
                     must_clauses.append({
-                        "range": {
-                            "m_leak_date": {
-                                "gte": from_date,
-                                "lte": to_date
-                            }
-                        }
+                        "range": {"m_leak_date": {"gte": from_date, "lte": to_date}}
                     })
                 except ValueError:
                     pass
@@ -272,6 +263,7 @@ class elastic_request_generator:
 
         quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
         quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+        m_page_number = getattr(p_query_model, "page", 1)
 
         try:
             ipaddress.ip_address(raw_query)
@@ -279,7 +271,9 @@ class elastic_request_generator:
         except ValueError:
             is_ip = False
 
-        if raw_query == "*":
+        if p_query_model.matchtype == "semantic":
+            main_query = {"match_all": {}}
+        elif raw_query == "*":
             if is_consolidated:
                 main_query = {}
             else:
@@ -304,11 +298,7 @@ class elastic_request_generator:
                 should_clauses.append({"term": {"m_ip": raw_query}})
                 should_clauses.append({
                     "wildcard": {
-                        "m_ip": {
-                            "value": f"*{raw_query}*",
-                            "case_insensitive": True,
-                            "boost": 2
-                        }
+                        "m_ip": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}
                     }
                 })
             else:
@@ -318,20 +308,13 @@ class elastic_request_generator:
                     {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
                     {"match": {"m_url": {"query": raw_query, "boost": 50}}},
                     {"match": {"m_base_url": {"query": raw_query, "boost": 50}}},
-                    {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},  # NEW
+                    {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},
                     {
                         "multi_match": {
                             "query": raw_query,
                             "fields": [
-                                "m_location^5",
-                                "m_web_url^5",
-                                "m_base_url^5",
-                                "m_url^5",
-                                "m_web_server^3",
-                                "m_attacker^5",  # NEW
-                                "m_team^5",
-                                "m_network^3",
-                                "m_mirror_links^5"
+                                "m_location^5", "m_web_url^5", "m_base_url^5", "m_url^5",
+                                "m_web_server^3", "m_attacker^5", "m_team^5", "m_network^3", "m_mirror_links^5"
                             ],
                             "type": "best_fields",
                             "boost": 5
@@ -345,7 +328,7 @@ class elastic_request_generator:
                                 {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
                                 {"wildcard": {"m_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
                                 {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                                {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},  # NEW
+                                {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
                                 {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
                                 {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
                                 {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
@@ -363,6 +346,14 @@ class elastic_request_generator:
                     "must_not": must_not_clause
                 }
             }
+
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
+        if main_query != {}:
+            if "bool" not in main_query:
+                main_query = {"bool": {"must": [main_query], "filter": []}}
+            main_query["bool"]["filter"] = main_query["bool"].get("filter", []) + must_filter_clauses
+            if not getattr(p_query_model, "must", None) and should_filter_clauses:
+                main_query["bool"]["filter"].append({"bool": {"should": should_filter_clauses, "minimum_should_match": 1}})
 
         query_statement = {
             "min_score": 0,
@@ -390,9 +381,7 @@ class elastic_request_generator:
                             }
                         },
                         {
-                            "filter": {
-                                "exists": {"field": "m_leak_date"}
-                            },
+                            "filter": {"exists": {"field": "m_leak_date"}},
                             "weight": 1
                         },
                         {
@@ -407,15 +396,36 @@ class elastic_request_generator:
                             "weight": 1
                         }
                     ],
-                    "score_mode": "sum",
-                    "boost_mode": "multiply"
                 }
             },
-            "from": max(0, (m_page_number - 1) * 100),
-            "size": 100,
+            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
+            "size": 20,
             "track_total_hits": True,
-            "sort": [{"m_leak_date": {"order": "desc"}}]
+            "explain": True
         }
+
+        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+            try:
+                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+                if qvec:
+                    knn_clause = {
+                        "knn": {
+                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+                            "num_candidates": 1000,
+                            "query_vector": qvec
+                        }
+                    }
+                    fs_query = query_statement["query"]["function_score"]["query"]
+                    if "bool" not in fs_query:
+                        query_statement["query"]["function_score"]["query"] = {"bool": {"must": [fs_query]}}
+                    if "must" not in query_statement["query"]["function_score"]["query"]["bool"]:
+                        query_statement["query"]["function_score"]["query"]["bool"]["must"] = []
+                    query_statement["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+                    query_statement["min_score"] = 29
+            except Exception as ex:
+                print(ex, flush=True)
+                pass
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 

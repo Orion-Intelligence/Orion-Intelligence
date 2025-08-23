@@ -3,15 +3,18 @@ import {CommonModule, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ScrollService} from '../../../../services/scroll.service';
 import {DefacementResultItem} from '../../../../model/results/defacement/defacement.callback.model';
+import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-result-general-list',
-  standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe, CommonModule],
+  standalone: true, imports: [NgIf, NgForOf, RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
   templateUrl: './dashboard-result-general-list.component.html'
 })
 export class DashboardResultGeneralListComponent implements OnInit, AfterViewInit {
   @Input() searchResults: DefacementResultItem[] = [];
   @Input() isExpandAble: boolean = false;
+  @Input() isList: boolean = true;
+
   currentUrl = '';
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';

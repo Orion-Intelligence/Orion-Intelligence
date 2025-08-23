@@ -25,6 +25,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
   protected readonly Math = Math;
   protected readonly defacement_filters = defacement_filters;
+  protected isList = true
 
   defacementCallbackModel: DefacementCallbackModel = new DefacementCallbackModel();
   result_count = 0;
@@ -32,7 +33,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
   query = '';
   firstTrigger = true;
 
-  constructor(protected helperService: HelperService, public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
+  constructor(private app_service: AppService, protected helperService: HelperService, public appService: AppService, private route: ActivatedRoute, private cdr: ChangeDetectorRef, public dashboardService: DashboardService, private router: Router) {
   }
 
   ngAfterViewInit(): void {
@@ -91,9 +92,14 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
     if (lastSegment)
       this.dashboardService.consolidatedParamModel.content = lastSegment
 
+    let matchtype = ""
+    if(this.isList && this.app_service.configData().localSettings.matchType=="semantic"){
+      matchtype = "or"
+    }
+
     this.isResponseLoading.set(true)
     this.dashboardService
-      .fetchSearchResults<DefacementCallbackModel>('search/defacement', this.dashboardService.consolidatedParamModel)
+      .fetchSearchResults<DefacementCallbackModel>('search/defacement', this.dashboardService.consolidatedParamModel, matchtype)
       .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
       .subscribe(response => {
         if (response.success && response.data) {
@@ -143,5 +149,9 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       order
     );
     this.cdr.detectChanges();
+  }
+
+  list_switch(tab: string) {
+    this.isList = tab == "List";
   }
 }

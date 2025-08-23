@@ -1,7 +1,7 @@
-<app-result [discussion]="false" (onToggleSort)="onToggleSort($event)" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [isTool]="false" [filterModel]="defacement_filters" [isLoading]="isResponseLoading()" [result_count]="Math.ceil(result_count)" [searchQuery]="query" [showTabs]=false [type]="type"></app-result>
+<app-result [discussion]="false" (onToggleSort)="onToggleSort($event)" [list_grid]="true" (onToggleSwitch)="list_switch($event)" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" (updateQuery)="onUpdateQuery($event)" [filterModel]="defacement_filters" [isLoading]="isResponseLoading()" [result_count]="Math.ceil(result_count)" [searchQuery]="query" [showTabs]=true [type]="type"></app-result>
 
 <div *ngIf="!isResponseLoading() && this.defacementCallbackModel.Result.length" @fadeInDashboardItem>
-  <app-dashboard-result-general-list [searchResults]="defacementCallbackModel.Result"></app-dashboard-result-general-list>
+  <app-dashboard-result-general-list [isList]="this.isList" [searchResults]="defacementCallbackModel.Result"></app-dashboard-result-general-list>
 </div>
 
 <div *ngIf="!isResponseLoading() && this.defacementCallbackModel.Result.length > 0" @fadeInDashboardItem class="pagination-margin">

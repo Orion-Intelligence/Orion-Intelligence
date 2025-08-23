@@ -108,27 +108,32 @@
     </div>
   </div>
 </form>
-<ul *ngIf="showTabs && (analyticsToggle || domain || discussion || consolidated)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
-  <li class="nav-item" *ngIf="!consolidated && !domain">
+<ul *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated)" class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
+  <li class="nav-item" *ngIf="list_grid">
+    <a class="nav-link cursor-pointer active">List</a>
+  </li>
+  <li class="nav-item" *ngIf="list_grid">
+    <a class="nav-link cursor-pointer">Grid</a>
+  </li>
+  <li class="nav-item" *ngIf="!list_grid && !consolidated && !domain">
     <a class="nav-link cursor-pointer active">Results</a>
   </li>
-  <li class="nav-item" *ngIf="discussion">
+  <li class="nav-item" *ngIf="!list_grid && discussion">
     <a class="nav-link cursor-pointer">Discussion</a>
   </li>
-  <li class="nav-item" *ngIf="consolidated">
+  <li class="nav-item" *ngIf="!list_grid && consolidated">
     <a class="nav-link cursor-pointer active">Group</a>
   </li>
-  <li class="nav-item" *ngIf="consolidated">
+  <li class="nav-item" *ngIf="!list_grid && consolidated">
     <a class="nav-link cursor-pointer">Ranked</a>
   </li>
-  <li class="nav-item" *ngIf="domain">
+  <li class="nav-item" *ngIf="!list_grid && domain">
     <a class="nav-link cursor-pointer active">Fast Search</a>
   </li>
-  <li class="nav-item" *ngIf="domain">
+  <li class="nav-item" *ngIf="!list_grid && domain">
     <a class="nav-link cursor-pointer">Full Search</a>
   </li>
 </ul>
-
 <ng-container *ngIf="suggestion && suggestion.options.length > 0">
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
