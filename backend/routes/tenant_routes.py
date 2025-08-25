@@ -16,10 +16,6 @@ async def get_tenants(ctrl: tenant_controller = Depends(get_tenant_controller)):
 
 @tenant_routes.post("/api/tenant/add", response_model=dict)
 async def add_tenant(tenant: db_tenant_model, ctrl: tenant_controller = Depends(get_tenant_controller)):
-    print("----------------------------------------------------------")
-    print("----------------------------------------------------------")
-    print("----------------------------------------------------------")
-    print("----------------------------------------------------------")
     return await ctrl.add_tenant(tenant)
 
 @tenant_routes.get("/verify/{token}", response_model=dict)

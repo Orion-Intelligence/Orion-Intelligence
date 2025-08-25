@@ -1,0 +1,46 @@
+<ng-container>
+    <app-header></app-header>
+</ng-container>
+<img alt="background" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover"
+    src="/assets/images/shared/Bg.webp">
+<div class="auth-wrapper">
+    <div class="auth-wrapper__left">
+        <div class="signup-wrapper">
+            <div class="signup-container">
+                <div class="signup-container__title">Sign Up</div>
+                <p class="signup-container__subtitle">Enter your email and password to get started!</p>
+
+                <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="signup-container__form">
+                    <div class="signup-container__form-group">
+                        <label class="signup-container__label">Email</label>
+                        <input [(ngModel)]="user.username" for="id_username" type="email" placeholder="Enter your email"
+                            class="signup-container__input" name="username" required type="text" />
+                    </div>
+
+                    <div class="signup-container__form-group">
+                        <label class="signup-container__label">Password</label>
+                        <input [(ngModel)]="user.password" id="id_password" type="password"
+                            placeholder="Enter your password" class="signup-container__input" name="password" required
+                            type="password" />
+                    </div>
+                    <!-- <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
+          {{ errorMessage }} </p> -->
+
+                    <div>
+                        <input [disabled]="!signUpForm.valid" [class.signup-container__button]="signUpForm.valid"
+                            [class.signup-container__button-disabled]="!signUpForm.valid" type="submit"
+                            value="Sign Up" />
+                    </div>
+                </form>
+
+                <div class="signup-container__footer">
+                    Already have an account? <span (click)="goToLogin()"
+                        class="signup-container__login-link">Login</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="auth-wrapper__right">
+        <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="auth-wrapper__image" />
+    </div>
+</div>

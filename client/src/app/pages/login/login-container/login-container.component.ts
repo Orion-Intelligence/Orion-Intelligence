@@ -1,11 +1,11 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {NgClass, NgIf} from '@angular/common';
-import {FormsModule, NgForm} from '@angular/forms';
-import {Router} from '@angular/router';
-import {AuthService} from '../../../services/authetication/auth.service';
-import {Subscription} from 'rxjs';
-import {HeaderComponent} from '../../../shared/partials/header/login-header/header.component';
-import {AppService} from '../../../services/core/app/app.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NgClass, NgIf } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../services/authetication/auth.service';
+import { Subscription } from 'rxjs';
+import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
+import { AppService } from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-login-container',
@@ -14,7 +14,7 @@ import {AppService} from '../../../services/core/app/app.service';
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
-  user = {username: '', password: ''};
+  user = { username: '', password: '' };
   errorMessage: string | null = null;
   authenticated = true;
   private authSubscription!: Subscription;
@@ -25,7 +25,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.router.navigate(['dashboard'], {replaceUrl: true}).then();
+        this.router.navigate(['dashboard'], { replaceUrl: true }).then();
       } else {
         this.authenticated = false;
       }
@@ -37,6 +37,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     if (form.valid) {
       this.authService.login(this.user.username, this.user.password).subscribe();
     }
+  }
+
+  goToSignUp() {
+    this.router.navigate(['/signup']).then();
   }
 
   ngOnDestroy() {

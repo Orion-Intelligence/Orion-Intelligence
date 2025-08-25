@@ -29,15 +29,20 @@ export class AddTenantComponent {
     if (this.tenantForm.valid) {
       const formValues = this.tenantForm.value;
 
-      const tenantData: TenantModel = {
-        id: '',
-        name: formValues.name || null,
-        email: formValues.email || null,
-        userStatus: formValues.userStatus,
-        systemStatus: formValues.systemStatus,
-        createdAt: new Date(),
-        updatedAt: new Date()
-
+      const tenantData = {
+        metadata: {
+          name: formValues.name || null,
+          email: formValues.email || null,
+          userStatus: formValues.userStatus || 'PENDING',
+          systemStatus: formValues.systemStatus || 'PENDING',
+          verificationToken: '', // backend will override
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        mappings: {
+          emails: [formValues.email], // optional
+          phones: [] // optional
+        }
       };
 
       this.api.post<TenantModel>('tenant/add', tenantData).subscribe({

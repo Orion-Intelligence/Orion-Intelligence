@@ -25,6 +25,7 @@ import { subscriptionGuard } from './shared/guards/subscription.guard';
 import { SecurityScanResultsComponent } from './shared/partials/security-scan-results/security-scan-results.component';
 import { ViewTenantComponent } from './pages/tenant-management/view-tenant/view-tenant.component';
 import { AddTenantComponent } from './pages/tenant-management/add-tenant/add-tenant.component';
+import { SignupComponent } from './pages/signup/signup.component';
 
 export const routes: Routes = [
   {
@@ -32,6 +33,11 @@ export const routes: Routes = [
     redirectTo: 'dashboard',
     pathMatch: 'full',
     data: { animation: 'RootPage' }
+  },
+  {
+    path: 'signup',
+    component: SignupComponent,
+    data: { animation: 'SignupPage' }
   },
   {
     path: 'login',
