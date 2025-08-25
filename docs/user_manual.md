@@ -13,14 +13,16 @@ provide full control over the system's functionality, ensuring smooth and effici
 ## Homepage Page
 
 The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined
-access to its wide range of features.When we log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly
+access to its wide range of features. When we log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly
 enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter,
 and visualize data across multiple categories, making data exploration both effective and insightful. With its robust
 capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an
 ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility
 and performance ensure it meets the needs of various industries and use cases.
 
-![homepage](https://github.com/user-attachments/assets/668c206d-8b62-4456-9ac7-2f74d865a698)
+
+<img width="1920" height="1233" alt="Homepage" src="https://github.com/user-attachments/assets/156d58b2-5845-43a2-88df-4fd8b8a5f9db" />
+
 
 
 ## Directory Page
