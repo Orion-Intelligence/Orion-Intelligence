@@ -103,6 +103,14 @@ high-priority data. This well-organized structure ensures that users have an int
   
 <img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
 
+- Directly below the search bar, there are three main sections. The first section presents results in a statistical format, such as chart bars. The second section displays several subsections related to top leaked data. The third section shows certain results in the indexing state.
+
+#### Statistics
+
+In the statistics section, when we view the chart bars, several results are displayed. The first statistic highlights the top teams that are most frequently involved in leak incidents. The next chart shows the teams associated with website defacement activities. The third statistic presents the top geographic regions with the highest number of defacement incidents. Finally, another chart displays the most frequently used hashtags, reflecting their use in social media activities and related incidents.
+
+<img width="1587" height="300" alt="satistics" src="https://github.com/user-attachments/assets/cb089b53-bd31-4fce-8e27-04491939a7c5" />
+
 
 - The **Generic Index** offers a summarized view of the broad data collected from various sources. It presents standard
   findings in an organized format, giving users a quick understanding of general trends. This helps in forming a base
