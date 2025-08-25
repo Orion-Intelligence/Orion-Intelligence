@@ -68,6 +68,12 @@
   pointer-events: none;
 }
 
+.header-bar .inactive {
+  cursor: default;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 @media only screen and (width <= 943px) {
   .header-bar_title-container {
     margin-left: 0;

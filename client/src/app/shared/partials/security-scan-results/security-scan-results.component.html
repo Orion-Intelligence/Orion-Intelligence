@@ -1,3 +1,19 @@
+<div class="d-flex justify-content-end" *ngIf="!hasError && !isLoading">
+  <div class="btn-group report-menu-option-container">
+    <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
+      <img alt="Download" height="25" ngSrc="assets/images/shared/download.svg" width="25"/>
+    </button>
+    <div class="vr report-menu-divider"></div>
+
+<button ngxPrint
+        printSectionId="scanReport"
+        [useExistingCss]="true"
+        appTooltip="Print"
+        class="p-0 report-menu-option">
+  <img alt="Print" height="25" ngSrc="assets/images/shared/print.svg" width="25"/>
+</button>
+  </div>
+</div>
 <div class="security-scan scan_container">
   <div class="scan_report-section" *ngIf="hasError && !isLoading" @fadeInDashboardItem>
     <div class="scan_alert">
@@ -65,6 +81,7 @@
                     'scan_info': item.risk.toLowerCase() === 'informational'
                   }"></span>{{ item.header }} </h4>
             </div>
+
             <p class="scan_finding-description">{{ item.description }}</p>
             <div class="scan_finding-meta">
               <span class="scan_severity-badge" [ngClass]="{
@@ -76,11 +93,13 @@
                 {{ item.risk }} ({{ item.confidence }})
               </span>
             </div>
+            <app-code-block [code]="item.proof" *ngIf="item.proof"></app-code-block>
             <div class="scan_divider-light"></div>
           </div>
         </div>
       </div>
     </ng-container>
+
     <div class="scan_report-section" *ngIf="!categories.length && meta" @fadeInDashboardItem>
       <div class="scan_empty">
         <div class="scan_empty-title">No Findings</div>
@@ -128,7 +147,7 @@
           <div class="scan_finding-card" *ngFor="let j of skeletonCards; index as jdx">
             <div class="scan_finding-header">
               <div class="skeleton skeleton-dot shimmer"></div>
-              <div class="skeleton skeleton-subtitle shimmer" style="width: 70%;"></div>
+              <div class="skeleton skeleton-subtitle shimmer"></div>
             </div>
             <div class="skeleton skeleton-paragraph shimmer"></div>
             <div class="skeleton skeleton-badge shimmer"></div>
@@ -138,4 +157,12 @@
       </div>
     </ng-container>
   </ng-template>
+</div>
+
+<div id="scanReport" class="d-none">
+  <app-security-scan-export-component
+    *ngIf="meta"
+    [meta]="meta"
+    [categories]="categories">
+  </app-security-scan-export-component>
 </div>

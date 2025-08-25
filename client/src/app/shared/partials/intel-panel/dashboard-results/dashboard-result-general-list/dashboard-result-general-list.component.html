@@ -22,10 +22,10 @@
             <img class="list__cell-arrow" alt="click" width="15" height="15" src="assets/images/shared/arrow-right-click.svg">
           </td>
           <td>{{ item.m_url || '-' }}</td>
-          <td>{{ item.m_ip?.length ? item.m_ip.join(', ') : '-' }}</td>
-          <td>{{ item.m_attacker?.length ? item.m_attacker.join(', ') : '-' }}</td>
+          <td>{{ item.m_ip.length ? item.m_ip.join(', ') : '-' }}</td>
+          <td>{{ item.m_attacker.length ? item.m_attacker.join(', ') : '-' }}</td>
           <td>{{ item.m_team || '-' }}</td>
-          <td>{{ item.m_web_server?.length ? item.m_web_server.join(', ') : '-' }}</td>
+          <td>{{ item.m_web_server.length ? item.m_web_server.join(', ') : '-' }}</td>
           <td>{{ item.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</td>
           <td>
             <a *ngIf="item.m_source_url?.length" [href]="item.m_source_url[0]" class="text-decoration-none text-reset">{{ item.m_source_url[0] }}</a>

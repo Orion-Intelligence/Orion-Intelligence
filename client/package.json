@@ -24,6 +24,7 @@
     "@ng-bootstrap/ng-bootstrap": "^18.0.0",
     "@popperjs/core": "^2.11.8",
     "franc-min": "^6.2.0",
+    "ngx-print": "^20.0.0",
     "rxjs": "~7.8.0",
     "vis-network": "^9.1.12",
     "zone.js": "~0.15.0"
