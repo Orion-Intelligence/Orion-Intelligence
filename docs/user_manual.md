@@ -13,7 +13,7 @@ provide full control over the system's functionality, ensuring smooth and effici
 ## Homepage Page
 
 The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined
-access to its wide range of features. It seamlessly integrates with advanced machine learning models, significantly
+access to its wide range of features.When we log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly
 enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter,
 and visualize data across multiple categories, making data exploration both effective and insightful. With its robust
 capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an
