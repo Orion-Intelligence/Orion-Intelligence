@@ -8,7 +8,8 @@ illustrates the secure and straightforward login process for the admin panel, wh
 personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that
 provide full control over the system's functionality, ensuring smooth and efficient management of operations.
 
-![screencapture-orion-genesistechnologies-org-login-2025-04-14-14_35_29-modified](https://github.com/user-attachments/assets/6558f18f-eaa8-455d-83b5-c68b9371ddc2)
+<img width="1918" height="858" alt="login" src="https://github.com/user-attachments/assets/34afd0d9-2ef3-42b1-984b-5c54bc81201c" />
+
 
 ## Homepage Page
 
