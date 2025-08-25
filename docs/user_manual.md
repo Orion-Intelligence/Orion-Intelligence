@@ -100,6 +100,9 @@ high-priority data. This well-organized structure ensures that users have an int
 - The **search bar** at the top of the interface allows users to quickly and efficiently find specific pieces of
   information. It supports keyword-based queries, making the process of locating data fast and straightforward. This
   feature enhances productivity by reducing the time spent on manual searching.
+  
+<img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
+
 
 - The **Generic Index** offers a summarized view of the broad data collected from various sources. It presents standard
   findings in an organized format, giving users a quick understanding of general trends. This helps in forming a base
