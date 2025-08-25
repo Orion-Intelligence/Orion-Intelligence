@@ -33,7 +33,11 @@ Here’s an overview of the interface components
 ### Navbar Filter
 
 The navigation bar is now positioned on the left side of the page for improved accessibility and a more streamlined
-workflow. It consists of the following main menu items:
+workflow. 
+<img width="420" height="893" alt="sidebar" src="https://github.com/user-attachments/assets/2a7dd05b-8a34-4e87-b3de-42357f4663a2" />
+
+
+It consists of the following main menu items:
 
 1. **Homepage:** Navigates back to the platform’s main page, serving as a central hub for all primary operations.
    It allows users to quickly restart their workflow or re-access key features without losing progress or context.
@@ -78,7 +82,6 @@ These data dumps often include leaked databases, user credentials, email lists, 
 12. **Link:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
 
 13. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
-![navigation](https://github.com/user-attachments/assets/025ab902-7de7-4c71-9bfe-ee46390534b7)
 
 ## Homepage
 
