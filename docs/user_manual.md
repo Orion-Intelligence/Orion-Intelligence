@@ -103,11 +103,13 @@ high-priority data. This well-organized structure ensures that users have an int
   
 <img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
 
+In this search bar, a dropdown appears where we can select and apply different filters. There are two ways to use these filters: At the top, a "List of filters" is displayed, from which we can select the desired ones.
+
+Additionally, we can type directly into the search filter input field to find and apply a specific filter.
+
+Below this, there is another input field labeled “Enter Entity”, where an additional filter can be applied. When both the upper filter and the lower entity filter are applied together, they provide the most accurate and refined results.
+
 In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
-
-
-
-
 
 Next to the Advance button, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
 
@@ -119,6 +121,10 @@ This option shows results that contain all of the search terms, but not necessar
 
 - Match Full Query (Exact Match):
 This option only shows results that exactly match the full query entered. If such results exist, they will be displayed; otherwise, no results will appear.
+
+<img width="821" height="167" alt="filterbar" src="https://github.com/user-attachments/assets/d1974392-7a61-4e98-b98d-e16aa2ddd32b" />
+
+Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
 
 #### Statistics
 
