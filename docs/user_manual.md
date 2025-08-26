@@ -153,7 +153,7 @@ Below the top leaks data, the second row displays results related to defacements
   design allows users to navigate smoothly through different features without confusion. It creates a more intuitive and
   efficient experience for both new and experienced users.
 
-![cetagories-modified](https://github.com/user-attachments/assets/4202e48f-4965-40b4-ac53-df3ee6c4f81a)
+<img width="1657" height="877" alt="indexing" src="https://github.com/user-attachments/assets/dac910ad-bb35-4079-9c74-f4341296c7fb" />
 
 The home page features a prominent search bar positioned at the top, designed to let users quickly input data for either
 viewing or initiating a crawl process. This search bar acts as the central entry point for user interaction,
@@ -171,7 +171,7 @@ The clear layout supports streamlined analysis and quick interpretation of compl
 
 1. #### Generic Index
 
-![generic index-modified](https://github.com/user-attachments/assets/36155cf7-e710-4739-b62b-24a550402444)
+<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/e4e62891-3cb5-4ffe-a353-20c0fc11d93c" />
 
 The "Generic Index" category displays information related to the crawling process, providing users with insights into
 various states of the fetched data. These states represent different aspects of the crawling operation, each offering
