@@ -111,6 +111,14 @@ In the statistics section, when we view the chart bars, several results are disp
 
 <img width="1587" height="300" alt="satistics" src="https://github.com/user-attachments/assets/cb089b53-bd31-4fce-8e27-04491939a7c5" />
 
+#### To Data Leaks
+
+We are receiving data in two rows. The top row is related to leaks, where general results are being fetched from Onion, Clearnet, and I2P. In each block, when we click on “View Detail” at the bottom, it will take us to that specific result. There, the complete details will be available, including related URLs, metadata, JSON report, and other reports connected to the same leak.
+Below the top leaks data, the second row displays results related to defacements. Similar to the leaks section, clicking on “View Detail” redirects us to a specific result page, where comprehensive information is provided, including the associated network, JSON report, and other relevant details.
+
+<img width="1591" height="523" alt="topleakdata" src="https://github.com/user-attachments/assets/31c25b76-e1e0-4de7-87d2-e757d7483101" />
+
+
 
 - The **Generic Index** offers a summarized view of the broad data collected from various sources. It presents standard
   findings in an organized format, giving users a quick understanding of general trends. This helps in forming a base
