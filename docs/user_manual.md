@@ -103,7 +103,22 @@ high-priority data. This well-organized structure ensures that users have an int
   
 <img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
 
-- Directly below the search bar, there are three main sections. The first section presents results in a statistical format, such as chart bars. The second section displays several subsections related to top leaked data. The third section shows certain results in the indexing state.
+In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
+
+
+
+
+
+Next to the Advance button, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
+
+- Match Any Term (OR):
+This option shows results containing any of the search terms. The results are broader and may include more generic or loosely related data.
+
+- Match All Terms (AND):
+This option shows results that contain all of the search terms, but not necessarily in the same order or exact phrasing. The data here is usually more relevant and closely related to the query.
+
+- Match Full Query (Exact Match):
+This option only shows results that exactly match the full query entered. If such results exist, they will be displayed; otherwise, no results will appear.
 
 #### Statistics
 
