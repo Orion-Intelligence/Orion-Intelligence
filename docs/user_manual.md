@@ -276,7 +276,7 @@ strategies and mitigating future risks associated with web defacements.
 <img width="1647" height="203" alt="defacement" src="https://github.com/user-attachments/assets/9b4ce4c0-9bfd-46e8-b68a-15405d3fd0aa" />
 
 
-## General Index
+## General Intellignece
 
 This is the second option in the navigation bar, designed to give users easy access to a wide range of data categories.
 When a user performs a search using the search bar, the results are automatically displayed based on the query,
