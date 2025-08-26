@@ -239,7 +239,8 @@ interest without being overwhelmed by unnecessary information.
   gathered from diverse sources. It also helps in organizing the data into recognizable categories, making analysis more
   straightforward and manageable.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/generalindex.png)
+<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/dacc2f16-7e5f-4204-9384-093ae371a921" />
+
 
 In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box
 contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers
@@ -247,7 +248,8 @@ represent updates on a weekly basis.
 
 2. #### Leaked Index
 
-![leaked index-modified](https://github.com/user-attachments/assets/199958b0-9477-443f-9220-743dbe6ffc43)
+<img width="1641" height="297" alt="leak index" src="https://github.com/user-attachments/assets/cb4ab8a8-a8b2-490d-a671-bd7730d91814" />
+
 
 The Leaked Index offers detailed insights into the various states of leaked data within the dataset, specifically
 targeting sensitive or confidential information. It helps users identify critical data that has been exposed, making it
@@ -274,7 +276,8 @@ emerging threats in real time. By understanding the specific vulnerabilities tha
 the overall security posture of affected web servers. Furthermore, this information helps in improving website defense
 strategies and mitigating future risks associated with web defacements.
 
-![defecement-modified](https://github.com/user-attachments/assets/ecf0f26a-49e4-4dcc-89ee-91a32a78cec3)
+<img width="1647" height="203" alt="defacement" src="https://github.com/user-attachments/assets/9b4ce4c0-9bfd-46e8-b68a-15405d3fd0aa" />
+
 
 ## General Index
 
