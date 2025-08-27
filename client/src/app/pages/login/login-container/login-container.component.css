@@ -13,7 +13,7 @@
 }
 
 .login_container {
-	background: var(--color-blue-830);
+  background: var(--color-blue-830);
   height: 100vh;
   position: relative;
   color: white;
@@ -123,7 +123,7 @@
   display: none;
 }
 
-@media only screen and (width <= 643px) {
+@media only screen and (width <=643px) {
   .login_box {
     margin: -30vh 20px 0;
     padding: 42px 20px;

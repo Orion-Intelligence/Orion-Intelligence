@@ -12,9 +12,16 @@
 
                 <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="signup-container__form">
                     <div class="signup-container__form-group">
-                        <label class="signup-container__label">Email</label>
-                        <input [(ngModel)]="user.username" for="id_username" type="email" placeholder="Enter your email"
-                            class="signup-container__input" name="username" required type="text" />
+                        <label class="signup-container__label">User Name</label>
+                        <input [(ngModel)]="user.username" for="id_username" type="email"
+                            placeholder="Enter your username" class="signup-container__input" name="username" required
+                            type="text" />
+                    </div>
+
+                    <div class="signup-container__form-group">
+                        <label class="signup-container__label">Company Mail</label>
+                        <input [(ngModel)]="user.mail" id="id_companymail" placeholder="Enter your company mail"
+                            class="signup-container__input" name="companymail" required type="text" />
                     </div>
 
                     <div class="signup-container__form-group">
@@ -40,7 +47,7 @@
             </div>
         </div>
     </div>
-    <div class="auth-wrapper__right">
+    <div class="auth-wrapper__right image-wrapper">
         <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="auth-wrapper__image" />
     </div>
 </div>

@@ -11,7 +11,12 @@ class user_role(str, Enum):
     ADMIN = "admin"
     CRAWLER = "crawler"
     DEMO = "demo"
+    PROFILE="profile"
 
+class UserStatus(str, Enum):
+    PENDING = "verification_pending"
+    ONBOARDING="onboarding"
+    ACTIVE = "active"
 
 def hash_password(password: str) -> str:
     """Helper function to hash the password before storing it."""
@@ -21,7 +26,9 @@ def hash_password(password: str) -> str:
 class db_user_account(Model):
     username: str = Field(unique=True)
     password: str = Field(default="")
+    email:str=Field(default="")
     role: user_role = Field(default=user_role.DEMO)
+    status:UserStatus=Field(default=UserStatus.PENDING)
 
     @field_validator("username")
     @classmethod

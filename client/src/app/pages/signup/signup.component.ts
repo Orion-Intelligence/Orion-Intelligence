@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
 import { NgClass, NgIf } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { AuthService } from '../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-signup',
@@ -10,13 +11,23 @@ import { FormsModule, NgForm } from '@angular/forms';
   templateUrl: './signup.component.html'
 })
 export class SignupComponent {
-  user = { username: '', password: '' };
+  user = { username: '', mail: '', password: '' };
 
-  constructor(private router: Router) {
+  constructor(private router: Router, public auth_service: AuthService) {
   }
   onSubmit(form: NgForm) {
     if (form.valid) {
-      // this.authService.login(this.user.username, this.user.password).subscribe();
+      this.auth_service.signup(this.user.username, this.user.mail, this.user.password).subscribe({
+        next: (res) => {
+          this.router.navigate(['/welcome']).then(() => {
+            alert(res.message);
+          });
+        },
+        error: (err) => {
+          console.error(err);
+          alert(err.error.detail || "Signup failed");
+        }
+      });
     }
   }
   goToLogin() {

@@ -26,6 +26,8 @@ import { SecurityScanResultsComponent } from './shared/partials/security-scan-re
 import { ViewTenantComponent } from './pages/tenant-management/view-tenant/view-tenant.component';
 import { AddTenantComponent } from './pages/tenant-management/add-tenant/add-tenant.component';
 import { SignupComponent } from './pages/signup/signup.component';
+import { OnboardingComponent } from './pages/onboarding/onboarding.component';
+import { WelcomeComponent } from './pages/welcome/welcome.component';
 
 export const routes: Routes = [
   {
@@ -48,6 +50,16 @@ export const routes: Routes = [
     path: 'loginx',
     component: LoginComponent,
     data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'onboarding',
+    component: OnboardingComponent,
+    data: { animation: 'OnboardingPage' }
+  },
+  {
+    path: 'welcome',
+    component: WelcomeComponent,
+    data: { animation: 'WelcomePage' }
   },
   {
     path: 'dashboard',

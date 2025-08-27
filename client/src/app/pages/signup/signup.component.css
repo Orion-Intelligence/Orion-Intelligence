@@ -1,6 +1,6 @@
 .auth-wrapper {
     display: flex;
-    height: 100vh;
+    height: calc(100vh - 60px);
     width: 100vw;
     background: url('/assets/images/shared/Bg.webp') no-repeat center center;
     background-size: cover;

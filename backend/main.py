@@ -18,6 +18,7 @@ from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 from routes.tenant_routes import tenant_routes
+from routes.signup_routes import signup_router
 
 
 @asynccontextmanager
@@ -45,6 +46,7 @@ app.include_router(admin_routes, include_in_schema=False)
 app.include_router(micro_routes)
 app.include_router(api_routes)
 app.include_router(tenant_routes)
+app.include_router(signup_router)
 
 app.add_exception_handler(Exception, global_exception_handler)
 
