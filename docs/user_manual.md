@@ -288,7 +288,8 @@ search query, users can view data associated with any of these categories, provi
 information. In the following sections, we will explore each of these subcategories individually to offer a better
 understanding of their contents and how users can leverage them effectively.
 
-![General Intelligence-modified (1)](https://github.com/user-attachments/assets/1785f777-2f85-481e-bafe-79ad37b2c6d1)
+<img width="1913" height="567" alt="general_intelligence_all" src="https://github.com/user-attachments/assets/5cc296ec-59d6-4e26-9c22-d880ec462269" />
+
 
 ### All
 
@@ -304,6 +305,9 @@ fit neatly into the more specific categories outlined elsewhere. It includes mis
 gathered from different sources, providing users with a broader scope of information. This section ensures that no
 valuable data goes overlooked, even if it doesn't fall under a specific category.
 
+<img width="1366" height="424" alt="general feature-modified" src="https://github.com/user-attachments/assets/c55048a7-ae0c-4e9a-870b-97863c4c1660" />
+
+
 2. ### Forums
 
 In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions
@@ -311,11 +315,17 @@ around the data. These platforms provide spaces for users to share insights, ask
 about the relevant information. The forum serves as an interactive space where individuals can contribute their
 knowledge and collaborate on the topic.
 
+<img width="1912" height="563" alt="forums" src="https://github.com/user-attachments/assets/4fae3549-7431-4779-983a-5a0a9c560468" />
+
+
 3. ### News
 
 The news section allows users to view any news related to the data, provided there is relevant coverage available. It
 keeps users updated with the latest developments and trends related to the searched data. This section ensures users
 stay informed about any significant news that may impact their analysis or understanding.
+
+<img width="1362" height="396" alt="news-modified" src="https://github.com/user-attachments/assets/42410658-8aae-4b97-881c-d01ce42081e2" />
+
 
 4. ### Stolen Data
 
@@ -323,6 +333,8 @@ This section lists data breaches that involve the theft of sensitive personal, f
 includes incidents where credentials, credit card dumps, and other confidential data have been exposed, often being sold
 or shared on underground platforms. Users can explore the extent of these breaches and gain insights into the
 compromised data to assess potential risks.
+<img width="1365" height="411" alt="stolen-modified" src="https://github.com/user-attachments/assets/fff50b0f-c738-442c-ac67-6e4227668abc" />
+
 
 5. ### Drugs
 
@@ -331,6 +343,9 @@ providing a comprehensive overview of illicit activity in this area. By tracking
 enforcement and monitoring teams stay informed about emerging drug trends, enabling more effective intervention. The
 data serves as a valuable resource for identifying new patterns and taking action against illegal drug distribution.
 
+<img width="1266" height="629" alt="drugs-modified" src="https://github.com/user-attachments/assets/e1fff168-0acf-4157-90f4-b1ccc4311a2b" />
+
+
 6. ### Hacking
 
 Provides valuable insights into hacking-related content, including tutorials on website exploits, malware development,
@@ -338,20 +353,31 @@ and discussions or sales of vulnerabilities within hacker communities. It offers
 techniques being shared, helping security teams stay informed about potential threats. Monitoring this data is crucial
 for understanding evolving hacking methods and strengthening cybersecurity defenses.
 
+<img width="1364" height="426" alt="hacking-modified" src="https://github.com/user-attachments/assets/ca9a4718-1b74-4f10-b5a7-4404b1bc72f4" />
+
+
 7. ### Marketplaces
 
 Tracks online marketplaces (especially on the dark web) where illicit goods and services are traded. This includes
 weapons, fake documents, stolen data, malware, etc.
+
+<img width="1352" height="425" alt="marketplace-modified" src="https://github.com/user-attachments/assets/b0661028-3dbd-4ef2-92db-be86c6885244" />
+
 
 8. ### Cryptocurrencies
 
 Analyzes cryptocurrency-related intelligence including illicit transactions, wallets linked to cybercrime, and usage of
 crypto for money laundering or ransom payments.
 
+<img width="1366" height="577" alt="cryptocurrency-modified" src="https://github.com/user-attachments/assets/aef8b237-bf19-4ca3-9606-0fd5c25c9084" />
+
+
 9. ### Leaks
 
 Focuses on leaked documents, databases, or credentials published online. These could include government files, internal
 company data, or proprietary tools that have been exposed.
+<img width="1364" height="636" alt="leaks-modified" src="https://github.com/user-attachments/assets/7dfd43c9-f67a-4145-ba51-20c8c1b7fbf3" />
+
 
 The Data Breach section in the navigation bar includes six categories:
 ![breach](https://github.com/user-attachments/assets/da68c499-5701-464e-bee4-3d205a10f7e2)
