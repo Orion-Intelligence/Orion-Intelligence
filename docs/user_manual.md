@@ -327,7 +327,7 @@ stay informed about any significant news that may impact their analysis or under
 <img width="1362" height="396" alt="news-modified" src="https://github.com/user-attachments/assets/42410658-8aae-4b97-881c-d01ce42081e2" />
 
 
-4. ### Stolen Data
+4. ### Stolen
 
 This section lists data breaches that involve the theft of sensitive personal, financial, or business information. It
 includes incidents where credentials, credit card dumps, and other confidential data have been exposed, often being sold
@@ -364,7 +364,7 @@ weapons, fake documents, stolen data, malware, etc.
 <img width="1352" height="425" alt="marketplace-modified" src="https://github.com/user-attachments/assets/b0661028-3dbd-4ef2-92db-be86c6885244" />
 
 
-8. ### Cryptocurrencies
+8. ### Cryptocurrency
 
 Analyzes cryptocurrency-related intelligence including illicit transactions, wallets linked to cybercrime, and usage of
 crypto for money laundering or ransom payments.
