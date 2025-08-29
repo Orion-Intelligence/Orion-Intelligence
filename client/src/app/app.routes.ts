@@ -28,6 +28,7 @@ import { AddTenantComponent } from './pages/tenant-management/add-tenant/add-ten
 import { SignupComponent } from './pages/signup/signup.component';
 import { OnboardingComponent } from './pages/onboarding/onboarding.component';
 import { WelcomeComponent } from './pages/welcome/welcome.component';
+import { OnboardingCompleteComponent } from './pages/onboarding-complete/onboarding-complete.component';
 
 export const routes: Routes = [
   {
@@ -55,6 +56,11 @@ export const routes: Routes = [
     path: 'onboarding',
     component: OnboardingComponent,
     data: { animation: 'OnboardingPage' }
+  },
+  {
+    path: 'onboardingComplete',
+    component: OnboardingCompleteComponent,
+    data: { animation: 'OnboardingCompletePage' }
   },
   {
     path: 'welcome',

@@ -80,8 +80,8 @@
                             <div class="onboarding-step2__category-scroll" #categoryScroll>
                                 <ng-container *ngIf="onboardingData.iocs.length>0; else noEntity">
                                     <div *ngFor="let category of onboardingData.iocs" class="onboarding-step2__tab"
-                                        [class.selected]="category.id === selectedCategoryId"
-                                        (click)="$event.stopPropagation();onCategoryClick(category.id)">
+                                        [class.selected]="category.ioc_id === selectedCategoryId"
+                                        (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                                         {{ category.name }}
                                     </div>
                                 </ng-container>
@@ -120,7 +120,7 @@
                                             <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
                                                 <span>{{ value }}</span>
                                                 <span class="onboarding-step2__chip-remove"
-                                                    (click)="removeIoc(ioc.id, value)">
+                                                    (click)="removeIoc(ioc.ioc_id, value)">
                                                     ✕
                                                 </span>
                                             </div>
@@ -163,7 +163,7 @@
                                             <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
                                                 <span>{{ value }}</span>
                                                 <span class="onboarding-step2__chip-remove"
-                                                    (click)="removeIoc(ioc.id, value)">
+                                                    (click)="removeIoc(ioc.ioc_id, value)">
                                                     ✕
                                                 </span>
                                             </div>

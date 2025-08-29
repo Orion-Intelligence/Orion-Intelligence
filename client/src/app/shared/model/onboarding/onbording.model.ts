@@ -1,5 +1,5 @@
 export interface IocCategory {
-    id: string;
+    ioc_id: string;
     name: string;
     values: string[];
 }

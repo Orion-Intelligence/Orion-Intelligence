@@ -1,12 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
 from pydantic import BaseModel, EmailStr, validator
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 import re
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, UserStatus,user_role
+from orion.services.mongo_manager.shared_model.db_onboarding_model import db_onboarding_model,OnboardingRequest
+from orion.services.session_manager.session_manager import session_manager
 from datetime import datetime
 
 signup_router = APIRouter()
+security = HTTPBearer()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 class SignupRequest(BaseModel):
     username: str
@@ -63,3 +68,17 @@ async def signup(data: SignupRequest):
     await engine.save(user)
 
     return {"message": "Signup successful. Your account is under verification.", "status": "pending"}
+
+@signup_router.post("/api/onboarding")
+async def save_onboarding(
+    data: OnboardingRequest,
+    token: str = Depends(oauth2_scheme)):
+    current_user =  await session_manager.get_instance().get_current_user(token)
+    new_onboarding = db_onboarding_model(
+    userId=str(current_user.id),
+    companyName=data.companyName,
+    iocs=data.iocs 
+    )
+    engine = session_manager.get_instance()._engine
+    await engine.save(new_onboarding)
+    return {"message": "Onboarding created", "user": current_user.username}

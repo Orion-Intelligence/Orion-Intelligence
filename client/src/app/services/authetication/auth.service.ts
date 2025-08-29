@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthModel } from '../../shared/model/auth/auth.model';
 import { TokenRefreshService } from './token-refresh.service';
 import { HttpHeaders } from '@angular/common/http';
+import { OnboardingModel } from '../../shared/model/onboarding/onbording.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -35,26 +36,75 @@ export class AuthService {
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    return this.apiService.post<{ access_token: string; role: string }>('token', body.toString(), { headers }).pipe(tap({
-      next: (response) => {
-        if (response.role === 'crawler') {
-          this.authState.next({
-            token: null,
-            username: null,
-            role: null,
-            isAuthenticated: false,
-            error: 'Access denied!'
-          });
-          return
-        }
-        this.setToken(response.access_token, username, response.role);
-        this.startTokenRefresh();
-      }, error: (_) => {
-        this.authState.next({
-          token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied!'
-        });
-      }
-    }));
+    return this.apiService
+      .post<{ access_token: string; role: string; status: string; hasOnboarding: boolean }>('token', body.toString(), { headers })
+      .pipe(
+        tap({
+          next: (response) => {
+            if (response.role === 'crawler') {
+              this.authState.next({
+                token: null,
+                username: null,
+                role: null,
+                isAuthenticated: false,
+                error: 'Access denied!'
+              });
+              return;
+            }
+            switch (response.status) {
+              case 'verification_pending':
+                console.log("1")
+                alert('Your account is under verification.');
+                this.authState.next({
+                  token: null,
+                  username: null,
+                  role: null,
+                  isAuthenticated: false,
+                  error: 'Account under verification'
+                });
+                break;
+
+              case 'onboarding':
+                console.log("2")
+                this.setToken(response.access_token, username, response.role);
+                this.startTokenRefresh();
+                if (response.hasOnboarding) {
+                  alert('Your data is under verification.');
+                  this.router.navigate(['/onboardingComplete'], { replaceUrl: true }).then();
+                } else {
+                  this.router.navigate(['/onboarding']).then();
+                }
+                break;
+
+              case 'active':
+                console.log("3")
+                this.setToken(response.access_token, username, response.role);
+                this.startTokenRefresh();
+                this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+                break;
+
+              default:
+                this.authState.next({
+                  token: null,
+                  username: null,
+                  role: null,
+                  isAuthenticated: false,
+                  error: 'Unknown account status'
+                });
+                break;
+            }
+          },
+          error: (_) => {
+            this.authState.next({
+              token: null,
+              username: null,
+              role: null,
+              isAuthenticated: false,
+              error: 'Access denied!'
+            });
+          }
+        })
+      );
   }
 
   logout(): void {
@@ -75,6 +125,14 @@ export class AuthService {
     return this.apiService.post('signup', { username, email, password });
   }
 
+  saveOnboarding(data: OnboardingModel): Observable<any> {
+    const token = this.getToken()
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.apiService.post('onboarding', data, { headers });
+  }
 
   getToken(): string | null {
     return this.getStoredToken();

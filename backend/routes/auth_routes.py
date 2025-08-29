@@ -28,8 +28,9 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token, role = await session_manager.get_instance().create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
+    onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.id))
 
-    return {"access_token": access_token, "token_type": "bearer", "role": role}
+    return {"access_token": access_token, "token_type": "bearer", "role": role,"status": user.status,"hasOnboarding": onboarding_exists}
 
 
 @auth_router.post("/api/token/refresh")
