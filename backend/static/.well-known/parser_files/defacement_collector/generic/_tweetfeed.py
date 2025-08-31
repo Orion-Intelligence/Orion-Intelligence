@@ -1,13 +1,18 @@
+import ipaddress
+import re
 from abc import ABC
 from datetime import datetime
 from typing import List
 from playwright.sync_api import Page
+
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -84,6 +89,25 @@ class _tweetfeed(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
+    @staticmethod
+    def extract_ip(value: str) -> str | None:
+        value = value.strip()
+        match = re.search(r"(?:\d{1,3}\.){3}\d{1,3}", value)
+        if match:
+            try:
+                ipaddress.ip_address(match.group())
+                return match.group()
+            except ValueError:
+                return None
+        return None
+
+    @staticmethod
+    def is_domain_or_url(value: str) -> bool:
+        value = value.strip().lower()
+        if value.startswith(("http://", "https://")):
+            return True
+        return bool(re.fullmatch(r"(?:[a-z0-9-]+\.)+[a-z]{2,}", value))
+
     def parse_leak_data(self, page: Page):
         try:
             current_page = 1
@@ -117,8 +141,14 @@ class _tweetfeed(leak_extractor_interface, ABC):
                         types = tags_text.split("#")
                         filtered = [s for s in types if len(s) >= 2]
                         filtered.append("databases")
+
+                        val = value_text.strip()
+                        ip_val = self.extract_ip(val)
+                        content = helper_method.extract_refhtml(ip_val, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+
                         card_data = defacement_model(
                             m_url=value_text,
+                            m_content=content,
                             m_base_url=self.base_url,
                             m_source_url=[original_tweet_link],
                             m_ioc_type=filtered,
@@ -127,12 +157,12 @@ class _tweetfeed(leak_extractor_interface, ABC):
                         )
 
                         entity_data = entity_model(
-                            m_ip=[value_text],
+                            m_ip=[ip_val] if ip_val else [],
+                            m_weblink=[val] if not ip_val and self.is_domain_or_url(val) else [],
                             m_team=user_text.strip(),
                             m_social_media_profiles=[user_url],
-                            m_external_scanners= [search_in_virus_tool_link]
+                            m_external_scanners=[search_in_virus_tool_link]
                         )
-
                         self.append_leak_data(card_data, entity_data)
 
                     except Exception as ex:

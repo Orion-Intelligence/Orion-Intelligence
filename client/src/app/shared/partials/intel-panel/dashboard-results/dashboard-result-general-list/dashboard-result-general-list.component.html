@@ -1,6 +1,6 @@
-<div *ngIf="isList; else cardView" class="list__container-result">
+<div *ngIf="isList; else cardView" class="list__container-result" @fadeInDashboardItem>
   <div class="list__container list-container">
-    <table class="table table-striped directory-list__table clear-paddings">
+    <table class="table table-striped directory-list__table clear-paddings" *ngIf="isLoading || (!isLoading && searchResults.length>0)">
       <thead>
       <tr>
         <th (click)="sortTable('#')" [ngClass]="getSortClass('#')" class="list__container-sort list__column-id-min" scope="col">#</th>
@@ -15,8 +15,33 @@
       </tr>
       </thead>
       <tbody>
-      <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults : searchResults); let i = index">
-        <tr (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams">
+      <ng-container *ngIf="isLoading">
+        <tr>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        </tr>
+        <tr>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+          <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        </tr>
+      </ng-container>
+
+      <ng-container  *ngFor="let item of (isExpandAble && isCollapsed ? searchResults : searchResults); let i = index">
+        <tr *ngIf="!isLoading" (click)="scrollService.saveSession(item.m_hash)" [id]="'item-' + item.m_hash" [routerLink]="[currentUrl, item.m_hash]" [queryParams]="queryParams" @fadeInDashboardItem>
           <td class="list__cell-id">
             <span>{{ i + 1 }}</span> <img class="list__cell-arrow" alt="click" width="15" height="15" src="assets/images/shared/arrow-right-click.svg">
           </td>

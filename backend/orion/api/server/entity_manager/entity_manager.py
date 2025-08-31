@@ -1,5 +1,6 @@
 import re
 
+from fastapi import HTTPException
 from fastapi.concurrency import run_in_threadpool
 
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
@@ -186,4 +187,4 @@ class entity_manager:
 
         except Exception as ex:
             log.g().e(f"ARANGO ENTITY UPSERT ERROR: {ex}")
-            return {"status": "error", "message": str(ex)}
+            raise HTTPException(status_code=500, detail="ARANGO ENTITY UPSERT ERROR")

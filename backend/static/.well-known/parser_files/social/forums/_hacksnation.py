@@ -52,7 +52,7 @@ class _hacksnation(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -158,6 +158,7 @@ class _hacksnation(leak_extractor_interface, ABC):
                         usernames.append(username)
                     body_div = post.query_selector("div.Post-body")
                     content_text = body_div.text_content().strip() if body_div else ""
+                    content_text = helper_method.filter_comments(content_text)
                     comments.append(content_text)
                 m_username = ", ".join(usernames[:5])
                 m_content = '\n'.join(comment.replace('\n', ' ') for comment in comments)
@@ -167,14 +168,13 @@ class _hacksnation(leak_extractor_interface, ABC):
                     m_content=m_content,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_message_date=m_date.date() if m_date else None,
-                    m_content_type=["leak"],
+                    m_content_type=["forum"],
                     m_platform="forum",
                     m_message_sharable_link=page.url
                 )
                 entity_data = entity_model(
                     m_username=[m_username]
                 )
-                entity_data = helper_method.extract_entities(m_content, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
                 processed_urls.add(full_url)

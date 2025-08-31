@@ -231,6 +231,16 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'mastodon',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
+            path: 'pastebin',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
             path: 'forum',
             component: DashboardSocialsComponent,
             pathMatch: 'full'

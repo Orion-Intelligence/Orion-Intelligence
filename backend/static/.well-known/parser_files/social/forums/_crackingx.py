@@ -52,7 +52,7 @@ class _crackingx(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -269,10 +269,7 @@ class _crackingx(leak_extractor_interface, ABC):
                                 thread_url = "https://crackingx.com" + href if not href.startswith(
                                     '/') else "https://crackingx.com" + href
 
-                            result = self.extract_thread_data(page, thread_url, title, category_name)
-                            if result:
-                                card_data, entity_data = result
-                                self.append_leak_data(card_data, entity_data)
+                            self.extract_thread_data(page, thread_url, title, category_name)
 
                     should_continue = False
 
@@ -392,7 +389,7 @@ class _crackingx(leak_extractor_interface, ABC):
             for i in range(wrapper_count):
                 wrapper = bb_wrappers.nth(i)
                 html_content = wrapper.inner_html()
-                text_content = wrapper.inner_text().strip()
+                text_content = helper_method.filter_comments(wrapper.inner_text().strip())
 
                 if ("block-mhhide" in html_content or
                         "bbCodeBlock" in html_content or
@@ -442,7 +439,6 @@ class _crackingx(leak_extractor_interface, ABC):
                 m_hashtags=hashtags
             )
 
-            entity_data = helper_method.extract_entities(m_content, entity_data)
             self.append_leak_data(card_data, entity_data)
 
         except Exception as ex:

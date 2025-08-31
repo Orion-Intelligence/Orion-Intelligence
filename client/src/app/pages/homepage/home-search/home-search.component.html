@@ -8,7 +8,7 @@
         </button>
 
         <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
-          class="form-control default-input dashboard-general-input" maxlength="150" name="q" placeholder="Search ..."
+          class="form-control default-input dashboard-general-input" maxlength="350" name="q" placeholder="Search ..."
           type="search" (focus)="setFilterOverlay(true)"> <input type="hidden" value="1">
 
         <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()" [disabled]="!searchQuery">

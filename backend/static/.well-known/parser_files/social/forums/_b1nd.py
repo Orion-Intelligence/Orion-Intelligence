@@ -1,4 +1,3 @@
-
 import datetime
 import re
 from abc import ABC
@@ -53,8 +52,7 @@ class _b1nd(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,
-                         m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[social_model]:
@@ -183,7 +181,7 @@ class _b1nd(leak_extractor_interface, ABC):
                                             txt = txt.replace('\u200b', '').replace('\xa0', ' ')
                                             txt = re.sub(r'[ \t\r\f\v]+', ' ', txt)
                                             txt = re.sub(r'[\n]+', ' ', txt)
-                                            m_content += txt.strip() + ' '
+                                            m_content += helper_method.filter_comments(txt.strip()) + ' '
                                             comment_count += 1
                                             if comment_count >= 20:
                                                 break
@@ -221,7 +219,6 @@ class _b1nd(leak_extractor_interface, ABC):
                                     m_username=usernames[:5]
                                 )
 
-                                entity_data = helper_method.extract_entities(m_content.strip(), entity_data)
                                 self.append_leak_data(card_data, entity_data)
                             except Exception as ex:
                                 log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
@@ -233,7 +230,3 @@ class _b1nd(leak_extractor_interface, ABC):
                             url = None
                     except Exception as ex:
                         log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
-
-
-

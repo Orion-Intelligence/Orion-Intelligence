@@ -52,7 +52,7 @@ class _xreactor(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[social_model]:
@@ -175,7 +175,7 @@ class _xreactor(leak_extractor_interface, ABC):
                     text = wrapper.inner_text().strip()
                     if "block-mhhide" in html or "bbCodeBlock" in html or len(text) < 10:
                         continue
-                    comments.append(text)
+                    comments.append(helper_method.filter_comments(text))
 
                 dates = page.locator("time.u-dt")
                 if dates.count() == 0:
@@ -208,7 +208,6 @@ class _xreactor(leak_extractor_interface, ABC):
             m_author=list(usernames),
             m_hashtags=hashtags
         )
-        entity_data = helper_method.extract_entities(' '.join(comments), entity_data)
         self.append_leak_data(card_data, entity_data)
 
     def parse_leak_data(self, page: sync_playwright()):

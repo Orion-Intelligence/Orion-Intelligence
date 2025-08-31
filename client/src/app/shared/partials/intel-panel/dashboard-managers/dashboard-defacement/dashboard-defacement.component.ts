@@ -61,7 +61,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
 
         if (this.dashboardService.defacementCallbackModel.Result.length > 0) {
-          this.isResponseLoading.set(false);
           this.query = this.dashboardService.consolidatedParamModel.q
         } else {
           this.cdr.detectChanges();
@@ -79,7 +78,6 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
 
   fetchSearchResults() {
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isResponseLoading.set(false)
       this.dashboardService.consolidatedParamModel.q = ""
 
       this.router.navigate([], {

@@ -21,6 +21,8 @@ import {AppService} from '../core/app/app.service';
 export class DashboardService {
   m_current_route = "";
 
+  rankedResult: any[] = [];
+
   consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
   generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
   chatCallbackModel: ChatCallbackModel = new ChatCallbackModel();
@@ -42,7 +44,7 @@ export class DashboardService {
   fetchSearchResults<T extends { Result?: any[]; cards_data?: any[] }>(
     apiEndpoint: string,
     paramModel: any,
-    semantic=""
+    semantic = ""
   ): Observable<{ success: boolean; isEmpty: boolean; data: T | null }> {
     const route: string = this.router.url.split('?')[0];
     this.m_current_route = String(route);
@@ -59,22 +61,24 @@ export class DashboardService {
     }).then();
 
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
-    if (semantic){
+    if (semantic) {
       baseParams['matchtype'] = semantic;
-    }else {
+    } else {
       baseParams['matchtype'] = this.app_service.configData().localSettings.matchType;
     }
-    if (entityCategories) {
-      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
-    }
+
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
+    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     const queryParamsForNav = {...baseParams};
-    delete queryParamsForNav['entity_filter'];
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: queryParamsForNav,
       replaceUrl: true
     }).then();
+
+    if (entityCategories) {
+      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
+    }
 
     return this.apiService.post<T>(apiEndpoint, baseParams).pipe(
       takeUntil(this.cancelRequest$),
@@ -239,5 +243,17 @@ export class DashboardService {
 
   private cancelOngoingRequest() {
     this.cancelRequest$.next();
+  }
+
+  clearCallback(): void {
+    this.rankedResult = [];
+    this.generalCallbackModel = new GeneralCallbackModel();
+    this.chatCallbackModel = new ChatCallbackModel();
+    this.defacementCallbackModel = new DefacementCallbackModel();
+    this.exploitCallbackModel = new ExploitCallbackModel();
+    this.leakCallbackModel = new LeakCallbackModel();
+    this.stealerlogCallbackModel = new StealerLogCallbackModel();
+    this.consolidatedCallbackModel = new ConsolidatedCallbackModel();
+    this.socialCallbackModel = new SocialCallbackModel();
   }
 }

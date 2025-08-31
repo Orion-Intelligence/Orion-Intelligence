@@ -35,6 +35,7 @@ import {ScrollService} from '../../services/scroll.service';
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
+  @Input() isList!: boolean;
   @Input() isTool: boolean = true;
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery = '';

@@ -259,7 +259,7 @@ class elastic_controller:
                     index = entry[ELASTIC_KEYS.S_DOCUMENT]
                     exists = await self.__m_connection.exists(index=index, id=doc_id)
 
-                    if not exists or bypass_empty_embedding:
+                    if not exists and not bypass_empty_embedding:
                         emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
                         if not (isinstance(emb, list) and len(emb) > 0):
                             log.g().w(f"Skipping insert without non-empty embedding: {doc_id}")
@@ -296,7 +296,7 @@ class elastic_controller:
 
         except Exception as ex:
             log.g().e(ex)
-            raise HTTPException(status_code=500, detail=f"Query embedding failed: {str(ex)}")
+            raise HTTPException(status_code=500, detail=f"Query embedding failed")
 
     async def index_bulk_data(self, p_data):
         try:
@@ -304,3 +304,4 @@ class elastic_controller:
             return response
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
+            raise HTTPException(status_code=500, detail=f"Query embedding failed")

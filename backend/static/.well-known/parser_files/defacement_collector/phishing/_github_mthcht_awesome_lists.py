@@ -2,11 +2,14 @@ from abc import ABC
 from datetime import date
 from typing import List
 from playwright.sync_api import Page
+
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 class _github_mthcht_awesome_lists(leak_extractor_interface, ABC):
@@ -90,8 +93,10 @@ class _github_mthcht_awesome_lists(leak_extractor_interface, ABC):
                 continue
 
             url = cells.nth(0).inner_text().strip()
+            content = helper_method.extract_refhtml(url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
 
             card_data = defacement_model(
+                m_content=content,
                 m_url=url,
                 m_base_url=self.base_url,
                 m_network=helper_method.get_network_type(self.base_url),

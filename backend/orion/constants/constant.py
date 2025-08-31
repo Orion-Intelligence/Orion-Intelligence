@@ -24,8 +24,9 @@ class CONSTANTS:
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 allowed_keys = {
+    'm_ltc', 'm_bch', 'm_eth', 'm_btc', 'm_xmpp_addresses', 'm_google_analytics_ids', 'm_md5_hashes', 'm_sha1_hashes', 'm_sha256_hashes', 'm_user_agents', 'm_hashes', 'm_md5s', 'm_enterprise_attack_techniques', 'm_mac_addresses',
     'm_search_all', 'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
-    'm_bitcoin_addresses', 'm_company_name', 'm_country', 'm_country_name', 'm_platform','m_credit_card', 'm_cve',
+    'm_company_name', 'm_country', 'm_country_name', 'm_platform', 'm_credit_card', 'm_cve',
     'm_cwe', 'm_document_id', 'm_dumplink', 'm_email', 'm_employee_count',
     'm_encoded_urls', 'm_event', 'm_fac', 'm_file_path', 'm_file_paths', 'm_gpe', 'm_hashtag', 'm_author',
     'm_in_aadhaar', 'm_in_pan', 'm_in_passport', 'm_in_vehicle_registration', 'm_in_voter',

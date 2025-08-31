@@ -1,7 +1,5 @@
 import datetime
-
 import time
-
 from datetime import  timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -11,7 +9,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -45,7 +43,7 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
 
     @property
     def seed_url(self) -> str:
-        return "https://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion"
+        return "http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion"
 
     @property
     def developer_signature(self) -> str:
@@ -53,11 +51,11 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
 
     @property
     def base_url(self) -> str:
-        return "https://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion"
+        return "http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -91,7 +89,6 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
             return None
 
     def parse_leak_data(self, page):
-
 
         base_urls = [
             "http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion/",
@@ -200,7 +197,7 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
                         for c in first10 + last10:
                             txt = c.text_content().strip()
                             if txt and txt not in seen:
-                                m_sections.append(txt)
+                                m_sections.append(helper_method.filter_comments(txt))
                                 seen.add(txt)
                         m_content = "\n\n".join(m_sections)
 
@@ -211,12 +208,11 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
                                 m_content=m_content,
                                 m_network=helper_method.get_network_type(self.base_url),
                                 m_message_date=helper_method.extract_and_convert_date(m_message_date),
-                                m_content_type=["leak"],
+                                m_content_type=["forum"],
                                 m_platform="forum",
                                 m_message_sharable_link=page.url
                             )
                             entity_data = entity_model(
-                                m_name=""
                             )
                             self.append_leak_data(card_data, entity_data)
                         except Exception as e:

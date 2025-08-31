@@ -157,8 +157,9 @@ class crawl_model:
 
     async def invoke_social_index(self, social_index: social_data_model):
 
+        m_bybass_embedding = social_index.cards_data[0].m_platform == "pastebin"
         m_data = elastic_request_generator().index_query_social(social_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await elastic_controller.get_instance().index_data(m_data, m_bybass_embedding)
 
         return await self._update_or_create_model(
             base_url=social_index.seed_url,

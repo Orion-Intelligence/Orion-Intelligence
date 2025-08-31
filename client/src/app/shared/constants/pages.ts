@@ -53,6 +53,8 @@ export enum SocialSubCategory {
   ALL = 'All',
   TELEGRAM = 'Telegram',
   TWITTER = 'Twitter',
+  MASTODON = 'Mastodon',
+  PASTEBIN = 'Pastebin',
   FORUM = 'Forum',
   REDDIT = 'Reddit',
 }

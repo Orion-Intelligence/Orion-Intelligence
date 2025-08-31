@@ -6,6 +6,7 @@ import {TooltipDirective} from '../../../../directive/tooltip-directive.directiv
 import {SocialResultItem} from '../../../../model/results/social/social.callback.model';
 import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
 import {RemoveEmojisPipe} from '../../../../pipes/remove-emojis-pipe.pipe';
+import {CodeBlockComponent} from '../../../code-block/code-block.component';
 
 @Component({
   selector: 'app-dashboard-result-social',
@@ -44,6 +45,22 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
         .split('\n')
         .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
       : [];
+  }
+
+  hasCodeType(item: any): boolean {
+    return Array.isArray(item.m_content_type)
+      ? item.m_content_type.some((t: string) => t.includes('code'))
+      : (typeof item.m_content_type === 'string' && item.m_content_type.includes('code'));
+  }
+
+  getContentWithoutEmptyLines(content: string|undefined): string {
+    if(!content){
+      return ""
+    }
+    return (content || '')
+      .split('\n')
+      .filter(line => line.trim().length > 0)
+      .join('\n');
   }
 
   ngOnInit() {
