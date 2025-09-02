@@ -58,11 +58,6 @@ export const routes: Routes = [
     data: { animation: 'OnboardingPage' }
   },
   {
-    path: 'onboardingComplete',
-    component: OnboardingCompleteComponent,
-    data: { animation: 'OnboardingCompletePage' }
-  },
-  {
     path: 'welcome',
     component: WelcomeComponent,
     data: { animation: 'WelcomePage' }

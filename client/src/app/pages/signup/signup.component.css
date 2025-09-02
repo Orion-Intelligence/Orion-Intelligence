@@ -15,14 +15,6 @@
 }
 
 .auth-wrapper__right {
-    /* flex: 1;
-    background-color: #172235f6;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center; */
-
     flex: 1;
     background-color: #172235f6;
     display: flex;
@@ -32,9 +24,8 @@
 }
 
 .auth-wrapper__image {
-    width: 747px;
+    /* width: 747px; */
     height: 578px;
-    /* align-self: flex-end; */
 }
 
 .login-container__forgot {
@@ -65,11 +56,8 @@
 .ai-summary {
     position: absolute;
     top: 50%;
-    /* vertical center of image */
     left: 50%;
-    /* horizontal center of wrapper */
     transform: translate(1%, -700%);
-    /* perfect center relative to image */
     display: flex;
     align-items: center;
     gap: 10px;
@@ -98,16 +86,9 @@
 
 
 
-.signup-wrapper {
-    /* display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw; */
-}
+.signup-wrapper {}
 
 .signup-container {
-    /* transform: translateY(-90px); */
     background-color: #172235;
     border-radius: 16px;
     padding: 42px 36px;
@@ -195,4 +176,22 @@
     font-weight: 400;
     margin-left: 4px;
     cursor: pointer;
+}
+
+
+@media screen and (max-width: 1300px) {
+    .auth-wrapper__right {
+        display: none;
+    }
+
+    .auth-wrapper__left {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .signup-container {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
 }

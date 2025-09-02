@@ -53,8 +53,6 @@ export class AuthService {
             }
             switch (response.status) {
               case 'verification_pending':
-                console.log("1")
-                alert('Your account is under verification.');
                 this.authState.next({
                   token: null,
                   username: null,
@@ -65,20 +63,13 @@ export class AuthService {
                 break;
 
               case 'onboarding':
-                console.log("2")
                 this.setToken(response.access_token, username, response.role);
                 this.startTokenRefresh();
-                if (response.hasOnboarding) {
-                  alert('Your data is under verification.');
-                  this.router.navigate(['/onboardingComplete'], { replaceUrl: true }).then();
-                } else {
-                  this.router.navigate(['/onboarding']).then();
-                }
+                this.router.navigate(['/onboarding']).then();
                 break;
 
               case 'active':
-                console.log("3")
-                this.setToken(response.access_token, username, response.role);
+                this.setToken(response.access_token, username, response.role, response.hasOnboarding);
                 this.startTokenRefresh();
                 this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
                 break;
@@ -112,6 +103,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('role');
+    localStorage.removeItem('onboarding');
 
     this.authState.next({
       token: null, username: null, role: null, isAuthenticated: false, error: null
@@ -146,13 +138,15 @@ export class AuthService {
     return !!this.getStoredToken();
   }
 
-  private setToken(token: string, username: string, role: string): void {
+  private setToken(token: string, username: string, role: string, hasOnboarding?: boolean): void {
     this.authState.next({
       token, username, role, isAuthenticated: true, error: null
     });
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
     localStorage.setItem('role', role);
+    if (hasOnboarding !== undefined)
+      this.setOnboarding(hasOnboarding);
   }
 
   private getStoredToken(): string | null {
@@ -193,5 +187,12 @@ export class AuthService {
         this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
       }
     }), map((response) => response?.access_token || null));
+  }
+
+  public setOnboarding(check: boolean) {
+    localStorage.setItem('onboarding', String(check))
+  }
+  public hasCompletedOnboarding(): boolean {
+    return localStorage.getItem('onboarding') === 'true';
   }
 }

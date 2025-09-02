@@ -13,6 +13,7 @@ from orion.services.auth_manager.auth_manager import auth_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
+from orion.services.mongo_manager.shared_model.db_onboarding_model import db_onboarding_model
 from orion.services.session_manager.session_manager import session_manager
 
 
@@ -103,5 +104,6 @@ def setup_admin(engine: AIOEngine) -> Admin:
     admin.add_view(ModelView(db_user_account, icon="fa fa-users", label="User Accounts", name="user_account"))
     admin.add_view(ModelView(db_system_model, icon="fa fa-cog", label="System Settings", name="system_settings"))
     admin.add_view(ModelView(db_url_data_model, icon="fa fa-link", label="URL Data", name="url_data"))
+    admin.add_view(ModelView(db_onboarding_model, icon="fa fa-users", label="Onboarding Data", name="onboarding_data"))
 
     return admin

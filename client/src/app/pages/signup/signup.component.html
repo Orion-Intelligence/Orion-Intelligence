@@ -1,8 +1,6 @@
 <ng-container>
     <app-header></app-header>
 </ng-container>
-<img alt="background" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover"
-    src="/assets/images/shared/Bg.webp">
 <div class="auth-wrapper">
     <div class="auth-wrapper__left">
         <div class="signup-wrapper">
@@ -30,8 +28,8 @@
                             placeholder="Enter your password" class="signup-container__input" name="password" required
                             type="password" />
                     </div>
-                    <!-- <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
-          {{ errorMessage }} </p> -->
+                    <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
+                        {{ errorMessage }} </p>
 
                     <div>
                         <input [disabled]="!signUpForm.valid" [class.signup-container__button]="signUpForm.valid"

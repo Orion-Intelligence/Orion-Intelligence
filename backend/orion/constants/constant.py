@@ -23,6 +23,8 @@ class CONSTANTS:
     S_AUTH_OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+    S_ENCRYPTION_KEY= env_handler.get_instance().env("ENCRYPTION_KEY")
+
 allowed_keys = {
     'm_search_all', 'm_asns', 'm_attacker', 'm_au_abn', 'm_au_acn', 'm_au_medicare', 'm_au_tfn', 'm_aws_secret', 'hashtags',
     'm_bitcoin_addresses', 'm_company_name', 'm_country', 'm_country_name', 'm_platform','m_credit_card', 'm_cve',

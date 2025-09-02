@@ -1,17 +1,18 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
-import { NgClass, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-signup',
-  imports: [FormsModule, HeaderComponent],
+  imports: [FormsModule, HeaderComponent, CommonModule],
   templateUrl: './signup.component.html'
 })
 export class SignupComponent {
   user = { username: '', mail: '', password: '' };
+  errorMessage: string | null = null;
 
   constructor(private router: Router, public auth_service: AuthService) {
   }
@@ -20,12 +21,10 @@ export class SignupComponent {
       this.auth_service.signup(this.user.username, this.user.mail, this.user.password).subscribe({
         next: (res) => {
           this.router.navigate(['/welcome']).then(() => {
-            alert(res.message);
           });
         },
         error: (err) => {
-          console.error(err);
-          alert(err.error.detail || "Signup failed");
+          this.errorMessage = err.error.detail || "Signup failed";
         }
       });
     }

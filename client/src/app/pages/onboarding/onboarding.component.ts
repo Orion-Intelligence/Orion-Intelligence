@@ -79,8 +79,8 @@ export class OnboardingComponent implements OnInit {
   confirm() {
     this.auth_service.saveOnboarding(this.onboardingData).subscribe({
       next: (res) => {
-        this.router.navigate(['/onboardingComplete']).then(() => {
-          alert(res.message);
+        this.auth_service.setOnboarding(true);
+        this.router.navigate(['/dashboard']).then(() => {
         });
       },
       error: (err) => {

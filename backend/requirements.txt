@@ -24,3 +24,4 @@ python-arango==8.1.6
 sphinx
 myst-parser
 sphinx_rtd_theme
+cryptography>=43.0.1

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
 
 @Component({
@@ -8,5 +9,9 @@ import { HeaderComponent } from "../../shared/partials/header/login-header/heade
   styleUrl: './welcome.component.css'
 })
 export class WelcomeComponent {
-
+  constructor(private router: Router) {
+  }
+  goToLogin() {
+    this.router.navigate(['/login']).then();
+  }
 }
