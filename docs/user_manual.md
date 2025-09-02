@@ -382,6 +382,9 @@ company data, or proprietary tools that have been exposed.
 The Data Breach section in the navigation bar includes six categories:
 <img width="1918" height="585" alt="data breach" src="https://github.com/user-attachments/assets/05a60160-0bd1-412e-98e5-b77b1cf19c4b" />
 
+**Discussion** 
+<img width="1917" height="630" alt="image" src="https://github.com/user-attachments/assets/aee08d43-1e09-4ec2-ab34-4fe201686255" />
+
 
 1. ### Databases
 
@@ -389,11 +392,6 @@ This section contains detailed records of actual data breaches, offering in-dept
 credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a
 clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and
 understand the type of sensitive information that was exposed.
-
-![databasebreach-modified](https://github.com/user-attachments/assets/29c0fd5b-56bb-4b90-b79f-196f77186362)
-
-**Discussion** 
-<img width="1917" height="630" alt="image" src="https://github.com/user-attachments/assets/aee08d43-1e09-4ec2-ab34-4fe201686255" />
 
 2. ### Email
 This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
