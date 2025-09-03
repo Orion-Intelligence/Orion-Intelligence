@@ -28,8 +28,8 @@
 }
 
 .welcome-page__card h1 {
-    font-size: 42px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 600;
     color: #fff;
     margin: 0 0 20px 0;
 }
@@ -69,7 +69,7 @@
     }
 
     .welcome-page__card h1 {
-        font-size: 28px;
+        font-size: 18px;
     }
 
     .welcome-page__card p {

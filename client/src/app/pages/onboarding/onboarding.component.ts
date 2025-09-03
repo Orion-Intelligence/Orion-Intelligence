@@ -77,7 +77,11 @@ export class OnboardingComponent implements OnInit {
     return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
   }
   confirm() {
-    this.auth_service.saveOnboarding(this.onboardingData).subscribe({
+    const filteredOnboardingData: OnboardingModel = {
+      companyName: this.onboardingData.companyName,
+      iocs: this.onboardingData.iocs.filter(ioc => ioc.values && ioc.values.length > 0)
+    };
+    this.auth_service.saveOnboarding(filteredOnboardingData).subscribe({
       next: (res) => {
         this.auth_service.setOnboarding(true);
         this.router.navigate(['/dashboard']).then(() => {

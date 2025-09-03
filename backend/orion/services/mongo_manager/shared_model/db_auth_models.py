@@ -59,3 +59,4 @@ class db_user_account(Model):
 
     def is_demo(self) -> bool:
         return self.role == user_role.DEMO
+    
