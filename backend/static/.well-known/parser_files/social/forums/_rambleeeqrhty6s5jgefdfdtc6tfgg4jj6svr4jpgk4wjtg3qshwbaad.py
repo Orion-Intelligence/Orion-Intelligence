@@ -1,5 +1,7 @@
 import datetime
-from datetime import  timedelta
+
+from datetime import  timezone
+from datetime import timedelta
 from urllib.parse import urljoin
 from abc import ABC
 from typing import List
@@ -8,8 +10,8 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
-from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 from datetime import datetime
 
@@ -78,177 +80,141 @@ class _rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad(leak_extractor_i
                 self._entity_data.clear()
 
     @staticmethod
-    def safe_find(page, selector, attr=None):
-        try:
-            element = page.query_selector(selector)
-            if element:
-                return element.get_attribute(attr) if attr else element.inner_text().strip()
-        except Exception:
-            return None
+    def date_to_str(d):
+            if not d:
+                return ""
+            if isinstance(d, datetime):
+                d = d.date()
+            return d.strftime("%Y%m%d")
 
     def parse_leak_data(self, page):
-
-
         base_urls = [
             "http://rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad.onion/f/Privacy",
             "http://rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad.onion/f/FreeSpeech",
             "http://rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad.onion/f/Security"
         ]
 
-        max_days = 500
         if self.is_crawled:
-            max_days = 5
+            max_days = 30
+            max_page = 2
+        else:
+            max_days = 500
+            max_page = 5
 
-        DAYS_AGO = datetime.utcnow() - timedelta(days=max_days)
+        max_date = datetime.now(timezone.utc) - timedelta(days=max_days)
 
         for base_url in base_urls:
             current_url = base_url
             page_count = 0
-            max_pages = 500
+            next_href = ""
 
-            while page_count < max_pages:
+            latest_date = None
+            last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, helper_method.generate_data_hash(base_url) + REDIS_KEYS.S_URL_TIMEOUT, "")
+            if last_seen_date_str:
+                last_seen_date = datetime.fromisoformat(last_seen_date_str.replace("Z", "+00:00"))
+            else:
+                last_seen_date = datetime.now() - timedelta(days=max_days)
+
+            while current_url:
                 page_count += 1
+                page.goto(current_url, timeout=120000)
 
-                try:
-                    page.goto(current_url)
-                    submission_headers = page.query_selector_all("header.submission__header")
-                except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
+                post_tops = page.query_selector_all("div.submission__row")
+                valid_threads = []
+
+                next_li = page.query_selector("li.next")
+                next_link = next_li.query_selector('a[rel="next"]') if next_li else None
+                if next_link:
+                    next_href = next_link.get_attribute("href")
+
+                for idx, post in enumerate(post_tops):
+                    atag = post.query_selector('h1.submission__title a.submission__link')
+                    if not atag:
+                        continue
+
+                    m_title = atag.inner_text().strip()
+
+                    date_el = post.query_selector('time.submission__timestamp')
+                    m_message_date = date_el.get_attribute("datetime").strip() if date_el else ""
+
+                    thread_date = helper_method.parse_date(m_message_date)
+                    if not thread_date or thread_date < max_date:
+                        continue
+
+                    thread_href = atag.get_attribute("href")
+                    if not thread_href:
+                        continue
+
+                    if thread_date.date() <=last_seen_date.date():
+                        continue
+
+                    thread_url = urljoin(current_url, thread_href)
+                    thread_hash = helper_method.generate_data_hash(thread_url)
+                    current_date_str = self.date_to_str(thread_date) if thread_date else ""
+
+                    valid_threads.append({
+                        "thread_url": thread_url,
+                        "m_title": m_title,
+                        "m_message_date": m_message_date,
+                        "thread_date": thread_date,
+                        "thread_hash": thread_hash,
+                        "current_date_str": current_date_str
+                    })
+
+                if len(valid_threads)==0:
                     break
 
-                for idx in range(len(submission_headers)):
-                    try:
-                        submission_headers = page.query_selector_all("header.submission__header")
-                        if idx >= len(submission_headers):
-                            continue
+                if not latest_date:
+                    latest_date = max(valid_threads, key=lambda x: x["thread_date"])["thread_date"]
 
-                        header = submission_headers[idx]
-                        title_row = header.query_selector("div.submission__title-row")
-                        if not title_row:
-                            continue
+                for thread_info in valid_threads:
+                    thread_url = thread_info["thread_url"]
+                    page.goto(thread_url)
+                    page.wait_for_selector("div.submission__content.flow-slim, div.comment__row")
 
-                        thread_link = title_row.query_selector("h1.submission__title a.submission__link")
-                        if not thread_link:
-                            continue
-
-                        m_title = thread_link.text_content().strip()
-                        thread_href = thread_link.get_attribute("href")
-                        thread_url = urljoin(current_url, thread_href)
-
-                        time_tag = header.query_selector("time.submission__timestamp")
-                        m_message_date = ""
-                        thread_date = None
-                        if time_tag:
-                            m_message_date_raw = time_tag.text_content().strip()
-                            m_message_date = m_message_date_raw
-                            if m_message_date.lower().startswith("on "):
-                                m_message_date = m_message_date[3:].strip()
-                            if " at " in m_message_date:
-                                m_message_date = m_message_date.split(" at ")[0].strip()
-
-                            try:
-                                thread_date = datetime.strptime(m_message_date, "%B %d, %Y")
-                                if thread_date < DAYS_AGO:
-                                    continue
-                            except Exception as ex:
-                                log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-                                continue
-
-                        try:
-                            page.goto(thread_url)
-                        except Exception as ex:
-                            log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-                            continue
-
-                        try:
-                            content_div = page.query_selector("div.submission__content.flow-slim")
-                            main_content = content_div.text_content().strip() if content_div else ""
-                        except Exception as ex:
-                            log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-                            main_content = ""
-
-                        try:
-                            comment_rows = page.query_selector_all("div.comment__row")
-                            m_sections = []
-                            m_usernames = []
-
-                            if main_content:
-                                m_sections.append(main_content)
-
-                            for cidx, comment_row in enumerate(comment_rows):
-                                try:
-                                    comment_body = comment_row.query_selector("div.comment__body p[lang]")
-                                    comment_text = comment_body.text_content().strip() if comment_body else ""
-                                    comment_text = helper_method.filter_comments(comment_text)
-                                    if comment_text:
-                                        m_sections.append(comment_text)
-
-                                    comment_header_user = comment_row.query_selector(
-                                        "header.comment__header h1.comment__info a.fg-inherit strong")
-                                    m_username = ""
-                                    if comment_header_user:
-                                        m_username = comment_header_user.text_content().strip()
-                                        m_usernames.append(m_username)
-                                    else:
-                                        user_link = comment_row.query_selector(
-                                            "header.comment__header h1.comment__info a.fg-inherit")
-                                        if user_link:
-                                            m_username = user_link.text_content().strip()
-                                            m_usernames.append(m_username)
-                                except Exception as ex:
-                                    log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-                                    continue
-
-                            m_content = "\n\n".join(m_sections)
-                            usernames_str = ", ".join(set(m_usernames))
-                        except Exception as ex:
-                            log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-                            m_content = ""
-                            usernames_str = ""
-
-                        try:
-                            card_data = social_model(
-                                m_title=m_title,
-                                m_channel_url=page.url,
-                                m_content=m_content,
-                                m_network=helper_method.get_network_type(self.base_url),
-                                m_message_date=helper_method.extract_and_convert_date(m_message_date),
-                                m_content_type=["forum"],
-                                m_platform="forum",
-                                m_message_sharable_link=page.url
-                            )
-                            entity_data = entity_model(
-                                m_name=usernames_str
-                            )
-                            self.append_leak_data(card_data, entity_data)
-                        except Exception as ex:
-                            log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-
-                        try:
-                            page.goto(current_url)
-                        except Exception as ex:
-                            log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-
-                    except Exception as ex:
-                        log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-                        try:
-                            page.goto(current_url)
-                        except Exception as ex:
-                            log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
-
-                try:
-                    next_li = page.query_selector("li.next")
-                    next_link = None
-                    if next_li:
-                        next_link = next_li.query_selector('a[rel="next"]')
-                    if next_link:
-                        next_href = next_link.get_attribute("href")
-                        if next_href:
-                            current_url = urljoin(current_url, next_href)
-                        else:
-                            break
+                    content_div = page.query_selector("div.submission__content.flow-slim div.submission__body")
+                    if content_div:
+                        paras = content_div.query_selector_all("p[lang]")
+                        main_content = "\n".join([p.text_content().strip() for p in paras]) if paras else content_div.text_content().strip()
                     else:
-                        break
-                except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} " + str(self._class.name_))
+                        main_content = ""
+
+                    comment_rows = page.query_selector_all("div.comment__row")
+                    first10 = comment_rows[:10]
+                    last10 = comment_rows[-10:]
+                    seen = set()
+                    m_sections = []
+
+                    if main_content:
+                        m_sections.append(main_content)
+                        seen.add(main_content)
+
+                    for c in first10 + last10:
+                        comment_body = c.query_selector("div.comment__body p[lang]")
+                        txt = comment_body.text_content().strip() if comment_body else ""
+                        if txt and txt not in seen:
+                            m_sections.append(helper_method.filter_comments(txt))
+                            seen.add(txt)
+
+                    m_content = "\n".join(m_sections)
+
+                    card_data = social_model(
+                        m_title=thread_info["m_title"],
+                        m_channel_url=page.url,
+                        m_content=m_content,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_message_date=helper_method.extract_and_convert_date(thread_info["m_message_date"]),
+                        m_content_type=["forum"],
+                        m_platform="forum",
+                        m_message_sharable_link=page.url
+                    )
+                    entity_data = entity_model()
+                    self.append_leak_data(card_data, entity_data)
+
+                if page_count < max_page:
                     break
+
+                if next_href:
+                    current_url = urljoin(current_url, next_href)
+            if latest_date:
+                self.invoke_db(REDIS_COMMANDS.S_SET_STRING, helper_method.generate_data_hash(base_url) + REDIS_KEYS.S_URL_TIMEOUT, latest_date.strftime("%Y%m%d"))

@@ -9,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.leak_model import le
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -93,7 +93,8 @@ class _reddit(leak_extractor_interface, ABC):
         except Exception:
             return None
 
-    def _p(self, s):
+    @staticmethod
+    def data_parsre(s):
         return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
 
     def parse_leak_data(self, page):
@@ -122,8 +123,8 @@ class _reddit(leak_extractor_interface, ABC):
 
         last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, "")
 
-        ldt = self._p(last_seen_date_str)
-        new_posts = [p for p in posts if p.get("timestamp") and (self._p(p["timestamp"]) and (not ldt or self._p(p["timestamp"]) > ldt))]
+        ldt = self.data_parsre(last_seen_date_str)
+        new_posts = [p for p in posts if p.get("timestamp") and (self.data_parsre(p["timestamp"]) and (not ldt or self.data_parsre(p["timestamp"]) > ldt))]
 
         for post in new_posts:
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)

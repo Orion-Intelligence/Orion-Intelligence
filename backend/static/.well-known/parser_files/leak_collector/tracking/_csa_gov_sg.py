@@ -1,5 +1,4 @@
 from abc import ABC
-from datetime import datetime
 from typing import List
 
 from playwright.sync_api import Page
@@ -8,16 +7,14 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
-from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _securityweek(leak_extractor_interface, ABC):
+class _csa_gov_sg(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
-
         self.callback = callback
         self._card_data = []
         self._entity_data = []
@@ -27,13 +24,11 @@ class _securityweek(leak_extractor_interface, ABC):
         self._is_crawled = False
 
     def init_callback(self, callback=None):
-
         self.callback = callback
 
     def __new__(cls, callback=None):
-
         if cls._instance is None:
-            cls._instance = super(_securityweek, cls).__new__(cls)
+            cls._instance = super(_csa_gov_sg, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -43,8 +38,7 @@ class _securityweek(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-
-        return "https://www.securityweek.com/category/data-breaches/"
+        return "https://www.csa.gov.sg/alerts-and-advisories/"
 
     @property
     def developer_signature(self) -> str:
@@ -52,34 +46,27 @@ class _securityweek(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-
-        return "https://www.securityweek.com/"
+        return "https://www.csa.gov.sg/"
 
     @property
     def rule_config(self) -> RuleModel:
-
-        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.TRACKING,m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
-
         return self._card_data
 
     @property
     def entity_data(self) -> List[entity_model]:
-
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-
-        return "https://advertise.securityweek.com/info"
+        return "https://www.csa.gov.sg/contact-us/"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
-
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
@@ -88,70 +75,78 @@ class _securityweek(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-        try:
-            collected_urls = []
-            max_clicks = 20
-            clicks = 0
-            if self.is_crawled:
-                max_clicks = 2
+        max_pages = 20
+        all_urls = set()
+        current_page = 1
+        if self._is_crawled:
+            max_pages=5
 
-            popup = page.locator("button.pum-close.popmake-close")
-            if popup.count():
-                popup.wait_for(state="visible", timeout=10000)
-                popup.click()
+        while current_page <= max_pages:
+            links = page.locator('a.outline.outline-offset-2.outline-link')
+            count = links.count()
+            for i in range(count):
+                href = links.nth(i).get_attribute("href")
+                if href and "/alerts-and-advisories/" in href:
+                    all_urls.add(self.base_url + href)
 
-            while clicks < max_clicks:
-                more_button = page.locator("a.zox-inf-more-but")
-                if more_button.count() == 0:
-                    break
+            next_button = page.locator('li.flex button[aria-label="Go to next page"]')
+            if not next_button.is_visible():
+                break
+            current_page += 1
+            next_button.first.click()
+            page.wait_for_load_state("domcontentloaded")
 
-                more_button.scroll_into_view_if_needed()
-                more_button.click()
-                page.wait_for_timeout(1000)
-                clicks += 1
+        for article_url in all_urls:
+            page.goto(article_url, timeout=30000)
 
-            post_links = page.locator("a:has(h2.zox-s-title2)")
-            for i in range(post_links.count()):
-                href = post_links.nth(i).get_attribute("href")
-                if href and not href.startswith("#"):
-                    collected_urls.append(href)
+            title = page.locator(
+                "h1.prose-display-md.break-words.text-base-content-strong"
+            ).first.inner_text() if page.locator(
+                "h1.prose-display-md.break-words.text-base-content-strong"
+            ).count() > 0 else ""
 
-            for idx, url in enumerate(collected_urls):
-                try:
-                    page.goto(url,timeout=20000)
+            raw_date = page.locator(
+                "p.prose-label-sm-medium.text-base-content"
+            ).first.inner_text() if page.locator(
+                "p.prose-label-sm-medium.text-base-content"
+            ).count() > 0 else ""
+            date = raw_date.strip() if raw_date else ""
 
-                    title = page.locator("h1.zox-post-title.left.entry-title").inner_text() if page.locator(
-                        "h1.zox-post-title.left.entry-title").count() else ""
-                    description_text = ""
+            content_parts = []
+            for selector in [
+                "div.prose-title-lg.text-base-content-light",
+                "div.w-full.overflow-x-auto.break-words.lg\\:max-w-\\[660px\\]"
+            ]:
+                if page.locator(selector).count() > 0:
+                    content_parts.append(page.locator(selector).first.inner_text().strip())
+            content = "\n".join(content_parts)
 
-                    if page.locator("span.zox-post-excerpt").count():
-                        description_text += page.locator("span.zox-post-excerpt").inner_text() + "\n"
+            imp_content = " ".join(content.split()[:200])
 
-                    if page.locator("div.zox-post-body.left.zoxrel.zox100").count():
-                        description_text += page.locator("div.zox-post-body.left.zoxrel.zox100").inner_text()
+            links_in_content = []
+            content_links_elem = page.locator(
+                "div.w-full.overflow-x-auto.break-words.lg\\:max-w-\\[660px\\]"
+            ).first
+            for link_elem in content_links_elem.locator("a").all():
+                link_href = link_elem.get_attribute("href")
+                if link_href:
+                    links_in_content.append(link_href)
 
-                    short_description = " ".join(description_text.split()[:100])
-                    article_date = datetime.fromisoformat(page.get_attribute('time.post-date.updated', 'datetime')).date()
+            card_data = leak_model(
+                m_title=title,
+                m_url=article_url,
+                m_base_url=self.base_url,
+                m_content=content,
+                m_network=helper_method.get_network_type(self.base_url),
+                m_important_content=imp_content,
+                m_content_type=["cve", "tracking"],
+                m_leak_date=helper_method.extract_and_convert_date(date),
+                m_weblink=links_in_content,
+            )
 
-                    card_data = leak_model(
-                        m_title=title,
-                        m_url=url,
-                        m_base_url=self.base_url,
-                        m_screenshot="",
-                        m_content=description_text.strip(),
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=short_description,
-                        m_weblink=[],
-                        m_dumplink=[],
-                        m_leak_date=article_date,
-                        m_content_type=["news"],
-                    )
+            entity_data = entity_model(
+                m_team="csa-gov-sg",
+                m_country=["Singapore"],
+            )
 
-                    entity_data = entity_model(m_team="securityweek")
-                    self.append_leak_data(card_data, entity_data)
-
-                except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
-        except Exception as ex:
-            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            self.append_leak_data(card_data, entity_data)

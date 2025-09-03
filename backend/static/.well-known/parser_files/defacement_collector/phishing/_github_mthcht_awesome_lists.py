@@ -93,7 +93,7 @@ class _github_mthcht_awesome_lists(leak_extractor_interface, ABC):
                 continue
 
             url = cells.nth(0).inner_text().strip()
-            content = helper_method.extract_refhtml(url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+            content = helper_method.extract_refhtml(url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
             card_data = defacement_model(
                 m_content=content,

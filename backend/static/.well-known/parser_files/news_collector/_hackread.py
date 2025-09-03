@@ -135,7 +135,6 @@ class _hackread(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(m_team="hackread")
-                    entity_data = helper_method.extract_entities(full_content, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

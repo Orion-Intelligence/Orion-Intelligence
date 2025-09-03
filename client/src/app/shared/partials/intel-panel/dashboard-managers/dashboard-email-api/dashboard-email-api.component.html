@@ -37,7 +37,7 @@
   <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
     Username:
   </div>
-  <span class="text-white">{{ username }}</span>
+  <span class="text-white">{{ username && username.trim() !== '' ? username : 'not found' }}</span>
 
   <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
     Email Address:

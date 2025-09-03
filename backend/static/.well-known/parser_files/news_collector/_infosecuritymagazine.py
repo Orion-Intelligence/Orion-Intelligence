@@ -125,7 +125,6 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
                     )
 
                 entity_data = entity_model(m_team="infosecuritymagazine")
-                entity_data = helper_method.extract_entities(description, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
         except Exception as ex:

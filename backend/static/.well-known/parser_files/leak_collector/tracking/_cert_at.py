@@ -1,9 +1,7 @@
 from abc import ABC
+from datetime import datetime
 from typing import List
 from playwright.sync_api import Page
-import re
-from urllib.parse import urljoin
-from datetime import datetime
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -12,7 +10,7 @@ from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 
-class _cert(leak_extractor_interface, ABC):
+class _cert_at(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
@@ -29,7 +27,7 @@ class _cert(leak_extractor_interface, ABC):
 
     def __new__(cls, callback=None):
         if cls._instance is None:
-            cls._instance = super(_cert, cls).__new__(cls)
+            cls._instance = super(_cert_at, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -39,7 +37,7 @@ class _cert(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://cert.ir/security-alerts"
+        return "https://www.cert.at/de/meldungen/aktuelles"
 
     @property
     def developer_signature(self) -> str:
@@ -47,7 +45,7 @@ class _cert(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-        return "https://cert.ir"
+        return "https://www.cert.at"
 
     @property
     def rule_config(self) -> RuleModel:
@@ -65,7 +63,7 @@ class _cert(leak_extractor_interface, ABC):
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-        return "https://cert.ir"
+        return "https://www.cert.at/de/ueber-uns/kontakt"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
@@ -81,70 +79,62 @@ class _cert(leak_extractor_interface, ABC):
             base_url = self.base_url
             is_first_crawl = not self.is_crawled
             min_year = 2023 if is_first_crawl else 2024
-
             visited_urls = set()
             page.goto(seed_url, wait_until="domcontentloaded")
-
             has_next = True
             while has_next:
-                rows = page.query_selector_all("tr.news-page")
-                stop_pagination = False
-
+                rows = page.query_selector_all("div.row")
+                found_valid_article = False
                 for row in rows:
-                    title_td = row.query_selector("td.alert-title a[href]")
-                    card_url = urljoin(seed_url, title_td.get_attribute("href")) if title_td else None
-                    title = title_td.inner_text().strip() if title_td else ""
-
-                    date_td = row.query_selector("td.release-date time.datetime")
-                    persian_date = date_td.inner_text().strip() if date_td else ""
-                    gregorian_datetime = date_td.get_attribute("datetime") if date_td else ""
-                    gregorian_year = None
-                    if gregorian_datetime:
-                        m = re.match(r"(\d{4})", gregorian_datetime)
-                        if m:
-                            gregorian_year = int(m.group(1))
-                    else:
-                        m = re.match(r"(1[34]\d{2})", persian_date)
-                        if m:
-                            persian_year = int(m.group(1))
-                            gregorian_year = persian_year - 1403 + 2024
-
-                    if not gregorian_year or gregorian_year < min_year:
-                        stop_pagination = True
-                        break
-
+                    read_more_link = row.query_selector("a#article-ref")
+                    if not read_more_link:
+                        continue
+                    card_url = read_more_link.get_attribute("href")
                     if not card_url or card_url in visited_urls:
                         continue
                     visited_urls.add(card_url)
-
+                    h2 = row.query_selector("div.col-sm-11 > h2")
+                    date_text = ""
+                    if h2:
+                        small = h2.query_selector("small")
+                        if small:
+                            date_text = small.inner_text().strip()
+                    date_obj = None
+                    if date_text:
+                        try:
+                            date_obj = datetime.strptime(date_text, "%d.%m.%Y %H:%M").date()
+                        except ValueError:
+                            try:
+                                date_obj = datetime.strptime(date_text, "%m/%d/%Y %I:%M %p").date()
+                            except ValueError:
+                                pass
+                    if not date_obj or date_obj.year < min_year:
+                        continue
+                    found_valid_article = True
                     detail_page = page.context.new_page()
                     detail_page.goto(card_url, wait_until="domcontentloaded")
-                    detail_page.wait_for_selector("div.node__main-content-section", timeout=8000)
-
-                    main_section = detail_page.query_selector("div.node__main-content-section")
-                    content = ""
-                    if main_section:
-                        content_div = main_section.query_selector("div[property='schema:text']")
-                        content = content_div.inner_text().strip() if content_div else ""
-
-                    published_date = gregorian_datetime if gregorian_datetime else persian_date
-                    if published_date and "T" in published_date:
-                        published_date = published_date.split("T")[0]
-                    date_obj = None
-                    if published_date:
-                        try:
-                            date_obj = datetime.strptime(published_date, "%Y-%m-%d").date()
-                        except Exception:
-                            date_obj = None
-
+                    detail_page.wait_for_selector("h1", timeout=8000)
+                    h1 = detail_page.query_selector("h1")
+                    date_val = ""
+                    title = ""
+                    if h1:
+                        small = h1.query_selector("small")
+                        if small:
+                            date_val = small.inner_text().strip()
+                        all_text = h1.inner_text().strip()
+                        if date_val and all_text.startswith(date_val):
+                            title = all_text[len(date_val):].strip(" \n\r-")
+                        else:
+                            title = all_text
+                        title = " ".join(title.split())
+                    content_blocks = detail_page.query_selector_all("div.block p.block")
+                    content = "\n".join([p.inner_text().strip() for p in content_blocks]) if content_blocks else ""
                     weblinks = []
-                    if main_section:
-                        news_sources = main_section.query_selector_all("a[href]")
-                        for a in news_sources:
+                    for p in content_blocks:
+                        for a in p.query_selector_all("a[href]"):
                             href = a.get_attribute("href")
-                            if href and (href.startswith("http://") or href.startswith("https://")):
+                            if href:
                                 weblinks.append(href)
-
                     card_data = leak_model(
                         m_title=title,
                         m_url=card_url,
@@ -153,22 +143,25 @@ class _cert(leak_extractor_interface, ABC):
                         m_network=helper_method.get_network_type(base_url),
                         m_important_content=content[:500],
                         m_weblink=weblinks,
-                        m_content_type=["news", "tracking"],
                         m_leak_date=date_obj,
+                        m_content_type=["news", "tracking"],
                     )
                     entity_data = entity_model(
-                        m_team="cert",
-                        m_country=["iran"],
+                        m_team="cert.at",
+                        m_country=["austria"]
                     )
                     self.append_leak_data(card_data, entity_data)
                     detail_page.close()
-                if stop_pagination:
-                    break
-
-                next_btn = page.query_selector("li.pager__item.pager__item--next a[rel='next']")
+                if not found_valid_article:
+                    has_next = False
+                    continue
+                next_btn = page.query_selector('ul.pagination li.page-item a.page-link[rel="next"]')
                 if next_btn and next_btn.is_enabled():
-                    next_url = urljoin(seed_url, next_btn.get_attribute("href"))
-                    page.goto(next_url, wait_until="domcontentloaded")
+                    next_url = next_btn.get_attribute("href")
+                    if next_url:
+                        page.goto(next_url, wait_until="domcontentloaded")
+                    else:
+                        has_next = False
                 else:
                     has_next = False
         except Exception as ex:

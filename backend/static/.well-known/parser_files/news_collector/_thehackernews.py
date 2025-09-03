@@ -159,5 +159,4 @@ class _thehackernews(leak_extractor_interface, ABC):
                 m_team="hackernews live",
             )
 
-            entity_data = helper_method.extract_entities(full_text.strip(), entity_data)
             self.append_leak_data(card, entity_data)

@@ -139,7 +139,6 @@ class _krebsonsecurity(leak_extractor_interface, ABC):
                         m_content_type=["news"],
                     )
                     entity_data = entity_model(m_team="krebson security")
-                    entity_data = helper_method.extract_entities(content_text, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

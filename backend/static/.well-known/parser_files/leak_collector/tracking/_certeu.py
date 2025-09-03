@@ -183,7 +183,6 @@ class _certeu(leak_extractor_interface, ABC):
                         m_country=[country]
                     )
 
-                    entity_data = helper_method.extract_entities(full_content, entity_data)
                     self.append_leak_data(leak_obj, entity_data)
 
                 except Exception as ex:

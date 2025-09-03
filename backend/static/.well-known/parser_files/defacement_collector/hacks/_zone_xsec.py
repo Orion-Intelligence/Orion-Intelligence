@@ -133,7 +133,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             if iframe_src:
                                 m_mirror = iframe_src
 
-                        content = helper_method.extract_refhtml(ip, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                        content = helper_method.extract_refhtml(ip, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                         card_data = defacement_model(
                             m_web_server=[web_server],

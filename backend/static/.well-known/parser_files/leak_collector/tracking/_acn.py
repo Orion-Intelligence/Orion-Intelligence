@@ -159,7 +159,6 @@ class _acn(leak_extractor_interface, ABC):
                     m_country=["italy"]
                 )
 
-                entity_data = helper_method.extract_entities(m_content, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
 

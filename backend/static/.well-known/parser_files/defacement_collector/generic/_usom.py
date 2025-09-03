@@ -1,18 +1,21 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-from urllib.parse import urljoin
+
 from playwright.sync_api import Page
 
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
+from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _idsirtii(leak_extractor_interface, ABC):
+class _usom(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
@@ -32,7 +35,7 @@ class _idsirtii(leak_extractor_interface, ABC):
     def __new__(cls, callback=None):
 
         if cls._instance is None:
-            cls._instance = super(_idsirtii, cls).__new__(cls)
+            cls._instance = super(_usom, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -42,8 +45,7 @@ class _idsirtii(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-
-        return "https://idsirtii.or.id/en/news/"
+        return "https://www.usom.gov.tr/en/address/"
 
     @property
     def developer_signature(self) -> str:
@@ -52,21 +54,18 @@ class _idsirtii(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-
-        return "https://idsirtii.or.id"
+        return "https://www.usom.gov.tr/"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.DEFACEMENT)
 
     @property
     def card_data(self) -> List[leak_model]:
-
         return self._card_data
 
     @property
     def entity_data(self) -> List[entity_model]:
-
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
@@ -74,11 +73,9 @@ class _idsirtii(leak_extractor_interface, ABC):
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
+        return "https://www.usom.gov.tr/en/contact"
 
-        return "https://idsirtii.or.id/en/page/contact-us.html"
-
-    def append_leak_data(self, leak: leak_model, entity: entity_model):
-
+    def append_leak_data(self, leak: defacement_model, entity: entity_model):
         self._card_data.append(leak)
         self._entity_data.append(entity)
         if self.callback:
@@ -86,80 +83,59 @@ class _idsirtii(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-
-
     def parse_leak_data(self, page: Page):
+        max_pages = 2000 if not self.is_crawled else 2
 
-        max_pages = 2 if self._is_crawled else 4
+        for page_count in range(max_pages):
+            page.wait_for_load_state('networkidle', timeout=30000)
+            page.wait_for_selector('table.table-striped tbody tr.data1', timeout=30000)
 
-        for page_idx in range(max_pages):
-            page_suffix = "index.html" if page_idx == 0 else f"{page_idx * 10}.html"
-            current_url = f"{self.seed_url}{page_suffix}"
+            rows = page.query_selector_all('table.table-striped tbody tr.data1')
+            for row in rows:
+                tds = row.query_selector_all('td')
+                if len(tds) < 4:
+                    continue
+                address = tds[0].inner_text().strip()
+                date_str = tds[1].inner_text().strip()
 
-            page.goto(current_url, timeout=30000)
+                try:
+                    dt_obj = datetime.strptime(date_str, "%m/%d/%Y, %I:%M %p")
+                except ValueError:
+                    dt_obj = datetime.strptime(date_str, "%m/%d/%Y")
 
+                dt_obj = dt_obj.date()
 
-            post_links = []
-            for link in page.locator("div.span9 h2 a[href]").all():
-                href = link.get_attribute("href")
-                full_url = urljoin(current_url, href)
-                post_links.append(full_url)
+                description = tds[2].inner_text().strip()
+                desc = (description or "")[:20]
+                m_content_type = ["exploits"] + (
+                    ["phishing"] if "phishing" in desc.lower() else [desc]
+                )
+                content = helper_method.extract_refhtml(address, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
-            if not post_links:
+                card_data = defacement_model(
+                    m_url=address,
+                    m_content=content,
+                    m_base_url=self.base_url,
+                    m_network=helper_method.get_network_type(self.base_url),
+                    m_ioc_type=m_content_type,
+                    m_leak_date=dt_obj
+                )
+                entity_data = entity_model(
+                    m_weblink=[address],
+                    m_team="National Cyber Incident Response Center",
+                    m_country=["Turkey"],
+                )
+                self.append_leak_data(card_data, entity_data)
+
+            try:
+                next_button = page.query_selector('a.page-link:has(span[aria-hidden="true"]:text(">"))')
+                if not next_button:
+                    break
+
+                next_button.click()
+                page.wait_for_load_state("networkidle", timeout=30000)
+            except Exception as e:
+                print(f"Stopped pagination: {e}")
                 break
 
-            for url in post_links:
-
-                page.goto(url, timeout=30000)
-
-
-                title_element = page.locator("h2 a").first
-                title = title_element.text_content().strip() if title_element.is_visible() else "No title"
-                if title == "No title":
-                    continue
-
-                desc_container = page.locator("div.blog-item.margin-bottom-40").first
-                if desc_container.is_visible():
-                    desc_elements = desc_container.locator("p").all()
-                    description = "\n".join(
-                        p.text_content().strip() for p in desc_elements if p.text_content().strip()
-                    )
-                else:
-                    description = "No description found"
-
-                date, admin, date_obj = "", "", None
-                info_items = page.locator("ul.blog-info li").all()
-                for item in info_items:
-                    text = item.text_content().strip()
-                    if "calendar" in str(item.inner_html()):
-                        date = text.replace("calendar", "").strip()
-                        clean_date = date.split(", ", 1)[1]
-                        try:
-                            dt = datetime.strptime(clean_date, "%d %b %Y")
-                            date_obj = dt.date()
-                        except ValueError:
-                            date_obj = None
-                    elif "user" in str(item.inner_html()):
-                        admin = text.replace("By", "").strip()
-
-                m_content = f"{description}\n\nPublished on: {date}\nBy: {admin}"
-
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=url,
-                    m_base_url=self.base_url,
-                    m_content=m_content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=description[:500],
-                    m_content_type=["news", "tracking"],
-                    m_leak_date=date_obj,
-                )
-
-                entity_data = entity_model(
-                    m_team="Indonesia Security Incident Response Team",
-                    m_author=[admin],
-                    m_country=["indonesia"]
-                )
-
-                self.append_leak_data(card_data, entity_data)
 

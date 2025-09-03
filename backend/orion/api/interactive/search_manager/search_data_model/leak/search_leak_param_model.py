@@ -5,7 +5,7 @@ from orion.helper_manager.helper_controller import helper_controller
 
 
 class search_leak_param_model(BaseModel,helper_controller):
-    q: Optional[str] = Field("", max_length=150)
+    q: Optional[str] = Field("")
     category: Optional[str] = "all"
     page: Optional[int] = 1
     safe: bool = False

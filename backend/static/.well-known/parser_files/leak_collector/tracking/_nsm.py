@@ -147,7 +147,6 @@ class _nsm(leak_extractor_interface, ABC):
                         m_country=["norway"]
                     )
 
-                    entity_data = helper_method.extract_entities(content, entity_data)
                     self.append_leak_data(card_data, entity_data)
                     detail_page.close()
 

@@ -9,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
-
+from datetime import datetime
 
 class _cybernewsksa(leak_extractor_interface, ABC):
     _instance = None
@@ -116,6 +116,7 @@ class _cybernewsksa(leak_extractor_interface, ABC):
                         except Exception:
                             continue
                     content = "\n".join(content_lines)
+                    date_obj = datetime.strptime("28/08/2024", "%d/%m/%Y").date()
 
                     leak_obj = leak_model(
                         m_title=title,
@@ -127,7 +128,7 @@ class _cybernewsksa(leak_extractor_interface, ABC):
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=content[0:200],
                         m_content_type=["news", "tracking"],
-                        m_leak_date=None,
+                        m_leak_date=date_obj,
                     )
 
                     entity_data = entity_model(
@@ -136,7 +137,6 @@ class _cybernewsksa(leak_extractor_interface, ABC):
                         m_team="NCA KSA Cyber"
                     )
 
-                    entity_data = helper_method.extract_entities(content, entity_data)
                     self.append_leak_data(leak_obj, entity_data)
                 except Exception as e:
                     log.g().e(f"Failed parsing article {url} - {e}")

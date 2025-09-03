@@ -166,6 +166,5 @@ class _thaicert(leak_extractor_interface, ABC):
                     m_country=["Thailand"]
                 )
 
-                entity_data = helper_method.extract_entities(m_content, entity_data)
                 self.append_leak_data(card_data, entity_data)
 

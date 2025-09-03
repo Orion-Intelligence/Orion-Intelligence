@@ -326,7 +326,7 @@ class ELASTIC_ENUMS:
                 "m_exploit_year": {"type": "keyword"},
                 "m_github_links": {"type": "keyword"},
                 "m_hash": {"type": "keyword"},
-                "m_ip": {"type": "ip"},
+                "m_ip": {"type": "keyword"},
                 "m_location": {"type": "keyword"},
                 "m_mirror_links": {"type": "keyword"},
                 "m_name": {"type": "keyword"},

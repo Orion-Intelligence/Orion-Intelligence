@@ -148,7 +148,6 @@ class _ncsc_swed(leak_extractor_interface, ABC):
                         m_team="ncsc",
                         m_country=["switzerland"]
                     )
-                    entity_data = helper_method.extract_entities(content, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

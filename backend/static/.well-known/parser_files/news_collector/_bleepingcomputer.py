@@ -144,7 +144,6 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(m_team="bleeping computer")
-                    entity_data = helper_method.extract_entities(description.strip(), entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

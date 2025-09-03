@@ -141,7 +141,6 @@ class _incibe(leak_extractor_interface, ABC):
                     m_country=["spain"]
                 )
 
-                entity_data = helper_method.extract_entities(content, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
             except Exception as ex:

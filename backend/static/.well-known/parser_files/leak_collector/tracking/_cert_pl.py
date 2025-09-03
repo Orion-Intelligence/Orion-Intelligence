@@ -1,9 +1,7 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-from urllib.parse import urljoin
 from playwright.sync_api import Page
-
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -12,7 +10,7 @@ from crawler.crawler_services.redis_manager.redis_controller import redis_contro
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _idsirtii(leak_extractor_interface, ABC):
+class _cert_pl(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
@@ -32,7 +30,7 @@ class _idsirtii(leak_extractor_interface, ABC):
     def __new__(cls, callback=None):
 
         if cls._instance is None:
-            cls._instance = super(_idsirtii, cls).__new__(cls)
+            cls._instance = super(_cert_pl, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -42,8 +40,7 @@ class _idsirtii(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-
-        return "https://idsirtii.or.id/en/news/"
+        return "https://cert.pl/en"
 
     @property
     def developer_signature(self) -> str:
@@ -52,8 +49,7 @@ class _idsirtii(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-
-        return "https://idsirtii.or.id"
+        return "https://cert.pl"
 
     @property
     def rule_config(self) -> RuleModel:
@@ -61,12 +57,10 @@ class _idsirtii(leak_extractor_interface, ABC):
 
     @property
     def card_data(self) -> List[leak_model]:
-
         return self._card_data
 
     @property
     def entity_data(self) -> List[entity_model]:
-
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
@@ -74,8 +68,7 @@ class _idsirtii(leak_extractor_interface, ABC):
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-
-        return "https://idsirtii.or.id/en/page/contact-us.html"
+        return "https://x.com/CERT_Polska_en"
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
 
@@ -87,78 +80,124 @@ class _idsirtii(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
 
-
     def parse_leak_data(self, page: Page):
+        max_pages = 2 if self._is_crawled else 16
 
-        max_pages = 2 if self._is_crawled else 4
+        for page_number in range(1, max_pages + 1):
 
-        for page_idx in range(max_pages):
-            page_suffix = "index.html" if page_idx == 0 else f"{page_idx * 10}.html"
-            current_url = f"{self.seed_url}{page_suffix}"
+            if page_number == 1:
+                current_url = f"{self.seed_url}"
+            else:
+                current_url = f"{self.seed_url}/{page_number}/"
 
-            page.goto(current_url, timeout=30000)
-
+            page.goto(current_url)
+            page.wait_for_selector("a.post-outer-container", timeout=10000)
 
             post_links = []
-            for link in page.locator("div.span9 h2 a[href]").all():
+            for link in page.locator("a.post-outer-container").all():
                 href = link.get_attribute("href")
-                full_url = urljoin(current_url, href)
+                if not href:
+                    continue
+
+                if href.startswith("../"):
+                    href = href[2:]
+
+
+
+                full_url = f"{self.seed_url}/{href}"
+
                 post_links.append(full_url)
 
+
             if not post_links:
+                print(f"No posts found on {current_url}, stopping")
                 break
 
             for url in post_links:
 
-                page.goto(url, timeout=30000)
+                try:
+                    page.goto(url, wait_until='domcontentloaded', timeout=30000)
+                except Exception as e:
+                    print(f"[WARN] Timeout or error on {url}: {e}, skipping...")
+                    return
 
+                page.wait_for_selector("div.cert-title", timeout=10000)
 
-                title_element = page.locator("h2 a").first
+                title_element = page.locator("div.cert-title").first
                 title = title_element.text_content().strip() if title_element.is_visible() else "No title"
                 if title == "No title":
                     continue
 
-                desc_container = page.locator("div.blog-item.margin-bottom-40").first
-                if desc_container.is_visible():
-                    desc_elements = desc_container.locator("p").all()
-                    description = "\n".join(
-                        p.text_content().strip() for p in desc_elements if p.text_content().strip()
-                    )
-                else:
-                    description = "No description found"
+                date_element = page.locator("div.cert-subtitle").first
+                date_text = ""
+                parsed_date = None
+                if date_element.is_visible():
+                    raw_text = date_element.text_content().strip()
+                    date_text = raw_text.split("|")[0].strip()
+                    try:
+                        parsed_date = datetime.strptime(date_text, "%d %B %Y").date()
+                    except ValueError as e:
+                        print(f"[!] Failed to parse date '{date_text}' for {full_url}: {e}")
 
-                date, admin, date_obj = "", "", None
-                info_items = page.locator("ul.blog-info li").all()
-                for item in info_items:
-                    text = item.text_content().strip()
-                    if "calendar" in str(item.inner_html()):
-                        date = text.replace("calendar", "").strip()
-                        clean_date = date.split(", ", 1)[1]
-                        try:
-                            dt = datetime.strptime(clean_date, "%d %b %Y")
-                            date_obj = dt.date()
-                        except ValueError:
-                            date_obj = None
-                    elif "user" in str(item.inner_html()):
-                        admin = text.replace("By", "").strip()
+                desc_elements = page.locator(
+                    "div.main.cell.entry div.article p, "
+                    "div.main.cell.entry div.article li, "
+                    "div.main.cell.entry div.article ul, "
+                    "div.main.cell.entry div.article ol, "
+                    "div.main.cell.entry div.article h2, "
+                    "div.main.cell.entry div.article h3, "
+                    "div.main.cell.entry div.article h4 "
+                ).all()
 
-                m_content = f"{description}\n\nPublished on: {date}\nBy: {admin}"
+                description_parts = []
+                for el in desc_elements:
+                    text = el.text_content().strip()
+                    if text:
+                        if el.evaluate("el => el.tagName.toLowerCase()") == "li":
+                            description_parts.append(f"- {text}")
+                        else:
+                            description_parts.append(text)
+
+                description = "\n".join(description_parts) if description_parts else "No description found"
+
+                if description == "No description found":
+                    print(f"No description found for {full_url}")
+
+                source_links = []
+                content_div = page.locator("div.main.cell.entry div.article").first
+                if content_div.is_visible():
+                    for a in content_div.locator("a[href]").all():
+                        href = a.get_attribute("href").strip()
+                        if href and (href == a.text_content().strip() or href.startswith('http')):
+                            source_links.append(href)
+                source_links = list(set(source_links))
+
+                image_urls = []
+                for img in page.locator("div.main.cell.entry div.article img").all():
+                    src = img.get_attribute("src")
+                    if src:
+                        image_urls.append(src if src.startswith('http') else f"{self.base_url}{src}")
+
+                m_content = f"Title: {title}\n{description}\n\nPublished on: {date_text}\nResources: {source_links}\nImages: {image_urls}"
+
 
                 card_data = leak_model(
                     m_title=title,
-                    m_url=url,
+                    m_url=full_url,
                     m_base_url=self.base_url,
                     m_content=m_content,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_important_content=description[:500],
                     m_content_type=["news", "tracking"],
-                    m_leak_date=date_obj,
+                    m_logo_or_images=image_urls,
+                    m_websites=source_links,
+                    m_leak_date=parsed_date
                 )
 
                 entity_data = entity_model(
-                    m_team="Indonesia Security Incident Response Team",
-                    m_author=[admin],
-                    m_country=["indonesia"]
+                    m_team="CERT Polska Team",
+                    m_author=["CERT Author"],
+                    m_country=["Poland"]
                 )
 
                 self.append_leak_data(card_data, entity_data)

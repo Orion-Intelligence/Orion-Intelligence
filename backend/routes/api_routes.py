@@ -147,6 +147,10 @@ async def search_twitter(param: search_social_param_model = Body(...)):
 @api_routes.post("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_leak(param: search_leak_param_model = Body(...)):
+    print(":::::::::::::::::::::::::: 16", flush=True)
+    print(":::::::::::::::::::::::::: 16", flush=True)
+    print(":::::::::::::::::::::::::: 16", flush=True)
+
     if param.category in ['all']:
         base_index = [
             ELASTIC_INDEX.S_LEAK_INDEX,
@@ -225,9 +229,9 @@ async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, ali
     return await search_model.getInstance().request_social_doc(doc_id, lang)
 
 
-@api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
+@api_routes.post("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Perform a dynamic search for emails found in breach and defacement data.")
-async def search_dynamic_email(param: search_dynamic_param_model = Depends()):
+async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search_email(param)
 
 

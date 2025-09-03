@@ -97,7 +97,7 @@ class _phishunt(leak_extractor_interface, ABC):
                 if not link.startswith(("http://", "https://")):
                     continue
 
-                content = helper_method.extract_refhtml(link, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                content = helper_method.extract_refhtml(link, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                 card_data = defacement_model(
                     m_content=content,

@@ -162,7 +162,6 @@ class _csocybercrime_tracking(leak_extractor_interface, ABC):
                         m_country=["united kingdom"],
                     )
 
-                    entity_data = helper_method.extract_entities(summary, entity_data)
                     self.append_leak_data(card, entity_data)
 
                 except Exception as ex:
