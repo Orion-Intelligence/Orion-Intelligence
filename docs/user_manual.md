@@ -456,9 +456,22 @@ The Social module is designed to monitor and analyze threat intelligence shared 
 platforms, with a primary focus on Telegram—a widely used channel among cybercriminal groups for sharing illicit
 information. This module integrates directly with selected Telegram channels, groups, and bots that are known to
 circulate cyber threat data, including leaked credentials, data dumps, malware samples, and discussions of planned
-cyberattacks.
+cyberattacks. In addition, under the social category, there are three more platforms from which Orion Intelligence collects data. These include Twitter, various discussion forums, and Reddit.
 
-![social-modified](https://github.com/user-attachments/assets/e1180853-35b6-4123-af06-4940fa1d17e5)
+**Twitter (now called X)**
+A social media platform where people post short messages, news, updates, and opinions.
+Orion can collect data from here to monitor trending topics, public opinions, and potential threats being discussed in real-time.
+
+**Forums**
+Online discussion boards where people talk about specific topics (e.g., hacking, technology, politics, etc.).
+Orion can gather data from forums to track detailed conversations, underground discussions, and community insights that may not appear on mainstream platforms.
+
+**Reddit**
+A large online platform made up of “subreddits,” which are communities focused on different topics (like cybersecurity, news, technology, etc.).
+Orion can use Reddit to collect data on user discussions, emerging issues, and niche community insights that might highlight potential risks or trends.
+
+<img width="1912" height="855" alt="social" src="https://github.com/user-attachments/assets/230e62db-50e4-4b09-baf7-cd274edee76b" />
+
 
 ## Live APIs
 
