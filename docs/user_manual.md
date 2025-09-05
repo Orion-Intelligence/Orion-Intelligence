@@ -409,19 +409,19 @@ The Cloud module focuses on identifying misconfigurations, leaked credentials, a
 
 The Defacement section provides access to an archive list of websites that have been compromised or defaced. In the Defacement menu, there are three main categories:
 
-1- Hacked (Website Defacement / Unauthorized Access)
+**1- Hacked (Website Defacement / Unauthorized Access)**
 
 When an attacker changes the content of a website, such as text, images, or replaces the homepage.
 
 Example: Displaying messages like “Hacked by XYZ.”
 
-2- Phishing
+**2- Phishing**
 
 When a website is cloned or modified to trick users into providing sensitive information.
 
 Example: Fake login pages used to steal credentials.
 
-3- Database (Data Breach / Data Dumping)
+**3- Database (Data Breach / Data Dumping)**
 
 When an attacker gains access to the database and leaks, modifies, or deletes its data.
 
