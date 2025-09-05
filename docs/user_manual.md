@@ -488,7 +488,9 @@ insights into potential security incidents or data breaches.
 Below the lookup interface, a list of data breach records is displayed. These records offer additional context and
 reference points, allowing users to explore known breaches and validate the exposure of specific information.
 
-![apilive-modified](https://github.com/user-attachments/assets/6019f8ca-ba2d-4f70-9596-506639773d84)
+<img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
+
+
 
 ## Data Dump
 
