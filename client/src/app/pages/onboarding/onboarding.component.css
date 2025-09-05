@@ -17,7 +17,6 @@
     justify-content: space-between;
 }
 
-/* Stepper */
 .onboarding-box__stepper {
     display: flex;
     align-items: center;
@@ -75,7 +74,6 @@
     background-color: #57a5eb;
 }
 
-/* Divider */
 .onboarding-box__divider {
     width: 936px;
     height: 2px;
@@ -83,7 +81,6 @@
     margin: 20px 0;
 }
 
-/* Content */
 .onboarding-box__content {
     flex-grow: 1;
 }

@@ -146,7 +146,7 @@ export class AuthService {
     localStorage.setItem('username', username);
     localStorage.setItem('role', role);
     if (hasOnboarding !== undefined)
-      this.setOnboarding(hasOnboarding);
+      localStorage.setItem('onboarding', String(hasOnboarding));
   }
 
   private getStoredToken(): string | null {
@@ -187,12 +187,5 @@ export class AuthService {
         this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
       }
     }), map((response) => response?.access_token || null));
-  }
-
-  public setOnboarding(check: boolean) {
-    localStorage.setItem('onboarding', String(check))
-  }
-  public hasCompletedOnboarding(): boolean {
-    return localStorage.getItem('onboarding') === 'true';
   }
 }

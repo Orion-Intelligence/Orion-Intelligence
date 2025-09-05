@@ -5,9 +5,7 @@
 </ng-container>
 <div class="onboarding-container">
     <div class="onboarding-box">
-        <!-- Stepper -->
         <div class="onboarding-box__stepper">
-            <!-- Step 1 -->
             <div class="onboarding-box__step" [class.onboarding-box__step--active]="currentStep >= 1">
                 <div class="onboarding-box__step-circle" [class.onboarding-box__step-circle--tick]="currentStep > 1">
                     <ng-container *ngIf="currentStep > 1; else step1Number">
@@ -20,7 +18,6 @@
 
             <div class="onboarding-box__line" [class.onboarding-box__line--active]="currentStep > 1"></div>
 
-            <!-- Step 2 -->
             <div class="onboarding-box__step" [class.onboarding-box__step--active]="currentStep >= 2">
                 <div class="onboarding-box__step-circle" [class.onboarding-box__step-circle--tick]="currentStep > 2">
                     <ng-container *ngIf="currentStep > 2; else step2Number">
@@ -33,20 +30,16 @@
 
             <div class="onboarding-box__line" [class.onboarding-box__line--active]="currentStep > 2"></div>
 
-            <!-- Step 3 -->
             <div class="onboarding-box__step" [class.onboarding-box__step--active]="currentStep === 3">
                 <div class="onboarding-box__step-circle">3</div>
                 <span class="onboarding-box__step-label">Confirmation</span>
             </div>
         </div>
 
-        <!-- Divider -->
         <div class="onboarding-box__divider"></div>
 
-        <!-- Dynamic Content -->
         <div class="onboarding-box__content">
             <ng-container [ngSwitch]="currentStep">
-                <!-- Step 1 -->
                 <div *ngSwitchCase="1">
                     <h2 class="onboarding-box__title">Welcome to Orion Intelligence</h2>
                     <p class="onboarding-box__subtitle">
@@ -60,9 +53,7 @@
                     </div>
                 </div>
 
-                <!-- Step 2 -->
                 <div *ngSwitchCase="2">
-                    <!-- <app-ongoarding-step2></app-ongoarding-step2> -->
                     <div class="onboarding-step2">
                         <h2 class="onboarding-step2__title">Add IOCs</h2>
                         <p class="onboarding-step2__description">Add IOCs description here...</p>
@@ -136,13 +127,11 @@
                     </div>
                 </div>
 
-                <!-- Step 3 -->
                 <div *ngSwitchCase="3">
                     <div class="confirmation-container">
-                        <!-- Heading -->
+
                         <h2 class="onboarding-step3__title">Confirm Your Information</h2>
 
-                        <!-- Company Name -->
                         <div class="section">
                             <p class="onboarding-step2__added-title">Company Name</p>
                             <p class="company-value">{{ onboardingData.companyName }}</p>
@@ -150,7 +139,6 @@
 
                         <hr class="onboarding-step2__divider2" />
 
-                        <!-- Added IOCs -->
                         <p class="onboarding-step2__added-title">Added IOCs</p>
                         <div class="onboarding-step3__added">
 

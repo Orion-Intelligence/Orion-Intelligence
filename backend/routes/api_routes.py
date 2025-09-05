@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Body
 from fastapi import Depends, Query
+from fastapi.security import OAuth2PasswordBearer
 
 from configs.app_dependency import role_required
 from configs.limiter_dependency import limiter_dependency
@@ -33,8 +34,11 @@ from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_onboarding_model import OnboardingRequest
+from orion.services.onboarding_manager.onboarding_manager import OnboardingManager
 
 api_routes = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @api_routes.get("/api/public", description="Get publicly exposed configuration values for frontend initialization.")
@@ -229,3 +233,8 @@ async def search_dynamic_email(param: search_dynamic_param_model = Depends()):
                 description="Retrieve the screenshot associated with a breach document (image is in .webp format).")
 async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
+
+
+@api_routes.post("/api/onboarding")
+async def save_onboarding(data: OnboardingRequest,token: str = Depends(oauth2_scheme)):
+    return await OnboardingManager.save_onboarding(data, token)

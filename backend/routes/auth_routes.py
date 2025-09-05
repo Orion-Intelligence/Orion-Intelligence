@@ -7,6 +7,7 @@ from starlette.responses import JSONResponse
 from orion.services.auth_manager.auth_manager import auth_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.services.session_manager.session_manager import session_manager
+from orion.services.mongo_manager.signup_model.signup_request_model import SignupRequest
 
 auth_router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -44,3 +45,7 @@ async def logout(ptoken: str = Depends(oauth2_scheme)):
     response = JSONResponse(content={"detail": "Logged out"})
     response.delete_cookie("access_token", path="/")
     return response
+
+@auth_router.post("/api/signup")
+async def signup(data: SignupRequest):
+    return await auth_manager.signup_user(data)

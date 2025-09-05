@@ -1,5 +1,5 @@
-import {effect, Injectable, WritableSignal} from '@angular/core';
-import {AppSettingsModel, ConfigSettings, LocalSettingsModel} from '../../../shared/model/app/config';
+import { effect, Injectable, WritableSignal } from '@angular/core';
+import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,7 @@ export class AppStorageService {
     'iocExpanded',
     'entityFilterCondition',
     'entityfilterCategories',
+    'onboarding',
   ];
 
   getFromStorage<T>(key: string, parseJson = false): T | undefined {
@@ -29,6 +30,7 @@ export class AppStorageService {
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
+      onboarding: this.getFromStorage<boolean>('onboarding') || false,
     };
   }
 
@@ -52,8 +54,8 @@ export class AppStorageService {
         if (value !== undefined) {
           const storeValue =
             typeof value === 'boolean' ? String(value)
-            : typeof value === 'object' ? JSON.stringify(value)
-            : String(value);
+              : typeof value === 'object' ? JSON.stringify(value)
+                : String(value);
           localStorage.setItem(key, storeValue);
         }
       });

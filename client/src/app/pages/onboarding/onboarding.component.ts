@@ -6,6 +6,9 @@ import { OnboardingModel } from '../../shared/model/onboarding/onbording.model';
 import { search_filter_keys, search_filter_labels } from '../../shared/constants/shared-enums';
 import { AuthService } from '../../services/authetication/auth.service';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ApiService } from '../../shared/services/api.service';
+import { AppService } from '../../services/core/app/app.service';
 
 @Component({
   selector: 'app-onboarding',
@@ -24,7 +27,7 @@ export class OnboardingComponent implements OnInit {
   selectedCategoryId = '';
   addedIocs: { [key: string]: string[] } = {};
 
-  constructor(private router: Router, public auth_service: AuthService) {
+  constructor(private router: Router, public auth_service: AuthService, public apiService: ApiService, private http: HttpClient, public appService: AppService) {
   }
   ngOnInit(): void {
     this.initializeIOCs();
@@ -81,16 +84,22 @@ export class OnboardingComponent implements OnInit {
       companyName: this.onboardingData.companyName,
       iocs: this.onboardingData.iocs.filter(ioc => ioc.values && ioc.values.length > 0)
     };
-    this.auth_service.saveOnboarding(filteredOnboardingData).subscribe({
-      next: (res) => {
-        this.auth_service.setOnboarding(true);
-        this.router.navigate(['/dashboard']).then(() => {
-        });
-      },
-      error: (err) => {
-        console.error(err);
-        alert(err.error.detail || "onboard failed");
-      }
+    const token = this.auth_service.getToken()
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
     });
+    this.http
+      .post('/api/onboarding', filteredOnboardingData, { headers })
+      .subscribe({
+        next: () => {
+          this.appService.set('onboarding', true);
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          console.error(err);
+          alert(err?.error?.detail || 'Onboarding failed');
+        },
+      });
+    return this.apiService.post('onboarding', filteredOnboardingData, { headers });
   }
 }
