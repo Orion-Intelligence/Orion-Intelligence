@@ -407,14 +407,32 @@ The Cloud module focuses on identifying misconfigurations, leaked credentials, a
 
 ## Defacement
 
-The Defacement section provides access to an archive list of websites that have been compromised or defaced. This
-section maintains a structured table that records detailed information about each hacked website, including:
+The Defacement section provides access to an archive list of websites that have been compromised or defaced. In the Defacement menu, there are three main categories:
 
+1- Hacked (Website Defacement / Unauthorized Access)
+
+When an attacker changes the content of a website, such as text, images, or replaces the homepage.
+
+Example: Displaying messages like “Hacked by XYZ.”
+
+2- Phishing
+
+When a website is cloned or modified to trick users into providing sensitive information.
+
+Example: Fake login pages used to steal credentials.
+
+3- Database (Data Breach / Data Dumping)
+
+When an attacker gains access to the database and leaks, modifies, or deletes its data.
+
+Example: Leaking user emails, passwords, or personal information.
+
+These three categories together make up the major classifications under “Defacement.” When you click on any of these three categories, you get an internal list with certain parameters, which are as follows:
 - Serial Number – Unique identifier for each record.
 
 - Base URL – The domain or main address associated with the defaced site.
 
-- Data Source URL – Link to where the defaced content or evidence is archived.
+- IP Address – Link to where the defaced content or evidence is archived.
 
 - Attacker(s) Name – The individual or group responsible for the defacement.
 
@@ -429,7 +447,8 @@ section maintains a structured table that records detailed information about eac
 This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams
 and analysts to monitor and investigate web-based attacks efficiently.
 
-![archive-modified](https://github.com/user-attachments/assets/fcc2876a-449f-4792-bb13-45dc482cad11)
+<img width="1907" height="411" alt="image" src="https://github.com/user-attachments/assets/4e27e5d9-de20-4017-ad75-e02c8d245232" />
+
 
 ## Social
 
