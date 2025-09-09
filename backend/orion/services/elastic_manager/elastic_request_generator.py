@@ -19,12 +19,9 @@ class elastic_request_generator:
     def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_field):
         multi_fields = [f"{field}^{boost}" for field, boost in phrase_fields]
 
-        print(":::::::::::::::::::::::::: 1", flush=True)
         if raw_query == "*":
-            print(":::::::::::::::::::::::::: 2", flush=True)
             content_query = {"match_all": {}}
         else:
-            print(":::::::::::::::::::::::::: 3", flush=True)
             content_query = {"bool": {"should": [], "minimum_should_match": 1}}
             if quoted_value:
                 raw_query = raw_query.strip('"')
@@ -39,7 +36,6 @@ class elastic_request_generator:
                         }
                     })
             else:
-                print(":::::::::::::::::::::::::: 4", flush=True)
                 for phrase in exact_phrases:
                     must_clauses.append({
                         "bool": {
@@ -73,9 +69,46 @@ class elastic_request_generator:
                         }
                     }
 
-        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(
+            pfilter, p_query_model, allowed_keys
+        )
 
-        print(":::::::::::::::::::::::::: 5", flush=True)
+        if pfilter and "m_url" in pfilter and pfilter["m_url"]:
+            url_values = pfilter["m_url"]
+            if not isinstance(url_values, list):
+                url_values = [url_values]
+            url_shoulds = []
+            url_fields = ["m_url.raw", "m_url"]
+            for u in url_values:
+                if not isinstance(u, str):
+                    continue
+                u = u.strip()
+                if not u:
+                    continue
+                has_scheme = bool(re.match(r"^(?:https?://)", u, flags=re.I))
+                candidates = set()
+                if has_scheme:
+                    candidates.add(u)
+                else:
+                    candidates.add(f"https://{u}")
+                    candidates.add(f"http://{u}")
+                    candidates.add(u)
+                expanded = set()
+                for c in candidates:
+                    expanded.add(c)
+                    expanded.add(c.rstrip("/") + "/")
+                for fld in url_fields:
+                    for c in expanded:
+                        url_shoulds.append({"term": {fld: c}})
+                        url_shoulds.append({"prefix": {fld: {"value": c, "boost": 5}}})
+            if url_shoulds:
+                must_filter_clauses.append({
+                    "bool": {
+                        "should": url_shoulds,
+                        "minimum_should_match": 1
+                    }
+                })
+
         base_bool_query = {
             "must": [content_query] if isinstance(content_query, dict) else [],
             "filter": must_clauses + must_filter_clauses,
@@ -83,11 +116,20 @@ class elastic_request_generator:
         }
 
         if not p_query_model.must and should_filter_clauses:
-            base_bool_query["should"] = should_filter_clauses
-            base_bool_query["minimum_should_match"] = 1
+            base_bool_query.setdefault("should", []).extend(should_filter_clauses)
+
+        boost_shoulds = []
+        url_fields = ["m_url.raw", "m_url"]
+        exact_targets = ["https://hostmaster.amazon-relay.com", "http://hostmaster.amazon-relay.com", "hostmaster.amazon-relay.com"]
+        for fld in url_fields:
+            for v in exact_targets:
+                boost_shoulds.append({"term": {fld: v}})
+                boost_shoulds.append({"prefix": {fld: {"value": v, "boost": 3}}})
+                boost_shoulds.append({"prefix": {fld: {"value": v.rstrip('/') + '/', "boost": 3}}})
+        if boost_shoulds:
+            base_bool_query.setdefault("should", []).extend(boost_shoulds)
 
         functions_block = []
-        print(":::::::::::::::::::::::::: 6", flush=True)
         if p_query_model.matchtype != "semantic":
             functions_block = [
                 {
@@ -103,14 +145,11 @@ class elastic_request_generator:
                 }
             ]
 
-        print(":::::::::::::::::::::::::: 7", flush=True)
         query_statement = {
             "min_score": 0,
             "query": {
                 "function_score": {
-                    "query": {
-                        "bool": base_bool_query
-                    },
+                    "query": {"bool": base_bool_query},
                     **({"functions": functions_block} if functions_block else {}),
                     "score_mode": "sum",
                     "boost_mode": "multiply"
@@ -122,16 +161,11 @@ class elastic_request_generator:
             "explain": True
         }
 
-        print(":::::::::::::::::::::::::: 8", flush=True)
         if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
             try:
-                print(":::::::::::::::::::::::::: 9", flush=True)
-                semantic_boost = 50
-                if p_query_model.matchtype == "semantic":
-                    semantic_boost = 100
+                semantic_boost = 100 if p_query_model.matchtype == "semantic" else 50
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
                 if qvec:
-                    print(":::::::::::::::::::::::::: 10", flush=True)
                     knn_clause = {
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
@@ -147,13 +181,11 @@ class elastic_request_generator:
                             }
                         }
                     }
-                    print(":::::::::::::::::::::::::: 11", flush=True)
                     qb = query_statement["query"]["function_score"]["query"]["bool"]
                     qb.setdefault("should", []).append(knn_clause)
                     query_statement["query"]["function_score"]["boost_mode"] = "sum"
                     query_statement["min_score"] = 2
             except Exception as _:
-                print(":::::::::::::::::::::::::: 12", flush=True)
                 pass
 
         return query_statement
@@ -366,9 +398,7 @@ class elastic_request_generator:
 
     def on_search_defacement_data(self, p_query_model: search_defacement_param_model, pfilter=None):
         raw_query = p_query_model.q.lower()
-        print(":::::::::::::::::::::::::: 13", flush=True)
         if not raw_query or raw_query == "":
-            print(":::::::::::::::::::::::::: 14", flush=True)
             raw_query = "*"
 
         must_clauses = []
@@ -377,7 +407,6 @@ class elastic_request_generator:
         m_network = p_query_model.network
         m_date_range = p_query_model.daterange
 
-        print(":::::::::::::::::::::::::: 15", flush=True)
         if m_date_range:
             parts = m_date_range.split(',')
             if len(parts) == 2:
@@ -407,7 +436,6 @@ class elastic_request_generator:
         quoted_value = quoted_value_match.group(1) if quoted_value_match else None
         m_page_number = getattr(p_query_model, "page", 1)
 
-        print(":::::::::::::::::::::::::: 16", flush=True)
         exact_phrases = re.findall(r'"([^"]+)"', raw_query)
         loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
 
@@ -425,7 +453,6 @@ class elastic_request_generator:
             ("m_mirror_links", 3),
         ]
 
-        print(":::::::::::::::::::::::::: 17", flush=True)
         query_statement = self._build_query_block(
             p_query_model=p_query_model,
             pfilter=pfilter,
@@ -460,13 +487,6 @@ class elastic_request_generator:
 
         must_clauses = []
         must_not_clause = []
-
-        if blocked_categories:
-            must_not_clause.append({
-                "terms": {
-                    "m_content_type": blocked_categories
-                }
-            })
 
         if m_date_range:
             try:
@@ -528,6 +548,20 @@ class elastic_request_generator:
                     "minimum_should_match": 1
                 }
             })
+
+        if blocked_categories:
+            if allowed_categories:
+                must_clauses.append({
+                    "bool": {
+                        "should": [
+                            {"terms": {"m_content_type": allowed_categories}},
+                            {"bool": {"must_not": {"terms": {"m_content_type": blocked_categories}}}}
+                        ],
+                        "minimum_should_match": 1
+                    }
+                })
+            else:
+                must_not_clause.append({"terms": {"m_content_type": blocked_categories}})
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})

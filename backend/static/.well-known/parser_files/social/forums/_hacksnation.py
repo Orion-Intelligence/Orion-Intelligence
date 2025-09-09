@@ -1,8 +1,8 @@
 import datetime
+
 from abc import ABC
 from typing import List
 from urllib.parse import urljoin
-
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -11,7 +11,6 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from datetime import datetime
 from datetime import timedelta
-
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
@@ -55,7 +54,7 @@ class _hacksnation(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_resoource_block=False, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -92,8 +91,8 @@ class _hacksnation(leak_extractor_interface, ABC):
         results = []
         codes_all = []
         articles = page.locator("article.CommentPost")
-        count = articles.count()
-        for i in range(count):
+        comment_count = int(articles.count())
+        for i in range(comment_count):
             art = articles.nth(i)
             user = art.locator(".PostUser-name .username").first.inner_text().strip()
             body = art.locator(".Post-body").first
@@ -103,7 +102,7 @@ class _hacksnation(leak_extractor_interface, ABC):
             parts = [p for p in paragraphs if p]
             text = "\n".join(parts) if parts else body.inner_text().strip()
             results.append((user, text))
-        return "\n".join([r[1] for r in results]), [r[0] for r in results], codes_all
+        return "\n".join([r[1] for r in results]), [r[0] for r in results], codes_all,comment_count
 
     def parse_leak_data(self, page):
         forbidden_keywords = [
@@ -177,8 +176,9 @@ class _hacksnation(leak_extractor_interface, ABC):
             try:
                 page.goto(item["href"])
                 page.wait_for_load_state("domcontentloaded")
-                content, m_username, code= self.extract_posts(page)
-                if len(code)>0:
+                content, m_username, code, comment_count= self.extract_posts(page)
+
+                if code and len(code)>0:
                     code += "\n" + code[0]
 
                 card_data = social_model(
@@ -190,14 +190,15 @@ class _hacksnation(leak_extractor_interface, ABC):
                     m_content_type=["forum"],
                     m_platform="forum",
                     m_message_sharable_link=page.url,
+                    m_post_comments_count=str(comment_count)
                 )
                 entity_data = entity_model(
                     m_username=m_username,
                     m_code_snippet=code
                 )
                 self.append_leak_data(card_data, entity_data)
-            except Exception as _:
-                continue
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
 
         if latest_date:
             self.invoke_db(REDIS_COMMANDS.S_SET_STRING, helper_method.generate_data_hash(self.seed_url) + REDIS_KEYS.S_URL_TIMEOUT, latest_date.strftime("%Y%m%d"))

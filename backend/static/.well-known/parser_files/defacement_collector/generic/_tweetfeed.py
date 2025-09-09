@@ -144,7 +144,11 @@ class _tweetfeed(leak_extractor_interface, ABC):
 
                         val = value_text.strip()
                         ip_val = self.extract_ip(val)
-                        content = helper_method.extract_refhtml(ip_val, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                        content = ""
+                        if self.is_domain_or_url:
+                            content = helper_method.extract_refhtml(val, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                        elif ip_val:
+                            content = helper_method.extract_refhtml(val, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                         card_data = defacement_model(
                             m_url=value_text,

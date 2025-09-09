@@ -8,7 +8,7 @@ from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
@@ -65,7 +65,7 @@ class _ransomware_live(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type= ThreatType.LEAK)
 
     def append_leak_data(self, leak: leak_model, entity: entity_model):
         self._card_data.append(leak)
@@ -130,13 +130,19 @@ class _ransomware_live(leak_extractor_interface, ABC):
                 else:
                     description_text = complete_description
 
-                ref_html = helper_method.extract_refhtml(
-                    victim_name,
-                    self.invoke_db,
-                    REDIS_COMMANDS,
-                    CUSTOM_SCRIPT_REDIS_KEYS,
-                    RAW_PATH_CONSTANTS
-                )
+                ref_html = ""
+                if victim_name and " " not in victim_name:
+                    try:
+                        ref_html = helper_method.extract_refhtml(
+                            victim_name,
+                            self.invoke_db,
+                            REDIS_COMMANDS,
+                            CUSTOM_SCRIPT_REDIS_KEYS,
+                            RAW_PATH_CONSTANTS,
+                            page
+                        )
+                    except Exception as ex:
+                        log.g().e(f"HTMLREF ERROR {ex} - Offending victim: {victim_name}")
 
                 card_data = leak_model(
                     m_ref_html=ref_html,
@@ -145,7 +151,7 @@ class _ransomware_live(leak_extractor_interface, ABC):
                     m_dumplink=[victim_url],
                     m_url=victim_url,
                     m_base_url=self.base_url,
-                    m_screenshot=helper_method.get_screenshot_base64(page, victim_name, self.base_url),
+                    m_screenshot="",
                     m_content=complete_description,
                     m_logo_or_images=[],
                     m_network=helper_method.get_network_type(self.base_url),
@@ -158,8 +164,6 @@ class _ransomware_live(leak_extractor_interface, ABC):
                     m_country=[country],
                     m_team=group
                 )
-
-                entity_data = helper_method.extract_entities(complete_description + (ref_html or ""), entity_data) or entity_data
 
                 self.append_leak_data(card_data, entity_data)
 

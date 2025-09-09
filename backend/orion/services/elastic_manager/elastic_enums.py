@@ -543,16 +543,6 @@ class ELASTIC_ENUMS:
             "max_result_window": 1000000,
             "analysis": {
                 "analyzer": {
-                    "custom_log_analyzer": {
-                        "type": "custom",
-                        "tokenizer": "uax_url_email",
-                        "filter": ["lowercase"]
-                    },
-                    "standard_lower": {
-                        "type": "custom",
-                        "tokenizer": "standard",
-                        "filter": ["lowercase"]
-                    },
                     "url_path_analyzer": {
                         "type": "custom",
                         "tokenizer": "custom_url_tokenizer",

@@ -55,7 +55,7 @@ class _rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_resoource_block=False, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -191,12 +191,17 @@ class _rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad(leak_extractor_i
 
                     for c in first10 + last10:
                         comment_body = c.query_selector("div.comment__body p[lang]")
+
                         txt = comment_body.text_content().strip() if comment_body else ""
                         if txt and txt not in seen:
                             m_sections.append(helper_method.filter_comments(txt))
                             seen.add(txt)
 
                     m_content = "\n".join(m_sections)
+                    count_comments = len(comment_rows)
+
+
+
 
                     card_data = social_model(
                         m_title=thread_info["m_title"],
@@ -206,7 +211,8 @@ class _rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad(leak_extractor_i
                         m_message_date=helper_method.extract_and_convert_date(thread_info["m_message_date"]),
                         m_content_type=["forum"],
                         m_platform="forum",
-                        m_message_sharable_link=page.url
+                        m_message_sharable_link=page.url,
+                        m_post_comments_count=str(count_comments),
                     )
                     entity_data = entity_model()
                     self.append_leak_data(card_data, entity_data)

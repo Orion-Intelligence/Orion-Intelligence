@@ -114,7 +114,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 30G
+          memory: 5G
 
 
   redis_server:

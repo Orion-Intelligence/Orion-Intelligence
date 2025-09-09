@@ -80,9 +80,17 @@ class _mastodon(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     def parse_leak_data(self, page):
-        page.wait_for_selector('.account__header', timeout=30000)
-        profile_info = self._helper_methods.get_profile_info(page)
+        selector = '.account__header'
+        for attempt in range(3):
+            try:
+                page.wait_for_selector(selector, timeout=30000)
+                break
+            except Exception:
+                if attempt == 2:
+                    raise
+                page.reload(wait_until="domcontentloaded")
 
+        profile_info = self._helper_methods.get_profile_info(page)
         account_url = helper_method.generate_data_hash(self.seed_url)
         username = profile_info.get("username", "")
         existing_ids = set()
@@ -102,7 +110,7 @@ class _mastodon(leak_extractor_interface, ABC):
         for post_id in posts:
             article = page.locator(f'article[data-id="{post_id}"]')
             article.scroll_into_view_if_needed()
-            post = self._helper_methods.extract_post_details(page, post_id)
+            post = self._helper_methods.extract_post_details(page, post_id, self.seed_url)
             parsed_post.append(post)
 
         new_posts = []
@@ -135,11 +143,14 @@ class _mastodon(leak_extractor_interface, ABC):
                     m_message_sharable_link=post.get("url", ""),
                     m_weblink=post.get("weblinks", []),
                     m_content=post.get("content", ""),
-                    m_content_type=["social"],
+                    m_content_type=["social_collector"],
                     m_network="clearnet",
                     m_message_date=parsed_date,
                     m_message_id=post.get("id"),
                     m_platform="mastodon",
+                    m_post_shares=post.get("boosts", None),
+                    m_post_likes=post.get("favourites", None),
+                    m_post_comments=post.get("comments", None),
                 )
                 entity_data = entity_model(
                     m_username=[post.get("username", "")],

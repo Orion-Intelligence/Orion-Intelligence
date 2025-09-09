@@ -187,6 +187,7 @@ class _b1nd(leak_extractor_interface, ABC):
 
                             usernames = []
                             post_divs = page.query_selector_all('article.message-body div.bbWrapper')
+                            post_divs_count = len(post_divs)
                             content = self.extract_clean_text(post_divs)
 
                             if category == "leaks":
@@ -202,7 +203,8 @@ class _b1nd(leak_extractor_interface, ABC):
                                 m_message_date=m_date.date() if m_date else None,
                                 m_content_type=m_content_type,
                                 m_platform="forum",
-                                m_message_sharable_link=thread_url
+                                m_message_sharable_link=thread_url,
+                                m_post_comments_count = str(post_divs_count)
                             )
                             entity_data = entity_model(
                                 m_username=usernames[:15]

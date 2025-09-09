@@ -356,6 +356,18 @@ export const routes: Routes = [
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
+            path: 'tracking/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: 'news/:m_hash',
+            component: ReportComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
             path: 'exploit/:m_hash',
             component: ReportComponent,
             resolve: { reportdata: ReportConsolidatedResolver },

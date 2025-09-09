@@ -191,6 +191,18 @@ class _pastebin(leak_extractor_interface, ABC):
                         fmt = "%b %d, %Y" if len(month) <= 3 else "%B %d, %Y"
                         date = datetime.strptime(clean_date, fmt).date()
 
+                        tags_locator = page.locator("div.tags a")
+                        if tags_locator.count():
+                            tags = tags_locator.all_inner_texts()
+                        else:
+                            tags = []
+
+                        visits_locator = page.locator("div.visits")
+                        visits = visits_locator.inner_text().strip()
+
+                        expire_locator = page.locator("div.expire")
+                        expire = expire_locator.inner_text().strip()
+
                         try:
                             source = page.locator(".post-view ol").inner_text(timeout=5000)
                         except:
@@ -222,6 +234,9 @@ class _pastebin(leak_extractor_interface, ABC):
                             m_content_type=content_type,
                             m_platform="pastebin",
                             m_message_date=date,
+                            m_post_tags=tags,
+                            m_post_views=visits,
+                            m_post_expiry=expire,
                         )
 
                         entity_data = entity_model(

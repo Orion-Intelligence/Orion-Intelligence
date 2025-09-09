@@ -51,7 +51,7 @@ class _xreactor(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_resoource_block=False,m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[social_model]:
@@ -84,6 +84,7 @@ class _xreactor(leak_extractor_interface, ABC):
         return d.strftime("%Y%m%d")
 
     def open_thread_in_new_tab(self, page, thread_url):
+        global wrappers
         page.goto(thread_url)
         thread_info = page.locator("h1.p-title-value").inner_text()
         thread_parts = thread_info.split("Thread Name:")
@@ -112,6 +113,7 @@ class _xreactor(leak_extractor_interface, ABC):
         current_page = 1
         comments = []
         main_text = page.locator("div.bbWrapper").first.inner_text().strip()
+
         while current_page <= page_limit and len(comments) < 20:
             wrappers = page.locator(
                 "div.bbWrapper, div.message-main.js-quickEditTarget, div.message-content.js-messageContent div.bbWrapper"
@@ -132,11 +134,14 @@ class _xreactor(leak_extractor_interface, ABC):
             next_button.click(force=True)
             current_page += 1
 
+
         if len(comments) == 0:
             comments = ["no comments"]
         comments = "\n".join(comments[:20])
         main_text = main_text + comments
         main_text = main_text[0:5000]
+        comments_count = wrappers.count()
+        
         card_data = social_model(
             m_title=thread_title,
             m_channel_url=page.url,
@@ -146,6 +151,7 @@ class _xreactor(leak_extractor_interface, ABC):
             m_content_type=[thread_type],
             m_platform="forum",
             m_message_sharable_link=page.url,
+            m_post_comments_count=str(comments_count),
         )
         entity_data = entity_model(
             m_author=list(usernames),

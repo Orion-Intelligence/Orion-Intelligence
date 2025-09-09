@@ -21,6 +21,8 @@ export class ReportConsolidatedResolver implements Resolve<any> {
 
     switch (category) {
       case 'leak':
+      case 'tracking':
+      case 'news':
         apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
         break;
       case 'defacement':

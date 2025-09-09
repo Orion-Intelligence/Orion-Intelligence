@@ -93,21 +93,22 @@ services:
       - discovery.type=single-node
       - network.host=0.0.0.0
       - http.port=9400
-      - ELASTIC_USERNAME=${ELASTIC_ROOT_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
-    env_file:
-      - .env
     ports:
       - "9400:9400"
     volumes:
       - elastic:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
     healthcheck:
-      test: curl -f http://localhost:9400/_cluster/health || exit 1
+      test: ["CMD-SHELL", "curl -f http://localhost:9400/_cluster/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -115,10 +116,6 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.1.11
-    deploy:
-      resources:
-        limits:
-          memory: 1G
 
   redis_server:
     container_name: trusted-web-redis

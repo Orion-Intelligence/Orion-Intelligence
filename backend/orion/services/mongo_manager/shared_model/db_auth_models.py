@@ -1,5 +1,8 @@
+# db_auth_models.py
 from enum import Enum
+from typing import Optional
 
+import pyotp
 from odmantic import Model, Field
 from passlib.context import CryptContext
 from pydantic import field_validator
@@ -14,7 +17,6 @@ class user_role(str, Enum):
 
 
 def hash_password(password: str) -> str:
-    """Helper function to hash the password before storing it."""
     return pwd_context.hash(password)
 
 
@@ -22,6 +24,8 @@ class db_user_account(Model):
     username: str = Field(unique=True)
     password: str = Field(default="")
     role: user_role = Field(default=user_role.DEMO)
+    twofa_enabled: bool = Field(default=False)
+    twofa_secret: Optional[str] = Field(default=None)
 
     @field_validator("username")
     @classmethod
@@ -52,3 +56,16 @@ class db_user_account(Model):
 
     def is_demo(self) -> bool:
         return self.role == user_role.DEMO
+
+    def verify_2fa(self, code: str) -> bool:
+        if not self.twofa_enabled or not self.twofa_secret:
+            return False
+        return pyotp.TOTP(self.twofa_secret).verify(code, valid_window=1)
+
+    def provisioning_uri(self, issuer: str = "MyApp") -> Optional[str]:
+        if not self.twofa_secret:
+            return None
+        return pyotp.totp.TOTP(self.twofa_secret).provisioning_uri(
+            name=self.username,
+            issuer_name=issuer,
+        )

@@ -1,8 +1,10 @@
+# session_manager.py
 import threading
 import time
 from datetime import datetime, timedelta, timezone
 
 import jwt
+import pyotp
 from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 
@@ -79,6 +81,54 @@ class session_manager:
         token = jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
         role = await self.get_current_role(token)
         return token, role
+
+    @staticmethod
+    async def create_temp_token(username: str, ttl_minutes: int = 5, extra: dict | None = None) -> str:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ttl_minutes)
+        payload = {"sub": username, "exp": expire.timestamp(), "twofa": True}
+        if extra:
+            payload.update(extra)
+        return jwt.encode(payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
+
+    async def verify_2fa_and_issue(self, temp_token: str, code: str):
+        try:
+            payload = jwt.decode(
+                temp_token,
+                CONSTANTS.S_AUTH_SECRET_KEY,
+                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+                options={"verify_exp": True},
+            )
+            if not payload.get("twofa"):
+                raise HTTPException(status_code=401, detail="Invalid 2FA token")
+
+            username = payload.get("sub")
+            if not username:
+                raise HTTPException(status_code=401, detail="Invalid 2FA token")
+
+            user = await self._engine.find_one(db_user_account, db_user_account.username == username)
+            if not user:
+                raise HTTPException(status_code=401, detail="User not found")
+
+            secret = user.twofa_secret or payload.get("tfa_secret")
+            if not secret:
+                raise HTTPException(status_code=401, detail="Missing 2FA secret")
+
+            if not pyotp.TOTP(secret).verify(code, valid_window=1):
+                raise HTTPException(status_code=401, detail="Invalid 2FA code")
+
+            if not user.twofa_secret:
+                user.twofa_secret = secret
+                user.twofa_enabled = True
+                await self._engine.save(user)
+
+            access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
+            access_token, role = await self.create_access_token({"sub": username}, access_ttl)
+            return {"access_token": access_token, "token_type": "bearer", "role": role}
+
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="2FA token expired")
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=401, detail="Invalid 2FA token")
 
     async def refresh_token(self, token: str):
         try:

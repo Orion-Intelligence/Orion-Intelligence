@@ -6,7 +6,7 @@ from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
@@ -53,7 +53,7 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -146,8 +146,6 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
                                     else:
                                         web_urls.append(url)
 
-                            description_without_links = re.sub(r'https?://\S+', '', description).strip()
-
                             data_size_match = re.search(r'(\d+\.?\d*)\s?(TB|GB)', description, re.IGNORECASE)
                             if data_size_match:
                                 extracted_data_size = f"{data_size_match.group(1)} {data_size_match.group(2)}"
@@ -156,7 +154,7 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
                             continue
                         ref_html = None
                         if len(web_urls)>0:
-                            ref_html = helper_method.extract_refhtml(web_urls[0], self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                            ref_html = helper_method.extract_refhtml(web_urls[0], self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                         card_data = leak_model(
                             m_ref_html=ref_html,
@@ -174,12 +172,10 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
                         )
 
                         entity_data = entity_model(
-                            m_ip=web_urls,
                             m_company_name=extracted_title,
                             m_team="ransomeware"
                         )
 
-                        entity_data = helper_method.extract_entities(description + (ref_html or ""), entity_data)
                         self.append_leak_data(card_data, entity_data)
                         error_count = 0
 

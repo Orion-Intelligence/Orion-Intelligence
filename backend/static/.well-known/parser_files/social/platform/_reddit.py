@@ -24,7 +24,7 @@ class _reddit(leak_extractor_interface, ABC):
         self._initialized = None
         self._redis_instance = redis_controller()
         self._is_crawled = False
-        self.m_seed_url=""
+        self.m_seed_url = ""
         self._subreddit_metadata = {}
 
     def init_callback(self, callback=None):
@@ -50,15 +50,14 @@ class _reddit(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-        return "https://www.reddittorjg6rue252oqsxryoxengawnmo46qy4kyii5wtqnwfj4ooad.onion"
+        return "https://www.reddit.com"
 
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
+            m_fetch_proxy=FetchProxy.NONE,
             m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_threat_type=ThreatType.REDDIT,
-            m_resoource_block=False
+            m_threat_type=ThreatType.REDDIT
         )
 
     @property
@@ -101,25 +100,17 @@ class _reddit(leak_extractor_interface, ABC):
         account_url = helper_method.generate_data_hash(self.seed_url)
         try:
             subreddit_name = RedditHelperMethod.extract_subreddit_name(self.seed_url)
-        except ValueError:
+        except Exception as _:
             return
 
         self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
 
-        if not self.is_crawled:
-            desired_posts = 1000
-            max_comments = 5
-            one_year_ago = datetime.now(UTC) - timedelta(days=365)
-            posts = RedditHelperMethod.scroll_and_collect_posts(
-                page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago
-            )
-        else:
-            desired_posts = 20
-            max_comments = 5
-            one_week = datetime.now(UTC) - timedelta(days=7)
-            posts = RedditHelperMethod.scroll_and_collect_posts(
-                page, subreddit_name, desired_posts, max_scrolls=100, filter_date=one_week
-            )
+        desired_posts = 100
+        max_comments = 5
+        one_year_ago = datetime.now(UTC) - timedelta(days=60)
+        posts = RedditHelperMethod.scroll_and_collect_posts(
+            page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago
+        )
 
         last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, "")
 
@@ -128,6 +119,11 @@ class _reddit(leak_extractor_interface, ABC):
 
         for post in new_posts:
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
+            locator = page.locator('div[property="schema:articleBody"]').first
+            post['content'] = ""
+            if locator.count():
+                post['content'] = locator.inner_text(timeout=0)
+
             post['comments'] = comments
 
             parsed_date = None
@@ -139,16 +135,17 @@ class _reddit(leak_extractor_interface, ABC):
 
             full_content = "\n".join(item['content'] for item in post['comments'])
             if post.get('content'):
-                full_content += f"\n\n{post['content']}"
+                full_content += f"{post['content']}"
+            full_content = full_content.replace("\n\n", "\n")
 
             card_data = social_model(
                 m_title=post['title'],
-                m_channel_url=account_url,
+                m_channel_url=self.seed_url,
                 m_sender_name=post.get('username') or "unknown",
                 m_message_sharable_link=post['url'],
                 m_weblink=post.get('weblinks', []),
                 m_content=full_content[:500],
-                m_content_type=["social"],
+                m_content_type=["social_collector"],
                 m_network="clearnet",
                 m_message_date=parsed_date,
                 m_message_id=post['id'],

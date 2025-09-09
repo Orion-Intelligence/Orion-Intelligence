@@ -173,9 +173,12 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
                     page.wait_for_selector("div.commentBody, div.postContent.viewPostBody")
 
                     post_body_div = page.query_selector("div.postContent.viewPostBody")
+
                     post_body_text = post_body_div.text_content().strip() if post_body_div else ""
 
                     comment_divs = page.query_selector_all("div.commentBody")
+                    count_comments= len(comment_divs)
+
                     first10 = comment_divs[:10]
                     last10 = comment_divs[-10:]
                     seen = set()
@@ -202,7 +205,8 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
                         m_message_date=helper_method.extract_and_convert_date(thread_info["m_message_date"]),
                         m_content_type=["forum"],
                         m_platform="forum",
-                        m_message_sharable_link=page.url
+                        m_message_sharable_link=page.url,
+                        m_post_comments_count=str(count_comments)
                     )
                     entity_data = entity_model()
                     self.append_leak_data(card_data, entity_data)

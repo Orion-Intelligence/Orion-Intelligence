@@ -68,6 +68,46 @@
         <p>Network:</p>
         <span>{{ resultItem.m_network }}</span>
       </div>
+      <div *ngIf="resultItem.m_post_likes" class="search__result-detail-meta-divs">
+        <p>Post Likes:</p>
+        <span>{{ resultItem.m_post_likes }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_shares" class="search__result-detail-meta-divs">
+        <p>Post Shares:</p>
+        <span>{{ resultItem.m_post_shares }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_comments_count" class="search__result-detail-meta-divs">
+        <p>Post Comments:</p>
+        <span>{{ resultItem.m_post_comments_count }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_tags?.length" class="search__result-detail-meta-divs">
+        <p>Post Tags:</p>
+        <span>{{ resultItem.m_post_tags.join(', ') }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_views" class="search__result-detail-meta-divs">
+        <p>Post Views:</p>
+        <span>{{ resultItem.m_post_views }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_expiry" class="search__result-detail-meta-divs">
+        <p>Post Expiry:</p>
+        <span>{{ resultItem.m_post_expiry }}</span>
+      </div>
+      <div *ngIf="resultItem.m_comment_count" class="search__result-detail-meta-divs">
+        <p>Comment Count:</p>
+        <span>{{ resultItem.m_comment_count }}</span>
+      </div>
+      <div *ngIf="resultItem.m_likes" class="search__result-detail-meta-divs">
+        <p>Likes:</p>
+        <span>{{ resultItem.m_likes }}</span>
+      </div>
+      <div *ngIf="resultItem.m_retweets" class="search__result-detail-meta-divs">
+        <p>Retweets:</p>
+        <span>{{ resultItem.m_retweets }}</span>
+      </div>
+      <div *ngIf="resultItem.m_commenters?.length" class="search__result-detail-meta-divs">
+        <p>Commenters:</p>
+        <span>{{ resultItem.m_commenters.join(', ') }}</span>
+      </div>
     </div>
   </div>
 

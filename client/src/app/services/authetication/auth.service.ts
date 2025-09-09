@@ -35,9 +35,35 @@ export class AuthService {
 
     const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
 
-    return this.apiService.post<{ access_token: string; role: string }>('token', body.toString(), {headers}).pipe(tap({
-      next: (response) => {
-        if (response.role === 'crawler') {
+    return this.apiService.post<any>('token', body.toString(), {headers}).pipe(
+      tap({
+        next: (response) => {
+          if (response.twofa_required) {
+            this.authState.next({
+              token: null,
+              username,
+              role: null,
+              isAuthenticated: false,
+              error: '2FA required'
+            });
+            return response.provisioning_uri || null;
+          }
+
+          if (response.role === 'crawler') {
+            this.authState.next({
+              token: null,
+              username: null,
+              role: null,
+              isAuthenticated: false,
+              error: 'Access denied!'
+            });
+            return;
+          }
+
+          this.setToken(response.access_token, username, response.role);
+          this.startTokenRefresh();
+        },
+        error: (_) => {
           this.authState.next({
             token: null,
             username: null,
@@ -45,17 +71,45 @@ export class AuthService {
             isAuthenticated: false,
             error: 'Access denied!'
           });
-          return
         }
-        this.setToken(response.access_token, username, response.role);
-        this.startTokenRefresh();
-      }, error: (_) => {
-        this.authState.next({
-          token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied!'
-        });
-      }
-    }));
+      })
+    );
   }
+
+  verifyTwofa(code: string, tempToken: string, username: string): Observable<any> {
+    if (!tempToken) {
+      return new Observable(observer => {
+        observer.next(null);
+        observer.complete();
+      });
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${tempToken}`
+    });
+
+    return this.apiService.post<any>('token/2fa/verify', {code}, {headers}).pipe(
+      tap({
+        next: (res) => {
+          if (res?.access_token) {
+            this.setToken(res.access_token, username, res.role);
+            this.startTokenRefresh();
+          } else {
+            this.authState.next({
+              token: null, username, role: null, isAuthenticated: false, error: 'Invalid 2FA code'
+            });
+          }
+        },
+        error: (_) => {
+          this.authState.next({
+            token: null, username, role: null, isAuthenticated: false, error: 'Invalid 2FA code'
+          });
+        }
+      })
+    );
+  }
+
 
   logout(): void {
     this.apiService.post('logout', {}).subscribe();

@@ -219,6 +219,7 @@ class _crackingx(leak_extractor_interface, ABC):
         bb_wrappers = page.locator("div.bbWrapper")
         wrapper_count = bb_wrappers.count()
 
+
         max_days = 5 if self.is_crawled else 500
         if wrapper_count < 10:
             if thread_dt:
@@ -255,7 +256,8 @@ class _crackingx(leak_extractor_interface, ABC):
             m_message_date=thread_dt.date() if thread_dt else None,
             m_content_type=m_content_type,
             m_platform="forum",
-            m_message_sharable_link=thread_url
+            m_message_sharable_link=thread_url,
+            m_post_comments_count=str(wrapper_count)
         )
 
         entity_data = entity_model(

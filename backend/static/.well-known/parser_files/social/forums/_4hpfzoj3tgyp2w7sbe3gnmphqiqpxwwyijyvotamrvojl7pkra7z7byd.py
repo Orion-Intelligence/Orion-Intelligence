@@ -91,8 +91,9 @@ class _4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd(leak_extractor_i
             title_el = page.query_selector("h1.post__title")
             m_title = title_el.text_content().strip() if title_el else ""
 
-            content_div = page.query_selector("div.post__content")
-            m_content = content_div.text_content().strip() if content_div else ""
+            content_div = page.query_selector_all('div.post__content')
+            m_content = "\n".join([div.text_content().strip() for div in content_div]) if content_div else ""
+            content_div_count = len(content_div)
 
             user_link = page.query_selector("a.meta-categories__link[rel='category']")
             m_username = user_link.text_content().strip() if user_link else ""
@@ -105,7 +106,8 @@ class _4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd(leak_extractor_i
                 m_message_date=post_date,
                 m_content_type=["leak"],
                 m_platform="forum",
-                m_message_sharable_link=full_href
+                m_message_sharable_link=full_href,
+                m_post_comments_count=str(content_div_count),
             )
             entity_data = entity_model(m_name=m_username)
             self.append_leak_data(card_data, entity_data)

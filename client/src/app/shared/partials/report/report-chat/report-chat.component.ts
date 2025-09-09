@@ -93,9 +93,7 @@ export class ReportChatComponent implements OnInit {
       if (!this.activeTab) {
         let selectedTab = '';
 
-        if (this.arrayKeys.includes('m_mitre_ttp_name')) {
-          selectedTab = 'm_mitre_ttp_name';
-        } else if (this.arrayKeys.includes('m_email')) {
+        if (this.arrayKeys.includes('m_email')) {
           selectedTab = 'm_email';
         } else if (this.arrayKeys.includes('m_entity')) {
           selectedTab = 'm_entity';

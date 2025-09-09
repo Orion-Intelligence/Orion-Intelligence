@@ -147,9 +147,6 @@ async def search_twitter(param: search_social_param_model = Body(...)):
 @api_routes.post("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_leak(param: search_leak_param_model = Body(...)):
-    print(":::::::::::::::::::::::::: 16", flush=True)
-    print(":::::::::::::::::::::::::: 16", flush=True)
-    print(":::::::::::::::::::::::::: 16", flush=True)
 
     if param.category in ['all']:
         base_index = [

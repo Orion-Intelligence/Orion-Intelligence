@@ -21,6 +21,16 @@ export class ChatResultItem {
   m_ref_html?: string;
   m_content_type?: string[];
   m_hash?: string;
+  m_post_likes?: string;
+  m_post_shares?: string;
+  m_post_comments_count?: string;
+  m_post_tags: string[] = [];
+  m_post_views?: string;
+  m_post_expiry?: string;
+  m_comment_count?: string;
+  m_likes?: string;
+  m_retweets?: string;
+  m_commenters: string[] = [];
 
   constructor(init?: Partial<ChatResultItem>) {
     Object.assign(this, init);

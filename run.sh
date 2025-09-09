@@ -32,6 +32,9 @@ client_build() {
         ng build --configuration production
     fi
     cd ..
+    rm -rf backend/build
+    mkdir -p backend/build
+    cp -r client/build/* backend/build/
 }
 
 use_compose_file() {
@@ -95,5 +98,5 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
 echo "Server started"

@@ -7,6 +7,7 @@ TrustlySearchServices/raw/classifier_output/training_data.csv
 env/*
 backend/env/*
 logs/*
+backend/build/*
 staticfiles/*
 mongo-data/*
 static/trustly/.well-known/model/*
