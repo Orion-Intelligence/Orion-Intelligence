@@ -1,4 +1,6 @@
+from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 from bson import ObjectId
 from odmantic import AIOEngine
@@ -33,6 +35,8 @@ class db_user_account(Model):
     email:str=Field(default="")
     role: user_role = Field(default=user_role.DEMO)
     status:UserStatus=Field(default=UserStatus.PENDING)
+    verification_token: Optional[str] = Field(default=None)
+    verification_expiry: Optional[datetime] = Field(default=None)
 
     @field_validator("username")
     @classmethod

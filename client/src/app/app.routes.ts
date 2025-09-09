@@ -29,6 +29,8 @@ import { SignupComponent } from './pages/signup/signup.component';
 import { OnboardingComponent } from './pages/onboarding/onboarding.component';
 import { WelcomeComponent } from './pages/welcome/welcome.component';
 import { OnboardingCompleteComponent } from './pages/onboarding-complete/onboarding-complete.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { OnboardingGuard } from './shared/guards/onboarding-guard.guard';
 
 export const routes: Routes = [
   {
@@ -55,12 +57,28 @@ export const routes: Routes = [
   {
     path: 'onboarding',
     component: OnboardingComponent,
+    canActivate: [OnboardingGuard],
     data: { animation: 'OnboardingPage' }
   },
   {
     path: 'welcome',
     component: WelcomeComponent,
     data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'welcome/:token',
+    component: WelcomeComponent,
+    data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'forgot',
+    component: ForgotPasswordComponent,
+    data: { animation: 'ForgotPasswordComponent' }
+  },
+  {
+    path: 'forgot/:token',
+    component: ForgotPasswordComponent,
+    data: { animation: 'ForgotPasswordComponent' }
   },
   {
     path: 'dashboard',

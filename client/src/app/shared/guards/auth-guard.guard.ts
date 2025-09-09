@@ -14,7 +14,8 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    if (!this.appService.configData().localSettings.onboarding && state.url !== '/onboarding') {
+    const onboarding = localStorage.getItem('onboarding') === 'true';
+    if (!onboarding && state.url !== '/onboarding') {
       this.router.navigate(['/onboarding']).then();
       return false;
     }

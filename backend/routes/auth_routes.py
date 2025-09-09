@@ -8,6 +8,7 @@ from orion.services.auth_manager.auth_manager import auth_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mongo_manager.signup_model.signup_request_model import SignupRequest
+from orion.services.mongo_manager.shared_model.forgot_model.forgot_password_request import ForgotPasswordRequest,ResetPassword
 
 auth_router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -49,3 +50,15 @@ async def logout(ptoken: str = Depends(oauth2_scheme)):
 @auth_router.post("/api/signup")
 async def signup(data: SignupRequest):
     return await auth_manager.signup_user(data)
+
+@auth_router.post("/api/verify/{token}")
+async def verifyUser(token: str):
+    return await auth_manager.verify_user(token)
+
+@auth_router.post("/api/forgot")
+async def forgotPassword(request: ForgotPasswordRequest):
+    return await auth_manager.forgot_password(request.email)
+
+@auth_router.post("/api/updatePassword")
+async def updatePassword(data:ResetPassword):
+    return await auth_manager.update_password(data.token,data.password)

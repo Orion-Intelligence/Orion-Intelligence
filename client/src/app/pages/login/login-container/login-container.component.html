@@ -9,11 +9,11 @@
       <div class="signup-wrapper">
         <div class="signup-container">
           <div class="signup-container__title">Login</div>
-          <p class="signup-container__subtitle">Enter your email and password to get started!</p>
+          <p class="signup-container__subtitle">Enter your username and password to get started!</p>
 
           <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="signup-container__form">
             <div class="signup-container__form-group">
-              <label class="signup-container__label">Email</label>
+              <label class="signup-container__label">Username</label>
               <input [(ngModel)]="user.username" for="id_username" type="email" placeholder="Enter your email"
                 class="signup-container__input" name="username" required type="text" />
             </div>
@@ -25,9 +25,9 @@
             </div>
             <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
               {{ errorMessage }} </p>
-            <!-- <div class="signup-container__forgot">
-              <a routerLink="/forgot-password">Reset password?</a>
-            </div> -->
+            <div class="login-container__forgot">
+              <a (click)="goToForgot()">Reset password?</a>
+            </div>
 
             <div>
               <input [disabled]="!loginForm.valid" [class.signup-container__button]="loginForm.valid"

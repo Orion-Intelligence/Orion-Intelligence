@@ -6,16 +6,16 @@ class SignupRequest(BaseModel):
     email: EmailStr
     password:str
 
-    @validator("email")
-    def validate_company_email(cls, v):
-        blocked_domains = {
-            "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", 
-            "live.com", "aol.com", "protonmail.com", "icloud.com"
-        }
-        domain = v.split("@")[-1].lower()
-        if domain in blocked_domains:
-            raise ValueError("Personal email addresses are not allowed. Please use your company email.")
-        return v
+    # @validator("email")
+    # def validate_company_email(cls, v):
+    #     blocked_domains = {
+    #         "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", 
+    #         "live.com", "aol.com", "protonmail.com", "icloud.com"
+    #     }
+    #     domain = v.split("@")[-1].lower()
+    #     if domain in blocked_domains:
+    #         raise ValueError("Personal email addresses are not allowed. Please use your company email.")
+    #     return v
     
     @validator("password")
     def validate_password_strength(cls, v):

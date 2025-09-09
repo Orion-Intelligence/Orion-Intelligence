@@ -42,6 +42,9 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   goToSignUp() {
     this.router.navigate(['/signup']).then();
   }
+  goToForgot() {
+    this.router.navigate(['/forgot']).then();
+  }
 
   ngOnDestroy() {
     if (this.authSubscription) {

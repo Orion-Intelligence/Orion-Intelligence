@@ -1,6 +1,7 @@
 import threading
 import time
 from datetime import datetime, timedelta, timezone
+import secrets
 
 import jwt
 from fastapi import HTTPException, status
@@ -113,6 +114,10 @@ class session_manager:
         engine = self._engine
         onboarding = await engine.find_one(db_onboarding_model, db_onboarding_model.userId == user_id)
         return onboarding is not None
+    
+    @staticmethod
+    def generate_verification_token():
+        return secrets.token_urlsafe(32) 
 
     @staticmethod
     def logout_user(ptoken: str):

@@ -116,16 +116,12 @@ export class AuthService {
   signup(username: string, email: string, password: string): Observable<any> {
     return this.apiService.post('signup', { username, email, password });
   }
-
-  saveOnboarding(data: OnboardingModel): Observable<any> {
-    const token = this.getToken()
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.apiService.post('onboarding', data, { headers });
+  forgotPassword(email: string): Observable<any> {
+    return this.apiService.post('forgot', { email });
   }
-
+  updatePassword(token: string, password: string): Observable<any> {
+    return this.apiService.post('updatePassword', { token, password });
+  }
   getToken(): string | null {
     return this.getStoredToken();
   }

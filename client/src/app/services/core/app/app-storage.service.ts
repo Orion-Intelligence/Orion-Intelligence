@@ -11,7 +11,6 @@ export class AppStorageService {
     'iocExpanded',
     'entityFilterCondition',
     'entityfilterCategories',
-    'onboarding',
   ];
 
   getFromStorage<T>(key: string, parseJson = false): T | undefined {
@@ -30,7 +29,6 @@ export class AppStorageService {
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
-      onboarding: this.getFromStorage<boolean>('onboarding') || false,
     };
   }
 
