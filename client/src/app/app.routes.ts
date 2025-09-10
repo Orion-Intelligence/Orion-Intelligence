@@ -31,6 +31,7 @@ import { WelcomeComponent } from './pages/welcome/welcome.component';
 import { OnboardingCompleteComponent } from './pages/onboarding-complete/onboarding-complete.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { OnboardingGuard } from './shared/guards/onboarding-guard.guard';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 export const routes: Routes = [
   {
@@ -439,7 +440,6 @@ export const routes: Routes = [
       },
       {
         path: 'tenant',
-        canActivate: [subscriptionGuard],
         data: { animation: 'TenantPage' },
         children: [
           {
@@ -456,6 +456,22 @@ export const routes: Routes = [
             path: 'add',
             component: AddTenantComponent,
             data: { type: 'add', animation: 'CategoryPage' }
+          }
+        ]
+      },
+      {
+        path: 'profile',
+        data: { animation: 'ProifilePage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'iocs',
+            pathMatch: 'full'
+          },
+          {
+            path: 'iocs',
+            component: ProfileComponent,
+            data: { type: 'iocs', animation: 'ProfilePage' }
           }
         ]
       }

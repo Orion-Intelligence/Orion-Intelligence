@@ -235,6 +235,17 @@ async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
 
-@api_routes.post("/api/onboarding")
-async def save_onboarding(data: OnboardingRequest,token: str = Depends(oauth2_scheme)):
-    return await OnboardingManager.save_onboarding(data, token)
+@api_routes.post("/api/createOnboarding")
+async def create_onboarding(data: OnboardingRequest,token: str = Depends(oauth2_scheme)):
+    return await OnboardingManager.create_onboarding(data, token)
+
+@api_routes.post("/api/getOnboarding")
+async def get_onboadring(token: str = Depends(oauth2_scheme)):
+    return await OnboardingManager.get_onboarding(token)
+
+@api_routes.post("/api/updateOnboarding")
+async def update_onboadring(data: OnboardingRequest,token: str = Depends(oauth2_scheme)):
+    return await OnboardingManager.update_onboarding(data,token)
+
+
+    

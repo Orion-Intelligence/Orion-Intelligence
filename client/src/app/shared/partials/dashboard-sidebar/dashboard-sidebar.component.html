@@ -54,6 +54,11 @@
       (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
       [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
       [title]="'Tenant Management'"></app-dashboard-sidebar-items>
+    <ng-container *ngIf="authService.getRole()==='profile'">
+      <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+        [icon]="'assets/images/sidebar/dump.svg'" [items]="prfileCategories" [routePrefix]="'profile'"
+        [title]="'Profile Data'"></app-dashboard-sidebar-items></ng-container>
 
 
     <div class="sidebar__item">

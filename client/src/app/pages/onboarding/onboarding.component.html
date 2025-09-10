@@ -56,7 +56,14 @@
                 <div *ngSwitchCase="2">
                     <div class="onboarding-step2">
                         <h2 class="onboarding-step2__title">Add IOCs</h2>
-                        <p class="onboarding-step2__description">Add IOCs description here...</p>
+                        <div class="onboarding-step2__description-row">
+                            <p class="onboarding-step2__description">
+                                Add IOCs description here...
+                            </p>
+
+                            <input type="text" class="onboarding-step2__search-input" placeholder="Search IOCs..."
+                                [(ngModel)]="iocSearchText" />
+                        </div>
 
                         <div class="onboarding-step2__category-scroll-container">
                             <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
@@ -70,7 +77,7 @@
 
                             <div class="onboarding-step2__category-scroll" #categoryScroll>
                                 <ng-container *ngIf="onboardingData.iocs.length>0; else noEntity">
-                                    <div *ngFor="let category of onboardingData.iocs" class="onboarding-step2__tab"
+                                    <div *ngFor="let category of getFilteredIocs()" class="onboarding-step2__tab"
                                         [class.selected]="category.ioc_id === selectedCategoryId"
                                         (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                                         {{ category.name }}
@@ -169,20 +176,24 @@
                 </div>
             </ng-container>
         </div>
-
         <div class="onboarding-box__actions">
             <button class="onboarding-box__btn onboarding-box__btn--back" (click)="goBack()"
                 [disabled]="currentStep === 1">
                 Back
             </button>
-            <ng-container *ngIf="currentStep==1 || currentStep==2; else confirmTemplate">
-                <button class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()">
+
+            <ng-container [ngSwitch]="currentStep">
+                <button *ngSwitchCase="1" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()"
+                    [disabled]="!onboardingData.companyName">
                     Next
-                </button></ng-container>
-            <ng-template #confirmTemplate>
-                <button class="onboarding-box__btn onboarding-box__btn--next" (click)="confirm()">
+                </button>
+                <button *ngSwitchCase="2" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()">
+                    {{ hasIocsWithValues() ? 'Next' : 'Skip' }}
+                </button>
+                <button *ngSwitchCase="3" class="onboarding-box__btn onboarding-box__btn--next" (click)="confirm()">
                     Confirm
                 </button>
-            </ng-template>
+            </ng-container>
         </div>
     </div>
+</div>

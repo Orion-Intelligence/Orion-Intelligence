@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../../services/authetication/auth.service';
 import { AppService } from '../../services/core/app/app.service';
+import { map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router, private appService: AppService) {
+  constructor(private authService: AuthService, private router: Router) {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -14,8 +15,7 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    const onboarding = localStorage.getItem('onboarding') === 'true';
-    if (!onboarding && state.url !== '/onboarding') {
+    if (!this.authService.getOnboardingStatus() && state.url !== '/onboarding') {
       this.router.navigate(['/onboarding']).then();
       return false;
     }

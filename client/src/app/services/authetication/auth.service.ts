@@ -47,6 +47,7 @@ export class AuthService {
                 username: null,
                 role: null,
                 isAuthenticated: false,
+                onboarding: null,
                 error: 'Access denied!'
               });
               return;
@@ -58,6 +59,7 @@ export class AuthService {
                   username: null,
                   role: null,
                   isAuthenticated: false,
+                  onboarding: null,
                   error: 'Account under verification'
                 });
                 break;
@@ -80,6 +82,7 @@ export class AuthService {
                   username: null,
                   role: null,
                   isAuthenticated: false,
+                  onboarding: 'false',
                   error: 'Unknown account status'
                 });
                 break;
@@ -91,6 +94,7 @@ export class AuthService {
               username: null,
               role: null,
               isAuthenticated: false,
+              onboarding: null,
               error: 'Access denied!'
             });
           }
@@ -106,7 +110,7 @@ export class AuthService {
     localStorage.removeItem('onboarding');
 
     this.authState.next({
-      token: null, username: null, role: null, isAuthenticated: false, error: null
+      token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null
     });
     this.tokenRefreshService.stopTokenRefresh();
 
@@ -129,20 +133,26 @@ export class AuthService {
   getRole(): string | null {
     return localStorage.getItem('role');
   }
+  getOnboardingStatus(): boolean {
+    return localStorage.getItem('onboarding') === 'true';
+  }
 
   isAuthenticated(): boolean {
     return !!this.getStoredToken();
   }
+  setOnboarding(value: boolean): void {
+    localStorage.setItem('onboarding', String(value));
+  }
 
   private setToken(token: string, username: string, role: string, hasOnboarding?: boolean): void {
     this.authState.next({
-      token, username, role, isAuthenticated: true, error: null
+      token, username, role, isAuthenticated: true, onboarding: String(hasOnboarding), error: null
     });
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
     localStorage.setItem('role', role);
     if (hasOnboarding !== undefined)
-      localStorage.setItem('onboarding', String(hasOnboarding));
+      this.setOnboarding(hasOnboarding)
   }
 
   private getStoredToken(): string | null {
@@ -156,6 +166,7 @@ export class AuthService {
       username: localStorage.getItem('username'),
       role: localStorage.getItem('role'),
       isAuthenticated: !!token,
+      onboarding: localStorage.getItem('onboarding'),
       error: null
     };
   }

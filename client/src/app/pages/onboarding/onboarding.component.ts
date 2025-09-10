@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIf, NgFor, NgSwitch, NgSwitchCase, CommonModule } from '@angular/common';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
@@ -6,7 +6,7 @@ import { OnboardingModel } from '../../shared/model/onboarding/onbording.model';
 import { search_filter_keys, search_filter_labels } from '../../shared/constants/shared-enums';
 import { AuthService } from '../../services/authetication/auth.service';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../../services/core/app/app.service';
 
@@ -26,8 +26,9 @@ export class OnboardingComponent implements OnInit {
   showRightFade = false;
   selectedCategoryId = '';
   addedIocs: { [key: string]: string[] } = {};
+  iocSearchText: string = '';
 
-  constructor(private router: Router, public auth_service: AuthService, public apiService: ApiService, private http: HttpClient, public appService: AppService) {
+  constructor(private router: Router, public auth_service: AuthService, public apiService: ApiService, public appService: AppService) {
   }
   ngOnInit(): void {
     this.initializeIOCs();
@@ -38,6 +39,7 @@ export class OnboardingComponent implements OnInit {
       name: search_filter_labels[key] || key,
       values: []
     }));
+    this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
   }
   onCategoryClick(categoryId: string): void {
     this.selectedCategoryId = categoryId;
@@ -79,6 +81,14 @@ export class OnboardingComponent implements OnInit {
   hasIocsWithValues(): boolean {
     return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
   }
+  getFilteredIocs() {
+    if (!this.iocSearchText) {
+      return this.onboardingData.iocs;
+    }
+    return this.onboardingData.iocs.filter(ioc =>
+      ioc.name.toLowerCase().includes(this.iocSearchText.toLowerCase())
+    );
+  }
   confirm() {
     const filteredOnboardingData: OnboardingModel = {
       companyName: this.onboardingData.companyName,
@@ -88,18 +98,16 @@ export class OnboardingComponent implements OnInit {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    this.http
-      .post('/api/onboarding', filteredOnboardingData, { headers })
-      .subscribe({
-        next: () => {
-          this.appService.set('onboarding', true);
-          this.router.navigate(['/dashboard']);
-        },
-        error: (err) => {
-          console.error(err);
-          alert(err?.error?.detail || 'Onboarding failed');
-        },
-      });
-    return this.apiService.post('onboarding', filteredOnboardingData, { headers });
+
+    this.apiService.post('createOnboarding', filteredOnboardingData, { headers }).subscribe({
+      next: () => {
+        this.auth_service.setOnboarding(true);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err?.error?.detail || 'Onboarding failed');
+      },
+    });
   }
 }

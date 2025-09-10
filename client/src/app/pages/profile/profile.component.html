@@ -1,0 +1,79 @@
+<div class="profile-padding">
+    <div class="onboarding-step2">
+        <h2 class="onboarding-step2__title">Add IOCs</h2>
+        <div class="onboarding-step2__description-row">
+            <p class="onboarding-step2__description">
+                Add IOCs description here...
+            </p>
+
+            <input type="text" class="onboarding-step2__search-input" placeholder="Search IOCs..."
+                [(ngModel)]="iocSearchText" />
+        </div>
+
+        <div class="onboarding-step2__category-scroll-container">
+            <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
+
+            <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollLeft()">
+                <div class="filter-panel__click-hitbox filter-panel__show">
+                    <img src="../../../../assets/images/shared/onboarding_leftButton.svg" alt="filter icon" />
+                </div>
+            </div>
+
+            <div class="onboarding-step2__category-scroll" #categoryScroll>
+                <ng-container *ngIf="(onboardingData?.iocs?.length || 0)>0; else noEntity">
+                    <div *ngFor="let category of onboardingData?.iocs" class="onboarding-step2__tab"
+                        [class.selected]="category.ioc_id === selectedCategoryId"
+                        (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+                        {{ category.name }}
+                    </div>
+                </ng-container>
+                <ng-template #noEntity>
+                    <div class="filter-panel__no-filters-text">No entity filters available.</div>
+                </ng-template>
+
+            </div>
+
+            <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollRight()">
+                <div class="filter-panel__click-hitbox filter-panel__show">
+                    <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" />
+                </div>
+            </div>
+
+            <div class="filter-panel__fade-right" *ngIf="showRightFade"></div>
+        </div>
+
+        <div class="onboarding-step2__divider1"></div>
+
+        <label class="onboarding-step2__label">Enter IOCs</label>
+        <input type="text" class="onboarding-step2__input" placeholder="Type"
+            (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+        <button class="profile-save-button" (click)="save_data()">Save</button>
+
+        <div class="onboarding-step2__divider2"></div>
+
+        <p class="onboarding-step2__added-title">Added IOCs</p>
+        <div class="onboarding-step2__added">
+
+            <div *ngIf="hasIocsWithValues(); else _noEntity">
+                <div *ngFor="let ioc of onboardingData?.iocs">
+                    <ng-container *ngIf="ioc.values.length > 0">
+                        <p class="onboarding-step2__heading">{{ ioc.name }}</p>
+
+                        <div class="onboarding-step2__chips">
+                            <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
+                                <span>{{ value }}</span>
+                                <span class="onboarding-step2__chip-remove" (click)="removeIoc(ioc.ioc_id, value)">
+                                    ✕
+                                </span>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+
+            <ng-template #_noEntity>
+                <p class="onboarding-step2__no-iocs">No IOCs added yet</p>
+            </ng-template>
+        </div>
+    </div>
+</div>
