@@ -37,6 +37,7 @@ class CardExtractionModel(BaseModel):
     m_team: Optional[str] = None
     m_cve: Optional[List[str]] = Field(default_factory=list)
     m_cwe: Optional[List[str]] = Field(default_factory=list)
+    m_embedding:List[float] = []
 
     class Config:
         extra = Extra.allow

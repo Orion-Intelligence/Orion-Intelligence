@@ -1,21 +1,187 @@
 import hashlib
 import re
-import ipaddress
+
 from datetime import timedelta, timezone
-from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
-from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
-from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
 from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.constants.enum import ChannelTypeEnum
+from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
+from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC
 from datetime import datetime
-
+from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
 
 class elastic_request_generator:
+
+    @staticmethod
+    def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_field):
+        multi_fields = [f"{field}^{boost}" for field, boost in phrase_fields]
+
+        if raw_query == "*":
+            content_query = {"match_all": {}}
+        else:
+            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+            if quoted_value:
+                raw_query = raw_query.strip('"')
+                for phrase in exact_phrases:
+                    content_query["bool"]["should"].append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {field: {"query": phrase, "boost": boost}}}
+                                for field, boost in phrase_fields
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
+            else:
+                for phrase in exact_phrases:
+                    must_clauses.append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {field: {"query": phrase, "boost": boost}}}
+                                for field, boost in phrase_fields
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
+                for term in loose_terms:
+                    content_query["bool"]["should"].append({
+                        "multi_match": {
+                            "query": term.lower(),
+                            "fields": multi_fields,
+                            "type": "best_fields",
+                            "operator": "OR"
+                        }
+                    })
+                    for kf in ["m_location", "m_attacker", "m_team", "m_web_server", "m_network", "m_ip"]:
+                        content_query["bool"]["should"].append({
+                            "term": {kf: {"value": term, "case_insensitive": True, "boost": 3}}
+                        })
+                if not exact_phrases and not loose_terms:
+                    content_query = {
+                        "multi_match": {
+                            "query": raw_query.lower(),
+                            "fields": multi_fields,
+                            "type": "best_fields",
+                            "operator": "OR"
+                        }
+                    }
+
+        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(
+            pfilter, p_query_model, allowed_keys
+        )
+
+        if pfilter and "m_url" in pfilter and pfilter["m_url"]:
+            url_values = pfilter["m_url"]
+            if not isinstance(url_values, list):
+                url_values = [url_values]
+            url_shoulds = []
+            url_fields = ["m_url.raw", "m_url"]
+            for u in url_values:
+                if not isinstance(u, str):
+                    continue
+                u = u.strip()
+                if not u:
+                    continue
+                has_scheme = bool(re.match(r"^(?:https?://)", u, flags=re.I))
+                candidates = set()
+                if has_scheme:
+                    candidates.add(u)
+                else:
+                    candidates.add(f"https://{u}")
+                    candidates.add(f"http://{u}")
+                    candidates.add(u)
+                expanded = set()
+                for c in candidates:
+                    expanded.add(c)
+                    expanded.add(c.rstrip("/") + "/")
+                for fld in url_fields:
+                    for c in expanded:
+                        url_shoulds.append({"term": {fld: c}})
+                        url_shoulds.append({"prefix": {fld: {"value": c, "boost": 5}}})
+            if url_shoulds:
+                must_filter_clauses.append({
+                    "bool": {
+                        "should": url_shoulds,
+                        "minimum_should_match": 1
+                    }
+                })
+
+        base_bool_query = {
+            "must": [content_query] if isinstance(content_query, dict) else [],
+            "filter": must_clauses + must_filter_clauses,
+            "must_not": must_not_clause,
+        }
+
+        if not p_query_model.must and should_filter_clauses:
+            base_bool_query.setdefault("should", []).extend(should_filter_clauses)
+
+        boost_shoulds = []
+        if boost_shoulds:
+            base_bool_query.setdefault("should", []).extend(boost_shoulds)
+
+        functions_block = []
+        if p_query_model.matchtype != "semantic":
+            functions_block = [
+                {
+                    "gauss": {
+                        date_field: {
+                            "origin": "now",
+                            "scale": "45d",
+                            "offset": "7d",
+                            "decay": 0.7
+                        }
+                    },
+                    "weight": 0.1
+                }
+            ]
+
+        query_statement = {
+            "min_score": 0,
+            "query": {
+                "function_score": {
+                    "query": {"bool": base_bool_query},
+                    **({"functions": functions_block} if functions_block else {}),
+                    "score_mode": "sum",
+                    "boost_mode": "multiply"
+                }
+            },
+            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
+            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+            "track_total_hits": True,
+            "explain": True
+        }
+
+        if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+            try:
+                semantic_boost = 100 if p_query_model.matchtype == "semantic" else 50
+                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+                if qvec:
+                    knn_clause = {
+                        "knn": {
+                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+                            "num_candidates": 5000,
+                            "query_vector": qvec,
+                            "boost": semantic_boost,
+                            "filter": {
+                                "bool": {
+                                    "filter": must_clauses + must_filter_clauses,
+                                    "must_not": must_not_clause
+                                }
+                            }
+                        }
+                    }
+                    qb = query_statement["query"]["function_score"]["query"]["bool"]
+                    qb.setdefault("should", []).append(knn_clause)
+                    query_statement["query"]["function_score"]["boost_mode"] = "sum"
+                    query_statement["min_score"] = 2
+            except Exception as _:
+                pass
+
+        return query_statement
 
     @staticmethod
     def on_bulk_domain_lookup(p_query_model, pFilter=None):
@@ -223,17 +389,13 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
-    @staticmethod
-    def on_search_defacement_data(p_query_model: search_defacement_param_model, _=None, is_consolidated: bool = False):
+    def on_search_defacement_data(self, p_query_model: search_defacement_param_model, pfilter=None):
         raw_query = p_query_model.q.lower()
         if not raw_query or raw_query == "":
             raw_query = "*"
 
-        m_page_number = getattr(p_query_model, 'page', 1)
-
         must_clauses = []
         must_not_clause = []
-        should_clauses = []
 
         m_network = p_query_model.network
         m_date_range = p_query_model.daterange
@@ -244,17 +406,10 @@ class elastic_request_generator:
                 try:
                     from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
                     from_date = from_date_obj.strftime("%Y-%m-%d")
-
                     to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
                     to_date = to_date_obj.strftime("%Y-%m-%d")
-
                     must_clauses.append({
-                        "range": {
-                            "m_leak_date": {
-                                "gte": from_date,
-                                "lte": to_date
-                            }
-                        }
+                        "range": {"m_leak_date": {"gte": from_date, "lte": to_date}}
                     })
                 except ValueError:
                     pass
@@ -263,7 +418,6 @@ class elastic_request_generator:
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
         m_content_type = p_query_model.content
-
         if m_content_type == "phishing":
             must_clauses.append({"terms": {"m_ioc_type": ["phishing"]}})
         elif m_content_type == "hacked":
@@ -273,163 +427,44 @@ class elastic_request_generator:
 
         quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
         quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+        m_page_number = getattr(p_query_model, "page", 1)
 
-        try:
-            ipaddress.ip_address(raw_query)
-            is_ip = True
-        except ValueError:
-            is_ip = False
+        exact_phrases = re.findall(r'"([^"]+)"', raw_query)
+        loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
 
-        if raw_query == "*":
-            if is_consolidated:
-                main_query = {}
-            else:
-                main_query = {
-                    "bool": {
-                        "must": [{"match_all": {}}],
-                        "filter": must_clauses,
-                        "must_not": must_not_clause
-                    }
-                }
-        else:
-            if quoted_value:
-                raw_query = quoted_value
-                should_clauses.append({
-                    "bool": {
-                        "should": [{"terms": {field: [raw_query], "boost": 3}} for field in allowed_keys],
-                        "minimum_should_match": 1,
-                        "boost": 5
-                    }
-                })
-            elif is_ip:
-                should_clauses.append({"term": {"m_ip": raw_query}})
-                should_clauses.append({
-                    "wildcard": {
-                        "m_ip": {
-                            "value": f"*{raw_query}*",
-                            "case_insensitive": True,
-                            "boost": 2
-                        }
-                    }
-                })
-            else:
-                should_clauses.extend([
-                    {"match": {"m_location": {"query": raw_query, "boost": 50}}},
-                    {"match": {"m_web_url": {"query": raw_query, "boost": 50}}},
-                    {"match": {"m_mirror_links": {"query": raw_query, "boost": 50}}},
-                    {"match": {"m_url": {"query": raw_query, "boost": 50}}},
-                    {"match": {"m_base_url": {"query": raw_query, "boost": 50}}},
-                    {"match": {"m_attacker": {"query": raw_query, "boost": 50}}},  # NEW
-                    {
-                        "multi_match": {
-                            "query": raw_query,
-                            "fields": [
-                                "m_location^5",
-                                "m_web_url^5",
-                                "m_base_url^5",
-                                "m_url^5",
-                                "m_web_server^3",
-                                "m_attacker^5",  # NEW
-                                "m_team^5",
-                                "m_network^3",
-                                "m_mirror_links^5"
-                            ],
-                            "type": "best_fields",
-                            "boost": 5
-                        }
-                    },
-                    {
-                        "bool": {
-                            "should": [
-                                {"wildcard": {"m_location": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {"m_web_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {"m_base_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {"m_url": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {"m_web_server": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                                {"wildcard": {"m_attacker": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},  # NEW
-                                {"wildcard": {"m_team": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}},
-                                {"wildcard": {"m_network": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 1}}},
-                                {"wildcard": {"m_mirror_links": {"value": f"*{raw_query}*", "case_insensitive": True, "boost": 2}}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    }
-                ])
+        phrase_fields = [
+            ("m_location", 3),
+            ("m_content", 5),
+            ("m_web_url", 3),
+            ("m_base_url", 3),
+            ("m_url", 3),
+            ("m_ip", 5),
+            ("m_web_server", 3),
+            ("m_attacker", 5),
+            ("m_team", 5),
+            ("m_network", 3),
+            ("m_mirror_links", 3),
+        ]
 
-            main_query = {
-                "bool": {
-                    "should": should_clauses,
-                    "minimum_should_match": 1,
-                    "filter": must_clauses,
-                    "must_not": must_not_clause
-                }
-            }
-
-        query_statement = {
-            "min_score": 0,
-            "query": {
-                "function_score": {
-                    "query": main_query,
-                    "functions": [
-                        {
-                            "gauss": {
-                                "m_update_date": {
-                                    "origin": "now",
-                                    "scale": "30d",
-                                    "offset": "10d",
-                                    "decay": 0.5
-                                }
-                            },
-                            "weight": 2
-                        },
-                        {
-                            "field_value_factor": {
-                                "field": "m_update_date",
-                                "factor": 1.1,
-                                "modifier": "log1p",
-                                "missing": 0
-                            }
-                        },
-                        {
-                            "filter": {
-                                "exists": {"field": "m_leak_date"}
-                            },
-                            "weight": 1
-                        },
-                        {
-                            "gauss": {
-                                "m_leak_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "5d",
-                                    "decay": 0.5
-                                }
-                            },
-                            "weight": 1
-                        }
-                    ],
-                    "score_mode": "sum",
-                    "boost_mode": "multiply"
-                }
-            },
-            "from": max(0, (m_page_number - 1) * 100),
-            "size": 100,
-            "track_total_hits": True,
-            "sort": [{"m_leak_date": {"order": "desc"}}]
-        }
+        query_statement = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=m_page_number,
+            date_field="m_leak_date"
+        )
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
-    @staticmethod
-    def _strip_query(query, size=20):
-        query["size"] = size
-        query.pop("highlight", None)
-        query.pop("suggest", None)
-        return query
-
     # noinspection PyTypeChecker
     @staticmethod
-    def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model, pfilter, base_index, allowed_categories):
+    def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -444,6 +479,7 @@ class elastic_request_generator:
         m_page_number = getattr(p_query_model, "page", 1)
 
         must_clauses = []
+        must_not_clause = []
 
         if m_date_range:
             try:
@@ -505,6 +541,20 @@ class elastic_request_generator:
                     "minimum_should_match": 1
                 }
             })
+
+        if blocked_categories:
+            if allowed_categories:
+                must_clauses.append({
+                    "bool": {
+                        "should": [
+                            {"terms": {"m_content_type": allowed_categories}},
+                            {"bool": {"must_not": {"terms": {"m_content_type": blocked_categories}}}}
+                        ],
+                        "minimum_should_match": 1
+                    }
+                })
+            else:
+                must_not_clause.append({"terms": {"m_content_type": blocked_categories}})
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
@@ -618,7 +668,8 @@ class elastic_request_generator:
                     "query": {
                         "bool": {
                             "filter": combined_filter,
-                            "must": query_block
+                            "must": query_block,
+                            "must_not": must_not_clause
                         }
                     },
                     "score_mode": "sum",
@@ -630,6 +681,23 @@ class elastic_request_generator:
             "track_total_hits": True,
             "explain": True
         }
+
+        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+            try:
+                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+                if qvec:
+                    knn_clause = {
+                        "knn": {
+                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+                            "num_candidates": 1000,
+                            "query_vector": qvec
+                        }
+                    }
+                    unified_query["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+                    unified_query["min_score"] = 29
+            except Exception:
+                pass
 
         query = base_index, unified_query, [b for b in [
             {ELASTIC_INDEX.S_LEAK_INDEX: 2},
@@ -644,46 +712,64 @@ class elastic_request_generator:
     def on_search_consolidated_data(self, p_query_model, pFilter=None):
         queries = []
         indices = []
+        labels = []
 
         m1 = helper_controller.clone_model(p_query_model)
         i1, q1 = self.on_search_leakdata(m1, pFilter)
-        queries.append(self._strip_query(q1))
+        queries.append(helper_controller.strip_query(q1))
         indices.append(i1)
+        labels.append("leak_model")
 
         m2 = helper_controller.clone_model(p_query_model)
         i2, q2 = self.on_search_general_data(m2, pFilter)
-        queries.append(self._strip_query(q2))
+        queries.append(helper_controller.strip_query(q2))
         indices.append(i2)
+        labels.append("generic_model")
 
         m3 = helper_controller.clone_model(p_query_model)
         i3, q3 = self.on_search_exploitdata(m3, pFilter)
-        queries.append(self._strip_query(q3))
+        queries.append(helper_controller.strip_query(q3))
         indices.append(i3)
+        labels.append("exploit_model")
 
         m4 = helper_controller.clone_model(p_query_model)
         i4, q4 = self.on_search_telegram_data(m4, pFilter)
-        queries.append(self._strip_query(q4))
+        queries.append(helper_controller.strip_query(q4))
         indices.append(i4)
+        labels.append("chat_model")
 
         m6 = helper_controller.clone_model(p_query_model)
-        i6, q6 = self.on_search_social_data(m6, pFilter)
-        queries.append(self._strip_query(q6))
+        i6, q6 = self.on_search_social_data(m6, pFilter, ELASTIC_INDEX.S_SOCIAL_INDEX)
+        queries.append(helper_controller.strip_query(q6))
         indices.append(i6)
+        labels.append("social_model")
 
         m8 = helper_controller.clone_model(p_query_model)
         i8, q8 = self.on_search_stealer_alert(m8, pFilter)
-        queries.append(self._strip_query(q8))
+        queries.append(helper_controller.strip_query(q8))
         indices.append(i8)
+        labels.append("stealer_model")
 
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)
+        labels.append("defacement_model")
 
-        return indices, queries
+        m1.category='tracking'
+        i9, q9 = self.on_search_leakdata(m1, pFilter)
+        queries.append(helper_controller.strip_query(q9))
+        indices.append(i9)
+        labels.append("tracking_model")
 
-    @staticmethod
-    def on_search_leakdata(p_query_model, pfilter=None):
+        m1.category='news'
+        i10, q10 = self.on_search_leakdata(m1, pFilter)
+        queries.append(helper_controller.strip_query(q10))
+        indices.append(i10)
+        labels.append("news_model")
 
+        return indices, queries, labels
+
+    def on_search_leakdata(self, p_query_model, pfilter=None):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -729,7 +815,6 @@ class elastic_request_generator:
                     from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
                     to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
                     to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
-
                     must_clauses.append({
                         "range": {
                             "m_leak_date": {
@@ -769,173 +854,30 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        if raw_query == "*":
-            content_query = {"match_all": {}}
-        else:
-            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
-            if quoted_value:
-                raw_query = raw_query.strip('"')
-                for phrase in exact_phrases:
-                    content_query["bool"]["should"].append({
-                        "bool": {
-                            "should": [
-                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
-                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    })
-            else:
-                content_query = {"bool": {"should": [], "minimum_should_match": 1}}
-                for phrase in exact_phrases:
-                    must_clauses.append({
-                        "bool": {
-                            "should": [
-                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
-                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    })
+        phrase_fields = [
+            ("m_title", 5),
+            ("m_content", 3),
+            ("m_important_content", 4),
+            ("m_ref_html", 2),
+        ]
 
-                for term in loose_terms:
-                    content_query["bool"]["should"].append({
-                        "query_string": {
-                            "query": term.lower() + "*",
-                            "fields": ["*"],
-                            "default_operator": "OR",
-                            "lenient": True,
-                            "analyze_wildcard": True,
-                            "boost": 2
-                        }
-                    })
-
-                if not exact_phrases and not loose_terms:
-                    content_query = {
-                        "query_string": {
-                            "query": raw_query.lower().rstrip("/") + "*",
-                            "fields": ["*"],
-                            "default_operator": "OR",
-                            "lenient": True,
-                            "analyze_wildcard": True,
-                            "boost": 2
-                        }
-                    }
-
-        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
-        query_statement = {
-            "min_score": 0,
-            "query": {
-                "function_score": {
-                    "query": {
-                        "bool": {
-                            "must": [content_query] if isinstance(content_query, dict) else [],
-                            "filter": must_clauses + must_filter_clauses,
-                            "must_not": must_not_clause,
-                            **({
-                                   "should": should_filter_clauses,
-                                   "minimum_should_match": 1
-                               } if not p_query_model.must and should_filter_clauses else {})
-                        }
-                    },
-                    "functions": [
-                        {
-                            "gauss": {
-                                "m_update_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "10d",
-                                    "decay": 0.5
-                                }
-                            },
-                            "weight": 2
-                        },
-                        {
-                            "field_value_factor": {
-                                "field": "m_update_date",
-                                "factor": 1.1,
-                                "modifier": "log1p",
-                                "missing": 0
-                            }
-                        },
-                        {
-                            "filter": {"exists": {"field": "m_leak_date"}},
-                            "weight": 1
-                        },
-                        {
-                            "gauss": {
-                                "m_leak_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "5d",
-                                    "decay": 0.5
-                                }
-                            },
-                            "weight": 1
-                        }
-                    ],
-                    "score_mode": "sum",
-                    "boost_mode": "multiply"
-                }
-            },
-            "highlight": {} if raw_query == "*" else {
-                "fields": {
-                    "m_important_content": {
-                        "fragment_size": 500,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    },
-                    "m_content": {
-                        "fragment_size": 250,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    },
-                    "m_ref_html": {
-                        "fragment_size": 250,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    }
-                }
-            },
-            "suggest": {
-                "important_content_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_important_content",
-                        "min_word_length": 3,
-                        "max_term_freq": 0.05,
-                        "sort": "score",
-                        "string_distance": "levenshtein"
-                    }
-                },
-                "content_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_content",
-                        "min_word_length": 3,
-                        "max_term_freq": 0.05,
-                        "sort": "score",
-                        "string_distance": "levenshtein"
-                    }
-                }
-            },
-            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
-            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-            "track_total_hits": True,
-            "explain": True
-        }
+        query_statement = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=m_page_number,
+            date_field="m_leak_date"
+        )
 
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
-    @staticmethod
-    def on_search_exploitdata(p_query_model: search_exploit_param_model, pfilter=None):
+    def on_search_exploitdata(self, p_query_model, pfilter=None):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -957,7 +899,6 @@ class elastic_request_generator:
         m_search_type = p_query_model.content
         m_date_range = p_query_model.daterange
         m_content_type = p_query_model.content
-        m_entity = p_query_model.entity
 
         exact_phrases = re.findall(r'"([^"]+)"', raw_query)
         loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
@@ -996,24 +937,6 @@ class elastic_request_generator:
                 except ValueError:
                     pass
 
-        if m_entity:
-            entity_list = [
-                e if e.startswith("m_") else f"m_{e}"
-                for e in [
-                    i.strip().lower().replace(" ", "_") for i in m_entity.split(",") if i.strip()
-                ]
-            ]
-
-            if entity_list:
-                must_clauses.append({
-                    "bool": {
-                        "should": [
-                            {"exists": {"field": entity}} for entity in entity_list
-                        ],
-                        "minimum_should_match": 1
-                    }
-                })
-
         if m_content_type and m_content_type.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})
 
@@ -1027,209 +950,84 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        if raw_query == "*":
-            content_query = {"match_all": {}}
-        else:
-            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
-            if quoted_value:
-                raw_query = raw_query.strip('"')
-                for phrase in exact_phrases:
-                    content_query["bool"]["should"].append({
-                        "bool": {
-                            "should": [
-                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
-                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    })
-            else:
-                content_query = {"bool": {"should": [], "minimum_should_match": 1}}
-                for phrase in exact_phrases:
-                    must_clauses.append({
-                        "bool": {
-                            "should": [
-                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
-                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_important_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_ref_html": {"query": phrase, "boost": 2.0}}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    })
+        phrase_fields = [
+            ("m_title", 3),
+            ("m_content", 5),
+            ("m_important_content", 3),
+            ("m_ref_html", 3),
+        ]
 
-                for term in loose_terms:
-                    content_query["bool"]["should"].append({
-                        "query_string": {
-                            "query": term.lower() + "*",
-                            "fields": ["*"],
-                            "default_operator": "OR",
-                            "lenient": True,
-                            "analyze_wildcard": True,
-                            "boost": 2
-                        }
-                    })
-
-                if not exact_phrases and not loose_terms:
-                    content_query = {
-                        "query_string": {
-                            "query": raw_query.lower().rstrip("/") + "*",
-                            "fields": ["*"],
-                            "default_operator": "OR",
-                            "lenient": True,
-                            "analyze_wildcard": True,
-                            "boost": 2
-                        }
-                    }
-        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
-        query_statement = {
-            "min_score": 0,
-            "query": {
-                "function_score": {
-                    "query": {
-                        "bool": {
-                            "must": [content_query] if isinstance(content_query, dict) else [],
-                            "filter": must_clauses + must_filter_clauses,
-                            "must_not": must_not_clause,
-                            **({
-                                   "should": should_filter_clauses,
-                                   "minimum_should_match": 1
-                               } if not p_query_model.must and should_filter_clauses else {})
-                        }
-                    },
-                    "functions": [
-                        {
-                            "gauss": {
-                                "m_update_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "10d",
-                                    "decay": 0.5
-                                }
-                            },
-                            "weight": 2
-                        },
-                        {
-                            "field_value_factor": {
-                                "field": "m_update_date",
-                                "factor": 1.1,
-                                "modifier": "log1p",
-                                "missing": 0
-                            }
-                        },
-                        {
-                            "filter": {
-                                "exists": {"field": "m_leak_date"}
-                            },
-                            "weight": 1
-                        },
-                        {
-                            "gauss": {
-                                "m_leak_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "5d",
-                                    "decay": 0.5
-                                }
-                            },
-                            "weight": 1
-                        }
-                    ],
-                    "score_mode": "sum",
-                    "boost_mode": "multiply"
-                }
-            },
-            "highlight": {} if raw_query == "*" else {
-                "fields": {
-                    "m_important_content": {
-                        "fragment_size": 500,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    },
-                    "m_content": {
-                        "fragment_size": 250,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    },
-                    "m_ref_html": {
-                        "fragment_size": 250,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    }
-                }
-            },
-            "suggest": {
-                "important_content_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_important_content",
-                        "min_word_length": 3,
-                        "max_term_freq": 0.05,
-                        "sort": "score",
-                        "string_distance": "levenshtein"
-                    }
-                },
-                "content_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_content",
-                        "min_word_length": 3,
-                        "max_term_freq": 0.05,
-                        "sort": "score",
-                        "string_distance": "levenshtein"
-                    }
-                }
-            },
-            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
-            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-            "track_total_hits": True,
-            "explain": True
-        }
+        query_statement = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=m_page_number,
+            date_field="m_leak_date"
+        )
 
         return ELASTIC_INDEX.S_EXPLOIT_INDEX, query_statement
 
-    @staticmethod
-    def on_search_social_data(p_query_model: search_social_param_model, pfilter=None):
+    def on_search_social_data(self, p_query_model, pfilter=None, p_index=None, must_clauses=None, must_not_clause=None):
+        pmust = must_clauses or []
+        pmustnot = must_not_clause or []
+
+        if p_query_model.matchtype == "semantic" and p_query_model.platform == "pastebin":
+            p_query_model.matchtype = "or"
+
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
         if p_query_model.q != "*":
-            raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
+            raw_query = p_query_model.q
+            raw_query = helper_controller.remove_stopwords_from_string(raw_query)
         else:
             raw_query = "*"
         if raw_query == "":
             raw_query = "*"
 
-        if p_query_model.q != "":
-            raw_query = helper_controller.remove_stopwords_from_string(str(p_query_model.q))
+        if p_query_model.q and p_query_model.q != "*" and (not raw_query or raw_query == "*"):
+            return ELASTIC_INDEX.S_SOCIAL_INDEX, {"query": {"match_none": {}}, "size": 0}
 
-        m_page_number = getattr(p_query_model, 'page', 1)
+        if not raw_query:
+            return ELASTIC_INDEX.S_SOCIAL_INDEX, {"query": {"match_none": {}}, "size": 0}
+
+        exact_phrases = re.findall(r'"([^"]+)"', raw_query)
+        loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
+
+        quoted_value_match = re.findall(r'"([^"]+)"', raw_query.strip())
+        quoted_value = quoted_value_match if quoted_value_match else None
+
+        m_page_number = getattr(p_query_model, "page", 1)
         m_network = p_query_model.network
+        m_platform = p_query_model.platform
+        m_date_range = p_query_model.daterange
 
         must_clauses = []
         must_not_clause = []
 
+        must_clauses.extend(pmust)
+        must_not_clause.extend(pmustnot)
+
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        if p_query_model.platform:
-            must_clauses.append({"term": {"m_platform": p_query_model.platform}})
+        if m_platform:
+            must_clauses.append({"term": {"m_platform": m_platform}})
 
-        if p_query_model.daterange:
-            parts = p_query_model.daterange.split(',')
+        if m_date_range:
+            parts = m_date_range.split(",")
             if len(parts) == 2:
                 try:
                     from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
                     from_date = from_date_obj.strftime("%Y-%m-%dT00:00:00.000000+00:00")
-
                     to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
                     to_date = to_date_obj.strftime("%Y-%m-%dT23:59:59.999999+00:00")
-
                     must_clauses.append({
                         "range": {
                             "m_message_date": {
@@ -1241,145 +1039,31 @@ class elastic_request_generator:
                 except ValueError:
                     pass
 
-        search_fields = [
-            "m_title^4",
-            "m_content^3",
-            "m_sender_name^2.5",
-            "m_platform^2",
-            "m_network^1.5"
+        phrase_fields = [
+            ("m_title", 8),
+            ("m_content", 4),
+            ("m_sender_name", 3)
         ]
 
-        quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
-        quoted_value = quoted_value_match.group(1) if quoted_value_match else None
+        query_statement = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=m_page_number,
+            date_field="m_leak_date"
+        )
 
-        if raw_query == "*":
-            query_string_query = {"match_all": {}}
-        elif quoted_value:
-            quoted_value = quoted_value.strip('"').strip()
-            raw_query = raw_query.strip('"').strip()
+        return p_index, query_statement
 
-            query_string_query = {
-                "bool": {
-                    "should": [{"terms": {field: [quoted_value], "boost": 3}} for field in allowed_keys],
-                    "minimum_should_match": 1,
-                    "boost": 5
-                }
-            }
-        else:
-            query_string_query = {
-                "multi_match": {
-                    "query": raw_query,
-                    "fields": search_fields,
-                    "type": "best_fields",
-                    "operator": "OR"
-                }
-            }
-
-        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
-
-        query = {
-            "min_score": 0,
-            "query": {
-                "function_score": {
-                    "query": {
-                        "bool": {
-                            "must": [query_string_query] if isinstance(query_string_query, dict) else [],
-                            "filter": (
-                                    must_clauses +
-                                    must_filter_clauses +
-                                    (
-                                        [{
-                                            "bool": {
-                                                "should": should_filter_clauses.get("bool", {}).get("should", []),
-                                                "minimum_should_match": 1
-                                            }
-                                        }] if not getattr(p_query_model, "must", False) and should_filter_clauses else []
-                                    )
-                            ),
-                            "must_not": must_not_clause,
-                            "should": [
-                                query_string_query,
-                                {
-                                    "wildcard": {
-                                        "m_content.keyword": {
-                                            "value": f"*{raw_query}*",
-                                            "boost": 1.5,
-                                            "case_insensitive": True
-                                        }
-                                    }
-                                },
-                                query_string_query,
-                                {
-                                    "wildcard": {
-                                        "m_content.keyword": {
-                                            "value": f"*{raw_query}*",
-                                            "boost": 1.5,
-                                            "case_insensitive": True
-                                        }
-                                    }
-                                },
-                                {
-                                    "wildcard": {
-                                        "m_sender_name": {
-                                            "value": f"*{raw_query.lower()}*",
-                                            "boost": 1.0,
-                                            "case_insensitive": True
-                                        }
-                                    }
-                                }
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    },
-                    "functions": [
-                        {
-                            "gauss": {
-                                "m_message_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "10d",
-                                    "decay": 0.5,
-                                }
-                            },
-                            "weight": 1,
-                        }
-                    ],
-                    "score_mode": "sum",
-                    "boost_mode": "multiply"
-                }
-            },
-            "highlight": {} if raw_query == "*" else {
-                "fields": {
-                    "m_content": {
-                        "fragment_size": 250,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    }
-                }
-            },
-            "suggest": {
-                "social_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_content",
-                        "min_word_length": 3,
-                        "max_term_freq": 0.05,
-                        "sort": "score",
-                        "string_distance": "levenshtein"
-                    }
-                }
-            },
-            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
-            "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-            "track_total_hits": True,
-            "explain": True
-        }
-
-        return ELASTIC_INDEX.S_SOCIAL_INDEX, query
 
     @staticmethod
-    def on_search_telegram_data(p_query_model: search_chat_param_model, pfilter=None):
+    def on_search_telegram_data(p_query_model, pfilter=None):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -1458,7 +1142,9 @@ class elastic_request_generator:
             "m_ref_html^0.8"
         ]
 
-        if raw_query == "*":
+        if p_query_model.matchtype == "semantic":
+            query_string_query = {"match_all": {}}
+        elif raw_query == "*":
             query_string_query = {"match_all": {}}
         elif '"' in raw_query:
             query_string_query = {
@@ -1590,6 +1276,22 @@ class elastic_request_generator:
             "explain": True
         }
 
+        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+            try:
+                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+                if qvec:
+                    knn_clause = {
+                        "knn": {
+                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+                            "num_candidates": 1000,
+                            "query_vector": qvec
+                        }
+                    }
+                    query["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+            except Exception as _:
+                pass
+
         return ELASTIC_INDEX.S_CHATS_INDEX, query
 
     @staticmethod
@@ -1630,6 +1332,7 @@ class elastic_request_generator:
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         url_query = p_query_model.url.strip() if p_query_model.url else ""
         url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
+        category = p_query_model.category
         date_range_filter = {}
 
         if p_query_model.daterange:
@@ -1643,7 +1346,7 @@ class elastic_request_generator:
                 }
             }
 
-        must_should = []
+        must_should = [{"term": {"type": category}}]
         should_clauses = []
 
         if p_query_model.fullsearch:
@@ -1659,7 +1362,9 @@ class elastic_request_generator:
                                 {"wildcard": {"username": f"*{term}*"}},
                                 {"wildcard": {"domain": f"*{term}*"}},
                                 {"wildcard": {"url.raw": f"*{term}*"}},
-                                {"wildcard": {"url": f"*{term.lower()}*"}}
+                                {"wildcard": {"url": f"*{term.lower()}*"}},
+                                {"wildcard": {"ioc": f"*{term}*"}},
+                                {"wildcard": {"ip": f"*{term}*"}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1671,7 +1376,10 @@ class elastic_request_generator:
                     "bool": {
                         "should": [
                             {"wildcard": {"url.raw": f"*{url_query}*"}},
-                            {"wildcard": {"url": f"*{url_query.lower()}*"}}
+                            {"wildcard": {"url": f"*{url_query.lower()}*"}},
+                            {"wildcard": {"domain": f"*{url_query}*"}},
+                            {"wildcard": {"ioc": f"*{url_query}*"}},
+                            {"wildcard": {"ip": f"*{url_query}*"}}
                         ],
                         "minimum_should_match": 1
                     }
@@ -1703,7 +1411,10 @@ class elastic_request_generator:
                     "bool": {
                         "should": [
                             {"term": {"url.raw": url_query}},
-                            {"match_phrase": {"url": url_query.lower()}}
+                            {"match_phrase": {"url": url_query.lower()}},
+                            {"term": {"domain": url_query}},
+                            {"term": {"ioc": url_query}},
+                            {"term": {"ip": url_query}}
                         ],
                         "minimum_should_match": 1
                     }
@@ -1725,7 +1436,7 @@ class elastic_request_generator:
             "size": 100,
             "track_total_hits": True,
             "sort": [{"timestamp": {"order": "desc"}}],
-            "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
+            "_source": ["url", "username", "ip", "email", "ioc", "domain", "password", "timestamp", "log_hash", "m_hash"]
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
@@ -1807,7 +1518,9 @@ class elastic_request_generator:
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
-        if raw_query == "*":
+        if p_query_model.matchtype == "semantic":
+            content_query = {"match_all": {}}
+        elif raw_query == "*":
             content_query = {"match_all": {}}
         else:
             content_query = {"bool": {"should": [], "minimum_should_match": 1}}
@@ -1941,6 +1654,22 @@ class elastic_request_generator:
             "track_total_hits": True,
             "explain": True
         }
+
+        if raw_query != "*" and p_query_model.matchtype=="semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+            try:
+                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+                if qvec:
+                    knn_clause = {
+                        "knn": {
+                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+                            "num_candidates": 1000,
+                            "query_vector": qvec
+                        }
+                    }
+                    query_statement["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+            except Exception:
+                pass
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
     @staticmethod
@@ -2005,7 +1734,7 @@ class elastic_request_generator:
             if post.get("m_message_id"):
                 m_hash = post.get("m_message_id")
             if not m_hash:
-                m_hash = post.get("m_title")
+                m_hash = post.get("m_title") + "_" + post.get("m_channel_url")
             if not m_hash:
                 continue
 
@@ -2072,6 +1801,10 @@ class elastic_request_generator:
                 "username": log.get("username", None),
                 "domain": log.get("domain", None),
                 "password": log.get("password", None),
+                "email": log.get("email", None),
+                "ip": log.get("ip", None),
+                "ioc": log.get("ioc", None),
+                "type": log.get("type", None),
                 "log_hash": m_hash,
                 "timestamp": now,
                 "m_index": "stealer_model",
@@ -2234,7 +1967,7 @@ class elastic_request_generator:
                     "aggs": {
                         "Document Count": {
                             "value_count": {
-                                "field": "_id"
+                                "field": "m_hash"
                             }
                         }
                     }
@@ -2260,7 +1993,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}},
                     "aggs": {
-                        "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 5 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2270,7 +2003,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}},
                     "aggs": {
-                        "Updated 9 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 9 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2342,7 +2075,7 @@ class elastic_request_generator:
                     "aggs": {
                         "Document Count": {
                             "value_count": {
-                                "field": "_id"
+                                "field": "m_hash"
                             }
                         }
                     }
@@ -2379,7 +2112,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}},
                     "aggs": {
-                        "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 5 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2389,7 +2122,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}},
                     "aggs": {
-                        "Updated 9 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 9 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },
@@ -2412,7 +2145,7 @@ class elastic_request_generator:
                 ELASTIC_KEYS.S_FILTER: {
                     "size": 0,
                     "aggs": {
-                        "Document Count": {"value_count": {"field": "_id"}}
+                        "Document Count": {"value_count": {"field": "m_hash"}}
                     }
                 }
             },
@@ -2422,7 +2155,7 @@ class elastic_request_generator:
                     "size": 0,
                     "query": {"range": {"m_leak_date": {"gte": "now-5d/d"}}},
                     "aggs": {
-                        "Updated 5 Days ago": {"value_count": {"field": "_id"}}
+                        "Updated 5 Days ago": {"value_count": {"field": "m_hash"}}
                     },
                 },
             },

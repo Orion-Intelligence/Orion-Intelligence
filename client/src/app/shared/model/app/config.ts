@@ -25,6 +25,8 @@ export class LocalSettingsModel {
   entityfilterCategories: Record<string, string[]> = {};
   entityFilterCondition: boolean = false;
   isSidebarOpen: boolean = true;
+  matchType: string = "";
+  sortType: string = "";
 }
 
 export class ConfigSettings {

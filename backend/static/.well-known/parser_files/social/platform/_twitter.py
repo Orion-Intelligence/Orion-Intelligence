@@ -9,7 +9,7 @@ from crawler.crawler_instance.local_shared_model.data_model.leak_model import le
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -87,37 +87,53 @@ class _twitter(leak_extractor_interface, ABC):
         except Exception:
             return None
 
+    @staticmethod
+    def _parse_iso(s):
+        return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
+
     def parse_leak_data(self, page):
-        account_url = self.seed_url
-        username = self._helper_methods.extract_username(account_url)
+        page.wait_for_load_state("networkidle")
+        account_url = helper_method.generate_data_hash(self.seed_url)
+        username = self._helper_methods.extract_username(self.seed_url)
         existing_ids = set()
 
-        page.wait_for_timeout(3000)
+        desired_count = 20 if self.is_crawled else 100
+        last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, "")
 
-        desired_count = 10 if self.is_crawled else 100
-        last_seen_index = int(self.invoke_db(REDIS_COMMANDS.S_GET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + account_url + CUSTOM_SCRIPT_REDIS_KEYS.S_TWITTER_CHANNEL.value, 0))
+        last_seen_dt = self._parse_iso(last_seen_date_str)
+
         tweets = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
-        new_tweets = [t for t in tweets if int(t["id"]) > last_seen_index]
+        new_tweets = []
+        for t in tweets:
+            td = self._parse_iso(t.get("date"))
+            if td and (not last_seen_dt or td > last_seen_dt):
+                new_tweets.append(t)
 
         for tweet in new_tweets:
-            parsed_date = datetime.fromisoformat(tweet['date']).date() if tweet['date'] else None
+            parsed_date = self._parse_iso(tweet.get("date")).date() if tweet.get("date") else None
             card_data = social_model(
                 m_channel_url=self.seed_url,
                 m_sender_name=f"@{username}",
                 m_message_sharable_link=tweet['url'],
                 m_weblink=tweet.get('weblink', []),
                 m_content=tweet['content'][:500],
-                m_content_type=["social"],
+                m_content_type=["social_collector"],
                 m_network="clearnet",
                 m_message_date=parsed_date,
                 m_message_id=tweet['id'],
                 m_platform="twitter",
+                m_likes=str(tweet.get('likes') or 0),
+                m_comment_count=str(tweet['comment_count']),
+                m_retweets=str(tweet['retweets']),
+                m_views=str(tweet['views']),
             )
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_name=username,
             )
-            if new_tweets:
-                entity_data = helper_method.extract_entities(tweet['content'][:500], entity_data)
-                self.append_leak_data(card_data, entity_data)
-                max_seen_id = max(int(t["id"]) for t in new_tweets)
-                self.invoke_db(REDIS_COMMANDS.S_SET_INT, CUSTOM_SCRIPT_REDIS_KEYS.URL_PARSED.value + account_url + CUSTOM_SCRIPT_REDIS_KEYS.S_TWITTER_CHANNEL.value, max_seen_id)
+
+            self.append_leak_data(card_data, entity_data)
+
+        if new_tweets:
+            max_seen_date = new_tweets[0].get("date", "")
+            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, max_seen_date)

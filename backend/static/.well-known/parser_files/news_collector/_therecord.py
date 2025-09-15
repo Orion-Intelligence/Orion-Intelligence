@@ -140,8 +140,7 @@ class _therecord(leak_extractor_interface, ABC):
                 first_two_lines = "\n".join(lines[:2]) if lines else ""
 
                 raw_date = page.locator(".article__date").first.inner_text().strip()
-                raw_date = raw_date.replace('st', '').replace('nd', '').replace('rd', '').replace('th', '')
-                article_date = datetime.strptime(raw_date, "%B %d, %Y").date()
+                article_date = helper_method.parse_date(raw_date)
 
                 if title and title != "Error":
                     card_data = leak_model(
@@ -157,10 +156,10 @@ class _therecord(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team="The Record Media"
                     )
 
-                    entity_data = helper_method.extract_entities(full_text, entity_data)
                     self.append_leak_data(card_data, entity_data)
             except Exception as ex:
                 log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

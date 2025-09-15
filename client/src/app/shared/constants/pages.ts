@@ -55,6 +55,8 @@ export enum SocialSubCategory {
   ALL = 'All',
   TELEGRAM = 'Telegram',
   TWITTER = 'Twitter',
+  MASTODON = 'Mastodon',
+  PASTEBIN = 'Pastebin',
   FORUM = 'Forum',
   REDDIT = 'Reddit',
 }
@@ -75,6 +77,7 @@ export enum DumpSubCategory {
 
 export enum StealerlogsSubCategory {
   CREDENTIAL = 'Credential',
+  LOGS = 'Logs',
 }
 export enum TenantSubCategory {
   VIEW = 'View',

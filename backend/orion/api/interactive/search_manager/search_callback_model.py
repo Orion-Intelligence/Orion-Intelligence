@@ -143,7 +143,10 @@ class search_callback:
     async def get_doc(results) -> Optional[result_item]:
         try:
             if results and isinstance(results, list) and len(results) > 0:
-                return results[0]
+                doc = results[0]
+                doc.pop("m_embedding", None)
+                return doc
             return None
         except ValidationError:
             return None
+

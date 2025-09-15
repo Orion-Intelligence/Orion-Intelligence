@@ -320,6 +320,16 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'mastodon',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
+            path: 'pastebin',
+            component: DashboardSocialsComponent,
+            pathMatch: 'full'
+          },
+          {
             path: 'forum',
             component: DashboardSocialsComponent,
             pathMatch: 'full'
@@ -442,6 +452,11 @@ export const routes: Routes = [
             path: 'credential',
             component: CredentialComponent,
             data: { type: 'credential', animation: 'CategoryPage' }
+          },
+          {
+            path: 'logs',
+            component: CredentialComponent,
+            data: { type: 'log', animation: 'CategoryPage' }
           }
         ]
       },

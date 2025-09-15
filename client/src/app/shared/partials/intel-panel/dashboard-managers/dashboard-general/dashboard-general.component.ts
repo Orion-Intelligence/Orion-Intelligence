@@ -64,7 +64,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     if (this.getRoute() == 'all') {
       return this.discussionCallbackModel.Result.length
     } else {
-      return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
+      return this.dashboardService.generalCallbackModel.Page_Count ?? 0;
     }
   }
 
@@ -145,7 +145,12 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
       if(lastSegment){
         this.dashboardService.consolidatedParamModel.category = lastSegment
       }
-      this.dashboardService.fetchConsolidatedRankededResults('search/breach', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
+      let api = "search/breach"
+      if(this.type == Category.STRATEGIC){
+        api = "search/strategic"
+      }
+
+      this.dashboardService.fetchConsolidatedRankededResults(api, this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
         if (response.success && response.data) {
           this.rankedResult = response.data;
         }

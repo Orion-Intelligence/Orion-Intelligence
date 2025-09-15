@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
@@ -15,6 +15,7 @@ import {DashboardService} from '../../../services/dashboard/dashboard.service';
 })
 export class CredentialListComponent implements OnInit {
   stealerData$: StealerLogCallbackModel;
+  @Input() type: string = 'credential';
 
   constructor(public dashboardService: DashboardService) {
     this.stealerData$ = this.dashboardService.stealerlogCallbackModel;

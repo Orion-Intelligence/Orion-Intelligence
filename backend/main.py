@@ -19,10 +19,13 @@ from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 from routes.tenant_routes import tenant_routes
 
+BASE_DIR = Path(__file__).resolve().parent
+ANGULAR_BUILD_DIR = BASE_DIR / "build"
 
 @asynccontextmanager
 async def lifespan(p_app: FastAPI):
     service_manager_instance = service_manager.get_instance()
+    await service_manager_instance.build_assets(ANGULAR_BUILD_DIR)
     await service_manager_instance.init_services()
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
@@ -30,10 +33,6 @@ async def lifespan(p_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-BASE_DIR = Path(__file__).resolve().parent
-ANGULAR_BUILD_DIR = BASE_DIR / "build"
-
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
 app.mount("/static", StaticFiles(directory=ANGULAR_BUILD_DIR), name="static")
 

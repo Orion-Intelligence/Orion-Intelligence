@@ -47,6 +47,7 @@
 @use 'app/shared/partials/intel-panel/dashboard-managers/result-insights/result-insights.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/defacement-results/threat-results.component.css';
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
+@use 'app/shared/partials/security-scan-results/security-scan-export-component/security-scan-export-component.component.css';
 @use 'app/pages/graphs/graphs.component.css';
 @use 'app/pages/graphs/graph-info/graph-info.component.css';
 @use 'app/pages/graphs/listings/graph-listings.component.css';
@@ -173,4 +174,17 @@ html::-webkit-scrollbar {
   outline: none;
   text-decoration: none;
   text-underline: none;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .security-report-pre {
+    background: #0b1020 !important;
+    color: #e6edf3 !important;
+    border-color: #1f2a44 !important;
+  }
 }

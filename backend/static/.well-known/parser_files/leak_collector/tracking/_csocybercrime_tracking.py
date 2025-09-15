@@ -158,11 +158,11 @@ class _csocybercrime_tracking(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team="CSO Cybercrime Section",
                         m_country=["united kingdom"],
                     )
 
-                    entity_data = helper_method.extract_entities(summary, entity_data)
                     self.append_leak_data(card, entity_data)
 
                 except Exception as ex:

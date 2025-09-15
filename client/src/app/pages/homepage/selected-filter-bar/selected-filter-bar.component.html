@@ -1,5 +1,5 @@
 <div [ngClass]="{ 'selected-filter-bar__top-space': showSorting }" @fadeInDashboardItem>
-  <div class="selected-filter-bar selected-filter-bar__left-space" *ngIf="!isConsolidatedRoute() && sidebarFilterCount(true)>0 || isConsolidatedRoute()">
+  <div class="selected-filter-bar selected-filter-bar__left-space" *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0">
     <div class="selected-filter-bar__top-row">
       <div class="selected-filter-bar__title">Filters</div>
       <div class="selected-filter-bar__actions">
@@ -7,15 +7,15 @@
           <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
             Filter Type ({{ app_service.getConfig().localSettings.entityFilterCondition ? 'must' : 'should' }})
           </div>
-          <div class="selected-filter-bar__filter-type">
+          <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
             Entity({{ entityFiltersCount() }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
           </div>
         </ng-container>
         <div class="selected-filter-bar__filter-type" *ngIf="sidebarFilterCount()>0">
           Sidebar({{ sidebarFilterCount() }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close"/>
         </div>
-        <div class="selected-filter-bar__filter-type" *ngIf="this.dashboardService.selectedFilters()['matchtype'] && this.dashboardService.selectedFilters()['matchtype']!='or'">
-          Search Type ({{ this.dashboardService.selectedFilters()['matchtype'] }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close"/>
+        <div class="selected-filter-bar__filter-type" *ngIf="this.dashboardService.selectedFilters()['matchtype'] && this.dashboardService.selectedFilters()['matchtype']!='semantic'">
+          Search Type ({{ this.app_service.getConfig().localSettings.matchType }}) <img src="../../../../assets/images/shared/searchFilter_clossButton_white.svg" class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close"/>
         </div>
         <button class="selected-filter-bar__clear-btn" (click)="clearFilters('all')">Clear Selection</button>
         <div class="selected-filter-bar__expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }" (click)="toggleFilterBarCollapse()">

@@ -6,4 +6,5 @@ class search_credential_param_model(BaseModel):
     daterange: Optional[str] = ""
     url: Optional[str] = ""
     user: Optional[str] = ""
+    category: Optional[str] = ""
     fullsearch: Optional[bool] = False

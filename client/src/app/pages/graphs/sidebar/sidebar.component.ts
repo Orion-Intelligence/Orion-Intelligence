@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
 import {AppService} from '../../../services/core/app/app.service';
-import {GraphAllowedPropertyKey, GraphClusterType, GraphType} from '../../../shared/constants/shared-enums';
+import {GraphClusterType, GraphType, search_filter_labels} from '../../../shared/constants/shared-enums';
 
 @Component({
   selector: 'graph-sidebar',
@@ -30,7 +30,7 @@ export class SidebarComponent implements OnInit {
 
   graphTypeOptions = Object.values(GraphType);
   graphClusterOptions = Object.values(GraphClusterType);
-  graphAllowedProperties = Object.entries(GraphAllowedPropertyKey).map(([label, key]) => ({
+  graphAllowedProperties = Object.entries(search_filter_labels).map(([key, label]) => ({
     label,
     key
   }));

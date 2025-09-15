@@ -5,7 +5,7 @@ from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
@@ -50,7 +50,7 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -115,7 +115,8 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
             for title_data in title_links:
                 ref_html = helper_method.extract_refhtml(
                     title_data["weblink"], self.invoke_db, REDIS_COMMANDS,
-                    CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS
+                    CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS,
+                    page
                 )
 
                 card_data = leak_model(
@@ -134,6 +135,7 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_location=[title_data["location"]] if title_data["location"] else [],
                     m_country=[title_data["location"]],
                     m_company_name=title_data["title"],
@@ -141,7 +143,6 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
                     m_team="qtox"
                 )
 
-                entity_data = helper_method.extract_entities(title_data["description"] + ref_html, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
         except Exception as ex:

@@ -153,8 +153,11 @@ class _postswigger(leak_extractor_interface, ABC):
                     m_leak_date=article_date,
                 )
 
-                entity_data = entity_model(m_team="PortSwigger DailySwig", m_name=author)
-                entity_data = helper_method.extract_entities(full_text, entity_data)
+                entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
+                    m_team="PortSwigger DailySwig",
+                    m_name=author
+                )
                 self.append_leak_data(card_data, entity_data)
 
             except Exception as ex:

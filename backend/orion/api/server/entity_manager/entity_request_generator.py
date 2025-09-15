@@ -341,20 +341,13 @@ class EntityRequestGenerator:
     @staticmethod
     def deduplicate_key(key: str) -> str | None:
         dedup_map = {
-            'm_ips': 'm_ip',
-            'm_ipv4s': 'm_ip',
-            'm_ipv6s': 'm_ip',
-            'm_ipv4_cidrs': 'm_ip',
+            'm_ipv4_addresses': 'm_ip', 'm_ipv6_addresses': 'm_ip', 'm_ipv4_cidrs': 'm_ip',
             'm_cves': 'm_cve',
-            'm_phone_numbers': 'm_phone_number',
-            'm_telephone_nums': 'm_phone_number',
+            'm_phone_numbers': 'm_phone_number', 'm_telephone_nums': 'm_phone_number',
             'm_domains': 'm_domain',
-            'm_weblink': 'm_url',
-            'm_websites': 'm_url',
-            'm_crypto': 'm_bitcoin_addresses',
-            'm_xmr_wallet': 'm_monero_addresses',
+            'm_weblink': 'm_url', 'm_websites': 'm_url',
+            'm_urls': 'm_url', 'm_unencoded_urls': 'm_url'
         }
-
 
         canonical = dedup_map.get(key, key)
         return canonical if canonical in allowed_keys else None

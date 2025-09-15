@@ -12,6 +12,11 @@
   pointer-events: none;
 }
 
+.twofaextend .login_box{
+  width: 700px;
+  margin-top: -15vh;
+}
+
 .login_container {
   background: var(--color-blue-830);
   height: 100vh;
@@ -24,6 +29,11 @@
   min-height: 400px;
   width: 100%;
   min-width: 300px;
+}
+
+.login_container .twofa-center {
+  text-align: center;
+  margin-bottom: 16px;
 }
 
 .login_box {

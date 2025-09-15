@@ -1,9 +1,5 @@
-.filter-panel__top-space-expand {
-  margin-top: 40px;
-}
-
 .filter-panel__top-space-shrink {
-  margin-top: 10px;
+  margin-top: 0 !important;
 }
 
 .filter-panel {
@@ -16,7 +12,7 @@
   color: white;
   max-height: 500px;
   width: 100%;
-  max-width: 870px;
+  max-width: 910px;
   z-index: 1;
   margin-top: 0;
   overflow-y: auto;
@@ -153,7 +149,7 @@
   width: 17px;
   height: 16px;
   border-radius: 50%;
-  background-color: #A0B8D1;
+  background-color: #A0B8D199;
   color: #0E1626;
   font-size: 12px;
   font-weight: 400;
@@ -173,6 +169,11 @@
   padding-right: 10px;
   white-space: nowrap;
   align-items: center;
+}
+
+.filter-panel__category-tab:hover {
+  color: #0E162699;
+  border-color: #0E162660;
 }
 
 .filter-panel__category-tab.selected {

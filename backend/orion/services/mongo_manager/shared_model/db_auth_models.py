@@ -1,10 +1,14 @@
+
 from datetime import datetime
 from enum import Enum
 from typing import Optional
-
 from bson import ObjectId
 from odmantic import AIOEngine
 from fastapi import HTTPException
+from enum import Enum
+from typing import Optional
+
+import pyotp
 from odmantic import Model, Field
 from passlib.context import CryptContext
 from pydantic import field_validator
@@ -25,7 +29,6 @@ class UserStatus(str, Enum):
     ACTIVE = "active"
 
 def hash_password(password: str) -> str:
-    """Helper function to hash the password before storing it."""
     return pwd_context.hash(password)
 
 
@@ -37,6 +40,9 @@ class db_user_account(Model):
     status:UserStatus=Field(default=UserStatus.PENDING)
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
+    twofa_enabled: bool = Field(default=False)
+    twofa_secret: Optional[str] = Field(default=None)
+
 
     @field_validator("username")
     @classmethod
@@ -92,4 +98,17 @@ class db_user_account(Model):
             )
 
         return user
-    
+
+
+    def verify_2fa(self, code: str) -> bool:
+        if not self.twofa_enabled or not self.twofa_secret:
+            return False
+        return pyotp.TOTP(self.twofa_secret).verify(code, valid_window=1)
+
+    def provisioning_uri(self, issuer: str = "MyApp") -> Optional[str]:
+        if not self.twofa_secret:
+            return None
+        return pyotp.totp.TOTP(self.twofa_secret).provisioning_uri(
+            name=self.username,
+            issuer_name=issuer,
+        )

@@ -147,8 +147,10 @@ class _securityweek(leak_extractor_interface, ABC):
                         m_content_type=["news"],
                     )
 
-                    entity_data = entity_model(m_team="securityweek")
-                    entity_data = helper_method.extract_entities(description_text.strip(), entity_data)
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="securityweek"
+                    )
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

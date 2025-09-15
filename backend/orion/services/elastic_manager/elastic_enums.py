@@ -1,6 +1,15 @@
 from orion.helper_manager.env_handler import env_handler
 
 
+class ELASTIC_SEMANTIC_INDEX:
+    S_GENERIC_INDEX = "generic_model"
+    S_LEAK_INDEX = "leak_model"
+    S_DEFACEMENT_INDEX = "defacement_model"
+    S_CHATS_INDEX = "chat_model"
+    S_EXPLOIT_INDEX = "exploit_model"
+    S_SOCIAL_INDEX = "social_model"
+
+
 class ELASTIC_INDEX:
     S_GENERIC_INDEX = "generic_model"
     S_LEAK_INDEX = "leak_model"
@@ -10,6 +19,12 @@ class ELASTIC_INDEX:
     S_CREDENTIAL_INDEX = "credential_model"
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
+
+
+class ELASTIC_SEMANTIC:
+    S_INFERENCE_ID = "orion-e5-small"
+    S_EMBED_FIELD = "m_embedding"
+    S_EMBED_DIMS = 1024
 
 
 class ELASTIC_CONNECTIONS:
@@ -51,9 +66,7 @@ class ELASTIC_ENUMS:
                 {
                     "strings_as_keywords": {
                         "match_mapping_type": "string",
-                        "mapping": {
-                            "type": "keyword"
-                        }
+                        "mapping": {"type": "keyword"}
                     }
                 }
             ],
@@ -83,7 +96,15 @@ class ELASTIC_ENUMS:
                 "m_country_name": {"type": "keyword"},
                 "m_revenue": {"type": "keyword"},
                 "m_update_date": {"type": "date"},
-                "m_creation_date": {"type": "date"}
+                "m_creation_date": {"type": "date"},
+
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }
@@ -113,8 +134,17 @@ class ELASTIC_ENUMS:
                 "m_meta_description": {"type": "text"},
                 "m_content": {"type": "text"},
                 "m_update_date": {"type": "date"},
+
                 "m_creation_date": {"type": "date"},
-                "m_content_type": {"type": "keyword"}
+                "m_content_type": {"type": "keyword"},
+
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }
@@ -125,6 +155,12 @@ class ELASTIC_ENUMS:
             "number_of_replicas": 0,
             "max_result_window": 1000000,
             "analysis": {
+                "normalizer": {
+                    "lowercase_normalizer": {
+                        "type": "custom",
+                        "filter": ["lowercase"]
+                    }
+                },
                 "tokenizer": {
                     "dot_split_tokenizer": {
                         "type": "pattern",
@@ -174,6 +210,12 @@ class ELASTIC_ENUMS:
                             "type": "text",
                             "analyzer": "dot_split_analyzer"
                         }
+                    }
+                },
+                "m_content": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword", "normalizer": "lowercase_normalizer"}
                     }
                 },
                 "m_url": {
@@ -241,6 +283,13 @@ class ELASTIC_ENUMS:
                 },
                 "m_domain": {
                     "type": "keyword"
+                },
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
                 }
             }
         }
@@ -278,7 +327,7 @@ class ELASTIC_ENUMS:
                 "m_exploit_year": {"type": "keyword"},
                 "m_github_links": {"type": "keyword"},
                 "m_hash": {"type": "keyword"},
-                "m_ip": {"type": "ip"},
+                "m_ip": {"type": "keyword"},
                 "m_location": {"type": "keyword"},
                 "m_mirror_links": {"type": "keyword"},
                 "m_name": {"type": "keyword"},
@@ -319,7 +368,14 @@ class ELASTIC_ENUMS:
                         "keyword": {"type": "keyword"}
                     }
                 },
-                "m_mitre_ttp_type": {"type": "keyword"}
+                "m_mitre_ttp_type": {"type": "keyword"},
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }
@@ -413,7 +469,14 @@ class ELASTIC_ENUMS:
                 "m_file_name": {"type": "keyword", "normalizer": "lowercase_normalizer"},
                 "m_users": {"type": "keyword", "normalizer": "lowercase_normalizer"},
                 "m_hashtags": {"type": "keyword", "normalizer": "lowercase_normalizer"},
-                "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"}
+                "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"},
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
+                }
             }
         }
     }
@@ -474,6 +537,7 @@ class ELASTIC_ENUMS:
             }
         }
     }
+
     mapping_stealer_log_model = {
         "settings": {
             "number_of_shards": 1,
@@ -481,16 +545,6 @@ class ELASTIC_ENUMS:
             "max_result_window": 1000000,
             "analysis": {
                 "analyzer": {
-                    "custom_log_analyzer": {
-                        "type": "custom",
-                        "tokenizer": "uax_url_email",
-                        "filter": ["lowercase"]
-                    },
-                    "standard_lower": {
-                        "type": "custom",
-                        "tokenizer": "standard",
-                        "filter": ["lowercase"]
-                    },
                     "url_path_analyzer": {
                         "type": "custom",
                         "tokenizer": "custom_url_tokenizer",
@@ -509,34 +563,22 @@ class ELASTIC_ENUMS:
         "mappings": {
             "dynamic": True,
             "properties": {
-                "username": {
-                    "type": "keyword"
-                },
-                "domain": {
-                    "type": "keyword"
-                },
-                "password": {
-                    "type": "keyword",
-                    "index": False,
-                    "doc_values": False
-                },
+                "username": {"type": "keyword"},
+                "email": {"type": "keyword"},
+                "ip": {"type": "keyword"},
+                "domain": {"type": "keyword"},
+                "password": {"type": "keyword", "index": False, "doc_values": False},
                 "url": {
                     "type": "text",
                     "analyzer": "url_path_analyzer",
                     "search_analyzer": "url_path_analyzer",
-                    "fields": {
-                        "raw": {"type": "keyword"}
-                    }
+                    "fields": {"raw": {"type": "keyword"}}
                 },
-                "log_hash": {
-                    "type": "keyword"
-                },
-                "timestamp": {
-                    "type": "date"
-                },
-                "m_hash": {
-                    "type": "keyword"
-                }
+                "log_hash": {"type": "keyword"},
+                "timestamp": {"type": "date"},
+                "m_hash": {"type": "keyword"},
+                "ioc": {"type": "keyword"},
+                "type": {"type": "keyword"}
             }
         }
     }
@@ -593,6 +635,13 @@ class ELASTIC_ENUMS:
                 },
                 "m_platform": {
                     "type": "keyword"
+                },
+                "m_embedding": {
+                    "type": "dense_vector",
+                    "dims": 1024,
+                    "element_type": "float",
+                    "similarity": "cosine",
+                    "index": True
                 }
             }
         }

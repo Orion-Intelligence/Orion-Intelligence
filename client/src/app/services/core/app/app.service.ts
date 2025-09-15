@@ -3,6 +3,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
 import { AppStorageService } from './app-storage.service';
 import { ApiService } from '../../../shared/services/api.service';
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs/operators';
+import { search_filter_labels } from '../../../shared/constants/shared-enums';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +14,12 @@ export class AppService {
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
 
-  constructor(
-    private apiService: ApiService,
-    private activatedRoute: ActivatedRoute,
-    private router: Router,
-    private appStorageService: AppStorageService
-  ) {
+  public entities = signal<any[]>([]);
+
+  private entitiesCache: any[] | null = null;
+
+  constructor(private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
+    this.loadEntities()
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) this.updatePage(pageParam);
@@ -61,5 +64,23 @@ export class AppService {
       queryParams: { ...this.activatedRoute.snapshot.queryParams, page: newPage },
       replaceUrl: true
     }).then();
+  }
+
+  loadEntities(): void {
+    if (this.entitiesCache) {
+      this.entities.set(this.entitiesCache);
+      return;
+    }
+
+    this.http.get<any[]>('assets/data/entities.json').pipe(
+      tap(data => {
+        this.entitiesCache = data;
+        this.entities.set(data);
+        for (const e of data) {
+          const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
+          search_filter_labels[key] = e.title;
+        }
+      })
+    ).subscribe();
   }
 }

@@ -546,6 +546,20 @@
   color: #9fb3c8;
 }
 
+.dashboard__search-container .collapsible-container{
+  height: 150px;
+  overflow: clip;
+  margin-left: -7px !important;
+  margin-right: -7px !important;
+  border-radius: 12px;
+  border: none;
+  box-shadow: inset 0 -40px 40px -40px rgb(0 0 0 / 30%) !important;
+}
+
+.dashboard__search-container code{
+  color: #ffffff90 !important;
+}
+
 .dashboard__search-container {
   margin-left: 30px;
   margin-right: 30px;

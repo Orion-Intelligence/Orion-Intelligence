@@ -1,5 +1,5 @@
 <div class="dashboard__search-container dashboard__search-container-chat">
-  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 10))" class="dashboard__search-card" [@fadeInDashboardItem]>
+  <div *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 12))" class="dashboard__search-card" [@fadeInDashboardItem]>
     <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
 
       <div class="dashboard__search-tags">
@@ -35,15 +35,25 @@
       </div>
 
       <ng-container *ngIf="item.m_platform !== 'forum'; else otherSection">
-        <ng-container *ngIf="item.m_content">
-          <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Content</h5>
-          <p class="dashboard__search-description highlight mt-2">
-            <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-              {{ part }}<br *ngIf="!last"/>
-            </ng-container>
-            <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
-          </p>
+        <ng-container *ngIf="hasCodeType(item); else normalContent">
+          <p class="dashboard__search-description highlight">
+            Code snippet - content not available </p>
+          <div class="content collapsible-container p-3">
+            <code [innerText]="getContentWithoutEmptyLines(item.m_content)"></code>
+          </div>
+
         </ng-container>
+        <ng-template #normalContent>
+          <ng-container *ngIf="item.m_content">
+            <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Content</h5>
+            <p class="dashboard__search-description highlight mt-2">
+              <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
+                {{ part }}<br *ngIf="!last"/>
+              </ng-container>
+              <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
+            </p>
+          </ng-container>
+        </ng-template>
       </ng-container>
 
       <ng-template #otherSection>

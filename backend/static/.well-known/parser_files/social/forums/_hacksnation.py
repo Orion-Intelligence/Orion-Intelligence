@@ -1,17 +1,20 @@
 import datetime
+
 from abc import ABC
 from typing import List
-from datetime import timezone
+from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from datetime import datetime
-from playwright.sync_api import sync_playwright
-
+from datetime import timedelta
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
+
 
 
 class _hacksnation(leak_extractor_interface, ABC):
@@ -52,7 +55,7 @@ class _hacksnation(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_resoource_block=False, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -77,55 +80,74 @@ class _hacksnation(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     @staticmethod
-    def safe_find(page, selector, attr=None):
-        try:
-            element = page.query_selector(selector)
-            if element:
-                return element.get_attribute(attr) if attr else element.inner_text().strip()
-        except Exception:
-            return None
+    def date_to_str(d):
+        if not d:
+            return ""
+        if isinstance(d, datetime):
+            d = d.date()
+        return d.strftime("%Y%m%d")
 
-    def parse_leak_data(self, page: sync_playwright()):
-        max_days = 5 if self.is_crawled else 500
-        page.goto(self.seed_url)
-        page.wait_for_load_state("domcontentloaded")
+    @staticmethod
+    def extract_posts(page):
+        results = []
+        codes_all = []
+        articles = page.locator("article.CommentPost")
+        comment_count = int(articles.count())
+        for i in range(comment_count):
+            art = articles.nth(i)
+            user = art.locator(".PostUser-name .username").first.inner_text().strip()
+            body = art.locator(".Post-body").first
+            paragraphs = [t.strip() for t in body.locator("p").all_text_contents()]
+            codes = [t.strip() for t in body.locator("code").all_text_contents()]
+            codes_all.extend(codes)
+            parts = [p for p in paragraphs if p]
+            text = "\n".join(parts) if parts else body.inner_text().strip()
+            results.append((user, text))
+        return "\n".join([r[1] for r in results]), [r[0] for r in results], codes_all,comment_count
 
+    def parse_leak_data(self, page):
         forbidden_keywords = [
             "porn", "onlyfans", "sex", "horny", "pornography", "adult",
             "escort", "camgirl", "cam boy", "nudes", "nude", "xxx", "fetish", "bdsm",
             "pornhub", "stripchat", "livejasmin", "snapchat", "chaturbate", "leak",
-            "leaked", "incest", "taboo", "hardcore", "erotica", "sexcam", "adultwork",
+            "incest", "taboo", "hardcore", "erotica", "sexcam", "adultwork",
             "escortservice", "hooker", "prostitute", "anal", "oral", "cum", "blowjob",
             "handjob", "dildo", "vibrator", "orgy", "gangbang", "deepfake", "onlyfansleak",
             "fansly", "amateur", "spank", "lust", "suck", "slut", "whore", "milf", "teen",
             "lolita", "hentai", "futa", "sextape", "sex tape"
         ]
-        processed_urls = set()
-        context = page.context
-        context.on("page", lambda new_page: (None, new_page.close()))
-        more_data = True
 
-        while more_data:
-            discussion_items = page.query_selector_all(".DiscussionListItem")
-            discussion_urls = []
-            all_dates = []
+        page.wait_for_load_state("domcontentloaded")
+        discussion_items = page.query_selector_all(".DiscussionListItem")
 
-            for item in discussion_items:
-                main_a = item.query_selector("a.DiscussionListItem-main")
-                if not main_a:
+        if self.is_crawled:
+            max_days = 500
+        else:
+            max_days = 500
+
+        latest_date = None
+        last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, helper_method.generate_data_hash(self.seed_url) + REDIS_KEYS.S_URL_TIMEOUT,"")
+        if last_seen_date_str:
+            last_seen_date = datetime.fromisoformat(last_seen_date_str.replace("Z", "+00:00"))
+        else:
+            last_seen_date = datetime.now() - timedelta(days=max_days)
+
+        to_parse = []
+        for post in discussion_items:
+            try:
+                post_meta = post.query_selector("a.DiscussionListItem-main")
+                if not post_meta:
                     continue
-                href = main_a.get_attribute('href')
+                href = post_meta.get_attribute('href')
+                href = urljoin(page.url, href)
                 if not href:
                     continue
-                full_url = href if href.startswith("http") else f"https://hacksnation.com{href}"
-                if full_url in processed_urls:
+                body_text = post.text_content().strip()
+                if not body_text:
                     continue
-                title_el = main_a.query_selector("h2.DiscussionListItem-title")
-                thread_title = title_el.text_content().strip() if title_el else ""
-                title_lower = thread_title.lower()
-                if any(word in title_lower for word in forbidden_keywords):
+                if any(word in body_text.lower() for word in forbidden_keywords):
                     continue
-                time_el = item.query_selector("time")
+                time_el = post.query_selector("time")
                 date_val = time_el.get_attribute("datetime") if time_el else None
                 m_date = None
                 if date_val:
@@ -137,85 +159,51 @@ class _hacksnation(leak_extractor_interface, ABC):
                         except Exception:
                             m_date = None
                 if m_date:
-                    all_dates.append(m_date)
-                discussion_urls.append((full_url, thread_title, m_date))
-
-            for url_info in discussion_urls:
-                full_url, thread_title, m_date = url_info
-                page.goto(full_url)
-                page.wait_for_load_state("domcontentloaded")
-                if not page.url.startswith("https://hacksnation.com"):
-                    page.goto(self.seed_url)
-                    page.wait_for_load_state("domcontentloaded")
-                    continue
-                comment_posts = page.query_selector_all("article.CommentPost.Post")
+                    if m_date.date() <= last_seen_date.date():
+                        continue
+                    if latest_date is None or m_date > latest_date:
+                        latest_date = m_date
                 usernames = []
-                comments = []
-                for post in comment_posts:
-                    user_span = post.query_selector("span.username")
-                    username = user_span.text_content().strip() if user_span else ""
-                    if username and username not in usernames:
-                        usernames.append(username)
-                    body_div = post.query_selector("div.Post-body")
-                    content_text = body_div.text_content().strip() if body_div else ""
-                    comments.append(content_text)
-                m_username = ", ".join(usernames[:5])
-                m_content = '\n'.join(comment.replace('\n', ' ') for comment in comments)
+                user_span = post.query_selector("span.username")
+                username = user_span.text_content().strip() if user_span else ""
+                if username:
+                    usernames.append(username)
+                m_content = helper_method.filter_comments(body_text).replace("\n", " ")
+                to_parse.append({"href": href, "m_date": m_date, "m_content": m_content, "usernames": usernames})
+            except Exception as _:
+                continue
+
+        for item in to_parse:
+            try:
+                page.goto(item["href"])
+                page.wait_for_load_state("domcontentloaded")
+                content, m_username, code, comment_count= self.extract_posts(page)
+
+                if code and len(code)>0:
+                    code += "\n" + code[0]
+
                 card_data = social_model(
-                    m_title=thread_title,
+                    m_title="Post",
                     m_channel_url=page.url,
-                    m_content=m_content,
+                    m_content=content,
                     m_network=helper_method.get_network_type(self.base_url),
-                    m_message_date=m_date.date() if m_date else None,
-                    m_content_type=["leak"],
+                    m_message_date=item["m_date"].date() if item["m_date"] else None,
+                    m_content_type=["forum"],
                     m_platform="forum",
-                    m_message_sharable_link=page.url
+                    m_message_sharable_link=page.url,
+                    m_post_comments_count=str(comment_count)
                 )
                 entity_data = entity_model(
-                    m_username=[m_username]
+                    m_scrap_file=self.__class__.__name__,
+                    m_username=m_username,
+                    m_code_snippet=code
                 )
-                entity_data = helper_method.extract_entities(m_content, entity_data)
                 self.append_leak_data(card_data, entity_data)
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
 
-                processed_urls.add(full_url)
-                page.goto(self.seed_url)
-                page.wait_for_load_state("domcontentloaded")
+        if latest_date:
+            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, helper_method.generate_data_hash(self.seed_url) + REDIS_KEYS.S_URL_TIMEOUT, latest_date.strftime("%Y%m%d"))
 
-            load_more_btn = page.query_selector("div.DiscussionList-loadMore button.Button")
-            should_load_more = False
-            if all_dates:
-                oldest_date = min(all_dates)
-                days_diff = (datetime.now(timezone.utc) - oldest_date).days
-                if days_diff <= max_days:
-                    should_load_more = True
-            if load_more_btn and should_load_more:
-                old_hrefs = set()
-                for item in page.query_selector_all(".DiscussionListItem"):
-                    a_tag = item.query_selector("a.DiscussionListItem-main")
-                    if a_tag:
-                        href = a_tag.get_attribute("href")
-                        if href:
-                            full_url = href if href.startswith("http") else f"https://hacksnation.com{href}"
-                            old_hrefs.add(full_url)
-                load_more_btn.click()
-                new_item_selector = ".DiscussionListItem"
-                page.wait_for_selector(new_item_selector, state="attached")
-                tries = 0
-                while tries < 5:
-                    new_items = page.query_selector_all(".DiscussionListItem")
-                    temp_hrefs = set()
-                    for item in new_items:
-                        a_tag = item.query_selector("a.DiscussionListItem-main")
-                        if a_tag:
-                            href = a_tag.get_attribute("href")
-                            if href:
-                                full_url = href if href.startswith("http") else f"https://hacksnation.com{href}"
-                                temp_hrefs.add(full_url)
-                    new_hrefs = temp_hrefs - old_hrefs
-                    if len(new_hrefs) > 0:
-                        break
-                    page.wait_for_selector(new_item_selector, state="attached")
-                    tries += 1
-                more_data = True
-            else:
-                more_data = False
+        return True
+

@@ -3,7 +3,10 @@ import { Suggestion } from "../shared/common-result";
 export class StealerLogResultItem {
   url: string = "";
   username: string = "";
+  email: string = "";
   domain: string = "";
+  type: string = "";
+  ioc: string[] = [];
   password: string = "";
   timestamp?: string;
   m_hash?: string;

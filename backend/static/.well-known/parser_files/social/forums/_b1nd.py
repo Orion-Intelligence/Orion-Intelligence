@@ -1,9 +1,9 @@
-
 import datetime
 import re
 from abc import ABC
 from typing import List
 from urllib.parse import urljoin
+
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
@@ -11,8 +11,9 @@ from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, Fe
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from datetime import datetime
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
-
+from datetime import timedelta
 
 class _b1nd(leak_extractor_interface, ABC):
     _instance = None
@@ -53,8 +54,7 @@ class _b1nd(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,
-                         m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[social_model]:
@@ -79,32 +79,14 @@ class _b1nd(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     @staticmethod
-    def safe_find(page, selector, attr=None):
-        try:
-            element = page.query_selector(selector)
-            if element:
-                return element.get_attribute(attr) if attr else element.inner_text().strip()
-        except Exception:
-            return None
-
-    @staticmethod
-    def parse_forum_date(date_str):
-        parsed_date = None
-        if date_str:
-            for fmt in ("%b %d, %Y", "%Y-%m-%dT%H:%M:%S%z"):
-                try:
-                    parsed_date = datetime.strptime(date_str, fmt)
-                    break
-                except Exception:
-                    continue
-            if not parsed_date:
-                m = re.search(r"(\w{3}) (\d{1,2}), (\d{4})", date_str)
-                if m:
-                    try:
-                        parsed_date = datetime.strptime(m.group(0), "%b %d, %Y")
-                    except Exception:
-                        pass
-        return parsed_date
+    def extract_clean_text(post_divs):
+        texts = []
+        for div in post_divs[0:20]:
+            div.eval_on_selector_all(".bbCodeBlock-expandLink", "els => els.forEach(e => e.remove())")
+            text = div.inner_text()
+            text = re.sub(r"\n+", "\n", text)
+            texts.append(text)
+        return texts
 
     def parse_leak_data(self, page):
         CATEGORY_URLS = {
@@ -117,123 +99,125 @@ class _b1nd(leak_extractor_interface, ABC):
             "leads": ["https://b1nd.net/forums/leads.7/"],
         }
 
-        max_days = 5 if self.is_crawled else 500
+        if self.is_crawled:
+            max_days = 1000
+            max_page = 2
+        else:
+            max_days = 1500
+            max_page = 5
 
         for category, url_list in CATEGORY_URLS.items():
             for seed_url in url_list:
                 url = seed_url
                 base_url = seed_url.split('/forums/')[0]
-                while url:
-                    try:
+                try:
+                    latest_date = None
+                    last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, helper_method.generate_data_hash(seed_url) + REDIS_KEYS.S_URL_TIMEOUT, "")
+                    if last_seen_date_str:
+                        last_seen_date = datetime.fromisoformat(last_seen_date_str.replace("Z", "+00:00"))
+                    else:
+                        last_seen_date = datetime.now() - timedelta(days=max_days)
+
+                    c_page = 1
+                    while url:
                         page.goto(url)
+
+                        next_btn = page.locator("a.pageNav-jump--next").last
+                        href = None
+                        if next_btn.count() > 0:
+                            val = next_btn.get_attribute("href")
+                            if val:
+                                href = urljoin(page.url, val)
+
+                        next_btn = href
+
                         page.wait_for_load_state("domcontentloaded")
                         thread_divs = page.query_selector_all('div.structItem--thread')
                         last_thread_date = None
                         thread_infos = []
 
                         for idx, div in enumerate(thread_divs):
-                            try:
-                                title_a = div.query_selector('div.structItem-title a')
-                                if not title_a:
-                                    continue
-                                thread_href = urljoin(base_url, title_a.get_attribute('href'))
-                                m_title = title_a.text_content().strip()
+                            title_a = div.query_selector('div.structItem-title a')
+                            if not title_a:
+                                continue
+                            thread_href = urljoin(base_url, title_a.get_attribute('href'))
+                            m_title = (title_a.text_content() or "").strip()
 
-                                replies_dd = div.query_selector('dl.pairs--justified dt:text("Replies") + dd')
-                                if not replies_dd:
-                                    replies_dd = div.query_selector('dl.pairs--justified dd')
-                                try:
-                                    replies = int(replies_dd.text_content().strip()) if replies_dd else 0
-                                except Exception:
-                                    replies = 0
+                            replies_dd = div.query_selector('dl.pairs--justified dt:text("Replies") + dd')
+                            if not replies_dd:
+                                replies_dd = div.query_selector('dl.pairs--justified dd')
+                            replies = int(replies_dd.text_content().strip()) if replies_dd else 0
 
-                                date_el = div.query_selector('time.structItem-latestDate')
-                                m_date = None
-                                if date_el:
-                                    date_str = date_el.get_attribute('data-date-string')
-                                    m_date = self.parse_forum_date(date_str)
-                                    last_thread_date = m_date
+                            date_el = div.query_selector('time.structItem-latestDate')
+                            m_date = None
+                            if date_el:
+                                date_str = date_el.get_attribute('data-date-string')
+                                m_date = helper_method.parse_date(date_str)
+                                last_thread_date = m_date
 
-                                thread_infos.append({
-                                    "thread_href": thread_href,
-                                    "m_title": m_title,
-                                    "replies": replies,
-                                    "m_date": m_date
-                                })
-                            except Exception as ex:
-                                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                            thread_infos.append({
+                                "thread_href": thread_href,
+                                "m_title": m_title,
+                                "replies": replies,
+                                "m_date": m_date
+                            })
 
-                        for thread_idx, info in enumerate(thread_infos):
-                            try:
-                                m_date = info["m_date"]
-                                if not m_date or (datetime.now() - m_date).days > max_days:
-                                    continue
+                        if not latest_date:
+                            latest_date = max(thread_infos, key=lambda x: x["m_date"])["m_date"]
 
-                                page.goto(info['thread_href'])
-                                page.wait_for_load_state("domcontentloaded")
+                        m_limit_reahed = True
 
-                                m_content = ""
-                                usernames = []
-                                comment_count = 0
-                                while comment_count < 20:
-                                    post_divs = page.query_selector_all('article.message-body div.bbWrapper')
-                                    for post_div in post_divs:
-                                        txt = post_div.text_content()
-                                        if txt:
-                                            txt = txt.replace('\u200b', '').replace('\xa0', ' ')
-                                            txt = re.sub(r'[ \t\r\f\v]+', ' ', txt)
-                                            txt = re.sub(r'[\n]+', ' ', txt)
-                                            m_content += txt.strip() + ' '
-                                            comment_count += 1
-                                            if comment_count >= 20:
-                                                break
-                                    user_links = page.query_selector_all('a.username')
-                                    for user_a in user_links:
-                                        uname = user_a.text_content().strip()
-                                        if uname and uname not in usernames:
-                                            usernames.append(uname)
-                                    if comment_count >= 20:
-                                        break
-                                    next_btn = page.query_selector('a.pageNav-jump--next')
-                                    if next_btn:
-                                        next_href = urljoin(base_url, next_btn.get_attribute('href'))
-                                        page.goto(next_href)
-                                        page.wait_for_load_state("domcontentloaded")
-                                    else:
-                                        break
+                        for info in thread_infos:
+                            m_date = info["m_date"]
+                            thread_url = info["thread_href"]
 
-                                if category == "leaks":
-                                    m_content_type = ["leaks", category]
-                                else:
-                                    m_content_type = [category]
+                            if not m_date:
+                                continue
+                            age_days = (datetime.now() - m_date).days
 
-                                card_data = social_model(
-                                    m_title=info["m_title"],
-                                    m_channel_url=info["thread_href"],
-                                    m_content=m_content.strip(),
-                                    m_network=helper_method.get_network_type(base_url),
-                                    m_message_date=m_date.date() if m_date else None,
-                                    m_content_type=m_content_type,
-                                    m_platform="forum",
-                                    m_message_sharable_link=info["thread_href"]
-                                )
-                                entity_data = entity_model(
-                                    m_username=usernames[:5]
-                                )
+                            if m_date <= last_seen_date:
+                                continue
 
-                                entity_data = helper_method.extract_entities(m_content.strip(), entity_data)
-                                self.append_leak_data(card_data, entity_data)
-                            except Exception as ex:
-                                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                            if age_days > max_days:
+                                continue
 
-                        if last_thread_date and (datetime.now() - last_thread_date).days <= max_days:
-                            next_btn = page.query_selector('a.pageNav-jump--next')
-                            url = urljoin(base_url, next_btn.get_attribute('href')) if next_btn else None
+                            m_limit_reahed = False
+                            page.goto(thread_url)
+                            page.wait_for_load_state("domcontentloaded")
+
+                            usernames = []
+                            post_divs = page.query_selector_all('article.message-body div.bbWrapper')
+                            post_divs_count = len(post_divs)
+                            content = self.extract_clean_text(post_divs)
+
+                            if category == "leaks":
+                                m_content_type = ["leaks", category]
+                            else:
+                                m_content_type = [category]
+
+                            card_data = social_model(
+                                m_title=info["m_title"],
+                                m_channel_url=thread_url,
+                                m_content="\n".join(content),
+                                m_network=helper_method.get_network_type(base_url),
+                                m_message_date=m_date.date() if m_date else None,
+                                m_content_type=m_content_type,
+                                m_platform="forum",
+                                m_message_sharable_link=thread_url,
+                                m_post_comments_count = str(post_divs_count)
+                            )
+                            entity_data = entity_model(
+                                m_scrap_file=self.__class__.__name__,
+                                m_username=usernames[:15]
+                            )
+
+                            self.append_leak_data(card_data, entity_data)
+
+                        if c_page<max_page and not m_limit_reahed and last_thread_date and (datetime.now() - last_thread_date).days <= max_days and next_btn:
+                            url = next_btn
+                            c_page+=1
                         else:
-                            url = None
-                    except Exception as ex:
-                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
-
-
-
+                            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, helper_method.generate_data_hash(seed_url) + REDIS_KEYS.S_URL_TIMEOUT, latest_date.strftime("%Y%m%d"))
+                            break
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

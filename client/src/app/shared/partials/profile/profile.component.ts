@@ -10,6 +10,7 @@ import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
 import {AuthService} from '../../../services/authetication/auth.service';
 import {Observable} from 'rxjs';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -34,7 +35,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dropdownOpen.set(false);
   };
 
-  constructor(protected authService: AuthService) {
+  constructor(protected authService: AuthService, public router: Router) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }

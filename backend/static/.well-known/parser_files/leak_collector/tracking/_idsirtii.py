@@ -156,11 +156,11 @@ class _idsirtii(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="Indonesia Security Incident Response Team",
                     m_author=[admin],
                     m_country=["indonesia"]
                 )
 
-                entity_data = helper_method.extract_entities(m_content, entity_data)
                 self.append_leak_data(card_data, entity_data)
 

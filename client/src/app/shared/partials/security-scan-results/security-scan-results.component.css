@@ -578,3 +578,8 @@
 .scan_status-dot.scan_info {
   color: #17a2b8;
 }
+
+.scan_container .search__result-detail{
+  margin-left: 0;
+  margin-right: 0;
+}

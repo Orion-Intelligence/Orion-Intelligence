@@ -12,6 +12,8 @@ export class AppStorageService {
     'entityFilterCondition',
     'entityfilterCategories',
     'isSidebarOpen',
+    'matchType',
+    'sortType'
   ];
 
   getFromStorage<T>(key: string, parseJson = false): T | undefined {
@@ -31,6 +33,8 @@ export class AppStorageService {
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
       isSidebarOpen: this.getFromStorage('isSidebarOpen', true),
+      matchType: this.getFromStorage<string>('matchType') || 'semantic',
+      sortType: this.getFromStorage<string>('sortType'),
     };
   }
 

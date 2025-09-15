@@ -1,15 +1,19 @@
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {finalize} from 'rxjs/operators';
 import {ApiService} from '../../services/api.service';
 import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
 import {UrlScanMeta, UrlScanResponse, UrlScanThreatItem} from '../../model/security-scan/security.scan.results.model';
+import {CodeBlockComponent} from '../code-block/code-block.component';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {SecurityScanExportComponentComponent} from './security-scan-export-component/security-scan-export-component.component';
+import {NgxPrintDirective, NgxPrintModule} from 'ngx-print';
 
 @Component({
   selector: 'app-security-scan-results',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CodeBlockComponent, NgxPrintModule, NgOptimizedImage, TooltipDirective, SecurityScanExportComponentComponent, NgxPrintDirective],
   templateUrl: './security-scan-results.component.html',
   styleUrl: './security-scan-results.component.css',
   animations: [fadeInDashboardItem]
@@ -22,9 +26,10 @@ export class SecurityScanResultsComponent implements OnInit {
   isLoading = true;
   hasError = false;
   errorMessage = '';
-  skeletonCards = Array.from({ length: 3 });
+  skeletonCards = Array.from({length: 3});
 
-  constructor(private api: ApiService, private route: ActivatedRoute) {}
+  constructor(private api: ApiService, private route: ActivatedRoute) {
+  }
 
   ngOnInit(): void {
     const rawParam = this.route.snapshot.queryParamMap.get('domain') || '';
@@ -39,8 +44,10 @@ export class SecurityScanResultsComponent implements OnInit {
     this.errorMessage = '';
     this.meta = null;
     this.categories = [];
-    this.api.post<UrlScanResponse>('urlscan/domain', { domain: this.requestedUrl })
-      .pipe(finalize(() => { this.isLoading = false; }))
+    this.api.post<UrlScanResponse>('urlscan/domain', {domain: this.requestedUrl})
+      .pipe(finalize(() => {
+        this.isLoading = false;
+      }))
       .subscribe({
         next: (res) => {
           const safe = !!(res && res.result && res.result.meta);
@@ -49,22 +56,39 @@ export class SecurityScanResultsComponent implements OnInit {
             this.errorMessage = 'No data received from scanner.';
             return;
           }
+
           const m = res.result.meta;
           this.meta = {
             ...m,
             Host: (m?.Host && m.Host.trim()) || this.extractHost(m?.URL) || this.requestedDomain,
             URL: m?.URL || this.requestedUrl
           };
+
+          const proofMap = new Map<string, string>();
+          const proofs = res.result.proofs || {};
+          Object.entries(proofs).forEach(([cat, items]) => {
+            (items || []).forEach(p => {
+              const k = (cat + '|' + (p.header || '').trim().toLowerCase());
+              if (p.proof && !proofMap.has(k)) proofMap.set(k, p.proof);
+            });
+          });
+
           this.categories = Object.entries(res.result.threats || {})
             .map(([name, items]) => {
               const seen = new Set<string>();
-              const uniqueItems = (items || []).filter(it => {
-                const key = (it.header || '').trim().toLowerCase();
-                if (!key || seen.has(key)) return false;
-                seen.add(key);
-                return true;
-              });
-              return { name, total: (items || []).length, items: uniqueItems };
+              const uniqueItems = (items || [])
+                .filter(it => {
+                  const key = (it.header || '').trim().toLowerCase();
+                  if (!key || seen.has(key)) return false;
+                  seen.add(key);
+                  return true;
+                })
+                .map(it => {
+                  const key = (it.header || '').trim().toLowerCase();
+                  const mergedProof = proofMap.get(name + '|' + key);
+                  return mergedProof ? {...it, proof: mergedProof} : it;
+                });
+              return {name, total: (items || []).length, items: uniqueItems};
             })
             .filter(c => c.items.length > 0);
         },
@@ -73,6 +97,28 @@ export class SecurityScanResultsComponent implements OnInit {
           this.errorMessage = (err && (err.error?.detail || err.message)) || 'Failed to fetch security scan results.';
         }
       });
+  }
+
+  exportReport(): void {
+    const payload = {
+      meta: this.meta,
+      threats: Object.fromEntries(this.categories.map(c => [c.name, c.items]))
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    const host = this.displayHost?.replace(/[^a-z0-9.-]/gi, '_') || 'report';
+    const dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    a.href = URL.createObjectURL(blob);
+    a.download = `security-scan-${host}-${dt}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  printReport(): void {
+    window.print();
   }
 
   private resolveRequestedUrl(input: string): string {
@@ -87,7 +133,11 @@ export class SecurityScanResultsComponent implements OnInit {
   }
 
   private extractHost(url?: string): string {
-    try { return url ? new URL(url).hostname : ''; } catch { return ''; }
+    try {
+      return url ? new URL(url).hostname : '';
+    } catch {
+      return '';
+    }
   }
 
   get displayHost(): string {

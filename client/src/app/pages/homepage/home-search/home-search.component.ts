@@ -27,6 +27,9 @@ export class HomeSearchComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const cfg = this.app_service.configData();
+    const matchtype = cfg.localSettings.matchType;
+    this.onSetMatchType(matchtype)
     if (!this.isRoleAdmin) {
       this.onSearchSubmit();
     }
@@ -37,6 +40,7 @@ export class HomeSearchComponent implements OnInit {
       ...this.dashboardService.selectedFilters(),
       matchtype: type
     });
+    this.app_service.set('matchType', type);
   }
 
   onSearchSubmit(): void {
@@ -53,7 +57,6 @@ export class HomeSearchComponent implements OnInit {
         queryParamsHandling: 'merge'
       }).then();
     } else {
-      alert("1");
       this.router.navigate(['/dashboard/profile/dashboard/all'], {
         queryParams,
         queryParamsHandling: 'merge'
@@ -63,10 +66,13 @@ export class HomeSearchComponent implements OnInit {
 
   getMatchType() {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
+
     if (matchtype === "full") {
       return "Match full query";
     } else if (matchtype === "or") {
       return "Match any term";
+    } else if (matchtype === "semantic") {
+      return "Match semantic query";
     } else {
       return "Match individual terms";
     }

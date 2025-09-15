@@ -4,7 +4,7 @@ from playwright.sync_api import Page
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 from bs4 import BeautifulSoup
@@ -52,7 +52,7 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_resoource_block=False, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_resoource_block=False, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -179,8 +179,8 @@ class _github_doormanbreach(leak_extractor_interface, ABC):
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="doormanBreach",
             )
 
-            entity_data = helper_method.extract_entities(m_content, entity_data)
             self.append_leak_data(card_data, entity_data)

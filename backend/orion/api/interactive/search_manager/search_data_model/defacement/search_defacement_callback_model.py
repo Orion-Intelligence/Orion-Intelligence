@@ -17,6 +17,7 @@ class result_item(BaseModel):
     m_hash: Optional[str] = None
     m_web_server: Optional[List[str]] = None
     m_ioc_type: Optional[List[str]] = None
+    m_content: Optional[str] = None
     m_base_url: Optional[str] = None
     m_url: Optional[str] = None
     m_ip: Optional[List[str]] = None

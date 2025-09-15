@@ -41,7 +41,6 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
   firstTrigger = true;
   result_count = 0;
   m_platform = ""
-  rankedResult: any[] = [];
 
   constructor(
     protected helperService: HelperService,
@@ -55,7 +54,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
 
   get currentResultCount(): number {
     if (this.getRoute() == 'all') {
-      return this.rankedResult.length
+      return this.dashboardService.rankedResult.length
     } else {
       return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
     }
@@ -82,7 +81,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
 
         if (this.router.url.split('?')[0] != this.dashboardService.m_current_route) {
           this.fetchSearchResults()
-        } else if (this.firstTrigger && this.dashboardService.socialCallbackModel.Result.length > 0) {
+        } else if (this.firstTrigger && this.currentResultCount > 0) {
           this.isLoading.set(false);
           this.query = this.dashboardService.consolidatedParamModel.q;
         } else {
@@ -132,10 +131,11 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     }
 
     const lastSegment = this.route.snapshot.url.at(-1)?.path;
+    this.dashboardService.clearCallback()
     if (lastSegment == "all") {
       this.dashboardService.fetchConsolidatedRankededResults('social/all', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
         if (response.success && response.data) {
-          this.rankedResult = response.data;
+          this.dashboardService.rankedResult = response.data;
         }
         this.isLoading.set(false);
       });

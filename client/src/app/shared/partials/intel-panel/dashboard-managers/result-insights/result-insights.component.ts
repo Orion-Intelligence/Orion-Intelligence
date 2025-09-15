@@ -1,10 +1,9 @@
-import { FormsModule } from '@angular/forms';
-import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
-import { UniqueLinkItem } from '../../../../model/homepage/consolidation_insights';
-import { DATA_SECTION_TEMPLATE, FIELDS_MAP } from '../../../../constants/shared-enums';
-
+import {FormsModule} from '@angular/forms';
+import {Component, Input, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ConsolidatedCallbackModel} from '../../../../model/results/consolidated/consolidated.callback.model';
+import {UniqueLinkItem} from '../../../../model/homepage/consolidation_insights';
+import {search_filter_labels} from '../../../../constants/shared-enums';
 
 @Component({
   selector: 'app-result-insights',
@@ -17,73 +16,33 @@ export class ResultInsightsComponent implements OnInit {
   @Input() results: any;
   @Input() rankedResults: any;
   @Input() isGrouped!: boolean;
-  sectionStates: Record<string, boolean> = {
-    isKeywordExpanded: true,
-    isCoverageExpanded: true,
-    isThreatExpanded: true,
-    isUrlsExpanded: true,
-    isBitcoinExpanded: false,
-    isPhoneExpanded: false,
-    isDomainExpanded: false,
-    isCveCweExpanded: false,
-    isIpExpanded: false,
-    isYaraExpanded: false,
-    isAwsExpanded: false,
-    isFilePathExpanded: false,
-    isCreditCardExpanded: false,
-    isOrganizationExpanded: false,
-    isGpeExpanded: false,
-    isNorpExpanded: false,
-    isProductExpanded: false,
-    isPersonExpanded: false,
-    isLocationExpanded: false,
-    isLawExpanded: false,
-    isAadhaarExpanded: false,
-    isAustralianIdExpanded: false,
-    isIndianIdExpanded: false,
-    isUsIdExpanded: false,
-    isUsBankExpanded: false,
-    isUsernameExpanded: false,
-    isPasswordExpanded: false,
-    isHashtagExpanded: false,
-    isMentionExpanded: false,
-    isMitreExpanded: false,
-    isDocumentIdExpanded: false,
-    isMedicalExpanded: false,
-    isEmployeeExpanded: false,
-    isTeamExpanded: false,
-    isLanguageExpanded: false,
-    isUserAgentExpanded: false,
-    isAsnExpanded: false,
-    isChannelExpanded: false,
-    isSenderExpanded: false,
-    isContentTypeExpanded: false
-  };
+
+  sectionStates: Record<string, boolean> = {};
+
   searchQuery = '';
   filterOptions = ['All', 'Email', 'Name'];
   selectedFilter: string = 'All';
   emails: string[] = [];
   names: string[] = [];
 
-
-  dataSections: { title: string; key: string; data: string[]; }[] = [];
+  dataSections: { title: string; key: string; data: string[] }[] = [];
 
   uniqueUrls: UniqueLinkItem[] = [];
-  keywordData: { value: number, label: string }[] = [];
-  coverageData: { value: number, label: string, color: string }[] = [];
+  keywordData: { value: number; label: string }[] = [];
+  coverageData: { value: number; label: string; color: string }[] = [];
 
   ngOnInit(): void {
     this.uniqueUrls = this.getUniqueLinks(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
 
-    const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
+    const {emails, names} = this.extractNamesAndEmails(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
     this.emails = emails;
     this.names = names;
 
     this.keywordData = [
-      { value: this.getTotalResultCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Total Found' },
-      { value: this.emails.length + this.names.length, label: 'Documents' },
-      { value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Links' },
-      { value: this.getActiveModelCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Pages' }
+      {value: this.getTotalResultCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Total Found'},
+      {value: this.emails.length + this.names.length, label: 'Documents'},
+      {value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Links'},
+      {value: this.getActiveModelCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Pages'}
     ];
 
     this.getCoverageSummaryFromModels(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
@@ -91,15 +50,39 @@ export class ResultInsightsComponent implements OnInit {
     const extractedData = this.extractMultipleFieldsFromResults(
       this.consolidatedCallbackModel,
       this.rankedResults,
-      FIELDS_MAP,
       this.isGrouped
     );
 
-    this.dataSections = DATA_SECTION_TEMPLATE.map(section => ({
-      title: section.title,
-      key: section.key,
-      data: extractedData[section.fieldKey] || []
-    }));
+    this.dataSections = Object.entries(search_filter_labels).map(([key, title]) => {
+      const variants = new Set<string>([
+        key,
+        key.replace(/^m_/, ''),
+        key.endsWith('s') ? key.slice(0, -key) : key,
+        key.replace(/^m_/, '').replace(/s$/, ''),
+        key.replace(/^m_/, '').replace(/_([a-z])/g, (_, c) => c.toUpperCase())
+      ]);
+
+      const collected: string[] = [];
+      for (const k of variants) {
+        const v = (extractedData as any)[k];
+        if (Array.isArray(v)) collected.push(...v);
+      }
+
+      return {
+        title,
+        key: key,
+        data: Array.from(new Set(collected))
+      };
+    });
+
+    for (const key of Object.keys(search_filter_labels)) {
+      this.sectionStates[key] = false;
+    }
+
+    this.sectionStates['isKeywordExpanded'] = true;
+    this.sectionStates['isCoverageExpanded'] = true;
+    this.sectionStates['isThreatExpanded'] = true;
+    this.sectionStates['isUrlsExpanded'] = true;
   }
 
   toggleFilter(option: string) {
@@ -163,12 +146,11 @@ export class ResultInsightsComponent implements OnInit {
       consolidated.chat_model,
       consolidated.generic_model,
       consolidated.social_model,
-      consolidated.defacement_model,
+      consolidated.defacement_model
     ];
 
     return models.filter(model => model && model.Result && model.Result.length > 0).length;
   }
-
 
   getUniqueLinks(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): UniqueLinkItem[] {
     const linkMap = new Map<string, UniqueLinkItem>();
@@ -176,7 +158,7 @@ export class ResultInsightsComponent implements OnInit {
     const addToMap = (url: string | undefined, title: string | undefined, date?: string) => {
       if (url && !linkMap.has(url)) {
         const status = this.getStatus(date);
-        linkMap.set(url, { url, title: title || 'Untitled', status });
+        linkMap.set(url, {url, title: title || 'Untitled', status});
       }
     };
 
@@ -187,7 +169,7 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.defacement_model?.Result || []),
         ...(consolidated.social_model?.Result || []),
         ...(consolidated.chat_model?.Result || []),
-        ...(consolidated.exploit_model?.Result || []),
+        ...(consolidated.exploit_model?.Result || [])
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
 
@@ -205,19 +187,17 @@ export class ResultInsightsComponent implements OnInit {
     return Array.from(linkMap.values());
   }
 
-
   getStatus(dateString?: string): boolean {
     if (!dateString) return false;
     const createdDate = new Date(dateString);
     const today = new Date();
     const diffInDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-
     if (diffInDays <= 5) {
       return true;
     } else return diffInDays <= 10;
   }
 
-  extractNamesAndEmails(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): { emails: string[], names: string[] } {
+  extractNamesAndEmails(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): { emails: string[]; names: string[] } {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/g;
     const nameRegex = /\b[A-Z][a-z]+\s[A-Z][a-z]+\b/g;
 
@@ -241,7 +221,7 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.social_model?.Result || []),
         ...(consolidated.leak_model?.Result || []),
         ...(consolidated.exploit_model?.Result || []),
-        ...(consolidated.chat_model?.Result || []),
+        ...(consolidated.chat_model?.Result || [])
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
 
@@ -260,10 +240,9 @@ export class ResultInsightsComponent implements OnInit {
 
     return {
       emails: Array.from(emails),
-      names: Array.from(names),
+      names: Array.from(names)
     };
   }
-
 
   getCoverageSummaryFromModels(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): void {
     let active = 0;
@@ -285,8 +264,7 @@ export class ResultInsightsComponent implements OnInit {
     total = allResults.length;
 
     allResults.forEach(item => {
-      const rawDate =
-        item.m_update_date || item.m_leak_date || item.m_message_date || item.m_creation_date;
+      const rawDate = item.m_update_date || item.m_leak_date || item.m_message_date || item.m_creation_date;
       const status = this.getStatusCategory(rawDate);
 
       if (status === 'Active') active++;
@@ -295,13 +273,12 @@ export class ResultInsightsComponent implements OnInit {
     });
 
     this.coverageData = [
-      { value: total, label: 'Total Found', color: '' },
-      { value: active, label: 'Active', color: '#1ec773' },
-      { value: inactive, label: 'Inactive', color: '#e6534b' },
-      { value: seldom, label: 'Seldom', color: '#f08b36' }
+      {value: total, label: 'Total Found', color: ''},
+      {value: active, label: 'Active', color: '#1ec773'},
+      {value: inactive, label: 'Inactive', color: '#e6534b'},
+      {value: seldom, label: 'Seldom', color: '#f08b36'}
     ];
   }
-
 
   getStatusCategory(dateString?: string): 'Active' | 'Seldom' | 'Inactive' {
     if (!dateString) return 'Inactive';
@@ -326,7 +303,8 @@ export class ResultInsightsComponent implements OnInit {
         const fields = ['m_url', 'm_weblink', 'm_dumplink', 'm_clearnet_links', 'm_source_url', 'm_channel_url'];
         for (const field of fields) {
           const value = item[field];
-          const url = Array.isArray(value) ? value.find(v => typeof v === 'string' && v.startsWith('http'))
+          const url = Array.isArray(value)
+            ? value.find(v => typeof v === 'string' && v.startsWith('http'))
             : (typeof value === 'string' && value.startsWith('http') ? value : null);
           if (url) {
             urls.add(url);
@@ -343,15 +321,16 @@ export class ResultInsightsComponent implements OnInit {
       defacement_model: ['m_url', 'm_source_url'],
       social_model: ['m_channel_url', 'm_weblink'],
       chat_model: ['m_weblink'],
-      exploit_model: ['m_url'],
+      exploit_model: ['m_url']
     };
 
     Object.entries(fieldMap).forEach(([modelKey, fields]) => {
-      const results = consolidated[modelKey as keyof ConsolidatedCallbackModel]?.Result || [];
+      const results = (consolidated as any)[modelKey]?.Result || [];
       results.forEach((item: any) => {
         for (const field of fields) {
           const value = item[field];
-          const url = Array.isArray(value) ? value.find(v => typeof v === 'string' && v.startsWith('http'))
+          const url = Array.isArray(value)
+            ? value.find(v => typeof v === 'string' && v.startsWith('http'))
             : (typeof value === 'string' && value.startsWith('http') ? value : null);
           if (url) {
             urls.add(url);
@@ -367,34 +346,32 @@ export class ResultInsightsComponent implements OnInit {
   extractMultipleFieldsFromResults(
     groupData: any,
     rankData: any,
-    fieldsMap: Record<string, string[]>,
     isGrouped: boolean
   ): Record<string, string[]> {
     const resultMap: Record<string, Set<string>> = {};
 
-    for (const [categoryKey, fields] of Object.entries(fieldsMap)) {
-      resultMap[categoryKey] = new Set();
+    const dataArray = isGrouped
+      ? Object.values(groupData).flatMap((model: any) => model?.Result || [])
+      : (Array.isArray(rankData) ? rankData : []);
 
-      const dataArray = isGrouped
-        ? Object.values(groupData).flatMap((model: any) => model?.Result || [])
-        : Array.isArray(rankData) ? rankData : [];
+    for (const item of dataArray) {
+      for (const [key, value] of Object.entries(item)) {
+        if (!resultMap[key]) {
+          resultMap[key] = new Set();
+        }
 
-      for (const item of dataArray) {
-        for (const field of fields) {
-          const value = item[field];
-
-          if (Array.isArray(value)) {
-            for (const v of value) {
-              if (typeof v === 'string' && v.trim()) {
-                resultMap[categoryKey].add(v);
-              }
+        if (Array.isArray(value)) {
+          for (const v of value) {
+            if (typeof v === 'string' && v.trim()) {
+              resultMap[key].add(v);
             }
-          } else if (typeof value === 'string' && value.trim()) {
-            resultMap[categoryKey].add(value);
           }
+        } else if (typeof value === 'string' && value.trim()) {
+          resultMap[key].add(value);
         }
       }
     }
+
     const finalResult: Record<string, string[]> = {};
     for (const key in resultMap) {
       finalResult[key] = Array.from(resultMap[key]);

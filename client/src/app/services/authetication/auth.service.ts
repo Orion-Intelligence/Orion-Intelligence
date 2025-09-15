@@ -35,60 +35,22 @@ export class AuthService {
     body.set('password', password);
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+    return this.apiService.post<any>('token', body.toString(), { headers }).pipe(
+      tap({
+        next: (response) => {
+          if (response.twofa_required) {
+            this.authState.next({
+              token: null,
+              username,
+              role: null,
+              isAuthenticated: false,
+              onboarding: null,
+              error: '2FA required'
+            });
+            return response.provisioning_uri || null;
+          }
 
-    return this.apiService
-      .post<{ access_token: string; role: string; status: string; hasOnboarding: boolean }>('token', body.toString(), { headers })
-      .pipe(
-        tap({
-          next: (response) => {
-            if (response.role === 'crawler') {
-              this.authState.next({
-                token: null,
-                username: null,
-                role: null,
-                isAuthenticated: false,
-                onboarding: null,
-                error: 'Access denied!'
-              });
-              return;
-            }
-            switch (response.status) {
-              case 'verification_pending':
-                this.authState.next({
-                  token: null,
-                  username: null,
-                  role: null,
-                  isAuthenticated: false,
-                  onboarding: null,
-                  error: 'Account under verification'
-                });
-                break;
-
-              case 'onboarding':
-                this.setToken(response.access_token, username, response.role);
-                this.startTokenRefresh();
-                this.router.navigate(['/onboarding']).then();
-                break;
-
-              case 'active':
-                this.setToken(response.access_token, username, response.role, response.hasOnboarding);
-                this.startTokenRefresh();
-                this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
-                break;
-
-              default:
-                this.authState.next({
-                  token: null,
-                  username: null,
-                  role: null,
-                  isAuthenticated: false,
-                  onboarding: 'false',
-                  error: 'Unknown account status'
-                });
-                break;
-            }
-          },
-          error: (_) => {
+          if (response.role === 'crawler') {
             this.authState.next({
               token: null,
               username: null,
@@ -97,10 +59,92 @@ export class AuthService {
               onboarding: null,
               error: 'Access denied!'
             });
+            return;
           }
-        })
-      );
+          switch (response.status) {
+            case 'verification_pending':
+              this.authState.next({
+                token: null,
+                username: null,
+                role: null,
+                isAuthenticated: false,
+                onboarding: null,
+                error: 'Account under verification'
+              });
+              break;
+
+            case 'onboarding':
+              this.setToken(response.access_token, username, response.role);
+              this.startTokenRefresh();
+              this.router.navigate(['/onboarding']).then();
+              break;
+
+            case 'active':
+              this.setToken(response.access_token, username, response.role, response.hasOnboarding);
+              this.startTokenRefresh();
+              this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+              break;
+
+            default:
+              this.authState.next({
+                token: null,
+                username: null,
+                role: null,
+                isAuthenticated: false,
+                onboarding: 'false',
+                error: 'Unknown account status'
+              });
+              break;
+          }
+        },
+        error: (_) => {
+          this.authState.next({
+            token: null,
+            username: null,
+            role: null,
+            isAuthenticated: false,
+            error: 'Access denied!',
+            onboarding: null,
+          });
+        }
+      })
+    );
   }
+
+  verifyTwofa(code: string, tempToken: string, username: string): Observable<any> {
+    if (!tempToken) {
+      return new Observable(observer => {
+        observer.next(null);
+        observer.complete();
+      });
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${tempToken}`
+    });
+
+    return this.apiService.post<any>('token/2fa/verify', { code }, { headers }).pipe(
+      tap({
+        next: (res) => {
+          if (res?.access_token) {
+            this.setToken(res.access_token, username, res.role);
+            this.startTokenRefresh();
+          } else {
+            this.authState.next({
+              token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code'
+            });
+          }
+        },
+        error: (_) => {
+          this.authState.next({
+            token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code'
+          });
+        }
+      })
+    );
+  }
+
 
   logout(): void {
     this.apiService.post('logout', {}).subscribe();

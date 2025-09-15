@@ -8,12 +8,12 @@
         </button>
 
         <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
-          class="form-control default-input dashboard-general-input" maxlength="150" name="q" placeholder="Search ..."
+          class="form-control default-input dashboard-general-input" maxlength="350" name="q" placeholder="Search ..."
           type="search" (focus)="setFilterOverlay(true)"> <input type="hidden" value="1">
 
-        <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()">
-          <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14"
-            [style.visibility]="searchQuery ? 'visible' : 'hidden'">
+        <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()"
+          [disabled]="!searchQuery">
+          <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14">
         </button>
 
         <span class="input-group-text border-start-0 gc-clear-selection cursor-pointer">
@@ -42,7 +42,8 @@
 
       <div #filtersWrapper class="filters-overlay search-trigger"
         *ngIf="showFiltersOverlay && app_service.configData().localSettings.advance_setting_toggle">
-        <app-search-filters [showSorting]="false" [homePage]="true"></app-search-filters>
+        <app-search-filters [showSorting]="app_service.configData().localSettings.enable_advanced_tools"
+          [homePage]="true"></app-search-filters>
       </div>
 
       <ng-container *ngIf="app_service.configData().localSettings.enable_advanced_tools;">
@@ -66,8 +67,14 @@
               <hr class="dropdown-divider mx-3">
             </li>
             <li><a class="dropdown-item"
-                (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();">Match full
+                (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();"> Match full
                 query (AND)</a></li>
+            <li>
+              <hr class="dropdown-divider mx-3">
+            </li>
+            <li><a class="dropdown-item"
+                (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('semantic');onSearchSubmit();">
+                Match semantic query (semantic)</a></li>
           </ul>
         </div>
       </ng-container>

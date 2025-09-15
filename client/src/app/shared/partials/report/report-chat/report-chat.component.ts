@@ -42,7 +42,7 @@ export class ReportChatComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(protected appService:AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, ) {
+  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router,) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
@@ -56,7 +56,7 @@ export class ReportChatComponent implements OnInit {
 
   metaadataToggleContent(): void {
     this.isExpandedMetadata = !this.isExpandedMetadata;
-    if(this.router.url.split('?')[0] != this.dashboardService.m_current_route){
+    if (this.router.url.split('?')[0] != this.dashboardService.m_current_route) {
       this.ngOnInit()
     }
   }
@@ -93,9 +93,7 @@ export class ReportChatComponent implements OnInit {
       if (!this.activeTab) {
         let selectedTab = '';
 
-        if (this.arrayKeys.includes('m_mitre_ttp_name')) {
-          selectedTab = 'm_mitre_ttp_name';
-        } else if (this.arrayKeys.includes('m_email')) {
+        if (this.arrayKeys.includes('m_email')) {
           selectedTab = 'm_email';
         } else if (this.arrayKeys.includes('m_entity')) {
           selectedTab = 'm_entity';
@@ -142,6 +140,21 @@ export class ReportChatComponent implements OnInit {
         .split('\n')
         .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
       : [];
+  }
+
+  getContentWithoutEmptyLines(content: string | undefined): string {
+    if (!content) {
+      return ""
+    }
+    return (content || '')
+      .split('\n')
+      .filter(line => line.trim().length > 0)
+      .join('\n');
+  }
+
+  hasCodeType(obj: any): boolean {
+    const t = obj?.m_content_type;
+    return Array.isArray(t) ? t.some((x: string) => x?.includes('code')) : (typeof t === 'string' && t.includes('code'));
   }
 
   formatKeyLabel(key: string): string {

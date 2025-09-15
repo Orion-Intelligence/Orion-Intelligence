@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, computed, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs';
 import {EmptyResultComponent} from '../empty-result/empty-result.component';
 import {FormsModule} from '@angular/forms';
@@ -35,10 +35,12 @@ import {ScrollService} from '../../services/scroll.service';
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
+  @Input() isList!: boolean;
   @Input() isTool: boolean = true;
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery = '';
   @Input() analyticsToggle = false;
+  @Input() list_grid = false;
   @Input() shrinkmenu = false;
   @Input() disableScroll = false;
   @Input() type!: Category;
@@ -74,7 +76,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
 
-  constructor(protected scrollService:ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
+  constructor(protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -94,18 +96,16 @@ export class ResultComponent implements OnInit, OnChanges {
       ...this.dashboardService.selectedFilters(),
       matchtype: type
     });
+    this.app_service.set('matchType', type);
   }
 
-  getMatchType() {
+  matchTypeLabel = computed(() => {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
-    if (matchtype === "full") {
-      return "Match full query";
-    } else if (matchtype === "and") {
-      return "Match individual terms";
-    } else {
-      return "Match any term";
-    }
-  }
+    if (matchtype === "full") return "Match full query";
+    if (matchtype === "and") return "Match individual terms";
+    if (matchtype === "or") return "Match any term";
+    return "Match semantic query";
+  });
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -138,6 +138,9 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true
     }
+    const cfg = this.app_service.configData();
+    const matchtype = cfg.localSettings.matchType || 'and';
+    this.onSetMatchType(matchtype)
   }
 
   onFormSubmit() {

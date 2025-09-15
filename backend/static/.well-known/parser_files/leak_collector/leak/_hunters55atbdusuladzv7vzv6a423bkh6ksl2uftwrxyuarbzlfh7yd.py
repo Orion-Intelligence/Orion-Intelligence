@@ -7,7 +7,7 @@ from typing import List
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -51,7 +51,7 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_resoource_block=False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_resoource_block=False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -197,12 +197,12 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_company_name=disclosure_title,
                         m_team="hunter",
                         m_country=[country],
                     )
 
-                    entity_data = helper_method.extract_entities(full_text, entity_data)
                     self.append_leak_data(card_data, entity_data)
             except Exception as ex:
                 log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
