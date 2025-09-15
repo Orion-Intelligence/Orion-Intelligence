@@ -29,11 +29,11 @@ class mail_manager:
         sender_email = "accounts@orionintelligence.org"
         smtp_server = "smtp.titan.email"
         smtp_port = 465
-        msg = MIMEMultipart()
+        msg = MIMEMultipart("alternative")
         msg["From"] = sender_email
         msg["To"] = to
         msg["Subject"] = subject
-        msg.attach(MIMEText(body, "plain"))
+        msg.attach(MIMEText(body, "html"))
         await asyncio.to_thread(self._send_sync_email, sender_email, ACCOUNTS_MAIL_PASSWORD, to, msg,smtp_server,smtp_port)
         
 

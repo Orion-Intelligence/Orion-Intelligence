@@ -149,7 +149,7 @@
     border-radius: 8px;
     font-weight: 500;
     font-size: 14px;
-    color: #0e1626;
+    color: #ffffff;
     cursor: pointer;
     box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
     margin-top: 20px;
@@ -160,14 +160,14 @@
 }
 
 .signup-container__button-disabled {
-    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .signup-container__footer {
     margin-top: 20px;
     font-size: 14px;
     font-weight: 400;
-    color: #a0b8d1;
+    color: #ffffff;
 }
 
 .signup-container__login-link {
@@ -178,6 +178,56 @@
     cursor: pointer;
 }
 
+.password-strength-bar {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.strength-fill.weak {
+    background: red;
+}
+
+.strength-fill.medium {
+    background: orange;
+}
+
+.strength-fill.strong {
+    background: green;
+}
+
+.password-checklist {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #a0b8d1;
+}
+
+.password-checklist li {
+    margin-bottom: 4px;
+}
+
+.password-checklist li.valid {
+    color: green;
+    font-weight: 500;
+}
+
+
+.validation-error {
+    color: red;
+    font-size: 12px;
+    margin-top: 10px;
+    margin-bottom: -10px;
+}
 
 @media screen and (max-width: 1300px) {
     .auth-wrapper__right {

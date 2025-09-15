@@ -1,12 +1,12 @@
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {ActivatedRoute, Router} from '@angular/router';
-import {FormsModule} from '@angular/forms';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {ConsolidatedCallbackModel} from '../../../shared/model/results/consolidated/consolidated.callback.model';
-import {SearchFiltersComponent} from "../search-filters/search-filters.component";
-import {HomeInsightComponent} from "../home-insight/home-insight.component";
-import {AppService} from '../../../services/core/app/app.service';
+import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
+import { SearchFiltersComponent } from "../search-filters/search-filters.component";
+import { HomeInsightComponent } from "../home-insight/home-insight.component";
+import { AppService } from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-home-search',
@@ -15,17 +15,21 @@ import {AppService} from '../../../services/core/app/app.service';
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
+  @Input() isRoleAdmin: boolean = true;
   searchQuery = '';
   selectedSearchBy = 'Match any term';
 
   showFiltersOverlay: boolean = false;
-  @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
+  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
   constructor(public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService) {
   }
 
   ngOnInit(): void {
+    if (!this.isRoleAdmin) {
+      this.onSearchSubmit();
+    }
   }
 
   onSetMatchType(type: string) {
@@ -43,10 +47,18 @@ export class HomeSearchComponent implements OnInit {
       q: this.searchQuery || null
     };
 
-    this.router.navigate(['/dashboard/consolidated/all'], {
-      queryParams,
-      queryParamsHandling: 'merge'
-    }).then();
+    if (this.isRoleAdmin) {
+      this.router.navigate(['/dashboard/consolidated/all'], {
+        queryParams,
+        queryParamsHandling: 'merge'
+      }).then();
+    } else {
+      alert("1");
+      this.router.navigate(['/dashboard/profile/dashboard/all'], {
+        queryParams,
+        queryParamsHandling: 'merge'
+      }).then();
+    }
   }
 
   getMatchType() {

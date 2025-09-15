@@ -11,6 +11,7 @@ export class AppStorageService {
     'iocExpanded',
     'entityFilterCondition',
     'entityfilterCategories',
+    'isSidebarOpen',
   ];
 
   getFromStorage<T>(key: string, parseJson = false): T | undefined {
@@ -29,6 +30,7 @@ export class AppStorageService {
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
+      isSidebarOpen: this.getFromStorage('isSidebarOpen', true),
     };
   }
 

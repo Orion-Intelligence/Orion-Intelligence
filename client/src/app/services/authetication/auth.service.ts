@@ -136,6 +136,9 @@ export class AuthService {
   getOnboardingStatus(): boolean {
     return localStorage.getItem('onboarding') === 'true';
   }
+  getUsername(): string {
+    return localStorage.getItem('username') ?? '';
+  }
 
   isAuthenticated(): boolean {
     return !!this.getStoredToken();

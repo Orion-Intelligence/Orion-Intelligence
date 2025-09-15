@@ -1,13 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NgClass, NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
-import {DefacementModel, GenericModel, InsightCallbackModel, LeakModel} from '../../../shared/model/homepage/stats_insight.model';
-import {TooltipDirective} from '../../../shared/directive/tooltip-directive.directive';
-import {ScrollService} from '../../../shared/services/scroll.service';
-import {CustomizeBarChartComponent} from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
-import {GraphModel} from '../../../shared/model/charts/charts.model';
-import {GraphInsightCallbackModel} from '../../../shared/model/homepage/graph.insight.model';
-import {LatestDocument, LatestDocumentCallbackModel} from '../../../shared/model/homepage/document_insight.model';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgClass, NgForOf, NgIf, NgOptimizedImage } from '@angular/common';
+import { DefacementModel, GenericModel, InsightCallbackModel, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ScrollService } from '../../../shared/services/scroll.service';
+import { CustomizeBarChartComponent } from "../../../shared/partials/customize-bar-chart/customize-bar-chart.component";
+import { GraphModel } from '../../../shared/model/charts/charts.model';
+import { GraphInsightCallbackModel } from '../../../shared/model/homepage/graph.insight.model';
+import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
+import { AppService } from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-home-insight',
@@ -23,7 +24,7 @@ export class HomeInsightComponent implements OnInit {
   latestDocumentModelKeys: string[] = [];
   GraphData!: GraphModel[];
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, public appService: AppService) {
   }
 
   ngOnInit() {
@@ -69,12 +70,12 @@ export class HomeInsightComponent implements OnInit {
     return Array.isArray(model) ? model.slice(0, 4) : [];
   }
 
-  openReport(modelKey: string, hash: string, title:string) {
+  openReport(modelKey: string, hash: string, title: string) {
     const route = this.getModelRoute(modelKey, hash, title);
     this.router.navigateByUrl(route).then();
   }
 
-  getModelRoute(modelKey: string, hash: string, title:string): string {
+  getModelRoute(modelKey: string, hash: string, title: string): string {
     let model = this.formatModelKey(modelKey).toLowerCase();
     if (model === 'generic') {
       model = 'general';

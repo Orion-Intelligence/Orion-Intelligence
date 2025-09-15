@@ -8,13 +8,28 @@
 
 
   <ul class="sidebar__items">
-    <li class="sidebar__item">
-      <div (click)="onSectionSelected(category.HOMEPAGE)"
-        [ngClass]="{'active': (selectionStore.selectedSection$ | async) === null || (selectionStore.selectedSection$ | async) === category.HOMEPAGE || (selectionStore.selectedSection$ | async) === category.CONSOLIDATED}"
-        [queryParamsHandling]="'merge'" [routerLink]="'home'" class="sidebar__item-dropdown">
-        <img alt="Home" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/home.svg" width="20">Homepage
-      </div>
-    </li>
+    <ng-container *ngIf="authService.getRole() === 'profile'; else homeTemplate">
+      <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+        [icon]="'assets/images/sidebar/dump.svg'" [items]="prfileCategories" [routePrefix]="'profile'"
+        [title]="authService.getUsername()">
+      </app-dashboard-sidebar-items>
+    </ng-container>
+
+    <ng-template #homeTemplate>
+      <li class="sidebar__item">
+        <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{
+        'active':
+          (selectionStore.selectedSection$ | async) === null ||
+          (selectionStore.selectedSection$ | async) === category.HOMEPAGE ||
+          (selectionStore.selectedSection$ | async) === category.CONSOLIDATED
+      }" [queryParamsHandling]="'merge'" [routerLink]="'home'" class="sidebar__item-dropdown">
+          <img alt="Home" class="sidebar__icon" height="20" ngSrc="assets/images/sidebar/home.svg" width="20" />
+          Homepage
+        </div>
+      </li>
+    </ng-template>
+
 
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
       (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
@@ -54,11 +69,7 @@
       (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
       [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
       [title]="'Tenant Management'"></app-dashboard-sidebar-items>
-    <ng-container *ngIf="authService.getRole()==='profile'">
-      <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
-        [icon]="'assets/images/sidebar/dump.svg'" [items]="prfileCategories" [routePrefix]="'profile'"
-        [title]="'Profile Data'"></app-dashboard-sidebar-items></ng-container>
+
 
 
     <div class="sidebar__item">

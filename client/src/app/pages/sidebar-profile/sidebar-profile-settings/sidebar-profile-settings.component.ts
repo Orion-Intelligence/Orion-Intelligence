@@ -1,20 +1,19 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { OnboardingModel } from '../../shared/model/onboarding/onbording.model';
-import { ApiService } from '../../shared/services/api.service';
-import { AuthService } from '../../services/authetication/auth.service';
+import { OnboardingModel } from '../../../shared/model/onboarding/onbording.model';
+import { ApiService } from '../../../shared/services/api.service';
+import { AuthService } from '../../../services/authetication/auth.service';
 import { HttpHeaders } from '@angular/common/http';
 import { NgIf, NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { search_filter_keys, search_filter_labels } from '../../shared/constants/shared-enums';
+import { search_filter_keys, search_filter_labels } from '../../../shared/constants/shared-enums';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-profile',
+  selector: 'app-sidebar-profile-settings',
   imports: [NgIf, NgFor, CommonModule, FormsModule],
-  templateUrl: './profile.component.html',
-  styleUrl: './profile.component.css'
+  templateUrl: './sidebar-profile-settings.component.html',
 })
-export class ProfileComponent implements OnInit {
+export class SidebarProfileSettingsComponent implements OnInit {
   onboardingData?: OnboardingModel;
   showLeftFade = false;
   showRightFade = false;

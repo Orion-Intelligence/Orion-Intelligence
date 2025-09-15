@@ -24,7 +24,7 @@ export class LocalSettingsModel {
   iocExpanded: boolean = true;
   entityfilterCategories: Record<string, string[]> = {};
   entityFilterCondition: boolean = false;
-  onboarding: boolean = false;
+  isSidebarOpen: boolean = true;
 }
 
 export class ConfigSettings {

@@ -18,23 +18,43 @@
 
                     <div class="signup-container__form-group">
                         <label class="signup-container__label">Company Mail</label>
-                        <input [(ngModel)]="user.mail" id="id_companymail" placeholder="Enter your company mail"
-                            class="signup-container__input" name="companymail" required type="text" />
+                        <input [(ngModel)]="user.mail" (input)="onEmailInput(user.mail)"
+                            placeholder="Enter your company mail" class="signup-container__input" name="companymail"
+                            required type="email" />
+                        <span *ngIf="!isCompanyMail" class="validation-error">
+                            Please enter your company email (Gmail, Yahoo, etc. not allowed).
+                        </span>
                     </div>
-
                     <div class="signup-container__form-group">
                         <label class="signup-container__label">Password</label>
-                        <input [(ngModel)]="user.password" id="id_password" type="password"
-                            placeholder="Enter your password" class="signup-container__input" name="password" required
-                            type="password" />
+                        <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password"
+                            type="password" placeholder="Enter your password" class="signup-container__input"
+                            name="password" required />
+
+                        <div *ngIf="showPasswordMeter">
+                            <div class="password-strength-bar">
+                                <div class="strength-fill" [ngClass]="passwordStrength"
+                                    [style.width.%]="passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100">
+                                </div>
+                            </div>
+
+                            <ul class="password-checklist">
+                                <li [class.valid]="passwordChecks.length">At least 8 characters</li>
+                                <li [class.valid]="passwordChecks.lowercase">At least one lowercase letter</li>
+                                <li [class.valid]="passwordChecks.uppercase">At least one uppercase letter</li>
+                                <li [class.valid]="passwordChecks.number">At least one number</li>
+                                <li [class.valid]="passwordChecks.specialChar">At least one special character</li>
+                            </ul>
+                        </div>
                     </div>
                     <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
                         {{ errorMessage }} </p>
 
                     <div>
-                        <input [disabled]="!signUpForm.valid" [class.signup-container__button]="signUpForm.valid"
-                            [class.signup-container__button-disabled]="!signUpForm.valid" type="submit"
-                            value="Sign Up" />
+                        <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet|| !isCompanyMail"
+                            [class.signup-container__button]="signUpForm.valid && allPasswordRequirementsMet"
+                            [class.signup-container__button-disabled]="!signUpForm.valid || !allPasswordRequirementsMet|| !isCompanyMail"
+                            type="submit" value="Sign Up" />
                     </div>
                 </form>
 
