@@ -156,6 +156,7 @@ class _thehackernews(leak_extractor_interface, ABC):
                 m_leak_date=parsed_date,
             )
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="hackernews live",
             )
 

@@ -164,6 +164,7 @@ class _kyberturvallisuuskeskus(leak_extractor_interface, ABC):
                             m_content_type=["news", "tracking"],
                         )
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_team="kyberturvallisuuskeskus",
                             m_country=["finland"]
                         )

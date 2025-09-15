@@ -195,6 +195,7 @@ class _cert_pl(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="CERT Polska Team",
                     m_author=["CERT Author"],
                     m_country=["Poland"]

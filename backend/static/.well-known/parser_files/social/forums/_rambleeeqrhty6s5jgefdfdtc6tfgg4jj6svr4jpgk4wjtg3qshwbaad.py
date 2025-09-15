@@ -214,7 +214,9 @@ class _rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad(leak_extractor_i
                         m_message_sharable_link=page.url,
                         m_post_comments_count=str(count_comments),
                     )
-                    entity_data = entity_model()
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__
+                    )
                     self.append_leak_data(card_data, entity_data)
 
                 if page_count < max_page:

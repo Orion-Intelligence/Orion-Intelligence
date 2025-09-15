@@ -129,6 +129,7 @@ class _om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd(leak_extractor_i
                         m_websites=websites,
                     )
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_company_name=title,
                         m_team="anubis blog"
                     )

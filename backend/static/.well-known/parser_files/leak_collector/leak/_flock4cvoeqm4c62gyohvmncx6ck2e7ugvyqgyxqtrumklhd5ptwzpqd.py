@@ -147,6 +147,7 @@ class _flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd(leak_extractor_i
                             )
 
                             entity_data = entity_model(
+                                m_scrap_file=self.__class__.__name__,
                                 m_team="fsociety"
                             )
 

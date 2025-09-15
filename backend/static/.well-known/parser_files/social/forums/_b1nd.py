@@ -207,6 +207,7 @@ class _b1nd(leak_extractor_interface, ABC):
                                 m_post_comments_count = str(post_divs_count)
                             )
                             entity_data = entity_model(
+                                m_scrap_file=self.__class__.__name__,
                                 m_username=usernames[:15]
                             )
 

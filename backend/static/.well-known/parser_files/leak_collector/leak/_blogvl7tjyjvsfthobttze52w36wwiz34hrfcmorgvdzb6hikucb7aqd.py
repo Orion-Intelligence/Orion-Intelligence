@@ -161,6 +161,7 @@ class _blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_company_name=title,
                     m_team="money message"
                 )

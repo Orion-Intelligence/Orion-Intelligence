@@ -157,6 +157,7 @@ class _cert(leak_extractor_interface, ABC):
                         m_leak_date=date_obj,
                     )
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team="cert",
                         m_country=["iran"],
                     )

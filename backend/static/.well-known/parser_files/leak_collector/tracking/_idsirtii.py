@@ -156,6 +156,7 @@ class _idsirtii(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="Indonesia Security Incident Response Team",
                     m_author=[admin],
                     m_country=["indonesia"]

@@ -23,7 +23,7 @@ class _mastodon(leak_extractor_interface, ABC):
         self._entity_data = []
         self.soup = None
         self._initialized = None
-        self.m_seed_url = ""
+        self.m_seed_url = " https://mastodon.social/@falconfeedsio/"
         self._redis_instance = redis_controller()
         self._is_crawled = False
         self._helper_methods = MastodonHelperMethods()
@@ -80,17 +80,9 @@ class _mastodon(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     def parse_leak_data(self, page):
-        selector = '.account__header'
-        for attempt in range(3):
-            try:
-                page.wait_for_selector(selector, timeout=30000)
-                break
-            except Exception:
-                if attempt == 2:
-                    raise
-                page.reload(wait_until="domcontentloaded")
-
+        page.wait_for_load_state("domcontentloaded")
         profile_info = self._helper_methods.get_profile_info(page)
+
         account_url = helper_method.generate_data_hash(self.seed_url)
         username = profile_info.get("username", "")
         existing_ids = set()
@@ -153,6 +145,7 @@ class _mastodon(leak_extractor_interface, ABC):
                     m_post_comments=post.get("comments", None),
                 )
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_username=[post.get("username", "")],
                 )
 

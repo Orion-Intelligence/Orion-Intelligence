@@ -133,6 +133,7 @@ class _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="Weyhro",
                 )
 

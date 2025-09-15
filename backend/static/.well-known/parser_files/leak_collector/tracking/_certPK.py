@@ -1,5 +1,5 @@
-import pdfplumber
-import requests
+import datetime, re, pdfplumber
+import io
 from abc import ABC
 from typing import List
 from playwright.sync_api import Page
@@ -9,12 +9,12 @@ from crawler.crawler_instance.local_shared_model.data_model.leak_model import le
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.shared.helper_method import helper_method
+
 
 class _certPK(leak_extractor_interface, ABC):
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, callback=None):
         if cls._instance is None:
             cls._instance = super(_certPK, cls).__new__(cls)
             cls._instance._initialized = False
@@ -24,6 +24,8 @@ class _certPK(leak_extractor_interface, ABC):
         self.callback = callback
         self._card_data = []
         self._entity_data = []
+        self.soup = None
+        self._initialized = None
         self._redis_instance = redis_controller()
         self._is_crawled = False
 
@@ -39,20 +41,18 @@ class _certPK(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://pkcert.gov.pk/advisories.asp"
+        return "https://pkcert.gov.pk/get-advisories.asp"
 
     @property
     def base_url(self) -> str:
         return "https://pkcert.gov.pk"
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-        return self._redis_instance.invoke_trigger(
-            command, [key + self.__class__.__name__, default_value, expiry]
-        )
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_threat_type=ThreatType.NEWS,m_fetch_proxy=FetchProxy.NONE,m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_threat_type=ThreatType.TRACKING, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_javascript=False, m_resoource_block=False)
 
     @property
     def card_data(self) -> List[RuleModel]:
@@ -75,60 +75,92 @@ class _certPK(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     def parse_leak_data(self, page: Page):
-        try:
-            page.goto(self.seed_url, wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_load_state("networkidle")
-        except Exception as e:
-            return
+        seen_urls = set()
+        start_year = 2020
+        current_year = datetime.datetime.now().year
+        any_success = False
 
-        for num in range(40, 3, -1):
-            url = f"https://pkcert.gov.pk/advisory/25/{num}.pdf"
-            self._process_pdf(url, year=2025, num=num)
+        for year in range(start_year, current_year + 1):
+            cat_id = year % 100
+            url = self.seed_url + f"?catId={cat_id}"
+            urls_to_process = []
 
-        for num in range(23, 0, -1):
-            url = f"https://pkcert.gov.pk/advisory/24-{num}.pdf"
-            self._process_pdf(url, year=2024, num=num)
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                anchors = page.locator('div.card-2 a[href$=".pdf"]')
+                count = anchors.count()
+                for i in range(count):
+                    href = anchors.nth(i).get_attribute("href") or ""
+                    if not href:
+                        continue
+                    if not href.startswith("http"):
+                        href = self.base_url + href.lstrip("/")
+                    if href in seen_urls:
+                        continue
+                    seen_urls.add(href)
 
-        self._is_crawled = True
+                    title_text = anchors.nth(i).inner_text().strip()
+                    m = re.search(r'(\d+)(?:\.pdf)?$', href)
+                    num = m.group(1) if m else "unknown"
+                    key = f"ADVISORY_PARSED_{year}_{num}"
+                    already_parsed = self.invoke_db(command=0, key=key, default_value=False)
+                    if not already_parsed:
+                        urls_to_process.append((href, year, num, key, title_text))
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} while fetching advisory list {year}")
 
-    def _process_pdf(self, url: str, year: int, num: int):
-        try:
+            if year == 2025:
+                if not any_success:
+                    pass
+                else:
+                    urls_to_process = urls_to_process[:6]
 
-            r = requests.get(url, timeout=30)
-            if r.status_code != 200:
-                return
+            for href, year, num, key, title_text in urls_to_process:
+                try:
+                    if href.lower().endswith(".pdf"):
+                        response = page.request.get(href, timeout=60000)
+                    else:
+                        page.goto(href, wait_until="load", timeout=60000)
+                        response = page.request.get(href, timeout=60000)
 
-            with open("temp.pdf", "wb") as f:
-                f.write(r.content)
+                    if response.status != 200 or "application/pdf" not in response.headers.get("content-type", "").lower():
+                        continue
 
-            all_text = []
-            with pdfplumber.open("temp.pdf") as pdf:
-                for page in pdf.pages:
-                    text = page.extract_text()
-                    if text:
-                        all_text.append(text.strip())
+                    all_text = ""
+                    try:
+                        with pdfplumber.open(io.BytesIO(response.body())) as pdf:
+                            for p in pdf.pages:
+                                text = p.extract_text()
+                                if text:
+                                    all_text += text + "\n"
+                    except:
+                        continue
 
-            if not all_text:
-                return
+                    if not all_text.strip():
+                        continue
 
-            heading = all_text[0].split("\n")[0]
-            content = "\n".join(all_text)
+                    heading = title_text or f"Advisory {year}-{num}"
+                    card = leak_model(
+                        m_screenshot="",
+                        m_title=heading,
+                        m_weblink=[href],
+                        m_dumplink=[href],
+                        m_url=href,
+                        m_base_url=self.base_url,
+                        m_content=all_text,
+                        m_network="clearnet",
+                        m_important_content=all_text[:200],
+                        m_content_type=["tracking"],
+                        m_leak_date=None,
+                    )
+                    entity = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_name=f"PKCERT Advisory {year}-{num}"
+                    )
+                    self.append_leak_data(card, entity)
 
-            card = leak_model(
-                m_screenshot="",
-                m_title=heading,
-                m_weblink=[url],
-                m_dumplink=[url],
-                m_url=url,
-                m_base_url=self.base_url,
-                m_content=content,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=content,
-                m_content_type=["news"],
-                m_leak_date=None,
-            )
-            entity_data = entity_model(m_team="pkcert advisories")
-            self.append_leak_data(card, entity_data)
+                    self.invoke_db(command=1, key=key, default_value=True)
+                    any_success = True
 
-        except Exception as e:
-            log.g().e(f"SCRIPT ERROR {e} " + str(self.__class__.__name__))
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

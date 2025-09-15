@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta, UTC
+from datetime import datetime
 from abc import ABC
 from typing import List
 
-from crawler.crawler_instance.genbot_service.helpers.reddit.reddit_helper_method import RedditHelperMethod
+from crawler.crawler_instance.genbot_service.helpers.twitter.tweet_helper_methods import TweetHelperMethods
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -13,7 +13,7 @@ from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, R
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
-class _reddit(leak_extractor_interface, ABC):
+class _twitter(leak_extractor_interface, ABC):
     _instance = None
 
     def __init__(self, callback=None):
@@ -22,17 +22,17 @@ class _reddit(leak_extractor_interface, ABC):
         self._entity_data = []
         self.soup = None
         self._initialized = None
+        self.m_seed_url = ""
         self._redis_instance = redis_controller()
         self._is_crawled = False
-        self.m_seed_url = "https://www.reddit.com/r/threatintel/new"
-        self._subreddit_metadata = {}
+        self._helper_methods = TweetHelperMethods()
 
     def init_callback(self, callback=None):
         self.callback = callback
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(_reddit, cls).__new__(cls)
+            cls._instance = super(_twitter, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
@@ -42,7 +42,7 @@ class _reddit(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://www.reddit.com/r/threatintel/new"
+        return self.m_seed_url
 
     @property
     def developer_signature(self) -> str:
@@ -50,15 +50,11 @@ class _reddit(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-        return "https://www.reddit.com"
+        return "https://www.x.com"
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(
-            m_fetch_proxy=FetchProxy.NONE,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
-            m_threat_type=ThreatType.REDDIT
-        )
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.TWITTER)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -69,19 +65,18 @@ class _reddit(leak_extractor_interface, ABC):
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-        return self._redis_instance.invoke_trigger(
-            command, [key + self.__class__.__name__, default_value, expiry]
-        )
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-        return "https://www.reddit.com/contact"
+        return "https://x.com/contact"
 
     def append_leak_data(self, leak: social_model, entity: entity_model):
         self._card_data.append(leak)
         self._entity_data.append(entity)
-        if self.callback and self.callback():
-            self._card_data.clear()
-            self._entity_data.clear()
+        if self.callback:
+            if self.callback():
+                self._card_data.clear()
+                self._entity_data.clear()
 
     @staticmethod
     def safe_find(page, selector, attr=None):
@@ -93,79 +88,52 @@ class _reddit(leak_extractor_interface, ABC):
             return None
 
     @staticmethod
-    def data_parsre(s):
+    def _parse_iso(s):
         return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
 
     def parse_leak_data(self, page):
+        page.wait_for_load_state("networkidle")
         account_url = helper_method.generate_data_hash(self.seed_url)
-        try:
-            subreddit_name = RedditHelperMethod.extract_subreddit_name(self.seed_url)
-        except Exception as _:
-            return
+        username = self._helper_methods.extract_username(self.seed_url)
+        existing_ids = set()
 
-        self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
-
-        if not self.is_crawled:
-            desired_posts = 30
-            max_comments = 5
-            one_year_ago = datetime.now(UTC) - timedelta(days=60)
-            posts = RedditHelperMethod.scroll_and_collect_posts(
-                page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago
-            )
-        else:
-            desired_posts = 20
-            max_comments = 5
-            one_week = datetime.now(UTC) - timedelta(days=7)
-            posts = RedditHelperMethod.scroll_and_collect_posts(
-                page, subreddit_name, desired_posts, max_scrolls=100, filter_date=one_week
-            )
-
+        desired_count = 20 if self.is_crawled else 100
         last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, "")
 
-        ldt = self.data_parsre(last_seen_date_str)
-        new_posts = [p for p in posts if p.get("timestamp") and (self.data_parsre(p["timestamp"]) and (not ldt or self.data_parsre(p["timestamp"]) > ldt))]
+        last_seen_dt = self._parse_iso(last_seen_date_str)
 
-        for post in new_posts:
-            comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
-            locator = page.locator('div[property="schema:articleBody"]').first
-            post['content'] = ""
-            if locator.count():
-                post['content'] = locator.inner_text(timeout=0)
+        tweets = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
+        new_tweets = []
+        for t in tweets:
+            td = self._parse_iso(t.get("date"))
+            if td and (not last_seen_dt or td > last_seen_dt):
+                new_tweets.append(t)
 
-            post['comments'] = comments
-
-            parsed_date = None
-            if post.get('timestamp'):
-                try:
-                    parsed_date = datetime.fromisoformat(post['timestamp'].replace('Z', '+00:00')).date()
-                except:
-                    parsed_date = None
-
-            full_content = "\n".join(item['content'] for item in post['comments'])
-            if post.get('content'):
-                full_content += f"{post['content']}"
-            full_content = full_content.replace("\n\n", "\n")
-
+        for tweet in new_tweets:
+            parsed_date = self._parse_iso(tweet.get("date")).date() if tweet.get("date") else None
             card_data = social_model(
-                m_title=post['title'],
-                m_channel_url=account_url,
-                m_sender_name=post.get('username') or "unknown",
-                m_message_sharable_link=post['url'],
-                m_weblink=post.get('weblinks', []),
-                m_content=full_content[:500],
+                m_channel_url=self.seed_url,
+                m_sender_name=f"@{username}",
+                m_message_sharable_link=tweet['url'],
+                m_weblink=tweet.get('weblink', []),
+                m_content=tweet['content'][:500],
                 m_content_type=["social_collector"],
                 m_network="clearnet",
                 m_message_date=parsed_date,
-                m_message_id=post['id'],
-                m_platform="reddit",
-                m_group_name=subreddit_name,
+                m_message_id=tweet['id'],
+                m_platform="twitter",
+                m_likes=str(tweet.get('likes') or 0),
+                m_comment_count=str(tweet['comment_count']),
+                m_retweets=str(tweet['retweets']),
+                m_views=str(tweet['views']),
             )
-
             entity_data = entity_model(
-                m_name=post.get('username') or "unknown",
+                m_scrap_file=self.__class__.__name__,
+                m_name=username,
             )
 
             self.append_leak_data(card_data, entity_data)
 
-        if new_posts:
-            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, new_posts[0].get("timestamp", ""))
+        if new_tweets:
+            max_seen_date = new_tweets[0].get("date", "")
+            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, max_seen_date)

@@ -135,6 +135,7 @@ class _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_location=[title_data["location"]] if title_data["location"] else [],
                     m_country=[title_data["location"]],
                     m_company_name=title_data["title"],

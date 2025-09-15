@@ -155,6 +155,7 @@ class _z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid(leak_extractor_i
                             m_leak_date=date,
                         )
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_team="dragon force",
                             m_location=[address] if address else [],
                             m_company_name=title,

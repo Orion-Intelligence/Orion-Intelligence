@@ -186,6 +186,7 @@ class _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd(leak_extractor_i
                             )
 
                             entity_data = entity_model(
+                                m_scrap_file=self.__class__.__name__,
                                 m_company_name=title,
                                 m_team="lynx"
                             )

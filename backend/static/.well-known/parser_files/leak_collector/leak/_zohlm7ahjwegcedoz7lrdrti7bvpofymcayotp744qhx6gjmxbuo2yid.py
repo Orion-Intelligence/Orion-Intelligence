@@ -178,6 +178,7 @@ class _zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="ransome house",
                     m_social_media_profiles=social_links,
                 )

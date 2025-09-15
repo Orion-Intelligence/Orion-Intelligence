@@ -145,6 +145,7 @@ class _xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd(leak_extractor_i
                             )
 
                             entity_data = entity_model(
+                                m_scrap_file=self.__class__.__name__,
                                 m_team="unknown"
                             )
                             self.append_leak_data(card_data, entity_data)

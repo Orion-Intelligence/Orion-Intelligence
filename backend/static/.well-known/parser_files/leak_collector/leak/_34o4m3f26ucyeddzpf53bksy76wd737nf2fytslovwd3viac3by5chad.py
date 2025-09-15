@@ -149,6 +149,7 @@ class _34o4m3f26ucyeddzpf53bksy76wd737nf2fytslovwd3viac3by5chad(leak_extractor_i
                         )
 
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_location=location.replace(" ", "").split(","),
                             m_company_name=company_name,
                             m_industry=industry,

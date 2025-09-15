@@ -155,6 +155,7 @@ class _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_location=[address] if address != "N/A" else [],
                     m_company_name=title,
                     m_industry=industry,

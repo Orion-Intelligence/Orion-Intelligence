@@ -58,7 +58,7 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -114,8 +114,10 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
 
             for idx, url in enumerate(all_links):
                 try:
+                    if not url.startswith(self.base_url):
+                        continue
+
                     page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                    page.wait_for_selector("div.article_section h1",timeout=3000)
 
                     title = (
                         page.locator("div.article_section h1").first.inner_text()
@@ -143,7 +145,10 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
                         m_content_type=["news"],
                     )
 
-                    entity_data = entity_model(m_team="bleeping computer")
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="bleeping computer"
+                    )
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

@@ -161,8 +161,8 @@ class _beast6azu4f7fxjakiayhnssybibsgjnmy77a6duufqw5afjzfjhzuqd(leak_extractor_i
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="BEAST",
-
             )
 
             self.append_leak_data(card_data, entity_data)

@@ -153,6 +153,7 @@ class _kawasa2qo7345dt7ogxmx7qmn6z2hnwaoi3h5aeosupozkddqwp6lqqd(leak_extractor_i
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="Kawa4096"
             )
 

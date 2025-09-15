@@ -131,6 +131,7 @@ class _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid(leak_extractor_i
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="Silent Blog"
             )
 

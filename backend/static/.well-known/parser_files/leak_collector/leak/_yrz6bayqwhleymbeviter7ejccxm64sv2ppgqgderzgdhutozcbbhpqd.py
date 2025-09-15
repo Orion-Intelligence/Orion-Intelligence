@@ -156,6 +156,7 @@ class _yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_country=[country],
                         m_company_name=page.title(),
                         m_team="apos blog"

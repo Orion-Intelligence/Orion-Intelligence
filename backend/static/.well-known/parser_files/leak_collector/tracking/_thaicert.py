@@ -58,7 +58,7 @@ class _thaicert(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_javascript=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -99,12 +99,11 @@ class _thaicert(leak_extractor_interface, ABC):
             page.goto(current_url, timeout=30000)
             page.wait_for_selector("header.entry-header h2.entry-title a[href]", timeout=10000)
 
-
             post_links = []
             for link in page.locator("header.entry-header h2.entry-title a[href]").all():
                 href = link.get_attribute("href")
                 if href:
-                    post_links.append(href)
+                    post_links.append(href.strip())
 
             if not post_links:
                 break
@@ -161,6 +160,7 @@ class _thaicert(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="ThaiCERT - Thailand Computer Emergency Response Team",
                     m_author=["ThaiCERT"],
                     m_country=["Thailand"]

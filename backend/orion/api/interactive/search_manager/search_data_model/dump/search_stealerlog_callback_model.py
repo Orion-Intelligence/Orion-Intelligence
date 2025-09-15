@@ -11,9 +11,13 @@ class suggestion(BaseModel):
 
 
 class stealerlog_result_item(BaseModel):
-    url: Optional[str] = None
-    username: Optional[str] = None
-    domain: Optional[str] = None
+    url: Optional[List[str]] = None
+    email: Optional[List[str]] = None
+    username: Optional[List[str]] = None
+    domain: Optional[List[str]] = None
+    ip: Optional[str] = None
+    ioc: Optional[List[str]] = None
+    type: Optional[str] = None
     password: Optional[str] = None
     log_hash: Optional[str] = None
     timestamp: Optional[str] = None

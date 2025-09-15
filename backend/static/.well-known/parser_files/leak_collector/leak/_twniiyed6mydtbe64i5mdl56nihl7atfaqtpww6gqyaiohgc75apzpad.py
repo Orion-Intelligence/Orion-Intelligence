@@ -172,6 +172,7 @@ class _twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="J Group"
                 )
 

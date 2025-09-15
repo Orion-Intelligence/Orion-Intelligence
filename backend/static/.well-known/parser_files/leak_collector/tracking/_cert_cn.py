@@ -121,6 +121,7 @@ class _cert_cn(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="National Computer Network Emergency Response Technical Team",
                     m_country=["CHINA"],
                     m_author=["CNCERT/CC"]

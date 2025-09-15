@@ -123,6 +123,7 @@ class _imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid(leak_extractor_i
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="imn crew",
             )
 

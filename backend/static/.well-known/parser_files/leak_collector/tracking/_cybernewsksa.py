@@ -132,6 +132,7 @@ class _cybernewsksa(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_company_name="National Cybersecurity Authority",
                         m_country=["Saudi Arabia"],
                         m_team="NCA KSA Cyber"

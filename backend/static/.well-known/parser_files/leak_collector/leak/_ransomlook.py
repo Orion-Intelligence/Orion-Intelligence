@@ -140,6 +140,7 @@ class _ransomlook(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team="ransom look"
                     )
 

@@ -45,6 +45,7 @@ class _zfytizegsze6uiswodhbaalyy5rawaytv2nzyzdkt3susbewviqqh7yd(leak_extractor_i
     def seed_url(self) -> str:
         return "http://zfytizegsze6uiswodhbaalyy5rawaytv2nzyzdkt3susbewviqqh7yd.onion"
 
+
     @property
     def developer_signature(self) -> str:
         return "name:signature"
@@ -119,6 +120,7 @@ class _zfytizegsze6uiswodhbaalyy5rawaytv2nzyzdkt3susbewviqqh7yd(leak_extractor_i
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="WarLock",
             )
 

@@ -27,16 +27,12 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   firstTrigger: boolean = true;
   user: any;
   url: any;
+  type: string;
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
 
-  constructor(
-    protected helperService: HelperService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
-    private dashboardService: DashboardService
-  ) {
+  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private dashboardService: DashboardService) {
+    this.type = this.route.snapshot.data['type'];
   }
 
   get currentResultCount(): number {
@@ -56,9 +52,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.url = params['url'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
 
-        if (this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
+        if (this.dashboardService.consolidatedParamModel.category ==this.type && this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
           this.isLoading = false;
-        } else {
+        } else if(this.dashboardService.consolidatedParamModel.category !=this.type){
           this.cdr.detectChanges();
           this.fetchSearchResults();
         }
@@ -73,6 +69,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   fetchSearchResults(reset = true): void {
     this.dashboardService.consolidatedParamModel.url = this.url
     this.dashboardService.consolidatedParamModel.user = this.user
+    this.dashboardService.consolidatedParamModel.category = this.type
+
     if (this.isLoading) return;
 
     this.isLoading = true;
@@ -88,10 +86,10 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-    if (!this.dashboardService.consolidatedParamModel.user){
+    if (!this.dashboardService.consolidatedParamModel.user) {
       this.dashboardService.consolidatedParamModel.user = ""
     }
-    if (!this.dashboardService.consolidatedParamModel.url){
+    if (!this.dashboardService.consolidatedParamModel.url) {
       this.dashboardService.consolidatedParamModel.url = ""
     }
 

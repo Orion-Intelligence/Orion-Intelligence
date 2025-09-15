@@ -52,7 +52,7 @@ class _hackread(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.NEWS)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.NEWS)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -101,7 +101,8 @@ class _hackread(leak_extractor_interface, ABC):
 
             for idx, link_url in enumerate(urls_to_visit):
                 try:
-                    page.goto(link_url,timeout=10000)
+                    page.goto(link_url)
+                    page.wait_for_load_state("domcontentloaded")
 
                     if page.locator("h1.cs-entry__title.cs-entry__title-line").count():
                         title = page.locator("h1.cs-entry__title.cs-entry__title-line").inner_text()
@@ -134,11 +135,14 @@ class _hackread(leak_extractor_interface, ABC):
                         m_content_type=['news'],
                     )
 
-                    entity_data = entity_model(m_team="hackread")
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="hackread"
+                    )
                     self.append_leak_data(card_data, entity_data)
 
-                except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                except Exception as _:
+                    pass
 
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

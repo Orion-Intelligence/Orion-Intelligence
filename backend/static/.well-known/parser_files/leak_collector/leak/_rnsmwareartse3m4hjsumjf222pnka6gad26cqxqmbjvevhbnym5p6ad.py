@@ -144,6 +144,7 @@ class _rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad(leak_extractor_i
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_company_name=title,
                         m_team="run some wares"
                     )

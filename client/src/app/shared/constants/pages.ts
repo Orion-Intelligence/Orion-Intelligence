@@ -75,4 +75,5 @@ export enum DumpSubCategory {
 
 export enum StealerlogsSubCategory {
   CREDENTIAL = 'Credential',
+  LOGS = 'Logs',
 }

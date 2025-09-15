@@ -163,6 +163,7 @@ class _worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_company_name=title_name if title_name else None,
                     m_team="worldleak",
                     m_employee_count=employees,

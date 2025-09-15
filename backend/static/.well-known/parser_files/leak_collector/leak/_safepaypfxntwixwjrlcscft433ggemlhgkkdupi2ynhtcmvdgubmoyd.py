@@ -177,6 +177,7 @@ class _safepaypfxntwixwjrlcscft433ggemlhgkkdupi2ynhtcmvdgubmoyd(leak_extractor_i
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="safepay",
                     m_country=[country] if country != "Unknown" else [],
 

@@ -109,5 +109,8 @@ class _4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd(leak_extractor_i
                 m_message_sharable_link=full_href,
                 m_post_comments_count=str(content_div_count),
             )
-            entity_data = entity_model(m_name=m_username)
+            entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
+                m_name=m_username
+            )
             self.append_leak_data(card_data, entity_data)

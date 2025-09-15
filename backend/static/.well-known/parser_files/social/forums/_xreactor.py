@@ -154,6 +154,7 @@ class _xreactor(leak_extractor_interface, ABC):
             m_post_comments_count=str(comments_count),
         )
         entity_data = entity_model(
+            m_scrap_file=self.__class__.__name__,
             m_author=list(usernames),
             m_hashtags=hashtags
         )

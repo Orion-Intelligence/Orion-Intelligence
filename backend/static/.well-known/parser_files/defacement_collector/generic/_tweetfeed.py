@@ -161,6 +161,7 @@ class _tweetfeed(leak_extractor_interface, ABC):
                         )
 
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_ip=[ip_val] if ip_val else [],
                             m_weblink=[val] if not ip_val and self.is_domain_or_url(val) else [],
                             m_team=user_text.strip(),

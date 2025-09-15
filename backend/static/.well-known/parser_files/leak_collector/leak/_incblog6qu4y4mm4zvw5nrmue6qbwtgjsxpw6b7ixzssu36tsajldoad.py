@@ -53,7 +53,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_resoource_block=False, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -127,14 +127,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                     title = item["title"]
                     weblink = item["weblink"]
 
-                    page.wait_for_selector("ul.new__el", timeout=15000)
-
-                    try:
-                        date_element = page.query_selector("div.text-muted span:nth-child(2)")
-                        date_raw = date_element.inner_text().strip() if date_element else None
-                        date = datetime.strptime(date_raw.split(" ")[0], "%Y-%m-%d").date() if date_raw else None
-                    except Exception:
-                        date = None
+                    page.wait_for_selector("ul.new__el", timeout=30000)
 
                     description_elements = page.query_selector_all("span.text-white.text-sm.break-words")
                     description = " ".join(
@@ -179,6 +172,7 @@ class _incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad(leak_extractor_i
                         m_leak_date=parsed_date.date(),
                     )
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team="inc ransome",
                         m_company_name=title,
                         m_industry=industry,

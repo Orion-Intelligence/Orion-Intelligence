@@ -165,6 +165,7 @@ class _ddosecrets(leak_extractor_interface, ABC):
 
                 country = " - ".join(countries) if countries else None
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_attacker=[sources],
                     m_location=countries,
                     m_country=[country] or [],

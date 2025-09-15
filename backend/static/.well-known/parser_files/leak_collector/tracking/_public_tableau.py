@@ -124,7 +124,7 @@ class _public_tableau(leak_extractor_interface, ABC):
             try:
                 page.mouse.move(x_position, y_position)
                 page.evaluate(f'moveFakeCursor({x_position}, {y_position});')
-                page.wait_for_selector(".tab-tooltipContainer", timeout=5000)
+                page.wait_for_selector(".tab-tooltipContainer", timeout=30000)
                 tooltip_element = page.query_selector(".tab-tooltipContainer")
                 if not tooltip_element:
                     continue
@@ -145,7 +145,6 @@ class _public_tableau(leak_extractor_interface, ABC):
                             val = tds[2].get_text(strip=True)
                             data_dict[key] = val
 
-                base_url = self.base_url
                 for table in tables:
                     for tr in table.find_all("tr"):
                         tds = tr.find_all("td")
@@ -190,6 +189,7 @@ class _public_tableau(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_country=["United States"],
                     m_company_name=company_name,
                     m_states=[data_dict["Breach Location State"]] if "Breach Location State" in data_dict else [],

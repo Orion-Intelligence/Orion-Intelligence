@@ -208,7 +208,9 @@ class _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad(leak_extractor_i
                         m_message_sharable_link=page.url,
                         m_post_comments_count=str(count_comments)
                     )
-                    entity_data = entity_model()
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__
+                    )
                     self.append_leak_data(card_data, entity_data)
 
                 if not latest_date:

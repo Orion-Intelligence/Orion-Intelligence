@@ -134,6 +134,7 @@ class ELASTIC_ENUMS:
                 "m_meta_description": {"type": "text"},
                 "m_content": {"type": "text"},
                 "m_update_date": {"type": "date"},
+
                 "m_creation_date": {"type": "date"},
                 "m_content_type": {"type": "keyword"},
 
@@ -536,6 +537,7 @@ class ELASTIC_ENUMS:
             }
         }
     }
+
     mapping_stealer_log_model = {
         "settings": {
             "number_of_shards": 1,
@@ -561,34 +563,22 @@ class ELASTIC_ENUMS:
         "mappings": {
             "dynamic": True,
             "properties": {
-                "username": {
-                    "type": "keyword"
-                },
-                "domain": {
-                    "type": "keyword"
-                },
-                "password": {
-                    "type": "keyword",
-                    "index": False,
-                    "doc_values": False
-                },
+                "username": {"type": "keyword"},
+                "email": {"type": "keyword"},
+                "ip": {"type": "keyword"},
+                "domain": {"type": "keyword"},
+                "password": {"type": "keyword", "index": False, "doc_values": False},
                 "url": {
                     "type": "text",
                     "analyzer": "url_path_analyzer",
                     "search_analyzer": "url_path_analyzer",
-                    "fields": {
-                        "raw": {"type": "keyword"}
-                    }
+                    "fields": {"raw": {"type": "keyword"}}
                 },
-                "log_hash": {
-                    "type": "keyword"
-                },
-                "timestamp": {
-                    "type": "date"
-                },
-                "m_hash": {
-                    "type": "keyword"
-                }
+                "log_hash": {"type": "keyword"},
+                "timestamp": {"type": "date"},
+                "m_hash": {"type": "keyword"},
+                "ioc": {"type": "keyword"},
+                "type": {"type": "keyword"}
             }
         }
     }

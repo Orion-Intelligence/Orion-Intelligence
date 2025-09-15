@@ -120,6 +120,7 @@ class _akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad(leak_extractor_i
                             )
 
                             entity_data = entity_model(
+                                m_scrap_file=self.__class__.__name__,
                                 m_team="akira",
                             )
 

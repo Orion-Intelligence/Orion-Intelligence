@@ -135,6 +135,7 @@ class _csidb(leak_extractor_interface, ABC):
                 )
 
                 entity = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_company_name=p_title,
                     m_country=[p_country],
                     m_location=[p_country],

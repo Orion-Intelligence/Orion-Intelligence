@@ -140,6 +140,7 @@ class _j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad(leak_extractor_i
                         )
 
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_company_name=company,
                             m_location=[country],
                             m_country=[country],

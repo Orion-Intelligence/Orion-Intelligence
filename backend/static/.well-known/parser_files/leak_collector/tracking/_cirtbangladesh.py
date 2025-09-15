@@ -31,6 +31,9 @@ class _cirtbangladesh(leak_extractor_interface, ABC):
         self._is_crawled = False
         self._initialized = True
 
+    def init_callback(self, callback=None):
+        self.callback = callback
+
     @property
     def seed_url(self):
         return "https://www.cirt.gov.bd/news/"
@@ -45,7 +48,7 @@ class _cirtbangladesh(leak_extractor_interface, ABC):
 
     @property
     def developer_signature(self) -> str:
-        return "Muhammad Abdullah"
+        return "Muhammad Abdullah:owGbwMvMwMEYdOzLoajv79gZTxskMWRU6bi8370 / LLUoMy0zNUUhJbUsNSe / ILXISsG3NCMxNzcxRcExKaU0Jycxg5erYzMLAyMHg6yYIkuQ4M9 / l7siYpT2b / oFM5GVCWQcAxenAEykRYSFYcHRJWUetXMKmo78Ec5ueHZq52rX / vuHpJTf / G31ULsywdC23 + fM4tmaUbP2cXYm7y9kPHnAdbXgspWerkeXW8ZYmm2xrpdTF / Yyvi0aGdn5iMne8PQGgSgWxeOMKUo8IQvL3W1PN4gtYYkxfr6kMZ3t0tmSRR2qnu / fZ2yfqfdm9szOQpt2AA ===weDX"
 
     @property
     def card_data(self):
@@ -60,9 +63,7 @@ class _cirtbangladesh(leak_extractor_interface, ABC):
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-        return self._redis_instance.invoke_trigger(
-            command, [key + self.__class__.__name__, default_value, expiry]
-        )
+        return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry] )
 
     def contact_page(self) -> str:
         return self.base_url
@@ -81,47 +82,41 @@ class _cirtbangladesh(leak_extractor_interface, ABC):
     def parse_leak_data(self, page: Page):
         try:
             all_links = set()
-            if self._is_crawled:
-                page_num = 6
-            else:
-                page_num = 1
+            max_pages = 10 if self._is_crawled else 8
 
-            for page_num in range(1, page_num):
-                if page_num == 1:
-                    url = self.seed_url
-                else:
-                    url = f"{self.base_url}/news/page/{page_num}/"
+            for num in range(1, max_pages):
+                url = self.seed_url if num == 1 else f"{self.base_url}/news/page/{num}/"
+                try:
+                    page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                    page.wait_for_load_state("networkidle")
 
-
-                page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                page.wait_for_load_state("networkidle")
-                page.wait_for_timeout(2000)
-
-                article_blocks = page.query_selector_all("div.col-md-11.omega")
-                for block in article_blocks:
                     try:
-                        a_tag = block.query_selector("h3 > a")
-                        if a_tag:
-                            title_text = a_tag.inner_text().strip()
-                            href = a_tag.get_attribute("href")
-                            if href and self.is_english(title_text):
-                                full_url = urljoin(self.base_url, href)
-                                all_links.add(full_url)
+                        page.wait_for_selector("div.col-md-11.omega", timeout=60000)
+                        article_blocks = page.query_selector_all("div.col-md-11.omega")
                     except:
-                        pass
+                        article_blocks = page.query_selector_all("div.col-md-11.omega")
 
+                    for block in article_blocks:
+                        try:
+                            a_tag = block.query_selector("h3 > a")
+                            if a_tag:
+                                title_text = a_tag.inner_text().strip()
+                                href = a_tag.get_attribute("href")
+                                if href and self.is_english(title_text):
+                                    full_url = urljoin(self.base_url, href)
+                                    all_links.add(full_url)
+                        except:
+                            pass
 
+                except Exception as e:
+                    pass
 
             articles = sorted(all_links)[:25]
 
-
             for url in articles:
                 try:
-
                     page.goto(url, wait_until="domcontentloaded", timeout=30000)
                     page.wait_for_load_state("networkidle")
-                    page.wait_for_timeout(1000)
-
 
                     title = "No Title"
                     for sel in ["h1", ".page-title", ".article-title", "h2", "h3"]:
@@ -155,15 +150,17 @@ class _cirtbangladesh(leak_extractor_interface, ABC):
                         els = page.query_selector_all(sel)
                         if els:
                             for p in els:
-                                txt = p.inner_text().strip()
+                                txt = p.text_content().strip()
                                 if len(txt) > 20:
                                     paragraphs.append(txt)
+
                             if paragraphs:
                                 break
+
                     if not paragraphs:
                         mc = page.query_selector("main") or page.query_selector("article")
                         if mc:
-                            paras = [p.strip() for p in mc.inner_text().split("\n\n") if len(p.strip()) > 20]
+                            paras = [p.strip() for p in mc.text_content().splitlines() if len(p.strip()) > 20]
                             paragraphs.extend(paras)
 
                     content = "\n\n".join(paragraphs) if paragraphs else "No content"
@@ -180,17 +177,20 @@ class _cirtbangladesh(leak_extractor_interface, ABC):
                         m_content_type=["news", "tracking"],
                         m_leak_date=date_obj
                     )
+
                     entity = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_company_name="BGD e-GOV CIRT",
                         m_country=["Bangladesh"],
                         m_team="Cyber Threat Intelligence Unit"
                     )
+
                     self.append_leak_data(leak, entity)
 
                 except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} [{self.__class__.__name__}]")
+                    pass
 
             self._is_crawled = True
 
         except Exception as ex:
-            log.g().e(f"SCRIPT ERROR {ex} [{self.__class__.__name__}]")
+            log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")

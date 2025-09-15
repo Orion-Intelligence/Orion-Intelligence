@@ -119,13 +119,6 @@ class elastic_request_generator:
             base_bool_query.setdefault("should", []).extend(should_filter_clauses)
 
         boost_shoulds = []
-        url_fields = ["m_url.raw", "m_url"]
-        exact_targets = ["https://hostmaster.amazon-relay.com", "http://hostmaster.amazon-relay.com", "hostmaster.amazon-relay.com"]
-        for fld in url_fields:
-            for v in exact_targets:
-                boost_shoulds.append({"term": {fld: v}})
-                boost_shoulds.append({"prefix": {fld: {"value": v, "boost": 3}}})
-                boost_shoulds.append({"prefix": {fld: {"value": v.rstrip('/') + '/', "boost": 3}}})
         if boost_shoulds:
             base_bool_query.setdefault("should", []).extend(boost_shoulds)
 
@@ -1339,6 +1332,7 @@ class elastic_request_generator:
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         url_query = p_query_model.url.strip() if p_query_model.url else ""
         url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
+        category = p_query_model.category
         date_range_filter = {}
 
         if p_query_model.daterange:
@@ -1352,7 +1346,7 @@ class elastic_request_generator:
                 }
             }
 
-        must_should = []
+        must_should = [{"term": {"type": category}}]
         should_clauses = []
 
         if p_query_model.fullsearch:
@@ -1368,7 +1362,9 @@ class elastic_request_generator:
                                 {"wildcard": {"username": f"*{term}*"}},
                                 {"wildcard": {"domain": f"*{term}*"}},
                                 {"wildcard": {"url.raw": f"*{term}*"}},
-                                {"wildcard": {"url": f"*{term.lower()}*"}}
+                                {"wildcard": {"url": f"*{term.lower()}*"}},
+                                {"wildcard": {"ioc": f"*{term}*"}},
+                                {"wildcard": {"ip": f"*{term}*"}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1380,7 +1376,10 @@ class elastic_request_generator:
                     "bool": {
                         "should": [
                             {"wildcard": {"url.raw": f"*{url_query}*"}},
-                            {"wildcard": {"url": f"*{url_query.lower()}*"}}
+                            {"wildcard": {"url": f"*{url_query.lower()}*"}},
+                            {"wildcard": {"domain": f"*{url_query}*"}},
+                            {"wildcard": {"ioc": f"*{url_query}*"}},
+                            {"wildcard": {"ip": f"*{url_query}*"}}
                         ],
                         "minimum_should_match": 1
                     }
@@ -1412,7 +1411,10 @@ class elastic_request_generator:
                     "bool": {
                         "should": [
                             {"term": {"url.raw": url_query}},
-                            {"match_phrase": {"url": url_query.lower()}}
+                            {"match_phrase": {"url": url_query.lower()}},
+                            {"term": {"domain": url_query}},
+                            {"term": {"ioc": url_query}},
+                            {"term": {"ip": url_query}}
                         ],
                         "minimum_should_match": 1
                     }
@@ -1434,7 +1436,7 @@ class elastic_request_generator:
             "size": 100,
             "track_total_hits": True,
             "sort": [{"timestamp": {"order": "desc"}}],
-            "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
+            "_source": ["url", "username", "ip", "email", "ioc", "domain", "password", "timestamp", "log_hash", "m_hash"]
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
@@ -1799,6 +1801,10 @@ class elastic_request_generator:
                 "username": log.get("username", None),
                 "domain": log.get("domain", None),
                 "password": log.get("password", None),
+                "email": log.get("email", None),
+                "ip": log.get("ip", None),
+                "ioc": log.get("ioc", None),
+                "type": log.get("type", None),
                 "log_hash": m_hash,
                 "timestamp": now,
                 "m_index": "stealer_model",

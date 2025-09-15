@@ -172,6 +172,7 @@ class _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad(leak_extractor_i
                         )
 
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_company_name=extracted_title,
                             m_team="ransomeware"
                         )

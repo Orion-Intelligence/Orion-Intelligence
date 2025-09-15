@@ -197,6 +197,7 @@ class _hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd(leak_extractor_i
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_company_name=disclosure_title,
                         m_team="hunter",
                         m_country=[country],

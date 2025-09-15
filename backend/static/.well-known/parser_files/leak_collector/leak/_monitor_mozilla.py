@@ -154,6 +154,7 @@ class _monitor_mozilla(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_company_name=card_title,
                     m_team="mozilla monitor"
                 )

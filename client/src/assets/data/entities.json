@@ -31,5 +31,6 @@
   { "title": "US Bank Numbers", "key": "m_us_bank_number" },
   { "title": "Platform", "key": "m_platform" },
   { "title": "Author", "key": "m_author" },
-  { "title": "Industry", "key": "m_industry" }
+  { "title": "Industry", "key": "m_industry" },
+  { "title": "Scrap Script", "key": "m_scrap_file" }
 ]

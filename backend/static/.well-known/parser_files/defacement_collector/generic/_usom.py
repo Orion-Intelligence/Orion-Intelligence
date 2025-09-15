@@ -107,6 +107,7 @@ class _usom(leak_extractor_interface, ABC):
 
                 description = tds[2].inner_text().strip()
                 desc = (description or "")[:20]
+
                 m_content_type = ["exploits"] + (
                     ["phishing"] if "phishing" in desc.lower() else [desc]
                 )
@@ -121,6 +122,7 @@ class _usom(leak_extractor_interface, ABC):
                     m_leak_date=dt_obj
                 )
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_weblink=[address],
                     m_team="National Cyber Incident Response Center",
                     m_country=["Turkey"],

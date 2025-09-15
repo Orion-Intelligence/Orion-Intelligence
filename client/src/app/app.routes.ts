@@ -417,6 +417,11 @@ export const routes: Routes = [
             path: 'credential',
             component: CredentialComponent,
             data: { type: 'credential', animation: 'CategoryPage' }
+          },
+          {
+            path: 'logs',
+            component: CredentialComponent,
+            data: { type: 'log', animation: 'CategoryPage' }
           }
         ]
       }

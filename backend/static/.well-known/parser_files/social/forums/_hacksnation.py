@@ -8,6 +8,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from datetime import datetime
 from datetime import timedelta
@@ -193,6 +194,7 @@ class _hacksnation(leak_extractor_interface, ABC):
                     m_post_comments_count=str(comment_count)
                 )
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_username=m_username,
                     m_code_snippet=code
                 )

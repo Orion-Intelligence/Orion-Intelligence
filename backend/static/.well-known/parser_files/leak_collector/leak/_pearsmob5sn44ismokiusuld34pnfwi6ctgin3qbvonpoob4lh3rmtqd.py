@@ -198,6 +198,7 @@ class _pearsmob5sn44ismokiusuld34pnfwi6ctgin3qbvonpoob4lh3rmtqd(leak_extractor_i
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_team="PEAR",
                 m_industry=industry,
                 m_location=[location],
