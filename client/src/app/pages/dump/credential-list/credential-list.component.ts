@@ -1,33 +1,25 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-credential-list',
   standalone: true,
   templateUrl: './credential-list.component.html',
+  animations: [fadeInDashboardItem],
   imports: [
     NgForOf,
     NgIf,
     DatePipe
   ]
 })
-export class CredentialListComponent implements OnInit {
-  stealerData$: StealerLogCallbackModel;
+export class CredentialListComponent {
+  @Input() stealerData$!: StealerLogCallbackModel;
   @Input() type: string = 'credential';
-
-  constructor(public dashboardService: DashboardService) {
-    this.stealerData$ = this.dashboardService.stealerlogCallbackModel;
-  }
-
-  ngOnInit(): void {
-    this.stealerData$ = this.dashboardService.stealerlogCallbackModel;
-  }
+  @Input() isLoading!: boolean;
 
   copyRowData(data: string): void {
-    navigator.clipboard.writeText(data).then(() => {
-    }).catch(_ => {
-    });
+    navigator.clipboard.writeText(data).catch(() => {});
   }
 }

@@ -31,7 +31,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
 
-  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private dashboardService: DashboardService) {
+  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService) {
     this.type = this.route.snapshot.data['type'];
   }
 

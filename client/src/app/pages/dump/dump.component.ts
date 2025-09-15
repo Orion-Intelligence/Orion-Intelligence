@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {PaginationComponent} from '../../shared/partials/pagination/pagination.component';
 import {FiltersComponent} from '../../shared/partials/filters/filters.component';
@@ -9,6 +9,7 @@ import {DumpListComponent} from './dump-list/dump-list.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-dump',
@@ -20,6 +21,8 @@ import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
     AsyncPipe,
     FiltersComponent,
     DumpListComponent,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   styleUrls: ['../../../assets/styles/shared/listing/directory.component.css']
 })
@@ -28,6 +31,8 @@ export class DumpComponent implements OnInit {
   filterModel: FilterModel = dump_filters;
   selectedFilters: Record<string, string | null> = {};
   totalPages = 0;
+  searchQuery: any;
+  isLoading = signal(false);
 
   constructor(private dumpService: DumpService, private route: ActivatedRoute, private router: Router) {
     this.dumpData$ = this.dumpService.dumpData$;
@@ -36,6 +41,10 @@ export class DumpComponent implements OnInit {
       if (data) {
         this.totalPages = Math.ceil(data.total_count / 100);
       }
+
+      setTimeout(() => {
+        this.isLoading.set(false);
+      }, 250);
     });
   }
 
@@ -67,10 +76,12 @@ export class DumpComponent implements OnInit {
       };
 
       this.selectedFilters = initialSelectedFilters;
+      this.searchQuery = params['q'] || '';
     });
   }
 
   onPageChange(currentPage: number): void {
+    this.isLoading.set(true);
     this.dumpService.setCurrentPage(currentPage);
     this.dumpService.reloadDumpData({...this.selectedFilters, page: currentPage});
   }
@@ -108,12 +119,31 @@ export class DumpComponent implements OnInit {
       )
     );
 
+    this.isLoading.set(true);
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: filteredParams,
       queryParamsHandling: 'merge',
     }).then();
 
-    this.dumpService.reloadDumpData({...filteredParams, page: 1});
+    const q = this.route.snapshot.queryParamMap.get('q');
+
+    this.dumpService.reloadDumpData({
+      ...filteredParams,
+      page: 1,
+      ...(q ? {q} : {}),
+    });
+  }
+
+  onSearchSubmit(): void {
+    this.isLoading.set(true);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {q: this.searchQuery},
+      queryParamsHandling: 'merge',
+    }).then(() => {
+      this.reloadDump();
+    });
   }
 }

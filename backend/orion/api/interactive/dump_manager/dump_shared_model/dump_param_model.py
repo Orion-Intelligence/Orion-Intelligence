@@ -8,4 +8,5 @@ class dump_param_model(BaseModel):
     source: Optional[str] = "all"
     group: Optional[str] = "all"
     status: Optional[bool | str] = "all"
-    mDateRange: Optional[str] = ""
+    daterange: Optional[str] = ""
+    q: Optional[str] = "*"

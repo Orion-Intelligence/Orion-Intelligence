@@ -3,6 +3,10 @@
   max-height: 100vh;
 }
 
+.directory-listing-search .dashboard__api-search-input-div{
+  padding: 8px 58px 0 0;
+}
+
 .directory-listing_container {
   min-height: 100vh;
   padding: 40px 40px 100px;
