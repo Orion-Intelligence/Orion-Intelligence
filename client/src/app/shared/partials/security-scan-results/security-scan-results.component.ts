@@ -1,14 +1,14 @@
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {finalize} from 'rxjs/operators';
-import {ApiService} from '../../services/api.service';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {UrlScanMeta, UrlScanResponse, UrlScanThreatItem} from '../../model/security-scan/security.scan.results.model';
-import {CodeBlockComponent} from '../code-block/code-block.component';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {SecurityScanExportComponentComponent} from './security-scan-export-component/security-scan-export-component.component';
-import {NgxPrintDirective, NgxPrintModule} from 'ngx-print';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+import { ApiService } from '../../services/api.service';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { UrlScanMeta, UrlScanResponse, UrlScanThreatItem } from '../../model/security-scan/security.scan.results.model';
+import { CodeBlockComponent } from '../code-block/code-block.component';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { SecurityScanExportComponentComponent } from './security-scan-export-component/security-scan-export-component.component';
+import { NgxPrintDirective, NgxPrintModule } from 'ngx-print';
 
 @Component({
   selector: 'app-security-scan-results',
@@ -26,7 +26,7 @@ export class SecurityScanResultsComponent implements OnInit {
   isLoading = true;
   hasError = false;
   errorMessage = '';
-  skeletonCards = Array.from({length: 3});
+  skeletonCards = Array.from({ length: 3 });
 
   constructor(private api: ApiService, private route: ActivatedRoute) {
   }
@@ -44,7 +44,7 @@ export class SecurityScanResultsComponent implements OnInit {
     this.errorMessage = '';
     this.meta = null;
     this.categories = [];
-    this.api.post<UrlScanResponse>('urlscan/domain', {domain: this.requestedUrl})
+    this.api.post<UrlScanResponse>('urlscan/domain', { domain: this.requestedUrl })
       .pipe(finalize(() => {
         this.isLoading = false;
       }))
@@ -86,9 +86,9 @@ export class SecurityScanResultsComponent implements OnInit {
                 .map(it => {
                   const key = (it.header || '').trim().toLowerCase();
                   const mergedProof = proofMap.get(name + '|' + key);
-                  return mergedProof ? {...it, proof: mergedProof} : it;
+                  return mergedProof ? { ...it, proof: mergedProof } : it;
                 });
-              return {name, total: (items || []).length, items: uniqueItems};
+              return { name, total: (items || []).length, items: uniqueItems };
             })
             .filter(c => c.items.length > 0);
         },
@@ -105,7 +105,7 @@ export class SecurityScanResultsComponent implements OnInit {
       threats: Object.fromEntries(this.categories.map(c => [c.name, c.items]))
     };
 
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     const host = this.displayHost?.replace(/[^a-z0-9.-]/gi, '_') || 'report';
     const dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');

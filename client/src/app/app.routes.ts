@@ -23,13 +23,11 @@ import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.reso
 import { DashboardSocialsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
 import { subscriptionGuard } from './shared/guards/subscription.guard';
 import { SecurityScanResultsComponent } from './shared/partials/security-scan-results/security-scan-results.component';
-import { ViewTenantComponent } from './pages/tenant-management/view-tenant/view-tenant.component';
-import { AddTenantComponent } from './pages/tenant-management/add-tenant/add-tenant.component';
 import { SignupComponent } from './pages/signup/signup.component';
-import { OnboardingComponent } from './pages/onboarding/onboarding.component';
+import { TenantComponent } from './pages/tenant/tenant.component';
 import { WelcomeComponent } from './pages/welcome/welcome.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
-import { OnboardingGuard } from './shared/guards/onboarding-guard.guard';
+import { TenantGuard } from './shared/guards/tenant-guard.guard';
 import { SidebarProfileHomepageComponent } from './pages/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
 import { SidebarProfileSettingsComponent } from './pages/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
 import { SidebarProfileDashboardComponent } from './pages/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
@@ -105,8 +103,8 @@ export const routes: Routes = [
   },
   {
     path: 'onboarding',
-    component: OnboardingComponent,
-    canActivate: [OnboardingGuard],
+    component: TenantComponent,
+    canActivate: [TenantGuard],
     data: { animation: 'OnboardingPage' }
   },
   {
@@ -457,27 +455,6 @@ export const routes: Routes = [
             path: 'logs',
             component: CredentialComponent,
             data: { type: 'log', animation: 'CategoryPage' }
-          }
-        ]
-      },
-      {
-        path: 'tenant',
-        data: { animation: 'TenantPage' },
-        children: [
-          {
-            path: '',
-            redirectTo: 'view',
-            pathMatch: 'full'
-          },
-          {
-            path: 'view',
-            component: ViewTenantComponent,
-            data: { type: 'view', animation: 'CategoryPage' }
-          },
-          {
-            path: 'add',
-            component: AddTenantComponent,
-            data: { type: 'add', animation: 'CategoryPage' }
           }
         ]
       },

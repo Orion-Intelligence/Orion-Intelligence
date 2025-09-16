@@ -1,4 +1,3 @@
-# session_manager.py
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -12,7 +11,7 @@ from starlette.responses import JSONResponse
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account
-from orion.services.mongo_manager.shared_model.db_onboarding_model import db_onboarding_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
 
 class session_manager:
@@ -162,7 +161,7 @@ class session_manager:
 
     async def has_onboarding(self, user_id: str) -> bool:
         engine = self._engine
-        onboarding = await engine.find_one(db_onboarding_model, db_onboarding_model.userId == user_id)
+        onboarding = await engine.find_one(db_tenant_model, db_tenant_model.userId == user_id)
         return onboarding is not None
     
     @staticmethod

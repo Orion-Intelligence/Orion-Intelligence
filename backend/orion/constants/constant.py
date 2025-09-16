@@ -25,3 +25,4 @@ class CONSTANTS:
     S_ENCRYPTION_KEY= env_handler.get_instance().env("ENCRYPTION_KEY")
 
 allowed_keys: set[str] = set()
+mail_template = None

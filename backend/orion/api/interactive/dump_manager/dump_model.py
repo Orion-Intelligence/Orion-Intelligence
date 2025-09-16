@@ -8,7 +8,6 @@ from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_reco
 
 
 class dump_model:
-    # Private Variables
     __instance = None
 
     @staticmethod

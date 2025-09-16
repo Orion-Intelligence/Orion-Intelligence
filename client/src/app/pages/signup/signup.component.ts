@@ -28,9 +28,9 @@ export class SignupComponent {
   constructor(private router: Router, public auth_service: AuthService) {
   }
   isCompanyMail: boolean = true;
-  private blockedDomains = [
-    'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
-    'live.com', 'aol.com', 'icloud.com', 'protonmail.com', 'gmx.com'
+  private blockedDomains = [''
+    // 'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
+    // 'live.com', 'aol.com', 'icloud.com', 'protonmail.com', 'gmx.com'
   ];
   onPasswordInput(password: string) {
     this.showPasswordMeter = password.length > 0;
@@ -50,7 +50,6 @@ export class SignupComponent {
       return;
     }
 
-    // Strength after requirements are satisfied
     if (password.length >= 12 && /[^A-Za-z0-9]/.test(password) && /[0-9]/.test(password)) {
       this.passwordStrength = 'strong';
     } else if (password.length >= 10) {

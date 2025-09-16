@@ -1,6 +1,7 @@
 import asyncio
 import json
 from asyncio import sleep
+from jinja2 import Environment, FileSystemLoader
 
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
@@ -9,6 +10,7 @@ from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.constants.constant import allowed_keys
+from orion.constants import constant
 
 
 class service_manager:
@@ -31,7 +33,6 @@ class service_manager:
     async def init_services(self):
         while not self._is_available:
             try:
-                # noinspection PyUnresolvedReferences
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
                 writer.close()
                 await writer.wait_closed()
@@ -75,3 +76,13 @@ class service_manager:
         for item in data:
             if "key" in item:
                 allowed_keys.add(item["key"])
+
+        env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data"))
+        constant.mail_template = env.get_template("mail_template.html")
+        if(constant.mail_template==None):
+            print("ffffffsdsasdasfasdfasfafafafafsdfds")
+            print("+++++__________________________+++++++++______________+++++++++++++++")
+        else:
+            print("eeeeeeeeeeeee-------------------------------")
+            print("+++++__________________________+++++++++______________+++++++++++++++")
+        

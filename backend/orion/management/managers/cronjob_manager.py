@@ -6,7 +6,6 @@ from orion.services.elastic_manager.elastic_controller import elastic_controller
 class cronjob_manager:
     __instance = None
 
-    # Initializations
     @staticmethod
     def get_instance():
         if cronjob_manager.__instance is None:

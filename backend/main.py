@@ -17,7 +17,6 @@ from routes.api_micros import micro_routes
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
-from routes.tenant_routes import tenant_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
@@ -43,9 +42,7 @@ app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(micro_routes)
 app.include_router(api_routes)
-app.include_router(tenant_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 
-# noinspection PyTypeChecker
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

@@ -1,11 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from fastapi import Query
 from fastapi import Request
-from fastapi import Request, Depends
 from odmantic import AIOEngine
 from fastapi.responses import RedirectResponse
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
-from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.api.interactive.auth_manager.auth_manager import auth_manager
 
 
 
@@ -19,13 +17,8 @@ async def block_row_action(name: str = Query(...)):
 
     return {"message": f"Action '{name}' is not restricted"}
 
+
 @admin_routes.post("/admin/db_user_account/edit/{id}")
-async def custom_edit(
-    id: str,
-    request: Request,
-    engine: AIOEngine = Depends(mongo_controller.get_instance().get_engine)
-):
-    form = await request.form()
-    updates = dict(form)
-    await db_user_account.edit_userStatus_and_sendMail(engine, id, updates)
+async def custom_edit(id: str,request: Request):
+    await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=302)

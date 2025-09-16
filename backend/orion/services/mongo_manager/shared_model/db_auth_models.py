@@ -2,9 +2,6 @@
 from datetime import datetime
 from enum import Enum
 from typing import Optional
-from bson import ObjectId
-from odmantic import AIOEngine
-from fastapi import HTTPException
 from enum import Enum
 from typing import Optional
 
@@ -12,7 +9,6 @@ import pyotp
 from odmantic import Model, Field
 from passlib.context import CryptContext
 from pydantic import field_validator
-from orion.services.mail_manager.mail_manager import mail_manager
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -73,32 +69,6 @@ class db_user_account(Model):
 
     def is_demo(self) -> bool:
         return self.role == user_role.DEMO
-    
-    @staticmethod
-    async def edit_userStatus_and_sendMail(engine: AIOEngine, user_id: str, updates: dict):
-        user = await engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        old_status = getattr(user, "status", None)
-        new_status = updates.get("status", old_status)
-
-        for field, value in updates.items():
-            if hasattr(user, field):
-                setattr(user, field, value)
-
-        await engine.save(user)
-
-        if old_status != "onboarding" and new_status == "onboarding":
-            await mail_manager.get_instance().send_verification_mail(
-                to=user.email,
-                subject="Your account has been approved",
-                body=f"Hi {user.username},\n\nYour account is now approved. "
-                    f"You can log in and start onboarding.\n\nBest regards,\nTeam"
-            )
-
-        return user
-
 
     def verify_2fa(self, code: str) -> bool:
         if not self.twofa_enabled or not self.twofa_secret:

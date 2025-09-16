@@ -8,7 +8,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import (db_user_ac
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
-from orion.services.mongo_manager.shared_model.db_onboarding_model import db_onboarding_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.session_manager.session_enums import admin_mock, crawler_mock
 
 
@@ -75,6 +75,6 @@ class mongo_controller:
         admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
         admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
-        admin.add_view(ModelView(db_onboarding_model, icon="fa fa-link"))
+        admin.add_view(ModelView(db_tenant_model, icon="fa fa-link"))
 
         return admin

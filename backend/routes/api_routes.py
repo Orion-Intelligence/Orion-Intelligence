@@ -34,8 +34,8 @@ from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.services.mongo_manager.shared_model.db_onboarding_model import OnboardingRequest
-from orion.services.onboarding_manager.onboarding_manager import OnboardingManager
+from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 
 api_routes = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -247,17 +247,17 @@ async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
 
-@api_routes.post("/api/createOnboarding")
-async def create_onboarding(data: OnboardingRequest,token: str = Depends(oauth2_scheme)):
-    return await OnboardingManager.create_onboarding(data, token)
+@api_routes.post("/api/createTenant")
+async def create_tenant(data: TenantRequest,token: str = Depends(oauth2_scheme)):
+    return await TenantManager.create_tenant(data, token)
 
-@api_routes.post("/api/getOnboarding")
-async def get_onboadring(token: str = Depends(oauth2_scheme)):
-    return await OnboardingManager.get_onboarding(token)
+@api_routes.post("/api/getTenant")
+async def get_tenant(token: str = Depends(oauth2_scheme)):
+    return await TenantManager.get_tenant(token)
 
-@api_routes.post("/api/updateOnboarding")
-async def update_onboadring(data: OnboardingRequest,token: str = Depends(oauth2_scheme)):
-    return await OnboardingManager.update_onboarding(data,token)
+@api_routes.post("/api/updateTenant")
+async def update_tenant(data: TenantRequest,token: str = Depends(oauth2_scheme)):
+    return await TenantManager.update_tenant(data,token)
 
 
     

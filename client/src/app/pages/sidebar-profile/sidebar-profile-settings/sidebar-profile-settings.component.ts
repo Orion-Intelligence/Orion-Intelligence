@@ -5,7 +5,7 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { HttpHeaders } from '@angular/common/http';
 import { NgIf, NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { search_filter_keys, search_filter_labels } from '../../../shared/constants/shared-enums';
+import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { Router } from '@angular/router';
 
 @Component({
@@ -23,11 +23,12 @@ export class SidebarProfileSettingsComponent implements OnInit {
   @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
   constructor(private router: Router, protected apiService: ApiService, public authService: AuthService) { }
   ngOnInit(): void {
+    const search_filter_keys = Object.keys(search_filter_labels);
     const token = this.authService.getToken()
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    this.apiService.post<OnboardingModel>('getOnboarding', { headers })
+    this.apiService.post<OnboardingModel>('getTenant', { headers })
       .subscribe({
         next: (backendData) => {
           this.onboardingData = {
@@ -87,7 +88,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
       'Authorization': `Bearer ${token}`
     });
 
-    this.apiService.post('updateOnboarding', filteredOnboardingData, { headers }).subscribe({
+    this.apiService.post('updateTenant', filteredOnboardingData, { headers }).subscribe({
       next: () => {
         this.authService.setOnboarding(true);
         this.router.navigate(['/dashboard']);
