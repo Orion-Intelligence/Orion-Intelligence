@@ -4,7 +4,7 @@ import {switchMap, timer, map, distinctUntilChanged, combineLatest} from 'rxjs';
 import {ResultComponent} from '../../../shared/partials/result/result.component';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {NgIf, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import {CredentialListComponent} from '../credential-list/credential-list.component';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {SortType} from '../../../shared/constants/shared-enums';
@@ -15,7 +15,7 @@ import {FormsModule} from '@angular/forms';
 @Component({
   selector: 'app-credential',
   standalone: true,
-  imports: [ResultComponent, NgIf, CredentialListComponent, FormsModule, NgOptimizedImage],
+  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -30,6 +30,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   type: string;
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
+  searchQuery: any;
 
   constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService) {
     this.type = this.route.snapshot.data['type'];
@@ -138,5 +139,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   onToggleAnalyticsTrigger($event: string) {
     this.dashboardService.consolidatedParamModel.fullsearch = $event == "Full Search";
     this.fetchSearchResults(true);
+  }
+
+  onSearchSubmit() {
+
   }
 }

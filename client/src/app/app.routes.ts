@@ -392,14 +392,13 @@ export const routes: Routes = [
           },
           {
             path: 'basic',
-            component: DumpComponent,
-            resolve: { reportdata: DumpResolver },
+            component: SecurityScanResultsComponent,
             data: { type: 'basic', animation: 'ScannerPage' }
           },
           {
             path: 'full',
-            component: DumpComponent,
-            data: { type: 'full', animation: 'ScannerPage' }
+            component: SecurityScanResultsComponent,
+            data: { type: 'advanced', animation: 'ScannerPage' }
           }
         ]
       },

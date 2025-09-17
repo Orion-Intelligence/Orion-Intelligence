@@ -1,10 +1,14 @@
 .scan_container {
   font-family: 'Segoe UI', Arial, sans-serif;
   color: #e2e8f0;
-  margin: 0 auto;
   padding: 20px;
   background-color: #0f172a;
+  margin: 0 auto 0 20px;
   width: 100%;
+}
+
+.scan-default-input-container{
+  margin-left: 22px !important;
 }
 
 .scan_report-section {
@@ -265,7 +269,7 @@
 .scan_container {
   font-family: 'Segoe UI', Arial, sans-serif;
   color: #e2e8f0;
-  margin: 0 auto;
+  margin: 0 auto 0 11px;
   padding: 20px;
   background-color: #0000;
   width: 100%;
@@ -593,7 +597,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   background: #fff;
-  margin: 15px 20px 16px 15px;
+  margin: 15px 20px 16px 27px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
 }
 

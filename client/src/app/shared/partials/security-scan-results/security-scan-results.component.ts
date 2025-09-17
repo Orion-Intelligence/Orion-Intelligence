@@ -1,6 +1,6 @@
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {Component, OnInit, signal} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {finalize, expand, switchMap, takeWhile} from 'rxjs/operators';
 import {EMPTY, timer} from 'rxjs';
 import {ApiService} from '../../services/api.service';
@@ -10,11 +10,13 @@ import {CodeBlockComponent} from '../code-block/code-block.component';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 import {SecurityScanExportComponentComponent} from './security-scan-export-component/security-scan-export-component.component';
 import {NgxPrintDirective, NgxPrintModule} from 'ngx-print';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {EmptyQueryComponent} from '../empty-query/empty-query.component';
 
 @Component({
   selector: 'app-security-scan-results',
   standalone: true,
-  imports: [CommonModule, CodeBlockComponent, NgxPrintModule, NgOptimizedImage, TooltipDirective, SecurityScanExportComponentComponent, NgxPrintDirective],
+  imports: [CommonModule, CodeBlockComponent, NgxPrintModule, NgOptimizedImage, TooltipDirective, SecurityScanExportComponentComponent, NgxPrintDirective, FormsModule, ReactiveFormsModule, EmptyQueryComponent],
   templateUrl: './security-scan-results.component.html',
   styleUrl: './security-scan-results.component.css',
   animations: [fadeInDashboardItem]
@@ -23,40 +25,75 @@ export class SecurityScanResultsComponent implements OnInit {
   meta: UrlScanMeta | null = null;
   categories: { name: string; total: number; items: UrlScanThreatItem[] }[] = [];
   requestedUrl = '';
+  searchQuery: any = '';
   requestedDomain = '';
   isLoading = true;
+  isFetched = false;
   hasError = false;
   errorMessage = '';
   skeletonCards = Array.from({length: 3});
   progress = signal(0);
   currentStep = '';
+  scanType: string = "";
 
-  constructor(private api: ApiService, private route: ActivatedRoute) {
+  constructor(private router: Router, private api: ApiService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
+    this.scanType = this.route.snapshot.data['type'];
+    if (!this.scanType){
+      this.scanType = "basic"
+    }
     const rawParam = this.route.snapshot.queryParamMap.get('domain') || '';
-    this.requestedUrl = this.resolveRequestedUrl(rawParam) || window.location.href;
-    this.requestedDomain = this.extractHost(this.requestedUrl) || window.location.hostname || 'localhost';
-    this.load();
+    this.searchQuery = rawParam;
+    if (!rawParam) {
+      this.isLoading = false;
+      return;
+    }
+
+    const resolved = this.resolveRequestedUrl(rawParam);
+    try {
+      const u = new URL(resolved);
+      const host = u.hostname;
+      const isIPv4 = /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
+      const validHost = host === 'localhost' || isIPv4 || host.includes('.');
+      if (!validHost) {
+        this.isLoading = false;
+        return;
+      }
+
+      this.requestedUrl = u.toString();
+      this.requestedDomain = this.extractHost(this.requestedUrl) || window.location.hostname || 'localhost';
+      this.load();
+    } catch {
+      this.isLoading = false;
+    }
   }
 
   private load(): void {
     this.isLoading = true;
+    this.isFetched = false;
     this.hasError = false;
     this.errorMessage = '';
     this.meta = null;
     this.categories = [];
     this.progress.set(0);
     this.currentStep = '';
-    this.api.post<any>('urlscan/domain', {domain: this.requestedUrl})
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {domain: this.requestedUrl, scanType: this.scanType},
+      queryParamsHandling: 'merge'
+    }).then();
+
+    this.api.post<any>('urlscan/domain', {domain: this.requestedUrl, scanType: this.scanType})
       .pipe(
         expand(res => (
             res?.status === 'pending' ||
             res?.result?.status === 'busy' ||
             res?.result?.status === 'pending'
           ) ? timer(5000).pipe(
-              switchMap(() => this.api.post<any>('urlscan/domain', {domain: this.requestedUrl}))
+              switchMap(() => this.api.post<any>('urlscan/domain', {domain: this.requestedUrl, scanType: this.scanType}))
             )
             : EMPTY
         ),
@@ -79,6 +116,8 @@ export class SecurityScanResultsComponent implements OnInit {
             if (typeof st === 'string' && st) this.currentStep = st;
             return;
           }
+
+          this.isFetched = true;
 
           const safe = !!(res && res.result && res.result.meta);
           if (!safe) {
@@ -125,6 +164,7 @@ export class SecurityScanResultsComponent implements OnInit {
             .filter(c => c.items.length > 0);
         },
         error: (err) => {
+          this.isFetched = true;
           this.hasError = true;
           this.errorMessage = (err && (err.error?.detail || err.message)) || 'Failed to fetch security scan results.';
         }
@@ -186,4 +226,24 @@ export class SecurityScanResultsComponent implements OnInit {
 
   trackByCategory = (_: number, c: { name: string }) => c.name;
   trackByItem = (i: number) => i;
+
+  onSearchSubmit(): void {
+    const raw = (this.searchQuery ?? '').trim();
+    if (!raw) return;
+
+    const domain = this.resolveRequestedUrl(raw);
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        domain,
+        scanType: this.scanType
+      },
+      queryParamsHandling: 'merge'
+    }).then(() => {
+      this.requestedUrl = domain;
+      this.requestedDomain = this.extractHost(domain) || this.requestedDomain;
+      this.load();
+    });
+  }
 }
