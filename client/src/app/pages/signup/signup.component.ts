@@ -28,9 +28,9 @@ export class SignupComponent {
   constructor(private router: Router, public auth_service: AuthService) {
   }
   isCompanyMail: boolean = true;
-  private blockedDomains = [''
-    // 'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
-    // 'live.com', 'aol.com', 'icloud.com', 'protonmail.com', 'gmx.com'
+  private blockedDomains = [
+    'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
+    'live.com', 'aol.com', 'icloud.com', 'protonmail.com', 'gmx.com'
   ];
   onPasswordInput(password: string) {
     this.showPasswordMeter = password.length > 0;
