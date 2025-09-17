@@ -497,6 +497,30 @@ reference points, allowing users to explore known breaches and validate the expo
 
 <img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
 
+## Exploit
+
+An exploit is a piece of software, code, or technique that takes advantage of a vulnerability or weakness in a system, application, or network. If a program has a flaw (like improper input validation or weak authentication), an exploit can be used to trigger that flaw.
+Short answer: they are different kinds of exploit-related information, not all the same thing.
+
+CVE — a vulnerability identifier (public record of a known flaw).
+Tools — references to exploit modules / PoC code / attacker tools (methods someone could use to exploit a CVE).
+Zero-day — an unpatched, actively exploited vulnerability (high-risk because no vendor patch exists yet).
+
+<img width="1918" height="715" alt="exploit" src="https://github.com/user-attachments/assets/a5683c65-8165-4843-aecd-5b04454168d3" />
+
+**1- CVE:** 
+
+In Orion, CVE (Common Vulnerabilities and Exposures) provides a standardized identifier for publicly known software vulnerabilities (e.g., CVE-2024-xxxx). Each entry includes a stable ID, a brief description, and references to help teams track and remediate issues. Within Orion, the results may include both actual vulnerability records as well as discussion-based references related to those vulnerabilities.
+
+<img width="1908" height="535" alt="cve" src="https://github.com/user-attachments/assets/902e0533-fec6-4e28-8280-e7dd54bfdd71" />
+
+**2- Tools:**
+
+<img width="1905" height="908" alt="tools" src="https://github.com/user-attachments/assets/e1cf46ca-de11-4355-ac74-3b2be4353dee" />
+
+**3- Zeroday:**
+
+<img width="1908" height="900" alt="zeroday" src="https://github.com/user-attachments/assets/ee37db76-1753-4f7c-9d7b-00d881d33c9a" />
 
 
 ## Data Dump
