@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIf, NgFor, NgSwitch, NgSwitchCase, CommonModule } from '@angular/common';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
-import { OnboardingModel } from '../../shared/model/onboarding/onbording.model';
+import { TenantModel } from '../../shared/model/tenant/tenant.model';
 import { search_filter_labels } from '../../shared/constants/shared-enums';
 import { AuthService } from '../../services/authetication/auth.service';
 import { Router } from '@angular/router';
@@ -16,7 +16,7 @@ import { AppService } from '../../services/core/app/app.service';
   templateUrl: './tenant.component.html'
 })
 export class TenantComponent implements OnInit {
-  onboardingData: OnboardingModel = {
+  onboardingData: TenantModel = {
     companyName: '',
     iocs: []
   };
@@ -27,6 +27,7 @@ export class TenantComponent implements OnInit {
   selectedCategoryId = '';
   addedIocs: { [key: string]: string[] } = {};
   iocSearchText: string = '';
+  categories: Record<string, string[]> = {};
 
   constructor(private router: Router, public auth_service: AuthService, public apiService: ApiService, public appService: AppService) {
   }
@@ -91,10 +92,15 @@ export class TenantComponent implements OnInit {
     );
   }
   confirm() {
-    const filteredOnboardingData: OnboardingModel = {
+    const filteredOnboardingData: TenantModel = {
       companyName: this.onboardingData.companyName,
       iocs: this.onboardingData.iocs.filter(ioc => ioc.values && ioc.values.length > 0)
     };
+    this.categories = {};
+    this.onboardingData.iocs.forEach(ioc => {
+      this.categories[ioc.ioc_id] = ioc.values;
+    });
+    this.appService.set('entityfilterCategories', this.categories);
     const token = this.auth_service.getToken()
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`

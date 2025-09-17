@@ -10,7 +10,7 @@ export class RoleGuard implements CanActivate {
 
     canActivate(): boolean {
         if (this.authService.getRole() === 'profile') {
-            this.router.navigate(['dashboard/profile/dashboard']);
+            this.router.navigate(['dashboard/profile']);
         } else {
             return true;
         }

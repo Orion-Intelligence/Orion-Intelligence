@@ -65,7 +65,7 @@ class service_manager:
 
     @staticmethod
     async def build_assets(build_dir):
-        entities_file = build_dir / "assets" / "data" / "entities.json"
+        entities_file = build_dir / "assets" / "data" / "entities_data" / "entities.json"
         if not entities_file.exists():
             raise FileNotFoundError(f"entities.json not found at {entities_file}")
 
@@ -77,12 +77,6 @@ class service_manager:
             if "key" in item:
                 allowed_keys.add(item["key"])
 
-        env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data"))
+        env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"))
         constant.mail_template = env.get_template("mail_template.html")
-        if(constant.mail_template==None):
-            print("ffffffsdsasdasfasdfasfafafafafsdfds")
-            print("+++++__________________________+++++++++______________+++++++++++++++")
-        else:
-            print("eeeeeeeeeeeee-------------------------------")
-            print("+++++__________________________+++++++++______________+++++++++++++++")
         

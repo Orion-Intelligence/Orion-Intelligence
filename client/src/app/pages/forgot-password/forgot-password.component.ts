@@ -79,7 +79,6 @@ export class ForgotPasswordComponent {
 
         this.auth_service.updatePassword(this.token, this.password).subscribe({
           next: (res) => {
-            console.log("Password updated response:", res);
             this.router.navigate(['login'], { replaceUrl: true }).then();
           },
           error: (err) => {

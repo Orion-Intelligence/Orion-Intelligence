@@ -72,7 +72,7 @@ export class AppService {
       return;
     }
 
-    this.http.get<any[]>('assets/data/entities.json').pipe(
+    this.http.get<any[]>('assets/data/entities_data/entities.json').pipe(
       tap(data => {
         this.entitiesCache = data;
         this.entities.set(data);

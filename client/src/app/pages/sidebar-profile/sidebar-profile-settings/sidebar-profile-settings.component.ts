@@ -1,11 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { OnboardingModel } from '../../../shared/model/onboarding/onbording.model';
+import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { HttpHeaders } from '@angular/common/http';
 import { NgIf, NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
+import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -14,21 +15,24 @@ import { Router } from '@angular/router';
   templateUrl: './sidebar-profile-settings.component.html',
 })
 export class SidebarProfileSettingsComponent implements OnInit {
-  onboardingData?: OnboardingModel;
+  onboardingData?: TenantModel;
   showLeftFade = false;
   showRightFade = false;
   selectedCategoryId = '';
   addedIocs: { [key: string]: string[] } = {};
   iocSearchText: string = '';
+  categories: Record<string, string[]> = {};
   @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
-  constructor(private router: Router, protected apiService: ApiService, public authService: AuthService) { }
+  constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
   ngOnInit(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
+    if (search_filter_keys === null)
+      alert("null")
     const token = this.authService.getToken()
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    this.apiService.post<OnboardingModel>('getTenant', { headers })
+    this.apiService.post<TenantModel>('getTenant', { headers })
       .subscribe({
         next: (backendData) => {
           this.onboardingData = {
@@ -43,12 +47,18 @@ export class SidebarProfileSettingsComponent implements OnInit {
             })
           };
           this.selectedCategoryId = this.onboardingData?.iocs[0]?.ioc_id;
-          console.log('Onboarding data received:', backendData);
         },
         error: (err) => {
           console.error('Error fetching onboarding:', err);
         }
       });
+  }
+  get filteredIocs() {
+    const search = this.iocSearchText?.toLowerCase() || '';
+    const iocs = (this.onboardingData?.iocs || []).filter(ioc =>
+      ioc.name.toLowerCase().includes(search)
+    );
+    return iocs
   }
   onCategoryClick(categoryId: string): void {
     this.selectedCategoryId = categoryId;
@@ -79,10 +89,15 @@ export class SidebarProfileSettingsComponent implements OnInit {
     return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
   }
   save_data() {
-    const filteredOnboardingData: OnboardingModel = {
+    const filteredOnboardingData: TenantModel = {
       companyName: this.onboardingData?.companyName || '',
       iocs: this.onboardingData?.iocs.filter(ioc => ioc.values && ioc.values.length > 0) || []
     };
+    this.categories = {};
+    this.onboardingData?.iocs.forEach(ioc => {
+      this.categories[ioc.ioc_id] = ioc.values;
+    });
+    this.appService.set('entityfilterCategories', this.categories);
     const token = this.authService.getToken()
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`

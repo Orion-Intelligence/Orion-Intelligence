@@ -1,9 +1,9 @@
-import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {tap} from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class SuggestionService {
   private cache?: Record<string, string[]>;
 
@@ -14,7 +14,7 @@ export class SuggestionService {
     if (this.cache) {
       return of(this.cache);
     }
-    return this.http.get<Record<string, string[]>>('assets/data/entity_filter_suggestions.json')
+    return this.http.get<Record<string, string[]>>('assets/data/entities_data/entity_filter_suggestions.json')
       .pipe(tap(data => this.cache = data));
   }
 }

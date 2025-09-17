@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
@@ -59,19 +60,23 @@ class TenantManager:
         )
 
         if not onboarding:
-            return None  
+            raise HTTPException(status_code=404, detail="Tenant not found")
 
-        return {
-            "companyName": encryptor.decrypt(onboarding.companyName),
-            "iocs": [
-                {
-                    "ioc_id": encryptor.decrypt(ioc.ioc_id),
-                    "name": encryptor.decrypt(ioc.name),
-                    "values": [encryptor.decrypt(v) for v in ioc.values]
-                }
-                for ioc in onboarding.iocs
-            ]
-        }
+        ioc_models = [
+            IocCategory(
+                ioc_id=encryptor.decrypt(ioc.ioc_id),
+                name=encryptor.decrypt(ioc.name),
+                values=[encryptor.decrypt(v) for v in ioc.values]
+            )
+            for ioc in onboarding.iocs
+        ]
+
+        tenant_request = TenantRequest(
+            companyName=encryptor.decrypt(onboarding.companyName),
+            iocs=ioc_models
+        )
+
+        return tenant_request
     
     @staticmethod
     async def update_tenant(data: TenantRequest, token: str):

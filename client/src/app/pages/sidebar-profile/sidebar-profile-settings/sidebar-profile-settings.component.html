@@ -20,8 +20,8 @@
             </div>
 
             <div class="onboarding-step2__category-scroll" #categoryScroll>
-                <ng-container *ngIf="(onboardingData?.iocs?.length || 0)>0; else noEntity">
-                    <div *ngFor="let category of onboardingData?.iocs" class="onboarding-step2__tab"
+                <ng-container *ngIf="filteredIocs.length > 0; else noEntity">
+                    <div *ngFor="let category of filteredIocs" class="onboarding-step2__tab"
                         [class.selected]="category.ioc_id === selectedCategoryId"
                         (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
                         {{ category.name }}

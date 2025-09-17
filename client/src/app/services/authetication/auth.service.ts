@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { AuthModel } from '../../shared/model/auth/auth.model';
 import { TokenRefreshService } from './token-refresh.service';
 import { HttpHeaders } from '@angular/common/http';
-import { OnboardingModel } from '../../shared/model/onboarding/onbording.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

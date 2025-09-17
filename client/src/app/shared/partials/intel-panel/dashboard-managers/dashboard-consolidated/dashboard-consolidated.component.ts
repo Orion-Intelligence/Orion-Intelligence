@@ -34,6 +34,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   protected readonly fadeInDashboardItem = fadeInDashboardItem;
   protected readonly consolidated_filters = consolidated_filters;
 
+
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public groupedResults: { [index: string]: any[] } = {};
   public response: any;

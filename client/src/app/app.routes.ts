@@ -105,7 +105,7 @@ export const routes: Routes = [
     path: 'onboarding',
     component: TenantComponent,
     canActivate: [TenantGuard],
-    data: { animation: 'OnboardingPage' }
+    data: { animation: 'TenantPage' }
   },
   {
     path: 'welcome',
