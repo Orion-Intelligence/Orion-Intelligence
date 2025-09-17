@@ -704,19 +704,42 @@ hashes, or IOCs, etc. — they can do so.
 ![entity-modified](https://github.com/user-attachments/assets/2289a79b-adaa-44a8-adf7-d567ea0856df)
 
 ### Search Results
+In Orion Intelligence there are two types of searches: keyword-based searches and URL-based searches.
+If you enter a URL (which may be any website) and click the Run Scan button next to the search bar, Orion immediately begins scanning that site.
+Within a few seconds the platform returns all findings related to the URL and presents them as a set of strong and weak parameters for that site.
+This allows analysts to quickly see an overall assessment and the specific strengths and weaknesses associated with the scanned website.
+<img width="1906" height="911" alt="urlsearch" src="https://github.com/user-attachments/assets/2b321636-ebea-40e2-a728-19ec52a46c42" />
+
 
 When you enter any keywords into the search bar and press enter, the system processes the input and retrieves relevant
 data. It then displays the search results that match the specified keywords. This allows users to efficiently find
 information based on their search criteria. The results are presented in an organized format for easy analysis.
 
-![search](https://github.com/user-attachments/assets/b3823643-6489-4904-87b7-158a85926c0a)
+<img width="1906" height="911" alt="urlsearch" src="https://github.com/user-attachments/assets/47861a0d-2f8e-4bf9-bd6b-6173057e4f41" />
+
+As shown in the image below, the security scan report displays findings related to that site’s security.
+It highlights identified vulnerabilities and weaknesses and provides details needed to assess and remediate each issue.
+
+<img width="1906" height="911" alt="urlsearch" src="https://github.com/user-attachments/assets/58f5cd44-dc0c-43b4-908f-d0fac92638b9" />
+
+In the search results we have two actions: Explore and Open Report.
+Clicking Explore takes the specific result into the relevant tool menu—e.g., a social-related result opens the Social menu for deeper inspection.
+Open Report opens the full report for that result so you can review all findings and details.
+
+<img width="1156" height="620" alt="searchdetail" src="https://github.com/user-attachments/assets/62fffea6-049e-4d76-bc35-78fcf3d3381f" />
+
+Clicking Open Report redirects to a separate page where detailed information about the selected result is displayed. This allows you to examine that specific result more thoroughly, with all related findings and insights presented in one place.
+
+<img width="1667" height="677" alt="openreport" src="https://github.com/user-attachments/assets/2368921f-d991-4189-bfc3-77e85a6dbc08" />
+
 
 When performing a search, the results are shown in a split view, helping organize the information more effectively. This
 layout separates different data sets, making it easier for users to focus on specific results. By displaying the data
 side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by
 simplifying the navigation of search results. Below the search bar overall fetch results related to the keyword.
 
-![resultoptions-modified](https://github.com/user-attachments/assets/ae7fcd3d-8310-4bdd-ad3a-b7c81011efab)
+<img width="1916" height="897" alt="image" src="https://github.com/user-attachments/assets/5611d6a7-a126-4013-b5d2-3c5798cd56af" />
+
 
 The detailed view of a search result provides essential information to help users assess the nature of a website before
 accessing it. This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak
