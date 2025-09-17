@@ -383,6 +383,8 @@ The Data Breach section in the navigation bar includes six categories:
 <img width="1918" height="585" alt="data breach" src="https://github.com/user-attachments/assets/05a60160-0bd1-412e-98e5-b77b1cf19c4b" />
 
 **Discussion** 
+
+In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
 <img width="1917" height="630" alt="image" src="https://github.com/user-attachments/assets/aee08d43-1e09-4ec2-ab34-4fe201686255" />
 
 
@@ -407,7 +409,12 @@ The Cloud module focuses on identifying misconfigurations, leaked credentials, a
 
 ## Defacement
 
-The Defacement section provides access to an archive list of websites that have been compromised or defaced. In the Defacement menu, there are three main categories:
+The Defacement section provides access to an archive list of websites that have been compromised or defaced. 
+
+<img width="1907" height="411" alt="defacementmenu" src="https://github.com/user-attachments/assets/422d3ece-3e5f-47d4-a9cb-d7c429946ef8" />
+
+
+In the Defacement menu, there are three main categories:
 
 **1- Hacked (Website Defacement / Unauthorized Access)**
 
@@ -447,7 +454,7 @@ These three categories together make up the major classifications under “Defac
 This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams
 and analysts to monitor and investigate web-based attacks efficiently.
 
-<img width="1907" height="411" alt="image" src="https://github.com/user-attachments/assets/4e27e5d9-de20-4017-ad75-e02c8d245232" />
+
 
 
 ## Social
