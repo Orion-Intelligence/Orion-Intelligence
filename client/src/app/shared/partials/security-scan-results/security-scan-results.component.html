@@ -16,7 +16,6 @@
   </div>
 </form>
 
-
 <app-empty-query *ngIf="!isFetched && !isLoading"></app-empty-query>
 
 <ng-container *ngIf="isFetched || isLoading">
@@ -54,8 +53,8 @@
       </div>
     </div>
 
-    <div class="scan_report-section" *ngIf="!hasError">
-      <h3 class="scan_section-title">
+<div class="scan_report-section" [ngClass]="{ 'scan_report-section-danger': grade === 'D' || grade === 'F', 'scan_report-section-warning': grade === 'C' }" *ngIf="!hasError">
+  <h3 class="scan_section-title">
         <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton">
           Security Scan Report for 〡 <a [href]="meta.URL">{{ displayHost }}</a>
         </ng-container>
@@ -64,6 +63,9 @@
 
       <ng-container *ngIf="!isLoading && meta; else metaGridSkeleton">
         <div class="scan_scan-meta-grid" @fadeInDashboardItem>
+          <div class="scan_meta-card">
+            <p class="scan_meta-value scan_meta-value-large">{{ grade || '—' }} Grade</p>
+          </div>
           <div class="scan_meta-card">
             <p class="scan_meta-label">URL</p>
             <p class="scan_meta-value">{{ meta.URL }}</p>
@@ -84,7 +86,7 @@
           </div>
           <div class="scan_meta-card">
             <p class="scan_meta-label">Scanned by</p>
-            <p class="scan_meta-value">{{ meta.Scanned_by }}</p>
+            <p class="scan_meta-value">{{ meta.Scanned_by}}</p>
           </div>
         </div>
       </ng-container>
@@ -115,7 +117,7 @@
                   'scan_low': item.risk.toLowerCase() === 'low',
                   'scan_info': item.risk.toLowerCase() === 'informational'
                 }">
-                {{ item.risk }} ({{ item.confidence }})
+                {{ item.risk }} Risk ({{ item.confidence }} Confidence)
               </span>
               </div>
               <app-code-block [code]="item.proof" *ngIf="item.proof"></app-code-block>
@@ -188,4 +190,3 @@
     <app-security-scan-export-component *ngIf="meta" [meta]="meta" [categories]="categories"></app-security-scan-export-component>
   </div>
 </ng-container>
-

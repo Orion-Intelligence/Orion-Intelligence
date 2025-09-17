@@ -5,7 +5,6 @@ import {finalize, expand, switchMap, takeWhile} from 'rxjs/operators';
 import {EMPTY, timer} from 'rxjs';
 import {ApiService} from '../../services/api.service';
 import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {UrlScanMeta, UrlScanThreatItem} from '../../model/security-scan/security.scan.results.model';
 import {CodeBlockComponent} from '../code-block/code-block.component';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 import {SecurityScanExportComponentComponent} from './security-scan-export-component/security-scan-export-component.component';
@@ -35,6 +34,8 @@ export class SecurityScanResultsComponent implements OnInit {
   progress = signal(0);
   currentStep = '';
   scanType: string = "";
+  grade = '';
+  gradeCounts: { high: number; medium: number; low: number; informational: number } = { high: 0, medium: 0, low: 0, informational: 0 };
 
   constructor(private router: Router, private api: ApiService, private route: ActivatedRoute) {
   }
@@ -79,6 +80,8 @@ export class SecurityScanResultsComponent implements OnInit {
     this.categories = [];
     this.progress.set(0);
     this.currentStep = '';
+    this.grade = '';
+    this.gradeCounts = { high: 0, medium: 0, low: 0, informational: 0 };
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -86,7 +89,7 @@ export class SecurityScanResultsComponent implements OnInit {
       queryParamsHandling: 'merge'
     }).then();
 
-    this.api.post<any>('urlscan/domain', {domain: this.requestedUrl, scanType: this.scanType})
+    this.api.post<UrlScanResponse | any>('urlscan/domain', {domain: this.requestedUrl, scanType: this.scanType})
       .pipe(
         expand(res => (
             res?.status === 'pending' ||
@@ -133,6 +136,9 @@ export class SecurityScanResultsComponent implements OnInit {
             URL: m?.URL || this.requestedUrl
           };
 
+          this.grade = res.result.grade || '';
+          this.gradeCounts = res.result.grade_counts || { high: 0, medium: 0, low: 0, informational: 0 };
+
           const proofMap = new Map<string, string>();
           const proofs = res.result.proofs || {};
           Object.entries(proofs).forEach(([cat, items]) => {
@@ -174,6 +180,8 @@ export class SecurityScanResultsComponent implements OnInit {
   exportReport(): void {
     const payload = {
       meta: this.meta,
+      grade: this.grade,
+      grade_counts: this.gradeCounts,
       threats: Object.fromEntries(this.categories.map(c => [c.name, c.items]))
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
@@ -246,4 +254,39 @@ export class SecurityScanResultsComponent implements OnInit {
       this.load();
     });
   }
+}
+
+export interface UrlScanMeta {
+  URL: string;
+  Host: string;
+  Port: string;
+  Scanned_on_date: string;
+  Scanned_by: string;
+}
+
+export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Informational' | string;
+
+export interface UrlScanThreatItem {
+  header: string;
+  description: string;
+  confidence: RiskLevel;
+  risk: RiskLevel;
+  proof?: string;
+}
+
+export interface UrlScanProofItem {
+  header: string;
+  proof: string;
+  confidence: RiskLevel;
+  risk: RiskLevel;
+}
+
+export interface UrlScanResponse {
+  result: {
+    meta: UrlScanMeta;
+    threats: Record<string, UrlScanThreatItem[]>;
+    proofs?: Record<string, UrlScanProofItem[]>;
+    grade?: string;
+    grade_counts?: { high: number; medium: number; low: number; informational: number };
+  };
 }

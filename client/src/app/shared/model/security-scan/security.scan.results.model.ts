@@ -28,5 +28,7 @@ export interface UrlScanResponse {
     meta: UrlScanMeta;
     threats: Record<string, UrlScanThreatItem[]>;
     proofs?: Record<string, UrlScanProofItem[]>;
+    grade?: string;
+    grade_counts?: { high: number; medium: number; low: number; informational: number };
   };
 }
