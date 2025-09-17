@@ -489,7 +489,13 @@ export const routes: Routes = [
             path: 'settings',
             component: SidebarProfileSettingsComponent,
             data: { type: 'settings', animation: 'ProfilePage' }
-          }
+          },
+          {
+            path: 'consolidated',
+            data: { animation: 'ConsolidatedPage' },
+            children: consolidatedChildren
+          },
+
         ]
       }
     ]

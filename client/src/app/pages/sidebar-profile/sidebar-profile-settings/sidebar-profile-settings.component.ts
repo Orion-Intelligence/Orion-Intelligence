@@ -42,7 +42,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
               };
             })
           };
-          this.selectedCategoryId = this.onboardingData?.iocs[0].ioc_id;
+          this.selectedCategoryId = this.onboardingData?.iocs[0]?.ioc_id;
           console.log('Onboarding data received:', backendData);
         },
         error: (err) => {

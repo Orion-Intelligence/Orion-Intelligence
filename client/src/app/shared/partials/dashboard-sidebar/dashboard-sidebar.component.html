@@ -118,13 +118,33 @@
   </div>
 
   <ul class="sidebar__items">
-    <li class="sidebar__item">
+    <ng-container *ngIf="authService.getRole() === 'profile'; else homeTemplate">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+        [icon]="'assets/images/sidebar/dump.svg'" [items]="prfileCategories" [routePrefix]="'profile'"
+        [selectionStore]="selectionStore" [title]="authService.getUsername()"></app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-template #homeTemplate>
+      <li class="sidebar__item">
+        <div (click)="onSectionSelected(category.HOMEPAGE)"
+          [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" [routerLink]="'home'"
+          appTooltip="Homepage" class="sidebar__item-dropdown">
+          <img alt="Home" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/home.svg"
+            width="20">
+        </div>
+      </li>
+    </ng-template>
+
+
+
+    <!-- <li class="sidebar__item">
       <div (click)="onSectionSelected(category.HOMEPAGE)"
         [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category.HOMEPAGE}" [routerLink]="'home'"
         appTooltip="Homepage" class="sidebar__item-dropdown">
         <img alt="Home" class="sidebar__icon" height="20" ngSrc="../../../../assets/images/sidebar/home.svg" width="20">
       </div>
-    </li>
+    </li> -->
 
     <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
       (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
