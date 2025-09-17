@@ -119,13 +119,24 @@ class crawl_model:
 
     @staticmethod
     async def scan_domain(model):
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "http://trusted-micros-api:8010/urlscan/domain",
-                json=model.model_dump(),
-                timeout=200
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/urlscan/domain",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling urlscan/domain"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling urlscan/domain"}
             )
-            return response.json()
 
     @staticmethod
     async def parse_chat_ai(model: ReportChatRequest):

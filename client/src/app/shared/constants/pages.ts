@@ -13,6 +13,7 @@ export enum Category {
   FEED = 'Feed',
   CONSOLIDATED = 'Consolidated',
   STEALERLOGS = 'Stealerlogs',
+  SCANNER = 'Scanner',
 }
 
 export enum GeneralSubCategory {
@@ -69,6 +70,12 @@ export enum ExploitSubCategory {
 export enum FeedSubCategory {
   NEWS = 'News',
 }
+
+export enum ScannerSubCategory {
+  BASIC = 'Basic',
+  FULL = 'Full',
+}
+
 export enum DumpSubCategory {
   LISTING = 'Listing',
 }

@@ -382,6 +382,28 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'scanner',
+        data: { animation: 'ScannerPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'basic',
+            pathMatch: 'full'
+          },
+          {
+            path: 'basic',
+            component: DumpComponent,
+            resolve: { reportdata: DumpResolver },
+            data: { type: 'basic', animation: 'ScannerPage' }
+          },
+          {
+            path: 'full',
+            component: DumpComponent,
+            data: { type: 'full', animation: 'ScannerPage' }
+          }
+        ]
+      },
+      {
         path: 'dump',
         data: { animation: 'DumpPage' },
         children: [

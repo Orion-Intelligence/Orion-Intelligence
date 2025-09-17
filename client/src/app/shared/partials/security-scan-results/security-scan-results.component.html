@@ -1,3 +1,10 @@
+<div class="scan_progress-top" *ngIf="!hasError && isLoading && progress() < 100">
+  <div class="scan_progress-text">{{ currentStep || 'Scanning...' }} ({{ progress() }}%)</div>
+  <div class="scan_progress-bar">
+    <div class="scan_progress-fill" [style.width.%]="progress()"></div>
+  </div>
+</div>
+
 <div class="d-flex justify-content-end" *ngIf="!hasError && !isLoading">
   <div class="btn-group report-menu-option-container">
     <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
@@ -5,13 +12,13 @@
     </button>
     <div class="vr report-menu-divider"></div>
 
-<button ngxPrint
-        printSectionId="scanReport"
-        [useExistingCss]="true"
-        appTooltip="Print"
-        class="p-0 report-menu-option">
-  <img alt="Print" height="25" ngSrc="assets/images/shared/print.svg" width="25"/>
-</button>
+    <button ngxPrint
+            printSectionId="scanReport"
+            [useExistingCss]="true"
+            appTooltip="Print"
+            class="p-0 report-menu-option">
+      <img alt="Print" height="25" ngSrc="assets/images/shared/print.svg" width="25"/>
+    </button>
   </div>
 </div>
 <div class="security-scan scan_container">

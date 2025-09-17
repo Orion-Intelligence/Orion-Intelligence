@@ -1,10 +1,11 @@
 import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {finalize} from 'rxjs/operators';
+import {finalize, expand, switchMap, takeWhile} from 'rxjs/operators';
+import {EMPTY, timer} from 'rxjs';
 import {ApiService} from '../../services/api.service';
 import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {UrlScanMeta, UrlScanResponse, UrlScanThreatItem} from '../../model/security-scan/security.scan.results.model';
+import {UrlScanMeta, UrlScanThreatItem} from '../../model/security-scan/security.scan.results.model';
 import {CodeBlockComponent} from '../code-block/code-block.component';
 import {TooltipDirective} from '../../directive/tooltip-directive.directive';
 import {SecurityScanExportComponentComponent} from './security-scan-export-component/security-scan-export-component.component';
@@ -27,6 +28,8 @@ export class SecurityScanResultsComponent implements OnInit {
   hasError = false;
   errorMessage = '';
   skeletonCards = Array.from({length: 3});
+  progress = signal(0);
+  currentStep = '';
 
   constructor(private api: ApiService, private route: ActivatedRoute) {
   }
@@ -44,12 +47,39 @@ export class SecurityScanResultsComponent implements OnInit {
     this.errorMessage = '';
     this.meta = null;
     this.categories = [];
-    this.api.post<UrlScanResponse>('urlscan/domain', {domain: this.requestedUrl})
-      .pipe(finalize(() => {
-        this.isLoading = false;
-      }))
+    this.progress.set(0);
+    this.currentStep = '';
+    this.api.post<any>('urlscan/domain', {domain: this.requestedUrl})
+      .pipe(
+        expand(res => (
+            res?.status === 'pending' ||
+            res?.result?.status === 'busy' ||
+            res?.result?.status === 'pending'
+          ) ? timer(5000).pipe(
+              switchMap(() => this.api.post<any>('urlscan/domain', {domain: this.requestedUrl}))
+            )
+            : EMPTY
+        ),
+        takeWhile(res =>
+            res?.status === 'pending' ||
+            res?.result?.status === 'busy' ||
+            res?.result?.status === 'pending',
+          true
+        ),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
+          if (res?.result?.status === 'busy' || res?.result?.status === 'pending' || res?.status === 'pending') {
+            const p = res?.result?.progress ?? res?.progress;
+            if (typeof p === 'number' && !Number.isNaN(p)) this.progress.set(p);
+            const st = res?.result?.step ?? res?.step;
+            if (typeof st === 'string' && st) this.currentStep = st;
+            return;
+          }
+
           const safe = !!(res && res.result && res.result.meta);
           if (!safe) {
             this.hasError = true;
@@ -67,16 +97,18 @@ export class SecurityScanResultsComponent implements OnInit {
           const proofMap = new Map<string, string>();
           const proofs = res.result.proofs || {};
           Object.entries(proofs).forEach(([cat, items]) => {
-            (items || []).forEach(p => {
+            (items as any[] || []).forEach((p: any) => {
               const k = (cat + '|' + (p.header || '').trim().toLowerCase());
               if (p.proof && !proofMap.has(k)) proofMap.set(k, p.proof);
             });
           });
 
-          this.categories = Object.entries(res.result.threats || {})
+          const entries = Object.entries(res.result.threats || {}) as [string, any][];
+          this.categories = entries
             .map(([name, items]) => {
+              const list: any[] = Array.isArray(items) ? items : [];
               const seen = new Set<string>();
-              const uniqueItems = (items || [])
+              const uniqueItems = list
                 .filter(it => {
                   const key = (it.header || '').trim().toLowerCase();
                   if (!key || seen.has(key)) return false;
@@ -88,7 +120,7 @@ export class SecurityScanResultsComponent implements OnInit {
                   const mergedProof = proofMap.get(name + '|' + key);
                   return mergedProof ? {...it, proof: mergedProof} : it;
                 });
-              return {name, total: (items || []).length, items: uniqueItems};
+              return {name, total: list.length, items: uniqueItems as UrlScanThreatItem[]};
             })
             .filter(c => c.items.length > 0);
         },
@@ -104,7 +136,6 @@ export class SecurityScanResultsComponent implements OnInit {
       meta: this.meta,
       threats: Object.fromEntries(this.categories.map(c => [c.name, c.items]))
     };
-
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
     const a = document.createElement('a');
     const host = this.displayHost?.replace(/[^a-z0-9.-]/gi, '_') || 'report';
@@ -115,10 +146,6 @@ export class SecurityScanResultsComponent implements OnInit {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-  }
-
-  printReport(): void {
-    window.print();
   }
 
   private resolveRequestedUrl(input: string): string {
