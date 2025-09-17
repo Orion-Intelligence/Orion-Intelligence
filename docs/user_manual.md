@@ -502,9 +502,9 @@ reference points, allowing users to explore known breaches and validate the expo
 An exploit is a piece of software, code, or technique that takes advantage of a vulnerability or weakness in a system, application, or network. If a program has a flaw (like improper input validation or weak authentication), an exploit can be used to trigger that flaw.
 Short answer: they are different kinds of exploit-related information, not all the same thing.
 
-CVE — a vulnerability identifier (public record of a known flaw).
-Tools — references to exploit modules / PoC code / attacker tools (methods someone could use to exploit a CVE).
-Zero-day — an unpatched, actively exploited vulnerability (high-risk because no vendor patch exists yet).
+- CVE — a vulnerability identifier (public record of a known flaw).
+- Tools — references to exploit modules / PoC code / attacker tools (methods someone could use to exploit a CVE).
+- Zero-day — an unpatched, actively exploited vulnerability (high-risk because no vendor patch exists yet).
 
 <img width="1918" height="715" alt="exploit" src="https://github.com/user-attachments/assets/a5683c65-8165-4843-aecd-5b04454168d3" />
 
@@ -521,6 +521,14 @@ In Orion, CVE (Common Vulnerabilities and Exposures) provides a standardized ide
 **3- Zeroday:**
 
 <img width="1908" height="900" alt="zeroday" src="https://github.com/user-attachments/assets/ee37db76-1753-4f7c-9d7b-00d881d33c9a" />
+
+
+## Feed
+
+Deed mainly contains news items that may cover any topic or be related to a specific search. Each general feed result can be opened and viewed individually.
+You can also plot any result on the CTI graph to see its relationships and context. This lets analysts examine single items and explore their connections visually.
+
+<img width="1913" height="907" alt="feed" src="https://github.com/user-attachments/assets/28ed9fa1-df82-4f31-97ad-3de95c1b26dc" />
 
 
 ## Data Dump
@@ -543,7 +551,15 @@ users to selectively view data dumps based on their preferred source. Users can 
 websites, Telegram channels, or other monitored resources, enabling more efficient navigation and targeted analysis of
 the collected data.
 
-![dump-modified](https://github.com/user-attachments/assets/c218ae0d-de70-4445-a2b7-7a6a04ce5b47)
+<img width="1903" height="886" alt="dump" src="https://github.com/user-attachments/assets/0b69b04d-4b84-4ddd-898b-b5727a9a9f3f" />
+
+## Stealerlogs
+
+Stealer logs are collections of data harvested by “info-stealer” malware. Credentials in these stealer logs typically consist of usernames, passwords, and sometimes session tokens taken from an infected device.
+When viewing credentials, you can often filter or group by domain to see which credentials are associated with a particular service. The typical record layout is: (1) a URL or domain in the first column, (2) the username or email in the second column, (3) the password in the third column — usually stored as a hash rather than the plaintext password — and (4) a timestamp indicating the date and time the credential was leaked.
+
+<img width="1915" height="907" alt="stealerlogs" src="https://github.com/user-attachments/assets/11fba8d7-bfe3-4344-baf7-ec10f2a1a89c" />
+
 
 ## CTI Graph
 
@@ -555,7 +571,8 @@ with previous incidents. This enhances threat hunting, improves situational awar
 The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to
 provide contextual, actionable insights.
 
-![cti-modified](https://github.com/user-attachments/assets/2f718103-3325-46da-8096-95e247a2e79f)
+<img width="1917" height="911" alt="image" src="https://github.com/user-attachments/assets/2510cf42-0cd7-4c30-825b-e9ca00f9b5b0" />
+
 
 When the CTI Graph module is clicked, it automatically opens in a new tab. This module displays a connection graph
 composed of various nodes, visually representing complex relationships between different cyber threat entities.
