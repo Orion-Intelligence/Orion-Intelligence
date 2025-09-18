@@ -1,8 +1,11 @@
 import threading
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from http.client import HTTPException
+
+from starlette import status
+
 from orion.constants.constant import CONSTANTS
+from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.session_manager.session_manager import session_manager
@@ -22,14 +25,14 @@ class TenantManager:
         return TenantManager.__instance
 
     def __init__(self):
+        self._engine = mongo_controller.get_instance().get_engine()
         if TenantManager.__instance is not None:
             raise Exception("This class is a singleton!")
         TenantManager.__instance = self
 
-    async def create_tenant(self,data: TenantRequest, token: str=Depends(oauth2_scheme)):
-        sess = session_manager.get_instance()
-        current_user = await sess.get_current_user(token)
-        engine = sess._engine
+    async def create_tenant(self, data: TenantRequest, token: str=Depends(oauth2_scheme)):
+        session_instance = session_manager.get_instance()
+        current_user = await session_instance.get_current_user(token)
 
         encryptor = encryption_manager.get_instance(
             secret_key=CONSTANTS.S_ENCRYPTION_KEY
@@ -51,10 +54,10 @@ class TenantManager:
             iocs=encrypted_iocs
         )
 
-        await engine.save(new_onboarding)
+        await self._engine.save(new_onboarding)
 
         current_user.status = UserStatus.ACTIVE
-        await engine.save(current_user)
+        await self._engine.save(current_user)
 
         return {
             "message": "Onboarding created",
@@ -62,22 +65,21 @@ class TenantManager:
             "company": encrypted_company
         }
     
-    async def get_tenant(self,token:str=Depends(oauth2_scheme)) -> TenantRequest:
-        sess = session_manager.get_instance()
-        current_user = await sess.get_current_user(token)
-        engine = sess._engine
+    async def get_tenant(self, token:str=Depends(oauth2_scheme)) -> TenantRequest:
+        session_instance = session_manager.get_instance()
+        current_user = await session_instance.get_current_user(token)
 
         encryptor = encryption_manager.get_instance(
             secret_key=CONSTANTS.S_ENCRYPTION_KEY
         )
 
-        onboarding = await engine.find_one(
+        onboarding = await self._engine.find_one(
             db_tenant_model,
             db_tenant_model.userId == str(current_user.id)
         )
 
         if not onboarding:
-            raise HTTPException(status_code=404, detail="Tenant not found")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
 
         ioc_models = [
             IocCategory(
@@ -96,15 +98,14 @@ class TenantManager:
         return tenant_request
     
     async def update_tenant(self, data: TenantRequest, token: str=Depends(oauth2_scheme)):
-        sess = session_manager.get_instance()
-        current_user = await sess.get_current_user(token)
-        engine = sess._engine
+        session_instance = session_manager.get_instance()
+        current_user = await session_instance.get_current_user(token)
 
         encryptor = encryption_manager.get_instance(
             secret_key=CONSTANTS.S_ENCRYPTION_KEY
         )
 
-        onboarding = await engine.find_one(
+        onboarding = await self._engine.find_one(
             db_tenant_model, 
             db_tenant_model.userId == str(current_user.id)
         )
@@ -122,7 +123,7 @@ class TenantManager:
             for ioc in data.iocs
         ]
 
-        await engine.save(onboarding)
+        await self._engine.save(onboarding)
 
         return {
             "message": "Onboarding updated",

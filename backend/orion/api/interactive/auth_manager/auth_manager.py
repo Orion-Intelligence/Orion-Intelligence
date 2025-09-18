@@ -9,7 +9,7 @@ from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account,user_role,UserStatus
 from orion.services.session_manager.session_manager import session_manager
-from orion.api.interactive.mail_manager.mail_manager  import mail_manager
+from orion.services.mail_manager.mail_manager import mail_manager
 from orion.helper_manager.env_handler import env_handler
 import pyotp
 

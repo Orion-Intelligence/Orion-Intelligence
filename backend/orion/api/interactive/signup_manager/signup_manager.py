@@ -7,11 +7,11 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account,user_role,UserStatus
 from orion.api.interactive.signup_manager.signup_request_model import SignupRequest
 from orion.services.session_manager.session_manager import session_manager
-from orion.api.interactive.mail_manager.mail_manager import mail_manager
-from orion.api.interactive.mail_manager.mail_enums import MailSubject
+from orion.services.mail_manager.mail_manager import mail_manager
+from orion.services.mail_manager.mail_enums import MailSubject
 from orion.constants import constant
 from orion.helper_manager.env_handler import env_handler
-from jinja2 import Template
+
 
 class SignupManager:
     @staticmethod

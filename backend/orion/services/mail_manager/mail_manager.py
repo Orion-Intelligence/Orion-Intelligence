@@ -37,7 +37,8 @@ class mail_manager:
         await asyncio.to_thread(self._send_sync_email, sender_email, ACCOUNTS_MAIL_PASSWORD, to, msg,smtp_server,smtp_port)
         
 
-    def _send_sync_email(self, sender_email, password, to, msg,smtp_server,smtp_port):
+    @staticmethod
+    def _send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):
         with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
             server.login(sender_email, password)
             server.sendmail(sender_email, to, msg.as_string())

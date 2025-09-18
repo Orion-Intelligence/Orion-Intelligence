@@ -29,7 +29,7 @@ export class SignupComponent {
   }
   isCompanyMail: boolean = true;
   private blockedDomains = [
-    'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
+    'yahoo.com', 'outlook.com', 'hotmail.com',
     'live.com', 'aol.com', 'icloud.com', 'protonmail.com', 'gmx.com'
   ];
   onPasswordInput(password: string) {

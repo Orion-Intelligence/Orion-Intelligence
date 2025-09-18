@@ -75,17 +75,18 @@ class session_manager:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
         return role
     
+
     async def get_current_status(self, token: str) -> str:
         user = await self.get_current_user(token)
         if not user or isinstance(user, JSONResponse):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
 
-        status = user.status
+        user_status = user.status
         try:
             _ = UserStatus(status)
         except ValueError:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User access not found")
-        return status
+        return user_status
 
     async def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
