@@ -611,7 +611,7 @@ On the rightmost side of the CTI Graph interface, there are several additional o
 ## Fillter and Analytics
 
 On the left side of the page, there are two options: Analytics and Filter.
-![analytics-modified (1)](https://github.com/user-attachments/assets/90e59067-d5ca-4eed-a404-7a67d6435558)
+<img width="1918" height="552" alt="filters" src="https://github.com/user-attachments/assets/29b31e54-3d46-4067-8c1a-e4d66df596e8" />
 
 ### Analytics:
 
@@ -624,17 +624,20 @@ Keyword Insights Table – This table presents data based on the keywords used d
 
 General Coverage of Results Table – This table provides an overview of the general distribution of the search results.
 
-### Keyword Insight:
+### Search Results Insights:
 
-This section highlights the fetch results related to the entered search word. It provides detailed insights, including:
+This section presents a comprehensive overview of the fetched results based on the entered search word. It provides:
 
-The number of keywords identified during the crawl.
-The total count of documents fetched containing those keywords.
-The number of links or pages retrieved that are associated with the keywords. These observations offer a clear
-understanding of how the data is gathered and processed, ensuring that users can analyze the results efficiently and
-make informed decisions based on the displayed metrics.
+- The number of keywords identified during the crawl.
 
-![keywords-modified](https://github.com/user-attachments/assets/4d39a666-3473-4fbc-b15c-0e63cb86b1a8)
+- The total documents fetched containing those keywords.
+
+- The number of links or pages associated with the keywords.
+
+These insights offer a clear understanding of how data is gathered and processed, enabling users to analyze results efficiently and make informed decisions. Additionally, the General Coverage summary displays the total number of items found during the search, with a breakdown of active, inactive, and seldom active items, ensuring a structured and clear representation of the data.
+
+<img width="492" height="748" alt="keywords" src="https://github.com/user-attachments/assets/aa97e9db-38ef-4fbd-b391-cc325f3f3bb5" />
+
 
 ### Results General Coverage
 
@@ -644,7 +647,6 @@ It first shows the total number of items found during the search.
 Then, it provides a breakdown of active and inactive items, along with the results for seldom active items, offering a
 clear summary of the data.
 
-![results-modified](https://github.com/user-attachments/assets/0bbedfd0-ad5c-4061-8689-60f238053af4)
 
 Below the two tables mentioned above, we have detailed data associated with each category, such as URLs, titles, and
 networks. For instance, if the data includes URLs, it displays which specific URLs are available; if it includes titles,
