@@ -590,7 +590,7 @@ General, Leak, Defacement, and Chat.
 **Property** Similarly, if the Property filter is selected, the second-level filter asks the user to choose a property
 type—such as email, hashes, etc.—and then specify the property value for a more targeted query.
 
-![ctifilter-modified](https://github.com/user-attachments/assets/c5af2eab-74f6-42b7-8914-2395f544c704)
+<img width="757" height="658" alt="ctifilters" src="https://github.com/user-attachments/assets/6b46a285-8d27-4e27-ba19-41a8848f2686" />
 
 On the rightmost side of the CTI Graph interface, there are several additional options:
 
@@ -605,7 +605,8 @@ On the rightmost side of the CTI Graph interface, there are several additional o
 - Finally, there is a Color Indicators section, which explains the meaning of different node colors used within the
   graph for easier interpretation.
 
-![toggle-modified](https://github.com/user-attachments/assets/bb0bedca-818b-4929-80da-453091ef6c8b)
+<img width="243" height="805" alt="properties" src="https://github.com/user-attachments/assets/b9632368-1658-480e-b8c6-f03952f498dc" />
+
 
 ## Fillter and Analytics
 
