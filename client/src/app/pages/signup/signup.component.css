@@ -24,12 +24,15 @@
 }
 
 .auth-wrapper__image {
-    height: 578px;
+    width: 822px;
+    height: 636px;
+
 }
 
 .login-container__forgot {
+    font-family: 'Inter';
     text-align: right;
-    margin: 6px 0 14px 0;
+    margin: 6px 0 6px 0;
 }
 
 .login-container__forgot a {
@@ -69,6 +72,7 @@
     font-weight: 500;
     font-size: 20px;
     color: #ffffff;
+    margin-top: -25px;
 }
 
 .ai-summary__icon {
@@ -92,6 +96,7 @@
     border-radius: 16px;
     padding: 42px 36px;
     width: 500px;
+    max-height: 100%;
     color: white;
     font-family: 'Inter', sans-serif;
 }
@@ -166,13 +171,13 @@
     margin-top: 20px;
     font-size: 14px;
     font-weight: 400;
-    color: #ffffff;
+    color: #A0B8D1;
 }
 
 .signup-container__login-link {
     color: white !important;
     text-decoration: none !important;
-    font-weight: 400;
+    font-weight: 500;
     margin-left: 4px;
     cursor: pointer;
 }
@@ -192,7 +197,7 @@
 }
 
 .strength-fill.weak {
-    background: red;
+    background: bg-danger-subtle;
 }
 
 .strength-fill.medium {
@@ -242,5 +247,43 @@
         width: 100%;
         max-width: 500px;
         margin: 0 auto;
+    }
+}
+
+@media screen and (max-width: 1600px) {
+    .auth-wrapper__image {
+        width: 747px;
+        height: 578px;
+    }
+}
+
+@media screen and (max-height: 950px) {
+    .ai-summary {
+        display: none;
+    }
+}
+
+@media screen and (max-height: 730px) {
+    .auth-wrapper__image {
+        width: 747px;
+        height: 578px;
+    }
+}
+
+@media screen and (max-height: 690px) {
+    .auth-wrapper__image {
+        width: 672px;
+        height: 520px;
+    }
+}
+
+@media screen and (max-height: 620px) {
+    .auth-wrapper__image {
+        width: 560px;
+        height: 433px;
+    }
+
+    .signup-container {
+        max-height: 80%;
     }
 }

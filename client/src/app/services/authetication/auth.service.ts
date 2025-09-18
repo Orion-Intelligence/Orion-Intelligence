@@ -60,40 +60,48 @@ export class AuthService {
             });
             return;
           }
-          switch (response.status) {
-            case 'verification_pending':
-              this.authState.next({
-                token: null,
-                username: null,
-                role: null,
-                isAuthenticated: false,
-                onboarding: null,
-                error: 'Account under verification'
-              });
-              break;
+          if (response.role === 'admin' || response.role === 'demo') {
+            localStorage.setItem('role', response.role);
+            this.setToken(response.access_token, username, response.role);
+            this.startTokenRefresh();
+            this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+          }
+          else {
+            switch (response.status) {
+              case 'verification_pending':
+                this.authState.next({
+                  token: null,
+                  username: null,
+                  role: null,
+                  isAuthenticated: false,
+                  onboarding: null,
+                  error: 'Account under verification'
+                });
+                break;
 
-            case 'onboarding':
-              this.setToken(response.access_token, username, response.role);
-              this.startTokenRefresh();
-              this.router.navigate(['/onboarding']).then();
-              break;
+              case 'onboarding':
+                this.setToken(response.access_token, username, response.role);
+                this.startTokenRefresh();
+                this.router.navigate(['/onboarding']).then();
+                break;
 
-            case 'active':
-              this.setToken(response.access_token, username, response.role, response.hasOnboarding);
-              this.startTokenRefresh();
-              this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
-              break;
+              case 'active':
+                this.setToken(response.access_token, username, response.role, response.hasOnboarding);
+                this.startTokenRefresh();
+                this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+                break;
 
-            default:
-              this.authState.next({
-                token: null,
-                username: null,
-                role: null,
-                isAuthenticated: false,
-                onboarding: 'false',
-                error: 'Unknown account status'
-              });
-              break;
+              default:
+                this.authState.next({
+                  token: null,
+                  username: null,
+                  role: null,
+                  isAuthenticated: false,
+                  onboarding: 'false',
+                  error: 'Unknown account status'
+                });
+                break;
+            }
           }
         },
         error: (_) => {

@@ -16,13 +16,15 @@
               <div class="home-insight-card-company-info">
                 <div class="home-insight-card-label">Company Name</div>
                 <div class="home-insight-card-value">
-                  {{item.title.slice(0, 25)}}
-                  <span *ngIf="item.title.length > 25">…</span>
+                  {{item.title.slice(0, 20)}}
+                  <span *ngIf="item.title.length > 20">…</span>
                 </div>
               </div>
               <div class="home-insight-card-attacker-info">
                 <div class="home-insight-card-label">Source</div>
-                <div class="home-insight-card-value">{{ item.source }}</div>
+                <div class="home-insight-card-value">{{ item.source.slice(0,20) }}
+                  <span *ngIf="item.source.length > 20">…</span>
+                </div>
               </div>
             </div>
 

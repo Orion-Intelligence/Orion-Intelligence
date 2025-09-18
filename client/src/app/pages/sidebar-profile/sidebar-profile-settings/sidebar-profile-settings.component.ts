@@ -26,13 +26,11 @@ export class SidebarProfileSettingsComponent implements OnInit {
   constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
   ngOnInit(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
-    if (search_filter_keys === null)
-      alert("null")
     const token = this.authService.getToken()
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    this.apiService.post<TenantModel>('getTenant', { headers })
+    this.apiService.post<TenantModel>('getTenant', {})
       .subscribe({
         next: (backendData) => {
           this.onboardingData = {
@@ -103,7 +101,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
       'Authorization': `Bearer ${token}`
     });
 
-    this.apiService.post('updateTenant', filteredOnboardingData, { headers }).subscribe({
+    this.apiService.post('updateTenant', filteredOnboardingData).subscribe({
       next: () => {
         this.authService.setOnboarding(true);
         this.router.navigate(['/dashboard']);

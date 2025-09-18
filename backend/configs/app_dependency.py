@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from orion.helper_manager.env_handler import env_handler
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role,UserStatus
 from orion.services.session_manager.session_manager import session_manager
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
@@ -19,6 +19,13 @@ async def get_current_role(token: str = Depends(oauth2_scheme)):
 
     return role
 
+async def get_current_status(token: str = Depends(oauth2_scheme)):
+    status = await session_manager.get_instance().get_current_status(token)
+    if status is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
+
+    return status
+
 
 def role_required(required_roles: list[user_role]):
     async def verify_role(role: user_role = Depends(get_current_role)):
@@ -27,3 +34,11 @@ def role_required(required_roles: list[user_role]):
         return role
 
     return verify_role
+
+def status_required(status_required:list[UserStatus]):
+    async def verify_status(status: UserStatus = Depends(get_current_status)):
+        if status not in status_required:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        return status
+
+    return verify_status

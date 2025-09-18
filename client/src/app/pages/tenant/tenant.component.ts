@@ -41,7 +41,7 @@ export class TenantComponent implements OnInit {
       name: search_filter_labels[key] || key,
       values: []
     }));
-    this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
+    this.selectedCategoryId = this.onboardingData.iocs[0]?.ioc_id;
   }
   onCategoryClick(categoryId: string): void {
     this.selectedCategoryId = categoryId;
@@ -106,7 +106,7 @@ export class TenantComponent implements OnInit {
       'Authorization': `Bearer ${token}`
     });
 
-    this.apiService.post('createTenant', filteredOnboardingData, { headers }).subscribe({
+    this.apiService.post('createTenant', filteredOnboardingData).subscribe({
       next: () => {
         this.auth_service.setOnboarding(true);
         this.router.navigate(['/dashboard']);
