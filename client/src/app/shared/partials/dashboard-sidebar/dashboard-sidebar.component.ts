@@ -7,7 +7,7 @@ import {
   DefacementSubCategory, DumpSubCategory,
   ExploitSubCategory,
   GeneralSubCategory, FeedSubCategory,
-  SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory
+  SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory,
   TenantSubCategory,
   ProfileSubCategory
 
