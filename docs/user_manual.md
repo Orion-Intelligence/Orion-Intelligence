@@ -799,8 +799,11 @@ the selected result.
 
 Then we have the Person option, which displays the names of individuals associated with the selected search result.
 
-<img width="757" height="658" alt="ctifilters" src="https://github.com/user-attachments/assets/20a1c5c7-5b71-4905-8c7c-e5c18b9b86c3" />
+<img width="1715" height="822" alt="reports" src="https://github.com/user-attachments/assets/d1bdea60-b148-4f46-94b1-6b24ff9afdb9" />
 
+Metadata
+Json response
+Related reports
 
 ## Overview and Additional Features
 
