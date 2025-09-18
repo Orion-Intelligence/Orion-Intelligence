@@ -1,0 +1,199 @@
+<img alt="background" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover"
+    src="/assets/images/shared/Bg.webp">
+<ng-container>
+    <app-header></app-header>
+</ng-container>
+<div class="onboarding-container">
+    <div class="onboarding-box">
+        <div class="onboarding-box__stepper">
+            <div class="onboarding-box__step" [class.onboarding-box__step--active]="currentStep >= 1">
+                <div class="onboarding-box__step-circle" [class.onboarding-box__step-circle--tick]="currentStep > 1">
+                    <ng-container *ngIf="currentStep > 1; else step1Number">
+                        <img src="assets/images/shared/onboarding_tick.svg" alt="tick" />
+                    </ng-container>
+                    <ng-template #step1Number>1</ng-template>
+                </div>
+                <span class="onboarding-box__step-label">Company Info</span>
+            </div>
+
+            <div class="onboarding-box__line" [class.onboarding-box__line--active]="currentStep > 1"></div>
+
+            <div class="onboarding-box__step" [class.onboarding-box__step--active]="currentStep >= 2">
+                <div class="onboarding-box__step-circle" [class.onboarding-box__step-circle--tick]="currentStep > 2">
+                    <ng-container *ngIf="currentStep > 2; else step2Number">
+                        <img src="assets/images/shared/onboarding_tick.svg" alt="tick" />
+                    </ng-container>
+                    <ng-template #step2Number>2</ng-template>
+                </div>
+                <span class="onboarding-box__step-label">Add IOCs</span>
+            </div>
+
+            <div class="onboarding-box__line" [class.onboarding-box__line--active]="currentStep > 2"></div>
+
+            <div class="onboarding-box__step" [class.onboarding-box__step--active]="currentStep === 3">
+                <div class="onboarding-box__step-circle">3</div>
+                <span class="onboarding-box__step-label">Confirmation</span>
+            </div>
+        </div>
+
+        <div class="onboarding-box__divider"></div>
+
+        <div class="onboarding-box__content">
+            <ng-container [ngSwitch]="currentStep">
+                <div *ngSwitchCase="1">
+                    <h2 class="onboarding-box__title">Welcome to Orion Intelligence</h2>
+                    <p class="onboarding-box__subtitle">
+                        Let us know a little about your company
+                    </p>
+
+                    <div class="onboarding-box__form-group">
+                        <label for="company" class="onboarding-box__form-label">Company name</label>
+                        <input type="text" id="company" class="onboarding-box__form-input"
+                            placeholder="Enter company name" [(ngModel)]="onboardingData.companyName" />
+                    </div>
+                </div>
+
+                <div *ngSwitchCase="2">
+                    <div class="onboarding-step2">
+                        <h2 class="onboarding-step2__title">Add IOCs</h2>
+                        <div class="onboarding-step2__description-row">
+                            <p class="onboarding-step2__description">
+                                Add IOCs description here...
+                            </p>
+
+                            <input type="text" class="onboarding-step2__search-input" placeholder="Search IOCs..."
+                                [(ngModel)]="iocSearchText" />
+                        </div>
+
+                        <div class="onboarding-step2__category-scroll-container">
+                            <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
+
+                            <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollLeft()">
+                                <div class="filter-panel__click-hitbox filter-panel__show">
+                                    <img src="../../../../assets/images/shared/onboarding_leftButton.svg"
+                                        alt="filter icon" />
+                                </div>
+                            </div>
+
+                            <div class="onboarding-step2__category-scroll" #categoryScroll>
+                                <ng-container *ngIf="onboardingData.iocs.length>0; else noEntity">
+                                    <div *ngFor="let category of getFilteredIocs()" class="onboarding-step2__tab"
+                                        [class.selected]="category.ioc_id === selectedCategoryId"
+                                        (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+                                        {{ category.name }}
+                                    </div>
+                                </ng-container>
+                                <ng-template #noEntity>
+                                    <div class="filter-panel__no-filters-text">No entity filters available.</div>
+                                </ng-template>
+
+                            </div>
+
+                            <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollRight()">
+                                <div class="filter-panel__click-hitbox filter-panel__show">
+                                    <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" />
+                                </div>
+                            </div>
+
+                            <div class="filter-panel__fade-right" *ngIf="showRightFade"></div>
+                        </div>
+
+                        <div class="onboarding-step2__divider1"></div>
+
+                        <label class="onboarding-step2__label">Enter IOCs</label>
+                        <input type="text" class="onboarding-step2__input" placeholder="Type"
+                            (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+
+                        <div class="onboarding-step2__divider2"></div>
+
+                        <p class="onboarding-step2__added-title">Added IOCs</p>
+                        <div class="onboarding-step2__added">
+
+                            <div *ngIf="hasIocsWithValues(); else _noEntity">
+                                <div *ngFor="let ioc of onboardingData.iocs">
+                                    <ng-container *ngIf="ioc.values.length > 0">
+                                        <p class="onboarding-step2__heading">{{ ioc.name }}</p>
+
+                                        <div class="onboarding-step2__chips">
+                                            <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
+                                                <span>{{ value }}</span>
+                                                <span class="onboarding-step2__chip-remove"
+                                                    (click)="removeIoc(ioc.ioc_id, value)">
+                                                    ✕
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+
+                            <ng-template #_noEntity>
+                                <p class="onboarding-step2__no-iocs">No IOCs added yet</p>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngSwitchCase="3">
+                    <div class="confirmation-container">
+
+                        <h2 class="onboarding-step3__title">Confirm Your Information</h2>
+
+                        <div class="section">
+                            <p class="onboarding-step2__added-title">Company Name</p>
+                            <p class="company-value">{{ onboardingData.companyName }}</p>
+                        </div>
+
+                        <hr class="onboarding-step2__divider2" />
+
+                        <p class="onboarding-step2__added-title">Added IOCs</p>
+                        <div class="onboarding-step3__added">
+
+                            <div *ngIf="hasIocsWithValues(); else _noEntity">
+                                <div *ngFor="let ioc of onboardingData.iocs">
+                                    <ng-container *ngIf="ioc.values.length > 0">
+                                        <p class="onboarding-step2__heading">{{ ioc.name }}</p>
+
+                                        <div class="onboarding-step2__chips">
+                                            <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
+                                                <span>{{ value }}</span>
+                                                <span class="onboarding-step2__chip-remove"
+                                                    (click)="removeIoc(ioc.ioc_id, value)">
+                                                    ✕
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+
+                            <ng-template #_noEntity>
+                                <p class="onboarding-step2__no-iocs">No IOCs added yet</p>
+                            </ng-template>
+                        </div>
+                    </div>
+
+                </div>
+            </ng-container>
+        </div>
+        <div class="onboarding-box__actions">
+            <button class="onboarding-box__btn onboarding-box__btn--back" (click)="goBack()"
+                [disabled]="currentStep === 1">
+                Back
+            </button>
+
+            <ng-container [ngSwitch]="currentStep">
+                <button *ngSwitchCase="1" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()"
+                    [disabled]="!onboardingData.companyName">
+                    Next
+                </button>
+                <button *ngSwitchCase="2" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()">
+                    {{ hasIocsWithValues() ? 'Next' : 'Skip' }}
+                </button>
+                <button *ngSwitchCase="3" class="onboarding-box__btn onboarding-box__btn--next" (click)="confirm()">
+                    Confirm
+                </button>
+            </ng-container>
+        </div>
+    </div>
+</div>

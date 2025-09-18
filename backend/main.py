@@ -45,5 +45,4 @@ app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 
-# noinspection PyTypeChecker
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

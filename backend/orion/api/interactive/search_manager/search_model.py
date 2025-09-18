@@ -326,21 +326,3 @@ class search_model:
                         es_clauses.append({"terms": {es_field_name: tags}})
         return es_clauses
     
-
-    _DEFACEMENT_FIELD_MAPPING = {
-        'email': 'm_email',
-        'country': 'm_location',
-        'hashes': 'm_hash',
-    }
-
-    _LEAK_FIELD_MAPPING = {
-        'email': 'm_email',
-        'country': 'm_country_name',
-        'hashes': 'm_hash', 
-    }
-
-    _GENERAL_FIELD_MAPPING = {
-        'email': 'general_email_field',
-        'country': 'general_m_location',
-        'hashes': 'm_hash',
-    }

@@ -8,7 +8,6 @@ from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_d
 
 
 class directory_model:
-    # Private Variables
     __instance = None
 
     @staticmethod

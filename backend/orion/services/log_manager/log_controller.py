@@ -45,7 +45,6 @@ class log:
         log.__server_instance = self
         self.__configure_logs()
 
-    # noinspection PyUnresolvedReferences
     def get_caller_info(self):
         frame = inspect.currentframe()
         while frame:
@@ -107,9 +106,9 @@ class log:
         try:
             now = datetime.datetime.now().date()
             if log.__last_cleanup_date == now:
-                return  # Skip if cleanup already ran today
+                return  
 
-            log.__last_cleanup_date = now  # Update last cleanup date
+            log.__last_cleanup_date = now  
             cutoff_date = now - datetime.timedelta(days=retention_days)
 
             log_root = os.path.join(os.getcwd(), 'logs')
@@ -124,7 +123,7 @@ class log:
                                 os.remove(os.path.join(log_path, file))
                             os.rmdir(log_path)
                     except ValueError:
-                        continue  # Skip directories that don't match the date format
+                        continue  
 
         except Exception as e:
             print(f"Error during log cleanup: {e}")

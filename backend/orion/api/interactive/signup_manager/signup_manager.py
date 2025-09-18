@@ -1,0 +1,53 @@
+
+from fastapi import HTTPException
+from datetime import datetime, timedelta, timezone
+
+from orion.constants.constant import CONSTANTS
+from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account,user_role,UserStatus
+from orion.api.interactive.signup_manager.signup_request_model import SignupRequest
+from orion.services.session_manager.session_manager import session_manager
+from orion.api.interactive.mail_manager.mail_manager import mail_manager
+from orion.api.interactive.mail_manager.mail_enums import MailSubject
+from orion.constants import constant
+from orion.helper_manager.env_handler import env_handler
+from jinja2 import Template
+
+class SignupManager:
+    @staticmethod
+    async def signup_user(data: SignupRequest):
+        engine = mongo_controller.get_instance().get_engine()
+        existing_user = await engine.find_one(
+            db_user_account,
+            (db_user_account.username == data.username) |
+            (db_user_account.email == data.email)
+        )
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Username or email already exists")
+
+        hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(data.password)
+        _verification_token=session_manager.get_instance().generate_verification_token()
+        _verification_token_expire=datetime.now(timezone.utc) + timedelta(days=1)
+
+        user = db_user_account(
+            username=data.username,
+            email=data.email,
+            password=hashed_password,
+            role=user_role.PROFILE,
+            status=UserStatus.PENDING,
+            verification_token=_verification_token,
+            verification_expiry=_verification_token_expire
+        )
+        await engine.save(user)
+        APP_URL = env_handler.get_instance().env("APP_URL")
+        verify_url = f"{APP_URL}/welcome/{_verification_token}"
+        # html_content=f"""\<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="x-apple-disable-message-reformatting"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thank You</title></head><body style="margin:0;padding:0;background:#f5f7fa;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f5f7fa;"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:820px;background:#ffffff;border:1px solid #e5e7eb; border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(17,24,39,.06);"><tr><td style="background:linear-gradient(90deg,#0ea5e9,#6366f1); color:#ffffff;padding:22px 26px; font:600 20px/1.3 Arial,Helvetica,sans-serif;">We’ve Received Your Message</td></tr><tr><td style="padding:28px 26px 12px 26px; font:16px/1.65 Arial,Helvetica,sans-serif; color:#0f172a;">Thank you for contacting Orion Intelligence. Your request has been successfully submitted and added to our support queue. Our team reviews messages throughout the day, and you can expect a reply within 24–48 business hours. For urgent issues, simply reply to this email to escalate.</td></tr><tr><td style="padding:0 26px 8px 26px;"><div style="display:inline-block;background:#ecfeff;color:#0e7490; font:700 11px/1 Arial,Helvetica,sans-serif; border:1px solid #a5f3fc;border-radius:9999px; padding:6px 10px;margin:12px 0 0 0;">Submission Details</div></td></tr><tr><td style="padding:12px 26px 16px 26px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;"><tr><td style="padding:16px 18px;font:14px/1.7 Arial,Helvetica,sans-serif;color:#111827;"><div style="margin:0 0 10px 0;"><span style="display:inline-block;min-width:110px;color:#6b7280;">Name</span><strong>{data.username}</strong></div><div style="margin:0 0 10px 0;"><span style="display:inline-block;min-width:110px;color:#6b7280;">Email</span><strong>{data.email}</strong></div><div style="margin:0 0 10px 0;"><span style="display:inline-block;min-width:110px;color:#6b7280;">Subject</span><strong>{"Subject"}</strong></div><div><span style="display:inline-block;min-width:110px;color:#6b7280;vertical-align:top;">Message</span><div style="display:inline-block;border:1px solid #e5e7eb; border-radius:10px;background:#ffffff; padding:12px;max-width:100%;white-space:pre-wrap;">{verify_url}</div></div></td></tr></table></td></tr><tr><td style="padding:6px 26px 22px 26px; font:13px/1.7 Arial,Helvetica,sans-serif; color:#334155;background:linear-gradient(0deg,#ffffff,#ffffff);"><span>Please keep this confirmation email for your records. If you attached files or additional context, we may reference them during our response.</span></td></tr><tr><td style="background:#0f172a;color:#cbd5e1;padding:26px;text-align:center;"><div style="font:700 14px/1 Arial,Helvetica,sans-serif; letter-spacing:.3px;margin-bottom:10px;">Orion Intelligence</div><div style="font:12px/1.7 Arial,Helvetica,sans-serif;margin-bottom:10px;">Sydney, NSW · <a href="https://orionintelligence.org/" style="color:#93c5fd;text-decoration:none;">orionintelligence.org</a> · <a href="https://www.linkedin.com/showcase/orion-by-genesis-technologies" style="color:#93c5fd;text-decoration:none;">LinkedIn</a></div><div style="font:11px/1.6 Arial,Helvetica,sans-serif;color:#94a3b8;">You’re receiving this message because you contacted us through our website. If this wasn’t you, please ignore this email.</div></td></tr></table></td></tr></table></body></html>"""
+        # template=Template(mail_template)
+        html_content = constant.mail_template.render( username=user.username,email=user.email,subject=MailSubject.VERIFICATION,url=verify_url)
+        await mail_manager.get_instance().send_verification_mail(
+                to=user.email,
+                subject=MailSubject.VERIFICATION,
+                body=html_content
+            )
+
+        return {"message": "Signup successful. Your account is under verification.", "status": "pending"}

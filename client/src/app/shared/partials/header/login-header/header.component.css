@@ -41,6 +41,7 @@
   max-height: 100%;
   width: auto;
   object-fit: contain;
+  margin-left: 150px;
 }
 
 .header .dropdown-toggle::after {

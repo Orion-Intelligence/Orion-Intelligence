@@ -11,7 +11,8 @@
           class="form-control default-input dashboard-general-input" maxlength="350" name="q" placeholder="Search ..."
           type="search" (focus)="setFilterOverlay(true)"> <input type="hidden" value="1">
 
-        <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()" [disabled]="!searchQuery">
+        <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()"
+          [disabled]="!searchQuery">
           <img src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14">
         </button>
 
@@ -77,8 +78,9 @@
           </ul>
         </div>
       </ng-container>
-
-      <app-home-insight></app-home-insight>
+      <ng-container *ngIf="isRoleAdmin">
+        <app-home-insight></app-home-insight>
+      </ng-container>
     </div>
   </div>
 </form>

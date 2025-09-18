@@ -462,7 +462,6 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
-    # noinspection PyTypeChecker
     @staticmethod
     def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories):
         if p_query_model.matchtype:

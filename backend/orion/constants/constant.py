@@ -22,5 +22,7 @@ class CONSTANTS:
     S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = 30
     S_AUTH_OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    S_ENCRYPTION_KEY= env_handler.get_instance().env("ENCRYPTION_KEY")
 
 allowed_keys: set[str] = set()
+mail_template = None

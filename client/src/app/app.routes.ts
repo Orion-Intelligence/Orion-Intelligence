@@ -23,13 +23,73 @@ import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.reso
 import { DashboardSocialsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
 import { subscriptionGuard } from './shared/guards/subscription.guard';
 import { SecurityScanResultsComponent } from './shared/partials/security-scan-results/security-scan-results.component';
+import { SignupComponent } from './pages/signup/signup.component';
+import { TenantComponent } from './pages/tenant/tenant.component';
+import { WelcomeComponent } from './pages/welcome/welcome.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { TenantGuard } from './shared/guards/tenant-guard.guard';
+import { SidebarProfileHomepageComponent } from './pages/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
+import { SidebarProfileSettingsComponent } from './pages/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
+import { SidebarProfileDashboardComponent } from './pages/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
+import { RoleGuard } from './shared/guards/role-guard.guard';
+
+const consolidatedChildren = [
+  {
+    path: 'all',
+    component: DashboardConsolidatedComponent,
+    data: { type: 'consolidated', animation: 'DataBreach' }
+  },
+  {
+    path: 'chat/:m_hash',
+    component: ReportChatComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
+  },
+  {
+    path: 'social/:m_hash',
+    component: ReportChatComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
+  },
+  {
+    path: 'general/:m_hash',
+    component: ReportComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
+  },
+  {
+    path: 'leak/:m_hash',
+    component: ReportComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
+  },
+  {
+    path: 'exploit/:m_hash',
+    component: ReportComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
+  },
+  {
+    path: 'defacement/:m_hash',
+    component: ReportDefacementComponent,
+    resolve: { reportdata: ReportConsolidatedResolver },
+    data: { type: 'consolidated', animation: 'HashPage' }
+  }
+];
+
 
 export const routes: Routes = [
+
   {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',
     data: { animation: 'RootPage' }
+  },
+  {
+    path: 'signup',
+    component: SignupComponent,
+    data: { animation: 'SignupPage' }
   },
   {
     path: 'login',
@@ -40,6 +100,32 @@ export const routes: Routes = [
     path: 'loginx',
     component: LoginComponent,
     data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'onboarding',
+    component: TenantComponent,
+    canActivate: [TenantGuard],
+    data: { animation: 'TenantPage' }
+  },
+  {
+    path: 'welcome',
+    component: WelcomeComponent,
+    data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'welcome/:token',
+    component: WelcomeComponent,
+    data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'forgot',
+    component: ForgotPasswordComponent,
+    data: { animation: 'ForgotPasswordComponent' }
+  },
+  {
+    path: 'forgot/:token',
+    component: ForgotPasswordComponent,
+    data: { animation: 'ForgotPasswordComponent' }
   },
   {
     path: 'dashboard',
@@ -60,6 +146,7 @@ export const routes: Routes = [
       {
         path: 'home',
         component: HomepageComponent,
+        canActivate: [RoleGuard],
         resolve: { insights: InsightResolver },
         data: { animation: 'HomePage' }
       },
@@ -325,61 +412,7 @@ export const routes: Routes = [
       {
         path: 'consolidated',
         data: { animation: 'ConsolidatedPage' },
-        children: [
-          {
-            path: 'all',
-            component: DashboardConsolidatedComponent,
-            data: { type: 'consolidated', animation: 'DataBreach' }
-          },
-          {
-            path: 'chat/:m_hash',
-            component: ReportChatComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          },
-          {
-            path: 'social/:m_hash',
-            component: ReportChatComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          },
-          {
-            path: 'general/:m_hash',
-            component: ReportComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          },
-          {
-            path: 'leak/:m_hash',
-            component: ReportComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          },
-          {
-            path: 'tracking/:m_hash',
-            component: ReportComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          },
-          {
-            path: 'news/:m_hash',
-            component: ReportComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          },
-          {
-            path: 'exploit/:m_hash',
-            component: ReportComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          },
-          {
-            path: 'defacement/:m_hash',
-            component: ReportDefacementComponent,
-            resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
-          }
-        ]
+        children: consolidatedChildren
       },
       {
         path: 'scanner',
@@ -444,6 +477,46 @@ export const routes: Routes = [
             component: CredentialComponent,
             data: { type: 'log', animation: 'CategoryPage' }
           }
+        ]
+      },
+      {
+        path: 'profile',
+        data: { animation: 'ProifilePage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'dashboard',
+            pathMatch: 'full'
+          },
+          {
+            path: 'dashboard',
+            component: SidebarProfileDashboardComponent,
+            data: { type: 'dashboard', animation: 'HomePage' },
+            children: [
+              {
+                path: '',
+                redirectTo: 'all',
+                pathMatch: 'full'
+              },
+              ...consolidatedChildren]
+          },
+          {
+            path: 'homepage',
+            component: SidebarProfileHomepageComponent,
+            resolve: { insights: InsightResolver },
+            data: { type: 'settings', animation: 'ProfilePage' }
+          },
+          {
+            path: 'settings',
+            component: SidebarProfileSettingsComponent,
+            data: { type: 'settings', animation: 'ProfilePage' }
+          },
+          {
+            path: 'consolidated',
+            data: { animation: 'ConsolidatedPage' },
+            children: consolidatedChildren
+          },
+
         ]
       }
     ]
