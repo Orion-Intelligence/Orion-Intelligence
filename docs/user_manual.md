@@ -693,14 +693,8 @@ In this, you can select a custom date and view the updated results or sites spec
 
 It means that if we select something from the MITRE type, we will see comments or pages related to that attack type,
 content that corresponds to the selected attack type.
-![Uploading mitretype.png…]()
 
-
-### Entity Type
-
-In the entity type menu, it means that if someone wants to see results related to a specific category — such as emails,
-hashes, or IOCs, etc. — they can do so.
-![entity-modified](https://github.com/user-attachments/assets/2289a79b-adaa-44a8-adf7-d567ea0856df)
+<img width="257" height="585" alt="mitretype" src="https://github.com/user-attachments/assets/8f85ede7-a823-4ffe-89b3-a1dfedffe1ba" />
 
 ### Search Results
 In Orion Intelligence there are two types of searches: keyword-based searches and URL-based searches.
@@ -743,8 +737,13 @@ simplifying the navigation of search results. Below the search bar overall fetch
 The detailed view of a search result provides essential information to help users assess the nature of a website before
 accessing it. This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak
 site, or cryptocurrency platform.
+
 When a user clicks on a specific section of the result, a separate menu appears, offering various features related to
-the selected site. This menu is designed for quick access to useful tools, including:
+the selected site. 
+<img width="1917" height="598" alt="image" src="https://github.com/user-attachments/assets/10827be3-337d-48e2-a85b-df9a6d0e64db" />
+
+
+This menu is designed for quick access to useful tools, including:
 
 **Download:** Allows the user to download available site content
 
@@ -782,7 +781,6 @@ website within the fetched data.
 Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking
 on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/content1.png)
 
 #### Images
 
@@ -797,13 +795,12 @@ Next, we have the Content Type section, which shows the types of content associa
 After that, there is the Clearnet option, which displays all the links related to the Clearnet that are associated with
 the selected result.
 
-![clearnetlinks](https://github.com/user-attachments/assets/edeabeab-f64b-4548-af5f-93632e491955)
-
 #### Person
 
 Then we have the Person option, which displays the names of individuals associated with the selected search result.
 
-![person](https://github.com/user-attachments/assets/fe2aa912-52ff-4d50-a0c4-8d7db734a40b)
+<img width="757" height="658" alt="ctifilters" src="https://github.com/user-attachments/assets/20a1c5c7-5b71-4905-8c7c-e5c18b9b86c3" />
+
 
 ## Overview and Additional Features
 
