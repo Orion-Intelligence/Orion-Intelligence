@@ -638,16 +638,6 @@ These insights offer a clear understanding of how data is gathered and processed
 
 <img width="492" height="748" alt="keywords" src="https://github.com/user-attachments/assets/aa97e9db-38ef-4fbd-b391-cc325f3f3bb5" />
 
-
-### Results General Coverage
-
-Below this, the "General Coverage" section displays the results in a structured format.
-
-It first shows the total number of items found during the search.
-Then, it provides a breakdown of active and inactive items, along with the results for seldom active items, offering a
-clear summary of the data.
-
-
 Below the two tables mentioned above, we have detailed data associated with each category, such as URLs, titles, and
 networks. For instance, if the data includes URLs, it displays which specific URLs are available; if it includes titles,
 it shows the corresponding records; and if networks are present, it indicates the different types of networks appearing
@@ -656,7 +646,8 @@ in the search results.
 Each variable can be expanded through a dropdown menu, which reveals separate and specific results related to that
 particular variable from the entire search dataset.
 
-![search results-modified](https://github.com/user-attachments/assets/e29ae344-48d9-4b35-8cba-1c265ae0bb7a)
+<img width="801" height="961" alt="resultparameters" src="https://github.com/user-attachments/assets/08463d80-87d5-4f75-b0a8-af8ebe0fceb6" />
+
 
 ### Filters
 
@@ -665,7 +656,8 @@ contains two additional options.
 Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the
 process of refining results for more targeted insights.
 
-![fillter new-modified](https://github.com/user-attachments/assets/4118a0e4-308f-4e3f-b813-f35f091cfcd2)
+<img width="298" height="892" alt="sidefilters" src="https://github.com/user-attachments/assets/cca681b2-ee10-473a-9bc0-89d8a9882af0" />
+
 
 ### Network Types
 
@@ -675,7 +667,8 @@ I2P: Invisible Internet Project links.
 
 Clearnet: Surface web links.
 
-![network type-modified](https://github.com/user-attachments/assets/0844c5b1-8f61-4918-bed6-bb7245f0a5bf)
+<img width="295" height="307" alt="networktype" src="https://github.com/user-attachments/assets/f1351e9e-c3db-4954-87d6-a818f2217645" />
+
 
 ### Enable Safe Search Button
 
@@ -686,19 +679,22 @@ The Safe Search feature enhances user safety by filtering out inappropriate or e
 2.
     - Click the button to activate safe browsing.
 
-![safe search-modified](https://github.com/user-attachments/assets/e7ad92a7-524c-4f67-837c-9566af73b805)
+<img width="293" height="192" alt="safesearch" src="https://github.com/user-attachments/assets/b205a4ef-e4de-4324-bf80-e1f90d358633" />
+
 
 ### Creation Date
 
 In this, you can select a custom date and view the updated results or sites specific to that date.
 
-![date-modified](https://github.com/user-attachments/assets/21d7a6e0-6c41-49d3-8a52-e3f24b7ee701)
+<img width="258" height="356" alt="datefilter" src="https://github.com/user-attachments/assets/57f8ab96-faea-4233-919b-d53a027bf053" />
+
 
 ### Mitre TTP
 
 It means that if we select something from the MITRE type, we will see comments or pages related to that attack type,
 content that corresponds to the selected attack type.
-![mitre-modified](https://github.com/user-attachments/assets/b2de0b34-a88d-40b8-b891-7fe90469df1a)
+![Uploading mitretype.png…]()
+
 
 ### Entity Type
 
