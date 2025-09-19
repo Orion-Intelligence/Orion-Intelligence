@@ -1,18 +1,13 @@
 import threading
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-
+from fastapi import HTTPException
 from starlette import status
-
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
-from orion.services.session_manager.session_manager import session_manager
 from orion.services.encryption_manager.encryption_manager import encryption_manager
 
 class TenantManager:
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
     __instance = None
     __lock = threading.Lock()
 
@@ -30,10 +25,7 @@ class TenantManager:
             raise Exception("This class is a singleton!")
         TenantManager.__instance = self
 
-    async def create_tenant(self, data: TenantRequest, token: str=Depends(oauth2_scheme)):
-        session_instance = session_manager.get_instance()
-        current_user = await session_instance.get_current_user(token)
-
+    async def create_tenant(self, data: TenantRequest, current_user):
         encryptor = encryption_manager.get_instance(
             secret_key=CONSTANTS.S_ENCRYPTION_KEY
         )
@@ -65,9 +57,7 @@ class TenantManager:
             "company": encrypted_company
         }
     
-    async def get_tenant(self, token:str=Depends(oauth2_scheme)) -> TenantRequest:
-        session_instance = session_manager.get_instance()
-        current_user = await session_instance.get_current_user(token)
+    async def get_tenant(self, current_user) -> TenantRequest:
 
         encryptor = encryption_manager.get_instance(
             secret_key=CONSTANTS.S_ENCRYPTION_KEY
@@ -97,10 +87,7 @@ class TenantManager:
 
         return tenant_request
     
-    async def update_tenant(self, data: TenantRequest, token: str=Depends(oauth2_scheme)):
-        session_instance = session_manager.get_instance()
-        current_user = await session_instance.get_current_user(token)
-
+    async def update_tenant(self, data: TenantRequest, current_user):
         encryptor = encryption_manager.get_instance(
             secret_key=CONSTANTS.S_ENCRYPTION_KEY
         )

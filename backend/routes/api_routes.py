@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Body
 from fastapi import Depends, Query
 
-from configs.app_dependency import role_required,status_required
+from configs.app_dependency import role_required, status_required, get_current_user
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
@@ -246,16 +246,16 @@ async def get_screenshot(filename: str):
 
 
 @api_routes.post("/api/createTenant",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ONBOARDING]))],)
-async def create_tenant(data: TenantRequest):
-    return await TenantManager.get_instance().create_tenant(data)
+async def create_tenant(data: TenantRequest, current_user = Depends(get_current_user)):
+    return await TenantManager.get_instance().create_tenant(data, current_user)
 
 @api_routes.post("/api/getTenant",dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN]))],)
-async def get_tenant():
-    return await TenantManager.get_instance().get_tenant()
+async def get_tenant(current_user = Depends(get_current_user)):
+    return await TenantManager.get_instance().get_tenant(current_user)
 
 @api_routes.post("/api/updateTenant",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],)
-async def update_tenant(data: TenantRequest):
-    return await TenantManager.get_instance().update_tenant(data)
+async def update_tenant(data: TenantRequest, current_user = Depends(get_current_user)):
+    return await TenantManager.get_instance().update_tenant(data, current_user)
 
 
     
