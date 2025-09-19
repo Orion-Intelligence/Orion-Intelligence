@@ -91,6 +91,6 @@ export enum TenantSubCategory {
 }
 export enum ProfileSubCategory {
   DASHBOARD = 'Dashboard',
-  HOMEPAGE = 'Homepage',
+  STATISTICS = 'Statistics',
   SETTINGS = 'Settings'
 }

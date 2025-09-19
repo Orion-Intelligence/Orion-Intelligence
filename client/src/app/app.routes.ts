@@ -501,7 +501,7 @@ export const routes: Routes = [
               ...consolidatedChildren]
           },
           {
-            path: 'homepage',
+            path: 'statistics',
             component: SidebarProfileHomepageComponent,
             resolve: { insights: InsightResolver },
             data: { type: 'settings', animation: 'ProfilePage' }

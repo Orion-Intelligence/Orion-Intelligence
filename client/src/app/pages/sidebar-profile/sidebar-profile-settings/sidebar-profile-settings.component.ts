@@ -45,6 +45,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
             })
           };
           this.selectedCategoryId = this.onboardingData?.iocs[0]?.ioc_id;
+          this.setIocLocal();
         },
         error: (err) => {
           console.error('Error fetching onboarding:', err);
@@ -91,11 +92,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
       companyName: this.onboardingData?.companyName || '',
       iocs: this.onboardingData?.iocs.filter(ioc => ioc.values && ioc.values.length > 0) || []
     };
-    this.categories = {};
-    this.onboardingData?.iocs.forEach(ioc => {
-      this.categories[ioc.ioc_id] = ioc.values;
-    });
-    this.appService.set('entityfilterCategories', this.categories);
+    this.setIocLocal();
     const token = this.authService.getToken()
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
@@ -111,5 +108,12 @@ export class SidebarProfileSettingsComponent implements OnInit {
         alert(err?.error?.detail || 'Onboarding failed');
       },
     });
+  }
+  setIocLocal() {
+    this.categories = {};
+    this.onboardingData?.iocs.forEach(ioc => {
+      this.categories[ioc.ioc_id] = ioc.values;
+    });
+    this.appService.set('entityfilterCategories', this.categories);
   }
 }

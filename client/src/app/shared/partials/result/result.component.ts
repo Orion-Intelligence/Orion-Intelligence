@@ -25,13 +25,15 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { HelperService } from '../../services/helper.service';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
+import { NgbSlide } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap/carousel/carousel";
+import { EmptyIocComponent } from "../empty-ioc/empty-ioc.component";
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, NgbSlide, EmptyIocComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
@@ -271,5 +273,11 @@ export class ResultComponent implements OnInit, OnChanges {
     const url = this.router.url;
     const parts = url.split('/');
     return parts.includes('profile');
+  }
+  hasIOCs(): boolean {
+    const categories = this.app_service.configData().localSettings.entityfilterCategories;
+    return Object.values(categories).some(
+      (arr: any) => Array.isArray(arr) && arr.length > 0
+    );
   }
 }

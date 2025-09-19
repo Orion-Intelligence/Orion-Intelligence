@@ -1,4 +1,6 @@
 
+from orion.constants import constant
+from orion.services.mail_manager.mail_enums import MailSubject,MailUrlHeading
 from fastapi import HTTPException,Depends,Request
 from bson import ObjectId
 from odmantic import AIOEngine
@@ -114,13 +116,12 @@ class auth_manager:
             user.verification_token=forgotToken
             await engine.save(user)
             APP_URL=env_handler.get_instance().env("APP_URL")
-            verify_url = f"{APP_URL}/forgot/{forgotToken}"
+            forgot_url = f"{APP_URL}/forgot/{forgotToken}"
+            html_content = constant.mail_template.render( username=user.username,email=user.email,subject=MailSubject.FORGOT_PASSWORD.value,lurlHeading=MailUrlHeading.FORGOT_PASSWORD.value,url=forgot_url)
             await mail_manager.get_instance().send_verification_mail(
                     to=user.email,
-                    subject="Password rest link for orion intelligence",
-                    body=f"Hi {user.username},\n\nDon't share this link with anyone\n"
-                f"{verify_url}\n\n"
-                "Best regards,\nTeam"
+                    subject=MailSubject.FORGOT_PASSWORD.value,
+                    body=html_content
                 )
             
             return {"message": "Reset password mail send successfully."}

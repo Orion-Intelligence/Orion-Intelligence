@@ -1,4 +1,4 @@
-<ng-container *ngIf="!checkProfile()">
+<ng-container *ngIf="!checkProfile(); else profile">
   <form (submit)="onFormSubmit()" @fadeInDashboardItem
     class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
     <div class="d-flex align-items-start default-input-container-justify w-100 flex-wrap">
@@ -153,6 +153,55 @@
     </div>
   </form>
 </ng-container>
+<ng-template #profile>
+  <div class="mt-2 d-flex gap-3 dropdown-menu-container" @fadeInDashboardItem>
+    <div class="dropdown me-3" *ngIf="showSorting">
+      <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        sort by <b>({{ selectedSortBy }})</b>
+        <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
+      </span>
+      <ul class="dropdown-menu mt-3 rounded-4 fade" aria-labelledby="dropdownMenu1">
+        <li><a class="dropdown-item" (click)="onSortChange(SortType.NEWEST_FIRST)">Newest first</a></li>
+        <li>
+          <hr class="dropdown-divider mx-3">
+        </li>
+        <li><a class="dropdown-item" (click)="onSortChange(SortType.OLDEST_FIRST)">Oldest first</a></li>
+      </ul>
+    </div>
+
+    <div class="dropdown">
+      <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        search by <b>({{ matchTypeLabel() }})</b>
+        <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
+      </span>
+      <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
+        <li><a class="dropdown-item"
+            (click)="selectedSearchBy = 'Match Semantic';onSetMatchType('semantic');onFormSubmit();"> Match
+            Semantic</a></li>
+        <li>
+          <hr class="dropdown-divider mx-3">
+        </li>
+        <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();">
+            Match any term
+            (OR)</a></li>
+        <li>
+          <hr class="dropdown-divider mx-3">
+        </li>
+        <li><a class="dropdown-item"
+            (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onFormSubmit();"> Match
+            indivisual terms (AND)</a></li>
+        <li>
+          <hr class="dropdown-divider mx-3">
+        </li>
+        <li><a class="dropdown-item"
+            (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onFormSubmit();"> Match full
+            query (AND)</a></li>
+      </ul>
+    </div>
+  </div>
+</ng-template>
 <ul *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated)"
   class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
   <li class="nav-item" *ngIf="list_grid">
@@ -209,11 +258,22 @@
   <app-empty-query></app-empty-query>
 </div>
 
-<div
+<div *ngIf="checkProfile() && !hasIOCs() && !isLoading" @fadeInDashboardItem>
+  <app-empty-ioc></app-empty-ioc>
+</div>
+
+<div *ngIf="!(checkProfile() && !hasIOCs()) 
+         && isLoading!=null 
+         && (this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0) 
+         && !isLoading 
+         && result_count==0" @fadeInDashboardItem>
+  <app-empty-result [searchQuery]="local_query"></app-empty-result>
+</div>
+<!-- <div
   *ngIf="isLoading!=null && (this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0) && !isLoading && result_count==0"
   @fadeInDashboardItem>
   <app-empty-result [searchQuery]="local_query"></app-empty-result>
-</div>
+</div> -->
 
 <ng-container *ngIf="result_count && !isLoading && !(result_count==0) && type == Category.STRATEGIC">
   <div class="default-notification-banner">

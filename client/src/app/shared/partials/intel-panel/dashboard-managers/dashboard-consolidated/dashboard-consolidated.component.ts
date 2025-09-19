@@ -92,6 +92,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(_ = false): void {
+    if (this.checkProfile() && !this.hasIOCs()) {
+      return
+    }
     if (!this.isGrouped) {
       this.fetchRanked()
       return
@@ -149,6 +152,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchRanked() {
+    if (this.checkProfile() && !this.hasIOCs()) {
+      return
+    }
     this.isLoading.set(true);
     this.rankedResult = []
     this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
@@ -296,5 +302,16 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isGrouped = false
       this.fetchRanked()
     }
+  }
+  checkProfile(): boolean {
+    const url = this.router.url;
+    const parts = url.split('/');
+    return parts.includes('profile');
+  }
+  hasIOCs(): boolean {
+    const categories = this.appService.configData().localSettings.entityfilterCategories;
+    return Object.values(categories).some(
+      (arr: any) => Array.isArray(arr) && arr.length > 0
+    );
   }
 }
