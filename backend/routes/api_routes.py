@@ -43,17 +43,17 @@ api_routes = APIRouter()
 async def get_public_config():
     return await config_controller.getInstance().get_all()
 
-@api_routes.get("/api/directory", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.get("/api/directory", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Fetch the directory listing with optional filters for categories, types, or tags.")
 async def get_directory(param: directory_param_model = Depends()):
     return await directory_model.getInstance().invoke_directory(param)
 
-@api_routes.get("/api/dumps", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.get("/api/dumps", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Fetch the directory listing with optional filters for categories, types, or tags.")
 async def get_directory(param: dump_param_model = Depends()):
     return await dump_model.getInstance().invoke_dump(param)
 
-@api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Retrieve analytics and strategic insights for dashboard overview.")
 async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
@@ -78,12 +78,12 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
     manager = entity_manager.get_instance()
     return await manager.get_entity_relations(query)
 
-@api_routes.post("/api/nlp/chat/report",  dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency),Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/nlp/chat/report",  dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def chat_report(payload: ReportChatRequest):
     response = await crawl_model.getInstance().parse_chat_ai(payload)
     return response
 
-@api_routes.post("/api/search/strategic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.post("/api/search/strategic", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Search strategic intelligence reports using filters like category, title, date, or hash.")
 async def search_general(param: search_general_param_model = Body(...)):
     if param.category in ['all']:
@@ -95,21 +95,21 @@ async def search_general(param: search_general_param_model = Body(...)):
         return await search_model.getInstance().search_general_result(param)
 
 
-@api_routes.get("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.get("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def search_consolidated(param: search_credential_param_model = Body(...)):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
-@api_routes.post("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def search_consolidated(param: search_credential_param_model = Body(...)):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
 
-@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
+@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     return await search_model.getInstance().search_consolidated_result(param)
 
 
-@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
+@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))], description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     base_index = [
         ELASTIC_INDEX.S_LEAK_INDEX,
@@ -121,12 +121,12 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index,[], [])
 
 
-@api_routes.post("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/chat/telegram", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def search_telegram(param: search_chat_param_model = Body(...)):
     return await search_model.getInstance().search_telegram_result(param)
 
 
-@api_routes.post("/api/exploit/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/exploit/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def search_discussion(param: search_general_param_model = Body(...)):
     base_index = [
         ELASTIC_INDEX.S_CHATS_INDEX
@@ -137,7 +137,7 @@ async def search_discussion(param: search_general_param_model = Body(...)):
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
 
 
-@api_routes.post("/api/social/all", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/social/all", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def search_discussion(param: search_general_param_model = Body(...)):
     base_index = [
         ELASTIC_INDEX.S_CHATS_INDEX,
@@ -145,12 +145,12 @@ async def search_discussion(param: search_general_param_model = Body(...)):
     ]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
 
-@api_routes.post("/api/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def search_twitter(param: search_social_param_model = Body(...)):
     return await search_model.getInstance().search_social_result(param)
 
 
-@api_routes.post("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.post("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],bypass_roles=[user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_leak(param: search_leak_param_model = Body(...)):
 
@@ -169,77 +169,77 @@ async def search_leak(param: search_leak_param_model = Body(...)):
         return await search_model.getInstance().search_leak_result(param)
 
 
-@api_routes.post("/api/search/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.post("/api/search/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Search breach news (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_news(param: search_leak_param_model = Body(...)):
     param.mContentType = "news"
     return await search_model.getInstance().search_leak_result(param)
 
 
-@api_routes.post("/api/search/exploit", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.post("/api/search/exploit", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_leak(param: search_leak_param_model = Body(...)):
     return await search_model.getInstance().search_exploit_result(param)
 
 
-@api_routes.post("/api/search/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.post("/api/search/defacement", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Search defacement intelligence reports by keywords, group names, or affected domains.")
 async def search_defacement(param: search_defacement_param_model = Body(...)):
     return await search_model.getInstance().search_defacement_result(param)
 
 
 @api_routes.get("/api/search/defacement/{doc_id}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Get a specific defacement document by its document ID.")
 async def get_defacement_document(doc_id: str):
     return await search_model.getInstance().request_defacement_doc(doc_id)
 
 
-@api_routes.get("/api/search/breach/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.get("/api/search/breach/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],bypass_roles=[user_role.ADMIN, user_role.DEMO]))],
                 description="Get a specific breach (leak) document by its document ID and optional language.")
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
 
-@api_routes.get("/api/search/news/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.get("/api/search/news/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Get a specific breach (leak) document by its document ID and optional language.")
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
 
 @api_routes.get("/api/search/exploit/{doc_id}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Get a specific breach (leak) document by its document ID and optional language.")
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
 
 
 @api_routes.get("/api/search/strategic/{doc_id}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Get a specific strategic report document by its document ID and optional language.")
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_general_doc(doc_id, lang)
 
 
-@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],description="Get a specific strategic report document by its document ID and optional language.")
+@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],description="Get a specific strategic report document by its document ID and optional language.")
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
 
-@api_routes.get("/api/search/social/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.get("/api/search/social/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Get a specific strategic report document by its document ID and optional language.")
 async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_social_doc(doc_id, lang)
 
 
-@api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+@api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search_email(param)
 
 
 @api_routes.get("/api/search/breach/screenshot/{filename}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Retrieve the screenshot associated with a breach document (image is in .webp format).")
 async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
@@ -249,7 +249,7 @@ async def get_screenshot(filename: str):
 async def create_tenant(data: TenantRequest):
     return await TenantManager.get_instance().create_tenant(data)
 
-@api_routes.post("/api/getTenant",dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],)
+@api_routes.post("/api/getTenant",dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN]))],)
 async def get_tenant():
     return await TenantManager.get_instance().get_tenant()
 

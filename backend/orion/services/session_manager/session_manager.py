@@ -83,7 +83,7 @@ class session_manager:
 
         user_status = user.status
         try:
-            _ = UserStatus(status)
+            _ = UserStatus(user_status)
         except ValueError:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User access not found")
         return user_status
