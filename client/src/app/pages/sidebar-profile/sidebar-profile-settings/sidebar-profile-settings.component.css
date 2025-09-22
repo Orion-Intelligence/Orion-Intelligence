@@ -18,3 +18,10 @@
     margin-left: 50px;
     border: none;
 }
+
+@media (max-width: 1024px) {
+    .sidebar-profile-settings-save-button {
+        margin-top: 20px;
+        margin-left: 0px;
+    }
+}

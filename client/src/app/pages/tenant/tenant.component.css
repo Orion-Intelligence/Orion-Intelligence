@@ -272,7 +272,6 @@
     border: 1px solid #D0D5DD;
     padding: 10px 16px;
     background: #ffffff;
-    /* color: white; */
     font-family: Inter, sans-serif;
     font-size: 14px;
     box-shadow: 0px 1px 2px 0px #1018280d;
@@ -372,4 +371,38 @@
     font-weight: 500;
     color: white;
     font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 1024px) {
+    .onboarding-box {
+        width: 90%;
+        height: auto;
+        padding: 24px;
+    }
+
+    .onboarding-box__divider {
+        width: 100%;
+    }
+
+    .onboarding-box__form-input {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .onboarding-step2__search-input {
+        width: 200px;
+        margin-top: 0;
+    }
+
+    .onboarding-box__actions {
+        margin-top: 30px;
+    }
+
+    .onboarding-box__step-circle {
+        height: 25px;
+    }
+
+    .onboarding-step2__added {
+        max-height: 100px;
+    }
 }
