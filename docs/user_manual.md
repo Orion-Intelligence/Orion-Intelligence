@@ -300,9 +300,7 @@ In a forum, various platforms can be utilized, such as blogs, websites, or media
 
 3. ### News
 
-The news section allows users to view any news related to the data, provided there is relevant coverage available. It
-keeps users updated with the latest developments and trends related to the searched data. This section ensures users
-stay informed about any significant news that may impact their analysis or understanding.
+The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest  developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
 
 <img width="1362" height="396" alt="news-modified" src="https://github.com/user-attachments/assets/42410658-8aae-4b97-881c-d01ce42081e2" />
 
@@ -370,10 +368,7 @@ In discussion, we often receive general results that may appear in various place
 
 1. ### Databases
 
-This section contains detailed records of actual data breaches, offering in-depth information about compromised
-credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a
-clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and
-understand the type of sensitive information that was exposed.
+This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
 
 2. ### Email
 This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
