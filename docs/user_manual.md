@@ -717,7 +717,7 @@ simplifying the navigation of search results. Below the search bar overall fetch
 The detailed view of a search result provides essential information to help users assess the nature of a website before
 accessing it. This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak
 site, or cryptocurrency platform.
-
+**Open Report**
 When a user clicks on a specific section of the result, a separate menu appears, offering various features related to
 the selected site. 
 <img width="1917" height="598" alt="image" src="https://github.com/user-attachments/assets/10827be3-337d-48e2-a85b-df9a6d0e64db" />
