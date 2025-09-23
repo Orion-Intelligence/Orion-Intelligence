@@ -738,7 +738,7 @@ In addition to the mentioned details, this section also displays the publish dat
 relevant tags, and the status of the link. The status indicates whether the link is currently active or inactive,
 helping users quickly determine if the site is accessible.
 
-##### Search Insight:
+#### Search Insight:
 
 In this, if we open any result obtained from the search, the bottom section—referred to as Search Insight—displays
 additional parameters related to that site or search result. These may include the section, context, location type, IP
