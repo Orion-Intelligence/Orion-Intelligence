@@ -32,8 +32,9 @@ Here’s an overview of the interface components
 
 ### Navbar Filter
 
-The navigation bar is now positioned on the left side of the page for improved accessibility and a more streamlined
-workflow. 
+The navigation bar has been moved to the left side of the page. This adjustment enhances accessibility for users. It also creates a cleaner and more efficient workflow.
+
+
 <img width="420" height="893" alt="sidebar" src="https://github.com/user-attachments/assets/2a7dd05b-8a34-4e87-b3de-42357f4663a2" />
 
 
