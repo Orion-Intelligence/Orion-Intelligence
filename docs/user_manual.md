@@ -584,7 +584,7 @@ On the rightmost side of the CTI Graph interface, there are several additional o
 - Finally, there is a Color Indicators section, which explains the meaning of different node colors used within the
   graph for easier interpretation.
 
-<img width="243" height="805" alt="properties" src="https://github.com/user-attachments/assets/b9632368-1658-480e-b8c6-f03952f498dc" />
+<img width="257" height="888" alt="togglebar" src="https://github.com/user-attachments/assets/5cf73e5a-6d3e-4da0-9695-ef9b13c412ee" />
 
 
 ## Fillter and Analytics
@@ -635,7 +635,7 @@ contains two additional options.
 Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the
 process of refining results for more targeted insights.
 
-<img width="298" height="892" alt="sidefilters" src="https://github.com/user-attachments/assets/cca681b2-ee10-473a-9bc0-89d8a9882af0" />
+<img width="281" height="887" alt="filters2" src="https://github.com/user-attachments/assets/e7f62291-b4e9-4a2d-a223-6a781e875429" />
 
 
 ### Network Types
@@ -725,14 +725,10 @@ the selected site.
 This menu is designed for quick access to useful tools, including:
 
 **Download:** Allows the user to download available site content
-
 **Print:** Enables printing of the current view or content
-
 **AI Summary:** Search results we receive are in another language, the AI Summary will generate a summary for us in our
 preferred language.
-
 **Share Link:** Copies the site’s URL for easy sharing
-
 **Open in New Tab:** Loads the site in a separate browser tab for convenience.
 **Open CTI Graph:** This option redirects the user from the search results to the corresponding page on the CTI Graph,
 displaying relevant visual relationships based on the selected search item.
@@ -750,32 +746,20 @@ address, and any web links or URLs found within it.
 Towards the end, there is a complete menu table available, where several additional elements can be viewed, such as:
 
 #### Section Tab
-
 The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being
 extracted during the data crawling process. This feature helps users identify and understand the structure of the
 website within the fetched data.
-
 #### Content Tab
-
 Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking
 on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
-
-
 #### Images
-
 In the Images menu, it displays the number of images related to that particular result.
-
 #### Content Type
-
 Next, we have the Content Type section, which shows the types of content associated with that particular result.
-
 #### Clear Net
-
 After that, there is the Clearnet option, which displays all the links related to the Clearnet that are associated with
 the selected result.
-
 #### Person
-
 Then we have the Person option, which displays the names of individuals associated with the selected search result.
 
 <img width="1715" height="822" alt="reports" src="https://github.com/user-attachments/assets/d1bdea60-b148-4f46-94b1-6b24ff9afdb9" />
@@ -791,7 +775,6 @@ The JSON response presents information from the same link in a structured format
 
 <img width="1598" height="866" alt="jsonresponse" src="https://github.com/user-attachments/assets/aa4a439d-803a-4347-9d60-ad47aaacbee2" />
 
-
 #### Related Reports
 Related reports display all additional reports connected to the same link being analyzed. This helps identify what other findings or references are linked to that particular source.
 
@@ -802,7 +785,6 @@ Related reports display all additional reports connected to the same link being 
 Finally, one of the most important features of our tool is the AI-powered chatbot. This intelligent assistant allows users to ask questions about any related report, URL, or dataset and instantly receive clear answers. The chatbot is designed to simplify complex information by providing summaries, highlighting key details, and guiding users toward deeper insights. It also supports interactive queries, enabling users to explore data in a conversational manner rather than searching manually. This feature makes the overall experience more efficient, user-friendly, and highly effective for decision-making.
 
 <img width="387" height="588" alt="chatbot" src="https://github.com/user-attachments/assets/b2f847eb-9981-48d7-9df2-c2f561baa406" />
-
 
 ## Overview and Additional Features
 
