@@ -87,7 +87,6 @@ export enum StealerlogsSubCategory {
 }
 export enum TenantSubCategory {
   VIEW = 'View',
-  ADD = 'Add',
 }
 export enum ProfileSubCategory {
   DASHBOARD = 'Dashboard',

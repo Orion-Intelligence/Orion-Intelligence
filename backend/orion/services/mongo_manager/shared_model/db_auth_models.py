@@ -23,6 +23,7 @@ class UserStatus(str, Enum):
     PENDING = "verification_pending"
     ONBOARDING="onboarding"
     ACTIVE = "active"
+    DISABLE="disable"
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
