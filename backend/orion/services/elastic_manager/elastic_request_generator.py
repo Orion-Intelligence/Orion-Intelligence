@@ -1328,106 +1328,68 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model):
+        from typing import Any
+
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
-        url_query = p_query_model.url.strip() if p_query_model.url else ""
-        url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
+        raw_url = p_query_model.url.strip() if p_query_model.url else ""
+        url_query = ""
+        if raw_url:
+            u = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', raw_url)
+            url_query = re.split(r'[/:?#]', u)[0].lower()
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
-            must_should = [{"term": {"type": "logs"}}]
+            must_should: list[dict[str, Any]] = [{"term": {"type": "logs"}}]
         else:
-            must_should = [{"term": {"type": "credential"}}]
-
-        date_range_filter = {}
-
+            must_should: list[dict[str, Any]] = [{"term": {"type": "credential"}}]
+        date_range_filter: dict[str, Any] = {}
         if p_query_model.daterange:
             start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
             date_range_filter = {"range": {"timestamp": {"gte": start_date, "lte": end_date}}}
-
-
-        should_clauses = []
-        ak = list(allowed_keys) if 'allowed_keys' in globals() else []
-
+        should_clauses: list[dict[str, Any]] = []
         if p_query_model.fullsearch:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
                 for quoted, unquoted in terms:
                     term = quoted or unquoted
-                    clause = {
+                    clause: dict[str, Any] = {
                         "bool": {
                             "should": [
-                                {"wildcard": {"username": f"*{term}*"}},
-                                {"wildcard": {"domain": f"*{term}*"}},
-                                {"wildcard": {"url.raw": f"*{term}*"}},
-                                {"wildcard": {"url": f"*{term.lower()}*"}},
-                                {"wildcard": {"ip": f"*{term}*"}},
-                                *({"wildcard": {k: f"*{term}*"}} for k in ak),
-                                {"wildcard": {"type": f"*{term}*"}},
-                                {"wildcard": {"raw": f"*{term}*"}},
-                                {"wildcard": {"channel": f"*{term}*"}},
-                                {"wildcard": {"filename": f"*{term}*"}}
+                                {"wildcard": {"email": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"username": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"domain": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"ip": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"type": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"raw": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"channel": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"filename": {"value": f"*{term}*", "case_insensitive": True}}}
                             ],
                             "minimum_should_match": 1
                         }
                     }
                     must_should.append(clause)
-
             if url_query:
-                url_clause = {
-                    "bool": {
-                        "should": [
-                            {"wildcard": {"url.raw": f"*{url_query}*"}},
-                            {"wildcard": {"url": f"*{url_query.lower()}*"}},
-                            {"wildcard": {"domain": f"*{url_query}*"}},
-                            {"wildcard": {"ip": f"*{url_query}*"}},
-                            *({"wildcard": {k: f"*{url_query}*"}} for k in ak)
-                        ],
-                        "minimum_should_match": 1
-                    }
-                }
-                should_clauses.append(url_clause)
-
+                should_clauses.append({"term": {"domain": url_query}})
         else:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
                 for quoted, unquoted in terms:
                     term = quoted or unquoted
-                    clause = {
+                    clause: dict[str, Any] = {
                         "bool": {
                             "should": [
+                                {"term": {"email": term}},
                                 {"term": {"username": term}},
-                                {"term": {"domain": term}},
-                                {"term": {"url.raw": term}},
-                                {"match_phrase": {"url": term.lower()}},
-                                {"term": {"ip": term}},
-                                *({"term": {k: term}} for k in ak),
-                                {"term": {"type": term}},
-                                {"match_phrase": {"raw": term}},
-                                {"term": {"channel": term}},
-                                {"term": {"filename": term}}
+                                {"term": {"domain": term}}
                             ],
                             "minimum_should_match": 1
                         }
                     }
                     must_should.append(clause)
-
             if url_query:
-                url_clause = {
-                    "bool": {
-                        "should": [
-                            {"term": {"url.raw": url_query}},
-                            {"match_phrase": {"url": url_query.lower()}},
-                            {"term": {"domain": url_query}},
-                            {"term": {"ip": url_query}},
-                            *({"term": {k: url_query}} for k in ak)
-                        ],
-                        "minimum_should_match": 1
-                    }
-                }
-                should_clauses.append(url_clause)
-
-        bool_query = {}
+                should_clauses.append({"term": {"domain": url_query}})
+        bool_query: dict[str, Any] = {}
         if must_should:
             bool_query["must"] = must_should
         if should_clauses:
@@ -1435,8 +1397,7 @@ class elastic_request_generator:
             bool_query["minimum_should_match"] = 1
         if date_range_filter:
             bool_query.setdefault("filter", []).append(date_range_filter)
-
-        query = {
+        query: dict[str, Any] = {
             "query": {"bool": bool_query},
             "from": 0,
             "size": 100,
@@ -1444,7 +1405,6 @@ class elastic_request_generator:
             "sort": [{"timestamp": {"order": "desc"}}],
             "_source": True
         }
-
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod

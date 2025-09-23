@@ -95,11 +95,6 @@ async def search_general(param: search_general_param_model = Body(...)):
     else:
         return await search_model.getInstance().search_general_result(param)
 
-
-@api_routes.get("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
-async def search_consolidated(param: search_credential_param_model = Body(...)):
-    return await search_model.getInstance().search_stealerlogs_result(param)
-
 @api_routes.post("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))])
 async def search_consolidated(param: search_credential_param_model = Body(...)):
     return await search_model.getInstance().search_stealerlogs_result(param)

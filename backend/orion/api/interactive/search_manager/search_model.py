@@ -283,10 +283,18 @@ class search_model:
         document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
+        if param.category != "credential":
+            hits = m_documents.get("hits", {}).get("hits", [])
+            for h in hits:
+                src = h.get("_source", {})
+                if "mapping" in src:
+                    src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
+
         return await self.__search_callback.search_handler(
             m_status, m_documents,
             search_stealerlog_callback_model,
-            {}
+            {},
+            data_limit=False
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
