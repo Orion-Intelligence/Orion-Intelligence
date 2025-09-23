@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { NgClass, NgIf } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
@@ -24,11 +24,14 @@ import { AppService } from '../../services/core/app/app.service';
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })
-export class DashboardComponent implements AfterViewInit {
+export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
   animationState: any;
 
   constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, private appService: AppService) {
+  }
+  ngOnInit(): void {
+    this.appService.set('isSidebarOpen', this.isMenuOpen);
   }
 
   toggleNavigation() {
