@@ -485,20 +485,18 @@ Short answer: they are different kinds of exploit-related information, not all t
 
 <img width="1918" height="715" alt="exploit" src="https://github.com/user-attachments/assets/a5683c65-8165-4843-aecd-5b04454168d3" />
 
-**1- CVE:** 
 
+**1- CVE:** 
 In Orion, CVE (Common Vulnerabilities and Exposures) provides a standardized identifier for publicly known software vulnerabilities (e.g., CVE-2024-xxxx). Each entry includes a stable ID, a brief description, and references to help teams track and remediate issues. Within Orion, the results may include both actual vulnerability records as well as discussion-based references related to those vulnerabilities.
 
 <img width="1908" height="535" alt="cve" src="https://github.com/user-attachments/assets/902e0533-fec6-4e28-8280-e7dd54bfdd71" />
 
 **2- Tools:**
-
 Orion Intelligence includes a tool-discovery feature that identifies which tools are in use (for example, WordPress). It scans those tools for issues and alerts you if it finds bugs or vulnerabilities. The feature provides clear, actionable information about the problem and where it appears. This helps developers quickly prioritize fixes and maintain safer, more reliable systems.
 
 <img width="1905" height="908" alt="tools" src="https://github.com/user-attachments/assets/e1cf46ca-de11-4355-ac74-3b2be4353dee" />
 
 **3- Zeroday:**
-
 A zero-day vulnerability is a previously unknown flaw in a software or system that has not yet been identified or patched by the vendor. Because no fix exists at the time of discovery, it can be exploited immediately by attackers. Orion Intelligence identifies and reports these vulnerabilities in real time, enabling organizations to respond quickly and reduce potential risks.
 
 <img width="1908" height="900" alt="zeroday" src="https://github.com/user-attachments/assets/ee37db76-1753-4f7c-9d7b-00d881d33c9a" />
