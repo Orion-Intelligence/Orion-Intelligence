@@ -66,13 +66,13 @@ It consists of the following main menu items:
 These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
    In this module, the system actively collects data from:
+   
+ **Telegram channels:** Extracts downloadable files and shared dump links related to breaches or leaks.
 
-    - Telegram channels: Extracts downloadable files and shared dump links related to breaches or leaks.
-
-    - Websites and forums: Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious
+**Websites and forums:** Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious
       actors.
 
-    - Other open-source intelligence (OSINT) platforms: Tracks and organizes dump-related information for quick
+**Other open-source intelligence (OSINT) platforms:** Tracks and organizes dump-related information for quick
       analysis.
 10. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
 
