@@ -563,22 +563,13 @@ class ELASTIC_ENUMS:
         "mappings": {
             "dynamic": True,
             "properties": {
-                "username": {"type": "keyword"},
-                "email": {"type": "keyword"},
-                "ip": {"type": "keyword"},
-                "domain": {"type": "keyword"},
-                "password": {"type": "keyword", "index": False, "doc_values": False},
-                "url": {
-                    "type": "text",
-                    "analyzer": "url_path_analyzer",
-                    "search_analyzer": "url_path_analyzer",
-                    "fields": {"raw": {"type": "keyword"}}
-                },
+                "type": {"type": "keyword"},
+                "raw": {"type": "text"},
+                "channel": {"type": "keyword"},
+                "filename": {"type": "keyword"},
                 "log_hash": {"type": "keyword"},
                 "timestamp": {"type": "date"},
-                "m_hash": {"type": "keyword"},
-                "ioc": {"type": "keyword"},
-                "type": {"type": "keyword"}
+                "m_hash": {"type": "keyword"}
             }
         }
     }

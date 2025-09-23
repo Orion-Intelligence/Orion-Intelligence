@@ -1332,28 +1332,26 @@ class elastic_request_generator:
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         url_query = p_query_model.url.strip() if p_query_model.url else ""
         url_query = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', url_query)
-        category = p_query_model.category
+        category = (p_query_model.category or "").strip()
+        if category and category.lower() in ("log", "logs"):
+            must_should = [{"term": {"type": "logs"}}]
+        else:
+            must_should = [{"term": {"type": "credential"}}]
+
         date_range_filter = {}
 
         if p_query_model.daterange:
             start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
-            date_range_filter = {
-                "range": {
-                    "timestamp": {
-                        "gte": start_date,
-                        "lte": end_date
-                    }
-                }
-            }
+            date_range_filter = {"range": {"timestamp": {"gte": start_date, "lte": end_date}}}
 
-        must_should = [{"term": {"type": category}}]
+
         should_clauses = []
+        ak = list(allowed_keys) if 'allowed_keys' in globals() else []
 
         if p_query_model.fullsearch:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
-
                 for quoted, unquoted in terms:
                     term = quoted or unquoted
                     clause = {
@@ -1363,8 +1361,12 @@ class elastic_request_generator:
                                 {"wildcard": {"domain": f"*{term}*"}},
                                 {"wildcard": {"url.raw": f"*{term}*"}},
                                 {"wildcard": {"url": f"*{term.lower()}*"}},
-                                {"wildcard": {"ioc": f"*{term}*"}},
-                                {"wildcard": {"ip": f"*{term}*"}}
+                                {"wildcard": {"ip": f"*{term}*"}},
+                                *({"wildcard": {k: f"*{term}*"}} for k in ak),
+                                {"wildcard": {"type": f"*{term}*"}},
+                                {"wildcard": {"raw": f"*{term}*"}},
+                                {"wildcard": {"channel": f"*{term}*"}},
+                                {"wildcard": {"filename": f"*{term}*"}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1378,8 +1380,8 @@ class elastic_request_generator:
                             {"wildcard": {"url.raw": f"*{url_query}*"}},
                             {"wildcard": {"url": f"*{url_query.lower()}*"}},
                             {"wildcard": {"domain": f"*{url_query}*"}},
-                            {"wildcard": {"ioc": f"*{url_query}*"}},
-                            {"wildcard": {"ip": f"*{url_query}*"}}
+                            {"wildcard": {"ip": f"*{url_query}*"}},
+                            *({"wildcard": {k: f"*{url_query}*"}} for k in ak)
                         ],
                         "minimum_should_match": 1
                     }
@@ -1390,7 +1392,6 @@ class elastic_request_generator:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
-
                 for quoted, unquoted in terms:
                     term = quoted or unquoted
                     clause = {
@@ -1399,7 +1400,13 @@ class elastic_request_generator:
                                 {"term": {"username": term}},
                                 {"term": {"domain": term}},
                                 {"term": {"url.raw": term}},
-                                {"match_phrase": {"url": term.lower()}}
+                                {"match_phrase": {"url": term.lower()}},
+                                {"term": {"ip": term}},
+                                *({"term": {k: term}} for k in ak),
+                                {"term": {"type": term}},
+                                {"match_phrase": {"raw": term}},
+                                {"term": {"channel": term}},
+                                {"term": {"filename": term}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1413,8 +1420,8 @@ class elastic_request_generator:
                             {"term": {"url.raw": url_query}},
                             {"match_phrase": {"url": url_query.lower()}},
                             {"term": {"domain": url_query}},
-                            {"term": {"ioc": url_query}},
-                            {"term": {"ip": url_query}}
+                            {"term": {"ip": url_query}},
+                            *({"term": {k: url_query}} for k in ak)
                         ],
                         "minimum_should_match": 1
                     }
@@ -1436,7 +1443,7 @@ class elastic_request_generator:
             "size": 100,
             "track_total_hits": True,
             "sort": [{"timestamp": {"order": "desc"}}],
-            "_source": ["url", "username", "ip", "email", "ioc", "domain", "password", "timestamp", "log_hash", "m_hash"]
+            "_source": True
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
@@ -1790,21 +1797,10 @@ class elastic_request_generator:
         bulk_entries = []
 
         for log in p_index_data.get("logs", []):
-            if not log or not log.get("url"):
-                continue
-
-            raw_string = f'{log.get("url", "")} {log.get("username", "")} {log.get("domain", "")} {log.get("password", "")}'
-            m_hash = hashlib.sha256(raw_string.encode()).hexdigest()
+            m_hash = hashlib.sha256(str(log.get("raw", "")).encode("utf-8", "ignore")).hexdigest()
 
             doc = {
-                "url": log.get("url", ""),
-                "username": log.get("username", None),
-                "domain": log.get("domain", None),
-                "password": log.get("password", None),
-                "email": log.get("email", None),
-                "ip": log.get("ip", None),
-                "ioc": log.get("ioc", None),
-                "type": log.get("type", None),
+                **{k: v for k, v in log.items() if v is not None},
                 "log_hash": m_hash,
                 "timestamp": now,
                 "m_index": "stealer_model",

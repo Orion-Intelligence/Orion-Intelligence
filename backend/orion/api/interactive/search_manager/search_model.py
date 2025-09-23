@@ -27,7 +27,6 @@ from orion.api.interactive.search_manager.search_data_model.exploit.search_explo
     search_exploit_callback_model
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import \
     search_exploit_param_model
-from orion.api.interactive.search_manager.search_data_model.general import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import \
     search_general_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import \
@@ -129,7 +128,7 @@ class search_model:
                                                                                       target_lang=lang)
         return await self.__search_callback.get_doc(result)
 
-    async def search_general_result(self, param: search_general_param_model):
+    async def search_general_result(self, param):
         document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(

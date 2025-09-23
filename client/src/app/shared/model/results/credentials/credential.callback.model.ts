@@ -1,15 +1,13 @@
 import { Suggestion } from "../shared/common-result";
 
 export class StealerLogResultItem {
-  url: string = "";
-  username: string = "";
-  email: string = "";
-  domain: string = "";
-  type: string = "";
-  ioc: string[] = [];
-  password: string = "";
+  type?: string;
+  raw?: string;
+  channel?: string;
+  filename?: string;
+  log_hash?: string;
   timestamp?: string;
-  m_hash?: string;
+  [key: string]: any;
 
   constructor(init?: Partial<StealerLogResultItem>) {
     Object.assign(this, init);
