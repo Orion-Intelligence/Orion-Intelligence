@@ -458,7 +458,8 @@ Orion can use Reddit to collect data on user discussions, emerging issues, and n
 
 ## Live APIs
 
-The Live APIs section provides users with real-time investigative tools. Within this section:
+The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
+It can also include many other features and possibilities. Within this section:
 
 ### Email Lookup:
 
