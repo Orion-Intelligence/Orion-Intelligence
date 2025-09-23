@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {interval, Observable, switchMap, tap, timer} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { interval, Observable, switchMap, tap, timer } from 'rxjs';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class TokenRefreshService {
   private refreshTokenSubscription: any;
   private readonly FIRST_REFRESH_DELAY = 5000;
@@ -20,7 +20,7 @@ export class TokenRefreshService {
               this.stopTokenRefresh();
             },
           }),
-          switchMap(() => interval(this.REFRESH_INTERVAL).pipe(switchMap(() => refreshAction()))) // Subsequent refresh every 15 min
+          switchMap(() => interval(this.REFRESH_INTERVAL).pipe(switchMap(() => refreshAction())))
         )
         .subscribe();
     }

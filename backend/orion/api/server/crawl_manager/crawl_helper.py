@@ -2,11 +2,9 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 
 
 class crawl_helper:
-    # Private Variables
     __instance = None
     __crawl_model = None
 
-    # Initializations
     @staticmethod
     def getInstance():
         if crawl_helper.__instance is None:

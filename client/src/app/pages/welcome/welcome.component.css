@@ -1,0 +1,83 @@
+.welcome-page-wrapper {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: calc(100vh - 60px);
+    width: 100vw;
+    background-size: cover;
+}
+
+
+.welcome-page__card {
+    max-width: 1000px;
+    width: 90%;
+    max-height: 502px;
+    background-color: #172235;
+    border: 1px solid #FCFCFC12;
+    border-radius: 16px;
+    padding: 60px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.welcome-page__card img {
+    margin-bottom: 24px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.welcome-page__card-heading {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 20px 0;
+}
+
+.welcome-page__card-paragraph {
+    font-size: 18px;
+    font-weight: 400;
+    color: #A0B8D1;
+    line-height: 1.6;
+    margin: 0 0 32px 0;
+}
+
+.welcome-page__card button {
+    width: 124px;
+    height: 44px;
+    background-color: #57A5EB;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #373637;
+    cursor: pointer;
+    box-shadow: 0px 1px 2px #1018280D;
+    transition: all 0.2s ease;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.welcome-page__card button:hover {
+    background-color: #4591d4;
+}
+
+@media (max-width: 600px) {
+    .welcome-page__card {
+        padding: 30px 20px;
+    }
+
+    .welcome-page__card-heading {
+        font-size: 18px;
+    }
+
+    .welcome-page__card-paragraph {
+        font-size: 16px;
+    }
+
+    .welcome-page__card img {
+        width: 72px;
+        height: 72px;
+    }
+}

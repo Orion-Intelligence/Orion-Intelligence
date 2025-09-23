@@ -5,7 +5,7 @@ import { AppStorageService } from './app-storage.service';
 import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
-import {search_filter_labels} from '../../../shared/constants/shared-enums';
+import { search_filter_labels } from '../../../shared/constants/shared-enums';
 
 @Injectable({
   providedIn: 'root'
@@ -72,7 +72,7 @@ export class AppService {
       return;
     }
 
-    this.http.get<any[]>('assets/data/entities.json').pipe(
+    this.http.get<any[]>('assets/data/entities_data/entities.json').pipe(
       tap(data => {
         this.entitiesCache = data;
         this.entities.set(data);

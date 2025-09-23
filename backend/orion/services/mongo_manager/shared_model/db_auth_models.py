@@ -1,4 +1,7 @@
-# db_auth_models.py
+
+from datetime import datetime
+from enum import Enum
+from typing import Optional
 from enum import Enum
 from typing import Optional
 
@@ -14,7 +17,12 @@ class user_role(str, Enum):
     ADMIN = "admin"
     CRAWLER = "crawler"
     DEMO = "demo"
+    PROFILE="profile"
 
+class UserStatus(str, Enum):
+    PENDING = "verification_pending"
+    ONBOARDING="onboarding"
+    ACTIVE = "active"
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -23,9 +31,14 @@ def hash_password(password: str) -> str:
 class db_user_account(Model):
     username: str = Field(unique=True)
     password: str = Field(default="")
+    email:str=Field(default="")
     role: user_role = Field(default=user_role.DEMO)
+    status:UserStatus=Field(default=UserStatus.PENDING)
+    verification_token: Optional[str] = Field(default=None)
+    verification_expiry: Optional[datetime] = Field(default=None)
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
+
 
     @field_validator("username")
     @classmethod

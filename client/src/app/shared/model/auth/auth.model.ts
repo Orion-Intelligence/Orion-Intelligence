@@ -3,5 +3,6 @@ export interface AuthModel {
   username: string | null;
   role: string | null;
   isAuthenticated: boolean;
+  onboarding: string | null;
   error: string | null;
 }

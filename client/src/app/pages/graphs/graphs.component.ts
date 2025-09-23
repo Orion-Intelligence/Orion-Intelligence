@@ -1,15 +1,15 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {HttpParams} from '@angular/common/http';
-import {Color, DataSet, Edge, Network, Node} from 'vis-network/standalone';
-import {FormsModule} from '@angular/forms';
-import {ApiService} from '../../shared/services/api.service';
-import {SidebarComponent} from './sidebar/sidebar.component';
-import {GraphInfoComponent} from './graph-info/graph-info.component';
-import {NgIf} from '@angular/common';
-import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
-import {Clipboard} from '@angular/cdk/clipboard';
-import {getDefaultRuleSet, RuleSet} from "../../shared/model/graph/ruleset_model";
-import {ActivatedRoute} from '@angular/router';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { Color, DataSet, Edge, Network, Node } from 'vis-network/standalone';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../shared/services/api.service';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { GraphInfoComponent } from './graph-info/graph-info.component';
+import { NgIf } from '@angular/common';
+import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { getDefaultRuleSet, RuleSet } from "../../shared/model/graph/ruleset_model";
+import { ActivatedRoute } from '@angular/router';
 
 interface ExtendedNode extends Node {
   isGroup?: boolean;
@@ -24,7 +24,7 @@ interface ExtendedNode extends Node {
   imports: [FormsModule, SidebarComponent, GraphInfoComponent, NgIf]
 })
 export class GraphComponent implements OnInit {
-  @ViewChild('networkContainer', {static: true}) networkContainer!: ElementRef;
+  @ViewChild('networkContainer', { static: true }) networkContainer!: ElementRef;
 
   public rawNodes: ExtendedNode[] = [];
   public rawEdges: Edge[] = [];
@@ -127,9 +127,9 @@ export class GraphComponent implements OnInit {
 
     this.resetGraph();
 
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
-        const {results, limit_reached} = response;
+        const { results, limit_reached } = response;
         this.result = results;
         this.renderGraph(this.result);
         this.limitReached = limit_reached;
@@ -273,7 +273,7 @@ export class GraphComponent implements OnInit {
 
     this.nodeSet.update({
       id: nodeId,
-      color: {background: '#bf80ff', border: '#bf80ff'}
+      color: { background: '#bf80ff', border: '#bf80ff' }
     });
     this.hideContextMenu();
   }
@@ -298,7 +298,7 @@ export class GraphComponent implements OnInit {
       this.groupExpandedState[nodeId] = false;
       this.nodeSet.update({
         id: nodeId,
-        color: {background: '#F2F3F4', border: '#F2F3F4'}
+        color: { background: '#F2F3F4', border: '#F2F3F4' }
       });
 
     } else {
@@ -414,7 +414,7 @@ export class GraphComponent implements OnInit {
   onPhysicsToggled(enabled: boolean): void {
     this.physicsEnabled = enabled;
     if (this.network) {
-      this.network.setOptions({physics: {enabled}});
+      this.network.setOptions({ physics: { enabled } });
     }
   }
 
@@ -426,9 +426,9 @@ export class GraphComponent implements OnInit {
     }
 
     if (!this.physicsEnabled && this.network) {
-      this.network.setOptions({physics: {enabled: true}});
+      this.network.setOptions({ physics: { enabled: true } });
       this.network.stabilize();
-      this.network.setOptions({physics: {enabled: false}});
+      this.network.setOptions({ physics: { enabled: false } });
       this.physicsEnabled = false;
     }
 
@@ -456,14 +456,14 @@ export class GraphComponent implements OnInit {
           id: extNode.id,
           color: (extNode.id === "cti_vertices/" + this.singleInput)
             ? 'yellow'
-            : {background: '#bf80ff', border: '#bf80ff'}
+            : { background: '#bf80ff', border: '#bf80ff' }
         });
 
         if (extNode.id === "cti_vertices/" + this.singleInput) {
           this.network.getConnectedEdges(extNode.id).forEach(id => {
             this.edgeSet.update({
               id,
-              color: {color: 'yellow', highlight: 'yellow', hover: 'yellow'},
+              color: { color: 'yellow', highlight: 'yellow', hover: 'yellow' },
               dashes: true,
               width: 3
             });
@@ -486,7 +486,7 @@ export class GraphComponent implements OnInit {
           id: extNode.id,
           color: (node.id === "cti_vertices/" + this.singleInput)
             ? 'yellow'
-            : {background: '#66ff66', border: '#66ff66'}
+            : { background: '#66ff66', border: '#66ff66' }
         });
       }
     });
@@ -527,7 +527,7 @@ export class GraphComponent implements OnInit {
     const updatedEdges = allEdges.map(edge => ({
       id: edge.id!,
       arrows: enable ? 'to' : '',
-      ...(this.ruleSet.edgeColor ? {} : {color: {color: '#FFFFFF'}}),
+      ...(this.ruleSet.edgeColor ? {} : { color: { color: '#FFFFFF' } }),
     }));
     this.edgeSet.update(updatedEdges);
   }
@@ -614,7 +614,7 @@ export class GraphComponent implements OnInit {
         from: e._from,
         to: e._to,
         arrows: this.ruleSet.edgePointers ? 'to' : '',
-        ...(!this.ruleSet.edgeColor ? {color: {color: '#FFFFFF'}} : {}),
+        ...(!this.ruleSet.edgeColor ? { color: { color: '#FFFFFF' } } : {}),
         width: 2
       });
 
@@ -703,12 +703,12 @@ export class GraphComponent implements OnInit {
     this.edgeSet = new DataSet(visibleEdges);
 
     const container = this.networkContainer.nativeElement;
-    this.network = new Network(container, {nodes: this.nodeSet, edges: this.edgeSet}, {
+    this.network = new Network(container, { nodes: this.nodeSet, edges: this.edgeSet }, {
       physics: {
         enabled: this.physicsEnabled,
         solver: 'forceAtlas2Based',
         timestep: 1,
-        stabilization: {iterations: 20, fit: true},
+        stabilization: { iterations: 20, fit: true },
         forceAtlas2Based: {
           gravitationalConstant: -170,
           centralGravity: 0.005,
@@ -718,15 +718,15 @@ export class GraphComponent implements OnInit {
         }
       },
       edges: {
-        arrows: {to: {enabled: false, scaleFactor: 1}},
+        arrows: { to: { enabled: false, scaleFactor: 1 } },
         width: 2
       },
       nodes: {
         shape: 'dot',
         size: 20,
-        font: {size: 20, color: '#FFFFFF'}
+        font: { size: 20, color: '#FFFFFF' }
       },
-      interaction: {selectConnectedEdges: false}
+      interaction: { selectConnectedEdges: false }
     });
 
     container.addEventListener('contextmenu', (e: { preventDefault: () => any; }) => e.preventDefault());
@@ -739,13 +739,13 @@ export class GraphComponent implements OnInit {
 
     if (!this.physicsEnabled) {
       if (this.network) {
-        this.network.setOptions({physics: {enabled: true}});
+        this.network.setOptions({ physics: { enabled: true } });
       }
 
       this.physicsTimeoutId = setTimeout(() => {
         this.physicsEnabled = false;
         if (this.network) {
-          this.network.setOptions({physics: {enabled: false}});
+          this.network.setOptions({ physics: { enabled: false } });
         }
         this.physicsTimeoutId = null;
       }, 1500);
@@ -862,7 +862,7 @@ export class GraphComponent implements OnInit {
           .filter(e => e.id)
           .map(e => ({
             id: e.id!,
-            color: {color: '#FFFFFF'},
+            color: { color: '#FFFFFF' },
             width: 2
           }));
         this.edgeSet.update(resetEdges);
@@ -879,7 +879,7 @@ export class GraphComponent implements OnInit {
               .filter(e => e.id)
               .map(e => ({
                 id: e.id!,
-                color: {color: 'yellow'},
+                color: { color: 'yellow' },
                 width: 3
               }));
             this.edgeSet.update(highlightEdges);
@@ -913,10 +913,10 @@ export class GraphComponent implements OnInit {
     this.edgeSet.update(
       matchedEdges.map(edge => ({
         id: edge.id!,
-        color: {color: 'yellow'},
+        color: { color: 'yellow' },
         dashes: true,
         width: 3,
-        arrows: {to: {enabled: false}}
+        arrows: { to: { enabled: false } }
       }))
     );
 

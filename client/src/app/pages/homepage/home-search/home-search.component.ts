@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import { AppService } from '../../../services/core/app/app.service';
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
+  @Input() isRoleAdmin: boolean = true;
   searchQuery = '';
   selectedSearchBy = 'Match any term';
 
@@ -29,6 +30,9 @@ export class HomeSearchComponent implements OnInit {
     const cfg = this.app_service.configData();
     const matchtype = cfg.localSettings.matchType;
     this.onSetMatchType(matchtype)
+    if (!this.isRoleAdmin) {
+      this.onSearchSubmit();
+    }
   }
 
   onSetMatchType(type: string) {
@@ -47,10 +51,17 @@ export class HomeSearchComponent implements OnInit {
       q: this.searchQuery || null
     };
 
-    this.router.navigate(['/dashboard/consolidated/all'], {
-      queryParams,
-      queryParamsHandling: 'merge'
-    }).then();
+    if (this.isRoleAdmin) {
+      this.router.navigate(['/dashboard/consolidated/all'], {
+        queryParams,
+        queryParamsHandling: 'merge'
+      }).then();
+    } else {
+      this.router.navigate(['/dashboard/profile/dashboard/all'], {
+        queryParams,
+        queryParamsHandling: 'merge'
+      }).then();
+    }
   }
 
   getMatchType() {

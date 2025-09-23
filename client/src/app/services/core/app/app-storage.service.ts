@@ -11,6 +11,7 @@ export class AppStorageService {
     'iocExpanded',
     'entityFilterCondition',
     'entityfilterCategories',
+    'isSidebarOpen',
     'matchType',
     'sortType'
   ];
@@ -31,6 +32,7 @@ export class AppStorageService {
       iocExpanded: this.getFromStorage<boolean>('iocExpanded') || true,
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
+      isSidebarOpen: this.getFromStorage('isSidebarOpen', true),
       matchType: this.getFromStorage<string>('matchType') || 'semantic',
       sortType: this.getFromStorage<string>('sortType'),
     };

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 
-from configs.SimpleAuthProvider import setup_admin
+from configs.token_auth_provider import setup_admin
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from configs.swagger_config import configure_swagger
 from interface import interface
@@ -45,5 +45,4 @@ app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 
-# noinspection PyTypeChecker
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

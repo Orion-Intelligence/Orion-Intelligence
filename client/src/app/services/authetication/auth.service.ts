@@ -1,12 +1,12 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, map, Observable, tap} from 'rxjs';
-import {ApiService} from '../../shared/services/api.service';
-import {Router} from '@angular/router';
-import {AuthModel} from '../../shared/model/auth/auth.model';
-import {TokenRefreshService} from './token-refresh.service';
-import {HttpHeaders} from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { ApiService } from '../../shared/services/api.service';
+import { Router } from '@angular/router';
+import { AuthModel } from '../../shared/model/auth/auth.model';
+import { TokenRefreshService } from './token-refresh.service';
+import { HttpHeaders } from '@angular/common/http';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
@@ -33,9 +33,8 @@ export class AuthService {
     body.set('username', username);
     body.set('password', password);
 
-    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
-
-    return this.apiService.post<any>('token', body.toString(), {headers}).pipe(
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+    return this.apiService.post<any>('token', body.toString(), { headers }).pipe(
       tap({
         next: (response) => {
           if (response.twofa_required) {
@@ -44,6 +43,7 @@ export class AuthService {
               username,
               role: null,
               isAuthenticated: false,
+              onboarding: null,
               error: '2FA required'
             });
             return response.provisioning_uri || null;
@@ -55,13 +55,54 @@ export class AuthService {
               username: null,
               role: null,
               isAuthenticated: false,
+              onboarding: null,
               error: 'Access denied!'
             });
             return;
           }
+          if (response.role === 'admin' || response.role === 'demo') {
+            localStorage.setItem('role', response.role);
+            this.setToken(response.access_token, username, response.role);
+            this.startTokenRefresh();
+            this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+          }
+          else {
+            switch (response.status) {
+              case 'verification_pending':
+                this.authState.next({
+                  token: null,
+                  username: null,
+                  role: null,
+                  isAuthenticated: false,
+                  onboarding: null,
+                  error: 'Account under verification'
+                });
+                break;
 
-          this.setToken(response.access_token, username, response.role);
-          this.startTokenRefresh();
+              case 'onboarding':
+                this.setToken(response.access_token, username, response.role);
+                this.startTokenRefresh();
+                this.router.navigate(['/onboarding']).then();
+                break;
+
+              case 'active':
+                this.setToken(response.access_token, username, response.role, response.hasOnboarding);
+                this.startTokenRefresh();
+                this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
+                break;
+
+              default:
+                this.authState.next({
+                  token: null,
+                  username: null,
+                  role: null,
+                  isAuthenticated: false,
+                  onboarding: 'false',
+                  error: 'Unknown account status'
+                });
+                break;
+            }
+          }
         },
         error: (_) => {
           this.authState.next({
@@ -69,7 +110,8 @@ export class AuthService {
             username: null,
             role: null,
             isAuthenticated: false,
-            error: 'Access denied!'
+            error: 'Access denied!',
+            onboarding: null,
           });
         }
       })
@@ -89,7 +131,7 @@ export class AuthService {
       'Authorization': `Bearer ${tempToken}`
     });
 
-    return this.apiService.post<any>('token/2fa/verify', {code}, {headers}).pipe(
+    return this.apiService.post<any>('token/2fa/verify', { code }, { headers }).pipe(
       tap({
         next: (res) => {
           if (res?.access_token) {
@@ -97,13 +139,13 @@ export class AuthService {
             this.startTokenRefresh();
           } else {
             this.authState.next({
-              token: null, username, role: null, isAuthenticated: false, error: 'Invalid 2FA code'
+              token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code'
             });
           }
         },
         error: (_) => {
           this.authState.next({
-            token: null, username, role: null, isAuthenticated: false, error: 'Invalid 2FA code'
+            token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code'
           });
         }
       })
@@ -116,15 +158,25 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('role');
+    localStorage.removeItem('onboarding');
 
     this.authState.next({
-      token: null, username: null, role: null, isAuthenticated: false, error: null
+      token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null
     });
     this.tokenRefreshService.stopTokenRefresh();
 
     this.router.navigate(['/login']).then();
   }
 
+  signup(username: string, email: string, password: string): Observable<any> {
+    return this.apiService.post('signup', { username, email, password });
+  }
+  forgotPassword(email: string): Observable<any> {
+    return this.apiService.post('forgot', { email });
+  }
+  updatePassword(token: string, password: string): Observable<any> {
+    return this.apiService.post('updatePassword', { token, password });
+  }
   getToken(): string | null {
     return this.getStoredToken();
   }
@@ -132,18 +184,29 @@ export class AuthService {
   getRole(): string | null {
     return localStorage.getItem('role');
   }
+  getOnboardingStatus(): boolean {
+    return localStorage.getItem('onboarding') === 'true';
+  }
+  getUsername(): string {
+    return localStorage.getItem('username') ?? '';
+  }
 
   isAuthenticated(): boolean {
     return !!this.getStoredToken();
   }
+  setOnboarding(value: boolean): void {
+    localStorage.setItem('onboarding', String(value));
+  }
 
-  private setToken(token: string, username: string, role: string): void {
+  private setToken(token: string, username: string, role: string, hasOnboarding?: boolean): void {
     this.authState.next({
-      token, username, role, isAuthenticated: true, error: null
+      token, username, role, isAuthenticated: true, onboarding: String(hasOnboarding), error: null
     });
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
     localStorage.setItem('role', role);
+    if (hasOnboarding !== undefined)
+      this.setOnboarding(hasOnboarding)
   }
 
   private getStoredToken(): string | null {
@@ -157,6 +220,7 @@ export class AuthService {
       username: localStorage.getItem('username'),
       role: localStorage.getItem('role'),
       isAuthenticated: !!token,
+      onboarding: localStorage.getItem('onboarding'),
       error: null
     };
   }
@@ -179,7 +243,7 @@ export class AuthService {
     return this.apiService.post<{
       access_token: string;
       role: string
-    }>('token/refresh', {token: currentToken}, {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}).pipe(tap((response) => {
+    }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ 'Authorization': `Bearer ${currentToken}` }) }).pipe(tap((response) => {
       if (response) {
         this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
       }
