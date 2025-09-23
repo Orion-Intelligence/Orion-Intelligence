@@ -12,7 +12,7 @@ class AllowedKeys(str, Enum):
     LANGUAGE_ALLOWED = "language_allowed"
     TELEGRAM_ALLOWED = "telegram_allowed"
     LOGO_URL = "logo_url"
-    AI_ENDPOINT = "ai_endpoint"  # <-- added
+    AI_ENDPOINT = "ai_endpoint"
 
 
 VALID_LANGUAGE_CODES = {
@@ -21,7 +21,7 @@ VALID_LANGUAGE_CODES = {
 }
 
 IMAGE_URL_REGEX = re.compile(r"^https?://.+\.(png|jpg|jpeg|svg|webp)$", re.IGNORECASE)
-ENDPOINT_URL_REGEX = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)  # <-- added
+ENDPOINT_URL_REGEX = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)
 
 
 class db_system_model(Model):
@@ -38,7 +38,7 @@ class db_system_model(Model):
             AllowedKeys.VERSION: lambda v: bool(v.strip()),
             AllowedKeys.LANGUAGE_ALLOWED: lambda v: v in VALID_LANGUAGE_CODES,
             AllowedKeys.LOGO_URL: lambda v: v == "" or bool(IMAGE_URL_REGEX.match(v)),
-            AllowedKeys.AI_ENDPOINT: lambda v: v == "" or bool(ENDPOINT_URL_REGEX.match(v)),  # <-- added
+            AllowedKeys.AI_ENDPOINT: lambda v: v == "" or bool(ENDPOINT_URL_REGEX.match(v)),
         }
 
         error_messages = {
@@ -47,7 +47,7 @@ class db_system_model(Model):
             AllowedKeys.VERSION: "VERSION must be a non-empty string",
             AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}",
             AllowedKeys.LOGO_URL: "LOGO_URL must be a valid image URL ending with .png, .jpg, .svg, etc., or be empty",
-            AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty",  # <-- added
+            AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty",
         }
 
         if key in validators and not validators[key](value):

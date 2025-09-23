@@ -3,3 +3,4 @@
 {"file": "_github_mthcht_awesome_lists", "url": "https://github.com"}
 {"file": "_tweetfeed", "url": "https://tweetfeed.live"}
 {"file": "_zone_xsec", "url": "https://zone-xsec.com"}
+{"file": "_usom", "url": "https://www.usom.gov.tr"}

@@ -1,5 +1,7 @@
 import asyncio
+import json
 from asyncio import sleep
+from jinja2 import Environment, FileSystemLoader
 
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
@@ -7,6 +9,8 @@ from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
+from orion.constants.constant import allowed_keys
+from orion.constants import constant
 
 
 class service_manager:
@@ -58,3 +62,21 @@ class service_manager:
 
     def check_status(self):
         return self._is_available
+
+    @staticmethod
+    async def build_assets(build_dir):
+        entities_file = build_dir / "assets" / "data" / "entities_data" / "entities.json"
+        if not entities_file.exists():
+            raise FileNotFoundError(f"entities.json not found at {entities_file}")
+
+        with open(entities_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        allowed_keys.clear()
+        for item in data:
+            if "key" in item:
+                allowed_keys.add(item["key"])
+
+        env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"))
+        constant.mail_template = env.get_template("mail_template.html")
+        

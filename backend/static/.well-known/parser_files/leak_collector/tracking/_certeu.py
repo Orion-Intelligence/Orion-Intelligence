@@ -179,11 +179,11 @@ class _certeu(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team=team,
                         m_country=[country]
                     )
 
-                    entity_data = helper_method.extract_entities(full_content, entity_data)
                     self.append_leak_data(leak_obj, entity_data)
 
                 except Exception as ex:

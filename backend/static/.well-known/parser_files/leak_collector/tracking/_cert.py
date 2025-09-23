@@ -157,10 +157,10 @@ class _cert(leak_extractor_interface, ABC):
                         m_leak_date=date_obj,
                     )
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team="cert",
                         m_country=["iran"],
                     )
-                    entity_data = helper_method.extract_entities(content[:500], entity_data)
                     self.append_leak_data(card_data, entity_data)
                     detail_page.close()
                 if stop_pagination:

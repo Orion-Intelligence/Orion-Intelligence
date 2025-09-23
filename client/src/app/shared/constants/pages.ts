@@ -1,4 +1,3 @@
-// noinspection JSUnusedGlobalSymbols
 
 export enum Category {
   STRATEGIC = 'Strategic',
@@ -13,6 +12,9 @@ export enum Category {
   FEED = 'Feed',
   CONSOLIDATED = 'Consolidated',
   STEALERLOGS = 'Stealerlogs',
+  SCANNER = 'Scanner',
+  TENANT = 'Tenant',
+  PROFILE = 'Profile'
 }
 
 export enum GeneralSubCategory {
@@ -53,6 +55,8 @@ export enum SocialSubCategory {
   ALL = 'All',
   TELEGRAM = 'Telegram',
   TWITTER = 'Twitter',
+  MASTODON = 'Mastodon',
+  PASTEBIN = 'Pastebin',
   FORUM = 'Forum',
   REDDIT = 'Reddit',
 }
@@ -67,10 +71,25 @@ export enum ExploitSubCategory {
 export enum FeedSubCategory {
   NEWS = 'News',
 }
+
+export enum ScannerSubCategory {
+  BASIC = 'Basic',
+  FULL = 'Full',
+}
+
 export enum DumpSubCategory {
   LISTING = 'Listing',
 }
 
 export enum StealerlogsSubCategory {
   CREDENTIAL = 'Credential',
+  LOGS = 'Logs',
+}
+export enum TenantSubCategory {
+  VIEW = 'View',
+}
+export enum ProfileSubCategory {
+  DASHBOARD = 'Dashboard',
+  STATISTICS = 'Statistics',
+  SETTINGS = 'Settings'
 }

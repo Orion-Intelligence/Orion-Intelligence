@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { search_filter_keys, search_filter_labels } from '../../../shared/constants/shared-enums';
-import { AppService } from '../../../services/core/app/app.service';
-import { FilterCategory } from '../../../shared/model/filter/filter.model';
-import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
-import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import {CommonModule} from '@angular/common';
+import {Component, ViewChild, ElementRef, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {search_filter_labels} from '../../../shared/constants/shared-enums';
+import {AppService} from '../../../services/core/app/app.service';
+import {FilterCategory} from '../../../shared/model/filter/filter.model';
+import {searchFilterAnimation} from '../../../shared/animations/search.filter.animation';
+import {SuggestionService} from '../../../services/entity_filter_suggestions/suggestions.service';
 import {HelperService} from '../../../shared/services/helper.service';
 
 @Component({
@@ -21,7 +21,7 @@ export class SearchFiltersComponent implements OnInit {
   @Input() homePage: Boolean = false;
   @Output() checkDomain = new EventEmitter<void>();
   @Output() searchFiltersChange = new EventEmitter<void>();
-  @ViewChild('categoryScroll', { static: true }) categoryScroll!: ElementRef;
+  @ViewChild('categoryScroll', {static: true}) categoryScroll!: ElementRef;
 
   filteredCategories: FilterCategory[] = [];
   categories: Record<string, string[]> = {};
@@ -35,7 +35,7 @@ export class SearchFiltersComponent implements OnInit {
   showLeftFade = false;
   showRightFade = false;
 
-  constructor(public helperService:HelperService, public app_service: AppService, private suggestionService: SuggestionService) {
+  constructor(public helperService: HelperService, public app_service: AppService, private suggestionService: SuggestionService) {
   }
 
   get selectedCategoryTags() {
@@ -47,7 +47,7 @@ export class SearchFiltersComponent implements OnInit {
       this.suggestionsMap = data;
     });
     const defaultCategories: Record<string, string[]> = {};
-    for (const key of search_filter_keys) {
+    for (const key of Object.keys(search_filter_labels)) {
       defaultCategories[key] = [];
     }
     this.initializeFilterCategories(defaultCategories);
@@ -63,11 +63,11 @@ export class SearchFiltersComponent implements OnInit {
   }
 
   scrollLeft() {
-    this.categoryScroll.nativeElement.scrollBy({ left: -150, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: -150, behavior: 'smooth'});
   }
 
   scrollRight() {
-    this.categoryScroll.nativeElement.scrollBy({ left: 150, behavior: 'smooth' });
+    this.categoryScroll.nativeElement.scrollBy({left: 150, behavior: 'smooth'});
   }
 
   addTag() {
@@ -76,7 +76,7 @@ export class SearchFiltersComponent implements OnInit {
     const alreadyExists = allTags.some(tag => tag.toLowerCase() === trimmed.toLowerCase());
 
     if (trimmed && !alreadyExists) {
-      if((this.selectedCategoryId=="m_domain" || this.selectedCategoryId=="m_url" || this.selectedCategoryId=="m_search_all") && (trimmed.startsWith("www") || trimmed.includes("http"))){
+      if ((this.selectedCategoryId == "m_domain" || this.selectedCategoryId == "m_search_all") && (trimmed.startsWith("www") || trimmed.includes("http"))) {
         trimmed = this.helperService.extractDomain(trimmed)
       }
       this.categories[this.selectedCategoryId] = [...this.selectedCategoryTags, trimmed];
@@ -137,10 +137,10 @@ export class SearchFiltersComponent implements OnInit {
     const queryLower = query.toLowerCase();
 
     const isDefaultSelection = !this.selectedCategoryId;
+    console.log(this.categories)
 
     if (queryLower === '') {
       const allKeys = Object.keys(this.categories);
-
       const sortedKeys = allKeys
         .filter(k => k !== 'm_search_all')
         .sort((a, b) => this.getTags(b).length - this.getTags(a).length);
@@ -156,7 +156,7 @@ export class SearchFiltersComponent implements OnInit {
 
       this.filteredCategories = finalSortedKeys.map(key => ({
         id: key,
-        name: search_filter_labels[key] || key,
+        name: key === 'm_search_all' ? 'Search All' : (search_filter_labels[key] || key),
         tags: this.getTags(key).map(val => ({
           id: `${key}-${val}`,
           value: val,
@@ -171,12 +171,11 @@ export class SearchFiltersComponent implements OnInit {
       const rest = matchedKeys.filter(k => k !== 'm_search_all' && k !== this.selectedCategoryId);
       const sortedRest = rest.sort((a, b) => this.getTags(b).length - this.getTags(a).length);
 
-      // Set default if no selection yet
       if (isDefaultSelection) {
         this.selectedCategoryId = matchedKeys.includes('m_search_all') ? 'm_search_all' : matchedKeys[0] || '';
       }
 
-      const finalSortedKeys = ['m_search_all', ...sortedRest];
+      const finalSortedKeys = ['Search All', ...sortedRest];
       if (this.selectedCategoryId && this.selectedCategoryId !== 'm_search_all') {
         finalSortedKeys.splice(1, 0, this.selectedCategoryId);
       }
@@ -192,6 +191,7 @@ export class SearchFiltersComponent implements OnInit {
       }));
     }
   }
+
   onFilterInputChange(): void {
     const input = this.newValue.trim().toLowerCase();
     const list = this.suggestionsMap[this.selectedCategoryId] || [];
@@ -205,6 +205,7 @@ export class SearchFiltersComponent implements OnInit {
       this.showSuggestions = false;
     }
   }
+
   onSuggestionClick(event: MouseEvent, value: string): void {
     this.newValue = value;
     this.addTag();

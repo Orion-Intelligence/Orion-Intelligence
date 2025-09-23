@@ -32,6 +32,9 @@ client_build() {
         ng build --configuration production
     fi
     cd ..
+    rm -rf backend/build
+    mkdir -p backend/build
+    cp -r client/build/* backend/build/
 }
 
 use_compose_file() {

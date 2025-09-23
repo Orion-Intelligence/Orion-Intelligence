@@ -6,7 +6,7 @@ from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
-from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig
+from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import CUSTOM_SCRIPT_REDIS_KEYS, REDIS_COMMANDS
@@ -52,7 +52,7 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_timeout=277200, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_timeout=277200, m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type= ThreatType.LEAK)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -112,7 +112,7 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                         if address_element:
                             btc_address = address_element.inner_text().strip()
 
-                        ref_html = helper_method.extract_refhtml(site, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS)
+                        ref_html = helper_method.extract_refhtml(site, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                         content = (
                             description + btc_address
@@ -136,12 +136,11 @@ class _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid(leak_extractor_i
                         )
 
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_company_name=database,
-                            m_ip=[site],
                             m_team="Hacked databases store"
                         )
 
-                        entity_data = helper_method.extract_entities(content + ref_html, entity_data)
                         self.append_leak_data(card_data, entity_data)
 
                         buy_page.close()

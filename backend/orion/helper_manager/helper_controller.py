@@ -125,6 +125,13 @@ class helper_controller:
         return sorted(domains)
 
     @staticmethod
+    def strip_query(query, size=20):
+        query["size"] = size
+        query.pop("highlight", None)
+        query.pop("suggest", None)
+        return query
+
+    @staticmethod
     def transform_query_match(query: str, matchtype: str) -> str:
         query = " ".join(query.strip().split())
         if not query or query.count('"') >= 2:

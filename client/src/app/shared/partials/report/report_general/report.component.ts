@@ -6,8 +6,6 @@ import {CommonModule} from '@angular/common';
 import {last, Observable} from 'rxjs';
 import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
 import {HelperService} from '../../../services/helper.service';
-import {LeakResultItem} from '../../../model/results/leak/leak.callback.model';
-import {GeneralResultItem} from '../../../model/results/general/general.callback.model';
 import {AppService} from '../../../../services/core/app/app.service';
 import {Category} from '../../../constants/pages';
 import {ApiService} from '../../../services/api.service';
@@ -19,15 +17,16 @@ import {AuthService} from '../../../../services/authetication/auth.service';
 import {DashboardService} from '../../../../services/dashboard/dashboard.service';
 import {ReportHeaderComponent} from '../../report-header/report-header.component';
 import {ChatWidgetComponent} from '../../chat-widget/chat-widget.component';
+import {CodeBlockComponent} from '../../code-block/code-block.component';
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent],
+  imports: [ResultListComponent, CommonModule, ResultSectionComponent, TooltipDirective, NgbCollapseModule, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit {
-  resultItem: GeneralResultItem | LeakResultItem | null = null;
+  resultItem: any = null;
   arrayKeys: string[] = [];
   listItems: any[] = [];
   activeTab = '';

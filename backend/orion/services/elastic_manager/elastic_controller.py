@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from string import capwords
 from elasticsearch import AsyncElasticsearch
-
+from fastapi import HTTPException
 from orion.constants.constant import CONSTANTS
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
@@ -48,40 +48,70 @@ class elastic_controller:
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_LEAK_INDEX, body={"index.blocks.read_only_allow_delete": False})
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_GENERIC_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_GENERIC_INDEX,
-                                                         body=mapping_generic_model)
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=mapping_generic_model)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_GENERIC_INDEX, body={"index.blocks.read_only_allow_delete": False})
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX,
-                                                         body=mapping_defacement_model)
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body={"index.blocks.read_only_allow_delete": False})
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_EXPLOIT_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
-                                                         body=mapping_exploit_model)
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body=mapping_exploit_model)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body={"index.blocks.read_only_allow_delete": False})
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_CHATS_INDEX, body={"index.blocks.read_only_allow_delete": False})
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body=mapping_stealer_model)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body={"index.blocks.read_only_allow_delete": False})
 
             if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_SOCIAL_INDEX):
                 await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_SOCIAL_INDEX, body=mapping_social_model)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_SOCIAL_INDEX, body={"index.blocks.read_only_allow_delete": False})
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
     async def purge_old_records(self):
-        m_request = {"query": {"range": {"timestamp": {"lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"}}}}
         try:
+            m_request_stealer = {
+                "query": {
+                    "range": {
+                        "timestamp": {
+                            "lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"
+                        }
+                    }
+                }
+            }
             await self.__m_connection.delete_by_query(
                 index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
-                body=m_request,
+                body=m_request_stealer,
                 ignore=[404],
                 request_timeout=300
             )
+
+            days_15_seconds = int(timedelta(days=15).total_seconds())
+            m_request_defacement = {
+                "query": {
+                    "range": {
+                        "timestamp": {
+                            "m_leak_date": f"now-{days_15_seconds}s"
+                        }
+                    }
+                }
+            }
+            await self.__m_connection.delete_by_query(
+                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+                body=m_request_defacement,
+                ignore=[404],
+                request_timeout=300
+            )
+
         except Exception as ex:
             log.g().e(f"Failed to delete old records: {str(ex)}")
 
@@ -194,7 +224,7 @@ class elastic_controller:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, None
 
-    async def index_data(self, p_data):
+    async def index_data(self, p_data, bypass_empty_embedding = False):
         try:
             def ensure_creation_date(p_entry):
                 data = p_entry[ELASTIC_KEYS.S_VALUE]
@@ -203,8 +233,7 @@ class elastic_controller:
                     data["m_creation_date"] = datetime.now(timezone.utc).isoformat()
 
                 keys_to_remove = []
-
-                for key, value in data.items():
+                for key, value in list(data.items()):
                     if isinstance(value, list):
                         filtered = [v for v in value if v and str(v).lower() != "null"]
                         if filtered:
@@ -227,8 +256,17 @@ class elastic_controller:
                         log.g().w("Skipping document due to missing m_hash")
                         continue
 
+                    index = entry[ELASTIC_KEYS.S_DOCUMENT]
+                    exists = await self.__m_connection.exists(index=index, id=doc_id)
+
+                    if not exists and not bypass_empty_embedding:
+                        emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
+                        if not (isinstance(emb, list) and len(emb) > 0):
+                            log.g().w(f"Skipping insert without non-empty embedding: {doc_id}")
+                            continue
+
                     await self.__m_connection.update(
-                        index=entry[ELASTIC_KEYS.S_DOCUMENT],
+                        index=index,
                         id=doc_id,
                         body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
                     )
@@ -240,8 +278,16 @@ class elastic_controller:
                     log.g().w("Skipping indexing due to missing m_hash")
                     return False, "Missing m_hash in document"
 
+                index = p_data[ELASTIC_KEYS.S_DOCUMENT]
+                exists = await self.__m_connection.exists(index=index, id=doc_id)
+
+                if not exists:
+                    emb = p_data[ELASTIC_KEYS.S_VALUE].get("m_embedding")
+                    if not (isinstance(emb, list) and len(emb) > 0):
+                        return False, "Missing non-empty m_embedding for new document"
+
                 await self.__m_connection.update(
-                    index=p_data[ELASTIC_KEYS.S_DOCUMENT],
+                    index=index,
                     id=doc_id,
                     body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
                 )
@@ -249,12 +295,18 @@ class elastic_controller:
             return True, None
 
         except Exception as ex:
-            log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
-            return False, str(ex)
+            log.g().e(ex)
+            raise HTTPException(status_code=500, detail=f"Query embedding failed")
 
     async def index_bulk_data(self, p_data):
         try:
+            print("::::::::::::::::::::::::::::::::::", flush=True)
+            print("::::::::::::::::::::::::::::::::::", flush=True)
+            print(p_data, flush=True)
+            print("::::::::::::::::::::::::::::::::::", flush=True)
+            print("::::::::::::::::::::::::::::::::::", flush=True)
             response = await self.__m_connection.bulk(body=p_data)
             return response
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
+            raise HTTPException(status_code=500, detail=f"Query embedding failed")

@@ -106,7 +106,7 @@ class search_callback:
             return mRelevanceListData, [], total_pages
 
 
-    async def search_handler(self, m_status, m_documents, callback_model, listing_filter=None, p_consolidated=False):
+    async def search_handler(self, m_status, m_documents, callback_model, listing_filter=None, p_consolidated=False, data_limit = True):
         if not m_status:
             return callback_model(Result=[], Suggestions=[], Page_Count=0)
 
@@ -122,9 +122,10 @@ class search_callback:
             if listing_filter is not None:
                 doc = {k: v for k, v in doc.items() if k not in listing_filter}
 
-            for key, value in doc.items():
-                if isinstance(value, list) and len(value) > 7:
-                    doc[key] = value[:7]
+            if data_limit:
+                for key, value in doc.items():
+                    if isinstance(value, list) and len(value) > 7:
+                        doc[key] = value[:7]
 
             return {
                 k: v for k, v in doc.items()
@@ -143,7 +144,10 @@ class search_callback:
     async def get_doc(results) -> Optional[result_item]:
         try:
             if results and isinstance(results, list) and len(results) > 0:
-                return results[0]
+                doc = results[0]
+                doc.pop("m_embedding", None)
+                return doc
             return None
         except ValidationError:
             return None
+

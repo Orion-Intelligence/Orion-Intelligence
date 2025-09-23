@@ -6,7 +6,7 @@ from orion.constants.constant import CONSTANTS
 from orion.management.models.insight_model import (
     GENERIC_AGGREGATION_MAPPING,
     LEAK_AGGREGATION_MAPPING,
-    DEFACEMENT_AGGREGATION_MAPPING,  # Add this import
+    DEFACEMENT_AGGREGATION_MAPPING,
     InsightData
 )
 from orion.management.models.insight_model_comparison import InsightComparisonModel
@@ -19,7 +19,6 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 class insight_job:
     __instance = None
 
-    # Initializations
     @staticmethod
     def get_instance():
         if insight_job.__instance is None:
@@ -44,7 +43,7 @@ class insight_job:
 
         REVERSE_GENERIC_MAPPING = {v: k for k, v in GENERIC_AGGREGATION_MAPPING.items()}
         REVERSE_LEAK_MAPPING = {v: k for k, v in LEAK_AGGREGATION_MAPPING.items()}
-        REVERSE_DEFACEMENT_MAPPING = {v: k for k, v in DEFACEMENT_AGGREGATION_MAPPING.items()}  # New reverse mapping
+        REVERSE_DEFACEMENT_MAPPING = {v: k for k, v in DEFACEMENT_AGGREGATION_MAPPING.items()} 
 
         for section in ["general", "leak", "defacement"]:
             old_model_daily = getattr(insight_old_daily, section)
@@ -138,7 +137,7 @@ class insight_job:
                 )
 
         except Exception as ex:
-            log.g().ex(ex)
+            log.g().e(ex)
             return
 
     async def update_insights(self):

@@ -1,32 +1,44 @@
-import {Component, OnInit} from '@angular/core';
-import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import {Component, Input} from '@angular/core';
+import {DatePipe, KeyValuePipe, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-credential-list',
   standalone: true,
   templateUrl: './credential-list.component.html',
-  imports: [
-    NgForOf,
-    NgIf,
-    DatePipe
-  ]
+  animations: [fadeInDashboardItem],
+  imports: [NgForOf, NgIf, DatePipe, KeyValuePipe, TitleCasePipe]
 })
-export class CredentialListComponent implements OnInit {
-  stealerData$: StealerLogCallbackModel;
+export class CredentialListComponent {
+  @Input() stealerData$!: StealerLogCallbackModel;
+  @Input() type: string = 'credential';
+  @Input() isLoading!: boolean;
 
-  constructor(public dashboardService: DashboardService) {
-    this.stealerData$ = this.dashboardService.stealerlogCallbackModel;
-  }
-
-  ngOnInit(): void {
-    this.stealerData$ = this.dashboardService.stealerlogCallbackModel;
-  }
+  expandedIndex: number | null = null;
 
   copyRowData(data: string): void {
-    navigator.clipboard.writeText(data).then(() => {
-    }).catch(_ => {
+    navigator.clipboard.writeText(data).catch(() => {
     });
+  }
+
+  toggleRow(i: number): void {
+    this.expandedIndex = this.expandedIndex === i ? null : i;
+  }
+
+  splitRaw(value: any, delimiters: any): string[] {
+    const text = (value ?? '').toString();
+    const list = Array.isArray(delimiters)
+      ? delimiters
+      : (typeof delimiters === 'string' ? delimiters.split('') : [':', ';', '|', ',']);
+    const escaped = list.map((c: string) => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('');
+    const re = new RegExp(`[${escaped}]`, 'g');
+    return text.split(re).map((s: string) => s.trim()).filter((s: string) => !!s);
+  }
+
+  iocValue(item: any, idx: number): string | null {
+    const parts = this.splitRaw(item['raw'], item['delimiter']);
+    if (idx < 0 || idx >= parts.length) return null;
+    return parts[idx] || null;
   }
 }

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 
-from configs.SimpleAuthProvider import setup_admin
+from configs.token_auth_provider import setup_admin
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from configs.swagger_config import configure_swagger
 from interface import interface
@@ -18,10 +18,13 @@ from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 
+BASE_DIR = Path(__file__).resolve().parent
+ANGULAR_BUILD_DIR = BASE_DIR / "build"
 
 @asynccontextmanager
 async def lifespan(p_app: FastAPI):
     service_manager_instance = service_manager.get_instance()
+    await service_manager_instance.build_assets(ANGULAR_BUILD_DIR)
     await service_manager_instance.init_services()
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
@@ -29,10 +32,6 @@ async def lifespan(p_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-BASE_DIR = Path(__file__).resolve().parent
-ANGULAR_BUILD_DIR = BASE_DIR / "build"
-
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
 app.mount("/static", StaticFiles(directory=ANGULAR_BUILD_DIR), name="static")
 
@@ -46,5 +45,4 @@ app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 
-# noinspection PyTypeChecker
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

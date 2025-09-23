@@ -31,8 +31,7 @@ class _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd(api_collector_in
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT,
-                         m_threat_type=ThreatType.API)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.API)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -113,6 +112,7 @@ class _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd(api_collector_in
             )
 
             entity_data = entity_model(
+                m_scrap_file=self.__class__.__name__,
                 m_email=list(email_list),
                 m_name=", ".join(username_list)
             )

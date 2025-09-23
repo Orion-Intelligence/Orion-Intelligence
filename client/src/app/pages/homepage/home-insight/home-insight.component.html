@@ -1,64 +1,73 @@
-<div id="analytics">
-  <div class="home_insight_graph_container mt-lg-5">
+<div id="analytics" [ngClass]="{
+    'sidebar-open': appService.getConfig().localSettings.isSidebarOpen===true,
+    'sidebar-closed': appService.getConfig().localSettings.isSidebarOpen===false
+  }">
+  <div class="home_insight__container mt-lg-5">
     <app-customize-bar-chart *ngFor="let graph of GraphData" [graphModel]="graph"></app-customize-bar-chart>
   </div>
   <div class="home_insight__single">Top Data Leaks</div>
   <div *ngFor="let modelKey of latestDocumentModelKeys let i = index; let last = last">
     <ng-container *ngIf="i < 1 || last">
-      <div class="home_insight__container home_insight__container-top mt-4">
-        <div *ngFor="let item of getResultItems(modelKey);" class="home-insight-card-container">
-          <div class="home-insight-card-header-section">
-            <div class="home-insight-card-company-info">
-              <div class="home-insight-card-label">Company Name</div>
-              <div class="home-insight-card-value">
-                {{item.title.slice(0, 25)}}
-                <span *ngIf="item.title.length > 25">…</span>
+      <div [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen===true,
+        'sidebar-closed': appService.getConfig().localSettings.isSidebarOpen===false}">
+        <div class="home_insight__container home_insight__container-top mt-4">
+          <div *ngFor="let item of getResultItems(modelKey);" class="home-insight-card-container">
+            <div class="home-insight-card-header-section">
+              <div class="home-insight-card-company-info">
+                <div class="home-insight-card-label">Company Name</div>
+                <div class="home-insight-card-value">
+                  {{item.title.slice(0, 20)}}
+                  <span *ngIf="item.title.length > 20">…</span>
+                </div>
+              </div>
+              <div class="home-insight-card-attacker-info">
+                <div class="home-insight-card-label">Source</div>
+                <div class="home-insight-card-value">{{ item.source.slice(0,20) }}
+                  <span *ngIf="item.source.length > 20">…</span>
+                </div>
               </div>
             </div>
-            <div class="home-insight-card-attacker-info">
-              <div class="home-insight-card-label">Source</div>
-              <div class="home-insight-card-value">{{ item.source }}</div>
-            </div>
-          </div>
 
-          <div class="home-insight-detail-row">
-            <ng-container *ngIf="item.location; else checkURL">
-              <div class="home-insight-card-country-info">
-                <div class="home-insight-card-label">Location</div>
-                <div class="home-insight-card-value">{{ item.location }}</div>
-              </div>
-            </ng-container>
-
-            <ng-template #checkURL>
-              <ng-container *ngIf="item.url; else checkPhone">
+            <div class="home-insight-detail-row">
+              <ng-container *ngIf="item.location; else checkURL">
                 <div class="home-insight-card-country-info">
-                  <div class="home-insight-card-label">URL</div>
-                  <div class="home-insight-card-value" *ngIf="item.url[0]">
-                    {{ item.url[0].length > 24 ? item.url[0].slice(0, 24) + '...' : item.url[0] }}
-                  </div>
+                  <div class="home-insight-card-label">Location</div>
+                  <div class="home-insight-card-value">{{ item.location }}</div>
                 </div>
               </ng-container>
-            </ng-template>
 
-            <ng-template #checkPhone>
-              <div class="home-insight-card-country-info">
-                <div class="home-insight-card-label">Phone Number</div>
-                <div class="home-insight-card-value">{{ item.phoneNumber || '-' }}</div>
-              </div>
-            </ng-template>
-          </div>
+              <ng-template #checkURL>
+                <ng-container *ngIf="item.url; else checkPhone">
+                  <div class="home-insight-card-country-info">
+                    <div class="home-insight-card-label">URL</div>
+                    <div class="home-insight-card-value" *ngIf="item.url[0]">
+                      {{ item.url[0].length > 24 ? item.url[0].slice(0, 24) + '...' : item.url[0] }}
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-template>
 
-          <div class="home-insight-detail-row">
-            <div class="home-insight-card-date-time-info">
-              <div class="home-insight-card-label">Date</div>
-              <div class="home-insight-card-value">{{ item.date || '-' }}</div>
+              <ng-template #checkPhone>
+                <div class="home-insight-card-country-info">
+                  <div class="home-insight-card-label">Phone Number</div>
+                  <div class="home-insight-card-value">{{ item.phoneNumber || '-' }}</div>
+                </div>
+              </ng-template>
             </div>
-          </div>
 
-          <div class="home_insight__divider"></div>
+            <div class="home-insight-detail-row">
+              <div class="home-insight-card-date-time-info">
+                <div class="home-insight-card-label">Date</div>
+                <div class="home-insight-card-value">{{ item.date || '-' }}</div>
+              </div>
+            </div>
 
-          <div class="home-insight-card-footer-section">
-            <p appTooltip="Open Report" (click)="openReport(modelKey, item.hash, item.title)" class="home-insight-card-view-details-button">View Details</p>
+            <div class="home_insight__divider"></div>
+
+            <div class="home-insight-card-footer-section">
+              <p appTooltip="Open Report" (click)="openReport(modelKey, item.hash, item.title)"
+                class="home-insight-card-view-details-button">View Details</p>
+            </div>
           </div>
         </div>
       </div>
@@ -67,7 +76,9 @@
   <br><br>
 
   <div *ngFor="let model of models">
-    <div class="home_insight__container">
+
+    <div class="home_insight__container" [ngClass]="{'sidebar-open': appService.getConfig().localSettings.isSidebarOpen===true,
+    'sidebar-closed': appService.getConfig().localSettings.isSidebarOpen===false }">
       <div *ngFor="let key of getKeys(insights[model]); let first = first" class="home_insight__card">
         <div class="home_insight__content">
 
@@ -79,11 +90,11 @@
                    : 'This is the Defacement'
                " class="home_insight__header">
             {{
-              model === 'general'
-                ? 'Generic Index'
-                : model === 'leak'
-                  ? 'Leaked Index'
-                  : 'Defacement Index'
+            model === 'general'
+            ? 'Generic Index'
+            : model === 'leak'
+            ? 'Leaked Index'
+            : 'Defacement Index'
             }}
           </div>
 

@@ -18,3 +18,6 @@ class grouped_consolidated_search_callback_model(BaseModel):
     defacement_model: Optional[search_defacement_callback_model] = None
     social_model: Optional[search_social_callback_model] = None
     stealer_model: Optional[search_stealerlog_callback_model] = None
+
+    tracking_model:Optional[search_leak_callback_model]=None
+    news_model:Optional[search_leak_callback_model]=None

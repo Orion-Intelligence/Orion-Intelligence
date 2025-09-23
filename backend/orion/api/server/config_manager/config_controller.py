@@ -43,5 +43,5 @@ class config_controller:
             fresh_config = {record.key.value: record.value for record in records}
             return config_data(settings=fresh_config)
         except Exception as ex:
-            log.g().ex(f"Error fetching config: {ex}")
+            log.g().e(f"Error fetching config: {ex}")
             return config_data(settings={})

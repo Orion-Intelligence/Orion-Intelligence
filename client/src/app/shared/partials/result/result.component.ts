@@ -1,44 +1,48 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
-import {Observable} from 'rxjs';
-import {EmptyResultComponent} from '../empty-result/empty-result.component';
-import {FormsModule} from '@angular/forms';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {LoadingFormComponent} from '../loading-form/loading-form.component';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {SidebarService} from '../../services/sidebar.service';
-import {FiltersComponent} from '../filters/filters.component';
-import {FilterCategory, FilterModel} from '../../model/filter/filter.model';
-import {SortType} from '../../constants/shared-enums';
-import {SuggestionComponent} from '../suggestion/suggestion.component';
-import {EmptyQueryComponent} from '../empty-query/empty-query.component';
-import {Suggestion} from '../../model/results/shared/common-result';
-import {query} from '@angular/animations';
-import {Category} from "../../constants/pages";
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {ScrollTopComponent} from '../scroll-top/scroll-top.component';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {AppService} from '../../../services/core/app/app.service';
-import {SearchFiltersComponent} from "../../../pages/homepage/search-filters/search-filters.component";
-import {searchFilterAnimation} from '../../animations/search.filter.animation';
-import {SelectedFilterBarComponent} from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {HelperService} from '../../services/helper.service';
-import {ScrollService} from '../../services/scroll.service';
+import { Component, computed, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Observable } from 'rxjs';
+import { EmptyResultComponent } from '../empty-result/empty-result.component';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { LoadingFormComponent } from '../loading-form/loading-form.component';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { SidebarService } from '../../services/sidebar.service';
+import { FiltersComponent } from '../filters/filters.component';
+import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
+import { SortType } from '../../constants/shared-enums';
+import { SuggestionComponent } from '../suggestion/suggestion.component';
+import { EmptyQueryComponent } from '../empty-query/empty-query.component';
+import { Suggestion } from '../../model/results/shared/common-result';
+import { query } from '@angular/animations';
+import { Category } from "../../constants/pages";
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { AppService } from '../../../services/core/app/app.service';
+import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/search-filters.component";
+import { searchFilterAnimation } from '../../animations/search.filter.animation';
+import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { HelperService } from '../../services/helper.service';
+import { ScrollService } from '../../services/scroll.service';
+import { AuthService } from '../../../services/authetication/auth.service';
+import { EmptyIocComponent } from "../empty-ioc/empty-ioc.component";
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, EmptyIocComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
+  @Input() isList!: boolean;
   @Input() isTool: boolean = true;
   @Input() suggestion!: Suggestion | undefined;
   @Input() searchQuery = '';
   @Input() analyticsToggle = false;
+  @Input() list_grid = false;
   @Input() shrinkmenu = false;
   @Input() disableScroll = false;
   @Input() type!: Category;
@@ -71,10 +75,10 @@ export class ResultComponent implements OnInit, OnChanges {
   protected readonly Category = Category;
 
   showFiltersOverlay: boolean = false;
-  @ViewChild('filtersWrapper', {static: false}) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', {static: false}) searchInputRef!: ElementRef;
+  @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
 
-  constructor(protected scrollService:ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute) {
+  constructor(protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -94,18 +98,16 @@ export class ResultComponent implements OnInit, OnChanges {
       ...this.dashboardService.selectedFilters(),
       matchtype: type
     });
+    this.app_service.set('matchType', type);
   }
 
-  getMatchType() {
+  matchTypeLabel = computed(() => {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
-    if (matchtype === "full") {
-      return "Match full query";
-    } else if (matchtype === "and") {
-      return "Match individual terms";
-    } else {
-      return "Match any term";
-    }
-  }
+    if (matchtype === "full") return "Match full query";
+    if (matchtype === "and") return "Match individual terms";
+    if (matchtype === "or") return "Match any term";
+    return "Match semantic query";
+  });
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -123,10 +125,10 @@ export class ResultComponent implements OnInit, OnChanges {
           }
 
           if (value && base.options.includes(value)) {
-            newFilters[key] = {...base, selected: value};
+            newFilters[key] = { ...base, selected: value };
             updatedSelectedFilters[key] = value;
           } else {
-            newFilters[key] = {...base};
+            newFilters[key] = { ...base };
           }
         });
 
@@ -138,6 +140,9 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true
     }
+    const cfg = this.app_service.configData();
+    const matchtype = cfg.localSettings.matchType || 'and';
+    this.onSetMatchType(matchtype)
   }
 
   onFormSubmit() {
@@ -258,9 +263,20 @@ export class ResultComponent implements OnInit, OnChanges {
   onScanSelected(domain: string) {
     const url = this.router.serializeUrl(
       this.router.createUrlTree(['/dashboard/scan'], {
-        queryParams: {domain}
+        queryParams: { domain }
       })
     );
     window.open(url, '_blank');
+  }
+  checkProfile(): boolean {
+    const url = this.router.url;
+    const parts = url.split('/');
+    return parts.includes('profile');
+  }
+  hasIOCs(): boolean {
+    const categories = this.app_service.configData().localSettings.entityfilterCategories;
+    return Object.values(categories).some(
+      (arr: any) => Array.isArray(arr) && arr.length > 0
+    );
   }
 }

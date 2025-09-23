@@ -523,6 +523,15 @@ table a:visited {
   border-radius: 0;
 }
 
+.input-cross:disabled{
+  background: #fff !important;
+  opacity: 1;
+}
+
+.input-cross:disabled img {
+  visibility: hidden;
+}
+
 .input-cross img {
   margin-top: -3px;
 }

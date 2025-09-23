@@ -47,8 +47,7 @@ class crawl_model:
         else:
             crawl_model.__instance = self
 
-    async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list,
-                                      network_type: str, is_leak_update: bool, name: str = None):
+    async def _update_or_create_model(self, base_url: str, new_content_type: list, new_index_type: list,network_type: str, is_leak_update: bool, name: str = None):
         normalized_url = base_url
         if network_type != "telegram":
             normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
@@ -120,13 +119,24 @@ class crawl_model:
 
     @staticmethod
     async def scan_domain(model):
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "http://trusted-micros-api:8010/urlscan/domain",
-                json=model.model_dump(),
-                timeout=200
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/urlscan/domain",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling urlscan/domain"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling urlscan/domain"}
             )
-            return response.json()
 
     @staticmethod
     async def parse_chat_ai(model: ReportChatRequest):
@@ -158,8 +168,9 @@ class crawl_model:
 
     async def invoke_social_index(self, social_index: social_data_model):
 
+        m_bybass_embedding = social_index.cards_data[0].m_platform == "pastebin"
         m_data = elastic_request_generator().index_query_social(social_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await elastic_controller.get_instance().index_data(m_data, m_bybass_embedding)
 
         return await self._update_or_create_model(
             base_url=social_index.seed_url,
@@ -251,7 +262,7 @@ class crawl_model:
 
     async def invoke_defacement_index(self, defacement_index: DefacementDataModel):
         m_data = elastic_request_generator().index_query_defacement(defacement_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await elastic_controller.get_instance().index_data(m_data, True)
         return await self._update_or_create_model(
             base_url=defacement_index.base_url,
             new_content_type=['defacement'],

@@ -27,7 +27,6 @@ from orion.api.interactive.search_manager.search_data_model.exploit.search_explo
     search_exploit_callback_model
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import \
     search_exploit_param_model
-from orion.api.interactive.search_manager.search_data_model.general import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_callback_model import \
     search_general_callback_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_callback_model import \
@@ -129,7 +128,7 @@ class search_model:
                                                                                       target_lang=lang)
         return await self.__search_callback.get_doc(result)
 
-    async def search_general_result(self, param: search_general_param_model):
+    async def search_general_result(self, param):
         document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
         return await self.__search_callback.search_handler(
@@ -148,13 +147,13 @@ class search_model:
         )
 
     @staticmethod
-    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, allowed_categories):
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories):
         if param.entity_filter:
             filter_dict = param.entity_filter
         else:
             filter_dict = {}
 
-        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict, base_index, allowed_categories)
+        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict, base_index, blocked_categories, allowed_categories)
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
 
         ranked_results = []
@@ -178,7 +177,7 @@ class search_model:
         else:
             filter_dict = {}
 
-        indices, queries = elastic_request_generator().on_search_consolidated_data(param, filter_dict)
+        indices, queries, labels = elastic_request_generator().on_search_consolidated_data(param, filter_dict)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         leak_data = {}
@@ -188,8 +187,10 @@ class search_model:
         defacement_data = {}
         social_data = {}
         stealer_data = {}
+        tracking_data={}
+        news_data={}
 
-        for index, res in zip(indices, responses):
+        for index, res,label in zip(indices, responses,labels):
             data = {"Result": [], "Suggestions": [], "Page_Count": 0}
 
             if not res:
@@ -208,20 +209,24 @@ class search_model:
                 data["Result"] = [hit["_source"] for hit in hits]
                 data["Page_Count"] = len(hits)
 
-            if index == "leak_model":
+            if label == "leak_model":
                 leak_data = data
-            elif index == "generic_model":
+            elif label == "generic_model":
                 general_data = data
-            elif index == "exploit_model":
+            elif label == "exploit_model":
                 exploit_data = data
-            elif index == "chat_model":
+            elif label == "chat_model":
                 chat_data = data
-            elif index == "social_model":
+            elif label == "social_model":
                 social_data = data
-            elif index == "stealer_model":
+            elif label == "stealer_model":
                 stealer_data = data
-            elif index == "defacement_model":
+            elif label == "defacement_model":
                 defacement_data = data
+            elif label == "tracking_model":
+                tracking_data = data
+            elif label == "news_model":
+                news_data = data
 
         return grouped_consolidated_search_callback_model(
             leak_model=search_leak_callback_model(**leak_data),
@@ -230,7 +235,9 @@ class search_model:
             generic_model=search_general_callback_model(**general_data),
             defacement_model=search_defacement_callback_model(**defacement_data),
             social_model=search_social_callback_model(**social_data),
-            stealer_model = search_stealerlog_callback_model(**stealer_data)
+            stealer_model = search_stealerlog_callback_model(**stealer_data),
+            tracking_model=search_leak_callback_model(**tracking_data),
+            news_model=search_leak_callback_model(**news_data)
         )
 
     async def search_exploit_result(self, param: search_exploit_param_model):
@@ -252,28 +259,6 @@ class search_model:
             {}
         )
 
-    @staticmethod
-    async def search_discussion_result(param: search_consolidated_param_model):
-        indices, queries = elastic_request_generator().on_search_discussion_data(param, param.entity_filter)
-        responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
-
-        chat_data = {}
-        social_data = {}
-
-        for index, res in zip(indices, responses):
-            hits = res.get("hits", {}).get("hits", []) if res else []
-            data = {"Result": [hit["_source"] for hit in hits], "Suggestions": [], "Page_Count": len(hits)}
-
-            if index == "chat_model":
-                chat_data = data
-            elif index == "social_model":
-                social_data = data
-
-        return grouped_consolidated_search_callback_model(
-            chat_model=search_chat_callback_model(**chat_data),
-            social_model=search_social_callback_model(**social_data)
-        )
-    
     async def search_social_result(self, param: search_social_param_model):
         document, data_filter = elastic_request_generator().on_search_social_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
@@ -298,10 +283,18 @@ class search_model:
         document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
+        if param.category != "credential":
+            hits = m_documents.get("hits", {}).get("hits", [])
+            for h in hits:
+                src = h.get("_source", {})
+                if "mapping" in src:
+                    src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
+
         return await self.__search_callback.search_handler(
             m_status, m_documents,
             search_stealerlog_callback_model,
-            {}
+            {},
+            data_limit=False
         )
 
     async def search_defacement_result(self, param: search_defacement_param_model):
@@ -340,21 +333,3 @@ class search_model:
                         es_clauses.append({"terms": {es_field_name: tags}})
         return es_clauses
     
-
-    _DEFACEMENT_FIELD_MAPPING = {
-        'email': 'm_email',
-        'country': 'm_location',
-        'hashes': 'm_hash',
-    }
-
-    _LEAK_FIELD_MAPPING = {
-        'email': 'm_email',
-        'country': 'm_country_name',
-        'hashes': 'm_hash', 
-    }
-
-    _GENERAL_FIELD_MAPPING = {
-        'email': 'general_email_field',
-        'country': 'general_m_location',
-        'hashes': 'm_hash',
-    }

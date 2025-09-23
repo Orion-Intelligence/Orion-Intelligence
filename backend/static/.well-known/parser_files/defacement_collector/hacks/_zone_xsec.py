@@ -4,12 +4,15 @@ import requests
 from abc import ABC
 from typing import List
 from urllib.parse import urljoin
+
+from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
 from playwright.sync_api import Page
 
@@ -130,9 +133,12 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             if iframe_src:
                                 m_mirror = iframe_src
 
+                        content = helper_method.extract_refhtml(ip, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+
                         card_data = defacement_model(
                             m_web_server=[web_server],
                             m_source_url=[link],
+                            m_content=content,
                             m_base_url=self.base_url,
                             m_url=extracted_url,
                             m_ioc_type=["hacked"],
@@ -142,6 +148,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                         )
 
                         entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
                             m_ip=[ip],
                             m_location=[location],
                             m_team=team,

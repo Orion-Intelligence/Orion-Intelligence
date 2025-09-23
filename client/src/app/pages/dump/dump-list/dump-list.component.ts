@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { AsyncPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
 import { map, Observable } from 'rxjs';
 import { DumpService } from '../../../services/dump/dump.service';
 import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
+import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'dump-list',
   standalone: true,
   templateUrl: './dump-list.component.html',
+  animations: [fadeInDashboardItem],
   imports: [
     NgForOf,
     AsyncPipe,
@@ -17,6 +19,7 @@ import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
 })
 export class DumpListComponent implements OnInit {
   dumpData$: Observable<DumpCallbackModel | null>;
+  @Input() isLoading!: boolean;
 
   constructor(public dumpService: DumpService) {
     this.dumpData$ = this.dumpService.dumpData$;

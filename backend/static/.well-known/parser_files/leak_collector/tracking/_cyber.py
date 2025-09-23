@@ -138,12 +138,12 @@ class _cyber(leak_extractor_interface, ABC):
                 )
 
                 entity_data = entity_model(
+                    m_scrap_file=self.__class__.__name__,
                     m_team="ANSSI - Agence nationale de la sécurité des systèmes d'information",
                     m_author=["ANSSI Web Team"],
                     m_country=["France"]
                 )
 
-                entity_data = helper_method.extract_entities(m_content, entity_data)
                 self.append_leak_data(card_data, entity_data)
 
             page_number += 1

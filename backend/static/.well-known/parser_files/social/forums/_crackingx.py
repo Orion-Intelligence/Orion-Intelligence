@@ -1,17 +1,20 @@
-import re
 import datetime
+import re
 from abc import ABC
 from typing import List
 from datetime import  timezone
+from urllib.parse import urljoin
+
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
-from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from datetime import datetime, timedelta
+from datetime import datetime
+from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
+from datetime import timedelta
 
 
 class _crackingx(leak_extractor_interface, ABC):
@@ -52,7 +55,7 @@ class _crackingx(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.SOCIAL)
+        return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.FORUM)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -77,373 +80,190 @@ class _crackingx(leak_extractor_interface, ABC):
                 self._entity_data.clear()
 
     @staticmethod
-    def safe_find(page, selector, attr=None):
-        try:
-            element = page.query_selector(selector)
-            if element:
-                return element.get_attribute(attr) if attr else element.inner_text().strip()
-        except Exception:
-            return None
+    def date_to_str(d):
+        if not d:
+            return ""
+        if isinstance(d, datetime):
+            d = d.date()
+        formatted = d.strftime("%Y%m%d")
+        return formatted
 
     @staticmethod
-    def parse_date(date_str):
-        if not date_str:
-            return None
-
-        if date_str.startswith("Yesterday at "):
-            try:
-                t = datetime.strptime(date_str[13:], "%I:%M %p").time()
-                y = datetime.now()
-                return datetime.combine((y - timedelta(days=1)).date(), t)
-            except:
-                pass
-
-        weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        for day in weekdays:
-            if date_str.startswith(day + " at "):
-                try:
-                    t = datetime.strptime(date_str[len(day) + 4:], "%I:%M %p").time()
-                    today = datetime.now()
-                    target_weekday = weekdays.index(day)
-                    days_diff = (today.weekday() - target_weekday) % 7
-                    target_date = today - timedelta(days=days_diff)
-                    return datetime.combine(target_date.date(), t)
-                except:
-                    pass
-
-        for fmt in ("%b %d, %Y", "%B %d, %Y"):
-            try:
-                return datetime.strptime(date_str, fmt)
-            except ValueError:
-                pass
-
-        iso_like = (
-                re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", date_str) or
-                re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", date_str)
-        )
-        if iso_like:
-            try:
-                if "Z" in date_str:
-                    date_str = date_str.replace("Z", "+00:00")
-                date_str = re.sub(r'([+-]\d{2})(\d{2})$', r'\1:\2', date_str)
-                return datetime.fromisoformat(date_str)
-            except:
-                pass
-
-        return None
+    def extract_clean_text(bb_wrappers):
+        texts = []
+        for div in bb_wrappers.all()[:20]:
+            text = div.inner_text()
+            text = re.sub(r"\n+", "\n", text).strip()
+            texts.append(text[:1000])
+        return texts
 
     def parse_leak_data(self, page):
-        max_days = 5 if self.is_crawled else 500
-        MIN_REPLIES = 2
+        if self.is_crawled:
+            max_days = 30
+            max_page = 2
+        else:
+            max_days = 500
+            max_page = 5
 
         category_mapping = {
-            "information": ["https://crackingx.com/forums/Rules_announcements/"],
             "cracking": [
                 "https://crackingx.com/forums/9/",
                 "https://crackingx.com/forums/5/",
                 "https://crackingx.com/forums/2/",
                 "https://crackingx.com/forums/17/",
-                "https://crackingx.com/forums/11/"
+                "https://crackingx.com/forums/11/",
             ],
             "Marketplace": [
                 "https://crackingx.com/forums/premium_section/",
                 "https://crackingx.com/forums/14/",
                 "https://crackingx.com/forums/13/",
-                "https://crackingx.com/forums/16/"
+                "https://crackingx.com/forums/16/",
             ],
             "Money": [
                 "https://crackingx.com/forums/4/",
-                "https://crackingx.com/forums/19/"
-            ]
+                "https://crackingx.com/forums/19/",
+            ],
         }
 
         for category_name, section_urls in category_mapping.items():
+            page_num = 1
             for section_url in section_urls:
-                page.goto(section_url)
-                page.wait_for_load_state("domcontentloaded")
+                latest_date = None
+                section_hash = helper_method.generate_data_hash(section_url)
+                while section_url:
+                    page.goto(section_url)
+                    page.wait_for_load_state("domcontentloaded")
 
-                page_num = 1
-                max_pages = 3
-
-                while page_num <= max_pages:
                     thread_data = []
                     thread_items = page.query_selector_all(".structItem")
+                    last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, section_hash + REDIS_KEYS.S_URL_TIMEOUT, "")
+                    if last_seen_date_str:
+                        last_seen_date = datetime.fromisoformat(last_seen_date_str.replace("Z", "+00:00"))
+                    else:
+                        last_seen_date = datetime.now() - timedelta(days=max_days)
 
-                    for item in thread_items:
-                        try:
-                            title_el = item.query_selector("a[href^='/threads/']")
-                            if not title_el:
-                                continue
-
-                            href = title_el.get_attribute('href')
-                            title = title_el.inner_text().strip()
-
-                            replies_el = item.query_selector("dl.pairs--justified:has(dt:has-text('Replies')) dd")
-                            num_replies = 0
-                            if replies_el:
-                                replies_text = replies_el.inner_text().strip()
-                                if replies_text.isdigit():
-                                    num_replies = int(replies_text)
-
-                            if num_replies < MIN_REPLIES:
-                                continue
-
-                            date_el = item.query_selector("time.structItem-latestDate.u-dt")
-                            date_str = None
-                            datetime_attr = None
-                            data_time = None
-                            data_date_string = None
-
-                            if date_el:
-                                datetime_attr = date_el.get_attribute('datetime')
-                                data_time = date_el.get_attribute('data-time')
-                                data_date_string = date_el.get_attribute('data-date-string')
-                                date_str = date_el.inner_text().strip()
-
-                            thread_data.append({
-                                'href': href,
-                                'title': title,
-                                'datetime': datetime_attr,
-                                'data_time': data_time,
-                                'data_date_string': data_date_string,
-                                'dateStr': date_str
-                            })
-                        except:
+                    for idx, item in enumerate(thread_items, start=1):
+                        title_el = item.query_selector("a[href^='/threads/']")
+                        if not title_el:
                             continue
+                        href = title_el.get_attribute("href")
+                        title = title_el.inner_text().strip()
+                        date_el = item.query_selector("time.structItem-latestDate.u-dt")
+                        if not date_el:
+                            continue
+                        datetime_attr = date_el.get_attribute("datetime")
+                        dtime = datetime.strptime(datetime_attr, "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=None)
+
+                        if last_seen_date and dtime.date() <= last_seen_date.date():
+                            continue
+
+                        thread_url = "https://crackingx.com" + href if href and not href.startswith("http") else href
+                        if not thread_url:
+                            continue
+
+                        thread_hash = helper_method.generate_data_hash(thread_url)
+                        thread_data.append({
+                            "href": thread_url,
+                            "title": title,
+                            "thread_dt": dtime,
+                            "thread_hash": thread_hash,
+                            "date_str": datetime_attr,
+                        })
 
                     if not thread_data:
                         break
 
-                    valid_threads = []
-                    for thread in thread_data:
-                        href = thread.get('href')
-                        title = thread.get('title')
+                    next_btn = page.locator("a.pageNav-jump--next").last
+                    href = None
+                    if next_btn.count() > 0:
+                        val = next_btn.get_attribute("href")
+                        if val:
+                            href = urljoin(page.url, val)
 
-                        datetime_attr = thread.get('datetime')
-                        data_time = thread.get('data_time')
-                        data_date_string = thread.get('data_date_string')
-                        date_str = thread.get('dateStr')
-
-                        thread_dt = None
-
-                        if datetime_attr:
-                            try:
-                                thread_dt = self.parse_date(datetime_attr)
-                            except:
-                                pass
-
-                        if thread_dt is None and data_time:
-                            try:
-                                timestamp = int(data_time)
-                                thread_dt = datetime.fromtimestamp(timestamp, timezone.utc)
-                            except:
-                                pass
-
-                        if thread_dt is None and data_date_string:
-                            try:
-                                thread_dt = self.parse_date(data_date_string)
-                            except:
-                                pass
-
-                        if thread_dt is None and date_str:
-                            try:
-                                thread_dt = self.parse_date(date_str)
-                            except:
-                                pass
-
-                        if thread_dt:
-                            now_dt = datetime.now(timezone.utc)
-                            days_diff = (now_dt - thread_dt).days
-                            if days_diff <= max_days:
-                                valid_threads.append({'href': href, 'title': title})
-                        else:
-                            valid_threads.append({'href': href, 'title': title})
-
-                    if valid_threads:
-                        for thread in valid_threads:
-                            href = thread.get('href')
-                            title = thread.get('title')
-
-                            thread_url = href
-                            if not thread_url.startswith('http'):
-                                thread_url = "https://crackingx.com" + href if not href.startswith(
-                                    '/') else "https://crackingx.com" + href
-
-                            result = self.extract_thread_data(page, thread_url, title, category_name)
-                            if result:
-                                card_data, entity_data = result
-                                self.append_leak_data(card_data, entity_data)
-
-                    should_continue = False
+                    next_btn = href
 
                     if thread_data:
-                        last_thread = thread_data[-1]
+                        for thread in thread_data:
+                            self.extract_thread_data(page, thread["href"], thread["title"], category_name)
 
-                        last_datetime = last_thread.get('datetime')
-                        last_data_time = last_thread.get('data_time')
-                        last_data_date_string = last_thread.get('data_date_string')
-                        last_date_str = last_thread.get('dateStr')
 
-                        last_thread_dt = None
+                    if not latest_date:
+                        latest_thread = max(thread_data, key=lambda t: t["thread_dt"])
+                        latest_date = latest_thread["thread_dt"]
+                        self.invoke_db(REDIS_COMMANDS.S_SET_STRING, section_hash + REDIS_KEYS.S_URL_TIMEOUT, latest_date.strftime("%Y%m%d"))
 
-                        if last_datetime:
-                            try:
-                                last_thread_dt = self.parse_date(last_datetime)
-                            except:
-                                pass
-
-                        if last_thread_dt is None and last_data_time:
-                            try:
-                                timestamp = int(last_data_time)
-                                last_thread_dt = datetime.fromtimestamp(timestamp, timezone.utc)
-                            except:
-                                pass
-
-                        if last_thread_dt is None and last_data_date_string:
-                            try:
-                                last_thread_dt = self.parse_date(last_data_date_string)
-                            except:
-                                pass
-
-                        if last_thread_dt is None and last_date_str:
-                            try:
-                                last_thread_dt = self.parse_date(last_date_str)
-                            except:
-                                pass
-
-                        if last_thread_dt:
-                            now_dt = datetime.now(timezone.utc)
-                            days_diff = (now_dt - last_thread_dt).days
-                            if days_diff <= max_days:
-                                should_continue = True
-                        else:
-                            should_continue = True
-
-                    if not should_continue:
+                    if max_page < page_num:
                         break
 
-                    next_button_selectors = [
-                        "a.pageNav-jump--next",
-                        "a.pageNavSimple-el--next",
-                        "li.pageNav-page--next a",
-                        "a[rel='next']",
-                        "a:has-text('Next')",
-                        "a.structItem-pageJump:has-text('Next')"
-                    ]
-
-                    next_button = None
-                    for selector in next_button_selectors:
-                        try:
-                            element = page.query_selector(selector)
-                            if element:
-                                next_button = selector
-                                break
-                        except:
-                            continue
-
-                    if not next_button or page_num >= max_pages:
-                        break
-
-                    try:
-                        current_url = page.url
-                        page.click(next_button)
-                        page.wait_for_load_state("domcontentloaded")
-                        new_url = page.url
-                        if new_url == current_url:
-                            break
-                        else:
-                            page_num += 1
-                    except:
-                        break
+                    section_url = next_btn
+                    page_num += 1
 
         return True
 
     def extract_thread_data(self, page, thread_url, thread_title, category_name):
-        try:
-            page.goto(thread_url)
-            page.wait_for_load_state("domcontentloaded")
+        page.goto(thread_url)
+        page.wait_for_load_state("domcontentloaded")
 
-            date_tag = page.locator("time.u-dt").first
-            thread_dt = None
+        date_tag = page.locator("time.u-dt").first
+        thread_dt = None
 
-            if date_tag.count() > 0:
-                datetime_attr = date_tag.get_attribute("datetime")
-                if datetime_attr:
-                    m_date = datetime_attr
-                    thread_dt = self.parse_date(m_date)
-                else:
-                    date_text = date_tag.inner_text()
-                    thread_dt = self.parse_date(date_text)
-
-            bb_wrappers = page.locator("div.bbWrapper")
-            wrapper_count = bb_wrappers.count()
-
-            max_days = 5 if self.is_crawled else 500
-            if wrapper_count < 10:
-                if thread_dt:
-                    now_dt = datetime.now(timezone.utc)
-                    days_diff = (now_dt - thread_dt).days
-                    if days_diff > max_days:
-                        return None
-                else:
-                    return None
-
-            valid_sections = []
-            for i in range(wrapper_count):
-                wrapper = bb_wrappers.nth(i)
-                html_content = wrapper.inner_html()
-                text_content = wrapper.inner_text().strip()
-
-                if ("block-mhhide" in html_content or
-                        "bbCodeBlock" in html_content or
-                        len(text_content) < 10):
-                    continue
-
-                valid_sections.append(text_content)
-
-            if len(valid_sections) > 20:
-                selected_sections = valid_sections[:10] + valid_sections[-10:]
+        if date_tag.count() > 0:
+            datetime_attr = date_tag.get_attribute("datetime")
+            if datetime_attr:
+                m_date = datetime_attr
+                thread_dt = helper_method.parse_date(m_date)
             else:
-                selected_sections = valid_sections
+                date_text = date_tag.inner_text()
+                thread_dt = helper_method.parse_date(date_text)
 
-            if not selected_sections:
-                selected_sections = ["no comments"]
+        bb_wrappers = page.locator("div.bbWrapper")
+        wrapper_count = bb_wrappers.count()
 
-            m_content = "\n".join(selected_sections)
-            m_content_type = ["leaks", category_name]
 
-            usernames = set()
-            username_elements = page.query_selector_all("a.username")
-            for i in range(min(len(username_elements), 5)):
-                username = username_elements[i].inner_text().strip()
-                if username:
-                    usernames.add(username)
+        max_days = 5 if self.is_crawled else 500
+        if wrapper_count < 10:
+            if thread_dt:
+                now_dt = datetime.now(timezone.utc)
+                days_diff = (now_dt - thread_dt).days
+                if days_diff > max_days:
+                    return None
+            else:
+                return None
 
-            hashtags = []
-            tag_elements = page.query_selector_all("a.tagItem")
-            for i in range(len(tag_elements)):
-                tag = tag_elements[i].inner_text().strip()
-                if tag:
-                    hashtags.append(tag)
+        text_content = self.extract_clean_text(bb_wrappers)
+        m_content = "\n".join(text_content)
+        m_content_type = ["leaks", category_name]
 
-            card_data = social_model(
-                m_title=thread_title,
-                m_channel_url=thread_url,
-                m_content=m_content,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_message_date=thread_dt.date() if thread_dt else None,
-                m_content_type=m_content_type,
-                m_platform="forum",
-                m_message_sharable_link=thread_url
-            )
+        usernames = set()
+        username_elements = page.query_selector_all("a.username")
+        for i in range(min(len(username_elements), 5)):
+            username = username_elements[i].inner_text().strip()
+            if username:
+                usernames.add(username)
 
-            entity_data = entity_model(
-                m_author=list(usernames),
-                m_hashtags=hashtags
-            )
+        hashtags = []
+        tag_elements = page.query_selector_all("a.tagItem")
+        for i in range(len(tag_elements)):
+            tag = tag_elements[i].inner_text().strip()
+            if tag:
+                hashtags.append(tag)
 
-            entity_data = helper_method.extract_entities(m_content, entity_data)
-            self.append_leak_data(card_data, entity_data)
+        card_data = social_model(
+            m_title=thread_title,
+            m_channel_url=thread_url,
+            m_content=m_content,
+            m_network=helper_method.get_network_type(self.base_url),
+            m_message_date=thread_dt.date() if thread_dt else None,
+            m_content_type=m_content_type,
+            m_platform="forum",
+            m_message_sharable_link=thread_url,
+            m_post_comments_count=str(wrapper_count)
+        )
 
-        except Exception as ex:
-            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+        entity_data = entity_model(
+            m_scrap_file=self.__class__.__name__,
+            m_author=list(usernames),
+            m_hashtags=hashtags
+        )
+
+        self.append_leak_data(card_data, entity_data)

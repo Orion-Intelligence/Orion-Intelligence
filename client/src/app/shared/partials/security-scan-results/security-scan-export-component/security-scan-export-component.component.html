@@ -1,0 +1,57 @@
+<div class="security-report-container">
+  <h1 class="security-report-h1">Security Scan Report</h1>
+
+  <table class="security-report-meta">
+    <tbody>
+      <tr>
+        <th>URL</th><td>{{ meta.URL }}</td>
+        <th>Host</th><td>{{ meta.Host || '' }}</td>
+      </tr>
+      <tr>
+        <th>Port</th><td>{{ meta.Port || '' }}</td>
+        <th>Scanned on</th><td>{{ meta.Scanned_on_date || '' }}</td>
+      </tr>
+      <tr>
+        <th>Scanned by</th><td>{{ meta.Scanned_by || '' }}</td>
+        <th>Printed</th><td>{{ printedNow }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="security-report-h2">Findings</h2>
+
+  <ng-container *ngIf="viewFindings.length; else noFindings">
+    <section *ngFor="let item of viewFindings"
+             class="security-report-card"
+             [ngClass]="riskClass(item.risk)">
+      <header class="security-report-card-head">
+        <div class="security-report-title">
+          <span class="security-report-num">{{ item.n }}.</span>
+          <span class="security-report-hdr">{{ item.header }}</span>
+        </div>
+        <div class="security-report-riskwrap">
+          <span class="security-report-badge" [ngClass]="riskClass(item.risk)">{{ item.risk }}</span>
+          <span class="security-report-conf">{{ item.confidence }}</span>
+        </div>
+      </header>
+
+      <div class="security-report-meta-line">
+        <span class="security-report-label">Category:</span> {{ item.category }}
+      </div>
+
+      <div class="security-report-desc">
+        <span class="security-report-label">Description:</span>
+        <div class="security-report-prewrap">{{ item.description }}</div>
+      </div>
+
+      <div *ngIf="item.proof" class="security-report-proof">
+        <span class="security-report-label">Proof (first 15 lines):</span>
+        <pre class="security-report-pre">{{ trimProof(item.proof) }}</pre>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-template #noFindings>
+    <div class="security-report-empty">No findings.</div>
+  </ng-template>
+</div>

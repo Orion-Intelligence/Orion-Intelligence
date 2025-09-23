@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import re
 
 from orion.api.interactive.dump_manager.dump_shared_model.dump_callback_model import dump_callback_model, \
     dump_callback_link
@@ -8,7 +9,6 @@ from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_reco
 
 
 class dump_model:
-    # Private Variables
     __instance = None
 
     @staticmethod
@@ -21,6 +21,7 @@ class dump_model:
         self._engine = mongo_controller.get_instance().get_engine()
 
     async def fetch_filtered_dumps(self, params: dump_param_model):
+        from datetime import timezone
         query = {}
 
         if params.source != "all":
@@ -39,15 +40,14 @@ class dump_model:
             elif isinstance(params.status, bool):
                 query["parsed_status"] = params.status
 
-        if params.mDateRange:
-            start_str, end_str = [s.strip() for s in params.mDateRange.split(",")]
-            start_date = datetime.strptime(start_str, "%Y-%m-%d")
-            end_date = datetime.strptime(end_str, "%Y-%m-%d") + timedelta(days=1)
+        if params.daterange:
+            start_str, end_str = [s.strip() for s in params.daterange.split(",")]
+            start_date = datetime.strptime(start_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            end_date = datetime.strptime(end_str, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=1)
+            query["created_at"] = {"$gte": start_date, "$lte": end_date}
 
-            query["created_at"] = {
-                "$gte": start_date,
-                "$lt": end_date
-            }
+        if params.q and params.q != "*":
+            query["leak_url"] = {"$regex": re.escape(params.q), "$options": "i"}
 
         total_count = await self._engine.count(db_dump_record_model, query)
         data = await self._engine.find(

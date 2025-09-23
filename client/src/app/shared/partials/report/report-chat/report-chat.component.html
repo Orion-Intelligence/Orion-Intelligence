@@ -8,14 +8,24 @@
     <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_url">
       {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_url.length || 'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
 
-    <ng-container *ngIf="getContentLines(resultItem).length > 0; else noContent">
+    <ng-container *ngIf="hasCodeType(resultItem); else showSections">
       <div class="result-list_section-content">
-        <ng-container *ngFor="let section of getContentLines(resultItem).slice(0, 12); let i = index">
-          <h3 class="mt-0 pt-0">Section {{ i + 1 }}</h3>
-          <p>{{ section.length > 550 ? (section | slice:0:550) + '...' : section }}</p>
-        </ng-container>
+        <p>Code snippet - content not available</p>
+        <div class="content collapsible-container p-3">
+          <code [innerText]="getContentWithoutEmptyLines(resultItem.m_content)"></code>
+        </div>
       </div>
     </ng-container>
+    <ng-template #showSections>
+      <ng-container *ngIf="getContentLines(resultItem).length > 0; else noContent">
+        <div class="result-list_section-content">
+          <ng-container *ngFor="let section of getContentLines(resultItem).slice(0, 12); let i = index">
+            <h3 class="mt-0 pt-0">Section {{ i + 1 }}</h3>
+            <p>{{ section.length > 550 ? (section | slice:0:550) + '...' : section }}</p>
+          </ng-container>
+        </div>
+      </ng-container>
+    </ng-template>
 
     <ng-template #noContent>
       <p class="search__result-detail-description">No content available</p>
@@ -57,6 +67,46 @@
       <div *ngIf="resultItem.m_network" class="search__result-detail-meta-divs">
         <p>Network:</p>
         <span>{{ resultItem.m_network }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_likes" class="search__result-detail-meta-divs">
+        <p>Post Likes:</p>
+        <span>{{ resultItem.m_post_likes }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_shares" class="search__result-detail-meta-divs">
+        <p>Post Shares:</p>
+        <span>{{ resultItem.m_post_shares }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_comments_count" class="search__result-detail-meta-divs">
+        <p>Post Comments:</p>
+        <span>{{ resultItem.m_post_comments_count }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_tags?.length" class="search__result-detail-meta-divs">
+        <p>Post Tags:</p>
+        <span>{{ resultItem.m_post_tags.join(', ') }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_views" class="search__result-detail-meta-divs">
+        <p>Post Views:</p>
+        <span>{{ resultItem.m_post_views }}</span>
+      </div>
+      <div *ngIf="resultItem.m_post_expiry" class="search__result-detail-meta-divs">
+        <p>Post Expiry:</p>
+        <span>{{ resultItem.m_post_expiry }}</span>
+      </div>
+      <div *ngIf="resultItem.m_comment_count" class="search__result-detail-meta-divs">
+        <p>Comment Count:</p>
+        <span>{{ resultItem.m_comment_count }}</span>
+      </div>
+      <div *ngIf="resultItem.m_likes" class="search__result-detail-meta-divs">
+        <p>Likes:</p>
+        <span>{{ resultItem.m_likes }}</span>
+      </div>
+      <div *ngIf="resultItem.m_retweets" class="search__result-detail-meta-divs">
+        <p>Retweets:</p>
+        <span>{{ resultItem.m_retweets }}</span>
+      </div>
+      <div *ngIf="resultItem.m_commenters?.length" class="search__result-detail-meta-divs">
+        <p>Commenters:</p>
+        <span>{{ resultItem.m_commenters.join(', ') }}</span>
       </div>
     </div>
   </div>

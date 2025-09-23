@@ -20,8 +20,8 @@ class GeneralDataModel(BaseModel):
     m_validity_score: int
     m_meta_keywords: str
     m_content_type: Optional[List[str]] = None
-    m_section: List[str]
     m_clearnet_links: List[str]
+    m_embedding:List[float] = []
 
     class Config:
         extra = Extra.allow

@@ -8,6 +8,7 @@
   border: 1px solid #ffffff20;
   font-family: 'Segoe UI', sans-serif;
   transition: all 0.3s ease;
+  font-size: 14px;
 }
 
 .insight-card .card_header {

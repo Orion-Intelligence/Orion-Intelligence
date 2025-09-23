@@ -10,6 +10,8 @@ class search_defacement_param_model(BaseModel,helper_controller):
     network: str = "all"
     daterange: Optional[str] = ""
     attacker: Optional[str] = ""
+    must: Optional[bool] = False
+    matchtype: Optional[str] = ""
     team: Optional[str] = ""
     content: Optional[str] = ""
     entity_filter: Optional[Dict[str, List[str]]] = None

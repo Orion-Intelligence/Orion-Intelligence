@@ -1,11 +1,22 @@
 <li class="sidebar__item">
-  <div (click)="selectSection()" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}" [queryParams]="{ page: 1 }" [routerLink]="[routePrefix]" appTooltip="{{tooltip}}" class="sidebar__item-dropdown" queryParamsHandling="merge">
-    <img [alt]="title" class="sidebar__icon" height="20" src="{{icon}}" width="20">{{ title }}<img alt="Drop Down" class="sidebar__dropdown-icon" height="20" ngSrc="../../../../../assets/images/shared/search_side_dropdown_icon.svg" width="20">
+  <div (click)="selectSection()" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}"
+    [queryParams]="{ page: 1 }" [routerLink]="[routePrefix]" appTooltip="{{tooltip}}" class="sidebar__item-dropdown"
+    queryParamsHandling="merge">
+    <img [alt]="title" class="sidebar__icon" height="20" src="{{icon}}" width="20">{{ title }}<img alt="Drop Down"
+      class="sidebar__dropdown-icon" height="20"
+      ngSrc="../../../../../assets/images/shared/search_side_dropdown_icon.svg" width="20">
   </div>
-  <ul [ngClass]="{'sidebar__subitems-fast': items.length < 4, 'show': (selectionStore.selectedSection$ | async) === category}" class="sidebar__subitems">
+  <ul
+    [ngClass]="{'sidebar__subitems-fast': items.length < 4, 'show': (selectionStore.selectedSection$ | async) === category}"
+    class="sidebar__subitems">
     <li *ngFor="let item of items">
-      <div (click)="selectOption(item)" [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}" [queryParams]="{ page: 1 }" [routerLink]="[routePrefix, item.toLowerCase()]" class="sidebar__subitem" queryParamsHandling="merge">
-        <div [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}" class="sidebar__subitem-content">
+      <div (click)="selectOption(item)"
+        [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
+        [queryParams]="{ page: 1 }" [routerLink]="[routePrefix, item.toLowerCase()]" class="sidebar__subitem"
+        queryParamsHandling="merge">
+        <div
+          [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
+          class="sidebar__subitem-content">
           {{ item }}
         </div>
       </div>

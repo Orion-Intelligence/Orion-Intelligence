@@ -90,6 +90,7 @@
         src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
+
   <div *ngIf="isExpandedMetadata">
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
@@ -114,6 +115,8 @@
       [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
   </div>
 </div>
+
+<app-code-block [code]="resultItem?.m_code_snippet" *ngIf="resultItem?.m_code_snippet?.length"></app-code-block>
 
 <div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!=''"
   class="search__result-detail">

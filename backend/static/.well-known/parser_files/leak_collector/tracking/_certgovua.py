@@ -138,10 +138,10 @@ class _certgovua(leak_extractor_interface, ABC):
                     )
 
                     entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
                         m_team="CERT-UA",
                         m_country=["ukraine"]
                     )
-                    entity_data = helper_method.extract_entities(content, entity_data)
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

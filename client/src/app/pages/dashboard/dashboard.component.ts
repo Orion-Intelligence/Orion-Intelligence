@@ -1,12 +1,13 @@
-import {AfterViewInit, ChangeDetectorRef, Component} from '@angular/core';
-import {NgClass, NgIf} from '@angular/common';
-import {Router, RouterOutlet} from '@angular/router';
-import {dashboardGlobalAnimation} from '../../shared/animations/dashboard.global.animations';
-import {DashboardSidebarComponent} from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
-import {DashboardHeaderComponent} from '../../shared/partials/header/dashboard-header/dashboard-header.component';
-import {ScrollingModule} from '@angular/cdk/scrolling';
-import {ProSubscriptionComponent} from '../../shared/partials/pro-subscription/pro-subscription.component';
-import {DashboardService} from '../../services/dashboard/dashboard.service';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { NgClass, NgIf } from '@angular/common';
+import { Router, RouterOutlet } from '@angular/router';
+import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
+import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
+import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription/pro-subscription.component';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { AppService } from '../../services/core/app/app.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,15 +24,19 @@ import {DashboardService} from '../../services/dashboard/dashboard.service';
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })
-export class DashboardComponent implements AfterViewInit {
+export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
   animationState: any;
 
-  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router) {
+  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, private appService: AppService) {
+  }
+  ngOnInit(): void {
+    this.appService.set('isSidebarOpen', this.isMenuOpen);
   }
 
   toggleNavigation() {
     this.isMenuOpen = !this.isMenuOpen;
+    this.appService.set('isSidebarOpen', this.isMenuOpen);
   }
 
   prepareRoute(outlet: RouterOutlet) {

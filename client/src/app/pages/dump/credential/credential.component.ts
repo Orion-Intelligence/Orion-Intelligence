@@ -4,7 +4,7 @@ import {switchMap, timer, map, distinctUntilChanged, combineLatest} from 'rxjs';
 import {ResultComponent} from '../../../shared/partials/result/result.component';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {NgIf, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import {CredentialListComponent} from '../credential-list/credential-list.component';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {SortType} from '../../../shared/constants/shared-enums';
@@ -15,7 +15,7 @@ import {FormsModule} from '@angular/forms';
 @Component({
   selector: 'app-credential',
   standalone: true,
-  imports: [ResultComponent, NgIf, CredentialListComponent, FormsModule, NgOptimizedImage],
+  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -27,16 +27,13 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   firstTrigger: boolean = true;
   user: any;
   url: any;
+  type: string;
 
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
+  searchQuery: any;
 
-  constructor(
-    protected helperService: HelperService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
-    private dashboardService: DashboardService
-  ) {
+  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService) {
+    this.type = this.route.snapshot.data['type'];
   }
 
   get currentResultCount(): number {
@@ -56,9 +53,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.url = params['url'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
 
-        if (this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
+        if (this.dashboardService.consolidatedParamModel.category ==this.type && this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
           this.isLoading = false;
-        } else {
+        } else if(this.dashboardService.consolidatedParamModel.category !=this.type){
           this.cdr.detectChanges();
           this.fetchSearchResults();
         }
@@ -73,6 +70,8 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   fetchSearchResults(reset = true): void {
     this.dashboardService.consolidatedParamModel.url = this.url
     this.dashboardService.consolidatedParamModel.user = this.user
+    this.dashboardService.consolidatedParamModel.category = this.type
+
     if (this.isLoading) return;
 
     this.isLoading = true;
@@ -88,10 +87,10 @@ export class CredentialComponent implements OnInit, AfterViewInit {
       queryParamsHandling: reset ? '' : 'merge'
     }).then();
 
-    if (!this.dashboardService.consolidatedParamModel.user){
+    if (!this.dashboardService.consolidatedParamModel.user) {
       this.dashboardService.consolidatedParamModel.user = ""
     }
-    if (!this.dashboardService.consolidatedParamModel.url){
+    if (!this.dashboardService.consolidatedParamModel.url) {
       this.dashboardService.consolidatedParamModel.url = ""
     }
 
@@ -140,5 +139,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   onToggleAnalyticsTrigger($event: string) {
     this.dashboardService.consolidatedParamModel.fullsearch = $event == "Full Search";
     this.fetchSearchResults(true);
+  }
+
+  onSearchSubmit() {
+
   }
 }

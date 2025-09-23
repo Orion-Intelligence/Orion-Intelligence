@@ -13,11 +13,22 @@ export interface UrlScanThreatItem {
   description: string;
   confidence: RiskLevel;
   risk: RiskLevel;
+  proof?: string;
+}
+
+export interface UrlScanProofItem {
+  header: string;
+  proof: string;
+  confidence: RiskLevel;
+  risk: RiskLevel;
 }
 
 export interface UrlScanResponse {
   result: {
     meta: UrlScanMeta;
     threats: Record<string, UrlScanThreatItem[]>;
+    proofs?: Record<string, UrlScanProofItem[]>;
+    grade?: string;
+    grade_counts?: { high: number; medium: number; low: number; informational: number };
   };
 }

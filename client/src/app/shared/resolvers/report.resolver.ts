@@ -36,10 +36,15 @@ export class ReportResolver implements Resolve<any> {
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
       case 'social':
-        if (category_2 == "twitter" || category_2 == "reddit" || category_2 == "forum")
+        if (category_2 == "all"){
           apiUrl = hash ? `search/social/${hash}` : `search/social`;
-        else
+        }
+        else if (category_2 == "twitter" || category_2 == "reddit" || category_2 == "forum" || category_2 == "pastebin" || category_2 == "mastodon"){
+          apiUrl = hash ? `search/social/${hash}` : `search/social`;
+        }
+        else{
           apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
+        }
         break;
       case 'feed':
         apiUrl = hash ? `search/news/${hash}` : `search/news`;
