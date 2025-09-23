@@ -516,9 +516,13 @@ In Orion, CVE (Common Vulnerabilities and Exposures) provides a standardized ide
 
 **2- Tools:**
 
+Orion Intelligence includes a tool-discovery feature that identifies which tools are in use (for example, WordPress). It scans those tools for issues and alerts you if it finds bugs or vulnerabilities. The feature provides clear, actionable information about the problem and where it appears. This helps developers quickly prioritize fixes and maintain safer, more reliable systems.
+
 <img width="1905" height="908" alt="tools" src="https://github.com/user-attachments/assets/e1cf46ca-de11-4355-ac74-3b2be4353dee" />
 
 **3- Zeroday:**
+
+A zero-day vulnerability is a previously unknown flaw in a software or system that has not yet been identified or patched by the vendor. Because no fix exists at the time of discovery, it can be exploited immediately by attackers. Orion Intelligence identifies and reports these vulnerabilities in real time, enabling organizations to respond quickly and reduce potential risks.
 
 <img width="1908" height="900" alt="zeroday" src="https://github.com/user-attachments/assets/ee37db76-1753-4f7c-9d7b-00d881d33c9a" />
 
@@ -801,9 +805,29 @@ Then we have the Person option, which displays the names of individuals associat
 
 <img width="1715" height="822" alt="reports" src="https://github.com/user-attachments/assets/d1bdea60-b148-4f46-94b1-6b24ff9afdb9" />
 
-Metadata
-Json response
-Related reports
+#### Metadata
+Metadata contains different types of information such as website URL, IP address, images, content, telephone numbers, content type, and file paths. It provides a complete overview of all available details related to a given source.
+
+<img width="1627" height="867" alt="metadata" src="https://github.com/user-attachments/assets/dfd00989-4a8d-4eca-86c6-a473a8d2345c" />
+
+
+#### JSON Response
+The JSON response presents information from the same link in a structured format. Each piece of data can be viewed separately and more clearly, making it easier to analyze individual elements.
+
+<img width="1598" height="866" alt="jsonresponse" src="https://github.com/user-attachments/assets/aa4a439d-803a-4347-9d60-ad47aaacbee2" />
+
+
+#### Related Reports
+Related reports display all additional reports connected to the same link being analyzed. This helps identify what other findings or references are linked to that particular source.
+
+<img width="1613" height="627" alt="relatedreports" src="https://github.com/user-attachments/assets/bcea17d6-f1aa-4b3a-bdfe-56df77de3456" />
+
+#### AI Powered Chatbot
+
+Finally, one of the most important features of our tool is the AI-powered chatbot. This intelligent assistant allows users to ask questions about any related report, URL, or dataset and instantly receive clear answers. The chatbot is designed to simplify complex information by providing summaries, highlighting key details, and guiding users toward deeper insights. It also supports interactive queries, enabling users to explore data in a conversational manner rather than searching manually. This feature makes the overall experience more efficient, user-friendly, and highly effective for decision-making.
+
+<img width="387" height="588" alt="chatbot" src="https://github.com/user-attachments/assets/b2f847eb-9981-48d7-9df2-c2f561baa406" />
+
 
 ## Overview and Additional Features
 
