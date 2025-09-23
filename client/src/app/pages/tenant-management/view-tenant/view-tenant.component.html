@@ -1,0 +1,38 @@
+<div class="view-tenant-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let user of users">
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <select [(ngModel)]="user.role">
+                        <option value="admin">Admin</option>
+                        <option value="crawler">Crawler</option>
+                        <option value="demo">Demo</option>
+                        <option value="profile">Profile</option>
+                    </select>
+                </td>
+                <td>
+                    <select [(ngModel)]="user.status">
+                        <option value="verification_pending">Verification Pending</option>
+                        <option value="onboarding">Onboarding</option>
+                        <option value="active">Active</option>
+                        <option value="disable">Disable</option>
+                    </select>
+                </td>
+                <td>
+                    <button (click)="updateUser(user)">Update</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

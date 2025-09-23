@@ -32,6 +32,7 @@ import { SidebarProfileHomepageComponent } from './pages/sidebar-profile/sidebar
 import { SidebarProfileSettingsComponent } from './pages/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
 import { SidebarProfileDashboardComponent } from './pages/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
 import { RoleGuard } from './shared/guards/role-guard.guard';
+import { ViewTenantComponent } from './pages/tenant-management/view-tenant/view-tenant.component';
 
 const consolidatedChildren = [
   {
@@ -476,6 +477,22 @@ export const routes: Routes = [
             path: 'logs',
             component: CredentialComponent,
             data: { type: 'log', animation: 'CategoryPage' }
+          }
+        ]
+      },
+      {
+        path: 'tenant',
+        data: { animation: 'TenantPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'view',
+            pathMatch: 'full'
+          },
+          {
+            path: 'view',
+            component: ViewTenantComponent,
+            data: { type: 'view', animation: 'CategoryPage' }
           }
         ]
       },

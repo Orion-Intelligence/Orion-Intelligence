@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Body
 from fastapi import Depends, Query
@@ -32,9 +32,10 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role,UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role,UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+from orion.api.interactive.tenant_manager.models.get_all_users_request import UserResponse
 
 api_routes = APIRouter()
 
@@ -257,5 +258,10 @@ async def get_tenant(current_user = Depends(get_current_user)):
 async def update_tenant(data: TenantRequest, current_user = Depends(get_current_user)):
     return await TenantManager.get_instance().update_tenant(data, current_user)
 
+@api_routes.post("/api/users", dependencies=[Depends(role_required([user_role.ADMIN]))])
+async def get_all_users():
+    return await TenantManager.get_instance().get_all_users()
 
-    
+@api_routes.post("/api/updateUser", dependencies=[Depends(role_required([user_role.ADMIN]))])
+async def update_user(user:UserResponse):
+    return await TenantManager.get_instance().update_user(user)

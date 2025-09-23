@@ -1,11 +1,14 @@
 import threading
+from typing import List
 from fastapi import HTTPException
 from starlette import status
+from odmantic import AIOEngine
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
 from orion.services.encryption_manager.encryption_manager import encryption_manager
+from orion.api.interactive.tenant_manager.models.get_all_users_request import UserResponse
 
 class TenantManager:
     __instance = None
@@ -117,3 +120,18 @@ class TenantManager:
             "user": current_user.username,
             "company": onboarding.companyName
         }
+    
+    async def get_all_users(self) ->List[UserResponse]:
+        users = await self._engine.find(db_user_account)
+        responseUsers=[UserResponse(**u.dict()) for u in users]
+        return responseUsers
+    
+    async def update_user(self,request: UserResponse):
+        user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user.role = request.role
+        user.status = request.status
+        await self._engine.save(user)
+        return {"message": "User updated successfully"}

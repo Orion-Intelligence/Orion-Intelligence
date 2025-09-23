@@ -34,7 +34,7 @@ def role_required(required_roles: list[user_role]):
         if role not in required_roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
         return role
-
+    
     return verify_role
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
