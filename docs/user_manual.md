@@ -13,13 +13,7 @@ provide full control over the system's functionality, ensuring smooth and effici
 
 ## Homepage Page
 
-The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined
-access to its wide range of features. When we log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly
-enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter,
-and visualize data across multiple categories, making data exploration both effective and insightful. With its robust
-capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an
-ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility
-and performance ensure it meets the needs of various industries and use cases.
+The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlinedaccess to its wide range of features. When we  log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
 
 <img width="1920" height="1233" alt="Homepage" src="https://github.com/user-attachments/assets/156d58b2-5845-43a2-88df-4fd8b8a5f9db" />
@@ -101,13 +95,7 @@ high-priority data. This well-organized structure ensures that users have an int
   
 <img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
 
-In this search bar, a dropdown appears where we can select and apply different filters. There are two ways to use these filters: At the top, a "List of filters" is displayed, from which we can select the desired ones.
-
-Additionally, we can type directly into the search filter input field to find and apply a specific filter.
-
-Below this, there is another input field labeled “Enter Entity”, where an additional filter can be applied. When both the upper filter and the lower entity filter are applied together, they provide the most accurate and refined results. And below, in the IOs section, it will display the filter that was selected above, indicating which filter has been applied.
-
-In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
+In this **search bar**, a dropdown appears where we can select and apply different filters. There are two ways to use these filters: At the top, a "List of filters" is displayed, from which we can select the desired ones. Additionally, we can type directly into the search filter input field to find and apply a specific filter. Below this, there is another input field labeled “Enter Entity”, where an additional filter can be applied. When both the upper filter and the lower entity filter are applied together, they provide the most accurate and refined results. And below, in the IOs section, it will display the filter that was selected above, indicating which filter has been applied. In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
 
 Next to the Advance button, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
 
@@ -294,27 +282,18 @@ understanding of their contents and how users can leverage them effectively.
 
 ### All
 
-The "All" category offers a comprehensive and unified view of intelligence data, consolidating information from every
-subcategory under the General Intelligence section. This enables users to access a broad range of data in one place,
-making it easier to analyze and compare information across various categories. The "All" category serves as a
-centralized hub for quickly reviewing the full spectrum of collected intelligence.
+The "All" category offers a comprehensive and unified view of intelligence data, consolidating information from every subcategory under the General Intelligence section. This enables users to access a broad range of data in one place, making it easier to analyze and compare information across various categories. The "All" category serves as a centralized hub for quickly reviewing the full spectrum of collected intelligence.
 
 1. ### General
 
-This section houses a diverse collection of uncategorized intelligence data, encompassing various findings that don’t
-fit neatly into the more specific categories outlined elsewhere. It includes miscellaneous insights and discoveries
-gathered from different sources, providing users with a broader scope of information. This section ensures that no
-valuable data goes overlooked, even if it doesn't fall under a specific category.
+This section houses a diverse collection of uncategorized intelligence data, encompassing various findings that don’t fit neatly into the more specific categories outlined elsewhere. It includes miscellaneous insights and discoveries gathered from different sources, providing users with a broader scope of information. This section ensures that no valuable data goes overlooked, even if it doesn't fall under a specific category.
 
 <img width="1366" height="424" alt="general feature-modified" src="https://github.com/user-attachments/assets/c55048a7-ae0c-4e9a-870b-97863c4c1660" />
 
 
 2. ### Forums
 
-In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions
-around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations
-about the relevant information. The forum serves as an interactive space where individuals can contribute their
-knowledge and collaborate on the topic.
+In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
 
 <img width="1912" height="563" alt="forums" src="https://github.com/user-attachments/assets/4fae3549-7431-4779-983a-5a0a9c560468" />
 
