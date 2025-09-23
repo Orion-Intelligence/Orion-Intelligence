@@ -868,7 +868,8 @@ MODE. These three concepts help us manage demo server access and control feature
 **TRAEFIK KEYS**
 
 1. TRAEFIK_USERNAME=admin
-2. TRAEFIK_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
+2. TRAEFIK_PASSWORD=
+('SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8')
 
 **Description:** These keys are used for both Flower and Dozzle. They allow access to the demo server, enabling users to
 use it for demonstration purposes.
@@ -876,7 +877,8 @@ use it for demonstration purposes.
 **DEMO KEYS**
 
 1. DEMO_USERNAME=demo
-2. DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
+2. DEMO_PASSWORD=
+('TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw')
 
 **Description:** Demo keys are used to provide users with a demo version of the service. By using these keys, users can
 access a limited, demo server environment to explore features.
