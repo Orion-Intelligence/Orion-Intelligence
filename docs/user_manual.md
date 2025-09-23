@@ -95,9 +95,10 @@ high-priority data. This well-organized structure ensures that users have an int
   
 <img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
 
+
 In this **search bar**, a dropdown appears where we can select and apply different filters. There are two ways to use these filters: At the top, a "List of filters" is displayed, from which we can select the desired ones. Additionally, we can type directly into the search filter input field to find and apply a specific filter. Below this, there is another input field labeled “Enter Entity”, where an additional filter can be applied. When both the upper filter and the lower entity filter are applied together, they provide the most accurate and refined results. And below, in the IOs section, it will display the filter that was selected above, indicating which filter has been applied. In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
 
-Next to the Advance button, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
+Next to the **Advance button**, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
 
 - Match Any Term (OR):
 This option shows results containing any of the search terms. The results are broader and may include more generic or loosely related data.
@@ -110,8 +111,8 @@ This option only shows results that exactly match the full query entered. If suc
 
 <img width="821" height="167" alt="filterbar" src="https://github.com/user-attachments/assets/d1974392-7a61-4e98-b98d-e16aa2ddd32b" />
 
-Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
 
+Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
 #### Statistics
 
 In the statistics section, when we view the chart bars, several results are displayed. The first statistic highlights the top teams that are most frequently involved in leak incidents. The next chart shows the teams associated with website defacement activities. The third statistic presents the top geographic regions with the highest number of defacement incidents. Finally, another chart displays the most frequently used hashtags, reflecting their use in social media activities and related incidents.
@@ -157,13 +158,13 @@ The clear layout supports streamlined analysis and quick interpretation of compl
 
 1. #### Generic Index
 
-<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/e4e62891-3cb5-4ffe-a353-20c0fc11d93c" />
-
 The "Generic Index" category displays information related to the crawling process, providing users with insights into
 various states of the fetched data. These states represent different aspects of the crawling operation, each offering
 valuable details. By reviewing the data systematically, one state at a time, users can gain a comprehensive
 understanding of the progress and status of the crawl. This structure ensures users can focus on specific areas of
 interest without being overwhelmed by unnecessary information.
+
+<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/e4e62891-3cb5-4ffe-a353-20c0fc11d93c" />
 
 - **Document Count:** This section provides detailed information about the results obtained after the data is fetched,
   focusing on the total document count. It displays the total number of documents retrieved from the crawl, presented as
