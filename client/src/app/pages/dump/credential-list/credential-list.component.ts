@@ -8,7 +8,7 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem],
-  imports: [NgForOf, NgIf, DatePipe, KeyValuePipe, NgSwitch, NgSwitchCase,]
+  imports: [NgForOf, NgIf, DatePipe, KeyValuePipe]
 })
 export class CredentialListComponent {
   @Input() stealerData$!: StealerLogCallbackModel;
