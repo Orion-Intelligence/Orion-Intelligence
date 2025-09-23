@@ -121,8 +121,9 @@ In the statistics section, when we view the chart bars, several results are disp
 
 #### To Data Leaks
 
-We are receiving data in two rows. The top row is related to leaks, where general results are being fetched from Onion, Clearnet, and I2P. In each block, when we click on “View Detail” at the bottom, it will take us to that specific result. There, the complete details will be available, including related URLs, metadata, JSON report, and other reports connected to the same leak.
-Below the top leaks data, the second row displays results related to defacements. Similar to the leaks section, clicking on “View Detail” redirects us to a specific result page, where comprehensive information is provided, including the associated network, JSON report, and other relevant details.
+The data is displayed in two rows. The top row contains leak-related results, fetched from Onion, Clearnet, and I2P. Each block includes a “View Detail” option at the bottom, which opens the specific result page with complete information such as related URLs, metadata, JSON report, and other reports linked to the same leak.
+
+The second row presents results related to defacements. Similar to the leaks section, selecting “View Detail” redirects to a detailed result page, where comprehensive insights are available, including the associated network, JSON report, and other relevant information.
 
 <img width="1591" height="523" alt="topleakdata" src="https://github.com/user-attachments/assets/31c25b76-e1e0-4de7-87d2-e757d7483101" />
 
@@ -504,7 +505,7 @@ A zero-day vulnerability is a previously unknown flaw in a software or system th
 
 ## Feed
 
-Deed mainly contains news items that may cover any topic or be related to a specific search. Each general feed result can be opened and viewed individually.
+Feed mainly contains news items that may cover any topic or be related to a specific search. Each general feed result can be opened and viewed individually.
 You can also plot any result on the CTI graph to see its relationships and context. This lets analysts examine single items and explore their connections visually.
 
 <img width="1913" height="907" alt="feed" src="https://github.com/user-attachments/assets/28ed9fa1-df82-4f31-97ad-3de95c1b26dc" />
