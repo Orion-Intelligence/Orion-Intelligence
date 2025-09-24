@@ -99,8 +99,8 @@ class elastic_controller:
             m_request_defacement = {
                 "query": {
                     "range": {
-                        "timestamp": {
-                            "m_leak_date": f"now-{days_15_seconds}s"
+                        "m_leak_date": {
+                            "lt": f"now-{days_15_seconds}s"
                         }
                     }
                 }
@@ -300,11 +300,6 @@ class elastic_controller:
 
     async def index_bulk_data(self, p_data):
         try:
-            print("::::::::::::::::::::::::::::::::::", flush=True)
-            print("::::::::::::::::::::::::::::::::::", flush=True)
-            print(p_data, flush=True)
-            print("::::::::::::::::::::::::::::::::::", flush=True)
-            print("::::::::::::::::::::::::::::::::::", flush=True)
             response = await self.__m_connection.bulk(body=p_data)
             return response
         except Exception as ex:

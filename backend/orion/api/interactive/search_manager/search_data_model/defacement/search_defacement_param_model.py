@@ -17,4 +17,4 @@ class search_defacement_param_model(BaseModel,helper_controller):
     entity_filter: Optional[Dict[str, List[str]]] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
