@@ -14,7 +14,7 @@
                 <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
                 <td>
-                    <select [(ngModel)]="user.role">
+                    <select [(ngModel)]="user.role" class="view-tenant_custom-dropdown">
                         <option value="admin">Admin</option>
                         <option value="crawler">Crawler</option>
                         <option value="demo">Demo</option>
@@ -22,7 +22,7 @@
                     </select>
                 </td>
                 <td>
-                    <select [(ngModel)]="user.status">
+                    <select [(ngModel)]="user.status" class="view-tenant_custom-dropdown">
                         <option value="verification_pending">Verification Pending</option>
                         <option value="onboarding">Onboarding</option>
                         <option value="active">Active</option>
@@ -30,7 +30,7 @@
                     </select>
                 </td>
                 <td>
-                    <button (click)="updateUser(user)">Update</button>
+                    <button (click)="updateUser(user)" class="view-tenant_btn-update">Update</button>
                 </td>
             </tr>
         </tbody>
