@@ -1621,7 +1621,7 @@ class elastic_request_generator:
             "explain": True
         }
 
-        if raw_query != "*" and p_query_model.matchtype=="semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
             try:
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
                 if qvec:
@@ -1633,7 +1633,7 @@ class elastic_request_generator:
                             "query_vector": qvec
                         }
                     }
-                    query_statement["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+                    query_statement["knn"] = knn_clause["knn"]
             except Exception:
                 pass
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement

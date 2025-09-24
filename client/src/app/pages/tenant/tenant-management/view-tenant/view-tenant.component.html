@@ -21,7 +21,7 @@
       <tbody>
       <tr *ngFor="let user of users">
         <td class="text-break">{{ user.username }}</td>
-        <td class="text-break">{{ user.email || 'Email not found' }}</td>
+        <td class="text-break">{{ user.email || '-' }}</td>
         <td>
           <select [(ngModel)]="user.role" class="view-tenant_custom-dropdown" [disabled]="!user.email">
             <option value="admin">Admin</option>
