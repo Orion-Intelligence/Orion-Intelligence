@@ -55,8 +55,9 @@ services:
 
   elasticsearch:
     container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.20
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
     environment:
+      - cluster.routing.allocation.disk.threshold_enabled=false
       - discovery.type=single-node
       - network.host=0.0.0.0
       - http.port=9400
@@ -64,7 +65,6 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
     env_file:
