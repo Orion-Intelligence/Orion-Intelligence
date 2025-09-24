@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../../shared/services/api.service';
-import { HttpHeaders } from '@angular/common/http';
-import { NgFor } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { User } from '../../../shared/model/tenant/tenant.model';
+import {Component, OnInit} from '@angular/core';
+import {ApiService} from '../../../../shared/services/api.service';
+import {HttpHeaders} from '@angular/common/http';
+import {NgFor} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {User} from '../../../../shared/model/tenant/tenant.model';
 
 @Component({
   selector: 'app-view-tenant',
@@ -12,8 +12,10 @@ import { User } from '../../../shared/model/tenant/tenant.model';
 })
 export class ViewTenantComponent implements OnInit {
   users: User[] = [];
+
   constructor(public apiService: ApiService,) {
   }
+
   ngOnInit(): void {
     const headers = new HttpHeaders({});
     this.apiService.post<User[]>('users', headers).subscribe({

@@ -6,7 +6,6 @@ import { TenantModel } from '../../shared/model/tenant/tenant.model';
 import { search_filter_labels } from '../../shared/constants/shared-enums';
 import { AuthService } from '../../services/authetication/auth.service';
 import { Router } from '@angular/router';
-import { HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../../services/core/app/app.service';
 
@@ -25,7 +24,6 @@ export class TenantComponent implements OnInit {
   showLeftFade = false;
   showRightFade = false;
   selectedCategoryId = '';
-  addedIocs: { [key: string]: string[] } = {};
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
 
@@ -101,15 +99,11 @@ export class TenantComponent implements OnInit {
       this.categories[ioc.ioc_id] = ioc.values;
     });
     this.appService.set('entityfilterCategories', this.categories);
-    const token = this.auth_service.getToken()
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
 
     this.apiService.post('createTenant', filteredOnboardingData).subscribe({
       next: () => {
         this.auth_service.setOnboarding(true);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard']).then();
       },
       error: (err) => {
         console.error(err);

@@ -17,7 +17,7 @@ import { ReportChatComponent } from './shared/partials/report/report-chat/report
 import { DashboardExploitComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-exploit/dashboard-exploit.component';
 import { DumpComponent } from './pages/dump/dump.component';
 import { CredentialComponent } from './pages/dump/credential/credential.component';
-import { ErrorHandlerComponent } from './pages/error-handler/error-handler.component';
+import { ErrorHandlerComponent } from './shared/partials/error-handler/error-handler.component';
 import { DashboardConsolidatedComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component';
 import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.resolver';
 import { DashboardSocialsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-social/dashboard-social.component';
@@ -26,13 +26,13 @@ import { SecurityScanResultsComponent } from './shared/partials/security-scan-re
 import { SignupComponent } from './pages/signup/signup.component';
 import { TenantComponent } from './pages/tenant/tenant.component';
 import { WelcomeComponent } from './pages/welcome/welcome.component';
-import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ForgotPasswordComponent } from './shared/partials/forgot-password/forgot-password.component';
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
-import { SidebarProfileHomepageComponent } from './pages/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
-import { SidebarProfileSettingsComponent } from './pages/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
-import { SidebarProfileDashboardComponent } from './pages/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
+import { SidebarProfileHomepageComponent } from './shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
+import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
+import { SidebarProfileDashboardComponent } from './shared/partials/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
 import { RoleGuard } from './shared/guards/role-guard.guard';
-import { ViewTenantComponent } from './pages/tenant-management/view-tenant/view-tenant.component';
+import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 
 const consolidatedChildren = [
   {

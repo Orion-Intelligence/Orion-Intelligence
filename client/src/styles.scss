@@ -2,7 +2,7 @@
 @use 'assets/styles/shared/shared.css';
 @use 'assets/styles/shared/override.scss';
 @use 'assets/styles/fonts.scss';
-@use 'app/pages/error-handler/error-handler.component.css';
+@use 'app/shared/partials/error-handler/error-handler.component.css';
 @use 'app/pages/homepage/homepage.component.css';
 @use 'app/shared/partials/chat-widget/chat-widget.component.css';
 @use 'app/shared/partials/header/login-header/header.component.css';
@@ -10,10 +10,10 @@
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/pages/tenant/tenant.component.css';
-@use 'app/pages//sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component.css';
-@use 'app/pages/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
-@use 'app/pages/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';
-@use 'app/pages/tenant-management/view-tenant/view-tenant.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';
+@use 'app/pages/tenant/tenant-management/view-tenant/view-tenant.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
 @use 'app/shared/partials/security-scan-results/security-scan-results.component.css';

@@ -1,0 +1,50 @@
+<div class="view-tenant-container">
+  <div class="default-notification-banner default-notification-banner-stealer">
+    <span>
+      <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg"/>
+      <span>Manage Tenant Users: Username, Email, Role, Status, and Actions.</span>
+    </span>
+  </div>
+
+  <div class="list__container credential-table">
+    <table class="table table-striped directory-list__table clear-paddings">
+      <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let user of users">
+        <td class="text-break">{{ user.username }}</td>
+        <td class="text-break">{{ user.email || 'Email not found' }}</td>
+        <td>
+          <select [(ngModel)]="user.role" class="view-tenant_custom-dropdown" [disabled]="!user.email">
+            <option value="admin">Admin</option>
+            <option value="crawler">Crawler</option>
+            <option value="demo">Demo</option>
+            <option value="profile">Profile</option>
+          </select>
+        </td>
+        <td>
+          <select [(ngModel)]="user.status" class="view-tenant_custom-dropdown" [disabled]="!user.email">
+            <option value="verification_pending">Verification Pending</option>
+            <option value="onboarding">Onboarding</option>
+            <option value="active">Active</option>
+            <option value="disable">Disable</option>
+          </select>
+        </td>
+        <td>
+          <button (click)="updateUser(user)" class="view-tenant_btn-update" [disabled]="!user.email">
+            Update
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

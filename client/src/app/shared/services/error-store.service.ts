@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {filter} from 'rxjs/operators';
-import {ErrorHandlerComponent} from '../../pages/error-handler/error-handler.component';
+import {ErrorHandlerComponent} from '../partials/error-handler/error-handler.component';
 
 @Injectable({providedIn: 'root'})
 export class ErrorStoreService {

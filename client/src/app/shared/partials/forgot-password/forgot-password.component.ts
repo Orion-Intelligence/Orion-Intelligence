@@ -1,9 +1,9 @@
 import { NgIf, CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../services/authetication/auth.service';
+import { AuthService } from '../../../services/authetication/auth.service';
 import { NgForm, FormsModule } from '@angular/forms';
-import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
+import { HeaderComponent } from "../header/login-header/header.component";
 import { HttpClient } from '@angular/common/http';
 
 @Component({

@@ -1,12 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { TenantModel } from '../../../shared/model/tenant/tenant.model';
-import { ApiService } from '../../../shared/services/api.service';
-import { AuthService } from '../../../services/authetication/auth.service';
+import { TenantModel } from '../../../model/tenant/tenant.model';
+import { ApiService } from '../../../services/api.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 import { HttpHeaders } from '@angular/common/http';
 import { NgIf, NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { search_filter_labels } from '../../../shared/constants/shared-enums';
-import { AppService } from '../../../services/core/app/app.service';
+import { search_filter_labels } from '../../../constants/shared-enums';
+import { AppService } from '../../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 
 @Component({

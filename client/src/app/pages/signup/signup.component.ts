@@ -72,7 +72,7 @@ export class SignupComponent {
   onSubmit(form: NgForm) {
     if (form.valid) {
       this.auth_service.signup(this.user.username, this.user.mail, this.user.password).subscribe({
-        next: (res) => {
+        next: (_) => {
           this.router.navigate(['/welcome']).then(() => {
           });
         },
