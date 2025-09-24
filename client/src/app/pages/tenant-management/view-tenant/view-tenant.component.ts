@@ -8,8 +8,7 @@ import { User } from '../../../shared/model/tenant/tenant.model';
 @Component({
   selector: 'app-view-tenant',
   imports: [NgFor, FormsModule],
-  templateUrl: './view-tenant.component.html',
-  styleUrl: './view-tenant.component.css'
+  templateUrl: './view-tenant.component.html'
 })
 export class ViewTenantComponent implements OnInit {
   users: User[] = [];
