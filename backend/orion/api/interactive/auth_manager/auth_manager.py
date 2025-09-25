@@ -41,7 +41,8 @@ class auth_manager:
             return None
         return user
     
-    async def login(username:str,password:str):
+    @staticmethod
+    async def login(username:str, password:str):
         user = await auth_manager.get_instance().authenticate_user(
             username, password
         )
@@ -76,6 +77,7 @@ class auth_manager:
 
         return {"access_token": access_token, "token_type": "bearer", "role": role,"status": user.status,"hasOnboarding": onboarding_exists}
     
+    @staticmethod
     async def verify_user(token: str):
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.verification_token == token)
@@ -92,7 +94,8 @@ class auth_manager:
 
         return {"message": "Email verified successfully. You may continue onboarding."}
     
-    async def update_password(token:str,password:str):
+    @staticmethod
+    async def update_password(token:str, password:str):
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.verification_token == token)
         if not user:
@@ -105,6 +108,7 @@ class auth_manager:
 
         return {"message": "Password reset successfully."}
     
+    @staticmethod
     async def forgot_password(mail: str):
             engine = mongo_controller.get_instance().get_engine()
             user = await engine.find_one(db_user_account, db_user_account.email == mail)
@@ -126,6 +130,7 @@ class auth_manager:
             
             return {"message": "Reset password mail send successfully."}
 
+    @staticmethod
     async def edit_userStatus_and_sendMail_from_admin(user_id: str, request: Request):
         form = await request.form()
         updates = dict(form)

@@ -231,7 +231,7 @@ export class AuthService {
     }
   }
 
-  private refreshToken(): Observable<string | null> {
+  refreshToken(): Observable<string | null> {
     const currentToken = this.getStoredToken();
     if (!currentToken) {
       return new Observable(observer => {

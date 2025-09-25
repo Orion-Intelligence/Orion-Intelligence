@@ -18,11 +18,13 @@ export const httpInterceptor: HttpInterceptorFn = (
   const router = inject(Router);
   const authService = inject(AuthService);
   const loadingService = inject(LoadingService);
-  const token = authService.getToken();
 
-  const authReq = token
-    ? req.clone({setHeaders: {Authorization: `Bearer ${token}`}})
-    : req;
+  const token = authService.getToken() ?? localStorage.getItem('token');
+
+  const authReq = (token
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` }, withCredentials: true })
+    : req.clone({ withCredentials: true })
+  );
 
   if (activeRequests === 0) {
     loadingService.show();
@@ -46,7 +48,6 @@ export const httpInterceptor: HttpInterceptorFn = (
     }),
     catchError((error: any) => {
       if (error instanceof TimeoutError) {
-        console.error('Request timed out:', req.url);
         return throwError(() => new HttpErrorResponse({
           error: 'Request timed out',
           status: 408,
@@ -57,7 +58,7 @@ export const httpInterceptor: HttpInterceptorFn = (
 
       if (error instanceof HttpErrorResponse && error.status === 401) {
         if (authService.isAuthenticated()) {
-          router.navigate(['/login'], {queryParams: {sessionExpired: 'true'}}).then();
+          router.navigate(['/login'], { queryParams: { sessionExpired: 'true' } }).then();
           authService.logout();
           alert('Session timeout');
         }

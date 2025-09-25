@@ -72,7 +72,7 @@
     <ng-container *ngIf="authService.getRole() === 'admin'">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
-        [icon]="'assets/images/sidebar/dump.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
+        [icon]="'assets/images/sidebar/tenant.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
         [title]="'Tenant'"></app-dashboard-sidebar-items>
     </ng-container>
 
@@ -181,6 +181,12 @@
       (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP" [icon]="'assets/images/sidebar/dump.svg'"
       [items]="dumpCategories" [routePrefix]="'dump'" [selectionStore]="selectionStore"
       [title]="'Dump'"></app-dashboard-sidebar-collapsed>
+    <ng-container *ngIf="authService.getRole() === 'admin'">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT" [icon]="'assets/images/sidebar/tenant.svg'"
+        [items]="tenantCategories" [routePrefix]="'tenant'" [selectionStore]="selectionStore"
+        [title]="'Tenant'"></app-dashboard-sidebar-collapsed>
+    </ng-container>
 
     <div class="sidebar__item">
       <a appTooltip="CTI Graph" class="sidebar__item-dropdown sidebar__item-dropdown-hotlink" href="/dashboard/ctigraph"
