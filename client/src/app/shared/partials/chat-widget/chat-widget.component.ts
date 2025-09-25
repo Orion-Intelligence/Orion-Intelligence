@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
@@ -21,15 +21,21 @@ type ChatApiResponse = {
   templateUrl: './chat-widget.component.html',
   animations: [chatBotAnimation]
 })
-export class ChatWidgetComponent implements OnInit {
+export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() reportText: string | undefined;
+  @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLElement>;
+  @ViewChild('bottomSentinel') bottomSentinel!: ElementRef<HTMLElement>;
+
   chatMessages: { id: string; sender: 'user' | 'bot' | 'error'; text: string; time: Date; retryPayload?: { message: string; report?: string }; }[] = [];
   isBotTyping = false;
   newMessage = '';
   chatOpen = false;
   private sessionId = '';
+  private userNearBottom = true;
+  private io?: IntersectionObserver;
+  private mo?: MutationObserver;
 
-  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService) {}
+  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone) {}
 
   ngOnInit(): void {
     this.authService.getUsername$().subscribe(u => {
@@ -45,20 +51,44 @@ export class ChatWidgetComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    this.io = new IntersectionObserver(
+      entries => {
+        this.userNearBottom = entries.some(e => e.isIntersecting);
+      },
+      { root: this.messagesContainer.nativeElement, threshold: 1 }
+    );
+    this.io.observe(this.bottomSentinel.nativeElement);
+
+    this.mo = new MutationObserver(() => {
+      if (this.userNearBottom || this.isBotTyping) this.scrollToBottom(true);
+    });
+    this.mo.observe(this.messagesContainer.nativeElement, { childList: true, subtree: true });
+
+    this.scrollToBottom(true);
+  }
+
+  ngOnDestroy(): void {
+    this.io?.disconnect();
+    this.mo?.disconnect();
+  }
+
   sendMessage(event: Event): void {
     event.preventDefault();
     const text = this.newMessage.trim();
     if (!text) return;
     this.chatMessages.push({ id: this.sessionId, sender: 'user', text, time: new Date() });
     this.newMessage = '';
-    this.scrollToNewMessage();
     this.isBotTyping = true;
+    this.scrollToNewMessage();
     this.aiSuggest(text);
   }
 
   aiSuggest(userMessage: string): void {
     if (this.authService.getRole() !== 'admin') {
       this.showErrorMessage(userMessage);
+      this.isBotTyping = false;
+      this.scrollToNewMessage();
       return;
     }
 
@@ -72,17 +102,18 @@ export class ChatWidgetComponent implements OnInit {
       next: (response) => {
         const reply =
           (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
-        if (!reply || response.message?.includes("went wrong")) {
+        if (!reply || (typeof response.message === 'string' && response.message.includes('went wrong'))) {
           this.showErrorMessage(userMessage);
         } else {
           this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: reply, time: new Date() });
-          this.scrollToNewMessage();
         }
         this.isBotTyping = false;
+        this.scrollToNewMessage();
       },
       error: () => {
         this.showErrorMessage(userMessage);
         this.isBotTyping = false;
+        this.scrollToNewMessage();
       }
     });
   }
@@ -95,11 +126,11 @@ export class ChatWidgetComponent implements OnInit {
       time: new Date(),
       retryPayload: { message: originalMessage, report: this.reportText }
     });
-    this.scrollToNewMessage();
   }
 
   retryMessage(payload: { message: string; report?: string }): void {
     this.isBotTyping = true;
+    this.scrollToNewMessage();
     this.aiSuggest(payload.message);
   }
 
@@ -109,6 +140,7 @@ export class ChatWidgetComponent implements OnInit {
       return;
     }
     this.chatOpen = true;
+    setTimeout(() => this.scrollToBottom(true));
   }
 
   closeChat() {
@@ -124,22 +156,28 @@ export class ChatWidgetComponent implements OnInit {
     setTimeout(() => btn.classList.remove('chat-bot-push-anim'), 150);
   }
 
-  private relativeTop(el: HTMLElement, container: HTMLElement): number {
-    let top = 0;
-    let node: HTMLElement | null = el;
-    while (node && node !== container) {
-      top += node.offsetTop;
-      node = node.offsetParent as HTMLElement | null;
-    }
-    return top;
+  onMessagesScroll(): void {
+    this.userNearBottom = this.isAtBottom(80);
+  }
+
+  private isAtBottom(threshold = 4): boolean {
+    const el = this.messagesContainer?.nativeElement;
+    if (!el) return true;
+    return el.scrollHeight - el.clientHeight - el.scrollTop <= threshold;
   }
 
   private scrollToNewMessage(): void {
-    const container = document.querySelector('.chat-support__messages') as HTMLElement | null;
-    if (!container) return;
-    const lastMsg = container.querySelector('.chat-support__message-container:last-of-type') as HTMLElement | null;
-    if (!lastMsg) return;
-    const relTop = this.relativeTop(lastMsg, container);
-    container.scrollTo({ top: relTop, behavior: 'smooth' });
+    if (!this.userNearBottom) return;
+    this.cdr.detectChanges();
+    this.zone.runOutsideAngular(() => {
+      requestAnimationFrame(() => this.scrollToBottom(true));
+    });
+  }
+
+  private scrollToBottom(smooth: boolean): void {
+    const el = this.messagesContainer?.nativeElement;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    this.userNearBottom = true;
   }
 }
