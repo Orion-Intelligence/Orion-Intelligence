@@ -26,6 +26,7 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_par
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import \
     search_social_param_model
 from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -35,7 +36,7 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role,UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-from orion.api.interactive.tenant_manager.models.get_all_users_request import UserResponse
+from orion.api.interactive.tenant_manager.models.user_param_model import user_param_model
 
 api_routes = APIRouter()
 
@@ -257,6 +258,6 @@ async def update_tenant(data: TenantRequest, current_user = Depends(get_current_
 async def get_all_users():
     return await TenantManager.get_instance().get_all_users()
 
-@api_routes.post("/api/updateUser", dependencies=[Depends(role_required([user_role.ADMIN]))])
-async def update_user(user:UserResponse):
+@api_routes.post("/api/update/user", dependencies=[Depends(role_required([user_role.ADMIN]))])
+async def update_user(user:tenant_param_model):
     return await TenantManager.get_instance().update_user(user)

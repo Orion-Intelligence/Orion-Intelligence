@@ -1,7 +1,5 @@
 import json
 from datetime import datetime
-from fastapi import HTTPException
-from starlette import status
 from orion.management.models.insight_model_comparison import InsightComparisonModel
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -25,10 +23,8 @@ class homepage_model:
         redis_instance = redis_controller.getInstance()
         redis_key = f"{REDIS_KEYS.GRAPH_INSIGHT_STAT}"
         result = await elastic_controller.get_instance().generate_graph()
-        cached = await redis_instance.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
 
-
-        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(result), 86400])
+        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(result), 1])
         return result
 
     @staticmethod
@@ -47,12 +43,12 @@ class homepage_model:
         except json.JSONDecodeError as ex:
             log.g().ex(f"JSON Decode Error: {ex}")
             return None
-        
+
     @staticmethod
     async def insight_consolidated_result():
         redis_instance = redis_controller.getInstance()
         redis_key = f"{REDIS_KEYS.APP_INSIGHT_KEY}"
-        
+
 
         indices, queries = elastic_insight_generator().on_insight_consolidated_data()
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
@@ -85,10 +81,10 @@ class homepage_model:
             "defacement_model": [homepage_model.transform_for_display("defacement_model", hit["_source"]) for hit in defacement_hits]
         }
 
-        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(display_data), 86400])
+        await redis_instance.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, json.dumps(display_data), 1])
 
         return display_data
-    
+
 
     @staticmethod
     def transform_for_display(model_key: str, item: dict) -> dict:
@@ -145,13 +141,13 @@ class homepage_model:
             "hash":m_hash,
         }
 
-    
+
     @staticmethod
     def parse_date_fallback(raw_date: str) -> str | None:
         formats = [
-            "%Y-%m-%dT%H:%M:%S.%f%z",  
-            "%Y-%m-%d",               
-            "%Y-%m-%dT%H:%M:%S.%fZ" 
+            "%Y-%m-%dT%H:%M:%S.%f%z",
+            "%Y-%m-%d",
+            "%Y-%m-%dT%H:%M:%S.%fZ"
         ]
         for fmt in formats:
             try:

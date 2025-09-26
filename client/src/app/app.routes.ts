@@ -427,12 +427,12 @@ export const routes: Routes = [
           {
             path: 'basic',
             component: SecurityScanResultsComponent,
-            data: { type: 'basic', animation: 'ScannerPage' }
+            data: { type: 'basic', animation: 'CategoryPage' }
           },
           {
             path: 'full',
             component: SecurityScanResultsComponent,
-            data: { type: 'advanced', animation: 'ScannerPage' }
+            data: { type: 'advanced', animation: 'CategoryPage' }
           }
         ]
       },

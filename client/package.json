@@ -21,6 +21,7 @@
     "@angular/platform-browser": "19.2.14",
     "@angular/platform-browser-dynamic": "19.2.14",
     "@angular/router": "19.2.14",
+    "@angular/service-worker": "19.2.14",
     "@ng-bootstrap/ng-bootstrap": "^18.0.0",
     "@popperjs/core": "^2.11.8",
     "franc-min": "^6.2.0",

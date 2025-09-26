@@ -1,11 +1,8 @@
+import pyotp
 
 from datetime import datetime
 from enum import Enum
 from typing import Optional
-from enum import Enum
-from typing import Optional
-
-import pyotp
 from odmantic import Model, Field
 from passlib.context import CryptContext
 from pydantic import field_validator

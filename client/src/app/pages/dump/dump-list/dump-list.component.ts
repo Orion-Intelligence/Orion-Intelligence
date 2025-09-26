@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { AsyncPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { DumpService } from '../../../services/dump/dump.service';
 import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
@@ -10,16 +10,11 @@ import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.ani
   standalone: true,
   templateUrl: './dump-list.component.html',
   animations: [fadeInDashboardItem],
-  imports: [
-    NgForOf,
-    AsyncPipe,
-    DatePipe,
-    NgIf
-  ]
+  imports: [NgForOf, AsyncPipe, DatePipe, NgIf]
 })
 export class DumpListComponent implements OnInit {
   dumpData$: Observable<DumpCallbackModel | null>;
-  @Input() isLoading!: boolean;
+  @Input() isLoading = true;
 
   constructor(public dumpService: DumpService) {
     this.dumpData$ = this.dumpService.dumpData$;
@@ -31,11 +26,12 @@ export class DumpListComponent implements OnInit {
 
   ngOnInit(): void {
     this.dumpData$ = this.dumpService.dumpData$.pipe(
+      tap(data => { if (data) this.isLoading = false; }),
       map(data => {
         if (!data) return null;
         return {
           ...data,
-          DumpCallbackModel: data.mDumpCallbackLinks.filter(item => {
+          mDumpCallbackLinks: data.mDumpCallbackLinks.filter(item => {
             const url = (item.leak_url || '').trim();
             return url !== '' && !/^\/+$/.test(url);
           })
@@ -45,8 +41,7 @@ export class DumpListComponent implements OnInit {
   }
 
   copyRowData(item: any): void {
-    const textToCopy = item
-
+    const textToCopy = item;
     navigator.clipboard.writeText(textToCopy).then(() => {
       console.log('Copied to clipboard:', textToCopy);
     }).catch(err => {

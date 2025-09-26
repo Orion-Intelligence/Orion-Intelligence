@@ -9,7 +9,7 @@ class elastic_insight_generator:
         query.pop("highlight", None)
         query.pop("suggest", None)
         return query
-    
+
     @staticmethod
     def on_insight_leakdata():
         from_ = 0
@@ -17,18 +17,18 @@ class elastic_insight_generator:
 
         query_statement = {
             "query": {
-                "match_all": {}
-            },
-            "sort": [
-                {
-                    "m_update_date": {
-                        "order": "desc"
-                    }
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_domain"}},
+                        {"script": {"script": "doc['m_domain'].size()==1"}}
+                    ]
                 }
-            ],
+            },
+            "sort": [{"m_update_date": {"order": "desc"}}],
             "from": from_,
             "size": size,
-            "track_total_hits": True
+            "track_total_hits": True,
+            "collapse": {"field": "m_domain"}
         }
 
         return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
@@ -40,18 +40,18 @@ class elastic_insight_generator:
 
         query_statement = {
             "query": {
-                "match_all": {}
-            },
-            "sort": [
-                {
-                    "m_update_date": {
-                        "order": "desc"
-                    }
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_domain"}},
+                        {"script": {"script": "doc['m_domain'].size()==1"}}
+                    ]
                 }
-            ],
+            },
+            "sort": [{"m_update_date": {"order": "desc"}}],
             "from": from_,
             "size": size,
-            "track_total_hits": True
+            "track_total_hits": True,
+            "collapse": {"field": "m_domain"}
         }
 
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
@@ -63,14 +63,18 @@ class elastic_insight_generator:
 
         query_statement = {
             "query": {
-                "match_all": {}
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_domain"}},
+                        {"script": {"script": "doc['m_domain'].size()==1"}}
+                    ]
+                }
             },
-            "sort": [
-                {"m_leak_date": {"order": "desc"}}
-            ],
+            "sort": [{"m_leak_date": {"order": "desc"}}],
             "from": from_,
             "size": size,
-            "track_total_hits": True
+            "track_total_hits": True,
+            "collapse": {"field": "m_domain"}
         }
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
@@ -82,18 +86,18 @@ class elastic_insight_generator:
 
         query_statement = {
             "query": {
-                "match_all": {}
-            },
-            "sort": [
-                {
-                    "m_update_date": {
-                        "order": "desc"
-                    }
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_domain"}},
+                        {"script": {"script": "doc['m_domain'].size()==1"}}
+                    ]
                 }
-            ],
+            },
+            "sort": [{"m_update_date": {"order": "desc"}}],
             "from": from_,
             "size": size,
-            "track_total_hits": True
+            "track_total_hits": True,
+            "collapse": {"field": "m_domain"}
         }
 
         return ELASTIC_INDEX.S_EXPLOIT_INDEX, query_statement
@@ -105,18 +109,18 @@ class elastic_insight_generator:
 
         query_statement = {
             "query": {
-                "match_all": {}
-            },
-            "sort": [
-                {
-                    "m_message_date": {
-                        "order": "desc"
-                    }
+                "bool": {
+                    "must": [
+                        {"exists": {"field": "m_domain"}},
+                        {"script": {"script": "doc['m_domain'].size()==1"}}
+                    ]
                 }
-            ],
+            },
+            "sort": [{"m_message_date": {"order": "desc"}}],
             "from": from_,
             "size": size,
-            "track_total_hits": True
+            "track_total_hits": True,
+            "collapse": {"field": "m_domain"}
         }
 
         return ELASTIC_INDEX.S_CHATS_INDEX, query_statement
@@ -147,4 +151,3 @@ class elastic_insight_generator:
         indices.append(i5)
 
         return indices, queries
-    

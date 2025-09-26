@@ -109,6 +109,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.TENANT:
           firstSubcategory = this.tenantCategories[0];
           break;
+        case Category.SCANNER:
+          firstSubcategory = this.scannerCategories[0];
+          break;
       }
 
       if (firstSubcategory) {
