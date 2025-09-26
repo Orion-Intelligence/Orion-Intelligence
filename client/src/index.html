@@ -34,6 +34,30 @@
       <meta content="Trustly Search Engine" name="author">
 
 </head>
+<script>
+(async function preloadAllSharedImages() {
+  try {
+    const res = await fetch('assets/image-manifest.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    const list = await res.json();
+    const head = document.head;
+
+    for (let i = 0; i < list.length; i++) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      // make sure URLs are base-href safe
+      link.href = new URL(list[i], document.baseURI).toString();
+      head.appendChild(link);
+    }
+
+    console.log(`✅ Preloaded ${list.length} images from image-manifest.json`);
+  } catch (err) {
+    console.error('❌ Image preloading failed:', err);
+  }
+})();
+</script>
+
 
 <body>
       <noscript>

@@ -38,9 +38,7 @@
             ],
             "scripts": [
               "src/assets/libs/bootstrap.min.js"
-            ],
-            "serviceWorker": true,
-            "ngswConfigPath": "ngsw-config.json"
+            ]
           },
           "configurations": {
             "production": {
