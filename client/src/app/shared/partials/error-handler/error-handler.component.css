@@ -5,7 +5,7 @@
 }
 
 .notice_container {
-  background-image: url("/client/src/assets/images/shared/error-page.png");
+  background-image: url("/assets/images/shared/error-page.png");
   margin-left: -5px;
   height: 100vh;
 }
