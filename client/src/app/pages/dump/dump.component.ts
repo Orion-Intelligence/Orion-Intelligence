@@ -32,7 +32,7 @@ export class DumpComponent implements OnInit {
   selectedFilters: Record<string, string | null> = {};
   totalPages = 0;
   searchQuery: any;
-  isLoading = signal(false);
+  isLoading = signal(true);
 
   constructor(private dumpService: DumpService, private route: ActivatedRoute, private router: Router) {
     this.dumpData$ = this.dumpService.dumpData$;
@@ -41,7 +41,6 @@ export class DumpComponent implements OnInit {
       if (data) {
         this.totalPages = Math.ceil(data.total_count / 100);
       }
-
       setTimeout(() => {
         this.isLoading.set(false);
       }, 250);
@@ -77,7 +76,7 @@ export class DumpComponent implements OnInit {
 
       this.selectedFilters = initialSelectedFilters;
       this.searchQuery = params['q'] || '';
-      this.reloadDump()
+      this.reloadDump();
     });
   }
 
@@ -102,11 +101,9 @@ export class DumpComponent implements OnInit {
 
   resetFilters(): void {
     this.selectedFilters = {};
-
     Object.keys(this.filterModel.filters).forEach(key => {
       delete (this.filterModel.filters as any)[key].selected;
     });
-
     const currentUrl = this.router.url.split('?')[0];
     this.router.navigateByUrl(currentUrl, {replaceUrl: true}).then(() => {
       this.reloadDump();
