@@ -32,18 +32,15 @@ export class DumpComponent implements OnInit {
   selectedFilters: Record<string, string | null> = {};
   totalPages = 0;
   searchQuery: any;
-  isLoading = signal(true);
+  isLoading = signal(false);
 
   constructor(private dumpService: DumpService, private route: ActivatedRoute, private router: Router) {
     this.dumpData$ = this.dumpService.dumpData$;
-
     this.dumpData$.subscribe(data => {
       if (data) {
         this.totalPages = Math.ceil(data.total_count / 100);
-      }
-      setTimeout(() => {
         this.isLoading.set(false);
-      }, 250);
+      }
     });
   }
 
