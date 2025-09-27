@@ -5,16 +5,22 @@ import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 
+const preload = document.createElement('link');
+preload.rel = 'preload';
+preload.as = 'image';
+preload.href = PLACEHOLDER_SRC;
+document.head.prepend(preload);
+
+const preloadPlaceholder = new Image();
+preloadPlaceholder.src = PLACEHOLDER_SRC;
+
 const s = document.createElement('style');
 s.textContent = `
-@keyframes ph-alpha{0%{opacity:.25}100%{opacity:.5}}
 img[data-ph]{
   background:url('${PLACEHOLDER_SRC}') center/cover no-repeat;
   object-fit:cover;
   border-radius:8px;
-  color:transparent;
-  font-size:0;
-  animation:ph-alpha 1.2s ease-in-out infinite alternate;
+  opacity:0.85;
 }
 img[data-ph]:not([width]):not([height]){
   aspect-ratio:1/1;
@@ -28,8 +34,9 @@ document.head.appendChild(s);
 const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
-  const alt = img.getAttribute('alt') || '';
-  if (alt.toLowerCase() === 'background' || src.endsWith('Bg.webp')) return;
+  const alt = (img.getAttribute('alt') || '').toLowerCase();
+  if (alt === 'background' || src.endsWith('Bg.webp')) return;
+  img.removeAttribute('alt');
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
   const onload = () => { img.removeAttribute('data-ph'); };
@@ -66,5 +73,7 @@ async function preloadAllImagesFromManifest() {
   } catch {}
 }
 
-preloadAllImagesFromManifest().then();
-bootstrapApplication(AppComponent, appConfig).then();
+preloadPlaceholder.decode().catch(() => {}).finally(() => {
+  preloadAllImagesFromManifest().then();
+  bootstrapApplication(AppComponent, appConfig).then();
+});
