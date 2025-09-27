@@ -14,22 +14,9 @@ document.head.prepend(preload);
 const preloadPlaceholder = new Image();
 preloadPlaceholder.src = PLACEHOLDER_SRC;
 
-const s = document.createElement('style');
-s.textContent = `
-img[data-ph]{
-  background:url('${PLACEHOLDER_SRC}') center/cover no-repeat;
-  object-fit:cover;
-  border-radius:8px;
-  opacity:0.85;
-}
-img[data-ph]:not([width]):not([height]){
-  aspect-ratio:1/1;
-  min-width:24px;
-  min-height:24px;
-  display:inline-block;
-}
-`;
-document.head.appendChild(s);
+const css = document.createElement('link');
+css.rel = 'stylesheet';
+document.head.appendChild(css);
 
 const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
