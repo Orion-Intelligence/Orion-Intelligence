@@ -448,7 +448,6 @@ export const routes: Routes = [
           {
             path: 'listing',
             component: DumpComponent,
-            resolve: { reportdata: DumpResolver },
             data: { type: 'listing', animation: 'CategoryPage' }
           },
           {

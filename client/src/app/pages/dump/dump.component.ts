@@ -41,7 +41,6 @@ export class DumpComponent implements OnInit {
       if (data) {
         this.totalPages = Math.ceil(data.total_count / 100);
       }
-
       setTimeout(() => {
         this.isLoading.set(false);
       }, 250);
@@ -61,7 +60,6 @@ export class DumpComponent implements OnInit {
       Object.keys(baseFilters).forEach(key => {
         const base = baseFilters[key];
         const value = params[key];
-
         if (value && base.options.includes(value)) {
           newFilters[key] = {...base, selected: value};
           initialSelectedFilters[key] = value;
@@ -77,6 +75,15 @@ export class DumpComponent implements OnInit {
 
       this.selectedFilters = initialSelectedFilters;
       this.searchQuery = params['q'] || '';
+
+      const page = Number(params['page'] || 1);
+      this.dumpService.setCurrentPage(page);
+      this.isLoading.set(true);
+      this.dumpService.reloadDumpData({
+        ...initialSelectedFilters,
+        ...(this.searchQuery ? { q: this.searchQuery } : {}),
+        page
+      });
     });
   }
 
@@ -101,11 +108,9 @@ export class DumpComponent implements OnInit {
 
   resetFilters(): void {
     this.selectedFilters = {};
-
     Object.keys(this.filterModel.filters).forEach(key => {
       delete (this.filterModel.filters as any)[key].selected;
     });
-
     const currentUrl = this.router.url.split('?')[0];
     this.router.navigateByUrl(currentUrl, {replaceUrl: true}).then(() => {
       this.reloadDump();
