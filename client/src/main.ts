@@ -4,6 +4,7 @@ import { AppComponent } from './app/pages/app/app.component';
 import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
+const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
 
 const preload = document.createElement('link');
 preload.rel = 'preload';
@@ -11,8 +12,17 @@ preload.as = 'image';
 preload.href = PLACEHOLDER_SRC;
 document.head.prepend(preload);
 
+const preloadAuthIcon = document.createElement('link');
+preloadAuthIcon.rel = 'preload';
+preloadAuthIcon.as = 'image';
+preloadAuthIcon.href = AUTH_ICON_SRC;
+document.head.prepend(preloadAuthIcon);
+
 const preloadPlaceholder = new Image();
 preloadPlaceholder.src = PLACEHOLDER_SRC;
+
+const preloadAuth = new Image();
+preloadAuth.src = AUTH_ICON_SRC;
 
 const css = document.createElement('link');
 css.rel = 'stylesheet';
@@ -22,7 +32,7 @@ const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
   const alt = (img.getAttribute('alt') || '').toLowerCase();
-  if (alt === 'background' || src.endsWith('Bg.webp')) return;
+  if (alt === 'background' || src.endsWith('Bg.webp') || src.endsWith('auth_dashboard_icon.svg') || img.classList.contains('auth-wrapper__image')) return;
   img.removeAttribute('alt');
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
