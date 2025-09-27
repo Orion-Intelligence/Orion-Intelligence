@@ -222,7 +222,7 @@
 }
 
 .sidebar_overlay .dropdown-select:focus::after {
-  background-image: url('/client/src/assets/images/shared/search_side_dropdown_icon.svg');
+  background-image: url('/assets/images/shared/search_side_dropdown_icon.svg');
 }
 
 .sidebar_form .dropdown-menu .dropdown-item:hover {
