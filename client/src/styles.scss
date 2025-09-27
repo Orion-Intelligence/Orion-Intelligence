@@ -188,24 +188,27 @@ html::-webkit-scrollbar {
   }
 }
 
-img[data-ph]{
-  background-image:
-    linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0) 100%),
-    url('/assets/images/shared/placeholder.svg');
-  background-position: -200% 0, center;
-  background-size: 200% 100%, cover;
-  background-repeat: no-repeat, no-repeat;
-  animation: ph-shimmer 1.4s linear infinite;
+img[data-ph] {
+  background:
+    linear-gradient(90deg,
+      rgba(14, 22, 38, 0) 0%,
+      rgba(14, 22, 38, 0.45) 50%,
+      rgba(14, 22, 38, 0) 100%
+    ),
+    url('/assets/images/shared/placeholder.svg') center/cover no-repeat;
   object-fit: cover;
   border-radius: 8px;
   opacity: 0.85;
+  background-size: 200% 100%, cover;
+  animation: shimmer-dark 1.6s linear infinite;
 }
 
-@keyframes ph-shimmer{
-  to{ background-position: 200% 0, center; }
+@keyframes shimmer-dark {
+  0% { background-position: -200% 0, center; }
+  100% { background-position: 200% 0, center; }
 }
 
-img[data-ph]:not([width], [height]){
+img[data-ph]:not([width], [height]) {
   aspect-ratio: 1/1;
   min-width: 24px;
   min-height: 24px;
