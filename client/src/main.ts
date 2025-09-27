@@ -26,6 +26,7 @@ preloadAuth.src = AUTH_ICON_SRC;
 
 const css = document.createElement('link');
 css.rel = 'stylesheet';
+css.href = '/assets/placeholder.css';
 document.head.appendChild(css);
 
 const mark = (img: HTMLImageElement) => {
@@ -70,7 +71,7 @@ async function preloadAllImagesFromManifest() {
   } catch {}
 }
 
-preloadPlaceholder.decode().catch(() => {}).finally(() => {
+Promise.allSettled([preloadPlaceholder.decode(), preloadAuth.decode()]).finally(() => {
   preloadAllImagesFromManifest().then();
   bootstrapApplication(AppComponent, appConfig).then();
 });
