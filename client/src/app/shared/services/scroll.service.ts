@@ -21,30 +21,30 @@ export class ScrollService {
   }
 
   saveSession(itemId: string): void {
-    if (itemId) {
-      sessionStorage.setItem('selectedItem', itemId);
-      let scrollableContainer: HTMLElement | null = document.getElementById('item-' + itemId);
-      while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
-        scrollableContainer = scrollableContainer.parentElement;
-      }
-      const scrollPosition = scrollableContainer ? scrollableContainer.scrollTop : window.scrollY;
-      sessionStorage.setItem('scrollPosition', scrollPosition.toString());
-    }
+    // if (itemId) {
+    //   sessionStorage.setItem('selectedItem', itemId);
+    //   let scrollableContainer: HTMLElement | null = document.getElementById('item-' + itemId);
+    //   while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
+    //     scrollableContainer = scrollableContainer.parentElement;
+    //   }
+    //   const scrollPosition = scrollableContainer ? scrollableContainer.scrollTop : window.scrollY;
+    //   sessionStorage.setItem('scrollPosition', scrollPosition.toString());
+    // }
   }
 
   openCTI(event: MouseEvent, itemId: string): void {
-    event.stopPropagation()
-    if (itemId) {
-      const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
-      const singleInput = itemId;
-
-      const params = new URLSearchParams({
-        selectedType: 'document', singleInput: singleInput
-      });
-
-      const fullUrl = `${baseUrl}?${params.toString()}`;
-      window.open(fullUrl, '_blank');
-    }
+    // event.stopPropagation()
+    // if (itemId) {
+    //   const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+    //   const singleInput = itemId;
+    //
+    //   const params = new URLSearchParams({
+    //     selectedType: 'document', singleInput: singleInput
+    //   });
+    //
+    //   const fullUrl = `${baseUrl}?${params.toString()}`;
+    //   window.open(fullUrl, '_blank');
+    // }
   }
 
   scrollToSavedPosition(): void {

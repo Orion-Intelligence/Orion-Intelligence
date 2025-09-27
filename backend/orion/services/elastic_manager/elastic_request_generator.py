@@ -462,8 +462,7 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
-    @staticmethod
-    def on_search_consolidated_ranked_data(p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories):
+    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -516,7 +515,6 @@ class elastic_request_generator:
             m_ctype = p_query_model.category
             if m_ctype != "all":
                 allowed_categories = [m_ctype]
-
             channel_ids = []
             for c in allowed_categories:
                 channel_enum = ChannelTypeEnum.__members__.get(c.upper())
@@ -527,7 +525,6 @@ class elastic_request_generator:
                     else:
                         channel_ids.append(v)
             channel_ids = list({str(x) for x in channel_ids}) or [""]
-
             must_clauses.append({
                 "bool": {
                     "should": [
@@ -558,145 +555,47 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
-
-        fixed_must_filter = []
-        for clause in must_filter_clauses:
-            if "term" in clause:
-                for k, v in clause["term"].items():
-                    if isinstance(v, str) and k == "m_gpe":
-                        v = v.title()
-                    fixed_must_filter.append({"term": {k: v}})
-            else:
-                fixed_must_filter.append(clause)
-        must_filter_clauses = fixed_must_filter
-
         phrases = re.findall(r'"([^"]+)"', p_query_model.q or "")
+        quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (p_query_model.q or "").strip().endswith('"')
+        exact_phrases = phrases
+        loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
+        phrase_fields = [
+            ("m_title", 5),
+            ("m_content", 3),
+            ("m_url", 2),
+            ("m_sender_name", 2),
+            ("m_base_url", 1),
+            ("m_team", 1),
+            ("m_attacker", 1),
+            ("m_users", 1),
+            ("m_network", 1),
+            ("m_channel_name", 4)
+        ]
+        date_field = "m_message_date"
 
-        if phrases:
-            query_block = {"bool": {"must": [{"match_phrase": {"m_content": {"query": ph}}} for ph in phrases]}}
-        elif raw_query == "*":
-            query_block = {"match_all": {}}
-        else:
-            should_list = [
-                {
-                    "multi_match": {
-                        "query": raw_query,
-                        "type": "best_fields",
-                        "fields": [
-                            "m_title^5",
-                            "m_content^3",
-                            "m_url^2",
-                            "m_sender_name^2",
-                            "m_base_url",
-                            "m_team",
-                            "m_attacker",
-                            "m_users",
-                            "m_network"
-                        ],
-                        "operator": "or",
-                        "lenient": True
-                    }
-                },
-                {
-                    "multi_match": {
-                        "query": raw_query,
-                        "type": "phrase_prefix",
-                        "fields": [
-                            "m_channel_name^4",
-                            "m_title^4",
-                            "m_url.keyword^3",
-                            "m_sender_name.keyword^2"
-                        ],
-                        "operator": "or",
-                        "lenient": True
-                    }
-                },
-                {
-                    "query_string": {
-                        "query": raw_query,
-                        "fields": ["*"],
-                        "default_operator": "OR",
-                        "analyze_wildcard": True,
-                        "lenient": True,
-                        "boost": 0.5
-                    }
-                }
-            ]
+        unified_query = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=m_page_number,
+            date_field=date_field
+        )
 
-            if channel_q:
-                should_list.append({
-                    "term": {
-                        "m_channel_name.keyword": {
-                            "value": channel_q,
-                            "boost": 7.0
-                        }
-                    }
-                })
-                should_list.append({
-                    "match_phrase": {
-                        "m_channel_name": {
-                            "query": channel_q,
-                            "slop": 1,
-                            "boost": 7.0
-                        }
-                    }
-                })
+        unified_query["size"] = 15
+        unified_query["from"] = 0
 
-            query_block = {
-                "bool": {
-                    "should": should_list,
-                    "minimum_should_match": 1
-                }
-            }
-
-        combined_filter = must_clauses + must_filter_clauses
-
-        if not getattr(p_query_model, "must", False) and should_filter_clauses:
-            combined_filter.append({
-                "bool": {
-                    "should": should_filter_clauses["bool"]["should"],
-                    "minimum_should_match": 1
-                }
-            })
-
-        unified_query = {
-            "min_score": 0,
-            "query": {
-                "function_score": {
-                    "query": {
-                        "bool": {
-                            "filter": combined_filter,
-                            "must": query_block,
-                            "must_not": must_not_clause
-                        }
-                    },
-                    "score_mode": "sum",
-                    "boost_mode": "multiply"
-                }
-            },
-            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
-            "size": CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE,
-            "track_total_hits": True,
-            "explain": True
-        }
-
-        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
-            try:
-                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
-                if qvec:
-                    knn_clause = {
-                        "knn": {
-                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
-                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 1000,
-                            "query_vector": qvec
-                        }
-                    }
-                    unified_query["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
-                    unified_query["min_score"] = 29
-            except Exception:
-                pass
+        if channel_q:
+            qb = unified_query["query"]["function_score"]["query"]["bool"]
+            qb.setdefault("should", []).extend([
+                {"term": {"m_channel_name.keyword": {"value": channel_q, "boost": 7.0}}},
+                {"match_phrase": {"m_channel_name": {"query": channel_q, "slop": 1, "boost": 7.0}}}
+            ])
 
         query = base_index, unified_query, [b for b in [
             {ELASTIC_INDEX.S_LEAK_INDEX: 2},

@@ -153,7 +153,7 @@ class search_model:
         else:
             filter_dict = {}
 
-        indices, query, indices_boost = elastic_request_generator.on_search_consolidated_ranked_data(param, filter_dict, base_index, blocked_categories, allowed_categories)
+        indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(param, filter_dict, base_index, blocked_categories, allowed_categories)
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
 
         ranked_results = []

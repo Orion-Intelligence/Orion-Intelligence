@@ -1,4 +1,4 @@
-import {Directive, ElementRef, HostListener, Input, OnDestroy, AfterViewInit, Renderer2} from '@angular/core';
+import {Directive, ElementRef, HostListener, Input, OnDestroy, AfterViewInit, Renderer2, NgZone} from '@angular/core';
 
 @Directive({
   selector: '[appTooltip]'
@@ -8,26 +8,29 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
   private tooltip: HTMLElement | null = null;
   private showTimeout: any = null;
   private removeContainerScroll?: () => void;
+  private rafHideScheduled = false;
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  constructor(private el: ElementRef, private renderer: Renderer2, private zone: NgZone) {}
 
   ngAfterViewInit(): void {
     const container = document.getElementById('dashboard-container');
     if (container) {
-      this.removeContainerScroll = this.renderer.listen(container, 'scroll', () => this.hideNow());
+      this.zone.runOutsideAngular(() => {
+        this.removeContainerScroll = this.renderer.listen(container, 'scroll', () => this.scheduleHide());
+      });
     }
   }
 
-  @HostListener('window:scroll')
+  @HostListener('window:scroll', ['$event'])
   onWindowScroll(): void {
-    this.hideNow();
+    this.scheduleHide();
   }
 
   @HostListener('mouseenter')
   onMouseEnter(): void {
     if (this.tooltipText.trim()) {
       this.showTimeout = setTimeout(() => {
-        this.createTooltip();
+        this.createOrUpdateTooltip();
       }, 300);
     }
   }
@@ -42,7 +45,20 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
       this.removeContainerScroll();
       this.removeContainerScroll = undefined;
     }
-    this.hideNow();
+    this.destroyTooltip();
+    if (this.showTimeout) {
+      clearTimeout(this.showTimeout);
+      this.showTimeout = null;
+    }
+  }
+
+  private scheduleHide(): void {
+    if (!this.tooltip || this.rafHideScheduled) return;
+    this.rafHideScheduled = true;
+    requestAnimationFrame(() => {
+      this.hideNow();
+      this.rafHideScheduled = false;
+    });
   }
 
   private hideNow(): void {
@@ -51,22 +67,28 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
       this.showTimeout = null;
     }
     if (this.tooltip) {
-      this.renderer.removeChild(document.body, this.tooltip);
-      this.tooltip = null;
+      this.renderer.setStyle(this.tooltip, 'opacity', '0');
+      this.renderer.setStyle(this.tooltip, 'pointer-events', 'none');
+      this.renderer.setStyle(this.tooltip, 'display', 'none');
     }
   }
 
-  private createTooltip(): void {
-    this.removeTooltip();
+  private createOrUpdateTooltip(): void {
+    if (!this.tooltip) {
+      this.tooltip = this.renderer.createElement('div');
+      this.renderer.addClass(this.tooltip, 'custom-tooltip');
+      this.renderer.setStyle(this.tooltip, 'position', 'fixed');
+      this.renderer.setStyle(this.tooltip, 'opacity', '0');
+      this.renderer.setStyle(this.tooltip, 'text-transform', 'capitalize');
+      this.renderer.setStyle(this.tooltip, 'pointer-events', 'none');
+      this.renderer.appendChild(document.body, this.tooltip);
+    } else {
+      this.renderer.setProperty(this.tooltip, 'textContent', '');
+    }
 
-    const text = this.renderer.createText(this.tooltipText);
-    this.tooltip = this.renderer.createElement('div');
-    this.renderer.appendChild(this.tooltip, text);
-    this.renderer.addClass(this.tooltip, 'custom-tooltip');
-    this.renderer.setStyle(this.tooltip, 'position', 'absolute');
-    this.renderer.setStyle(this.tooltip, 'opacity', '0');
-    this.renderer.setStyle(this.tooltip, 'text-transform', 'capitalize');
-    this.renderer.appendChild(document.body, this.tooltip);
+    const textNode = this.renderer.createText(this.tooltipText);
+    this.renderer.appendChild(this.tooltip, textNode);
+    this.renderer.setStyle(this.tooltip, 'display', 'block');
 
     requestAnimationFrame(() => {
       if (!this.tooltip) return;
@@ -108,16 +130,13 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
     });
   }
 
-  private removeTooltip(): void {
+  private destroyTooltip(): void {
     if (this.tooltip) {
-      const tooltipRef = this.tooltip;
-      tooltipRef.style.opacity = '0';
-      setTimeout(() => {
-        if (tooltipRef && document.body.contains(tooltipRef)) {
-          this.renderer.removeChild(document.body, tooltipRef);
-        }
-      }, 200);
+      const t = this.tooltip;
       this.tooltip = null;
+      if (document.body.contains(t)) {
+        this.renderer.removeChild(document.body, t);
+      }
     }
   }
 }

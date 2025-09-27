@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Body
 from fastapi import Depends, Query
@@ -33,10 +33,9 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role,UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role,UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-from orion.api.interactive.tenant_manager.models.user_param_model import user_param_model
 
 api_routes = APIRouter()
 
