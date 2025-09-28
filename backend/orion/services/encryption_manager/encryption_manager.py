@@ -1,18 +1,14 @@
+# orion/services/encryption_manager/encryption_manager.py
 from cryptography.fernet import Fernet
 
 class encryption_manager:
-    _instance = None
+    def __init__(self, secret_key: str | bytes):
+        key = secret_key.encode() if isinstance(secret_key, str) else secret_key
+        self.fernet = Fernet(key)
 
-    def __init__(self, secret_key: str = None):
-        if secret_key is None:
-            secret_key = Fernet.generate_key().decode()
-        self.fernet = Fernet(secret_key.encode())
-
-    @classmethod
-    def get_instance(cls, secret_key: str = None):
-        if cls._instance is None:
-            cls._instance = cls(secret_key)
-        return cls._instance
+    @staticmethod
+    def create(secret_key: str | bytes):
+        return encryption_manager(secret_key)
 
     def encrypt(self, data: str) -> str:
         return self.fernet.encrypt(data.encode()).decode()

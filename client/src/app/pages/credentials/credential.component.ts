@@ -1,15 +1,15 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {switchMap, timer, map, distinctUntilChanged, combineLatest} from 'rxjs';
-import {ResultComponent} from '../../../shared/partials/result/result.component';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {ResultComponent} from '../../shared/partials/result/result.component';
+import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
+import {DashboardService} from '../../services/dashboard/dashboard.service';
 import {NgOptimizedImage} from '@angular/common';
-import {CredentialListComponent} from '../credential-list/credential-list.component';
-import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
-import {SortType} from '../../../shared/constants/shared-enums';
-import {HelperService} from '../../../shared/services/helper.service';
-import {stealer_filters} from '../../../shared/constants/filters';
+import {CredentialListComponent} from './credential-list/credential-list.component';
+import {StealerLogCallbackModel} from '../../shared/model/results/credentials/credential.callback.model';
+import {SortType} from '../../shared/constants/shared-enums';
+import {HelperService} from '../../shared/services/helper.service';
+import {stealer_filters} from '../../shared/constants/filters';
 import {FormsModule} from '@angular/forms';
 
 @Component({
@@ -139,9 +139,5 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   onToggleAnalyticsTrigger($event: string) {
     this.dashboardService.consolidatedParamModel.fullsearch = $event == "Full Search";
     this.fetchSearchResults(true);
-  }
-
-  onSearchSubmit() {
-
   }
 }

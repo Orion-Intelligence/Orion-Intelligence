@@ -2,6 +2,7 @@ export class ConsolidatedParamModel {
   q = "";
   page = 1;
   category = "all";
+  profile = false;
   platform = "all";
   content = "all";
   email?: string;

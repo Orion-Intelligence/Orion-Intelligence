@@ -9,6 +9,7 @@ class search_leak_param_model(BaseModel,helper_controller):
     category: Optional[str] = "all"
     page: Optional[int] = 1
     safe: bool = False
+    profile: bool = False
     network: str = "all"
     matchtype: Optional[str] = "or"
     daterange: Optional[str] = ""

@@ -15,7 +15,7 @@ import { ReportDefacementComponent } from './shared/partials/report/report-defac
 import { ReportChatComponent } from './shared/partials/report/report-chat/report-chat.component';
 import { DashboardExploitComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-exploit/dashboard-exploit.component';
 import { DumpComponent } from './pages/dump/dump.component';
-import { CredentialComponent } from './pages/dump/credential/credential.component';
+import { CredentialComponent } from './pages/credentials/credential.component';
 import { ErrorHandlerComponent } from './shared/partials/error-handler/error-handler.component';
 import { DashboardConsolidatedComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/dashboard-consolidated.component';
 import { ReportConsolidatedResolver } from './shared/resolvers/consolidated.resolver';
@@ -32,6 +32,7 @@ import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profi
 import { SidebarProfileDashboardComponent } from './shared/partials/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
 import { RoleGuard } from './shared/guards/role-guard.guard';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
+import {AuditlogComponent} from './pages/admin/auditlog/auditlog.component';
 
 const consolidatedChildren = [
   {
@@ -491,6 +492,11 @@ export const routes: Routes = [
             path: 'view',
             component: ViewTenantComponent,
             data: { type: 'view', animation: 'CategoryPage' }
+          },
+          {
+            path: 'auditlog',
+            component: AuditlogComponent,
+            data: { type: 'auditlog', animation: 'CategoryPage' }
           }
         ]
       },
@@ -531,7 +537,11 @@ export const routes: Routes = [
             data: { animation: 'ConsolidatedPage' },
             children: consolidatedChildren
           },
-
+          {
+            path: 'auditlog',
+            component: AuditlogComponent,
+            data: { type: 'auditlog', animation: 'CategoryPage' }
+          }
         ]
       }
     ]

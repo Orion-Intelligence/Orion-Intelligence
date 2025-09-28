@@ -10,5 +10,5 @@ class MailMessage(str, Enum):
     FORGOT_PASSWORD = "Click the link below to reset your password."
 
 class MailUrlHeading(str, Enum):
-    VERIFICATION = "Verification link"
-    FORGOT_PASSWORD = "Password rest link"
+    VERIFICATION = "Verification link : "
+    FORGOT_PASSWORD = "Password rest link : "

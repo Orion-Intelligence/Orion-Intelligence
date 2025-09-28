@@ -116,7 +116,8 @@ class elastic_request_generator:
         }
 
         if not p_query_model.must and should_filter_clauses:
-            base_bool_query.setdefault("should", []).extend(should_filter_clauses)
+            items = [should_filter_clauses] if isinstance(should_filter_clauses, dict) else list(should_filter_clauses)
+            base_bool_query.setdefault("should", []).extend(items)
 
         boost_shoulds = []
         if boost_shoulds:
@@ -605,6 +606,7 @@ class elastic_request_generator:
             {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}
         ] if next(iter(b)) in base_index]
 
+
         return query
 
     def on_search_consolidated_data(self, p_query_model, pFilter=None):
@@ -613,6 +615,7 @@ class elastic_request_generator:
         labels = []
 
         m1 = helper_controller.clone_model(p_query_model)
+        m1.category='databases'
         i1, q1 = self.on_search_leakdata(m1, pFilter)
         queries.append(helper_controller.strip_query(q1))
         indices.append(i1)

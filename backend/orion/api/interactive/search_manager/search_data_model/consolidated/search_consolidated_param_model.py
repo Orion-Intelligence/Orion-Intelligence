@@ -8,6 +8,7 @@ class search_consolidated_param_model(BaseModel):
     category: Optional[str] = "all"
     page: Optional[int] = 1
     safe: bool = False
+    profile: bool = False
     must: bool = False
     network: str = "all"
     daterange: Optional[str] = ""

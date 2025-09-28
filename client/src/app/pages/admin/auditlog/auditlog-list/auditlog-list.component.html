@@ -1,0 +1,37 @@
+<div class="list__container">
+  <table class="table table-striped directory-list__table clear-paddings">
+    <thead>
+    <tr>
+      <th class="list__column-id-min">ID</th>
+      <th class="list__column-service-url">Timestamp</th>
+      <th class="list__column-category">Actor</th>
+      <th class="list__column-url-status">Event</th>
+    </tr>
+    </thead>
+
+    <tbody *ngIf="!isLoading && (auditData$ | async) as dumpData" @fadeInDashboardItem>
+      <tr *ngFor="let item of dumpData.items; let i = index">
+        <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
+        <td>{{ item.ts | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+        <td>{{ item.actor_id }}</td>
+        <td>{{ item.event }}</td>
+      </tr>
+
+      <tr *ngIf="dumpData.items?.length === 0">
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+    </tbody>
+
+    <tbody *ngIf="isLoading" @fadeInDashboardItem>
+      <tr *ngFor="let _ of [1,2,3,4,5]">
+        <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+        <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+        <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

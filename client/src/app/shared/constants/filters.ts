@@ -34,6 +34,18 @@ export const dump_filters: FilterModel = {
   }
 };
 
+export const audit_filters: FilterModel = {
+  filters: {
+    daterange: {
+      title: "Date Range",
+      options: [],
+      type: "daterange",
+      tooltip: "Select Range",
+      selected: ""
+    }
+  }
+};
+
 export const stealer_filters: FilterModel = {
   filters: {
     daterange: {

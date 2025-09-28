@@ -6,6 +6,8 @@ from fastapi import Depends, Query
 
 from configs.app_dependency import role_required, status_required, get_current_user
 from configs.limiter_dependency import limiter_dependency
+from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.dump_manager.dump_model import dump_model
@@ -149,7 +151,6 @@ async def search_twitter(param: search_social_param_model = Body(...)):
 @api_routes.post("/api/search/breach", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],bypass_roles=[user_role.ADMIN, user_role.DEMO]))],
                 description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_leak(param: search_leak_param_model = Body(...)):
-
     if param.category in ['all']:
         base_index = [
             ELASTIC_INDEX.S_LEAK_INDEX,
@@ -163,7 +164,6 @@ async def search_leak(param: search_leak_param_model = Body(...)):
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
     else:
         return await search_model.getInstance().search_leak_result(param)
-
 
 @api_routes.post("/api/search/news", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Search breach news (leak) intelligence reports using parameters such as company, country, or hash.")
@@ -260,3 +260,7 @@ async def get_all_users():
 @api_routes.post("/api/update/user", dependencies=[Depends(role_required([user_role.ADMIN]))])
 async def update_user(user:tenant_param_model):
     return await TenantManager.get_instance().update_user(user)
+
+@api_routes.post("/api/audit/logs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.DEMO])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN]))])
+async def get_audit_logs(param: audit_log_param_model = Body(...), current_user = Depends(get_current_user)):
+    return await AuditLogManager.get_instance().get(param, current_user)

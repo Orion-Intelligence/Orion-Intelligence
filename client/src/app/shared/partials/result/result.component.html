@@ -170,7 +170,7 @@
       </ul>
     </div>
 
-    <div class="dropdown">
+    <div class="dropdown" *ngIf="!checkProfile()">
       <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
         aria-expanded="false">
         search by <b>({{ matchTypeLabel() }})</b>
@@ -262,10 +262,10 @@
   <app-empty-ioc></app-empty-ioc>
 </div>
 
-<div *ngIf="!(checkProfile() && !hasIOCs()) 
-         && isLoading!=null 
-         && (this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0) 
-         && !isLoading 
+<div *ngIf="!(checkProfile() && !hasIOCs())
+         && isLoading!=null
+         && (this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0)
+         && !isLoading
          && result_count==0" @fadeInDashboardItem>
   <app-empty-result [searchQuery]="local_query"></app-empty-result>
 </div>
@@ -278,7 +278,7 @@
 <ng-container *ngIf="result_count && !isLoading && !(result_count==0) && type == Category.STRATEGIC">
   <div class="default-notification-banner">
     <span>
-      <img alt="Info Icon" class="default-notification-banner-icon" src="../../../../assets/images/shared/hint.svg">
+      <img alt="Info Icon" width="18px" height="18px" class="default-notification-banner-icon" src="../../../../assets/images/shared/hint.svg">
       <span>
         Current results are general and may lack accuracy. For precise insights, open the &nbsp;
         <u><b>
