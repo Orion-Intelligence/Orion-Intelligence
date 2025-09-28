@@ -33,7 +33,7 @@ const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
   const alt = (img.getAttribute('alt') || '').toLowerCase();
-  if (alt === 'background' || src.endsWith('Bg.webp') || src.endsWith('auth_dashboard_icon.svg') || img.classList.contains('auth-wrapper__image')) return;
+  if (alt === 'background' || src.endsWith('Bg.webp') || src.endsWith('hint.svg') || src.endsWith('auth_dashboard_icon.svg') || img.classList.contains('auth-wrapper__image')) return;
   img.removeAttribute('alt');
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
