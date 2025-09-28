@@ -1,7 +1,10 @@
 from typing import Any, Dict, List, Optional
 
+import httpx
 from fastapi import HTTPException
 from starlette import status
+from starlette.responses import JSONResponse
+
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.search_manager.search_data_model.chat.search_chat_callback_model import \
     search_chat_callback_model as SearchChatCallbackModel, search_chat_callback_model
@@ -64,13 +67,25 @@ class search_model:
             search_model.__instance = self
 
     @staticmethod
-    async def dynamic_search_email(param: search_dynamic_param_model):
-        result = await external_request_controller.getInstance().fetch_email_leak(param)
-
-        if isinstance(result, list) and len(result) > 0:
-            return breach_data(**(result[0]))
-        else:
-            return breach_data().model_dump()
+    async def dynamic_search_email(model, api):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://trusted-micros-api:8010/runtime/parse/"+api,
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling parse/"+api}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling parse/"+api}
+            )
 
     async def request_defacement_doc(self, doc_id) -> Optional[result_item]:
         result = await elastic_controller.get_instance().get_doc(ELASTIC_INDEX.S_DEFACEMENT_INDEX, doc_id)

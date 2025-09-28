@@ -1,3 +1,4 @@
+
 export interface UrlScanMeta {
   URL: string;
   Host: string;

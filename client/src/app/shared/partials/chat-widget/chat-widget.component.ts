@@ -52,19 +52,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.io = new IntersectionObserver(
-      entries => {
-        this.userNearBottom = entries.some(e => e.isIntersecting);
-      },
-      { root: this.messagesContainer.nativeElement, threshold: 1 }
-    );
-    this.io.observe(this.bottomSentinel.nativeElement);
-
-    this.mo = new MutationObserver(() => {
-      if (this.userNearBottom || this.isBotTyping) this.scrollToBottom(true);
-    });
-    this.mo.observe(this.messagesContainer.nativeElement, { childList: true, subtree: true });
-
+    this.setupObserversIfPossible();
     this.scrollToBottom(true);
   }
 
@@ -140,11 +128,17 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.chatOpen = true;
-    setTimeout(() => this.scrollToBottom(true));
+    this.cdr.detectChanges();
+    this.setupObserversIfPossible();
+    this.scrollToBottom(true);
   }
 
   closeChat() {
     this.chatOpen = false;
+    this.io?.disconnect();
+    this.mo?.disconnect();
+    this.io = undefined;
+    this.mo = undefined;
   }
 
   trackByIndex(index: number): number {
@@ -174,10 +168,31 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private scrollToBottom(smooth: boolean): void {
+  private scrollToBottom(_: boolean): void {
     const el = this.messagesContainer?.nativeElement;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     this.userNearBottom = true;
+  }
+
+  private setupObserversIfPossible(): void {
+    const rootEl = this.messagesContainer?.nativeElement;
+    const sentinelEl = this.bottomSentinel?.nativeElement;
+    if (!rootEl || !sentinelEl) return;
+
+    if (!this.io) {
+      this.io = new IntersectionObserver(
+        entries => { this.userNearBottom = entries.some(e => e.isIntersecting); },
+        { root: rootEl, threshold: 1 }
+      );
+      this.io.observe(sentinelEl);
+    }
+
+    if (!this.mo) {
+      this.mo = new MutationObserver(() => {
+        if (this.userNearBottom || this.isBotTyping) this.scrollToBottom(true);
+      });
+      this.mo.observe(rootEl, { childList: true, subtree: true });
+    }
   }
 }

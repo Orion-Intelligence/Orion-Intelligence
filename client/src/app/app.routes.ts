@@ -6,7 +6,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { HomepageComponent } from './pages/homepage/homepage.component';
 import { DirectoryComponent } from './pages/directory/directory.component';
-import { DashboardEmailApiComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-email-api/dashboard-email-api.component';
+import { DashboardApiComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-api/dashboard-api.component';
 import { DashboardChatsComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-chats/dashboard-chats.component';
 import { DashboardGeneralComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-general/dashboard-general.component';
 import { ReportComponent } from './shared/partials/report/report_general/report.component';
@@ -174,8 +174,13 @@ export const routes: Routes = [
           },
           {
             path: 'email',
-            component: DashboardEmailApiComponent,
-            data: { animation: 'EmailAPI' }
+            component: DashboardApiComponent,
+            data: { animation: 'EmailAPI', type: 'user' }
+          },
+          {
+            path: 'social',
+            component: DashboardApiComponent,
+            data: { animation: 'SocialAPI', type: 'social' }
           }
         ]
       },

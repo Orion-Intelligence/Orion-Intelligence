@@ -4,6 +4,14 @@
   align-items: center;
 }
 
+.dash-api_single-search {
+  width: 150px !important;
+}
+
+.dash-api_hint {
+  margin-left: 30px !important;
+}
+
 .default-input-button-light {
   background: #fff !important;
 }

@@ -228,28 +228,30 @@ async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, ali
     return await search_model.getInstance().request_social_doc(doc_id, lang)
 
 
-@api_routes.get("/api/dynamic/email", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
-                description="Perform a dynamic search for emails found in breach and defacement data.")
+@api_routes.post("/api/dynamic/user", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO]))],
+    description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
-    return await search_model.getInstance().dynamic_search_email(param)
+    return await search_model.getInstance().dynamic_search_email(param, "user")
 
+@api_routes.post("/api/dynamic/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO]))],
+    description="Perform a dynamic search for emails found in breach and defacement data.")
+async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
+    return await search_model.getInstance().dynamic_search_email(param, "social")
 
-@api_routes.get("/api/search/breach/screenshot/{filename}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
+@api_routes.get("/api/search/breach/screenshot/{filename}",dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Retrieve the screenshot associated with a breach document (image is in .webp format).")
 async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
-
-@api_routes.post("/api/createTenant",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ONBOARDING]))],)
+@api_routes.post("/api/create/tenant",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ONBOARDING]))],)
 async def create_tenant(data: TenantRequest, current_user = Depends(get_current_user)):
     return await TenantManager.get_instance().create_tenant(data, current_user)
 
-@api_routes.post("/api/getTenant",dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN]))],)
+@api_routes.post("/api/get/tenant",dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN]))],)
 async def get_tenant(current_user = Depends(get_current_user)):
     return await TenantManager.get_instance().get_tenant(current_user)
 
-@api_routes.post("/api/updateTenant",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],)
+@api_routes.post("/api/update/tenant",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))],)
 async def update_tenant(data: TenantRequest, current_user = Depends(get_current_user)):
     return await TenantManager.get_instance().update_tenant(data, current_user)
 

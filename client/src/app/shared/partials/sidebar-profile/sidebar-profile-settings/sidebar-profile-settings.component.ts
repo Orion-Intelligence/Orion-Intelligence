@@ -30,7 +30,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    this.apiService.post<TenantModel>('getTenant', {})
+    this.apiService.post<TenantModel>('get/tenant', {})
       .subscribe({
         next: (backendData) => {
           this.onboardingData = {
@@ -98,7 +98,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
       'Authorization': `Bearer ${token}`
     });
 
-    this.apiService.post('updateTenant', filteredOnboardingData).subscribe({
+    this.apiService.post('update/tenant', filteredOnboardingData).subscribe({
       next: () => {
         this.authService.setOnboarding(true);
         this.router.navigate(['/dashboard']);
