@@ -268,6 +268,10 @@ export class ResultComponent implements OnInit, OnChanges {
     );
     window.open(url, '_blank');
   }
+  onEntityFilterToggle(newValue: boolean): void {
+    this.app_service.set('entityFilterCondition', newValue);
+    this.onFormSubmit();
+  }
   checkProfile(): boolean {
     const url = this.router.url;
     const parts = url.split('/');

@@ -154,51 +154,12 @@
   </form>
 </ng-container>
 <ng-template #profile>
-  <div class="mt-2 d-flex gap-3 dropdown-menu-container" @fadeInDashboardItem>
-    <div class="dropdown me-3" *ngIf="showSorting">
-      <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown"
-        aria-expanded="false">
-        sort by <b>({{ selectedSortBy }})</b>
-        <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-      </span>
-      <ul class="dropdown-menu mt-3 rounded-4 fade" aria-labelledby="dropdownMenu1">
-        <li><a class="dropdown-item" (click)="onSortChange(SortType.NEWEST_FIRST)">Newest first</a></li>
-        <li>
-          <hr class="dropdown-divider mx-3">
-        </li>
-        <li><a class="dropdown-item" (click)="onSortChange(SortType.OLDEST_FIRST)">Oldest first</a></li>
-      </ul>
-    </div>
-
-    <div class="dropdown" *ngIf="!checkProfile()">
-      <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
-        aria-expanded="false">
-        search by <b>({{ matchTypeLabel() }})</b>
-        <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
-      </span>
-      <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
-        <li><a class="dropdown-item"
-            (click)="selectedSearchBy = 'Match Semantic';onSetMatchType('semantic');onFormSubmit();"> Match
-            Semantic</a></li>
-        <li>
-          <hr class="dropdown-divider mx-3">
-        </li>
-        <li><a class="dropdown-item" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onFormSubmit();">
-            Match any term
-            (OR)</a></li>
-        <li>
-          <hr class="dropdown-divider mx-3">
-        </li>
-        <li><a class="dropdown-item"
-            (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onFormSubmit();"> Match
-            indivisual terms (AND)</a></li>
-        <li>
-          <hr class="dropdown-divider mx-3">
-        </li>
-        <li><a class="dropdown-item"
-            (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onFormSubmit();"> Match full
-            query (AND)</a></li>
-      </ul>
+  <div class="result__match-row">
+    <label class="result__toggle-switch"> <input type="checkbox"
+        [(ngModel)]="app_service.configData().localSettings.entityFilterCondition"
+        (ngModelChange)="onEntityFilterToggle($event)" /> <span class="result__slider"></span> </label>
+    <div class="result__entity-condition">
+      {{ app_service.configData().localSettings.entityFilterCondition ? 'Exact Match' : 'Partial Match' }}
     </div>
   </div>
 </ng-template>

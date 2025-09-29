@@ -299,17 +299,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       (arr: any) => Array.isArray(arr) && arr.length > 0
     );
   }
-  shouldShowSection(): boolean {
-    if (!this.checkProfile()) {
-      return true;
-    }
-    const defacementData = this.consolidatedCallbackModel?.defacement_model?.Result?.length ?? 0;
-    const stealerData = this.consolidatedCallbackModel?.stealer_model?.Result?.length ?? 0;
-    const otherDataExists = Object.values(this.groupedResults || {}).some(
-      (group: any) => group.value?.length > 0
-    );
 
-    return this.hasIOCs() && (defacementData > 0 || stealerData > 0 || otherDataExists);
+  shouldShowSection(): boolean {
+    const totalResults = this.getTotalResultCount();
+    const hasAnyData = totalResults > 0;
+    if (!this.checkProfile()) {
+      return hasAnyData;
+    }
+    return hasAnyData && this.hasIOCs();
   }
+
 
 }
