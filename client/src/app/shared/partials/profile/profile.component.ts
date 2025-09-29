@@ -6,11 +6,14 @@ import {
   OnDestroy,
   signal
 } from '@angular/core';
-import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
-import {AuthService} from '../../../services/authetication/auth.service';
-import {Observable} from 'rxjs';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {Router} from '@angular/router';
+import { AsyncPipe, NgIf, NgOptimizedImage } from "@angular/common";
+import { AuthService } from '../../../services/authetication/auth.service';
+import { Observable } from 'rxjs';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { Router } from '@angular/router';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { AppService } from '../../../services/core/app/app.service';
+import { ConfigSettings } from '../../model/app/config';
 
 @Component({
   selector: 'app-profile',
@@ -35,7 +38,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dropdownOpen.set(false);
   };
 
-  constructor(protected authService: AuthService, public router: Router) {
+  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
@@ -53,7 +56,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.scrollContainer = document.getElementById('dashboard-container');
     if (this.scrollContainer) {
-      this.scrollContainer.addEventListener('scroll', this.scrollHandler, {passive: true});
+      this.scrollContainer.addEventListener('scroll', this.scrollHandler, { passive: true });
     }
   }
 
@@ -87,6 +90,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   logout() {
+    this.dashboardService.resetParams();
+    this.dashboardService.clearCallback();
+    this.appService.configData.set(new ConfigSettings({}, {}));
     this.authService.logout();
     this.dropdownOpen.set(false);
   }
