@@ -73,7 +73,7 @@ class search_model:
                 response = await client.post(
                     "http://trusted-micros-api:8010/runtime/parse/"+api,
                     json=model.model_dump(),
-                    timeout=120
+                    timeout=500
                 )
                 if response.status_code != 200:
                     return JSONResponse(
