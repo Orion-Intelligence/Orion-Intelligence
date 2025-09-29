@@ -13,13 +13,7 @@ provide full control over the system's functionality, ensuring smooth and effici
 
 ## Homepage Page
 
-The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlined
-access to its wide range of features. When we log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly
-enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter,
-and visualize data across multiple categories, making data exploration both effective and insightful. With its robust
-capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an
-ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility
-and performance ensure it meets the needs of various industries and use cases.
+The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlinedaccess to its wide range of features. When we  log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
 
 
 <img width="1920" height="1233" alt="Homepage" src="https://github.com/user-attachments/assets/156d58b2-5845-43a2-88df-4fd8b8a5f9db" />
@@ -32,8 +26,9 @@ Here’s an overview of the interface components
 
 ### Navbar Filter
 
-The navigation bar is now positioned on the left side of the page for improved accessibility and a more streamlined
-workflow. 
+The navigation bar has been moved to the left side of the page. This adjustment enhances accessibility for users. It also creates a cleaner and more efficient workflow.
+
+
 <img width="420" height="893" alt="sidebar" src="https://github.com/user-attachments/assets/2a7dd05b-8a34-4e87-b3de-42357f4663a2" />
 
 
@@ -65,13 +60,13 @@ It consists of the following main menu items:
 These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
    In this module, the system actively collects data from:
+   
+ **Telegram channels:** Extracts downloadable files and shared dump links related to breaches or leaks.
 
-    - Telegram channels: Extracts downloadable files and shared dump links related to breaches or leaks.
-
-    - Websites and forums: Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious
+**Websites and forums:** Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious
       actors.
 
-    - Other open-source intelligence (OSINT) platforms: Tracks and organizes dump-related information for quick
+**Other open-source intelligence (OSINT) platforms:** Tracks and organizes dump-related information for quick
       analysis.
 10. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
 
@@ -100,15 +95,10 @@ high-priority data. This well-organized structure ensures that users have an int
   
 <img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
 
-In this search bar, a dropdown appears where we can select and apply different filters. There are two ways to use these filters: At the top, a "List of filters" is displayed, from which we can select the desired ones.
 
-Additionally, we can type directly into the search filter input field to find and apply a specific filter.
+In this **search bar**, a dropdown appears where we can select and apply different filters. There are two ways to use these filters: At the top, a "List of filters" is displayed, from which we can select the desired ones. Additionally, we can type directly into the search filter input field to find and apply a specific filter. Below this, there is another input field labeled “Enter Entity”, where an additional filter can be applied. When both the upper filter and the lower entity filter are applied together, they provide the most accurate and refined results. And below, in the IOs section, it will display the filter that was selected above, indicating which filter has been applied. In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
 
-Below this, there is another input field labeled “Enter Entity”, where an additional filter can be applied. When both the upper filter and the lower entity filter are applied together, they provide the most accurate and refined results. And below, in the IOs section, it will display the filter that was selected above, indicating which filter has been applied.
-
-In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
-
-Next to the Advance button, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
+Next to the **Advance button**, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
 
 - Match Any Term (OR):
 This option shows results containing any of the search terms. The results are broader and may include more generic or loosely related data.
@@ -121,8 +111,8 @@ This option only shows results that exactly match the full query entered. If suc
 
 <img width="821" height="167" alt="filterbar" src="https://github.com/user-attachments/assets/d1974392-7a61-4e98-b98d-e16aa2ddd32b" />
 
-Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
 
+Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
 #### Statistics
 
 In the statistics section, when we view the chart bars, several results are displayed. The first statistic highlights the top teams that are most frequently involved in leak incidents. The next chart shows the teams associated with website defacement activities. The third statistic presents the top geographic regions with the highest number of defacement incidents. Finally, another chart displays the most frequently used hashtags, reflecting their use in social media activities and related incidents.
@@ -131,8 +121,9 @@ In the statistics section, when we view the chart bars, several results are disp
 
 #### To Data Leaks
 
-We are receiving data in two rows. The top row is related to leaks, where general results are being fetched from Onion, Clearnet, and I2P. In each block, when we click on “View Detail” at the bottom, it will take us to that specific result. There, the complete details will be available, including related URLs, metadata, JSON report, and other reports connected to the same leak.
-Below the top leaks data, the second row displays results related to defacements. Similar to the leaks section, clicking on “View Detail” redirects us to a specific result page, where comprehensive information is provided, including the associated network, JSON report, and other relevant details.
+The data is displayed in two rows. The top row contains leak-related results, fetched from Onion, Clearnet, and I2P. Each block includes a “View Detail” option at the bottom, which opens the specific result page with complete information such as related URLs, metadata, JSON report, and other reports linked to the same leak.
+
+The second row presents results related to defacements. Similar to the leaks section, selecting “View Detail” redirects to a detailed result page, where comprehensive insights are available, including the associated network, JSON report, and other relevant information.
 
 <img width="1591" height="523" alt="topleakdata" src="https://github.com/user-attachments/assets/31c25b76-e1e0-4de7-87d2-e757d7483101" />
 
@@ -168,13 +159,13 @@ The clear layout supports streamlined analysis and quick interpretation of compl
 
 1. #### Generic Index
 
-<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/e4e62891-3cb5-4ffe-a353-20c0fc11d93c" />
-
 The "Generic Index" category displays information related to the crawling process, providing users with insights into
 various states of the fetched data. These states represent different aspects of the crawling operation, each offering
 valuable details. By reviewing the data systematically, one state at a time, users can gain a comprehensive
 understanding of the progress and status of the crawl. This structure ensures users can focus on specific areas of
 interest without being overwhelmed by unnecessary information.
+
+<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/e4e62891-3cb5-4ffe-a353-20c0fc11d93c" />
 
 - **Document Count:** This section provides detailed information about the results obtained after the data is fetched,
   focusing on the total document count. It displays the total number of documents retrieved from the crawl, presented as
@@ -293,36 +284,25 @@ understanding of their contents and how users can leverage them effectively.
 
 ### All
 
-The "All" category offers a comprehensive and unified view of intelligence data, consolidating information from every
-subcategory under the General Intelligence section. This enables users to access a broad range of data in one place,
-making it easier to analyze and compare information across various categories. The "All" category serves as a
-centralized hub for quickly reviewing the full spectrum of collected intelligence.
+The "All" category offers a comprehensive and unified view of intelligence data, consolidating information from every subcategory under the General Intelligence section. This enables users to access a broad range of data in one place, making it easier to analyze and compare information across various categories. The "All" category serves as a centralized hub for quickly reviewing the full spectrum of collected intelligence.
 
 1. ### General
 
-This section houses a diverse collection of uncategorized intelligence data, encompassing various findings that don’t
-fit neatly into the more specific categories outlined elsewhere. It includes miscellaneous insights and discoveries
-gathered from different sources, providing users with a broader scope of information. This section ensures that no
-valuable data goes overlooked, even if it doesn't fall under a specific category.
+This section houses a diverse collection of uncategorized intelligence data, encompassing various findings that don’t fit neatly into the more specific categories outlined elsewhere. It includes miscellaneous insights and discoveries gathered from different sources, providing users with a broader scope of information. This section ensures that no valuable data goes overlooked, even if it doesn't fall under a specific category.
 
 <img width="1366" height="424" alt="general feature-modified" src="https://github.com/user-attachments/assets/c55048a7-ae0c-4e9a-870b-97863c4c1660" />
 
 
 2. ### Forums
 
-In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions
-around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations
-about the relevant information. The forum serves as an interactive space where individuals can contribute their
-knowledge and collaborate on the topic.
+In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
 
 <img width="1912" height="563" alt="forums" src="https://github.com/user-attachments/assets/4fae3549-7431-4779-983a-5a0a9c560468" />
 
 
 3. ### News
 
-The news section allows users to view any news related to the data, provided there is relevant coverage available. It
-keeps users updated with the latest developments and trends related to the searched data. This section ensures users
-stay informed about any significant news that may impact their analysis or understanding.
+The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest  developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
 
 <img width="1362" height="396" alt="news-modified" src="https://github.com/user-attachments/assets/42410658-8aae-4b97-881c-d01ce42081e2" />
 
@@ -390,10 +370,7 @@ In discussion, we often receive general results that may appear in various place
 
 1. ### Databases
 
-This section contains detailed records of actual data breaches, offering in-depth information about compromised
-credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a
-clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and
-understand the type of sensitive information that was exposed.
+This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
 
 2. ### Email
 This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
@@ -482,7 +459,8 @@ Orion can use Reddit to collect data on user discussions, emerging issues, and n
 
 ## Live APIs
 
-The Live APIs section provides users with real-time investigative tools. Within this section:
+The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
+It can also include many other features and possibilities. Within this section:
 
 ### Email Lookup:
 
@@ -508,20 +486,18 @@ Short answer: they are different kinds of exploit-related information, not all t
 
 <img width="1918" height="715" alt="exploit" src="https://github.com/user-attachments/assets/a5683c65-8165-4843-aecd-5b04454168d3" />
 
-**1- CVE:** 
 
+**1- CVE:** 
 In Orion, CVE (Common Vulnerabilities and Exposures) provides a standardized identifier for publicly known software vulnerabilities (e.g., CVE-2024-xxxx). Each entry includes a stable ID, a brief description, and references to help teams track and remediate issues. Within Orion, the results may include both actual vulnerability records as well as discussion-based references related to those vulnerabilities.
 
 <img width="1908" height="535" alt="cve" src="https://github.com/user-attachments/assets/902e0533-fec6-4e28-8280-e7dd54bfdd71" />
 
 **2- Tools:**
-
 Orion Intelligence includes a tool-discovery feature that identifies which tools are in use (for example, WordPress). It scans those tools for issues and alerts you if it finds bugs or vulnerabilities. The feature provides clear, actionable information about the problem and where it appears. This helps developers quickly prioritize fixes and maintain safer, more reliable systems.
 
 <img width="1905" height="908" alt="tools" src="https://github.com/user-attachments/assets/e1cf46ca-de11-4355-ac74-3b2be4353dee" />
 
 **3- Zeroday:**
-
 A zero-day vulnerability is a previously unknown flaw in a software or system that has not yet been identified or patched by the vendor. Because no fix exists at the time of discovery, it can be exploited immediately by attackers. Orion Intelligence identifies and reports these vulnerabilities in real time, enabling organizations to respond quickly and reduce potential risks.
 
 <img width="1908" height="900" alt="zeroday" src="https://github.com/user-attachments/assets/ee37db76-1753-4f7c-9d7b-00d881d33c9a" />
@@ -529,7 +505,7 @@ A zero-day vulnerability is a previously unknown flaw in a software or system th
 
 ## Feed
 
-Deed mainly contains news items that may cover any topic or be related to a specific search. Each general feed result can be opened and viewed individually.
+Feed mainly contains news items that may cover any topic or be related to a specific search. Each general feed result can be opened and viewed individually.
 You can also plot any result on the CTI graph to see its relationships and context. This lets analysts examine single items and explore their connections visually.
 
 <img width="1913" height="907" alt="feed" src="https://github.com/user-attachments/assets/28ed9fa1-df82-4f31-97ad-3de95c1b26dc" />
@@ -609,7 +585,7 @@ On the rightmost side of the CTI Graph interface, there are several additional o
 - Finally, there is a Color Indicators section, which explains the meaning of different node colors used within the
   graph for easier interpretation.
 
-<img width="243" height="805" alt="properties" src="https://github.com/user-attachments/assets/b9632368-1658-480e-b8c6-f03952f498dc" />
+<img width="257" height="888" alt="togglebar" src="https://github.com/user-attachments/assets/5cf73e5a-6d3e-4da0-9695-ef9b13c412ee" />
 
 
 ## Fillter and Analytics
@@ -660,7 +636,7 @@ contains two additional options.
 Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the
 process of refining results for more targeted insights.
 
-<img width="298" height="892" alt="sidefilters" src="https://github.com/user-attachments/assets/cca681b2-ee10-473a-9bc0-89d8a9882af0" />
+<img width="281" height="887" alt="filters2" src="https://github.com/user-attachments/assets/e7f62291-b4e9-4a2d-a223-6a781e875429" />
 
 
 ### Network Types
@@ -741,7 +717,7 @@ simplifying the navigation of search results. Below the search bar overall fetch
 The detailed view of a search result provides essential information to help users assess the nature of a website before
 accessing it. This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak
 site, or cryptocurrency platform.
-
+**Open Report**
 When a user clicks on a specific section of the result, a separate menu appears, offering various features related to
 the selected site. 
 <img width="1917" height="598" alt="image" src="https://github.com/user-attachments/assets/10827be3-337d-48e2-a85b-df9a6d0e64db" />
@@ -750,14 +726,10 @@ the selected site.
 This menu is designed for quick access to useful tools, including:
 
 **Download:** Allows the user to download available site content
-
 **Print:** Enables printing of the current view or content
-
 **AI Summary:** Search results we receive are in another language, the AI Summary will generate a summary for us in our
 preferred language.
-
 **Share Link:** Copies the site’s URL for easy sharing
-
 **Open in New Tab:** Loads the site in a separate browser tab for convenience.
 **Open CTI Graph:** This option redirects the user from the search results to the corresponding page on the CTI Graph,
 displaying relevant visual relationships based on the selected search item.
@@ -766,7 +738,7 @@ In addition to the mentioned details, this section also displays the publish dat
 relevant tags, and the status of the link. The status indicates whether the link is currently active or inactive,
 helping users quickly determine if the site is accessible.
 
-##### Search Insight:
+#### Search Insight:
 
 In this, if we open any result obtained from the search, the bottom section—referred to as Search Insight—displays
 additional parameters related to that site or search result. These may include the section, context, location type, IP
@@ -775,32 +747,20 @@ address, and any web links or URLs found within it.
 Towards the end, there is a complete menu table available, where several additional elements can be viewed, such as:
 
 #### Section Tab
-
 The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being
 extracted during the data crawling process. This feature helps users identify and understand the structure of the
 website within the fetched data.
-
 #### Content Tab
-
 Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking
 on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
-
-
 #### Images
-
 In the Images menu, it displays the number of images related to that particular result.
-
 #### Content Type
-
 Next, we have the Content Type section, which shows the types of content associated with that particular result.
-
 #### Clear Net
-
 After that, there is the Clearnet option, which displays all the links related to the Clearnet that are associated with
 the selected result.
-
 #### Person
-
 Then we have the Person option, which displays the names of individuals associated with the selected search result.
 
 <img width="1715" height="822" alt="reports" src="https://github.com/user-attachments/assets/d1bdea60-b148-4f46-94b1-6b24ff9afdb9" />
@@ -816,7 +776,6 @@ The JSON response presents information from the same link in a structured format
 
 <img width="1598" height="866" alt="jsonresponse" src="https://github.com/user-attachments/assets/aa4a439d-803a-4347-9d60-ad47aaacbee2" />
 
-
 #### Related Reports
 Related reports display all additional reports connected to the same link being analyzed. This helps identify what other findings or references are linked to that particular source.
 
@@ -827,7 +786,6 @@ Related reports display all additional reports connected to the same link being 
 Finally, one of the most important features of our tool is the AI-powered chatbot. This intelligent assistant allows users to ask questions about any related report, URL, or dataset and instantly receive clear answers. The chatbot is designed to simplify complex information by providing summaries, highlighting key details, and guiding users toward deeper insights. It also supports interactive queries, enabling users to explore data in a conversational manner rather than searching manually. This feature makes the overall experience more efficient, user-friendly, and highly effective for decision-making.
 
 <img width="387" height="588" alt="chatbot" src="https://github.com/user-attachments/assets/b2f847eb-9981-48d7-9df2-c2f561baa406" />
-
 
 ## Overview and Additional Features
 
@@ -910,7 +868,8 @@ MODE. These three concepts help us manage demo server access and control feature
 **TRAEFIK KEYS**
 
 1. TRAEFIK_USERNAME=admin
-2. TRAEFIK_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
+2. TRAEFIK_PASSWORD=
+('SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8')
 
 **Description:** These keys are used for both Flower and Dozzle. They allow access to the demo server, enabling users to
 use it for demonstration purposes.
@@ -918,7 +877,8 @@ use it for demonstration purposes.
 **DEMO KEYS**
 
 1. DEMO_USERNAME=demo
-2. DEMO_PASSWORD='TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw'
+2. DEMO_PASSWORD=
+('TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw')
 
 **Description:** Demo keys are used to provide users with a demo version of the service. By using these keys, users can
 access a limited, demo server environment to explore features.
