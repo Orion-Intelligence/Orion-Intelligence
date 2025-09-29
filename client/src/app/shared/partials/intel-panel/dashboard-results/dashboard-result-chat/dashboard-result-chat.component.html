@@ -1,5 +1,7 @@
 <div class="dashboard__search-container dashboard__search-container-chat">
-  <ng-container *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults)" class="dashboard__search-card">
+  <ng-container
+    *ngFor="let item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 7))"
+    class="dashboard__search-card">
     <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
         <div class="dashboard__search-tags">
@@ -10,14 +12,15 @@
             <span class="dashboard__tag">unknown</span>
           </ng-template>
         </div>
-        <div (click)="scrollService.saveSession(item.m_message_id ?? '')" appTooltip="Open Report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+        <div (click)="scrollService.saveSession(item.m_message_id ?? '')" appTooltip="Open Report"
+          [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
           <div class="dashboard__search-button-inner">
-            <img height="20" src="/assets/images/shared/redirect.svg" width="20" alt="redirect"/>
+            <img height="20" src="/assets/images/shared/redirect.svg" width="20" alt="redirect" />
           </div>
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <img alt="Channel" height="20" src="/assets/images/shared/channel.svg" width="20"/>
+        <img alt="Channel" height="20" src="/assets/images/shared/channel.svg" width="20" />
         <h2 class="dashboard__search-title mb-0 ml-2">{{ item.m_channel_name || 'Untitled' }}</h2>
       </div>
       <div *ngIf="item.m_message_sharable_link" class="dashboard__search-link dashboard__search-link-chat">
@@ -55,7 +58,7 @@
             <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Raw Data Content</h5>
             <p class="dashboard__search-description highlight mt-2">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                {{ part }}<br *ngIf="!last"/>...
+                {{ part }}<br *ngIf="!last" />...
               </ng-container>
               <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
             </p>
@@ -69,8 +72,9 @@
             <ng-container *ngIf="item.m_content">
               <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Raw Data Content</h5>
               <p class="dashboard__search-description highlight mt-2">
-                <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                  {{ part }}<br *ngIf="!last"/>...
+                <ng-container
+                  *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
+                  {{ part }}<br *ngIf="!last" />...
                 </ng-container>
                 <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
               </p>
@@ -82,7 +86,7 @@
           <ng-container *ngIf="item.m_content; else noContent">
             <p class="dashboard__search-description highlight mt-2">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                {{ part }}<br *ngIf="!last"/>...
+                {{ part }}<br *ngIf="!last" />...
               </ng-container>
               <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
             </p>
@@ -112,7 +116,7 @@
         <div *ngIf="item.m_views" class="dashboard__search-info-item">
           <span class="dashboard__info-label">Views:</span> <span class="dashboard__info-value">{{
             item.m_views
-          }}</span>
+            }}</span>
         </div>
 
       </div>

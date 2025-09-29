@@ -24,14 +24,10 @@ export class SignupComponent {
     number: false,
     specialChar: false
   };
+  currentUnmetCheck: string | null = null;
 
   constructor(private router: Router, public auth_service: AuthService) {
   }
-  isCompanyMail: boolean = true;
-  private blockedDomains = [
-    'yahoo.com', 'outlook.com', 'hotmail.com',
-    'live.com', 'aol.com', 'icloud.com', 'protonmail.com', 'gmx.com'
-  ];
   onPasswordInput(password: string) {
     this.showPasswordMeter = password.length > 0;
 
@@ -43,6 +39,17 @@ export class SignupComponent {
       specialChar: /[^A-Za-z0-9]/.test(password)
     };
 
+    const checkOrder = [
+      { key: 'length', message: 'At least 8 characters' },
+      { key: 'lowercase', message: 'At least one lowercase letter' },
+      { key: 'uppercase', message: 'At least one uppercase letter' },
+      { key: 'number', message: 'At least one number' },
+      { key: 'specialChar', message: 'At least one special character' }
+    ] as const;
+
+    this.currentUnmetCheck =
+      checkOrder.find(c => !this.passwordChecks[c.key])?.message || null;
+
     const allRequirementsMet = Object.values(this.passwordChecks).every(v => v);
 
     if (!allRequirementsMet) {
@@ -50,7 +57,7 @@ export class SignupComponent {
       return;
     }
 
-    if (password.length >= 12 && /[^A-Za-z0-9]/.test(password) && /[0-9]/.test(password)) {
+    if (password.length >= 12 && this.passwordChecks.specialChar && this.passwordChecks.number) {
       this.passwordStrength = 'strong';
     } else if (password.length >= 10) {
       this.passwordStrength = 'medium';
@@ -58,16 +65,9 @@ export class SignupComponent {
       this.passwordStrength = 'weak';
     }
   }
+
   get allPasswordRequirementsMet(): boolean {
     return Object.values(this.passwordChecks).every(v => v);
-  }
-  onEmailInput(email: string) {
-    if (!email) {
-      this.isCompanyMail = true;
-      return;
-    }
-    const domain = email.split('@')[1]?.toLowerCase();
-    this.isCompanyMail = domain ? !this.blockedDomains.includes(domain) : true;
   }
   onSubmit(form: NgForm) {
     if (form.valid) {

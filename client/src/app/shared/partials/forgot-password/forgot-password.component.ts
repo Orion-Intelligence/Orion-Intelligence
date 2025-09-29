@@ -29,6 +29,7 @@ export class ForgotPasswordComponent {
     number: false,
     specialChar: false
   };
+  currentUnmetCheck: string | null = null;
   constructor(private router: Router, private route: ActivatedRoute, private http: HttpClient, public auth_service: AuthService) {
   }
   onPasswordInput(password: string) {
@@ -42,6 +43,17 @@ export class ForgotPasswordComponent {
       specialChar: /[^A-Za-z0-9]/.test(password)
     };
 
+    const checkOrder = [
+      { key: 'length', message: 'At least 8 characters' },
+      { key: 'lowercase', message: 'At least one lowercase letter' },
+      { key: 'uppercase', message: 'At least one uppercase letter' },
+      { key: 'number', message: 'At least one number' },
+      { key: 'specialChar', message: 'At least one special character' }
+    ] as const;
+
+    this.currentUnmetCheck =
+      checkOrder.find(c => !this.passwordChecks[c.key])?.message || null;
+
     const allRequirementsMet = Object.values(this.passwordChecks).every(v => v);
 
     if (!allRequirementsMet) {
@@ -49,7 +61,7 @@ export class ForgotPasswordComponent {
       return;
     }
 
-    if (password.length >= 12 && /[^A-Za-z0-9]/.test(password) && /[0-9]/.test(password)) {
+    if (password.length >= 12 && this.passwordChecks.specialChar && this.passwordChecks.number) {
       this.passwordStrength = 'strong';
     } else if (password.length >= 10) {
       this.passwordStrength = 'medium';
@@ -79,11 +91,15 @@ export class ForgotPasswordComponent {
 
         this.auth_service.updatePassword(this.token, this.password).subscribe({
           next: (res) => {
+            this.responseError = false;
             this.router.navigate(['login'], { replaceUrl: true }).then();
           },
           error: (err) => {
+            this.responseError = true;
             if (err.status === 404) {
               this.errorMessage = "Invalid link";
+            } else if (err.status === 400) {
+              this.errorMessage = "New password must be different from the old one.";
             } else {
               this.errorMessage = "Something went wrong. Please try again later.";
             }

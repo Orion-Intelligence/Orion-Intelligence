@@ -1,4 +1,5 @@
 
+import re
 from fastapi import HTTPException
 from datetime import datetime, timedelta, timezone
 
@@ -24,10 +25,22 @@ class SignupManager:
         )
         if existing_user:
             raise HTTPException(status_code=400, detail="Username or email already exists")
+        
+        email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+        if not re.match(email_pattern, data.email):
+            raise HTTPException(status_code=400, detail="Invalid email format")
+
+        PRODUCTION = int(env_handler.get_instance().env("PRODUCTION", 0)) 
+        if PRODUCTION == 1:
+            non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"]
+            domain = data.email.split("@")[-1].lower()
+            if domain in non_company_domains:
+                raise HTTPException(status_code=400, detail="Please enter your company email (Gmail, Yahoo, etc. not allowed).")
 
         hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(data.password)
-        _verification_token=session_manager.get_instance().generate_verification_token()
-        _verification_token_expire=datetime.now(timezone.utc) + timedelta(days=1)
+
+        _verification_token = session_manager.get_instance().generate_verification_token()
+        _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
 
         user = db_user_account(
             username=data.username,
@@ -39,13 +52,20 @@ class SignupManager:
             verification_expiry=_verification_token_expire
         )
         await engine.save(user)
+
         APP_URL = env_handler.get_instance().env("APP_URL")
         verify_url = f"{APP_URL}/welcome/{_verification_token}"
-        html_content = constant.mail_template.render( username=user.username,email=user.email,subject=MailSubject.VERIFICATION.value,lurlHeading=MailUrlHeading.VERIFICATION.value,url=verify_url)
+        html_content = constant.mail_template.render(
+            username=user.username,
+            email=user.email,
+            subject=MailSubject.VERIFICATION.value,
+            lurlHeading=MailUrlHeading.VERIFICATION.value,
+            url=verify_url
+        )
         await mail_manager.get_instance().send_verification_mail(
-                to=user.email,
-                subject=MailSubject.VERIFICATION.value,
-                body=html_content
-            )
+            to=user.email,
+            subject=MailSubject.VERIFICATION.value,
+            body=html_content
+        )
 
         return {"message": "Signup successful. Your account is under verification.", "status": "pending"}

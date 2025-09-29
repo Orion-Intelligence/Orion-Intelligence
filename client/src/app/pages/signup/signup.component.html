@@ -11,19 +11,15 @@
                 <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="signup-container__form">
                     <div class="signup-container__form-group">
                         <label class="signup-container__label">User Name</label>
-                        <input [(ngModel)]="user.username" for="id_username" type="email"
+                        <input [(ngModel)]="user.username" for="id_username" type="username"
                             placeholder="Enter your username" class="signup-container__input" name="username" required
                             type="text" />
                     </div>
 
                     <div class="signup-container__form-group">
                         <label class="signup-container__label">Company Mail</label>
-                        <input [(ngModel)]="user.mail" (input)="onEmailInput(user.mail)"
-                            placeholder="Enter your company mail" class="signup-container__input" name="companymail"
-                            required type="email" />
-                        <span *ngIf="!isCompanyMail" class="validation-error">
-                            Please enter your company email (Gmail, Yahoo, etc. not allowed).
-                        </span>
+                        <input [(ngModel)]="user.mail" placeholder="Enter your company mail"
+                            class="signup-container__input" name="companymail" required type="email" />
                     </div>
                     <div class="signup-container__form-group">
                         <label class="signup-container__label">Password</label>
@@ -43,11 +39,7 @@
                             </div>
 
                             <ul class="password-checklist">
-                                <li *ngIf="!passwordChecks.length">At least 8 characters</li>
-                                <li *ngIf="!passwordChecks.lowercase">At least one lowercase letter</li>
-                                <li *ngIf="!passwordChecks.uppercase">At least one uppercase letter</li>
-                                <li *ngIf="!passwordChecks.number">At least one number</li>
-                                <li *ngIf="!passwordChecks.specialChar">At least one special character</li>
+                                <li *ngIf="currentUnmetCheck">{{ currentUnmetCheck }}</li>
                             </ul>
                         </div>
                     </div>
@@ -55,9 +47,9 @@
                         {{ errorMessage }} </p>
 
                     <div>
-                        <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet|| !isCompanyMail"
+                        <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet"
                             [class.signup-container__button]="signUpForm.valid && allPasswordRequirementsMet"
-                            [class.signup-container__button-disabled]="!signUpForm.valid || !allPasswordRequirementsMet|| !isCompanyMail"
+                            [class.signup-container__button-disabled]="!signUpForm.valid || !allPasswordRequirementsMet"
                             type="submit" value="Sign Up" />
                     </div>
                 </form>

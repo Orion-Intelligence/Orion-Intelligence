@@ -1,24 +1,24 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
-import {AppService} from '../../../../../services/core/app/app.service';
-import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
-import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
-import {ResultComponent} from '../../../result/result.component';
-import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
-import {ConsolidatedCallbackModel} from '../../../../model/results/consolidated/consolidated.callback.model';
-import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {SortGroupedResultsPipe} from '../../../../pipes/sort-grouped-results.pipe';
-import {ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory} from '../../../../constants/pages';
-import {SelectionStoreService} from '../../../../../services/dashboard/selection.service';
-import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
-import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
-import {ResultInsightsComponent} from "../result-insights/result-insights.component";
-import {consolidated_filters} from '../../../../constants/filters';
-import {ALLOWED_CONSOLIDATED_RANKED_SINGLETON} from '../../../../constants/shared-enums';
-import {ThreatResultsComponent} from "./defacement-results/threat-results.component";
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { AppService } from '../../../../../services/core/app/app.service';
+import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
+import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
+import { ResultComponent } from '../../../result/result.component';
+import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
+import { DashboardResultExploitComponent } from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import { DashboardResultChatComponent } from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { SortGroupedResultsPipe } from '../../../../pipes/sort-grouped-results.pipe';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../../constants/pages';
+import { SelectionStoreService } from '../../../../../services/dashboard/selection.service';
+import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
+import { DashboardResultSocialComponent } from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import { ResultInsightsComponent } from "../result-insights/result-insights.component";
+import { consolidated_filters } from '../../../../constants/filters';
+import { ALLOWED_CONSOLIDATED_RANKED_SINGLETON } from '../../../../constants/shared-enums';
+import { ThreatResultsComponent } from "./defacement-results/threat-results.component";
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -105,7 +105,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!this.dashboardService.consolidatedParamModel.q) {
       this.isLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
-      this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
+      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
     }
 
     this.isLoading.set(true);
@@ -173,50 +173,29 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.groupedResults = {};
     this.pageCounts = {};
 
-    if (this.consolidatedCallbackModel['leak_model']?.Result?.length) {
-      this.groupedResults['leak_model'] = this.consolidatedCallbackModel['leak_model'].Result;
-      this.pageCounts['leak_model'] = this.consolidatedCallbackModel['leak_model'].Page_Count ?? 0;
-    }
+    const models: (keyof ConsolidatedCallbackModel)[] = [
+      'leak_model',
+      'chat_model',
+      'defacement_model',
+      'generic_model',
+      'exploit_model',
+      'social_model',
+      'stealer_model',
+      'tracking_model',
+      'news_model',
+    ];
 
-    if (this.consolidatedCallbackModel['chat_model']?.Result?.length) {
-      this.groupedResults['chat_model'] = this.consolidatedCallbackModel['chat_model'].Result;
-      this.pageCounts['chat_model'] = this.consolidatedCallbackModel['chat_model'].Page_Count ?? 0;
-    }
+    models.forEach(model => {
+      const result = this.consolidatedCallbackModel[model]?.Result ?? [];
+      this.groupedResults[model] = result;
+      this.pageCounts[model] = this.consolidatedCallbackModel[model]?.Page_Count ?? 0;
+    });
 
-    if (this.consolidatedCallbackModel['defacement_model']?.Result?.length) {
-      this.groupedResults['defacement_model'] = this.consolidatedCallbackModel['defacement_model'].Result;
-      this.pageCounts['defacement_model'] = this.consolidatedCallbackModel['defacement_model'].Page_Count ?? 0;
-    }
 
-    if (this.consolidatedCallbackModel['generic_model']?.Result?.length) {
-      this.groupedResults['generic_model'] = this.consolidatedCallbackModel['generic_model'].Result;
-      this.pageCounts['generic_model'] = this.consolidatedCallbackModel['generic_model'].Page_Count ?? 0;
-    }
-
-    if (this.consolidatedCallbackModel['exploit_model']?.Result?.length) {
-      this.groupedResults['exploit_model'] = this.consolidatedCallbackModel['exploit_model'].Result;
-      this.pageCounts['exploit_model'] = this.consolidatedCallbackModel['exploit_model'].Page_Count ?? 0;
-    }
-
-    if (this.consolidatedCallbackModel['social_model']?.Result?.length) {
-      this.groupedResults['social_model'] = this.consolidatedCallbackModel['social_model'].Result;
-      this.pageCounts['social_model'] = this.consolidatedCallbackModel['social_model'].Page_Count ?? 0;
-    }
-
-    if (this.consolidatedCallbackModel['stealer_model']?.Result?.length) {
-      this.groupedResults['stealer_model'] = this.consolidatedCallbackModel['stealer_model'].Result;
-      this.pageCounts['stealer_model'] = this.consolidatedCallbackModel['stealer_model'].Page_Count ?? 0;
-    }
-    if (this.consolidatedCallbackModel['tracking_model']?.Result?.length) {
-      this.groupedResults['tracking_model'] = this.consolidatedCallbackModel['tracking_model'].Result;
-      this.pageCounts['tracking_model'] = this.consolidatedCallbackModel['tracking_model'].Page_Count ?? 0;
-    }
-    if (this.consolidatedCallbackModel['news_model']?.Result?.length) {
-      this.groupedResults['news_model'] = this.consolidatedCallbackModel['news_model'].Result;
-      this.pageCounts['news_model'] = this.consolidatedCallbackModel['news_model'].Page_Count ?? 0;
-    }
-
-    this.result_count = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
+    this.result_count = Object.values(this.groupedResults).reduce(
+      (sum, list) => sum + list.length,
+      0
+    );
   }
 
   onUpdateQuery(query: string) {
@@ -275,7 +254,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
     this.router.navigate([routePrefix], {
-      queryParams: {page: 1}, queryParamsHandling: 'merge'
+      queryParams: { page: 1 }, queryParamsHandling: 'merge'
     }).then();
   }
 
@@ -320,4 +299,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       (arr: any) => Array.isArray(arr) && arr.length > 0
     );
   }
+
+  shouldShowSection(): boolean {
+    const totalResults = this.getTotalResultCount();
+    const hasAnyData = totalResults > 0;
+    if (!this.checkProfile()) {
+      return hasAnyData;
+    }
+    return hasAnyData && this.hasIOCs();
+  }
+
+
 }

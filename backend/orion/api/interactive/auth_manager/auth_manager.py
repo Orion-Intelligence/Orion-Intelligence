@@ -99,13 +99,14 @@ class auth_manager:
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.verification_token == token)
         if not user:
-            raise HTTPException(status_code=404, detail="Invaild Link")
-        
-        hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
-        user.verification_token=None
-        user.password=hashed_password
-        await engine.save(user)
+            raise HTTPException(status_code=404, detail="Invalid Link")
+        if CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
+            raise HTTPException(status_code=400, detail="New password must be different from the old one.")
 
+        hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+        user.password = hashed_password
+        user.verification_token = None
+        await engine.save(user)
         return {"message": "Password reset successfully."}
     
     @staticmethod
