@@ -67,7 +67,7 @@ class search_model:
             search_model.__instance = self
 
     @staticmethod
-    async def dynamic_search_email(model, api):
+    async def dynamic_search(model, api):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(

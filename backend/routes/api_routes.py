@@ -231,12 +231,17 @@ async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, ali
 @api_routes.post("/api/dynamic/user", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO]))],
     description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
-    return await search_model.getInstance().dynamic_search_email(param, "user")
+    return await search_model.getInstance().dynamic_search(param, "user")
+
+@api_routes.post("/api/dynamic/cracked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO]))],
+    description="Perform a dynamic search for emails found in breach and defacement data.")
+async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
+    return await search_model.getInstance().dynamic_search(param, "cracked")
 
 @api_routes.post("/api/dynamic/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO]))],
     description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
-    return await search_model.getInstance().dynamic_search_email(param, "social")
+    return await search_model.getInstance().dynamic_search(param, "social")
 
 @api_routes.get("/api/search/breach/screenshot/{filename}",dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO,user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE],[user_role.ADMIN,user_role.DEMO]))],
                 description="Retrieve the screenshot associated with a breach document (image is in .webp format).")

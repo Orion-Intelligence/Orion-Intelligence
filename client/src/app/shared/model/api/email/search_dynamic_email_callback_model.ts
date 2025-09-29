@@ -13,7 +13,6 @@ export class CardData {
   m_name = "";
   m_email: string[] = [];
   m_industry?: string;
-  m_phone_numbers: string[] = [];
   m_websites: string[] = [];
   m_company_name?: string;
   m_logo_or_images: string[] = [];
@@ -21,6 +20,14 @@ export class CardData {
   m_data_size?: string;
   m_country_name?: string;
   m_revenue?: string;
+  m_app_name?: string;
+  m_app_url?: string;
+  m_package_id?: string;
+  m_version?: string;
+  m_download_link?: string[];
+  m_apk_size?: string;
+  m_latest_date?: string;
+  m_mod_features?: string;
 
   constructor(init?: Partial<CardData>) {
     Object.assign(this, init);

@@ -181,6 +181,11 @@ export const routes: Routes = [
             path: 'social',
             component: DashboardApiComponent,
             data: { animation: 'SocialAPI', type: 'social' }
+          },
+          {
+            path: 'cracked',
+            component: DashboardApiComponent,
+            data: { animation: 'CrackedAPI', type: 'cracked' }
           }
         ]
       },

@@ -28,7 +28,6 @@ export class DashboardApiComponent implements OnInit {
   apiType: string | null = null;
   progress = 0;
   currentStep = '';
-
   emailCallbackbackModel: SearchDynamicEmailCallbackModel = new SearchDynamicEmailCallbackModel();
 
   constructor(private route: ActivatedRoute, private http: HttpClient) {
@@ -47,6 +46,9 @@ export class DashboardApiComponent implements OnInit {
         if (params['email']) this.q2 = params['email'];
       } else if (this.apiType === 'social') {
         if (params['username']) this.q1 = params['username'];
+        this.q2 = '';
+      } else if (this.apiType === 'cracked') {
+        if (params['playstore']) this.q1 = params['playstore'];
         this.q2 = '';
       } else {
         if (params['q1']) this.q1 = params['q1'];
@@ -69,6 +71,8 @@ export class DashboardApiComponent implements OnInit {
       payload = {text: {username: this.q1, email: this.q2}};
     } else if (this.apiType === 'social') {
       payload = {text: {username: this.q1}};
+    } else if (this.apiType === 'cracked') {
+      payload = {text: {playstore: this.q1}};
     } else {
       payload = {text: {q1: this.q1, q2: this.q2}};
     }
@@ -78,7 +82,9 @@ export class DashboardApiComponent implements OnInit {
         ? '/api/dynamic/user'
         : this.apiType === 'social'
           ? '/api/dynamic/social'
-          : '/api/dynamic/';
+          : this.apiType === 'cracked'
+            ? '/api/dynamic/cracked'
+            : '/api/dynamic/';
 
     this.query_triggered = true;
     this.fetchSearchResults(endpoint, payload).pipe(finalize(() => {
@@ -103,8 +109,13 @@ export class DashboardApiComponent implements OnInit {
         if (res?.success && res?.data) {
           this.emailCallbackbackModel = res.data;
           this.breachData = res.data.cards_data?.length > 0 ? res.data.cards_data[0] : null;
-          this.displayQ1 = (res.data as any)?.username ?? this.q1;
-          this.displayQ2 = (res.data as any)?.email ?? this.q2;
+          this.displayQ1 =
+            this.apiType === 'user' ? ((res.data as any)?.username ?? this.q1)
+              : this.apiType === 'cracked' ? ((res.data as any)?.playstore ?? this.q1)
+                : this.q1;
+          this.displayQ2 =
+            this.apiType === 'user' ? ((res.data as any)?.email ?? this.q2)
+              : this.q2;
         } else {
           const data = res as SearchDynamicEmailCallbackModel;
           if ((data as any)?.cards_data) {
@@ -124,6 +135,15 @@ export class DashboardApiComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  get crackedValid(): boolean {
+    try {
+      const u = new URL(this.q1);
+      return (u.protocol === 'https:' || u.protocol === 'http:') && u.hostname === 'play.google.com';
+    } catch {
+      return false;
+    }
   }
 
   private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
