@@ -155,10 +155,8 @@ export class AuthService {
 
   logout(): void {
     this.apiService.post('logout', {}).subscribe();
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    localStorage.removeItem('onboarding');
+    localStorage.clear();
+    sessionStorage.clear();
 
     this.authState.next({
       token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null

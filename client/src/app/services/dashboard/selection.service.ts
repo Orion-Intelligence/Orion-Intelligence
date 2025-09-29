@@ -35,8 +35,8 @@ export class SelectionStoreService {
     const match = pathOnly.match(/^\/dashboard\/([^\/]+)(?:\/([^\/]+))?(?:\/([^\/]+))?$/);
 
     if (match) {
-      const section = match[1];
-      const option = match[2];
+      let section = match[1];
+      let option = match[2];
 
       const currentSection = this.getSelectedSection();
       const currentOption = this.selectedOptionSubject.value;
@@ -72,6 +72,7 @@ export class SelectionStoreService {
       }
     }
   }
+
 
   setSelectedSection(section: string) {
     this.selectedSectionSubject.next(section);

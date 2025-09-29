@@ -23,6 +23,7 @@
 @use 'assets/styles/shared/sidebar/filters-sidebar.component.css';
 @use 'assets/styles/shared/listing/directory.component.css';
 @use 'app/shared/partials/profile/profile.component.css';
+@use 'app/shared/partials//forgot-password/forgot-password.component.css';
 @use 'app/shared/partials/empty-result/empty-result.component.css';
 @use 'app/shared/partials/header/dashboard-header/dashboard-header.component.css';
 @use 'app/shared/partials/dashboard-sidebar/dashboard-sidebar.component.css';
@@ -193,8 +194,7 @@ img[data-ph] {
     linear-gradient(90deg,
       rgba(14, 22, 38, 0) 0%,
       rgba(14, 22, 38, 0.45) 50%,
-      rgba(14, 22, 38, 0) 100%
-    ),
+      rgba(14, 22, 38, 0) 100%),
     url('/assets/images/shared/placeholder.svg') center/cover no-repeat;
   object-fit: cover;
   border-radius: 8px;
@@ -204,8 +204,13 @@ img[data-ph] {
 }
 
 @keyframes shimmer-dark {
-  0% { background-position: -200% 0, center; }
-  100% { background-position: 200% 0, center; }
+  0% {
+    background-position: -200% 0, center;
+  }
+
+  100% {
+    background-position: 200% 0, center;
+  }
 }
 
 img[data-ph]:not([width], [height]) {

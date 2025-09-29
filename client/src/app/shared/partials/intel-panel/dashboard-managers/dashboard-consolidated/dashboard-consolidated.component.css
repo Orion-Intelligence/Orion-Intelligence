@@ -8,6 +8,12 @@
   padding: 0 20px 5px;
 }
 
+.consolidated_no-data-message {
+  padding: 16px;
+  font-size: 14px;
+  color: #888;
+}
+
 @media only screen and (width <=460px) {
   .consolidated_container {
     width: calc(100vw - 90px) !important;

@@ -350,6 +350,7 @@
     mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
     mask-size: 100% 100%;
     mask-repeat: no-repeat;
+    padding: 0px 25px;
 }
 
 .onboarding-step3__title {
@@ -373,7 +374,7 @@
     font-family: Inter, sans-serif;
 }
 
-@media (width <= 1024px) {
+@media (width <=1024px) {
     .onboarding-box {
         width: 90%;
         height: auto;
