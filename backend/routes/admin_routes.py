@@ -20,5 +20,5 @@ async def block_row_action(name: str = Query(...)):
 
 @admin_routes.post("/admin/db_user_account/edit/{id}")
 async def custom_edit(id: str,request: Request):
-    await auth_manager.edit_userStatus_and_sendMail_from_admin(request)
+    await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=302)
