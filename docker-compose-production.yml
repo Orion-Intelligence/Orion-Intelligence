@@ -93,43 +93,6 @@ services:
         limits:
           memory: 45G
 
-  traefik:
-    image: traefik:v2.10
-    container_name: trusted-web-traefik
-    ports:
-      - "9090:9090"
-      - "9443:9443"
-    command:
-      - "--entrypoints.web.address=:9090"
-      - "--entrypoints.websecure.address=:9443"
-      - "--providers.file.filename=/etc/traefik/api_collector.yml"
-      - "--providers.docker=true"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./dockerFiles/traefik/api_collector.yml:/etc/traefik/api_collector.yml:ro
-      - /etc/letsencrypt/live/orion.genesistechnologies.org/cert.pem:/certs/cert.pem:ro
-      - /etc/letsencrypt/live/orion.genesistechnologies.org/privkey.pem:/certs/privkey.pem:ro
-    restart: unless-stopped
-    networks:
-      - backend
-      - shared_bridge
-
-  dozzle:
-    container_name: trusted-web-dozzle
-    image: amir20/dozzle:latest
-    networks:
-      - backend
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dozzle.rule=Host(`dozzle.orion.genesistechnologies.org`)"
-      - "traefik.http.routers.dozzle.tls=true"
-      - "traefik.http.routers.dozzle.entrypoints=websecure"
-      - "traefik.http.routers.dozzle.middlewares=auth@file"
-      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
-    restart: unless-stopped
-
   redis_server:
     container_name: trusted-web-redis
     image: redis:7.4.0
