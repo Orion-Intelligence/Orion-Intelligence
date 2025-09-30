@@ -7,7 +7,7 @@
 
   <ul [class.show]="dropdownOpen()" class="profile-dropdown">
     <div class="profile-dropdown-arrow"></div>
-    <li><a class="dropdown-item disabled"> <img alt="Settings" height="15" ngSrc="assets/images/shared/profile.svg" priority width="15"/>{{ username$ | async }}</a></li>
+    <li><a class="dropdown-item disabled"> <img alt="Settings" height="15" class="ml-0" ngSrc="assets/images/shared/profile.svg" priority width="15"/>{{ username$ | async }}</a></li>
     <li class="dropdown-item d-flex align-items-center disabled">
       <span class="bg-success rounded-circle d-inline-block me-2 profile_user-active"></span> &nbsp;&nbsp;active
     </li>
@@ -24,7 +24,7 @@
     <li *ngIf="isAdmin()">
       <hr class="dropdown-divider mx-3">
     </li>
-    <li><a (click)="logout()" class="dropdown-item" id="logout-button"> <img alt="Logout" height="15" ngSrc="assets/images/shared/logout.svg" priority width="15"> &nbsp; Logout</a>
+    <li><a (click)="logout()" class="dropdown-item" id="logout-button"> <img alt="Logout" height="15" class="ml-0" ngSrc="assets/images/shared/logout.svg" priority width="15"> &nbsp; Logout</a>
     </li>
   </ul>
 </div>
