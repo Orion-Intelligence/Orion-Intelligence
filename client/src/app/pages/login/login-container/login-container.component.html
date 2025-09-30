@@ -8,76 +8,74 @@
 <div *ngIf="!authenticated && !twofaRequired" class="" id="content">
   <div class="auth-wrapper">
     <div class="auth-wrapper__left">
-      <div class="signup-wrapper">
-        <div class="signup-container">
-          <div class="signup-container__title">Login</div>
-          <p class="signup-container__subtitle">Enter your username and password to get started!</p>
+      <div class="signup-container">
+        <div class="signup-container__title">Login</div>
+        <p class="signup-container__subtitle">Enter your username and password to get started!</p>
 
-          <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="signup-container__form">
-            <div class="signup-container__form-group">
-              <label class="signup-container__label">Username</label>
-              <input [(ngModel)]="user.username" for="id_username" type="email" placeholder="Enter your email"
-                class="signup-container__input" name="username" required type="text" />
-            </div>
-
-            <div class="signup-container__form-group">
-              <label class="signup-container__label">Password</label>
-              <input [(ngModel)]="user.password" id="id_password" type="password" placeholder="Enter your password"
-                class="signup-container__input" name="password" required type="password" />
-            </div>
-            <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
-              {{ errorMessage }} </p>
-            <div class="login-container__forgot">
-              <a (click)="goToForgot()">Reset password?</a>
-            </div>
-
-            <div>
-              <input [disabled]="!loginForm.valid" [class.signup-container__button]="loginForm.valid"
-                [class.signup-container__button-disabled]="!loginForm.valid" type="submit" value="Login" />
-            </div>
-          </form>
-
-          <div class="signup-container__footer">
-            Dont't have an account? <span (click)="goToSignUp()" class="signup-container__login-link">Sign Up</span>
+        <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="signup-container__form">
+          <div class="signup-container__form-group">
+            <label class="signup-container__label">Username</label>
+            <input [(ngModel)]="user.username" for="id_username" type="email" placeholder="Enter your email"
+              class="signup-container__input" name="username" required type="text" />
           </div>
-          <div *ngIf="twofaRequired" class="login_container" [class.twofaextend]="otpSecret" id="content">
-            <div class="login_box">
-              <div class="login_header">
-                <img alt="logo" height="41" src="assets/images/shared/home-logo.svg" width="232">
-              </div>
 
-              <p *ngIf="errorMessage" class="text-warning"><b>{{ errorMessage }}</b></p>
-              <div *ngIf="otpDataUrl" class="login_form-group twofa-center">
-                <img [src]="otpDataUrl" alt="2FA QR" width="200" height="200">
-              </div>
+          <div class="signup-container__form-group">
+            <label class="signup-container__label">Password</label>
+            <input [(ngModel)]="user.password" id="id_password" type="password" placeholder="Enter your password"
+              class="signup-container__input" name="password" required type="password" />
+          </div>
+          <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
+            {{ errorMessage }} </p>
+          <div class="login-container__forgot">
+            <a (click)="goToForgot()">Reset password?</a>
+          </div>
 
-              <p *ngIf="otpSecret" class="text-white mt-4"><b>Keep your secret key safe in case you lose access to your
-                  authenticator app</b></p>
-              <div *ngIf="otpSecret" class="alert alert-warning cursor-pointer" role="alert"
-                (click)="copyToClipboard(otpSecret)">
-                <div class="d-flex align-items-center">
-                  <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="20px" height="20px" class="copy-icon">
-                  <strong class="me-2 ml-3">{{ otpSecret }}</strong>
-                  <span *ngIf="copied" class="ml-2">Copied!</span>
-                </div>
-              </div>
+          <div>
+            <input [disabled]="!loginForm.valid" [class.signup-container__button]="loginForm.valid"
+              [class.signup-container__button-disabled]="!loginForm.valid" type="submit" value="Login" />
+          </div>
+        </form>
 
-              <form (ngSubmit)="submitOtp()">
-                <div class="login_form-group">
-                  <label class="login_hidden-label" for="id_otp">OTP</label>
-                  <input [(ngModel)]="otpCode" name="otpCode" class="login_input" id="id_otp"
-                    placeholder="Authentication code" required minlength="6" maxlength="6" type="text">
-                </div>
-
-                <div class="login-button-container">
-                  <button type="submit" [disabled]="!otpCode || otpCode.length < 6"
-                    [class.login_btn-submit]="otpCode && otpCode.length === 6"
-                    [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
-                    Verify OTP
-                  </button>
-                </div>
-              </form>
+        <div class="signup-container__footer">
+          Dont't have an account? <span (click)="goToSignUp()" class="signup-container__login-link">Sign Up</span>
+        </div>
+        <div *ngIf="twofaRequired" class="login_container" [class.twofaextend]="otpSecret" id="content">
+          <div class="login_box">
+            <div class="login_header">
+              <img alt="logo" height="41" src="assets/images/shared/home-logo.svg" width="232">
             </div>
+
+            <p *ngIf="errorMessage" class="text-warning"><b>{{ errorMessage }}</b></p>
+            <div *ngIf="otpDataUrl" class="login_form-group twofa-center">
+              <img [src]="otpDataUrl" alt="2FA QR" width="200" height="200">
+            </div>
+
+            <p *ngIf="otpSecret" class="text-white mt-4"><b>Keep your secret key safe in case you lose access to your
+                authenticator app</b></p>
+            <div *ngIf="otpSecret" class="alert alert-warning cursor-pointer" role="alert"
+              (click)="copyToClipboard(otpSecret)">
+              <div class="d-flex align-items-center">
+                <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="20px" height="20px" class="copy-icon">
+                <strong class="me-2 ml-3">{{ otpSecret }}</strong>
+                <span *ngIf="copied" class="ml-2">Copied!</span>
+              </div>
+            </div>
+
+            <form (ngSubmit)="submitOtp()">
+              <div class="login_form-group">
+                <label class="login_hidden-label" for="id_otp">OTP</label>
+                <input [(ngModel)]="otpCode" name="otpCode" class="login_input" id="id_otp"
+                  placeholder="Authentication code" required minlength="6" maxlength="6" type="text">
+              </div>
+
+              <div class="login-button-container">
+                <button type="submit" [disabled]="!otpCode || otpCode.length < 6"
+                  [class.login_btn-submit]="otpCode && otpCode.length === 6"
+                  [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
+                  Verify OTP
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

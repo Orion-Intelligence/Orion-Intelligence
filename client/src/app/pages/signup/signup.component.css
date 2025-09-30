@@ -86,10 +86,6 @@
     color: white;
 }
 
-
-
-.signup-wrapper {}
-
 .signup-container {
     background-color: #172235;
     border-radius: 16px;
@@ -132,7 +128,7 @@
 }
 
 .signup-container__input {
-    width: 428px;
+    max-width: 428px;
     height: 44px;
     border: 1px solid rgb(252 252 252 / 7%);
     border-radius: 8px;
@@ -145,7 +141,8 @@
 
 .signup-container__button,
 .signup-container__button-disabled {
-    width: 428px;
+    width: 100%;
+    max-width: 428px;
     height: 44px;
     background-color: #57a5eb;
     border: none;
@@ -228,7 +225,7 @@
     margin-bottom: -10px;
 }
 
-@media screen and (width <= 1300px) {
+@media screen and (width <=1300px) {
     .auth-wrapper__right {
         display: none;
     }
@@ -245,34 +242,34 @@
     }
 }
 
-@media screen and (width <= 1600px) {
+@media screen and (width <=1600px) {
     .auth-wrapper__image {
         width: 747px;
         height: 578px;
     }
 }
 
-@media screen and (height <= 950px) {
+@media screen and (height <=950px) {
     .ai-summary {
         display: none;
     }
 }
 
-@media screen and (height <= 730px) {
+@media screen and (height <=730px) {
     .auth-wrapper__image {
         width: 747px;
         height: 578px;
     }
 }
 
-@media screen and (height <= 690px) {
+@media screen and (height <=690px) {
     .auth-wrapper__image {
         width: 672px;
         height: 520px;
     }
 }
 
-@media screen and (height <= 620px) {
+@media screen and (height <=620px) {
     .auth-wrapper__image {
         width: 560px;
         height: 433px;
@@ -280,5 +277,11 @@
 
     .signup-container {
         max-height: 80%;
+    }
+}
+
+@media screen and (width <=520px) {
+    .signup-container {
+        width: 80%;
     }
 }
