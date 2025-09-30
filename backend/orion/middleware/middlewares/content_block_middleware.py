@@ -12,7 +12,7 @@ class content_block_middleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
-        if path.startswith("/api/"):
+        if path.startswith("/api/") or path.startswith("/admin"):
             return await call_next(request)
 
         if not (path == "/dashboard" or path.startswith("/dashboard/")):
