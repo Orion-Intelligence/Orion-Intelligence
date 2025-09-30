@@ -3,6 +3,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from configs import config
 from orion.helper_manager.env_handler import env_handler
+from orion.middleware.middlewares.cache_admin import cache_admin
 from orion.middleware.middlewares.content_block_middleware import content_block_middleware
 from orion.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
 from orion.middleware.middlewares.security_headers_middleware import security_headers_middleware
@@ -30,3 +31,4 @@ def setup_middlewares(app):
 
     app.add_middleware(security_headers_middleware)
     app.add_middleware(content_block_middleware)
+    app.add_middleware(cache_admin)

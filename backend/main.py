@@ -31,11 +31,13 @@ async def lifespan(p_app: FastAPI):
     yield
 
 
+
 app = FastAPI(lifespan=lifespan)
+setup_middlewares(app)
+
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
 app.mount("/static", StaticFiles(directory=ANGULAR_BUILD_DIR), name="static")
 
-setup_middlewares(app)
 configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
