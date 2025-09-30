@@ -5,7 +5,7 @@
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="../../../../../../assets/images/shared/user1.svg" priority width="20">
         </div>
-        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input" [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : 'q1'))" [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Play Store URL' : 'Query 1'))" [type]="apiType === 'cracked' ? 'url' : 'text'" required> <input type="hidden" value="1"> <span class="input-group-text"></span>
+        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input" [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : 'q1'))" [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : 'Query 1'))" [type]="apiType === 'cracked' ? 'url' : 'text'" required> <input type="hidden" value="1"> <span class="input-group-text"></span>
       </div>
     </div>
 
