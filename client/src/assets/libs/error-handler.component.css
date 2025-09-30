@@ -1,0 +1,42 @@
+.notice {
+  margin-top: 100px;
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.notice_container {
+  background-image: url("/assets/images/shared/error-page.png");
+  margin-left: -5px;
+  height: 100vh;
+}
+
+.notice_header-divider {
+  width: 150px;
+  height: 5px;
+  background-color: orange;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.notice_action-button {
+  margin-top: 10px;
+  width: 300px
+}
+
+.notice_actions {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  margin-left: 20px;
+}
+
+.notice_actions .btn {
+  margin-right: 10px;
+}
+
+@media only screen and (width <= 943px) {
+  .notice {
+    margin-top: 30px;
+    padding: 40px 15px;
+    text-align: center;
+  }
+}
