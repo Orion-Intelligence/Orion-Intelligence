@@ -66,7 +66,6 @@
 {"file": "_b2ykcy2gcug4gnccm6hnrb5xapnresmyjjqgvhafaypppwgo4feixwyd", "url": "http://b2ykcy2gcug4gnccm6hnrb5xapnresmyjjqgvhafaypppwgo4feixwyd.onion"}
 {"file": "_tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad", "url": "http://tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad.onion"}
 {"file": "_securo45z554mw7rgrt7wcgv5eenj2xmxyrsdj3fcjsvindu63s4bsid", "url": "http://securo45z554mw7rgrt7wcgv5eenj2xmxyrsdj3fcjsvindu63s4bsid.onion"}
-
 {"file": "_handala_hack", "url": "http://handala-hack.to"}
 {"file": "_github_doormanbreach", "url": "https://github.com/doormanBreach"}
 {"file": "_netleaks", "url": "https://netleaks.net"}

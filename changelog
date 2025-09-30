@@ -1,3 +1,519 @@
+Changelog [1.0.2.9] – 2025-09-30
+
+Overview:
+ • Authentication & recovery upgrades: 2FA, revamped login, password strength checks, verified reset emails.
+ • Tenant governance: admin approval for new tenants; admin-only tenant visibility.
+ • Audit logging: CRUD coverage across core objects; admin-only access with export controls.
+ • Onboarding & dashboard: guided company onboarding with IOC setup; role‑aware dashboard and profile editing.
+ • Extraction & search: larger spaCy PII model, expanded IOC keys, advanced filters, semantic search and consolidated ranking.
+ • Web scanning: Basic/Advanced modes, CSP and error reporting, optional port scan, one-click exports.
+ • Scale & security: Cloudflare + VPS firewalling, Hetzner hardware upgrade, encryption at rest, org‑wide 2FA.
+ • Operations: richer dump search, faster stealer log handling, batched crawling, caching, and expanded APIs.
+
+1. Infrastructure
+ • Edge & Host Protection
+   - Cloudflare firewall and caching at the edge; hardened VPS firewall with strict allowlists.
+ • Hardware Upgrade (Hetzner)
+   - 3 TB SSD, 128 GB DC SSD, 22‑core CPU to increase concurrency and indexing throughput.
+
+2. Authentication
+ • 2FA
+   - TOTP second factor with optional admin enforcement.
+ • Login UI
+   - Streamlined, responsive sign‑in with clearer error states.
+ • Password Strength
+   - Real‑time complexity checks aligned to policy.
+ • Password Reset
+   - Tokenized flow with short‑lived links and mobile‑friendly pages.
+ • Verification Emails
+   - Branded HTML templates for sign‑up and reset.
+
+3. Tenant & Governance
+ • Admin Activation
+   - New tenants disabled by default; admins activate/deactivate during intake.
+ • Visibility
+   - Tenant records and status restricted to administrators.
+
+4. Audit Logs
+ • CRUD Events
+   - Users, tenants, profiles, searches, scans, exports, and related objects.
+ • Access
+   - Admin‑only viewing; export limited to authorized roles.
+
+5. Onboarding
+ • Company Onboarding
+   - Guided setup for org profile, contacts, and policies.
+ • IOC Configuration
+   - Company‑wide IOC preferences applied to collection and triage.
+
+6. Dashboard
+ • Profile‑Based Views
+   - Role‑aware widgets and queues.
+ • Profile Editing
+   - In‑place updates to details and notifications.
+ • Scoped Audit Access
+   - Tenant/company events visible per permissions.
+
+7. Intelligence Extraction & Search
+ • IOC Updates
+   - Larger spaCy PII model, better normalization, fewer false positives.
+ • Expanded Keys
+   - Phone, Email, Domains, URLs, CVE/CWE, IPs, YARA, Encoded URLs, File Paths, Credit Cards,
+     Organizations, Company Names, Persons, Locations, Languages, User Agents, ASNs, Teams,
+     Hashtags, Mentions, Social Profiles, Currencies, Crypto, XMPP, ATT&CK Tactics/Techniques,
+     Document IDs, AU/US IDs, US Bank Numbers, Platform, Author, Industry, Scrap Script.
+ • Search
+   - Advanced filters, semantic search across sections, and consolidated ranking.
+
+8. Dump Search
+ • Result Density
+   - More surfaced entries with concise previews for parsed files.
+
+9. WebScan
+ • Modes
+   - Basic for routine checks; Advanced adds authorized port scanning.
+ • Results
+   - Grades, CSP analysis, and script/network error details.
+ • Exports
+   - One‑click export for tickets/audits.
+ • Caching
+   - Reduced load with freshness safeguards.
+
+10. Stealer Logs
+ • Coverage
+   - Additional channels and formats supported.
+ • Archives
+   - Password‑protected ZIP/RAR; CSV, Excel/Sheets, and TXT.
+ • Views
+   - Separate “Logs” and “Credentials” views.
+ • Performance
+   - Faster search and improved relevance.
+ • Detail Pages
+   - Full item details with retained filters.
+
+11. Crawler & Microservices
+ • Efficiency
+   - Lower resource use and batched requests for faster responses.
+ • Telegram
+   - Higher throughput and reliability on large channels.
+ • Caching
+   - Avoids repeated semantic processing.
+ • Microservices
+   - Deeper scan reports, optimized PII/IOC extraction, and expanded APIs.
+
+12. Security & Compliance
+ • Encryption at Rest
+   - Data encrypted pre‑store using Fernet; separated key management.
+ • 2FA Policy
+   - Organization‑wide enforcement available via admin policy.
+
+13. UI & UX
+ • Mobile
+   - Responsive fixes improve readability and touch targets.
+ • Login
+   - Faster initial load and fewer transitions.
+ • Loading States
+   - Shimmer/skeleton feedback across pages.
+ • Empty States
+   - Guidance added when filters return no content.
+
+14. Live APIs
+ • Email Leaks
+   - Improved detection and validation.
+ • Social Presence
+   - Username existence checks with platform mapping.
+ • Mobile Apps
+   - Play Store and package‑name lookups for patched/cracked distributions.
+
+15. Defacement & Homepage
+ • Sources
+   - Broader phishing/defacement ingestion.
+ • Homepage
+   - Responsive statistics and de‑duplication per source.
+
+16. Mailing & Presence
+ • Mailing
+   - Production templates for sign‑up, login, reset, and notifications.
+ • Docs/Site
+   - Documentation and site updated; minor fixes.
+ • Outreach
+   - Daily posts and email + LinkedIn campaigns.
+
+17. Scripts (high‑level)
+ • Categories
+   - API, Defacements, Exploit, Forums, Leak, Mastodon, News, Pastebin, Reddit, Tracking, Twitter.
+
+
+18. Scripts Inventory
+ • API
+   - apk_mod
+   - breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd
+   - username_checker
+
+ • Defacements
+   - github_openfish — https://raw.githubusercontent.com
+   - phishunt — https://phishunt.io
+   - github_mthcht_awesome_lists — https://github.com
+   - tweetfeed — https://tweetfeed.live
+   - zone_xsec — https://zone-xsec.com
+   - usom — https://www.usom.gov.tr
+
+ • Exploit
+   - 0dayfans — https://0dayfans.com
+   - anyrun_malwaretrends — https://any.run
+   - cisa — https://www.cisa.gov/
+   - cybergcca — https://cybergcca.com
+   - exploitdb — https://www.exploit-db.com
+   - github_trickest_cve — https://github.com/trickest/cve
+   - kb_cert — https://www.kb.cert.org/
+   - cxsecurity — https://cxsecurity.com
+   - sploitus — https://sploitus.com
+   - rapid7 — https://www.rapid7.com/
+   - talosintelligence — https://talosintelligence.com
+   - inthewild — https://inthewild.io
+
+ • Forums
+   - b1nd — https://b1nd.net
+   - crackingx — https://crackingx.com
+   - dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad — http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion
+   - rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad — http://rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad.onion
+   - xreactor — https://xreactor.org
+   - 4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd — http://4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd.onion
+   - hacksnation — https://hacksnation.com
+
+ • Leak
+   - 34o4m3f26ucyeddzpf53bksy76wd737nf2fytslovwd3viac3by5chad — http://34o4m3f26ucyeddzpf53bksy76wd737nf2fytslovwd3viac3by5chad.onion
+   - hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd — http://hptqq2o2qjva7lcaaq67w36jihzivkaitkexorauw7b2yul2z6zozpqd.onion
+   - omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd — http://omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd.onion
+   - 3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd — http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion
+   - hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd — http://hunters55atbdusuladzv7vzv6a423bkh6ksl2uftwrxyuarbzlfh7yd.onion
+   - orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id — http://orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id.onion
+   - 47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd — http://47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd.onion
+   - ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd — http://ijzn3sicrcy7guixkzjkib4ukbiilwc3xhnmby4mcbccnsd7j2rekvqd.onion
+   - pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd — http://pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd.onion
+   - 5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid — http://5butbkrljkaorg5maepuca25oma7eiwo6a2rlhvkblb4v6mf3ki2ovid.onion
+   - imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid — http://imncrewwfkbjkhr2oylerfm5qtbzfphhmpcfag43xc2kfgvluqtlgoid.onion
+   - 7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd — http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion
+   - incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad — http://incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad.onion
+   - akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad — http://akiral2iz6a7qgd3ayp3l6yub7xx2uep76idk3u2kollpj5z3z636bad.onion
+   - ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad — http://ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.onion
+   - arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd — http://arcuufpr5xxbbkin4mlidt7itmr6znlppk63jbtkeguuhszmc5g7qdyd.onion
+   - j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid — http://j3dp6okmaklajrsk6zljl5sfa2vpui7j2w6cwmhmmqhab6frdfbphhid.onion
+   - basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd — http://basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd.onion
+   - j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad — http://j5o5y2feotmhvr7cbcp2j2ewayv5mn5zenl3joqwx67gtfchhezjznad.onion
+   - bertblogsoqmm4ow7nqyh5ik7etsmefdbf25stauecytvwy7tkgizhad — http://bertblogsoqmm4ow7nqyh5ik7etsmefdbf25stauecytvwy7tkgizhad.onion
+   - k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd — http://k7kg3jqxang3wh7hnmaiokchk7qoebupfgoik6rha6mjpzwupwtj25yd.onion
+   - rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad — http://rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad.onion
+   - black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd — http://black3gnkizshuynieigw6ejgpblb53mpasftzd6pydqpmq2vn2xf6yd.onion
+   - kawasa2qo7345dt7ogxmx7qmn6z2hnwaoi3h5aeosupozkddqwp6lqqd — http://kawasa2qo7345dt7ogxmx7qmn6z2hnwaoi3h5aeosupozkddqwp6lqqd.onion
+   - rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad — http://rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad.onion
+   - blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd — http://blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd.onion
+   - krakenccj3wr23452a4ibkbkuph4d6soyx2xgjoogtuamc3m7u7wemad — http://krakenccj3wr23452a4ibkbkuph4d6soyx2xgjoogtuamc3m7u7wemad.onion
+   - rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad — http://rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad.onion
+   - ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id — http://ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.onion
+   - sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad — http://sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.onion
+   - cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd — http://cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd.onion
+   - silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid — http://silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid.onion
+   - leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid — http://leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.onion
+   - tp5cwh6d2b5hekcg6jlhoe6mawa7dlwiv47epvnfmzuaaur2dnaa3uid — http://tp5cwh6d2b5hekcg6jlhoe6mawa7dlwiv47epvnfmzuaaur2dnaa3uid.onion
+   - lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd — http://lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd.onion
+   - twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad — http://twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad.onion
+   - darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd — http://darkleakyqmv62eweqwy4dnhaijg4m4dkburo73pzuqfdumcntqdokyd.onion
+   - lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd — http://lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd.onion
+   - txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd — http://txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.onion
+   - dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid — http://dataleakypypu7uwblm5kttv726l3iripago6p336xjnbstkjwrlnlid.onion
+   - mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid — http://mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid.onion
+   - vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd — http://vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd.onion
+   - weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd — http://weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd.onion
+   - ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid — http://ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid.onion
+   - mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id — http://mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id.onion
+   - worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid — http://worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid.onion
+   - flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd — http://flock4cvoeqm4c62gyohvmncx6ck2e7ugvyqgyxqtrumklhd5ptwzpqd.onion
+   - nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad — http://nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad.onion
+   - xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd — http://xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd.onion
+   - yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd — http://yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd.onion
+   - nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd — http://nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd.onion
+   - z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid — http://z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid.onion
+   - gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad — http://gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad.onion
+   - nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd — http://nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd.onion
+   - z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad — http://z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad.onion
+   - om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd — http://om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.onion
+   - zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid — http://zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid.onion
+   - beast6azu4f7fxjakiayhnssybibsgjnmy77a6duufqw5afjzfjhzuqd — http://beast6azu4f7fxjakiayhnssybibsgjnmy77a6duufqw5afjzfjhzuqd.onion
+   - nleakk6sejx45jxtk7x6iyt65hwvfrkifc5v7ertdlwm3gttbpvlvxqd — http://nleakk6sejx45jxtk7x6iyt65hwvfrkifc5v7ertdlwm3gttbpvlvxqd.onion
+   - pearsmob5sn44ismokiusuld34pnfwi6ctgin3qbvonpoob4lh3rmtqd — http://pearsmob5sn44ismokiusuld34pnfwi6ctgin3qbvonpoob4lh3rmtqd.onion
+   - safepaypfxntwixwjrlcscft433ggemlhgkkdupi2ynhtcmvdgubmoyd — http://safepaypfxntwixwjrlcscft433ggemlhgkkdupi2ynhtcmvdgubmoyd.onion
+   - zfytizegsze6uiswodhbaalyy5rawaytv2nzyzdkt3susbewviqqh7yd — http://zfytizegsze6uiswodhbaalyy5rawaytv2nzyzdkt3susbewviqqh7yd.onion
+   - obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad — http://obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad.onion
+   - ctyfftrjgtwdjzlgqh4avbd35sqrs6tde4oyam2ufbjch6oqpqtkdtid — http://ctyfftrjgtwdjzlgqh4avbd35sqrs6tde4oyam2ufbjch6oqpqtkdtid.onion
+   - fjg4zi4opkxkvdz7mvwp7h6goe4tcby3hhkrz43pht4j3vakhy75znyd — http://fjg4zi4opkxkvdz7mvwp7h6goe4tcby3hhkrz43pht4j3vakhy75znyd.onion
+   - b2ykcy2gcug4gnccm6hnrb5xapnresmyjjqgvhafaypppwgo4feixwyd — http://b2ykcy2gcug4gnccm6hnrb5xapnresmyjjqgvhafaypppwgo4feixwyd.onion
+   - tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad — http://tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad.onion
+   - securo45z554mw7rgrt7wcgv5eenj2xmxyrsdj3fcjsvindu63s4bsid — http://securo45z554mw7rgrt7wcgv5eenj2xmxyrsdj3fcjsvindu63s4bsid.onion
+   - handala_hack — http://handala-hack.to
+   - github_doormanbreach — https://github.com/doormanBreach
+   - netleaks — https://netleaks.net
+   - ddosecrets — https://ddosecrets.com
+   - monitor_mozilla — https://monitor.mozilla.org/breaches
+   - darkfeed — https://darkfeed.io
+   - csidb — https://www.csidb.net
+   - business_data_leaks — https://business-data-leaks.com
+   - ransomware_live — https://www.ransomware.live
+   - ransom — https://ransom.wiki
+   - ransomed — https://ransomed.biz
+   - ransomlook — https://www.ransomlook.io
+   - leak_lookup — https://leak-lookup.com
+
+ • Mastodon
+   - mastodon — https://mastodon.social/@falconfeedsio/
+   - mastodon — https://infosec.exchange/@H3liumb0y@infosec.exchange/
+   - mastodon — https://infosec.exchange/@hasherezade/
+   - mastodon — https://infosec.exchange/@btlr@infosec.exchange/
+   - mastodon — https://infosec.exchange/@briankrebs/
+   - mastodon — https://infosec.exchange/@z0vsky/
+   - mastodon — https://infosec.exchange/@rmceoin/
+   - mastodon — https://infosec.exchange/@deepthoughts10/
+   - mastodon — https://infosec.exchange/@seadev/
+   - mastodon — https://infosec.exchange/@sans_isc/
+   - mastodon — https://infosec.exchange/@hacks4pancakes/
+   - mastodon — https://infosec.exchange/@haveibeenpwned/
+   - mastodon — https://infosec.exchange/@InfobloxThreatIntel/
+   - mastodon — https://mastodon.social/@zackwhittaker/
+   - mastodon — https://mastodon.social/@cybersecurity_news/
+   - mastodon — https://mastodon.social/@cyberpromagazine24/
+   - mastodon — https://infosec.exchange/@ThreatInsight/
+   - mastodon — https://infosec.exchange/@ecrime_ch/
+   - mastodon — mastodon.online/@osintessentials/
+   - mastodon — https://infosec.exchange/@Spamhaus/
+   - mastodon — https://infosec.exchange/@ianw/
+   - mastodon — https://infosec.exchange/@lorenzofb/
+   - mastodon — https://ioc.exchange/@abuse_ch/
+
+ • News
+   - bleepingcomputer — https://www.bleepingcomputer.com
+   - csocybercrime — https://www.csocybercrime.com
+   - krebsonsecurity — https://krebsonsecurity.com
+   - postswigger — https://portswigger.net
+   - thehackernews — https://thehackernews.com/
+   - hackread — https://www.hackread.com
+   - securityweek — https://www.securityweek.com
+   - therecord — https://therecord.media
+   - schneier — https://www.schneier.com/
+   - infosecuritymagazine — https://www.infosecurity-magazine.com
+
+ • Pastebin
+   - pastebin — https://pastebin.com/u/Overwtime
+
+ • Reddit
+   - reddit — https://www.reddit.com/r/privacy/new
+   - reddit — https://www.reddit.com/r/HackingTechniques/new
+   - reddit — https://www.reddit.com/r/osinttools/new
+   - reddit — https://www.reddit.com/r/DataBreaches/new
+   - reddit — https://www.reddit.com/r/databreach/new
+   - reddit — https://www.reddit.com/r/DataBreached/new
+   - reddit — https://www.reddit.com/r/cybersecurity_news/new
+   - reddit — https://www.reddit.com/r/datasecurity/new
+   - reddit — https://www.reddit.com/r/CyberIncidentReports/new
+   - reddit — https://www.reddit.com/r/Malware/new
+   - reddit — https://www.reddit.com/r/CyberNews/new
+   - reddit — https://www.reddit.com/r/netsec/new
+   - reddit — https://www.reddit.com/r/Information_Security/new
+   - reddit — https://www.reddit.com/r/NetSecAPTWatch/new
+   - reddit — https://www.reddit.com/r/technews/new
+   - reddit — https://www.reddit.com/r/hackernews/new
+   - reddit — https://www.reddit.com/r/Hacking_Cracking/new
+   - reddit — https://www.reddit.com/r/AskNetsec/new
+   - reddit — https://www.reddit.com/r/HowToHack/new
+   - reddit — https://www.reddit.com/r/linux/new
+   - reddit — https://www.reddit.com/r/Hacking_Tutorials/new
+   - reddit — https://www.reddit.com/r/hacking/new
+   - reddit — https://www.reddit.com/r/securityCTF/new
+   - reddit — https://www.reddit.com/r/onions/new
+   - reddit — https://www.reddit.com/r/TOR/new
+   - reddit — https://www.reddit.com/r/pwned/new
+   - reddit — https://www.reddit.com/r/mintmobile/new
+   - reddit — https://www.reddit.com/r/node/new
+   - reddit — https://www.reddit.com/r/datasets/new
+   - reddit — https://www.reddit.com/r/databreach/new
+   - reddit — https://www.reddit.com/r/hackers/new
+   - reddit — https://www.reddit.com/r/ethicalhacking/new
+   - reddit — https://www.reddit.com/r/Hacking_Tricks/new
+   - reddit — https://www.reddit.com/r/Real_Hacking/new
+   - reddit — https://www.reddit.com/r/databreach/new
+   - reddit — https://www.reddit.com/r/blueteamsec/new
+   - reddit — https://www.reddit.com/r/redteamsec/new
+   - reddit — https://www.reddit.com/r/purpleteamsec/new
+   - reddit — https://www.reddit.com/r/threatintel/new
+   - reddit — https://www.reddit.com/r/dfir/new
+   - reddit — https://www.reddit.com/r/ThreathuntingDFIR/new
+   - reddit — https://www.reddit.com/r/osinttools/new
+   - reddit — https://www.reddit.com/r/OSINTExperts/new
+   - reddit — https://www.reddit.com/r/InfoSecNews/new
+   - reddit — https://www.reddit.com/r/CyberNews/new
+   - reddit — https://www.reddit.com/r/cybersecurity_news/new
+   - reddit — https://www.reddit.com/r/Information_Security/new
+   - reddit — https://www.reddit.com/r/Infosec/new
+   - reddit — https://www.reddit.com/user/Realistic_Truth_7030/
+   - reddit — https://www.reddit.com/user/SuperfluousJuggler/
+   - reddit — https://www.reddit.com/user/Bojack_Banerjee/
+   - reddit — https://www.reddit.com/r/cybersecurity/
+   - reddit — https://www.reddit.com/r/CryptoCurrency/
+   - reddit — https://www.reddit.com/r/hacking/
+   - reddit — https://www.reddit.com/r/technology/
+   - reddit — https://www.reddit.com/r/CoinBase//
+   - reddit — https://www.reddit.com/r/dataengineering/
+   - reddit — https://www.reddit.com/r/threatintel/
+   - reddit — https://www.reddit.com/r/HowToHack/
+   - reddit — https://www.reddit.com/r/privacy/
+   - reddit — https://www.reddit.com/r/msp/
+   - reddit — https://www.reddit.com/r/sysadmin/
+   - reddit — https://www.reddit.com/r/news/
+   - reddit — https://www.reddit.com/r/LeaksAndRumors/
+
+ • Tracking
+   - acn — https://www.acn.gov.it/
+   - cert — https://cert.ir/
+   - cert_at — https://www.cert.at/
+   - cert_cn — https://www.cert.org.cn/
+   - cert_pl — https://cert.pl/
+   - certeu — https://cert.europa.eu/
+   - certgovua — https://cert.gov.ua/
+   - cncs_pt — https://dyn.cncs.gov.pt
+   - csa_gov_sg — https://www.csa.gov.sg/
+   - cyber — https://cyber.gouv.fr
+   - idsirtii — https://idsirtii.or.id
+   - incibe — https://www.incibe.es/en/incibe-cert
+   - jpcert — https://www.jpcert.or.jp/english/
+   - msb — https://www.msb.se
+   - ncsc — https://english.ncsc.nl
+   - ncsc_swed — https://www.ncsc.admin.ch
+   - nsm — https://nsm.no
+   - nukibgovcz — https://nukib.gov.cz/
+   - public_tableau — https://public.tableau.com
+   - cirtbangladesh — https://www.cirt.gov.bd
+   - cfcs_dk — https://www.cfcs.dk/
+   - kyberturvallisuuskeskus — https://www.kyberturvallisuuskeskus.fi/fi
+   - csocybercrime_tracking — https://www.csoonline.com
+   - ncscuk — https://www.ncsc.gov.uk
+   - thaicert — https://www.thaicert.or.th
+   - certPK — https://pkcert.gov.pk/
+   - cybernewsksa — https://nca.gov.sa/ar/news
+
+ • Twitter / X
+   - Arkbird_SOLG — https://twitter.com/Arkbird_SOLG/
+   - crep1x — https://twitter.com/crep1x/
+   - Cryptolaemus1 — https://twitter.com/Cryptolaemus1/
+   - Cyberknow20 — https://twitter.com/Cyberknow20/
+   - ecarlesi — https://twitter.com/ecarlesi/
+   - EmotetB — https://twitter.com/EmotetB
+   - executemalware — https://twitter.com/executemalware
+   - htmalgae — https://twitter.com/htmalgae
+   - JAMESWT_MHT — https://twitter.com/JAMESWT_MHT
+   - mojoesec — https://twitter.com/mojoesec
+   - PhishStats — https://twitter.com/PhishStats
+   - powershellcode — https://twitter.com/powershellcode
+   - TMRansomMonitor — https://twitter.com/TMRansomMonitor
+   - RdpSnitch — https://twitter.com/RdpSnitch
+   - reecdeep — https://twitter.com/reecdeep
+   - shadowchasing1 — https://twitter.com/shadowchasing1
+   - thedfirreport — https://twitter.com/thedfirreport
+   - vuldb — https://twitter.com/vuldb
+   - vxunderground — https://twitter.com/vxunderground
+   - nav1n0x — https://x.com/nav1n0x
+   - OWASPWHID — https://x.com/OWASPWHID
+   - lu3ky13 — https://x.com/lu3ky13
+   - NullSecurityX — https://x.com/NullSecurityX
+   - rudr4_sarkar — https://x.com/rudr4_sarkar
+   - clintgibler — https://x.com/clintgibler
+   - ido_cohen2 — https://x.com/ido_cohen2
+   - 0xdef1ant — https://x.com/0xdef1ant
+   - hackinarticles — https://x.com/hackinarticles
+   - hack_git — https://x.com/hack_git
+   - NXBBSECHACKER — https://x.com/NXBBSECHACKER
+   - HackersOIHEC — https://x.com/HackersOIHEC
+   - nani_wilson — https://x.com/nani_wilson
+   - H4ckmanac — https://x.com/H4ckmanac
+   - HackingTeam777 — https://x.com/HackingTeam777
+   - Comparitech — https://x.com/Comparitech
+   - DataLeakLawyers — https://x.com/DataLeakLawyers
+   - cyberfeeddigest — https://x.com/cyberfeeddigest
+   - RakeshKrish12 — https://x.com/RakeshKrish12
+   - DarkWebInformer — https://x.com/DarkWebInformer
+   - blackorbird — https://x.com/blackorbird
+   - nshcthreatrecon — https://x.com/nshcthreatrecon
+   - cyb_detective — https://x.com/cyb_detective
+   - 1ZRR4H — https://x.com/1ZRR4H
+   - hackerthread — https://x.com/hackerthread
+   - MonThreat — https://x.com/MonThreat
+   - TweetThreatNews — https://x.com/TweetThreatNews
+   - CISACyber — https://x.com/CISACyber
+   - DarkReading — https://x.com/DarkReading
+   - CISAgov — https://x.com/CISAgov
+   - RansomwareNews — https://x.com/RansomwareNews
+   - FalconFeedsio — https://x.com/FalconFeedsio
+   - uuallan — https://x.com/uuallan
+   - DataBreachToday — https://x.com/DataBreachToday
+   - GroupIB_TI — https://x.com/GroupIB_TI
+   - Akamai — https://x.com/Akamai
+   - AWNetworks — https://x.com/AWNetworks
+   - BirminghamCyber — https://x.com/BirminghamCyber
+   - RansomwareLive — https://x.com/RansomwareLive
+   - charleshdray — https://x.com/charleshdray
+   - _venarix_ — https://x.com/_venarix_
+   - suyog41 — https://x.com/suyog41
+   - LindseyOD123 — https://x.com/LindseyOD123
+   - anyrun_app — https://x.com/anyrun_app
+   - TechJuicePk — https://x.com/TechJuicePk
+   - SaptangLabs — https://x.com/SaptangLabs
+   - Fact_Finder03 — https://x.com/Fact_Finder03
+   - fbgwls245 — https://x.com/fbgwls245
+   - suyog41 — https://x.com/suyog41
+   - leakd_com — https://x.com/leakd_com
+   - s3curetheweb — https://x.com/s3curetheweb
+   - malwrhunterteam — https://x.com/malwrhunterteam
+   - vxunderground — https://x.com/vxunderground
+   - 3xp0rtblog — https://x.com/3xp0rtblog
+   - Loginsoft_Inc — https://x.com/Loginsoft_Inc
+   - Threatlabz — https://x.com/Threatlabz
+   - ecrime_ch — https://x.com/ecrime_ch
+   - EHackerNews — https://x.com/EHackerNews
+   - socradar — https://x.com/socradar
+   - haveibeenpwned — https://x.com/haveibeenpwned
+   - Tobias_Ellwood — https://x.com/Tobias_Ellwood
+   - BleepinComputer — https://x.com/BleepinComputer
+   - rapid7 — https://x.com/rapid7
+   - Cyberwarzonecom — https://x.com/Cyberwarzonecom
+   - chrisschmitz — https://x.com/chrisschmitz
+   - vxunderground — https://x.com/vxunderground
+   - DailyDarkWeb — https://x.com/DailyDarkWeb
+   - hackinarticles — https://x.com/hackinarticles
+   - 7h3h4ckv157 — https://x.com/7h3h4ckv157
+   - 7odamoo — https://x.com/7odamoo
+   - PortSwiggerRes — https://x.com/PortSwiggerRes
+   - BleepinComputer — https://x.com/BleepinComputer
+   - TheDFIRReport — https://x.com/TheDFIRReport
+   - malwrhunterteam — https://x.com/malwrhunterteam
+   - three_cube — https://x.com/three_cube
+   - blueteamsec1 — https://x.com/blueteamsec1
+   - Unit42_Intel — https://x.com/Unit42_Intel
+   - executemalware — https://x.com/executemalware
+   - cglyer — https://x.com/cglyer
+   - billyleonard — https://x.com/billyleonard
+   - kostastsale — https://x.com/kostastsale
+   - SwiftOnSecurity — https://x.com/SwiftOnSecurity
+   - briankrebs — https://x.com/briankrebs
+   - vinnytroia — https://x.com/vinnytroia
+   - DataBreachToday — https://x.com/DataBreachToday?
+   - h4ckmanac — https://x.com/h4ckmanac
+   - h4ckmanac — https://x.com/h4ckmanac
+   - haveibeenpwned — https://x.com/haveibeenpwned
+   - DDoSecrets — https://x.com/DDoSecrets
+   - RakeshKrish12 — https://x.com/RakeshKrish12
+   - DailyDarkWeb — https://x.com/DailyDarkWeb
+   - campuscodi — https://x.com/campuscodi
+   - YourAnonTV — https://x.com/YourAnonTV
+   - wikileaks — https://x.com/wikileaks
+
 Changelog [1.0.2.7] – 2025-07-05
 
 Overview:
