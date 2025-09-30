@@ -13,7 +13,7 @@ uvicorn==0.34.0
 httpx==0.28.1
 gunicorn==23.0.0
 odmantic~=1.0.2
-starlette-admin==0.15.0rc9
+starlette-admin==0.15.1
 email-validator==2.2.0
 pymongo~=4.11
 passlib~=1.7.4
