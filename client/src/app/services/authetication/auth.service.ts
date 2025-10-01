@@ -86,7 +86,7 @@ export class AuthService {
                 break;
 
               case 'active':
-                this.setToken(response.access_token, username, response.role, response.hasOnboarding);
+                this.setToken(response.access_token, username, response.role, response.hasOnboarding, response.subscription, response.verificationDate);
                 this.startTokenRefresh();
                 this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
                 break;
@@ -135,7 +135,7 @@ export class AuthService {
       tap({
         next: (res) => {
           if (res?.access_token) {
-            this.setToken(res.access_token, username, res.role);
+            this.setToken(res.access_token, username, res.role, res.hasOnboarding);
             this.startTokenRefresh();
           } else {
             this.authState.next({
@@ -188,15 +188,23 @@ export class AuthService {
   getUsername(): string {
     return localStorage.getItem('username') ?? '';
   }
-
+  getSubscriptionStatus(): boolean {
+    return localStorage.getItem('subscription') === 'true';
+  }
+  getVerificationDate(): string {
+    return localStorage.getItem('verificationDate') ?? '';
+  }
   isAuthenticated(): boolean {
     return !!this.getStoredToken();
   }
   setOnboarding(value: boolean): void {
     localStorage.setItem('onboarding', String(value));
   }
+  setSubscription(value: boolean): void {
+    localStorage.setItem('subscription', String(value));
+  }
 
-  private setToken(token: string, username: string, role: string, hasOnboarding?: boolean): void {
+  private setToken(token: string, username: string, role: string, hasOnboarding?: boolean, subscription?: boolean, accountVerificationDate?: string): void {
     this.authState.next({
       token, username, role, isAuthenticated: true, onboarding: String(hasOnboarding), error: null
     });
@@ -205,6 +213,10 @@ export class AuthService {
     localStorage.setItem('role', role);
     if (hasOnboarding !== undefined)
       this.setOnboarding(hasOnboarding)
+    if (subscription !== undefined)
+      this.setSubscription(subscription)
+    if (accountVerificationDate !== undefined)
+      localStorage.setItem('verificationDate', accountVerificationDate);
   }
 
   private getStoredToken(): string | null {

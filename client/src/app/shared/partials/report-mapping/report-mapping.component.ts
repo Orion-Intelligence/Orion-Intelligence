@@ -1,12 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {HttpParams} from '@angular/common/http';
-import {ApiService} from '../../services/api.service';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {AuthService} from '../../../services/authetication/auth.service';
-import {Observable} from 'rxjs';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
+import { ApiService } from '../../services/api.service';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { AuthService } from '../../../services/authetication/auth.service';
+import { Observable } from 'rxjs';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { trialTime } from '../../constants/shared-enums';
+import { subscriptionGuard } from '../../guards/subscription.guard';
 
 @Component({
   selector: 'app-report-mapping',
@@ -22,7 +24,7 @@ export class ReportMappingComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(private api: ApiService, protected dashboardservice: DashboardService, protected authService: AuthService) {
+  constructor(private api: ApiService, protected dashboardservice: DashboardService, protected authService: AuthService, protected _subscriptionGuard: subscriptionGuard) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
@@ -30,13 +32,8 @@ export class ReportMappingComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  isAdmin(): boolean {
-    const currentRole = this.authService.getRole();
-    return currentRole === 'admin';
-  }
-
   toggleContent(): void {
-    if (!this.isAdmin()) {
+    if (!this._subscriptionGuard.isAdminOrSubscription()) {
       this.dashboardservice.showSubscription.set(true);
       return;
     }
@@ -57,9 +54,9 @@ export class ReportMappingComponent implements OnInit {
       .set('edge', '25')
       .set('depth', '2');
     this.loading = true;
-    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', {params}).subscribe({
+    this.api.get<{ results: any[]; limit_reached: boolean }>('graph', { params }).subscribe({
       next: response => {
-        const {results} = response;
+        const { results } = response;
         this.result = results;
         this.loading = false;
         this.getUniqueSortedItems(this.result, 25);

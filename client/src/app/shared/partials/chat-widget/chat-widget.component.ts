@@ -5,6 +5,7 @@ import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { chatBotAnimation } from '../../animations/chat.bot.animation';
+import { subscriptionGuard } from '../../guards/subscription.guard';
 
 type ChatApiResponse = {
   result?: string;
@@ -35,7 +36,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   private io?: IntersectionObserver;
   private mo?: MutationObserver;
 
-  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone) {}
+  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private _subscriptionGuard: subscriptionGuard) { }
 
   ngOnInit(): void {
     this.authService.getUsername$().subscribe(u => {
@@ -73,7 +74,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   aiSuggest(userMessage: string): void {
-    if (this.authService.getRole() !== 'admin') {
+    if (!this._subscriptionGuard.isAdminOrSubscription()) {
       this.showErrorMessage(userMessage);
       this.isBotTyping = false;
       this.scrollToNewMessage();
@@ -123,7 +124,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openChat() {
-    if (this.authService.getRole() !== 'admin') {
+    if (!this._subscriptionGuard.isAdminOrSubscription()) {
       this.dashboardService.showSubscription.set(true);
       return;
     }

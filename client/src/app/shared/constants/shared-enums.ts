@@ -95,3 +95,4 @@ export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set([
 
 export const search_filter_labels: { [key: string]: string } = {
 };
+export const trialTime: number = 7;

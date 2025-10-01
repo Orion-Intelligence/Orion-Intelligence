@@ -137,7 +137,8 @@ class session_manager:
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
             access_token, role = await self.create_access_token({"sub": username}, access_ttl)
-            return {"access_token": access_token, "token_type": "bearer", "role": role}
+            onboarding_exists = await self.get_instance().has_onboarding(str(user.id))
+            return {"access_token": access_token, "token_type": "bearer", "role": role,"hasOnboarding": onboarding_exists}
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="2FA token expired")

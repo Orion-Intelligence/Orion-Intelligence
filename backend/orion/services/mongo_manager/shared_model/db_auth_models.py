@@ -36,6 +36,8 @@ class db_user_account(Model):
     verification_expiry: Optional[datetime] = Field(default=None)
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
+    account_verify_at: Optional[datetime] = Field(default=None)
+    subscription: bool = Field(default=False)
 
 
     @field_validator("username")

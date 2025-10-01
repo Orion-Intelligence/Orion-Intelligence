@@ -1,15 +1,16 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {HelperService} from '../../services/helper.service';
-import {TooltipDirective} from '../../directive/tooltip-directive.directive';
-import {ApiService} from '../../services/api.service';
-import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
-import {AuthService} from '../../../services/authetication/auth.service';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
-import {GeneralResultItem} from '../../model/results/general/general.callback.model';
-import {LeakResultItem} from '../../model/results/leak/leak.callback.model';
-import {HttpParams} from '@angular/common/http';
-import {AppService} from '../../../services/core/app/app.service';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { HelperService } from '../../services/helper.service';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { ApiService } from '../../services/api.service';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { AuthService } from '../../../services/authetication/auth.service';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { GeneralResultItem } from '../../model/results/general/general.callback.model';
+import { LeakResultItem } from '../../model/results/leak/leak.callback.model';
+import { HttpParams } from '@angular/common/http';
+import { AppService } from '../../../services/core/app/app.service';
+import { subscriptionGuard } from '../../guards/subscription.guard';
 
 @Component({
   selector: 'app-report-header',
@@ -36,7 +37,8 @@ export class ReportHeaderComponent {
     protected appService: AppService,
     private authService: AuthService,
     private dashboardService: DashboardService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private _subscriptionGuard: subscriptionGuard
   ) {
   }
 
@@ -77,7 +79,7 @@ export class ReportHeaderComponent {
   }
 
   aiSuggest() {
-    if (this.authService.getRole() !== 'admin') {
+    if (!this._subscriptionGuard.isAdminOrSubscription()) {
       this.dashboardService.showSubscription.set(true);
       return;
     }

@@ -74,8 +74,9 @@ class auth_manager:
             data={"sub": user.username}, expires_delta=access_token_expires
         )
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.id))
-
-        return {"access_token": access_token, "token_type": "bearer", "role": role,"status": user.status,"hasOnboarding": onboarding_exists}
+        subscription=user.subscription
+        verificationDate=user.account_verify_at
+        return {"access_token": access_token, "token_type": "bearer", "role": role,"status": user.status,"hasOnboarding": onboarding_exists,"subscription":subscription,"verificationDate":verificationDate}
     
     @staticmethod
     async def verify_user(token: str):
@@ -88,6 +89,7 @@ class auth_manager:
             raise HTTPException(status_code=400, detail="Verification link expired")
 
         user.status = UserStatus.ONBOARDING 
+        user.account_verify_at=datetime.now(timezone.utc)
         user.verification_token = None
         user.verification_expiry = None
         await engine.save(user)
