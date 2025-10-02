@@ -33,18 +33,16 @@ export class ScrollService {
   }
 
   openCTI(event: MouseEvent, itemId: string): void {
-    // event.stopPropagation()
-    // if (itemId) {
-    //   const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
-    //   const singleInput = itemId;
-    //
-    //   const params = new URLSearchParams({
-    //     selectedType: 'document', singleInput: singleInput
-    //   });
-    //
-    //   const fullUrl = `${baseUrl}?${params.toString()}`;
-    //   window.open(fullUrl, '_blank');
-    // }
+    event.stopPropagation()
+    if (itemId) {
+      const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
+      const params = new URLSearchParams({
+        selectedType: 'document', singleInput: itemId
+      });
+
+      const fullUrl = `${baseUrl}?${params.toString()}`;
+      window.open(fullUrl, '_blank');
+    }
   }
 
   scrollToSavedPosition(): void {
@@ -64,17 +62,6 @@ export class ScrollService {
       }
     }
   }
-
-
-  public scrollToTop(behavior: ScrollBehavior = 'auto'): void {
-    const el = (document.scrollingElement || document.documentElement) as HTMLElement;
-    if (el && typeof (el as any).scrollTo === 'function') {
-      el.scrollTo({top: 0, left: 0, behavior});
-    } else {
-      window.scrollTo({top: 0, left: 0, behavior});
-    }
-  }
-
   private isScrollable(element: HTMLElement): boolean {
     const style = window.getComputedStyle(element);
     const overflowY = style.overflowY;
