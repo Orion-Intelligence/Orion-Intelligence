@@ -251,11 +251,14 @@ export class AuthService {
     }
 
     return this.apiService.post<{
+      verificationDate: string;
+      subscription: boolean;
+      hasOnboarding: boolean;
       access_token: string;
       role: string
     }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ 'Authorization': `Bearer ${currentToken}` }) }).pipe(tap((response) => {
       if (response) {
-        this.setToken(response.access_token, localStorage.getItem('username') || '', response.role);
+        this.setToken(response.access_token, localStorage.getItem('username') || '', response.role, response.hasOnboarding, response.subscription, response.verificationDate);
       }
     }), map((response) => response?.access_token || null));
   }

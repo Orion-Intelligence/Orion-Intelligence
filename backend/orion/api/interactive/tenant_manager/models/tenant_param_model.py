@@ -10,3 +10,4 @@ class tenant_param_model(BaseModel):
     username: str
     email: str
     status: UserStatus
+    subscription:bool

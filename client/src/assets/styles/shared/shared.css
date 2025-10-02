@@ -70,7 +70,7 @@
   height: 42px;
 }
 
-.dashboard__api-search-input-div .default-input-sub-container{
+.dashboard__api-search-input-div .default-input-sub-container {
   width: auto !important;
 }
 
@@ -518,12 +518,12 @@ table a:visited {
   margin-right: 12px;
 }
 
-.input-cross{
+.input-cross {
   background: #fff !important;
   border-radius: 0;
 }
 
-.input-cross:disabled{
+.input-cross:disabled {
   background: #fff !important;
   opacity: 1;
 }
@@ -613,7 +613,7 @@ table a:visited {
 }
 
 @media only screen and (width <=1000px) {
-  .default-notification-banner{
+  .default-notification-banner {
     width: calc(100% - 30px) !important;
   }
 

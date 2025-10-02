@@ -112,6 +112,7 @@ class TenantManager:
             await AuditLogManager.get_instance().register("system", f"update_user_failed:{request.username}")
             raise HTTPException(status_code=404, detail="User not found")
         user.status = request.status
+        user.subscription=request.subscription
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(str(user.id), "update_user")
         return {"message": "User updated successfully"}

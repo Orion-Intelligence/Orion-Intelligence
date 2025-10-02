@@ -1,7 +1,7 @@
 <div class="view-tenant-container">
   <div class="default-notification-banner default-notification-banner-stealer">
     <span>
-      <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg"/>
+      <img alt="Info Icon" class="default-notification-banner-icon" src="assets/images/shared/hint.svg" />
       <span>Manage Tenant Users: Username, Email, Role, Status, and Actions.</span>
     </span>
   </div>
@@ -9,57 +9,71 @@
   <div class="list__container credential-table">
     <table class="table table-striped directory-list__table clear-paddings">
       <thead>
-      <tr>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Subscription</th>
+          <th>Actions</th>
+        </tr>
       </thead>
 
       <tbody *ngIf="!isLoading" @fadeInDashboardItem>
-      <tr *ngFor="let user of users">
-        <td class="text-break">{{ user.username }}</td>
-        <td class="text-break">{{ user.email || '-' }}</td>
-        <td>
-          <select [(ngModel)]="user.role"
-                  [ngModelOptions]="{standalone: true}"
-                  class="view-tenant_custom-dropdown"
-                  disabled>
-            <option value="admin">Admin</option>
-            <option value="crawler">Crawler</option>
-            <option value="demo">Demo</option>
-            <option value="profile">Profile</option>
-          </select>
-        </td>
-        <td>
-          <select [(ngModel)]="user.status"
-                  [ngModelOptions]="{standalone: true}"
-                  class="view-tenant_custom-dropdown"
-                  [disabled]="isLoading || !user.email || user.status === 'verification_pending'">
-            <option value="verification_pending" disabled>Verification Pending</option>
-            <option value="onboarding" disabled>Onboarding</option>
-            <option value="active">Active</option>
-            <option value="disable">Disable</option>
-          </select>
-        </td>
-        <td>
-          <button (click)="updateUser(user)" class="view-tenant_btn-update" [disabled]="!user.email || isLoading">
-            Update
-          </button>
-        </td>
-      </tr>
+        <tr *ngFor="let user of users">
+          <td class="text-break">{{ user.username }}</td>
+          <td class="text-break">{{ user.email || '-' }}</td>
+          <td>
+            <select [(ngModel)]="user.role" [ngModelOptions]="{standalone: true}" class="view-tenant_custom-dropdown"
+              disabled>
+              <option value="admin">Admin</option>
+              <option value="crawler">Crawler</option>
+              <option value="demo">Demo</option>
+              <option value="profile">Profile</option>
+            </select>
+          </td>
+          <td>
+            <select [(ngModel)]="user.status" [ngModelOptions]="{standalone: true}" class="view-tenant_custom-dropdown"
+              [disabled]="isLoading || !user.email || user.status === 'verification_pending'">
+              <option value="verification_pending" disabled>Verification Pending</option>
+              <option value="onboarding" disabled>Onboarding</option>
+              <option value="active">Active</option>
+              <option value="disable">Disable</option>
+            </select>
+          </td>
+          <td>
+            <select [(ngModel)]="user.subscription" [ngModelOptions]="{standalone: true}"
+              class="view-tenant_custom-dropdown">
+              <option [ngValue]="true">Paid</option>
+              <option [ngValue]="false">Free</option>
+            </select>
+          </td>
+          <td>
+            <button (click)="updateUser(user)" class="view-tenant_btn-update" [disabled]="!user.email || isLoading">
+              Update
+            </button>
+          </td>
+        </tr>
       </tbody>
 
       <tbody *ngIf="isLoading" @fadeInDashboardItem>
-      <tr *ngFor="let _ of [1,2,3,4,5]">
-        <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-        <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
-      </tr>
+        <tr *ngFor="let _ of [1,2,3,4,5]">
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-75"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-100"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-50"></div>
+          </td>
+          <td>
+            <div class="skeleton_shimmer shimmer-line w-25"></div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>

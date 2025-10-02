@@ -14,4 +14,5 @@ export interface User {
     email: string;
     role: 'admin' | 'crawler' | 'demo' | 'profile';
     status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
+    subscription: boolean;
 }

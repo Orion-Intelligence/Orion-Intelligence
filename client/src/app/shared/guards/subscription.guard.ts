@@ -13,21 +13,32 @@ export class subscriptionGuard implements CanActivate {
   }
 
   public isAdminOrSubscription(): boolean {
-    const role = this.authService.getRole();
-    const subscription = this.authService.getSubscriptionStatus();
-    const verifyDate = this.authService.getVerificationDate();
-
-    let hasTrial = false;
-
-    if (verifyDate) {
-      const expiry = new Date(verifyDate);
-      expiry.setDate(expiry.getDate() + trialTime);
-      hasTrial = expiry > new Date();
-    }
-
-    return role === 'admin' || subscription || hasTrial;
+    return this.checkAdmin() || this.checkSubscription() || this.getTrialDaysLeft() > 0;
   }
+  public checkSubscription(): boolean {
+    const subscription = this.authService.getSubscriptionStatus();
+    return subscription;
+  }
+  public checkAdmin(): boolean {
+    const role = this.authService.getRole();
+    return role === 'admin'
+  }
+  public getTrialDaysLeft(): number {
+    const verifyDate = this.authService.getVerificationDate();
+    if (!verifyDate) {
+      return 0;
+    }
+    const expiry = new Date(verifyDate);
+    expiry.setDate(expiry.getDate() + trialTime);
+    const now = new Date();
+    if (expiry <= now) {
+      return 0;
+    }
+    const diffMs = expiry.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
+    return diffDays;
+  }
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
     if (this.isAdminOrSubscription()) {
       return true;

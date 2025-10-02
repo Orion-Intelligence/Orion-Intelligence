@@ -29,6 +29,14 @@ class SignupManager:
         email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         if not re.match(email_pattern, data.email):
             raise HTTPException(status_code=400, detail="Invalid email format")
+        
+        domain = data.email.split("@")[-1].lower()
+        existing_domain_user = await engine.find_one(
+            db_user_account,
+            {"email": {"$regex": f"@{domain}$", "$options": "i"}} 
+        )
+        if existing_domain_user:
+            raise HTTPException(status_code=400,detail=f"Accounts with domain '{domain}' are not allowed since one already exists.")
 
         PRODUCTION = int(env_handler.get_instance().env("PRODUCTION", 0)) 
         if PRODUCTION == 1:

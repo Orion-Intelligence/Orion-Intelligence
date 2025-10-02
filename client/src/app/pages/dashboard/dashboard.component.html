@@ -1,3 +1,4 @@
+<app-trail-notification [trialNotificationCheck]="false"></app-trail-notification>
 <app-pro-subscription *ngIf="dashboardService.showSubscription()" (close)="hideSubscription()"></app-pro-subscription>
 <div *ngIf="!isCtiGraph()">
   <div id="top"></div>
@@ -11,6 +12,7 @@
     <div class="dashboard_container">
       <div class="dashboard_sub-container dashboard_content-scroll" id="dashboard-container">
         <app-dashboard-header></app-dashboard-header>
+        <app-trail-notification [trialNotificationCheck]="true"></app-trail-notification>
         <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard_body">
           <router-outlet #routerOutlet="outlet"></router-outlet>
         </span>
