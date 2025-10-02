@@ -15,6 +15,7 @@ class search_general_param_model(BaseModel,helper_controller):
     matchtype: Optional[str] = "or"
     daterange: Optional[str] = ""
     content: Optional[str] = "all"
+    profile: bool = False
     entity: Optional[str] = ""
     entity_filter: Optional[Dict[str, List[str]]] = None
 

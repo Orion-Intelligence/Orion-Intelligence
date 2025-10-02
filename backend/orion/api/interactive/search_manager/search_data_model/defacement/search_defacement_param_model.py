@@ -8,6 +8,7 @@ class search_defacement_param_model(BaseModel,helper_controller):
     category: Optional[str] = "all"
     page: Optional[int] = 1
     network: str = "all"
+    profile: bool = False
     daterange: Optional[str] = ""
     attacker: Optional[str] = ""
     must: Optional[bool] = False
