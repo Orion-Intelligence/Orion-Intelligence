@@ -5,6 +5,7 @@ import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
+const SEARCH_LOGO_SRC = '/assets/images/sidebar/search_nav_logo.png';
 
 const preload = document.createElement('link');
 preload.rel = 'preload';
@@ -18,11 +19,20 @@ preloadAuthIcon.as = 'image';
 preloadAuthIcon.href = AUTH_ICON_SRC;
 document.head.prepend(preloadAuthIcon);
 
+const preloadSearchLogo = document.createElement('link');
+preloadSearchLogo.rel = 'preload';
+preloadSearchLogo.as = 'image';
+preloadSearchLogo.href = SEARCH_LOGO_SRC;
+document.head.prepend(preloadSearchLogo);
+
 const preloadPlaceholder = new Image();
 preloadPlaceholder.src = PLACEHOLDER_SRC;
 
 const preloadAuth = new Image();
 preloadAuth.src = AUTH_ICON_SRC;
+
+const preloadSearch = new Image();
+preloadSearch.src = SEARCH_LOGO_SRC;
 
 const css = document.createElement('link');
 css.rel = 'stylesheet';
@@ -33,7 +43,13 @@ const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
   const alt = (img.getAttribute('alt') || '').toLowerCase();
-  if (alt === 'background' || src.endsWith('Bg.webp') || src.endsWith('hint.svg') || src.endsWith('auth_dashboard_icon.svg') || img.classList.contains('auth-wrapper__image')) return;
+  if (
+    alt === 'background' ||
+    src.endsWith('Bg.webp') ||
+    src.endsWith('hint.svg') ||
+    src.endsWith('auth_dashboard_icon.svg') ||
+    img.classList.contains('auth-wrapper__image')
+  ) return;
   img.removeAttribute('alt');
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
@@ -71,7 +87,11 @@ async function preloadAllImagesFromManifest() {
   } catch {}
 }
 
-Promise.allSettled([preloadPlaceholder.decode(), preloadAuth.decode()]).finally(() => {
+Promise.allSettled([
+  preloadPlaceholder.decode(),
+  preloadAuth.decode(),
+  preloadSearch.decode()
+]).finally(() => {
   preloadAllImagesFromManifest().then();
   bootstrapApplication(AppComponent, appConfig).then();
 });
