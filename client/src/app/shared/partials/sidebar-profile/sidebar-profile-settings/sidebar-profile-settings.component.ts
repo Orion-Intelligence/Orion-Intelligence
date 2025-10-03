@@ -87,7 +87,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
   hasIocsWithValues(): boolean {
     return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
   }
-  save_data() {
+  update() {
     const filteredOnboardingData: TenantModel = {
       companyName: this.onboardingData?.companyName || '',
       iocs: this.onboardingData?.iocs.filter(ioc => ioc.values && ioc.values.length > 0) || []
@@ -108,6 +108,9 @@ export class SidebarProfileSettingsComponent implements OnInit {
         alert(err?.error?.detail || 'Onboarding failed');
       },
     });
+  }
+  goBack() {
+    this.router.navigate(['/dashboard']);
   }
   setIocLocal() {
     this.categories = {};

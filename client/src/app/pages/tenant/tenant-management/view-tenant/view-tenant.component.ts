@@ -1,21 +1,25 @@
 
-import {Component, OnInit} from '@angular/core';
-import {ApiService} from '../../../../shared/services/api.service';
-import {HttpHeaders} from '@angular/common/http';
-import {NgFor, NgIf} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {User} from '../../../../shared/model/tenant/tenant.model';
-import {fadeInDashboardItem} from '../../../../shared/animations/dashboard.item.animation';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ApiService } from '../../../../shared/services/api.service';
+import { HttpHeaders } from '@angular/common/http';
+import { NgFor, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { User } from '../../../../shared/model/tenant/tenant.model';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-view-tenant',
-  imports: [NgFor, NgIf, FormsModule],
+  imports: [NgFor, NgIf, FormsModule, CommonModule],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html'
 })
 export class ViewTenantComponent implements OnInit {
   users: User[] = [];
   isLoading = true;
+  selectedUserId: string | null = null;
+
+
 
   constructor(public apiService: ApiService,) {
   }
@@ -33,7 +37,19 @@ export class ViewTenantComponent implements OnInit {
       },
     });
   }
+  toggleMenu(user: User) {
+    this.selectedUserId = this.selectedUserId === user.username ? null : user.username;
+  }
 
+  getRoleLabel(role: User['role']): string {
+    switch (role) {
+      case 'admin': return 'Admin';
+      case 'crawler': return 'Crawler';
+      case 'demo': return 'Demo';
+      case 'profile': return 'Profile';
+      default: return '';
+    }
+  }
   updateUser(user: User) {
     this.isLoading = true;
     this.apiService.post('update/user', user).subscribe({
@@ -46,5 +62,12 @@ export class ViewTenantComponent implements OnInit {
         console.error('Failed to update user', err);
       },
     });
+  }
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.action-menu')) {
+      this.selectedUserId = null;
+    }
   }
 }

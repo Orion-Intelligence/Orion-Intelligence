@@ -1,0 +1,11 @@
+.empty-query_ioc-button {
+    background-color: #57A5EB;
+    color: #373637;
+    border: none;
+    margin-top: 20px;
+    border-radius: 8px;
+    width: 110px;
+    height: 44px;
+    font-size: 14px;
+    font-weight: 500px !important
+}

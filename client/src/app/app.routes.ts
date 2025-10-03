@@ -36,6 +36,7 @@ import {AuditlogComponent} from './pages/admin/auditlog/auditlog.component';
 import {DashboardResolver} from './shared/resolvers/dashboard.resolver';
 import {PaymentGatewayComponent} from './shared/partials/payment-gateway/payment-gateway.component';
 import {NotificationComponent} from './shared/partials/notification/notification.component';
+import {TrailNotificationComponent} from './shared/partials/trail-notification/trail-notification.component';
 
 const consolidatedChildren = [
   {
@@ -120,6 +121,11 @@ export const routes: Routes = [
     path: 'welcome/:token',
     component: WelcomeComponent,
     data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'paymentGateway',
+    component: TrailNotificationComponent,
+    data: { animation: 'TrailNotificationPage' }
   },
   {
     path: 'forgot',

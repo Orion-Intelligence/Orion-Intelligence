@@ -1,5 +1,9 @@
 .sidebar-profile-settings-container {
+    background-color: #172235;
+    border: 1px solid #FCFCFC12;
+    border-radius: 16px;
     padding: 30px;
+    margin: 30px;
 }
 
 .sidebar-profile-settings-save-button {
@@ -13,10 +17,26 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background: #6baeff;
-    color: #ffffff;
+    background: #57A5EB;
+    color: #373637;
     margin-left: 50px;
     border: none;
+}
+
+.profile-ioc-height {
+    max-height: 600px !important;
+    min-height: 200px;
+}
+
+.profile-ioc-search-input {
+    margin-top: -10px !important;
+}
+
+.profile-ioc-title {
+    font-family: Inter, sans-serif;
+    color: #57A5EB;
+    font-weight: 500px;
+    font-size: 20px;
 }
 
 @media (max-width: 1024px) {

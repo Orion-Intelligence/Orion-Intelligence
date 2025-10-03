@@ -12,7 +12,7 @@
   pointer-events: none;
 }
 
-.twofaextend .login_box{
+.twofaextend .login_box {
   width: 700px;
   margin-top: -15vh;
 }
@@ -149,4 +149,265 @@
     width: 175%;
     height: 175%;
   }
+}
+
+
+
+
+
+
+.login-page-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+
+.login-form-side {
+  flex: 0 0 33.3%;
+  background-color: #ffffff;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.header-links {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.header-link {
+  color: #a0b8d1;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.center-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 428px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.orion-logo {
+  margin-bottom: 24px;
+}
+
+.login-heading {
+  color: #373637;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-label {
+  color: #373637;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.login-input {
+  width: 100%;
+  max-width: 428px;
+  height: 44px;
+  background-color: #ffffff;
+  border: 1px solid #a0b8d1;
+  border-radius: 8px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.reset-password {
+  color: #a0b8d1;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  text-decoration: none;
+  align-self: flex-end;
+  margin-bottom: 24px;
+}
+
+.login-button,
+.login-button-disable {
+  width: 100%;
+  height: 44px;
+  background-color: #172235;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 32px;
+}
+
+.login-button-disable {
+  cursor: not-allowed;
+}
+
+.signup-text {
+  color: #373637;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  margin-top: -16px;
+}
+
+.signup-link {
+  color: #373637;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.footer-copyright {
+  text-align: center;
+  margin-top: auto;
+}
+
+.footer-copyright p {
+  color: #a0b8d1;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+
+.dashboard-preview-side {
+  flex: 1;
+  position: relative;
+  background:
+    linear-gradient(to bottom,
+      #2c4f9500,
+      #0e1626),
+    url('/assets/images/shared/login-bg.svg') no-repeat center center / cover;
+  background-color: #172235;
+  overflow: hidden;
+}
+
+.feature-bar {
+  display: flex;
+  align-items: center;
+  width: 295px;
+  height: 50px;
+  padding: 0 10px;
+  border-radius: 60px;
+  border: 2px solid #57a5eb33;
+  background-color: #0e162666;
+  backdrop-filter: blur(5px);
+  box-sizing: border-box;
+  display: flex;
+  gap: 10px;
+}
+
+.feature-bar .icon-placeholder {
+  width: 30px;
+  height: 30px;
+}
+
+.bar-text {
+  color: #ffffff;
+  font-family: 'Switzer', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.top-center {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.dashboard-visual {
+  width: 822px;
+  height: 636px;
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.diagonal-features {
+  position: absolute;
+  top: 15%;
+  right: 30%;
+  display: flex;
+  flex-direction: column;
+  gap: 150px;
+}
+
+.item-1 {
+  transform: translate(50px, 0);
+}
+
+.item-2 {
+  transform: translate(-50, 0);
+}
+
+.item-3 {
+  transform: translate(-150px, 0);
+}
+
+.item-4 {
+  transform: translate(-250px, 0);
+}
+
+.bottom-features {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 100px;
+}
+
+.feature-icon-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feature-icon-text .icon-placeholder {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.feature-label {
+  color: #0EC9AC;
+  font-family: 'Switzer', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
 }

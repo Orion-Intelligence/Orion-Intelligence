@@ -6,75 +6,63 @@
     </span>
   </div>
 
-  <div class="list__container credential-table">
-    <table class="table table-striped directory-list__table clear-paddings">
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th>Subscription</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+  <div class="user-management-container">
+    <div class="user-management-heading">User Management</div>
 
-      <tbody *ngIf="!isLoading" @fadeInDashboardItem>
-        <tr *ngFor="let user of users">
-          <td class="text-break">{{ user.username }}</td>
-          <td class="text-break">{{ user.email || '-' }}</td>
-          <td>
-            <select [(ngModel)]="user.role" [ngModelOptions]="{standalone: true}" class="view-tenant_custom-dropdown"
-              disabled>
-              <option value="admin">Admin</option>
-              <option value="crawler">Crawler</option>
-              <option value="demo">Demo</option>
-              <option value="profile">Profile</option>
-            </select>
-          </td>
-          <td>
-            <select [(ngModel)]="user.status" [ngModelOptions]="{standalone: true}" class="view-tenant_custom-dropdown"
-              [disabled]="isLoading || !user.email || user.status === 'verification_pending'">
-              <option value="verification_pending" disabled>Verification Pending</option>
-              <option value="onboarding" disabled>Onboarding</option>
-              <option value="active">Active</option>
-              <option value="disable">Disable</option>
-            </select>
-          </td>
-          <td>
-            <select [(ngModel)]="user.subscription" [ngModelOptions]="{standalone: true}"
-              class="view-tenant_custom-dropdown">
-              <option [ngValue]="true">Paid</option>
-              <option [ngValue]="false">Free</option>
-            </select>
-          </td>
-          <td>
-            <button (click)="updateUser(user)" class="view-tenant_btn-update" [disabled]="!user.email || isLoading">
-              Update
-            </button>
-          </td>
-        </tr>
-      </tbody>
+    <div class="user-management-table-wrapper">
+      <table class="user-management-table">
+        <thead>
+          <tr>
+            <th class="user-management-col-10">Sr</th>
+            <th class="user-management-col-30">User Name</th>
+            <th class="user-management-col-40">Email</th>
+            <th class="user-management-col-20">Role</th>
+            <th class="user-management-col-30">Status</th>
+            <th class="user-management-col-20">Subscription</th>
+            <th class="user-management-col-20">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users; let i = index">
+            <td class="user-management-col-10">{{ i + 1 }}</td>
+            <td class="user-management-col-30">{{ user.username }}</td>
+            <td class="user-management-col-40">{{ user.email }}</td>
+            <td class="user-management-col-20">
+              <div>{{ getRoleLabel(user.role) }}</div>
+            </td>
+            <td class="user-management-col-30">
+              <div class="view-tenant_dropdown-wrapper error">
+                <select [(ngModel)]="user.status" [ngModelOptions]="{standalone: true}"
+                  class="view-tenant_custom-dropdown"
+                  [disabled]="isLoading || !user.email || user.status === 'verification_pending'">
+                  <option value="verification_pending" disabled>Verification Pending</option>
+                  <option value="onboarding" disabled>Onboarding</option>
+                  <option value="active">Active</option>
+                  <option value="disable">Disable</option>
+                </select>
+              </div>
+            </td>
+            <td class="user-management-col-20">
+              <div class="view-tenant_dropdown-wrapper error">
+                <select [(ngModel)]="user.subscription" [ngModelOptions]="{standalone: true}"
+                  class="view-tenant_custom-dropdown">
+                  <option [ngValue]="true">Paid</option>
+                  <option [ngValue]="false">Free</option>
+                </select>
+              </div>
+            </td>
+            <td class="user-management-col-20">
+              <div class="action-menu">
+                <img src="/assets/images/shared/tenant-management-action-icon.svg" alt="menu" class="action-icon"
+                  (click)="toggleMenu(user)" />
 
-      <tbody *ngIf="isLoading" @fadeInDashboardItem>
-        <tr *ngFor="let _ of [1,2,3,4,5]">
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-75"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-100"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-50"></div>
-          </td>
-          <td>
-            <div class="skeleton_shimmer shimmer-line w-25"></div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+                <div class="action-dropdown" *ngIf="selectedUserId === user.username">
+                  <div class="dropdown-item" (click)="updateUser(user)">Update</div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>

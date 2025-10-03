@@ -1,13 +1,11 @@
 <div class="sidebar-profile-settings-container">
     <div class="onboarding-step2">
-        <h2 class="onboarding-step2__title">Add IOCs</h2>
-        <div class="onboarding-step2__description-row">
-            <p class="onboarding-step2__description">
-                Add IOCs description here...
-            </p>
 
-            <input type="text" class="onboarding-step2__search-input" placeholder="Search IOCs..."
-                [(ngModel)]="iocSearchText" />
+        <div class="onboarding-step2__description-row">
+            <h2 class="profile-ioc-title">Manage IOCs</h2>
+
+            <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
+                placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
         </div>
 
         <div class="onboarding-step2__category-scroll-container">
@@ -47,12 +45,11 @@
         <label class="onboarding-step2__label">Enter IOCs</label>
         <input type="text" class="onboarding-step2__input" placeholder="Type"
             (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-        <button class="sidebar-profile-settings-save-button" (click)="save_data()">Save</button>
 
         <div class="onboarding-step2__divider2"></div>
 
         <p class="onboarding-step2__added-title">Added IOCs</p>
-        <div class="onboarding-step2__added">
+        <div class="onboarding-step2__added profile-ioc-height">
 
             <div *ngIf="hasIocsWithValues(); else _noEntity">
                 <div *ngFor="let ioc of onboardingData?.iocs">
@@ -74,6 +71,15 @@
             <ng-template #_noEntity>
                 <p class="onboarding-step2__no-iocs">No IOCs added yet</p>
             </ng-template>
+        </div>
+        <div class="onboarding-box__actions">
+            <button class="onboarding-box__btn onboarding-box__btn--back" (click)="goBack()">
+                Back
+            </button>
+
+            <button class="sidebar-profile-settings-save-button" (click)="update()">
+                Update
+            </button>
         </div>
     </div>
 </div>
