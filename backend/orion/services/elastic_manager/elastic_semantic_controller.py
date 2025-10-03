@@ -98,11 +98,11 @@ class elastic_semantic_controller:
 
     @staticmethod
     def embed_query_sync(text: str) -> Optional[List[float]]:
-        base = "http://trusted-micros-api:8010"
+        base = env_handler.get_instance().env("EMBED_API_BASE") or "http://trusted-micros-api:8010"
         try:
             q = ("query: " + (text or "").strip())
             with httpx.Client(timeout=200) as client:
-                r = client.post(f"{base}/nlp/embed", json={"data": [q], "normalize": True})
+                r = client.post(f"{base}/nlp/embed/index", json={"data": [q], "normalize": True})
                 r.raise_for_status()
                 data = r.json()
                 payload = data.get("result", data) or {}

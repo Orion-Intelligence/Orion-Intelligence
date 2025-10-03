@@ -22,9 +22,9 @@ class ELASTIC_INDEX:
 
 
 class ELASTIC_SEMANTIC:
-    S_INFERENCE_ID = "orion-e5-small"
+    S_INFERENCE_ID = "bge-small-en-v1.5"
     S_EMBED_FIELD = "m_embedding"
-    S_EMBED_DIMS = 1024
+    S_EMBED_DIMS = 384
 
 
 class ELASTIC_CONNECTIONS:
@@ -100,7 +100,7 @@ class ELASTIC_ENUMS:
 
                 "m_embedding": {
                     "type": "dense_vector",
-                    "dims": 1024,
+                    "dims": 384,
                     "element_type": "float",
                     "similarity": "cosine",
                     "index": True
@@ -140,7 +140,7 @@ class ELASTIC_ENUMS:
 
                 "m_embedding": {
                     "type": "dense_vector",
-                    "dims": 1024,
+                    "dims": 384,
                     "element_type": "float",
                     "similarity": "cosine",
                     "index": True
@@ -286,7 +286,7 @@ class ELASTIC_ENUMS:
                 },
                 "m_embedding": {
                     "type": "dense_vector",
-                    "dims": 1024,
+                    "dims": 384,
                     "element_type": "float",
                     "similarity": "cosine",
                     "index": True
@@ -371,7 +371,7 @@ class ELASTIC_ENUMS:
                 "m_mitre_ttp_type": {"type": "keyword"},
                 "m_embedding": {
                     "type": "dense_vector",
-                    "dims": 1024,
+                    "dims": 384,
                     "element_type": "float",
                     "similarity": "cosine",
                     "index": True
@@ -472,7 +472,7 @@ class ELASTIC_ENUMS:
                 "m_content_type": {"type": "keyword", "normalizer": "lowercase_normalizer"},
                 "m_embedding": {
                     "type": "dense_vector",
-                    "dims": 1024,
+                    "dims": 384,
                     "element_type": "float",
                     "similarity": "cosine",
                     "index": True
@@ -629,7 +629,7 @@ class ELASTIC_ENUMS:
                 },
                 "m_embedding": {
                     "type": "dense_vector",
-                    "dims": 1024,
+                    "dims": 384,
                     "element_type": "float",
                     "similarity": "cosine",
                     "index": True
