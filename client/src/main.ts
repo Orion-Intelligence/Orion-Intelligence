@@ -4,26 +4,35 @@ import { AppComponent } from './app/pages/app/app.component';
 import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
+const SEARCH_LOGO_SRC = '/assets/images/sidebar/search_nav_logo.png';
 const CSS_HREF = '/assets/placeholder.css';
 const MANIFEST_URL = 'assets/precache-manifest.json';
 const STATS_DIR = '/assets/images/statistics/';
-const OBSERVER_OPTIONS: MutationObserverInit = { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] };
+const OBSERVER_OPTIONS: MutationObserverInit = {
+  childList: true,
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['src']
+};
 
-const preloadLink = document.createElement('link');
+const preloadImage = (src: string) => {
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = src;
+  document.head.prepend(link);
+  const img = new Image();
+  img.src = src;
+  return img;
+};
+
+const preloadPlaceholder = preloadImage(PLACEHOLDER_SRC);
+const preloadSearchLogo = preloadImage(SEARCH_LOGO_SRC);
+
 const cssLink = document.createElement('link');
-const placeholderImg = new Image();
-
-preloadLink.rel = 'preload';
-preloadLink.as = 'image';
-preloadLink.href = PLACEHOLDER_SRC;
-
 cssLink.rel = 'stylesheet';
 cssLink.href = CSS_HREF;
-
-document.head.prepend(preloadLink);
 document.head.appendChild(cssLink);
-
-placeholderImg.src = PLACEHOLDER_SRC;
 
 const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
@@ -31,7 +40,7 @@ const mark = (img: HTMLImageElement) => {
   if (!src.includes(STATS_DIR)) return;
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
-  const onload = () => { img.removeAttribute('data-ph'); };
+  const onload = () => img.removeAttribute('data-ph');
   img.addEventListener('load', onload, { once: true });
 };
 
@@ -65,7 +74,10 @@ async function preloadAllImagesFromManifest() {
   } catch {}
 }
 
-Promise.allSettled([placeholderImg.decode()]).finally(() => {
+Promise.allSettled([
+  preloadPlaceholder.decode(),
+  preloadSearchLogo.decode()
+]).finally(() => {
   preloadAllImagesFromManifest().then();
   bootstrapApplication(AppComponent, appConfig).then();
 });
