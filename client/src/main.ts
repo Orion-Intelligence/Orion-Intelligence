@@ -4,44 +4,38 @@ import { AppComponent } from './app/pages/app/app.component';
 import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
-const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
+const CSS_HREF = '/assets/placeholder.css';
+const MANIFEST_URL = 'assets/precache-manifest.json';
+const STATS_DIR = '/assets/images/statistics/';
+const OBSERVER_OPTIONS: MutationObserverInit = { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] };
 
-const preload = document.createElement('link');
-preload.rel = 'preload';
-preload.as = 'image';
-preload.href = PLACEHOLDER_SRC;
-document.head.prepend(preload);
+const preloadLink = document.createElement('link');
+const cssLink = document.createElement('link');
+const placeholderImg = new Image();
 
-const preloadAuthIcon = document.createElement('link');
-preloadAuthIcon.rel = 'preload';
-preloadAuthIcon.as = 'image';
-preloadAuthIcon.href = AUTH_ICON_SRC;
-document.head.prepend(preloadAuthIcon);
+preloadLink.rel = 'preload';
+preloadLink.as = 'image';
+preloadLink.href = PLACEHOLDER_SRC;
 
-const preloadPlaceholder = new Image();
-preloadPlaceholder.src = PLACEHOLDER_SRC;
+cssLink.rel = 'stylesheet';
+cssLink.href = CSS_HREF;
 
-const preloadAuth = new Image();
-preloadAuth.src = AUTH_ICON_SRC;
+document.head.prepend(preloadLink);
+document.head.appendChild(cssLink);
 
-const css = document.createElement('link');
-css.rel = 'stylesheet';
-css.href = '/assets/placeholder.css';
-document.head.appendChild(css);
+placeholderImg.src = PLACEHOLDER_SRC;
 
 const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
-  const alt = (img.getAttribute('alt') || '').toLowerCase();
-  if (alt === 'background' || src.endsWith('Bg.webp') || src.endsWith('hint.svg') || src.endsWith('auth_dashboard_icon.svg') || img.classList.contains('auth-wrapper__image')) return;
-  img.removeAttribute('alt');
+  if (!src.includes(STATS_DIR)) return;
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
   const onload = () => { img.removeAttribute('data-ph'); };
   img.addEventListener('load', onload, { once: true });
 };
 
-Array.from(document.images).forEach(i => mark(i as HTMLImageElement));
+for (const i of Array.from(document.images)) mark(i as HTMLImageElement);
 
 new MutationObserver(ms => {
   for (const m of ms) {
@@ -54,11 +48,11 @@ new MutationObserver(ms => {
       mark(m.target);
     }
   }
-}).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+}).observe(document.documentElement, OBSERVER_OPTIONS);
 
 async function preloadAllImagesFromManifest() {
   try {
-    const res = await fetch('assets/image-manifest.json', { cache: 'no-cache' });
+    const res = await fetch(MANIFEST_URL, { cache: 'no-cache' });
     if (!res.ok) return;
     const list: string[] = await res.json();
     for (const href of list) {
@@ -71,7 +65,7 @@ async function preloadAllImagesFromManifest() {
   } catch {}
 }
 
-Promise.allSettled([preloadPlaceholder.decode(), preloadAuth.decode()]).finally(() => {
+Promise.allSettled([placeholderImg.decode()]).finally(() => {
   preloadAllImagesFromManifest().then();
   bootstrapApplication(AppComponent, appConfig).then();
 });
