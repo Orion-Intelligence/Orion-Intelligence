@@ -7,8 +7,7 @@ import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Observable } from 'rxjs';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { trialTime } from '../../constants/shared-enums';
-import { subscriptionGuard } from '../../guards/subscription.guard';
+import {SubscriptionService} from '../../../services/dashboard/subscription.service';
 
 @Component({
   selector: 'app-report-mapping',
@@ -24,7 +23,7 @@ export class ReportMappingComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(private api: ApiService, protected dashboardservice: DashboardService, protected authService: AuthService, protected _subscriptionGuard: subscriptionGuard) {
+  constructor(private api: ApiService, protected dashboardservice: DashboardService, protected authService: AuthService, protected subscriptionService: SubscriptionService) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
@@ -33,7 +32,7 @@ export class ReportMappingComponent implements OnInit {
   }
 
   toggleContent(): void {
-    if (!this._subscriptionGuard.isAdminOrSubscription()) {
+    if (!this.subscriptionService.isAdminOrSubscription()) {
       this.dashboardservice.showSubscription.set(true);
       return;
     }
