@@ -8,7 +8,12 @@ const SEARCH_LOGO_SRC = '/assets/images/sidebar/search_nav_logo.png';
 const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
 const CSS_HREF = '/assets/placeholder.css';
 const MANIFEST_URL = 'assets/precache-manifest.json';
-const STATS_DIR = '/assets/images/statistics/';
+
+const TARGET_DIRS = [
+  '/assets/images/statistics/',
+  '/assets/images/sidebar/'
+];
+
 const OBSERVER_OPTIONS: MutationObserverInit = {
   childList: true,
   subtree: true,
@@ -39,7 +44,8 @@ document.head.appendChild(cssLink);
 function mark(img: HTMLImageElement) {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
-  if (!src.includes(STATS_DIR)) return;
+  const match = TARGET_DIRS.some(dir => src.includes(dir));
+  if (!match) return;
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
   img.addEventListener('load', () => img.removeAttribute('data-ph'), { once: true });
