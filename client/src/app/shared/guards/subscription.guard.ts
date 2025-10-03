@@ -13,10 +13,10 @@ export class subscriptionGuard implements CanActivate {
   }
 
   public isAdminOrSubscription(): boolean {
-    return this.checkAdmin() || this.checkSubscription() || this.getTrialDaysLeft() > 0;
+    return this.checkAdmin();
   }
   public checkSubscription(): boolean {
-    const subscription = this.authService.getSubscriptionStatus();
+    const subscription = false;
     return subscription;
   }
   public checkAdmin(): boolean {
@@ -24,7 +24,7 @@ export class subscriptionGuard implements CanActivate {
     return role === 'admin'
   }
   public getTrialDaysLeft(): number {
-    const verifyDate = this.authService.getVerificationDate();
+    const verifyDate = '';
     if (!verifyDate) {
       return 0;
     }

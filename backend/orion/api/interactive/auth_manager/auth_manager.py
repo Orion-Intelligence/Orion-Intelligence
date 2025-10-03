@@ -74,9 +74,7 @@ class auth_manager:
             data={"sub": user.username}, expires_delta=access_token_expires
         )
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.id))
-        subscription=user.subscription
-        verificationDate=user.account_verify_at
-        return {"access_token": access_token, "token_type": "bearer", "role": role,"status": user.status,"hasOnboarding": onboarding_exists,"subscription":subscription,"verificationDate":verificationDate}
+        return {"access_token": access_token, "token_type": "bearer", "role": role,"status": user.status,"hasOnboarding": onboarding_exists}
     
     @staticmethod
     async def verify_user(token: str):

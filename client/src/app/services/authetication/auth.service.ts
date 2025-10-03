@@ -86,7 +86,7 @@ export class AuthService {
                 break;
 
               case 'active':
-                this.setToken(response.access_token, username, response.role, response.hasOnboarding, response.subscription, response.verificationDate);
+                this.setToken(response.access_token, username, response.role, response.hasOnboarding);
                 this.startTokenRefresh();
                 this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
                 break;
@@ -188,23 +188,14 @@ export class AuthService {
   getUsername(): string {
     return localStorage.getItem('username') ?? '';
   }
-  getSubscriptionStatus(): boolean {
-    return localStorage.getItem('subscription') === 'true';
-  }
-  getVerificationDate(): string {
-    return localStorage.getItem('verificationDate') ?? '';
-  }
   isAuthenticated(): boolean {
     return !!this.getStoredToken();
   }
   setOnboarding(value: boolean): void {
     localStorage.setItem('onboarding', String(value));
   }
-  setSubscription(value: boolean): void {
-    localStorage.setItem('subscription', String(value));
-  }
 
-  private setToken(token: string, username: string, role: string, hasOnboarding?: boolean, subscription?: boolean, accountVerificationDate?: string): void {
+  private setToken(token: string, username: string, role: string, hasOnboarding?: boolean): void {
     this.authState.next({
       token, username, role, isAuthenticated: true, onboarding: String(hasOnboarding), error: null
     });
@@ -213,10 +204,6 @@ export class AuthService {
     localStorage.setItem('role', role);
     if (hasOnboarding !== undefined)
       this.setOnboarding(hasOnboarding)
-    if (subscription !== undefined)
-      this.setSubscription(subscription)
-    if (accountVerificationDate !== undefined)
-      localStorage.setItem('verificationDate', accountVerificationDate);
   }
 
   private getStoredToken(): string | null {
@@ -251,14 +238,12 @@ export class AuthService {
     }
 
     return this.apiService.post<{
-      verificationDate: string;
-      subscription: boolean;
       hasOnboarding: boolean;
       access_token: string;
       role: string
     }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ 'Authorization': `Bearer ${currentToken}` }) }).pipe(tap((response) => {
       if (response) {
-        this.setToken(response.access_token, localStorage.getItem('username') || '', response.role, response.hasOnboarding, response.subscription, response.verificationDate);
+        this.setToken(response.access_token, localStorage.getItem('username') || '', response.role, response.hasOnboarding);
       }
     }), map((response) => response?.access_token || null));
   }

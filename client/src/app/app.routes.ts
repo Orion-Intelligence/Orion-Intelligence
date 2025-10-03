@@ -32,7 +32,8 @@ import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profi
 import { SidebarProfileDashboardComponent } from './shared/partials/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
 import { RoleGuard } from './shared/guards/role-guard.guard';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
-import {AuditlogComponent} from './pages/admin/auditlog/auditlog.component';
+import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
+import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
 
 const consolidatedChildren = [
   {
@@ -117,6 +118,11 @@ export const routes: Routes = [
     path: 'welcome/:token',
     component: WelcomeComponent,
     data: { animation: 'WelcomePage' }
+  },
+  {
+    path: 'paymentGateway',
+    component: TrailNotificationComponent,
+    data: { animation: 'TrailNotificationPage' }
   },
   {
     path: 'forgot',

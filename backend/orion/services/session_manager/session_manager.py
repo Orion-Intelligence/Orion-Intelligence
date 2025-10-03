@@ -167,7 +167,7 @@ class session_manager:
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
             onboarding_exists = await self.has_onboarding(str(user.id))
-            return {"role": user.role.value, "access_token": new_token, "token_type": "bearer","hasOnboarding": onboarding_exists,"subscription":user.subscription,"verificationDate":user.account_verify_at}
+            return {"role": user.role.value, "access_token": new_token, "token_type": "bearer","hasOnboarding": onboarding_exists}
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token has expired, please log in again")
