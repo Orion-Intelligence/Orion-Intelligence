@@ -4,82 +4,44 @@ import { AppComponent } from './app/pages/app/app.component';
 import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
-const SEARCH_LOGO_SRC = '/assets/images/sidebar/search_nav_logo.png';
 const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
-const CSS_HREF = '/assets/placeholder.css';
-const MANIFEST_URL = 'assets/precache-manifest.json';
 
-const TARGET_DIRS = [
-  '/assets/images/statistics/',
-  '/assets/images/sidebar/',
-];
+const preload = document.createElement('link');
+preload.rel = 'preload';
+preload.as = 'image';
+preload.href = PLACEHOLDER_SRC;
+document.head.prepend(preload);
 
-const OBSERVER_OPTIONS: MutationObserverInit = {
-  childList: true,
-  subtree: true,
-  attributes: true,
-  attributeFilter: ['src'],
-};
+const preloadAuthIcon = document.createElement('link');
+preloadAuthIcon.rel = 'preload';
+preloadAuthIcon.as = 'image';
+preloadAuthIcon.href = AUTH_ICON_SRC;
+document.head.prepend(preloadAuthIcon);
 
-function preloadImage(src: string): HTMLImageElement {
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = src;
-  document.head.prepend(link);
-  const img = new Image();
-  img.src = src;
-  return img;
-}
+const preloadPlaceholder = new Image();
+preloadPlaceholder.src = PLACEHOLDER_SRC;
 
-const preloadPlaceholder = preloadImage(PLACEHOLDER_SRC);
-const preloadSearchLogo = preloadImage(SEARCH_LOGO_SRC);
-const preloadAuthIcon = preloadImage(AUTH_ICON_SRC);
+const preloadAuth = new Image();
+preloadAuth.src = AUTH_ICON_SRC;
 
-const cssLink = document.createElement('link');
-cssLink.rel = 'stylesheet';
-cssLink.href = CSS_HREF;
-document.head.appendChild(cssLink);
+const css = document.createElement('link');
+css.rel = 'stylesheet';
+css.href = '/assets/placeholder.css';
+document.head.appendChild(css);
 
-function shouldSkip(img: HTMLImageElement): boolean {
+const mark = (img: HTMLImageElement) => {
+  if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
   const alt = (img.getAttribute('alt') || '').toLowerCase();
-
-  const inTargetDir = TARGET_DIRS.some(dir => src.includes(dir));
-  if (!inTargetDir) return true;
-
-  if (
-    alt === 'background' ||
-    src.endsWith('Bg.webp') ||
-    src.endsWith('hint.svg') ||
-    src.endsWith('auth_dashboard_icon.svg') ||
-    img.classList.contains('auth-wrapper__image')
-  ) return true;
-
-  return false;
-}
-
-function mark(img: HTMLImageElement) {
-  if (img.dataset['ph'] === '1') return;
-  if (shouldSkip(img)) return;
-
-  const originalAlt = img.getAttribute('alt');
-  if (originalAlt !== null) img.dataset['alt'] = originalAlt;
+  if (alt === 'background' || src.endsWith('Bg.webp') || src.endsWith('hint.svg') || src.endsWith('auth_dashboard_icon.svg') || img.classList.contains('auth-wrapper__image')) return;
   img.removeAttribute('alt');
-
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
+  const onload = () => { img.removeAttribute('data-ph'); };
+  img.addEventListener('load', onload, { once: true });
+};
 
-  img.addEventListener('load', () => {
-    img.removeAttribute('data-ph');
-    if (img.dataset['alt'] !== undefined) {
-      img.setAttribute('alt', img.dataset['alt']!);
-      delete img.dataset['alt'];
-    }
-  }, { once: true });
-}
-
-for (const i of Array.from(document.images)) mark(i as HTMLImageElement);
+Array.from(document.images).forEach(i => mark(i as HTMLImageElement));
 
 new MutationObserver(ms => {
   for (const m of ms) {
@@ -92,11 +54,11 @@ new MutationObserver(ms => {
       mark(m.target);
     }
   }
-}).observe(document.documentElement, OBSERVER_OPTIONS);
+}).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
 
 async function preloadAllImagesFromManifest() {
   try {
-    const res = await fetch(MANIFEST_URL, { cache: 'no-cache' });
+    const res = await fetch('assets/precache-manifest.json', { cache: 'no-cache' });
     if (!res.ok) return;
     const list: string[] = await res.json();
     for (const href of list) {
@@ -109,11 +71,7 @@ async function preloadAllImagesFromManifest() {
   } catch {}
 }
 
-Promise.allSettled([
-  preloadPlaceholder.decode(),
-  preloadSearchLogo.decode(),
-  preloadAuthIcon.decode(),
-]).finally(() => {
+Promise.allSettled([preloadPlaceholder.decode(), preloadAuth.decode()]).finally(() => {
   preloadAllImagesFromManifest().then();
   bootstrapApplication(AppComponent, appConfig).then();
 });
