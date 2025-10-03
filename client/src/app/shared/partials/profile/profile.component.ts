@@ -1,12 +1,5 @@
-import {
-  Component,
-  HostListener,
-  OnInit,
-  AfterViewInit,
-  OnDestroy,
-  signal
-} from '@angular/core';
-import { AsyncPipe, NgIf, NgOptimizedImage } from "@angular/common";
+import {Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal} from '@angular/core';
+import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Observable } from 'rxjs';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -14,6 +7,7 @@ import { Router } from '@angular/router';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
+import { AppStorageService } from '../../../services/core/app/app-storage.service';
 
 @Component({
   selector: 'app-profile',
@@ -38,13 +32,19 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dropdownOpen.set(false);
   };
 
-  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService) {
+  constructor(
+    protected authService: AuthService,
+    public router: Router,
+    public dashboardService: DashboardService,
+    public appService: AppService,
+    private appStorage: AppStorageService
+  ) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
   }
 
   ngOnInit(): void {
-    const storedTheme = localStorage.getItem('theme');
+    const storedTheme = this.appStorage.getTheme();
     if (storedTheme === 'dark-theme') {
       this.isDarkTheme = true;
     } else if (storedTheme === 'light-theme') {
@@ -69,7 +69,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleThemeByClick() {
     this.isDarkTheme = !this.isDarkTheme;
     const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';
-    localStorage.setItem('theme', theme);
+    this.appStorage.setTheme(theme);
     this.applyTheme();
   }
 

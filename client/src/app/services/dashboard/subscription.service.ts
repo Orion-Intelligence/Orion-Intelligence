@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {AuthService} from '../authetication/auth.service';
-import {trialTime} from '../../shared/constants/shared-enums';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SubscriptionService {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {
+  }
 
-  public isAdminOrSubscription(): boolean {
-    return this.checkAdmin() || this.checkSubscription() || this.getTrialDaysLeft() > 0;
+  public accountExpirable(): boolean {
+    return this.authService.getRole()!="profile" || this.checkSubscription();
   }
 
   public checkSubscription(): boolean {
@@ -26,12 +26,12 @@ export class SubscriptionService {
     if (!verifyDate) return 0;
 
     const expiry = new Date(verifyDate);
-    expiry.setDate(expiry.getDate() + trialTime);
+    expiry.setMonth(expiry.getMonth() + 1); // 1-month trial
     const now = new Date();
 
-    if (expiry <= now) return 0;
-
     const diffMs = expiry.getTime() - now.getTime();
-    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    return diffDays > 0 ? diffDays : 0;
   }
 }

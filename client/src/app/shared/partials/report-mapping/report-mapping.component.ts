@@ -32,7 +32,7 @@ export class ReportMappingComponent implements OnInit {
   }
 
   toggleContent(): void {
-    if (!this.subscriptionService.isAdminOrSubscription()) {
+    if (!this.subscriptionService.accountExpirable()) {
       this.dashboardservice.showSubscription.set(true);
       return;
     }

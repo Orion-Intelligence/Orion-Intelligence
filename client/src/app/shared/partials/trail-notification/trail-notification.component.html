@@ -1,28 +1,12 @@
-<ng-container *ngIf="subscriptionService.getTrialDaysLeft()">
-  <ng-container *ngIf="trialNotificationCheck; else noTrial">
-    <ng-container *ngIf="!subscriptionService.checkSubscription()&&!subscriptionService.checkAdmin()&&subscriptionService.getTrialDaysLeft()<8">
-      <div class="trial-notification-container default-notification-banner default-notification-banner-stealer mb-0">
+<ng-container *ngIf="trialNotificationCheck;">
+    <ng-container
+        *ngIf="!subscriptionService.accountExpirable()&&subscriptionService.getTrialDaysLeft()<30">
+        <div class="trial-notification-container default-notification-banner default-notification-banner-stealer mb-0">
             <span>
-                <img alt="Info Icon" class="default-notification-banner-icon" src="../../../../assets/images/shared/hint.svg"/>
-                <span>Your subscription is about to expire in {{ subscriptionService.getTrialDaysLeft() }} days.</span>
+                <img alt="Info Icon" class="default-notification-banner-icon"
+                    src="assets/images/shared/hint.svg" />
+                <span>Your subscription is about to expire in {{subscriptionService.getTrialDaysLeft()}} days.</span>
             </span>
-      </div>
-    </ng-container>
-  </ng-container>
-  <ng-template #noTrial>
-    <ng-container *ngIf="!subscriptionService.checkSubscription()&&!subscriptionService.checkAdmin()&& subscriptionService.getTrialDaysLeft()<=0">
-      <ng-container>
-        <app-header></app-header>
-      </ng-container>
-      <img alt="background" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover" src="/assets/images/shared/Bg.webp">
-      <div class="welcome-page-wrapper">
-        <div class="welcome-page__card">
-          <img src="/assets/images/shared/welcom_icon.svg" alt="Tick">
-          <div class="welcome-page__card-heading"> Your Trial Has Ended</div>
-          <div class="welcome-page__card-paragraph"> Your trial period has ended. To continue enjoying full access, please upgrade your subscription.</div>
-          <button (click)="upgradeNow()">Upgrade Now</button>
         </div>
-      </div>
     </ng-container>
-  </ng-template>
 </ng-container>

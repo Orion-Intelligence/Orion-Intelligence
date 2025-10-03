@@ -74,7 +74,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   aiSuggest(userMessage: string): void {
-    if (!this.subscriptionService.isAdminOrSubscription()) {
+    if (!this.subscriptionService.accountExpirable()) {
       this.showErrorMessage(userMessage);
       this.isBotTyping = false;
       this.scrollToNewMessage();
@@ -124,7 +124,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openChat() {
-    if (!this.subscriptionService.isAdminOrSubscription()) {
+    if (!this.subscriptionService.accountExpirable()) {
       this.dashboardService.showSubscription.set(true);
       return;
     }

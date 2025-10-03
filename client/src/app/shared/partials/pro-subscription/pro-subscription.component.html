@@ -18,57 +18,62 @@
 
       <div class="pro-subscription_total-due">
         <h3>Total Due</h3>
-        <p>$59.99 <span class="per-year">/year</span></p>
+        <p>$1200 <span class="per-year">/year</span></p>
       </div>
     </div>
 
     <div class="pro-subscription_right-section">
       <h2>Upgrade to Dark Web Shield Pro</h2>
-      <p>Gain continuous protection by monitoring the dark web for your compromised information and security breaches.
-      </p>
+      <p>Gain continuous protection by monitoring the dark web for your compromised information and security breaches.</p>
 
       <div class="pro-subscription_subscription-options">
-        <label class="pro-subscription_subscription-option">
-          <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription" />
+        <label class="pro-subscription_subscription-option"> <input type="radio" name="subscription" value="monthly" [(ngModel)]="selectedSubscription"/>
           <div class="pro-subscription_option-content">
             <div class="radio-label">
-              <h4>($8.99/month)</h4>
-              <p>Billed annually at $130</p>
+              <h4>($100/month)</h4>
+              <p>Billed monthly at $1200</p>
             </div>
           </div>
         </label>
 
-        <label class="pro-subscription_subscription-option">
-          <input type="radio" name="subscription" value="monthly-highlighted" [(ngModel)]="selectedSubscription"
-            checked />
+        <label class="pro-subscription_subscription-option"> <input type="radio" name="subscription" value="annual" [(ngModel)]="selectedSubscription" checked/>
           <div class="pro-subscription_option-content">
             <div class="radio-label">
-              <h4>($8.99/month)</h4>
-              <p>Billed annually at $130</p>
+              <h4>($83.33/month)</h4>
+              <p>Billed annually at $1000</p>
             </div>
           </div>
         </label>
       </div>
 
-      <form class="pro-subscription_payment-form" (ngSubmit)="submitForm()" #formRef="ngForm">
+      <form class="pro-subscription_payment-form" (ngSubmit)="submitForm()" #formRef="ngForm" novalidate>
         <div class="form-row">
           <div class="form-group">
-            <label for="name">Your Name</label>
-            <input type="text" id="name" [(ngModel)]="userName" name="userName" required />
+            <label for="name">Your Name</label> <input type="text" id="name" name="userName" [(ngModel)]="userName" required minlength="2" #userNameCtrl="ngModel" [class.input-error]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)" [attr.aria-invalid]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)" [placeholder]="userNameCtrl.invalid && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted) ? 'Required' : ''"/> <span class="field-error" *ngIf="userNameCtrl.errors && (userNameCtrl.dirty || userNameCtrl.touched || formRef.submitted)">
+              {{ userNameCtrl.errors['required'] ? 'Required' : (userNameCtrl.errors['minlength'] ? 'Too short' : '') }}
+            </span>
           </div>
+
           <div class="form-group">
-            <label for="phone">Phone</label>
-            <input type="tel" id="phone" [(ngModel)]="userPhone" name="userPhone" required />
+            <label for="phone">Phone</label> <input type="tel" id="phone" name="userPhone" [(ngModel)]="userPhone" required pattern="^[0-9()+\\-\\s]{7,15}$" #userPhoneCtrl="ngModel" [class.input-error]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)" [attr.aria-invalid]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)" [placeholder]="userPhoneCtrl.invalid && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted) ? 'Required' : ''"/> <span class="field-error" *ngIf="userPhoneCtrl.errors && (userPhoneCtrl.dirty || userPhoneCtrl.touched || formRef.submitted)">
+              {{ userPhoneCtrl.errors['required'] ? 'Required' : 'Invalid' }}
+            </span>
           </div>
         </div>
 
         <div class="form-group full-width">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" [(ngModel)]="userEmail" name="userEmail" required />
+          <label for="email">Email Address</label> <input type="email" id="email" name="userEmail" [(ngModel)]="userEmail" required email #userEmailCtrl="ngModel" [class.input-error]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)" [attr.aria-invalid]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)" [placeholder]="userEmailCtrl.invalid && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted) ? 'Required' : ''"/> <span class="field-error" *ngIf="userEmailCtrl.errors && (userEmailCtrl.dirty || userEmailCtrl.touched || formRef.submitted)">
+            {{ userEmailCtrl.errors['required'] ? 'Required' : 'Invalid' }}
+          </span>
         </div>
 
-        <button type="submit" class="pro-subscription_btn-proceed" [disabled]="formRef.invalid">Proceed to Payment</button>
-        <button type="button" class="pro-subscription_btn-close" (click)="closePopup()">Close</button>
+        <button type="submit" class="pro-subscription_btn-proceed" [disabled]="formRef.invalid">
+          Proceed to Payment
+        </button>
+
+        <button type="button" class="pro-subscription_btn-close" *ngIf="!permanent" (click)="closePopup()">
+          Close
+        </button>
       </form>
     </div>
   </div>

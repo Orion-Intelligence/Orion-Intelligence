@@ -15,4 +15,5 @@ export interface User {
     role: 'admin' | 'crawler' | 'demo' | 'profile';
     status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
     subscription: boolean;
+    verificationDate: string;
 }

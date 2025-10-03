@@ -33,6 +33,9 @@ import { SidebarProfileDashboardComponent } from './shared/partials/sidebar-prof
 import { RoleGuard } from './shared/guards/role-guard.guard';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import {AuditlogComponent} from './pages/admin/auditlog/auditlog.component';
+import {DashboardResolver} from './shared/resolvers/dashboard.resolver';
+import {PaymentGatewayComponent} from './shared/partials/payment-gateway/payment-gateway.component';
+import {NotificationComponent} from './shared/partials/notification/notification.component';
 
 const consolidatedChildren = [
   {
@@ -124,6 +127,16 @@ export const routes: Routes = [
     data: { animation: 'ForgotPasswordComponent' }
   },
   {
+    path: 'notification',
+    component: NotificationComponent,
+    data: { animation: 'PaymentGatewayComponent' }
+  },
+  {
+    path: 'payment',
+    component: PaymentGatewayComponent,
+    data: { animation: 'PaymentGatewayComponent' }
+  },
+  {
     path: 'forgot/:token',
     component: ForgotPasswordComponent,
     data: { animation: 'ForgotPasswordComponent' }
@@ -132,6 +145,7 @@ export const routes: Routes = [
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [AuthGuard],
+    resolve: { session: DashboardResolver },
     data: { animation: 'DashboardPage' },
     children: [
       {

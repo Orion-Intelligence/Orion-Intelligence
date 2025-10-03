@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, Body, Response, Request, HTTPException, 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from starlette.responses import JSONResponse
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
+from orion.api.interactive.payment_manager.payment_manager import PaymentManager
 from orion.services.session_manager.session_manager import session_manager
-from orion.api.interactive.signup_manager.signup_request_model import SignupRequest
+from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
 from orion.api.interactive.signup_manager.signup_manager import SignupManager
 from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest, ResetPassword
 
@@ -88,6 +90,9 @@ async def verifyUser(token: str):
 async def forgotPassword(request: ForgotPasswordRequest):
     return await auth_manager.forgot_password(request.email)
 
+@auth_router.post("/api/subscription/request")
+async def subscriptionRequest(request: PaymentParamModel):
+    return await PaymentManager.get_instance().send_subscription_info(request)
 
 @auth_router.post("/api/updatePassword")
 async def updatePassword(data: ResetPassword):

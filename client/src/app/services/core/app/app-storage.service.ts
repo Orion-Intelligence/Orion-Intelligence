@@ -65,4 +65,13 @@ export class AppStorageService {
       });
     });
   }
+
+  getTheme(): 'dark-theme' | 'light-theme' | undefined {
+    const v = localStorage.getItem('theme') as 'dark-theme' | 'light-theme' | null;
+    return v === 'dark-theme' || v === 'light-theme' ? v : undefined;
+  }
+
+  setTheme(theme: 'dark-theme' | 'light-theme'): void {
+    localStorage.setItem('theme', theme);
+  }
 }

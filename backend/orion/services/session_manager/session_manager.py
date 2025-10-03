@@ -10,7 +10,7 @@ from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account,UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
 
@@ -48,7 +48,6 @@ class session_manager:
                 options={"verify_exp": True},
             )
             username: str = payload.get("sub")
-
             if not username:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
@@ -74,7 +73,6 @@ class session_manager:
         except ValueError:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
         return role
-    
 
     async def get_current_status(self, token: str) -> str:
         user = await self.get_current_user(token)
@@ -136,9 +134,17 @@ class session_manager:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
-            access_token, role = await self.create_access_token({"sub": username}, access_ttl)
+            access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
             onboarding_exists = await self.get_instance().has_onboarding(str(user.id))
-            return {"access_token": access_token, "token_type": "bearer", "role": role,"hasOnboarding": onboarding_exists}
+            session = {
+                "username": user.username,
+                "role": user.role.value if hasattr(user.role, "value") else str(user.role),
+                "status": user.status.value if hasattr(user.status, "value") else str(user.status),
+                "hasOnboarding": onboarding_exists,
+                "subscription": user.subscription,
+                "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
+            }
+            return {"access_token": access_token, "token_type": "bearer", "session": session}
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="2FA token expired")
@@ -154,7 +160,6 @@ class session_manager:
                 options={"verify_exp": True},
             )
             username = payload.get("sub")
-
             if not username:
                 raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -162,12 +167,34 @@ class session_manager:
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
 
+            role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
+            acct_at = user.account_verify_at
+            if isinstance(acct_at, datetime):
+                acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
+            if (
+                    role_name == "profile"
+                    and not bool(getattr(user, "subscription", False))
+                    and acct_at is not None
+                    and (datetime.now(timezone.utc) - acct_at).days >= 30
+            ):
+                raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
+
+            onboarding_exists = await self.has_onboarding(str(user.id))
+
             new_token_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
             new_token_payload = {"sub": username, "exp": new_token_expiry}
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
-            onboarding_exists = await self.has_onboarding(str(user.id))
-            return {"role": user.role.value, "access_token": new_token, "token_type": "bearer","hasOnboarding": onboarding_exists,"subscription":user.subscription,"verificationDate":user.account_verify_at}
+            session = {
+                "username": user.username,
+                "role": user.role.value if hasattr(user.role, "value") else str(user.role),
+                "status": user.status.value if hasattr(user.status, "value") else str(user.status),
+                "hasOnboarding": onboarding_exists,
+                "subscription": user.subscription,
+                "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
+            }
+
+            return {"access_token": new_token, "token_type": "bearer", "session": session}
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token has expired, please log in again")
@@ -178,10 +205,10 @@ class session_manager:
         engine = self._engine
         onboarding = await engine.find_one(db_tenant_model, db_tenant_model.userId == user_id)
         return onboarding is not None
-    
+
     @staticmethod
     def generate_verification_token():
-        return secrets.token_urlsafe(32) 
+        return secrets.token_urlsafe(32)
 
     @staticmethod
     def logout_user(ptoken: str):

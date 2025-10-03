@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account,user_role,UserStatus
-from orion.api.interactive.signup_manager.signup_request_model import SignupRequest
+from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.services.mail_manager.mail_enums import MailSubject,MailUrlHeading

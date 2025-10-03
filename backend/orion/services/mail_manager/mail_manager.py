@@ -25,6 +25,7 @@ class mail_manager:
 
 
     async def send_verification_mail(self, to: str, subject: str, body: str):
+        print("::::::::::::::::::: 4", flush=True)
         ACCOUNTS_MAIL_PASSWORD = env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD")
         sender_email = "accounts@orionintelligence.org"
         smtp_server = "smtp.titan.email"
@@ -34,11 +35,13 @@ class mail_manager:
         msg["To"] = to
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "html"))
+        print("::::::::::::::::::: 5", flush=True)
         await asyncio.to_thread(self._send_sync_email, sender_email, ACCOUNTS_MAIL_PASSWORD, to, msg,smtp_server,smtp_port)
         
 
     @staticmethod
     def _send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):
+        print("::::::::::::::::::: 6", flush=True)
         with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
             server.login(sender_email, password)
             server.sendmail(sender_email, to, msg.as_string())

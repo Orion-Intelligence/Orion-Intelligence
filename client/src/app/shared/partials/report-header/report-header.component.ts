@@ -77,7 +77,7 @@ export class ReportHeaderComponent {
   }
 
   aiSuggest() {
-    if (!this.subscriptionService.isAdminOrSubscription()) {
+    if (!this.subscriptionService.accountExpirable()) {
       this.dashboardService.showSubscription.set(true);
       return;
     }

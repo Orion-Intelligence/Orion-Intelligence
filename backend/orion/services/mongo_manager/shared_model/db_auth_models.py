@@ -32,10 +32,13 @@ class db_user_account(Model):
     email:str=Field(default="")
     role: user_role = Field(default=user_role.DEMO)
     status:UserStatus=Field(default=UserStatus.PENDING)
+
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
+
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
+
     account_verify_at: Optional[datetime] = Field(default=None)
     subscription: bool = Field(default=False)
 

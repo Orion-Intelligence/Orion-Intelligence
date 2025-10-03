@@ -1,7 +1,6 @@
-
 from orion.constants import constant
-from orion.services.mail_manager.mail_enums import MailSubject,MailUrlHeading
-from fastapi import HTTPException,Depends,Request
+from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
+from fastapi import HTTPException, Depends, Request
 from bson import ObjectId
 from odmantic import AIOEngine
 import threading
@@ -9,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account,user_role,UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.helper_manager.env_handler import env_handler
@@ -40,12 +39,10 @@ class auth_manager:
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
             return None
         return user
-    
+
     @staticmethod
-    async def login(username:str, password:str):
-        user = await auth_manager.get_instance().authenticate_user(
-            username, password
-        )
+    async def login(username: str, password: str):
+        user = await auth_manager.get_instance().authenticate_user(username, password)
         if not user:
             raise HTTPException(status_code=401, detail="Invalid username or password")
 
@@ -65,6 +62,22 @@ class auth_manager:
                     "twofa_secret": secret
                 }
 
+        role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
+        acct_at = user.account_verify_at
+        if isinstance(acct_at, datetime):
+            acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
+
+        print("::::::::::::::::::: role_name =", role_name, flush=True)
+        print("::::::::::::::::::: subscription =", getattr(user, "subscription", False), flush=True)
+        print("::::::::::::::::::: account_verify_at =", acct_at, flush=True)
+
+        if (role_name == "profile"
+            and not bool(getattr(user, "subscription", False))
+            and acct_at is not None
+            and (datetime.now(timezone.utc) - acct_at).days >= 30):
+
+            raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
+
         if user.role == user_role.CRAWLER:
             access_token_expires = timedelta(weeks=92)
         else:
@@ -74,10 +87,23 @@ class auth_manager:
             data={"sub": user.username}, expires_delta=access_token_expires
         )
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.id))
-        subscription=user.subscription
-        verificationDate=user.account_verify_at
-        return {"access_token": access_token, "token_type": "bearer", "role": role,"status": user.status,"hasOnboarding": onboarding_exists,"subscription":subscription,"verificationDate":verificationDate}
-    
+        subscription = user.subscription
+        verificationDate = user.account_verify_at
+
+        session_data = {
+            "role": role,
+            "status": user.status,
+            "hasOnboarding": onboarding_exists,
+            "subscription": subscription,
+            "verificationDate": verificationDate,
+        }
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "session": session_data,
+        }
+
     @staticmethod
     async def verify_user(token: str):
         engine = mongo_controller.get_instance().get_engine()
@@ -88,16 +114,16 @@ class auth_manager:
         if not user.verification_expiry or datetime.now(timezone.utc) > user.verification_expiry.replace(tzinfo=timezone.utc):
             raise HTTPException(status_code=400, detail="Verification link expired")
 
-        user.status = UserStatus.ONBOARDING 
-        user.account_verify_at=datetime.now(timezone.utc)
+        user.status = UserStatus.ONBOARDING
+        user.account_verify_at = datetime.now(timezone.utc)
         user.verification_token = None
         user.verification_expiry = None
         await engine.save(user)
 
         return {"message": "Email verified successfully. You may continue onboarding."}
-    
+
     @staticmethod
-    async def update_password(token:str, password:str):
+    async def update_password(token: str, password: str):
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.verification_token == token)
         if not user:
@@ -110,28 +136,34 @@ class auth_manager:
         user.verification_token = None
         await engine.save(user)
         return {"message": "Password reset successfully."}
-    
+
     @staticmethod
     async def forgot_password(mail: str):
-            engine = mongo_controller.get_instance().get_engine()
-            user = await engine.find_one(db_user_account, db_user_account.email == mail)
-            if not user:
-                raise HTTPException(status_code=404, detail="Entered mail is not resgister")
-            
-            forgotToken=session_manager.get_instance().generate_verification_token()
+        engine = mongo_controller.get_instance().get_engine()
+        user = await engine.find_one(db_user_account, db_user_account.email == mail)
+        if not user:
+            raise HTTPException(status_code=404, detail="Entered mail is not resgister")
 
-            user.verification_token=forgotToken
-            await engine.save(user)
-            APP_URL=env_handler.get_instance().env("APP_URL")
-            forgot_url = f"{APP_URL}/forgot/{forgotToken}"
-            html_content = constant.mail_template.render( username=user.username,email=user.email,subject=MailSubject.FORGOT_PASSWORD.value,lurlHeading=MailUrlHeading.FORGOT_PASSWORD.value,url=forgot_url)
-            await mail_manager.get_instance().send_verification_mail(
-                    to=user.email,
-                    subject=MailSubject.FORGOT_PASSWORD.value,
-                    body=html_content
-                )
-            
-            return {"message": "Reset password mail send successfully."}
+        forgotToken = session_manager.get_instance().generate_verification_token()
+
+        user.verification_token = forgotToken
+        await engine.save(user)
+        APP_URL = env_handler.get_instance().env("APP_URL")
+        forgot_url = f"{APP_URL}/forgot/{forgotToken}"
+        html_content = constant.mail_template.render(
+            username=user.username,
+            email=user.email,
+            subject=MailSubject.FORGOT_PASSWORD.value,
+            lurlHeading=MailUrlHeading.FORGOT_PASSWORD.value,
+            url=forgot_url
+        )
+        await mail_manager.get_instance().send_verification_mail(
+            to=user.email,
+            subject=MailSubject.FORGOT_PASSWORD.value,
+            body=html_content
+        )
+
+        return {"message": "Reset password mail send successfully."}
 
     @staticmethod
     async def edit_userStatus_and_sendMail_from_admin(user_id: str, request: Request):
@@ -156,12 +188,7 @@ class auth_manager:
                 to=user.email,
                 subject="Your account has been approved",
                 body=f"Hi {user.username},\n\nYour account is now approved. "
-                    f"You can log in and start onboarding.\n\nBest regards,\nTeam"
+                     f"You can log in and start onboarding.\n\nBest regards,\nTeam"
             )
 
         return user
-        
-        
-
-        
-        
