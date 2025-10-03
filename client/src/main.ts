@@ -43,7 +43,7 @@ const mark = (img: HTMLImageElement) => {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
   const alt = (img.getAttribute('alt') || '').toLowerCase();
-  if (!(src.includes('/assets/images/statistics/') || src.includes('/assets/images/sidebar/'))) return;
+  if (!/images\/(statistics|sidebar)\//.test(src)) return;
   if (
     alt === 'background' ||
     src.endsWith('Bg.webp') ||
