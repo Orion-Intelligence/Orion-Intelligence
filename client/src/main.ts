@@ -5,6 +5,7 @@ import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const SEARCH_LOGO_SRC = '/assets/images/sidebar/search_nav_logo.png';
+const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
 const CSS_HREF = '/assets/placeholder.css';
 const MANIFEST_URL = 'assets/precache-manifest.json';
 const STATS_DIR = '/assets/images/statistics/';
@@ -15,7 +16,7 @@ const OBSERVER_OPTIONS: MutationObserverInit = {
   attributeFilter: ['src']
 };
 
-const preloadImage = (src: string) => {
+function preloadImage(src: string): HTMLImageElement {
   const link = document.createElement('link');
   link.rel = 'preload';
   link.as = 'image';
@@ -24,25 +25,25 @@ const preloadImage = (src: string) => {
   const img = new Image();
   img.src = src;
   return img;
-};
+}
 
 const preloadPlaceholder = preloadImage(PLACEHOLDER_SRC);
 const preloadSearchLogo = preloadImage(SEARCH_LOGO_SRC);
+const preloadAuthIcon = preloadImage(AUTH_ICON_SRC);
 
 const cssLink = document.createElement('link');
 cssLink.rel = 'stylesheet';
 cssLink.href = CSS_HREF;
 document.head.appendChild(cssLink);
 
-const mark = (img: HTMLImageElement) => {
+function mark(img: HTMLImageElement) {
   if (img.dataset['ph'] === '1') return;
   const src = img.getAttribute('src') || '';
   if (!src.includes(STATS_DIR)) return;
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
-  const onload = () => img.removeAttribute('data-ph');
-  img.addEventListener('load', onload, { once: true });
-};
+  img.addEventListener('load', () => img.removeAttribute('data-ph'), { once: true });
+}
 
 for (const i of Array.from(document.images)) mark(i as HTMLImageElement);
 
@@ -76,7 +77,8 @@ async function preloadAllImagesFromManifest() {
 
 Promise.allSettled([
   preloadPlaceholder.decode(),
-  preloadSearchLogo.decode()
+  preloadSearchLogo.decode(),
+  preloadAuthIcon.decode()
 ]).finally(() => {
   preloadAllImagesFromManifest().then();
   bootstrapApplication(AppComponent, appConfig).then();
