@@ -11,14 +11,14 @@ const MANIFEST_URL = 'assets/precache-manifest.json';
 
 const TARGET_DIRS = [
   '/assets/images/statistics/',
-  '/assets/images/sidebar/'
+  '/assets/images/sidebar/',
 ];
 
 const OBSERVER_OPTIONS: MutationObserverInit = {
   childList: true,
   subtree: true,
   attributes: true,
-  attributeFilter: ['src']
+  attributeFilter: ['src'],
 };
 
 function preloadImage(src: string): HTMLImageElement {
@@ -41,14 +41,42 @@ cssLink.rel = 'stylesheet';
 cssLink.href = CSS_HREF;
 document.head.appendChild(cssLink);
 
+function shouldSkip(img: HTMLImageElement): boolean {
+  const src = img.getAttribute('src') || '';
+  const alt = (img.getAttribute('alt') || '').toLowerCase();
+
+  const inTargetDir = TARGET_DIRS.some(dir => src.includes(dir));
+  if (!inTargetDir) return true;
+
+  if (
+    alt === 'background' ||
+    src.endsWith('Bg.webp') ||
+    src.endsWith('hint.svg') ||
+    src.endsWith('auth_dashboard_icon.svg') ||
+    img.classList.contains('auth-wrapper__image')
+  ) return true;
+
+  return false;
+}
+
 function mark(img: HTMLImageElement) {
   if (img.dataset['ph'] === '1') return;
-  const src = img.getAttribute('src') || '';
-  const match = TARGET_DIRS.some(dir => src.includes(dir));
-  if (!match) return;
+  if (shouldSkip(img)) return;
+
+  const originalAlt = img.getAttribute('alt');
+  if (originalAlt !== null) img.dataset['alt'] = originalAlt;
+  img.removeAttribute('alt');
+
   img.dataset['ph'] = '1';
   img.setAttribute('data-ph', '');
-  img.addEventListener('load', () => img.removeAttribute('data-ph'), { once: true });
+
+  img.addEventListener('load', () => {
+    img.removeAttribute('data-ph');
+    if (img.dataset['alt'] !== undefined) {
+      img.setAttribute('alt', img.dataset['alt']!);
+      delete img.dataset['alt'];
+    }
+  }, { once: true });
 }
 
 for (const i of Array.from(document.images)) mark(i as HTMLImageElement);
@@ -84,7 +112,7 @@ async function preloadAllImagesFromManifest() {
 Promise.allSettled([
   preloadPlaceholder.decode(),
   preloadSearchLogo.decode(),
-  preloadAuthIcon.decode()
+  preloadAuthIcon.decode(),
 ]).finally(() => {
   preloadAllImagesFromManifest().then();
   bootstrapApplication(AppComponent, appConfig).then();
