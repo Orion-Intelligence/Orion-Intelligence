@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { NgIf } from '@angular/common';
-import { subscriptionGuard } from '../../guards/subscription.guard';
 import { HeaderComponent } from "../header/login-header/header.component";
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import {SubscriptionService} from '../../../services/dashboard/subscription.service';
 
 @Component({
   selector: 'app-trail-notification',
@@ -11,7 +11,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 })
 export class TrailNotificationComponent {
   @Input() trialNotificationCheck: boolean = false;
-  constructor(public subscriptionGuard: subscriptionGuard, private dashboardService: DashboardService) {
+  constructor(public subscriptionService: SubscriptionService, private dashboardService: DashboardService) {
   }
   upgradeNow() {
     this.dashboardService.showSubscription.set(true);

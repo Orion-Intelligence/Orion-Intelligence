@@ -1,18 +1,18 @@
 <ng-container *ngIf="trialNotificationCheck; else noTrial">
     <ng-container
-        *ngIf="!subscriptionGuard.checkSubscription()&&!subscriptionGuard.checkAdmin()&&subscriptionGuard.getTrialDaysLeft()<8">
+        *ngIf="!subscriptionService.checkSubscription()&&!subscriptionService.checkAdmin()&&subscriptionService.getTrialDaysLeft()<8">
         <div class="trial-notification-container default-notification-banner default-notification-banner-stealer mb-0">
             <span>
                 <img alt="Info Icon" class="default-notification-banner-icon"
                     src="../../../../assets/images/shared/hint.svg" />
-                <span>Your subscription is about to expire in {{subscriptionGuard.getTrialDaysLeft()}} days.</span>
+                <span>Your subscription is about to expire in {{subscriptionService.getTrialDaysLeft()}} days.</span>
             </span>
         </div>
     </ng-container>
 </ng-container>
 <ng-template #noTrial>
     <ng-container
-        *ngIf="!subscriptionGuard.checkSubscription()&&!subscriptionGuard.checkAdmin()&& subscriptionGuard.getTrialDaysLeft()<=0">
+        *ngIf="!subscriptionService.checkSubscription()&&!subscriptionService.checkAdmin()&& subscriptionService.getTrialDaysLeft()<=0">
         <ng-container>
             <app-header></app-header>
         </ng-container>
