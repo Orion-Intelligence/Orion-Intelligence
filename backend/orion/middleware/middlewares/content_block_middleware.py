@@ -2,6 +2,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response, RedirectResponse
 from orion.services.session_manager.session_manager import session_manager
+from datetime import datetime, timezone
 
 ACCESS_COOKIE = "access_token"
 
@@ -23,16 +24,24 @@ class content_block_middleware(BaseHTTPMiddleware):
         bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None
         token = bearer or request.cookies.get(ACCESS_COOKIE)
 
-        authed = False
+        user = None
         if token:
             try:
-                role = await session_manager.get_instance().get_current_role(token)
-                authed = role is not None
+                user = await session_manager.get_instance().get_current_user(token)
             except:
-                authed = False
+                user = None
 
-        if not authed:
+        if not user:
             return RedirectResponse(url="/login", status_code=302)
+
+        if (
+            str(getattr(user, "role", "")).lower() == "profile"
+            and not bool(getattr(user, "subscription", False))
+            and getattr(user, "account_verify_at", None) is not None
+            and (datetime.now(timezone.utc) - user.account_verify_at).days >= 30
+            and not path.startswith("/payment")
+        ):
+            return RedirectResponse(url="/payment", status_code=302)
 
         response: Response = await call_next(request)
         return response
