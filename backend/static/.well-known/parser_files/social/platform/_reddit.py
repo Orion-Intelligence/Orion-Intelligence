@@ -43,7 +43,7 @@ class _reddit(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return self.m_seed_url
+        return "https://www.reddit.com/r/osinttools/new"
 
     @property
     def developer_signature(self) -> str:
@@ -56,7 +56,7 @@ class _reddit(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
+            m_fetch_proxy=FetchProxy.NONE,
             m_fetch_config=FetchConfig.PLAYRIGHT,
             m_threat_type=ThreatType.REDDIT
         )
