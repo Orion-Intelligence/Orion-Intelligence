@@ -358,7 +358,10 @@ class ELASTIC_ENUMS:
                 "m_code_snippet": {
                     "type": "text",
                     "fields": {
-                        "keyword": {"type": "keyword"}
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 600
+                        }
                     }
                 },
                 "m_content": {
@@ -614,7 +617,10 @@ class ELASTIC_ENUMS:
                 "m_code_snippet": {
                     "type": "text",
                     "fields": {
-                        "keyword": {"type": "keyword"}
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 600
+                        }
                     }
                 },
                 "m_title": {
