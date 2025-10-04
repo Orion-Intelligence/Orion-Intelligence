@@ -49,7 +49,7 @@ class _reddit(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-        return "https://www.reddit.com"
+        return "https://www.reddittorjg6rue252oqsxryoxengawnmo46qy4kyii5wtqnwfj4ooad.onion/"
 
     @property
     def rule_config(self) -> RuleModel:
