@@ -98,6 +98,9 @@ class _twitter(leak_extractor_interface, ABC):
 
         tweets = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
         new_tweets = []
+        if len(tweets) < 3:
+            raise Exception("response empty")
+
         for t in tweets:
             new_tweets.append(t)
 

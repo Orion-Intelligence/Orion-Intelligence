@@ -41,7 +41,7 @@ class _reddit(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://www.reddit.com/r/osinttools/new"
+        return self.m_seed_url
 
     @property
     def developer_signature(self) -> str:
@@ -113,6 +113,8 @@ class _reddit(leak_extractor_interface, ABC):
         posts = RedditHelperMethod.scroll_and_collect_posts(
             page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago
         )
+        if len(posts) < 3:
+            raise Exception("response empty")
 
         for post in posts:
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
