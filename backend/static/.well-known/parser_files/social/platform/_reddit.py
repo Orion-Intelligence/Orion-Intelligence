@@ -104,7 +104,7 @@ class _reddit(leak_extractor_interface, ABC):
 
         self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
 
-        desired_posts = 100
+        desired_posts = 50
         max_comments = 5
         if self.is_crawled:
             desired_posts = 10
