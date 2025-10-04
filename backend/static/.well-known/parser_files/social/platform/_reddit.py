@@ -105,6 +105,7 @@ class _reddit(leak_extractor_interface, ABC):
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
             return
 
+        log.g().i(":::::::::::: " + str(subreddit_name))
         self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
 
         desired_posts = 5
@@ -114,10 +115,8 @@ class _reddit(leak_extractor_interface, ABC):
             page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago
         )
 
-        last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, "")
-
-        ldt = self.data_parsre(last_seen_date_str)
-        new_posts = [p for p in posts if p.get("timestamp") and (self.data_parsre(p["timestamp"]) and (not ldt or self.data_parsre(p["timestamp"]) > ldt))]
+        new_posts = [p for p in posts if p.get("timestamp") and (self.data_parsre(p["timestamp"]))]
+        log.g().i(":::::::::::: " + str(len(new_posts)))
 
         for post in new_posts:
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)

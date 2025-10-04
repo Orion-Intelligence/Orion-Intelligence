@@ -88,13 +88,6 @@ class _mastodon(leak_extractor_interface, ABC):
         existing_ids = set()
 
         desired_count = 20 if self.is_crawled else 200
-        last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, "")
-        last_seen_date = None
-        if last_seen_date_str:
-            try:
-                last_seen_date = datetime.fromisoformat(last_seen_date_str.replace("Z", "+00:00")).date()
-            except Exception:
-                last_seen_date = None
 
         posts = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
         parsed_post = []
@@ -112,8 +105,7 @@ class _mastodon(leak_extractor_interface, ABC):
                 d = datetime.fromisoformat(ds.replace("Z", "+00:00")).date() if ds else None
             except Exception:
                 continue
-            if not last_seen_date or (d and d > last_seen_date):
-                new_posts.append(p)
+            new_posts.append(p)
 
         for post in new_posts:
             try:

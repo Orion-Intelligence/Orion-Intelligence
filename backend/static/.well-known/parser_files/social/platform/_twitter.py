@@ -98,16 +98,11 @@ class _twitter(leak_extractor_interface, ABC):
         existing_ids = set()
 
         desired_count = 20 if self.is_crawled else 100
-        last_seen_date_str = self.invoke_db(REDIS_COMMANDS.S_GET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, "")
-
-        last_seen_dt = self._parse_iso(last_seen_date_str)
 
         tweets = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
         new_tweets = []
         for t in tweets:
-            td = self._parse_iso(t.get("date"))
-            if td and (not last_seen_dt or td > last_seen_dt):
-                new_tweets.append(t)
+            new_tweets.append(t)
 
         for tweet in new_tweets:
             parsed_date = self._parse_iso(tweet.get("date")).date() if tweet.get("date") else None
