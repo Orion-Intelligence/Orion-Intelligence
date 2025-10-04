@@ -315,7 +315,6 @@ class ELASTIC_ENUMS:
             "properties": {
                 "m_attacker": {"type": "keyword"},
                 "m_base_url": {"type": "keyword"},
-                "m_code_snippet": {"type": "keyword"},
                 "m_confidence": {"type": "keyword"},
                 "m_content_type": {"type": "keyword"},
                 "m_creation_date": {"type": "date"},
@@ -351,6 +350,12 @@ class ELASTIC_ENUMS:
                     "type": "keyword"
                 },
                 "m_title": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword"}
+                    }
+                },
+                "m_code_snippet": {
                     "type": "text",
                     "fields": {
                         "keyword": {"type": "keyword"}
