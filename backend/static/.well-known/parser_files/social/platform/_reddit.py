@@ -115,10 +115,9 @@ class _reddit(leak_extractor_interface, ABC):
             page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago
         )
 
-        new_posts = [p for p in posts if p.get("timestamp") and (self.data_parsre(p["timestamp"]))]
-        log.g().i(":::::::::::: " + str(len(new_posts)))
+        log.g().i(":::::::::::: " + str(len(posts)))
 
-        for post in new_posts:
+        for post in posts:
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
             locator = page.locator('div[property="schema:articleBody"]').first
             post['content'] = ""
@@ -161,5 +160,5 @@ class _reddit(leak_extractor_interface, ABC):
 
             self.append_leak_data(card_data, entity_data)
 
-        if new_posts:
-            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, new_posts[0].get("timestamp", ""))
+        # if posts:
+        #     self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, posts[0].get("timestamp", ""))
