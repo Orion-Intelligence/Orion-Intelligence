@@ -10,8 +10,6 @@ from crawler.crawler_instance.local_shared_model.data_model.social_model import 
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
-from crawler.crawler_services.shared.helper_method import helper_method
 
 
 class _reddit(leak_extractor_interface, ABC):
@@ -56,7 +54,7 @@ class _reddit(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
+            m_fetch_proxy=FetchProxy.NONE,
             m_fetch_config=FetchConfig.PLAYRIGHT,
             m_threat_type=ThreatType.REDDIT
         )
@@ -98,24 +96,23 @@ class _reddit(leak_extractor_interface, ABC):
         return datetime.fromisoformat(s.replace("Z", "+00:00")) if s else None
 
     def parse_leak_data(self, page):
-        account_url = helper_method.generate_data_hash(self.seed_url)
         try:
             subreddit_name = RedditHelperMethod.extract_subreddit_name(self.seed_url)
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
             return
 
-        log.g().i(":::::::::::: " + str(subreddit_name))
         self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
 
-        desired_posts = 5
+        desired_posts = 100
         max_comments = 5
+        if self.is_crawled:
+            desired_posts = 10
+
         one_year_ago = datetime.now(UTC) - timedelta(days=60)
         posts = RedditHelperMethod.scroll_and_collect_posts(
             page, subreddit_name, desired_posts, max_scrolls=1000, filter_date=one_year_ago
         )
-
-        log.g().i(":::::::::::: " + str(len(posts)))
 
         for post in posts:
             comments = RedditHelperMethod.get_comments_from_post(page, post['url'], max_comments=max_comments)
@@ -159,6 +156,3 @@ class _reddit(leak_extractor_interface, ABC):
             )
 
             self.append_leak_data(card_data, entity_data)
-
-        # if posts:
-        #     self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, posts[0].get("timestamp", ""))

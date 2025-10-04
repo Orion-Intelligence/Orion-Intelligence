@@ -83,11 +83,10 @@ class _mastodon(leak_extractor_interface, ABC):
         page.wait_for_load_state("domcontentloaded")
         profile_info = self._helper_methods.get_profile_info(page)
 
-        account_url = helper_method.generate_data_hash(self.seed_url)
         username = profile_info.get("username", "")
         existing_ids = set()
 
-        desired_count = 20 if self.is_crawled else 200
+        desired_count = 10 if self.is_crawled else 200
 
         posts = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
         parsed_post = []
@@ -98,16 +97,7 @@ class _mastodon(leak_extractor_interface, ABC):
             post = self._helper_methods.extract_post_details(page, post_id, self.seed_url)
             parsed_post.append(post)
 
-        new_posts = []
-        for p in parsed_post:
-            ds = p.get("date", "")
-            try:
-                d = datetime.fromisoformat(ds.replace("Z", "+00:00")).date() if ds else None
-            except Exception:
-                continue
-            new_posts.append(p)
-
-        for post in new_posts:
+        for post in parsed_post:
             try:
                 date_str = post.get("date", "")
                 parsed_date = None
@@ -144,7 +134,3 @@ class _mastodon(leak_extractor_interface, ABC):
                 self.append_leak_data(card_data, entity_data)
             except Exception as ex:
                 log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
-        if new_posts:
-            max_seen_date = new_posts[0].get("date", "")
-            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, max_seen_date)

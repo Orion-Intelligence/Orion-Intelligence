@@ -9,8 +9,6 @@ from crawler.crawler_instance.local_shared_model.data_model.leak_model import le
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
-from crawler.crawler_services.shared.helper_method import helper_method
 
 
 class _twitter(leak_extractor_interface, ABC):
@@ -93,11 +91,10 @@ class _twitter(leak_extractor_interface, ABC):
 
     def parse_leak_data(self, page):
         page.wait_for_load_state("networkidle")
-        account_url = helper_method.generate_data_hash(self.seed_url)
         username = self._helper_methods.extract_username(self.seed_url)
         existing_ids = set()
 
-        desired_count = 20 if self.is_crawled else 100
+        desired_count = 10 if self.is_crawled else 100
 
         tweets = self._helper_methods.scroll_and_collect(page, username, existing_ids, desired_count)
         new_tweets = []
@@ -128,7 +125,3 @@ class _twitter(leak_extractor_interface, ABC):
             )
 
             self.append_leak_data(card_data, entity_data)
-
-        if new_tweets:
-            max_seen_date = new_tweets[0].get("date", "")
-            self.invoke_db(REDIS_COMMANDS.S_SET_STRING, account_url + REDIS_KEYS.S_URL_TIMEOUT, max_seen_date)
