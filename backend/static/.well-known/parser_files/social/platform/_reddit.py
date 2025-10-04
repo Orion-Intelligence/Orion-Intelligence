@@ -8,6 +8,7 @@ from crawler.crawler_instance.local_shared_model.data_model.entity_model import 
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from crawler.crawler_services.shared.helper_method import helper_method
@@ -55,7 +56,7 @@ class _reddit(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(
-            m_fetch_proxy=FetchProxy.TOR,
+            m_fetch_proxy=FetchProxy.NONE,
             m_fetch_config=FetchConfig.PLAYRIGHT,
             m_threat_type=ThreatType.REDDIT
         )
@@ -100,12 +101,13 @@ class _reddit(leak_extractor_interface, ABC):
         account_url = helper_method.generate_data_hash(self.seed_url)
         try:
             subreddit_name = RedditHelperMethod.extract_subreddit_name(self.seed_url)
-        except Exception as _:
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
             return
 
         self._subreddit_metadata = RedditHelperMethod.get_subreddit_metadata(page, subreddit_name)
 
-        desired_posts = 100
+        desired_posts = 5
         max_comments = 5
         one_year_ago = datetime.now(UTC) - timedelta(days=60)
         posts = RedditHelperMethod.scroll_and_collect_posts(
