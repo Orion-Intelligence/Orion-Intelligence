@@ -611,6 +611,12 @@ class ELASTIC_ENUMS:
                 "m_weblink": {
                     "type": "keyword"
                 },
+                "m_code_snippet": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {"type": "keyword"}
+                    }
+                },
                 "m_title": {
                     "type": "text"
                 },
