@@ -33,7 +33,7 @@ import { NgbSlide } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, EmptyIocComponent, NgbSlide],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, EmptyIocComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count!: number;

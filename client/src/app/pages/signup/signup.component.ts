@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../services/authetication/auth.service';
+import {HeaderComponent} from '../../shared/partials/header/login-header/header.component';
 
 @Component({
   selector: 'app-signup',
-  imports: [FormsModule, HeaderComponent, CommonModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './signup.component.html'
 })
 export class SignupComponent {

@@ -38,8 +38,8 @@ class PaymentManager:
             """
         )
 
-        await mail_manager.get_instance().send_verification_mail(
-            to=support_email,
+        await mail_manager.get_instance().send_verification_mail_list(
+            to_list=[support_email, request.email],
             subject=MailSubject.PRO_SUBSCRIPTION.value,
             body=html_content
         )

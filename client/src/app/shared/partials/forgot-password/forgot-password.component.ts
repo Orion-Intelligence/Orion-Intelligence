@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { NgForm, FormsModule } from '@angular/forms';
 import { HeaderComponent } from "../header/login-header/header.component";
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-forgot-password',
@@ -30,7 +29,7 @@ export class ForgotPasswordComponent {
     specialChar: false
   };
   currentUnmetCheck: string | null = null;
-  constructor(private router: Router, private route: ActivatedRoute, private http: HttpClient, public auth_service: AuthService) {
+  constructor(private router: Router, private route: ActivatedRoute, public auth_service: AuthService) {
   }
   onPasswordInput(password: string) {
     this.showPasswordMeter = password.length > 0;
@@ -90,7 +89,7 @@ export class ForgotPasswordComponent {
         }
 
         this.auth_service.updatePassword(this.token, this.password).subscribe({
-          next: (res) => {
+          next: (_) => {
             this.responseError = false;
             this.router.navigate(['login'], { replaceUrl: true }).then();
           },
@@ -107,10 +106,14 @@ export class ForgotPasswordComponent {
         });
       } else {
         this.auth_service.forgotPassword(this.email).subscribe({
-          next: (res) => {
-            console.log(res);
+          next: (_) => {
             this.responseError = false;
-            this.errorMessage = 'Password reset mail sent successfully';
+            this.router.navigate(['notification'], {
+              state: {
+                title: 'Password Reset Email Sent',
+                description: 'A password reset link has been sent to your registered email address. Please check your inbox to continue.'
+              }
+            }).then();
           },
           error: (err) => {
             this.responseError = true;

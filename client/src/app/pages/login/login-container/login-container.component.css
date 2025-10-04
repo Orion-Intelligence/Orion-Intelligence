@@ -18,6 +18,7 @@
 }
 
 .login_container {
+  min-height: 1750px;
   background: var(--color-blue-830);
   height: 100vh;
   position: relative;
@@ -26,7 +27,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
   width: 100%;
   min-width: 300px;
 }
@@ -48,7 +48,7 @@
 .login-error-message {
   color: #fc0;
   text-align: left;
-  font-family: Inter, sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 500;
 }
 
@@ -73,13 +73,13 @@
   background: #fff url('/assets/images/shared/lock.svg') no-repeat calc(100% - 10px) center;
   background-size: 20px 20px;
   padding: 12px 40px 12px 20px;
-  font-family: Inter, sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 15px;
 }
 
 .login_input::placeholder {
-  font-family: Inter, sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 15px;
   color: #aaa;
@@ -138,34 +138,17 @@
   font-weight: 400;
 }
 
-@media only screen and (width <=643px) {
-  .login_box {
-    margin: -30vh 20px 0;
-    padding: 42px 20px;
-    width: 100%;
-  }
-
-  .login_background {
-    width: 175%;
-    height: 175%;
-  }
-}
-
-
-
-
-
-
 .login-page-container {
   display: flex;
-  min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  height: 100vh;
+  min-height: 750px;
+  font-family: Roboto, sans-serif;
 }
 
-
 .login-form-side {
-  flex: 0 0 33.3%;
-  background-color: #ffffff;
+  flex: 0 0 27vw;
+  min-width: 440px;
+  background-color: #fff;
   padding: 32px;
   display: flex;
   flex-direction: column;
@@ -179,12 +162,11 @@
   display: flex;
   justify-content: center;
   gap: 24px;
-  margin-bottom: 32px;
 }
 
 .header-link {
   color: #a0b8d1;
-  font-family: 'Inter', sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
   text-decoration: none;
@@ -193,28 +175,28 @@
 .center-content-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  margin-top: 10vh;
   align-items: center;
   flex-grow: 1;
 }
 
 .login-content {
-  width: 100%;
-  max-width: 428px;
+  width: 150%;
+  max-width: 428px !important;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: start;
 }
 
-.orion-logo {
-  margin-bottom: 24px;
+.login-page-container .orion-logo {
+  margin-bottom: 14px;
 }
 
 .login-heading {
   color: #373637;
-  font-family: 'Inter', sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
   margin-bottom: 32px;
 }
@@ -228,31 +210,54 @@
 
 .input-label {
   color: #373637;
-  font-family: 'Inter', sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 500;
   font-size: 14px;
   margin-bottom: 4px;
+}
+
+.login-input.username {
+  background: linear-gradient(rgb(255 255 255 / 70%), rgb(255 255 255 / 70%)),
+  url('/assets/images/shared/profile-icon-dark.svg') no-repeat 12px center;
+  background-size: 20px 20px;
+  padding-left: 42px;
+}
+
+.login-input.password {
+  background: linear-gradient(rgb(255 255 255 / 70%), rgb(255 255 255 / 70%)),
+  url('/assets/images/shared/lock.svg') no-repeat 12px center;
+  background-size: 20px 20px;
+  padding-left: 42px;
+}
+
+.login-input.email {
+  background: linear-gradient(rgb(255 255 255 / 70%), rgb(255 255 255 / 70%)),
+  url('/assets/images/shared/email.svg') no-repeat 12px center;
+  background-size: 20px 20px;
+  padding-left: 42px;
 }
 
 .login-input {
   width: 100%;
   max-width: 428px;
   height: 44px;
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #a0b8d1;
   border-radius: 8px;
   padding: 0 16px;
   box-sizing: border-box;
   margin-bottom: 8px;
+  margin-top: -13px;
 }
 
 .reset-password {
-  color: #a0b8d1;
-  font-family: 'Inter', sans-serif;
+  color: #a0b8d1 !important;
+  cursor: pointer;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
   text-decoration: none;
-  align-self: flex-end;
+  align-self: flex-start;
   margin-bottom: 24px;
 }
 
@@ -261,10 +266,10 @@
   width: 100%;
   height: 44px;
   background-color: #172235;
-  color: #ffffff;
+  color: #fff;
   border: none;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 500;
   font-size: 14px;
   cursor: pointer;
@@ -277,7 +282,7 @@
 
 .signup-text {
   color: #373637;
-  font-family: 'Inter', sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
   margin-top: -16px;
@@ -285,7 +290,7 @@
 
 .signup-link {
   color: #373637;
-  font-weight: 500;
+  font-weight: bold;
   text-decoration: none;
 }
 
@@ -296,7 +301,7 @@
 
 .footer-copyright p {
   color: #a0b8d1;
-  font-family: 'Inter', sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 1.2;
@@ -306,17 +311,14 @@
 .dashboard-preview-side {
   flex: 1;
   position: relative;
-  background:
-    linear-gradient(to bottom,
-      #2c4f9500,
-      #0e1626),
-    url('/assets/images/shared/login-bg.svg') no-repeat center center / cover;
-  background-color: #172235;
+  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 15%) 0, rgb(255 255 255 / 11%) 1px, transparent 1px, transparent 70px),
+  repeating-linear-gradient(90deg, rgb(255 255 255 / 15%) 0, rgb(255 255 255 / 11%) 1px, transparent 1px, transparent 70px),
+  radial-gradient(circle at center, #172a4f 0%, #0E1626 100%);
+  background-blend-mode: overlay;
   overflow: hidden;
 }
 
 .feature-bar {
-  display: flex;
   align-items: center;
   width: 295px;
   height: 50px;
@@ -336,8 +338,8 @@
 }
 
 .bar-text {
-  color: #ffffff;
-  font-family: 'Switzer', sans-serif;
+  color: #fff;
+  font-family: Switzer, sans-serif;
   font-weight: 500;
   font-size: 20px;
 }
@@ -350,11 +352,11 @@
 }
 
 .dashboard-visual {
-  width: 822px;
-  height: 636px;
+  width: 63vw;
+  min-width: 600px;
   position: absolute;
-  right: 0px;
-  top: 50%;
+  right: 0;
+  top: 63%;
   transform: translateY(-50%);
 }
 
@@ -372,7 +374,7 @@
 }
 
 .item-2 {
-  transform: translate(-50, 0);
+  transform: translate(-50px, 0);
 }
 
 .item-3 {
@@ -407,7 +409,26 @@
 
 .feature-label {
   color: #0EC9AC;
-  font-family: 'Switzer', sans-serif;
+  font-family: Switzer, sans-serif;
   font-weight: 500;
   font-size: 20px;
 }
+
+@media only screen and (width <= 943px) {
+  .login_box {
+    margin: -30vh 20px 0;
+    padding: 42px 20px;
+    width: 100%;
+  }
+
+  .login-form-side {
+    flex: 0 0 100vw;
+    min-width: 400px;
+  }
+
+  .login_background {
+    width: 175%;
+    height: 175%;
+  }
+}
+

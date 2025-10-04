@@ -378,10 +378,10 @@ button:focus {
 }
 
 .filter-panel__no-filters-text {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 0;
   margin-bottom: 10px;
-  color: #1722357d;
+  color: #fff;
 }
 
 .filter-panel__entity-condition {

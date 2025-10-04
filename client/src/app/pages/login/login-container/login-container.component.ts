@@ -13,7 +13,7 @@ import QRCode from 'qrcode';
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, NgIf, NgClass, HeaderComponent],
+  imports: [FormsModule, NgIf, NgClass],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {

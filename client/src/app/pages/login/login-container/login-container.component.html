@@ -2,81 +2,44 @@
   <div class="login-page-container">
     <div class="login-form-side">
       <div class="header-links">
-        <a href="#" class="header-link">Privacy Policy</a>
-        <a href="#" class="header-link">Terms & Conditions</a>
-        <a href="#" class="header-link">About Us</a>
+        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" class="header-link">Our Services</a> <a href="https://orionintelligence.org" class="header-link">About Us</a>
       </div>
       <div class="center-content-wrapper">
         <div class="login-content">
-          <img src="/assets/images/shared/login-orion-Intelligence-logo.svg" alt="ORION intelligence logo"
-            class="orion-logo" />
+          <img src="/assets/images/shared/login-orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo"/>
 
           <div class="login-heading">Login to get started!</div>
 
           <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="login-form">
             <label for="username" class="input-label">Username</label>
-            <input [(ngModel)]="user.username" for="id_username" type="email" placeholder="Enter your email"
-              class="login-input" name="username" required type="text" />
+            <input [(ngModel)]="user.username" placeholder="Enter your email" class="login-input username" name="username" required type="text"/>
 
             <label for="password" class="input-label">Password</label>
-            <input [(ngModel)]="user.password" id="id_password" type="password" placeholder="Enter your password"
-              class="login-input" name="password" required type="password" />
+            <input [(ngModel)]="user.password" id="id_password" placeholder="Enter your password" class="login-input password" name="password" required type="password"/>
 
 
             <a (click)="goToForgot()" class="reset-password">Reset password?</a>
             <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
               {{ errorMessage }} </p>
             <div>
-              <input [disabled]="!loginForm.valid" [class.login-button]="loginForm.valid"
-                [class.login-button-disable]="!loginForm.valid" type="submit" value="Login" />
+              <input [disabled]="!loginForm.valid" [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid" type="submit" value="Login"/>
             </div>
           </form>
 
           <p class="signup-text">
-            Don't have an account? <a (click)="goToSignUp()" class="signup-link">Sign Up</a>
+            Don't have an account? <a (click)="goToSignUp()" class="signup-link cursor-pointer">Sign Up</a>
           </p>
         </div>
       </div>
 
       <div class="footer-copyright">
         <p>Copyright &copy; 2025. Powered by</p>
-        <p>Genesis Technologies</p>
+        <p>Orion Technologies</p>
       </div>
     </div>
 
     <div class="dashboard-preview-side">
-      <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="dashboard-visual" />
-
-      <div class="diagonal-features">
-        <div class="feature-bar diagonal-item item-1">
-          <img src="/assets/images/shared/login-social-media.svg" alt="login-social-media" class="icon-placeholder" />
-          <span class="bar-text"> Social Media Intelligence</span>
-        </div>
-        <div class="feature-bar diagonal-item item-2">
-          <img src="/assets/images/shared/login-data-breach.svg" alt="login-data-breach" class="icon-placeholder" />
-          <span class="bar-text">Data Breach Monitoring</span>
-        </div>
-        <div class="feature-bar diagonal-item item-3">
-          <img src="/assets/images/shared/login-defacement-tracking.svg" alt="login-defacement-tracking"
-            class="icon-placeholder" />
-          <span class="bar-text">Defacement Tracking</span>
-        </div>
-        <div class="feature-bar diagonal-item item-4">
-          <img src="/assets/images/shared/login-thread-data.svg" alt="login-thread-data" class="icon-placeholder" />
-          <span class="bar-text">Threat Data Collection</span>
-        </div>
-      </div>
-
-      <div class="bottom-features">
-        <div class="feature-icon-text">
-          <img src="/assets/images/shared/login-thread-data.svg" alt="login-thread-data" class="icon-placeholder" />
-          <span class="feature-label">Feature 1</span>
-        </div>
-        <div class="feature-icon-text">
-          <img src="/assets/images/shared/login-thread-data.svg" alt="login-thread-data" class="icon-placeholder" />
-          <span class="feature-label">Feature 2</span>
-        </div>
-      </div>
+      <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="dashboard-visual"/>
     </div>
   </div>
 </div>
@@ -92,27 +55,20 @@
       <img [src]="otpDataUrl" alt="2FA QR" width="200" height="200">
     </div>
 
-    <p *ngIf="otpSecret" class="text-white mt-4"><b>Keep your secret key safe in case you lose access to your
-        authenticator app</b></p>
+    <p *ngIf="otpSecret" class="text-white mt-4"><b>Keep your secret key safe in case you lose access to your authenticator app</b></p>
     <div *ngIf="otpSecret" class="alert alert-warning cursor-pointer" role="alert" (click)="copyToClipboard(otpSecret)">
       <div class="d-flex align-items-center">
-        <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="20px" height="20px" class="copy-icon">
-        <strong class="me-2 ml-3">{{ otpSecret }}</strong>
-        <span *ngIf="copied" class="ml-2">Copied!</span>
+        <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="20px" height="20px" class="copy-icon"> <strong class="me-2 ml-3">{{ otpSecret }}</strong> <span *ngIf="copied" class="ml-2">Copied!</span>
       </div>
     </div>
 
     <form (ngSubmit)="submitOtp()">
       <div class="login_form-group">
-        <label class="login_hidden-label" for="id_otp">OTP</label>
-        <input [(ngModel)]="otpCode" name="otpCode" class="login_input" id="id_otp" placeholder="Authentication code"
-          required minlength="6" maxlength="6" type="text">
+        <label class="login_hidden-label" for="id_otp">OTP</label> <input [(ngModel)]="otpCode" name="otpCode" class="login_input" id="id_otp" placeholder="Authentication code" required minlength="6" maxlength="6" type="text">
       </div>
 
       <div class="login-button-container">
-        <button type="submit" [disabled]="!otpCode || otpCode.length < 6"
-          [class.login_btn-submit]="otpCode && otpCode.length === 6"
-          [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
+        <button type="submit" [disabled]="!otpCode || otpCode.length < 6" [class.login_btn-submit]="otpCode && otpCode.length === 6" [class.login_btn-disabled]="!otpCode || otpCode.length < 6">
           Verify OTP
         </button>
       </div>

@@ -558,7 +558,7 @@ export const routes: Routes = [
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {
-            path: 'settings',
+            path: 'ioc',
             component: SidebarProfileSettingsComponent,
             data: { type: 'settings', animation: 'ProfilePage' }
           },

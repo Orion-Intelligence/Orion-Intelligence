@@ -67,10 +67,6 @@ class auth_manager:
         if isinstance(acct_at, datetime):
             acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
 
-        print("::::::::::::::::::: role_name =", role_name, flush=True)
-        print("::::::::::::::::::: subscription =", getattr(user, "subscription", False), flush=True)
-        print("::::::::::::::::::: account_verify_at =", acct_at, flush=True)
-
         if (role_name == "profile"
             and not bool(getattr(user, "subscription", False))
             and acct_at is not None

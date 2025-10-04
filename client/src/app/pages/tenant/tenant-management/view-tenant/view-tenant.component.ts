@@ -10,7 +10,7 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 
 @Component({
   selector: 'app-view-tenant',
-  imports: [NgFor, NgIf, FormsModule, CommonModule],
+  imports: [NgFor, FormsModule, CommonModule],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html'
 })

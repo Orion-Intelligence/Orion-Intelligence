@@ -8,7 +8,7 @@ from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogMan
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, user_role
 from orion.api.interactive.tenant_manager.models.user_param_model import user_param_model
 from orion.services.encryption_manager.tenant_key_manager import TenantKeyManager
 
@@ -111,8 +111,11 @@ class TenantManager:
         if not user:
             await AuditLogManager.get_instance().register("system", f"update_user_failed:{request.username}")
             raise HTTPException(status_code=404, detail="User not found")
+        if user.role != user_role.PROFILE:
+            await AuditLogManager.get_instance().register(str(user.id), f"update_user_denied:{request.username}")
+            raise HTTPException(status_code=403, detail="Only profile users can be updated")
         user.status = request.status
-        user.subscription=request.subscription
+        user.subscription = request.subscription
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(str(user.id), "update_user")
         return {"message": "User updated successfully"}

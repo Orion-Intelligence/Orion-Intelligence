@@ -16,6 +16,7 @@
     border: 1px solid #FCFCFC12;
     border-radius: 16px;
     padding: 60px;
+    margin-top: -200px;
     text-align: center;
     box-sizing: border-box;
 }
