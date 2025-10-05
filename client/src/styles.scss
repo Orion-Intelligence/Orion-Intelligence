@@ -146,6 +146,7 @@ html {
   background: #172235;
   scrollbar-width: none;
   overflow-x: hidden;
+  min-width: 500px!important;
   scroll-behavior: smooth;
 }
 
@@ -153,6 +154,7 @@ body {
   margin: 0;
   background: #00000000;
   height: 100vh;
+  min-width: 500px!important;
   min-height: 100vh;
   scrollbar-width: none;
 }

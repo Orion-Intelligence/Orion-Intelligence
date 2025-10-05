@@ -5,6 +5,8 @@ from fastapi import Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import RedirectResponse, JSONResponse
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_422_UNPROCESSABLE_ENTITY
+from passlib.exc import PasswordSizeError
+from starlette_admin.exceptions import FormValidationError
 
 from configs import config
 from orion.shared_models.expection_handlers.expection_handlers_models import ErrorResponseModel, ValidationErrorDetail, \
@@ -21,6 +23,12 @@ def clean_traceback(exc: Exception):
 
 
 async def global_exception_handler(_: Request, exc: Exception):
+    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
+    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
+    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
+    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
+    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
+    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
     status_code = exc.status_code if isinstance(exc, HTTPException) else HTTP_500_INTERNAL_SERVER_ERROR
 
     if config.DEBUG:
@@ -50,3 +58,15 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError):
         return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_ENTITY, content=error_response.model_dump())
 
     return RedirectResponse(url=f"/{HTTP_422_UNPROCESSABLE_ENTITY}")
+
+
+async def password_size_exception_handler(_: Request, exc: PasswordSizeError):
+    return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_ENTITY, content={"detail": "Password too long"})
+
+
+async def value_error_exception_handler(_: Request, exc: ValueError):
+    return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_ENTITY, content={"detail": str(exc)})
+
+
+async def form_validation_exception_handler(_: Request, exc: FormValidationError):
+    return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_ENTITY, content={"detail": exc.messages})

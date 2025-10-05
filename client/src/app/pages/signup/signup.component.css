@@ -2,16 +2,24 @@
     display: flex;
     height: calc(100vh - 60px);
     width: 100vw;
-    background: url('/assets/images/shared/Bg.webp') no-repeat center center;
-    background-size: cover;
+    margin-top: 100px;
+  background: url('/assets/images/shared/Bg.webp') no-repeat center 100px;
+  background-size: cover;
 }
 
 .auth-wrapper__left {
     flex: 1;
+    margin-top: 100px;
     background-color: #0e1626f6;
     display: flex;
+    min-height: 600px;
     justify-content: center;
     align-items: center;
+}
+
+.auth-wrapper__left > * {
+  position: relative;
+  top: -5vh;
 }
 
 .auth-wrapper__right {
@@ -90,8 +98,8 @@
     background-color: #172235;
     border-radius: 16px;
     padding: 42px 36px;
-    width: 500px;
-    max-height: 100%;
+    min-width: 500px !important;
+    min-height: 350px !important;
     color: white;
     font-family: Inter, sans-serif;
 }
@@ -233,6 +241,7 @@
     .auth-wrapper__left {
         flex: 1 1 100%;
         width: 100%;
+        min-width: 500px !important;
     }
 
     .signup-container {
@@ -273,15 +282,5 @@
     .auth-wrapper__image {
         width: 560px;
         height: 433px;
-    }
-
-    .signup-container {
-        max-height: 80%;
-    }
-}
-
-@media screen and (width <=520px) {
-    .signup-container {
-        width: 80%;
     }
 }

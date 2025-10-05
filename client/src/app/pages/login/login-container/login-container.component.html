@@ -2,27 +2,27 @@
   <div class="login-page-container">
     <div class="login-form-side">
       <div class="header-links">
-        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" class="header-link">Our Services</a> <a href="https://orionintelligence.org" class="header-link">About Us</a>
+        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank" class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank" class="header-link">About Us</a>
       </div>
       <div class="center-content-wrapper">
         <div class="login-content">
-          <img src="/assets/images/shared/login-orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo"/>
+          <a href="/" class="cursor-pointer" ><img src="/assets/images/shared/login-orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo"/></a>
 
           <div class="login-heading">Login to get started!</div>
 
           <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="login-form">
-            <label for="username" class="input-label">Username</label>
-            <input [(ngModel)]="user.username" placeholder="Enter your email" class="login-input username" name="username" required type="text"/>
+            <label for="username" class="input-label">Email</label>
+            <input [(ngModel)]="user.username" placeholder="Enter email" class="login-input username" name="username" required type="text"/>
 
-            <label for="password" class="input-label">Password</label>
-            <input [(ngModel)]="user.password" id="id_password" placeholder="Enter your password" class="login-input password" name="password" required type="password"/>
+            <label for=" word" class="input-label mt-2">Password</label>
+            <input [(ngModel)]="user.password" id="id_password" placeholder="Enter password" class="login-input password" name="password" required type="password"/>
 
 
             <a (click)="goToForgot()" class="reset-password">Reset password?</a>
             <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
               {{ errorMessage }} </p>
             <div>
-              <input [disabled]="!loginForm.valid" [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid" type="submit" value="Login"/>
+              <input [disabled]="!loginForm.valid" [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid" type="submit" value="Sign In"/>
             </div>
           </form>
 

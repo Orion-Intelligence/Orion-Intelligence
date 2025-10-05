@@ -1,30 +1,32 @@
 <div class="login-page-container">
   <div class="login-form-side">
     <div class="header-links">
-      <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" class="header-link">Our Services</a> <a href="https://orionintelligence.org" class="header-link">About Us</a>
+        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank" class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank" class="header-link">About Us</a>
     </div>
 
     <div class="center-content-wrapper">
       <div class="login-content">
-        <img src="/assets/images/shared/login-orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo"/>
+        <a href="/" class="cursor-pointer"><img src="/assets/images/shared/login-orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo"/></a>
         <div class="login-heading">Sign Up to get started!</div>
 
         <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="login-form">
-          <label class="input-label">Username</label> <input [(ngModel)]="user.username" placeholder="Enter your username" class="login-input username" name="username" required type="text"/>
+          <label class="input-label">Username</label>
+          <input [(ngModel)]="user.username" placeholder="Enter your username" class="login-input username" name="username" required type="text"/>
 
-          <label class="input-label">Company Mail</label> <input [(ngModel)]="user.mail" placeholder="Enter your company mail" class="login-input email" name="companymail" required type="email"/>
+          <label class="input-label mt-2">Company Mail</label>
+          <input [(ngModel)]="user.mail" placeholder="Enter your company mail" class="login-input email" name="companymail" required type="email"/>
 
-          <label class="input-label">Password</label> <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password" type="password" placeholder="Enter your password" class="login-input password" name="password" required/>
+          <label class="input-label mt-2 ">Password</label>
+          <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password" type="password" placeholder="Enter your password" class="login-input password mb-4" name="password" required/>
 
           <div *ngIf="showPasswordMeter">
             <div class="password-strength-bar">
               <div class="strength-fill" [ngClass]="{
-                                    'bg-danger bg-opacity-50': passwordStrength === 'weak',
-                                    'bg-warning bg-opacity-50': passwordStrength === 'medium',
-                                    'bg-success bg-opacity-50': passwordStrength === 'strong'
-                                    }" [style.width.%]="passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100"></div>
+                'bg-danger bg-opacity-50': passwordStrength === 'weak',
+                'bg-warning bg-opacity-50': passwordStrength === 'medium',
+                'bg-success bg-opacity-50': passwordStrength === 'strong'
+              }" [style.width.%]="passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100"></div>
             </div>
-
             <ul class="password-checklist">
               <li *ngIf="currentUnmetCheck">{{ currentUnmetCheck }}</li>
             </ul>

@@ -3,18 +3,16 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../services/authetication/auth.service';
-import {HeaderComponent} from '../../shared/partials/header/login-header/header.component';
 
 @Component({
   selector: 'app-signup',
+  standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './signup.component.html'
 })
 export class SignupComponent {
   user = { username: '', mail: '', password: '' };
   errorMessage: string | null = null;
-
-
   passwordStrength: 'weak' | 'medium' | 'strong' | null = null;
   showPasswordMeter = false;
   passwordChecks = {
@@ -26,11 +24,25 @@ export class SignupComponent {
   };
   currentUnmetCheck: string | null = null;
 
-  constructor(private router: Router, public auth_service: AuthService) {
+  constructor(private router: Router, public auth_service: AuthService) {}
+
+  validateFields() {
+    const usernamePattern = /^[a-zA-Z0-9]+$/;
+    const emailPattern = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+    if (!usernamePattern.test(this.user.username)) {
+      this.errorMessage = 'Username must be alphanumeric';
+      return false;
+    }
+    if (!emailPattern.test(this.user.mail)) {
+      this.errorMessage = 'Please enter a valid email address';
+      return false;
+    }
+    this.errorMessage = null;
+    return true;
   }
+
   onPasswordInput(password: string) {
     this.showPasswordMeter = password.length > 0;
-
     this.passwordChecks = {
       length: password.length >= 8,
       lowercase: /[a-z]/.test(password),
@@ -38,7 +50,6 @@ export class SignupComponent {
       number: /[0-9]/.test(password),
       specialChar: /[^A-Za-z0-9]/.test(password)
     };
-
     const checkOrder = [
       { key: 'length', message: 'At least 8 characters' },
       { key: 'lowercase', message: 'At least one lowercase letter' },
@@ -46,17 +57,12 @@ export class SignupComponent {
       { key: 'number', message: 'At least one number' },
       { key: 'specialChar', message: 'At least one special character' }
     ] as const;
-
-    this.currentUnmetCheck =
-      checkOrder.find(c => !this.passwordChecks[c.key])?.message || null;
-
+    this.currentUnmetCheck = checkOrder.find(c => !this.passwordChecks[c.key])?.message || null;
     const allRequirementsMet = Object.values(this.passwordChecks).every(v => v);
-
     if (!allRequirementsMet) {
       this.passwordStrength = 'weak';
       return;
     }
-
     if (password.length >= 12 && this.passwordChecks.specialChar && this.passwordChecks.number) {
       this.passwordStrength = 'strong';
     } else if (password.length >= 10) {
@@ -69,19 +75,17 @@ export class SignupComponent {
   get allPasswordRequirementsMet(): boolean {
     return Object.values(this.passwordChecks).every(v => v);
   }
+
   onSubmit(form: NgForm) {
-    if (form.valid) {
-      this.auth_service.signup(this.user.username, this.user.mail, this.user.password).subscribe({
-        next: (_) => {
-          this.router.navigate(['/welcome']).then(() => {
-          });
-        },
-        error: (err) => {
-          this.errorMessage = err.error.detail || "Signup failed";
-        }
-      });
-    }
+    if (!this.validateFields() || !form.valid) return;
+    this.auth_service.signup(this.user.username, this.user.mail, this.user.password).subscribe({
+      next: () => this.router.navigate(['/welcome']),
+      error: (err) => {
+        this.errorMessage = err?.error?.detail || 'Signup failed';
+      }
+    });
   }
+
   goToLogin() {
     this.router.navigate(['/login']).then();
   }

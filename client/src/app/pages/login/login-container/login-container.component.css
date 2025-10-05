@@ -48,6 +48,7 @@
 .login-error-message {
   color: #fc0;
   text-align: left;
+  margin-top: -10px;
   font-family: Roboto, sans-serif;
   font-weight: 500;
 }
@@ -146,14 +147,13 @@
 }
 
 .login-form-side {
-  flex: 0 0 27vw;
-  min-width: 440px;
+  min-width: 500px;
   background-color: #fff;
   padding: 32px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch
 }
 
 
@@ -175,21 +175,22 @@
 .center-content-wrapper {
   display: flex;
   flex-direction: column;
-  margin-top: 10vh;
+  margin-top: 100px;
   align-items: center;
   flex-grow: 1;
 }
 
 .login-content {
-  width: 150%;
-  max-width: 428px !important;
+  width: 100%;
+  max-width: 500px !important;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: center;
 }
 
 .login-page-container .orion-logo {
   margin-bottom: 14px;
+  width: 300px;
 }
 
 .login-heading {
@@ -205,15 +206,15 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
 .input-label {
   color: #373637;
-  font-family: Roboto, sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 14px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 .login-input.username {
@@ -239,25 +240,25 @@
 
 .login-input {
   width: 100%;
-  max-width: 428px;
   height: 44px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Inter, sans-serif;
   background-color: #fff;
   border: 1px solid #a0b8d1;
   border-radius: 8px;
   padding: 0 16px;
   box-sizing: border-box;
-  margin-bottom: 8px;
-  margin-top: -13px;
 }
 
 .reset-password {
   color: #a0b8d1 !important;
   cursor: pointer;
-  font-family: Roboto, sans-serif;
+  font-family: Inter, sans-serif;
   font-weight: 400;
   font-size: 14px;
   text-decoration: none;
-  align-self: flex-start;
+  align-self: flex-end;
   margin-bottom: 24px;
 }
 
@@ -352,12 +353,9 @@
 }
 
 .dashboard-visual {
-  width: 63vw;
-  min-width: 600px;
+  height: 100vh;
   position: absolute;
   right: 0;
-  top: 63%;
-  transform: translateY(-50%);
 }
 
 .diagonal-features {
@@ -423,7 +421,7 @@
 
   .login-form-side {
     flex: 0 0 100vw;
-    min-width: 400px;
+    min-width: 500px;
   }
 
   .login_background {
