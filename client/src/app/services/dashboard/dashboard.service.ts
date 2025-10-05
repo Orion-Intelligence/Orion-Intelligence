@@ -112,6 +112,13 @@ export class DashboardService {
     }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
+    let match_type = this.app_service.configData().localSettings.matchType
+    if (match_type) {
+      baseParams['matchtype'] = match_type;
+    } else {
+      baseParams['matchtype'] = this.app_service.configData().localSettings.matchType;
+    }
+
     const queryParamsForNav = {...baseParams};
     delete queryParamsForNav['entity_filter'];
     this.router.navigate([], {

@@ -489,7 +489,10 @@ class elastic_request_generator:
                     must_clauses.append({
                         "bool": {
                             "should": [
-                                {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}},
+                                {"bool": {"filter": [
+                                    {"exists": {"field": "m_message_date"}},
+                                    {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}}
+                                ]}},
                                 {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}}
                             ],
                             "minimum_should_match": 1
@@ -503,7 +506,10 @@ class elastic_request_generator:
             must_clauses.append({
                 "bool": {
                     "should": [
-                        {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}},
+                        {"bool": {"filter": [
+                            {"exists": {"field": "m_message_date"}},
+                            {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}}
+                        ]}},
                         {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}}
                     ],
                     "minimum_should_match": 1
@@ -605,7 +611,6 @@ class elastic_request_generator:
             {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
             {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}
         ] if next(iter(b)) in base_index]
-
 
         return query
 
