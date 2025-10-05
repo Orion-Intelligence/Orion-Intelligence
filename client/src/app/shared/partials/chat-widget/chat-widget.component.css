@@ -303,3 +303,11 @@
   display: block;
 }
 
+.chat-support__messages--scroll {
+  overflow-y: auto;
+}
+
+.chat-support__bottom-sentinel {
+  height: 1px;
+  width: 100%;
+}

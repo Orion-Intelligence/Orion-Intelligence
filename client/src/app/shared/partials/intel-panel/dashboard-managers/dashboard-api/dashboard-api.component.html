@@ -52,10 +52,10 @@
   </div>
 </div>
 
-<div class="search__result-detail search__result-detail-extended" *ngIf="query_triggered && !loading && emailCallbackbackModel.cards_data.length > 0" style="height:auto; max-height:none; overflow:visible;" @fadeInDashboardItem>
+<div class="search__result-detail search__result-detail-extended" *ngIf="query_triggered && !loading && emailCallbackbackModel.cards_data.length > 0" @fadeInDashboardItem>
 
   <ng-container *ngIf="apiType === 'cracked'; else nonCrackedSwitch">
-    <div style="display:flex; flex-direction:column; gap:12px;">
+    <div class="flex-col-gap-12">
       <div *ngFor="let item of emailCallbackbackModel.cards_data; let last = last" class="dashboard-result-card">
         <div class="report__defacement-detail-header-url dashboard-header-header">
           {{ item?.m_app_name }}
@@ -75,12 +75,12 @@
         <div class="text-white">{{ item?.m_version }}</div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Content Type</div>
-        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <div class="flex-wrap-gap-8">
           <span *ngFor="let ct of item?.m_content_type" class="badge-red">{{ ct }}</span>
         </div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Download Links</div>
-        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <div class="flex-wrap-gap-8">
           <a *ngFor="let d of item?.m_download_link" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d }}</a> <span *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0" class="text-white">not available</span>
         </div>
 
@@ -91,7 +91,7 @@
         <div class="text-white">{{ item?.m_latest_date }}</div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Mod Features</div>
-        <pre class="text-white" style="white-space: pre-wrap; margin:0;">{{ item?.m_mod_features }}</pre>
+        <pre class="text-white pre-wrap-m0">{{ item?.m_mod_features }}</pre>
 
         <hr class="dashboard-header-divider" *ngIf="!last">
       </div>
@@ -100,7 +100,7 @@
 
   <ng-template #nonCrackedSwitch>
     <ng-container *ngIf="apiType === 'social'; else nonSocialView">
-      <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="flex-col-gap-12">
         <div *ngFor="let item of emailCallbackbackModel.cards_data; let last = last" class="dashboard-result-card">
           <div class="report__defacement-detail-header-url dashboard-header-header">
             {{ item?.m_title }}
@@ -113,7 +113,7 @@
           <div class="text-white">{{ item?.m_base_url }}</div>
 
           <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Links</div>
-          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <div class="flex-wrap-gap-8">
             <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a> <a *ngFor="let d of item?.m_dumplink" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d }}</a>
           </div>
 
@@ -141,7 +141,7 @@
       <span class="text-white">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</span>
     </ng-container>
     <div class="report__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">Breaches:</div>
-    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+    <div class="flex-wrap-gap-8">
       <span *ngFor="let item of breachData?.m_dumplink" class="badge-red">{{ item }}</span>
     </div>
   </ng-template>

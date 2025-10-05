@@ -16,7 +16,7 @@
         </div>
       </div>
 
-      <div #messagesContainer class="chat-support__messages" (scroll)="onMessagesScroll()" style="overflow-y:auto">
+      <div #messagesContainer class="chat-support__messages chat-support__messages--scroll" (scroll)="onMessagesScroll()">
         <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
           <ng-container [ngSwitch]="msg.sender">
             <div *ngSwitchCase="'user'" class="chat-support__message-container">
@@ -53,7 +53,7 @@
           <span class="chat-support__typing-dot"></span>
         </div>
 
-        <div #bottomSentinel style="height:1px;width:100%"></div>
+        <div #bottomSentinel class="chat-support__bottom-sentinel"></div>
       </div>
 
       <form class="chat-support__input" (submit)="sendMessage($event)">

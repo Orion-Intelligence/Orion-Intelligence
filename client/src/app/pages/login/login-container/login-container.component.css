@@ -312,8 +312,8 @@
 .dashboard-preview-side {
   flex: 1;
   position: relative;
-  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 15%) 0, rgb(255 255 255 / 11%) 1px, transparent 1px, transparent 70px),
-  repeating-linear-gradient(90deg, rgb(255 255 255 / 15%) 0, rgb(255 255 255 / 11%) 1px, transparent 1px, transparent 70px),
+  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 15%) 0, rgb(255 255 255 / 25%) 1px, transparent 1px, transparent 70px),
+  repeating-linear-gradient(90deg, rgb(255 255 255 / 15%) 0, rgb(255 255 255 / 25%) 1px, transparent 1px, transparent 70px),
   radial-gradient(circle at center, #172a4f 0%, #0E1626 100%);
   background-blend-mode: overlay;
   overflow: hidden;

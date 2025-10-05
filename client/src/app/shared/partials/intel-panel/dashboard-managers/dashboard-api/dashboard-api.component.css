@@ -155,3 +155,26 @@
     margin-right: 15px;
   }
 }
+
+.search__result-detail-extended {
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.flex-col-gap-12 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flex-wrap-gap-8 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pre-wrap-m0 {
+  white-space: pre-wrap;
+  margin: 0;
+}

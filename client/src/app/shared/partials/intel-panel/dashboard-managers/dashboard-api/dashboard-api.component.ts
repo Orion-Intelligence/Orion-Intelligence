@@ -92,13 +92,20 @@ export class DashboardApiComponent implements OnInit {
     })).subscribe({
       next: res => {
         const pending = res?.status === 'pending' || res?.result?.status === 'busy' || res?.result?.status === 'pending';
+        const failedPending =
+          (res?.status === 'pending' || res?.result?.status === 'pending') &&
+          ((res?.result?.progress ?? res?.progress) === 0) &&
+          ((res?.result?.step ?? res?.step) === 'failed');
+
         if (pending) {
           const p = res?.result?.progress ?? res?.progress;
           if (typeof p === 'number' && !Number.isNaN(p)) this.progress = p;
           const st = res?.result?.step ?? res?.step;
           if (typeof st === 'string' && st) this.currentStep = st;
+          if (failedPending) return;
           return;
         }
+
         if (Array.isArray(res?.result)) {
           (this.emailCallbackbackModel as any).cards_data = res.result;
           this.breachData = (this.emailCallbackbackModel as any).cards_data?.[0] ?? null;
@@ -106,6 +113,7 @@ export class DashboardApiComponent implements OnInit {
           this.displayQ2 = this.q2;
           return;
         }
+
         if (res?.success && res?.data) {
           this.emailCallbackbackModel = res.data;
           this.breachData = res.data.cards_data?.length > 0 ? res.data.cards_data[0] : null;
@@ -140,16 +148,32 @@ export class DashboardApiComponent implements OnInit {
   get crackedValid(): boolean {
     try {
       const u = new URL(this.q1);
-      return (u.protocol === 'https:' || u.protocol === 'http:') && u.hostname === 'play.google.com';
+      return ((u.protocol === 'https:' || u.protocol === 'http:') && u.hostname === 'play.google.com') || /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(this.q1);
     } catch {
-      return false;
+      return /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(this.q1);
     }
   }
 
   private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
     return this.http.post<any>(apiEndpoint, paramModel).pipe(
-      expand(res => ((res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending')) ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, paramModel))) : EMPTY),
-      takeWhile(res => (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending'), true),
+      expand(res => {
+        const isPending = (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
+        const isFailedPending =
+          (res?.status === 'pending' || res?.result?.status === 'pending') &&
+          ((res?.result?.progress ?? res?.progress) === 0) &&
+          ((res?.result?.step ?? res?.step) === 'failed');
+        return isPending && !isFailedPending
+          ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, paramModel)))
+          : EMPTY;
+      }),
+      takeWhile(res => {
+        const isPending = (res?.status === 'pending') || (res?.result?.status === 'busy') || (res?.result?.status === 'pending');
+        const isFailedPending =
+          (res?.status === 'pending' || res?.result?.status === 'pending') &&
+          ((res?.result?.progress ?? res?.progress) === 0) &&
+          ((res?.result?.step ?? res?.step) === 'failed');
+        return isPending && !isFailedPending;
+      }, true),
       catchError(error => {
         console.error('Search API call failed:', error);
         return of(null);
