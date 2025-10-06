@@ -45,7 +45,7 @@
                                 'status-disabled': user.status === 'disable',
                                 'status-other': user.status !== 'active' && user.status !== 'disable'
                               }">
-                          <span class="list__status-default-pointer"></span>{{ user.status }}
+                          <span class="list__status-default-pointer"></span>{{ user.status === 'verification_pending' ? 'verification' : user.status }}
                           <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
                         </span>
                         <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuStatus' + i">
