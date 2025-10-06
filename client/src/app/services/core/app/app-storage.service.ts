@@ -1,5 +1,5 @@
-import { effect, Injectable, WritableSignal } from '@angular/core';
-import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
+import {effect, Injectable, WritableSignal} from '@angular/core';
+import {AppSettingsModel, ConfigSettings, LocalSettingsModel} from '../../../shared/model/app/config';
 
 @Injectable({
   providedIn: 'root'
@@ -73,5 +73,9 @@ export class AppStorageService {
 
   setTheme(theme: 'dark-theme' | 'light-theme'): void {
     localStorage.setItem('theme', theme);
+  }
+
+  clearStorage(): void {
+    localStorage.clear();
   }
 }

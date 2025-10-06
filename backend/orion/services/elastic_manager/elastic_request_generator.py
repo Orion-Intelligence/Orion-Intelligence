@@ -578,7 +578,7 @@ class elastic_request_generator:
             ("m_network", 1),
             ("m_channel_name", 4)
         ]
-        date_field = "m_message_date"
+        date_field = "m_creation_date"
 
         unified_query = self._build_query_block(
             p_query_model=p_query_model,

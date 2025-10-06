@@ -5,6 +5,8 @@ import {Router} from '@angular/router';
 import {AuthModel} from '../../shared/model/auth/auth.model';
 import {TokenRefreshService} from './token-refresh.service';
 import {HttpHeaders} from '@angular/common/http';
+import {AppStorageService} from '../core/app/app-storage.service';
+import {AppService} from '../core/app/app.service';
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
@@ -16,7 +18,7 @@ export class AuthService {
 
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
-  constructor(private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
+  constructor(private appService:AppService, private appStorageService:AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
     if (this.isAuthenticated()) {
       const needsSession = !this.username() && !this.role() && !this.verificationDate();
       if (needsSession) this.refreshToken().subscribe();
@@ -127,6 +129,8 @@ export class AuthService {
     this.authState.next({token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null});
     this.tokenRefreshService.stopTokenRefresh();
     this.router.navigate(['/login']).then();
+    this.appStorageService.clearStorage()
+    this.appService.clearAll()
   }
 
   signup(username: string, email: string, password: string): Observable<any> {

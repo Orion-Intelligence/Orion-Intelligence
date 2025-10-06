@@ -62,7 +62,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   get currentResultCount(): number {
     if (this.getRoute() == 'all') {
-      return this.discussionCallbackModel.Result.length
+      return this.discussionCallbackModel.Result.length/15
     } else {
       return this.dashboardService.generalCallbackModel.Page_Count ?? 0;
     }
@@ -124,7 +124,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     }
   }
 
-  isConsolidatedResult(){
+  isConsolidatedResult() {
     const lastSegment = this.route.snapshot.url.at(-1)?.path;
     return !!(lastSegment && ["all", "email", "logs", "warfare", "cloud"].includes(lastSegment));
   }
@@ -142,11 +142,11 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.rankedResult = []
     if (this.isConsolidatedResult()) {
       const lastSegment = this.route.snapshot.url.at(-1)?.path;
-      if(lastSegment){
+      if (lastSegment) {
         this.dashboardService.consolidatedParamModel.category = lastSegment
       }
       let api = "search/breach"
-      if(this.type == Category.STRATEGIC){
+      if (this.type == Category.STRATEGIC) {
         api = "search/strategic"
       }
 

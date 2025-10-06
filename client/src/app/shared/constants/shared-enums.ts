@@ -79,6 +79,15 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Cloud': 'Cloud',
   'Tools': 'Tools',
   'ZeroDay': 'Zero Day',
+  'Twitter': 'Twitter',
+  'Mastodon': 'Mastodon',
+  'Pastebin': 'Pastebin',
+  'Forum': 'Forum',
+  'Reddit': 'Reddit',
+  'Social': 'Social',
+  'Cracked': 'Cracked',
+  'View': 'View',
+  'Auditlog': 'Audit Logs',
 };
 
 export const dashboardTooltips: Record<string, string> = {

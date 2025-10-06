@@ -19,6 +19,6 @@
   </div>
 </div>
 
-<div *ngIf="!isResponseLoading() && (currentCallbackModel.Result.length + currentResultCount+rankedResult.length > 0)" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="currentParamModel.page" [maxPages]="Math.floor(currentCallbackModel.Page_Count+rankedResult.length)"></app-pagination>
+<div *ngIf="!isResponseLoading() && (currentResultCount > 0)" @fadeInDashboardItem class="pagination-margin">
+  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="currentParamModel.page" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
 </div>

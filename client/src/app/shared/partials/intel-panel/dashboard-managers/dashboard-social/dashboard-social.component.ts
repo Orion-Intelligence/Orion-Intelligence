@@ -54,7 +54,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
 
   get currentResultCount(): number {
     if (this.getRoute() == 'all') {
-      return this.dashboardService.rankedResult.length
+      return this.dashboardService.rankedResult.length/15
     } else {
       return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
     }

@@ -117,6 +117,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
     this.onboardingData?.iocs.forEach(ioc => {
       this.categories[ioc.ioc_id] = ioc.values;
     });
+    
     this.appService.set('entityfilterCategories', this.categories);
   }
 }
