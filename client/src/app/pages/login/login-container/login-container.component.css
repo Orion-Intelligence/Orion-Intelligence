@@ -251,6 +251,11 @@
   box-sizing: border-box;
 }
 
+.login-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px #57A5EB;
+}
+
 .reset-password {
   color: #a0b8d1 !important;
   cursor: pointer;
