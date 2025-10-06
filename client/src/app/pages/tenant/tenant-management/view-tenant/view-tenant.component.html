@@ -11,7 +11,7 @@
         </div>
 
         <div class="list__container">
-          <ng-container *ngIf="users !== undefined; else loadingTpl">
+          <ng-container *ngIf="!isLoading; else loadingTpl">
             <table class="table table-striped directory-list__table clear-paddings">
               <thead *ngIf="(users?.length || 0) > 0">
                 <tr>
@@ -49,7 +49,7 @@
                           <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
                         </span>
                         <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuStatus' + i">
-                          <li><a class="dropdown-item disabled" tabindex="-1">Verification</a></li>
+                          <li><a class="dropdown-item disabled" tabindex="-1">Verification Pending</a></li>
                           <li><hr class="dropdown-divider mx-3"></li>
                           <li><a class="dropdown-item disabled" tabindex="-1">Onboarding</a></li>
                           <li><hr class="dropdown-divider mx-3"></li>

@@ -3,7 +3,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../shared/services/api.service';
 import { HttpHeaders } from '@angular/common/http';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
@@ -18,8 +18,6 @@ export class ViewTenantComponent implements OnInit {
   users: User[] = [];
   isLoading = true;
   selectedUserId: string | null = null;
-
-
 
   constructor(public apiService: ApiService,) {
   }
@@ -36,9 +34,6 @@ export class ViewTenantComponent implements OnInit {
         this.isLoading = false;
       },
     });
-  }
-  toggleMenu(user: User) {
-    this.selectedUserId = this.selectedUserId === user.username ? null : user.username;
   }
 
   getRoleLabel(role: User['role']): string {
