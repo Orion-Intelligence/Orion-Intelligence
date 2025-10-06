@@ -121,7 +121,7 @@
             </div>
           </div>
         </ng-container>
-        <app-selected-filter-bar *ngIf="(entityFiltersCount() || sidebarFilterCount())&&showSelectedFilters"
+        <app-selected-filter-bar *ngIf="(entityFiltersCount() || sidebarFilterCount() || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='semantic')&&showSelectedFilters"
           (clearAll)="reloadFilter()"
           [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
       </div>

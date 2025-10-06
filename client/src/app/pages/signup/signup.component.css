@@ -98,7 +98,7 @@
     background-color: #172235;
     border-radius: 16px;
     padding: 42px 36px;
-    min-width: 500px !important;
+    min-width: 350px !important;
     min-height: 350px !important;
     color: white;
     font-family: Inter, sans-serif;
@@ -241,12 +241,12 @@
     .auth-wrapper__left {
         flex: 1 1 100%;
         width: 100%;
-        min-width: 500px !important;
+        min-width: 350px !important;
     }
 
     .signup-container {
         width: 100%;
-        max-width: 500px;
+        max-width: 350px;
         margin: 0 auto;
     }
 }

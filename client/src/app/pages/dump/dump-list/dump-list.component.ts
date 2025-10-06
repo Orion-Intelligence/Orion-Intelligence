@@ -42,10 +42,6 @@ export class DumpListComponent implements OnInit {
 
   copyRowData(item: any): void {
     const textToCopy = item;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      console.log('Copied to clipboard:', textToCopy);
-    }).catch(err => {
-      console.error('Failed to copy:', err);
-    });
+    navigator.clipboard.writeText(textToCopy).then();
   }
 }

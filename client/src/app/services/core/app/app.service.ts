@@ -45,7 +45,6 @@ export class AppService {
   }
 
   getConfig(): ConfigSettings {
-    console.log(this.configData().localSettings.matchType)
     return this.configData();
   }
 

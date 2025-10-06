@@ -60,6 +60,7 @@ export class AppStorageService {
             typeof value === 'boolean' ? String(value)
               : typeof value === 'object' ? JSON.stringify(value)
                 : String(value);
+
           localStorage.setItem(key, storeValue);
         }
       });

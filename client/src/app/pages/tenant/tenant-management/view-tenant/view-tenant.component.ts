@@ -55,11 +55,9 @@ export class ViewTenantComponent implements OnInit {
     this.apiService.post('update/user', user).subscribe({
       next: () => {
         this.isLoading = false;
-        console.log('User updated successfully');
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Failed to update user', err);
       },
     });
   }

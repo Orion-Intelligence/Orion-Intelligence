@@ -137,7 +137,6 @@ export class SearchFiltersComponent implements OnInit {
     const queryLower = query.toLowerCase();
 
     const isDefaultSelection = !this.selectedCategoryId;
-    console.log(this.categories)
 
     if (queryLower === '') {
       const allKeys = Object.keys(this.categories);

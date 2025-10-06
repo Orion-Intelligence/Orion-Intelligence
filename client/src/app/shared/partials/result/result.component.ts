@@ -141,9 +141,6 @@ export class ResultComponent implements OnInit, OnChanges {
     if (this.local_query) {
       this.result_triggered = true
     }
-    const cfg = this.app_service.configData();
-    const matchtype = cfg.localSettings.matchType || 'and';
-    this.onSetMatchType(matchtype)
   }
 
   onFormSubmit() {

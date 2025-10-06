@@ -147,7 +147,7 @@
 }
 
 .login-form-side {
-  min-width: 500px;
+  min-width: 350px;
   background-color: #fff;
   padding: 32px;
   display: flex;
@@ -421,7 +421,7 @@
 
   .login-form-side {
     flex: 0 0 100vw;
-    min-width: 500px;
+    min-width: 350px;
   }
 
   .login_background {
