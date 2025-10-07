@@ -1,21 +1,16 @@
-import hashlib
-import random
 import re
-import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from abc import ABC
 from typing import List
 from collections import OrderedDict
 from playwright.sync_api import Page
 
-from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.social_model import social_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
 from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
-from crawler.crawler_services.redis_manager.redis_enums import REDIS_COMMANDS
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
@@ -35,11 +30,9 @@ class _pastebin(leak_extractor_interface, ABC):
         self._title_seen = OrderedDict()
 
     def init_callback(self, callback=None):
-
         self.callback = callback
 
     def __new__(cls, callback=None):
-
         if cls._instance is None:
             cls._instance = super(_pastebin, cls).__new__(cls)
             cls._instance._initialized = False
@@ -51,8 +44,7 @@ class _pastebin(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-
-        return "https://pastebin.com/archive"
+        return self.m_seed_url
 
     @property
     def developer_signature(self) -> str:
@@ -60,17 +52,14 @@ class _pastebin(leak_extractor_interface, ABC):
 
     @property
     def base_url(self) -> str:
-
         return "https://pastebin.com"
 
     @property
     def rule_config(self) -> RuleModel:
-
         return RuleModel(m_fetch_proxy=FetchProxy.TOR, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type=ThreatType.PASTEBIN)
 
     @property
     def card_data(self) -> List[social_model]:
-
         return self._card_data
 
     @property
@@ -79,11 +68,9 @@ class _pastebin(leak_extractor_interface, ABC):
         return self._entity_data
 
     def invoke_db(self, command: int, key: str, default_value, expiry: int = None):
-
         return self._redis_instance.invoke_trigger(command, [key + self.__class__.__name__, default_value, expiry])
 
     def contact_page(self) -> str:
-
         return "https://pastebin.com/contact"
 
     def append_leak_data(self, leak: social_model, entity: entity_model):
@@ -95,58 +82,9 @@ class _pastebin(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    @staticmethod
-    def _has_relevant_entities(entity: entity_model) -> bool:
-        detection_keys = [
-            'm_mobile_attack_techniques',
-            'm_xmpp_addresses',
-            'm_email',
-            'm_hashes',
-            'm_enterprise_attack_tactics',
-            'm_file_paths',
-            'm_yara_rules',
-            'm_ip',
-            'm_asns',
-            'm_registry_key_paths',
-            'm_mac_addresses',
-            'm_user_agents',
-            'm_cve',
-            'm_enterprise_attack_techniques',
-            'm_phone_number',
-            'm_uk_nhs',
-            'm_crypto_address',
-            'm_domain',
-        ]
-
-        for key in detection_keys:
-            if hasattr(entity, key):
-                value = getattr(entity, key)
-                if key == 'm_domain':
-                    if isinstance(value, (list, tuple, set)) and len(value) > 3:
-                        return True
-                elif isinstance(value, str):
-                    if value.strip():
-                        return True
-                elif isinstance(value, (list, tuple, set, dict)):
-                    if len(value) > 0:
-                        return True
-                elif value is not None:
-                    return True
-        return False
-
-    @staticmethod
-    def _norm(v):
-        if isinstance(v, (list, tuple, set)):
-            return tuple(sorted(map(str, v)))
-        if isinstance(v, dict):
-            return tuple(sorted((str(k), str(vv)) for k, vv in v.items()))
-        return str(v)
 
     def parse_leak_data(self, page: Page):
-        exc = 0
-        cooldown = {}
-        while True:
-            success = False
+
             try:
                 url_lists = []
 
@@ -159,29 +97,15 @@ class _pastebin(leak_extractor_interface, ABC):
                         url_lists.append(full_url)
 
                 for url in url_lists:
-                    try:
-                        time.sleep(random.uniform(1, 3))
+
                         try:
                             page.goto(url, wait_until="load", timeout=25000)
                         except:
                             pass
 
                         title = page.locator("div.info-top").inner_text()
-                        if title in self._title_seen:
-                            log.g().i(self.__class__.__name__ + " : duplicate title error : " + title)
-                            continue
-
-                        self._title_seen[title] = None
-                        if len(self._title_seen) > 500:
-                            self._title_seen.popitem(last=False)
 
                         username = page.locator("div.username").inner_text()
-
-                        now = datetime.now(tz=timezone.utc)
-                        until = cooldown.get(username)
-                        if until and now < until:
-                            log.g().i(self.__class__.__name__ + " : spam detection error : " + title)
-                            continue
 
                         raw_date = page.locator("div.date").inner_text()
                         clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw_date, flags=re.IGNORECASE)
@@ -208,7 +132,7 @@ class _pastebin(leak_extractor_interface, ABC):
                         except:
                             source = None
 
-                        m_content = source.replace("\xa0", " ")
+                        m_content = source.replace("\xa0", " ").strip()
 
                         cleaned = source.replace("\xa0", " ")
                         cleaned = re.sub(r'[ \t]+', ' ', cleaned)
@@ -247,41 +171,8 @@ class _pastebin(leak_extractor_interface, ABC):
                             m_weblink=domains,
                         )
 
-                        helper_method.extract_entities([(m_content, entity_data)])
-
-                        ed_items = sorted((k, self._norm(v)) for k, v in vars(entity_data).items())
-                        ed_repr = repr(ed_items).encode("utf-8")
-                        ed_hash = hashlib.sha256(ed_repr).hexdigest()
-                        redis_key = self.__class__.__name__ + f"_entityhash:{ed_hash}:"
-                        duplicate_status = self.invoke_db(REDIS_COMMANDS.S_GET_BOOL, redis_key, False, RAW_PATH_CONSTANTS.PASTE_UNIQUE_TIMEOUT)
-                        if duplicate_status:
-                            cooldown[username] = now + timedelta(minutes=60)
-                            continue
-
-                        valid_paste = self._has_relevant_entities(entity_data)
-                        if valid_paste:
-                            self.invoke_db(REDIS_COMMANDS.S_SET_BOOL, redis_key, True, RAW_PATH_CONSTANTS.PASTE_UNIQUE_TIMEOUT)
-                            self.append_leak_data(card_data, entity_data)
-                        else:
-                            log.g().i(self.__class__.__name__ + " : low yield request : " + title)
-                            cooldown[username] = now + timedelta(minutes=10)
-
-                        success = True
-
-                    except Exception as ex:
-                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                        exc += 1
-                        if exc >= 5:
-                            return
-
-                if success:
-                    exc = 0
+                        self.append_leak_data(card_data, entity_data)
 
             except Exception as ex:
                 log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-                exc += 1
-                if exc >= 5:
-                    return
 
-            time.sleep(random.uniform(1, 10))
-            page.goto(self.seed_url)

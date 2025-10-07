@@ -962,7 +962,7 @@ class elastic_request_generator:
             must_clauses=must_clauses,
             must_not_clause=must_not_clause,
             m_page_number=m_page_number,
-            date_field="m_leak_date"
+            date_field="m_creation_date"
         )
 
         return p_index, query_statement
