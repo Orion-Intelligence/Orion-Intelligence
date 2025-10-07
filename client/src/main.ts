@@ -5,7 +5,7 @@ import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
-const SEARCH_LOGO_SRC = '/assets/images/sidebar/search_nav_logo.png';
+const SEARCH_LOGO_SRC = '/assets/images/sidebar/orion-Intelligence-logo.svg';
 
 const preload = document.createElement('link');
 preload.rel = 'preload';

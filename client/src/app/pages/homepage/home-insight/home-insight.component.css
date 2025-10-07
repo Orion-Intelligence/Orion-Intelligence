@@ -243,19 +243,19 @@
   grid-template-columns: repeat(1, minmax(340px, 1fr));
 }
 
-@media (width >= calc(700px + 300px)) {
+@media (min-width: calc(700px + 300px)) {
   .sidebar-open .home_insight__container {
     grid-template-columns: repeat(2, minmax(340px, 1fr));
   }
 }
 
-@media (width >= calc(1500px + 300px)) {
+@media (min-width: calc(1500px + 300px)) {
   .sidebar-open .home_insight__container {
     grid-template-columns: repeat(4, minmax(340px, 1fr));
   }
 }
 
-@media (width >= calc(2100px + 300px)) {
+@media (min-width: calc(2100px + 300px)) {
   .sidebar-open .home_insight__container {
     grid-template-columns: repeat(6, minmax(340px, 1fr));
   }
@@ -265,19 +265,19 @@
   grid-template-columns: repeat(1, minmax(340px, 1fr));
 }
 
-@media (width >= calc(700px + 70px)) {
+@media (min-width: calc(700px + 70px)) {
   .sidebar-closed .home_insight__container {
     grid-template-columns: repeat(2, minmax(340px, 1fr));
   }
 }
 
-@media (width >= calc(1500px + 70px)) {
+@media (min-width: calc(1500px + 70px)) {
   .sidebar-closed .home_insight__container {
     grid-template-columns: repeat(4, minmax(340px, 1fr));
   }
 }
 
-@media (width >= calc(2100px + 70px)) {
+@media (min-width: calc(2100px + 70px)) {
   .sidebar-closed .home_insight__container {
     grid-template-columns: repeat(6, minmax(340px, 1fr));
   }
