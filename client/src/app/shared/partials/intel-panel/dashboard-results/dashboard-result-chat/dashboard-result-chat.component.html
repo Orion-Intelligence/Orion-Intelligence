@@ -4,7 +4,7 @@
     class="dashboard__search-card">
     <div [id]="'item-' + item.m_message_id" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
-        <div class="dashboard__search-tags">
+        <div class="dashboard__search-tags dashboard__search-tag-item">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
             <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
           </ng-container>

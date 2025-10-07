@@ -405,6 +405,7 @@
 .dashboard__buttons {
   display: flex;
   gap: 20px;
+  margin-left: auto;
 }
 
 .dashboard__search-main-buttons-outer {
@@ -415,8 +416,12 @@
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
-  justify-content: space-between;
+  justify-content: start;
   flex-wrap: wrap;
+}
+
+.dashboard__search-tag-item{
+  max-width: 80%;
 }
 
 .dashboard__tag {

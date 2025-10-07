@@ -1,15 +1,16 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { HelperService } from '../../services/helper.service';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import { ApiService } from '../../services/api.service';
-import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { GeneralResultItem } from '../../model/results/general/general.callback.model';
-import { LeakResultItem } from '../../model/results/leak/leak.callback.model';
-import { HttpParams } from '@angular/common/http';
-import { AppService } from '../../../services/core/app/app.service';
+import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {HelperService} from '../../services/helper.service';
+import {TooltipDirective} from '../../directive/tooltip-directive.directive';
+import {ApiService} from '../../services/api.service';
+import {fadeInDashboardItem} from '../../animations/dashboard.item.animation';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import {GeneralResultItem} from '../../model/results/general/general.callback.model';
+import {LeakResultItem} from '../../model/results/leak/leak.callback.model';
+import {HttpParams} from '@angular/common/http';
+import {AppService} from '../../../services/core/app/app.service';
 import {SubscriptionService} from '../../../services/dashboard/subscription.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-report-header',
@@ -30,14 +31,7 @@ export class ReportHeaderComponent {
   aiSuggestStatus = false;
   aiSuggestSummary = '';
 
-  constructor(
-    private helperService: HelperService,
-    private api: ApiService,
-    protected appService: AppService,
-    private dashboardService: DashboardService,
-    private cdr: ChangeDetectorRef,
-    private subscriptionService: SubscriptionService
-  ) {
+  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router) {
   }
 
   downloadCSV() {

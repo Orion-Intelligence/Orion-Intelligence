@@ -5,27 +5,34 @@
     class="dashboard__search-card">
     <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div">
       <div class="dashboard__search-tags">
-        <div class="dashboard__search-tags">
+        <div class="dashboard__search-tags dashboard__search-tag-item">
           <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
         </div>
 
         <div class="dashboard__buttons">
-          <div (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph"
-            class="dashboard__search-button">
+          <div *ngIf="this.type=='Strategic' && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/'))"
+               (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph"
+               class="dashboard__search-button">
             <div class="dashboard__search-button-inner">
-              <img height="20" src="/assets/images/sidebar/graph.svg" width="20" alt="graph" />
+              <img height="20" src="/assets/images/sidebar/graph.svg" width="20" alt="graph"/>
+            </div>
+          </div>
+
+          <div *ngIf="this.type!='Strategic'" (click)="scrollService.openCTI($event, item.m_hash)" appTooltip="Open CTI Graph"
+               class="dashboard__search-button">
+            <div class="dashboard__search-button-inner">
+              <img height="20" src="/assets/images/sidebar/graph.svg" width="20" alt="graph"/>
             </div>
           </div>
 
           <div (click)="scrollService.saveSession(item.m_hash)" [queryParams]="queryParams" appTooltip="Open Report"
-            [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
+               [routerLink]="[currentUrl, item.m_hash]" class="dashboard__search-button">
             <div class="dashboard__search-button-inner">
-              <img height="20" src="/assets/images/shared/redirect.svg" width="20" alt="redirect" />
+              <img height="20" src="/assets/images/shared/redirect.svg" width="20" alt="redirect"/>
             </div>
           </div>
         </div>
       </div>
-
 
       <ng-container *ngIf="item?.m_title as title; else noTitle">
         <h2 *ngIf="title.trim().length > 1; else noTitle" class="dashboard__search-title">
@@ -37,7 +44,7 @@
 
       <ng-container *ngIf="item?.m_important_content as content; else noDescription">
         <p *ngIf="content.trim().length > 1; else noDescription" [innerHTML]="content.slice(0, 600)"
-          class="dashboard__search-description"></p>
+           class="dashboard__search-description"></p>
       </ng-container>
       <ng-template #noDescription>
         <p class="dashboard__search-description">Description not available</p>
@@ -46,7 +53,7 @@
       <ng-container *ngIf="item.m_highlighted && item.m_highlighted.length>0">
         <span class="dashboard__search-title dashboard__search-title-secondary highlight">Webpage Content</span>
         <div [innerHTML]="highlightWords(item.m_ref_html)"
-          class="dashboard__search-description dashboard__search-description-light"></div>
+             class="dashboard__search-description dashboard__search-description-light"></div>
       </ng-container>
 
       <ng-container *ngIf="item?.m_url as url; else noUrl">
@@ -62,15 +69,17 @@
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Published on:</span> <span class="dashboard__info-value">{{
             item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-'
-            }}</span>
+          }}</span>
         </div>
         <div class="dashboard__search-info-item">
-          <span class="dashboard__info-label">Network:</span> <span class="dashboard__info-value">{{ item.m_network
-            }}</span>
+          <span class="dashboard__info-label">Network:</span> <span class="dashboard__info-value">{{
+            item.m_network
+          }}</span>
         </div>
         <div class="dashboard__search-info-item">
           <span class="dashboard__info-label">Last checked:</span> <span class="dashboard__info-value">{{
-            item?.m_creation_date | date: 'mediumDate' }}</span>
+            item?.m_creation_date | date: 'mediumDate'
+          }}</span>
         </div>
         <div class="dashboard__search-status">
           <span class="dashboard__info-label">Status</span>
