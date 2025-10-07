@@ -212,7 +212,7 @@
   }
 
   .home_insight__card {
-    width: calc(100vw - 85px);
+    width: calc(100vw - 90px);
     min-width: 150px;
     margin: 0 auto;
   }
@@ -226,7 +226,7 @@
   }
 
   .home-insight-card-container {
-    width: calc(100vw - 85px);
+    width: calc(100vw - 90px);
     min-width: 150px;
   }
 
