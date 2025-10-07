@@ -49,6 +49,7 @@ const mark = (img: HTMLImageElement) => {
     src.endsWith('Bg.webp') ||
     src.endsWith('hint.svg') ||
     src.endsWith('auth_dashboard_icon.svg') ||
+    src.includes('search_nav_logo.png') ||
     img.classList.contains('auth-wrapper__image')
   ) return;
   img.removeAttribute('alt');
