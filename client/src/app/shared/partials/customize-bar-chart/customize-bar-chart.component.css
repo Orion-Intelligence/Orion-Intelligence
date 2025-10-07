@@ -169,6 +169,6 @@
 @media (width <=460px) {
   .bar-chart_container {
     width: calc(100vw - 85px);
-    min-width: 350px;
+    min-width: 200px;
   }
 }

@@ -117,4 +117,12 @@
   .view-tenant-container .list__container table tbody tr:last-child td {
     border-bottom: 1px solid #ffffff10 !important;
   }
+
+  .view-tenant-container .directory-listing_upper-heading{
+    height: 60px;
+  }
+
+  .view-tenant-container .directory-listing_container{
+    padding: 0;
+  }
 }
