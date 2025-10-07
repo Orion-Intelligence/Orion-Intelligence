@@ -96,8 +96,8 @@ class _pastebin(leak_extractor_interface, ABC):
                         full_url = self.base_url + href
                         url_lists.append(full_url)
 
-                if self._is_crawled:
-                    url_lists = url_lists[0:2]
+                # if self._is_crawled:
+                #     url_lists = url_lists[0:2]
 
                 for url in url_lists:
 
