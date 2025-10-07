@@ -213,7 +213,7 @@
 
   .home_insight__card {
     width: calc(100vw - 85px);
-    min-width: 200px;
+    min-width: 150px;
     margin: 0 auto;
   }
 
@@ -227,7 +227,7 @@
 
   .home-insight-card-container {
     width: calc(100vw - 85px);
-    min-width: 200px;
+    min-width: 150px;
   }
 
   .home_insight_graph_container {
