@@ -63,7 +63,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   get currentResultCount(): number {
     if (this.getRoute() === 'all') {
-      return Math.ceil(this.discussionCallbackModel.Page_Count ?? 0);
+      return Math.ceil(this.rankedResult.pageCount ?? 0);
     } else {
       if (this.type === 'Strategic') {
         return Math.ceil(this.dashboardService.generalCallbackModel.Page_Count ?? 0);

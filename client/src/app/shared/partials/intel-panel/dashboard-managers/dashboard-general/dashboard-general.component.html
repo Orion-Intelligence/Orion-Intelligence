@@ -20,5 +20,5 @@
 </div>
 
 <div *ngIf="(currentResultCount > 0)" @fadeInDashboardItem class="pagination-margin">
-  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="currentParamModel.page" [maxPages]="Math.floor(currentResultCount)"></app-pagination>
+  <app-pagination (pageChange)="onPageChange($event)" [currentPage]="currentParamModel.page" [maxPages]="currentResultCount"></app-pagination>
 </div>
