@@ -12,7 +12,9 @@
 @use 'app/pages/tenant/tenant.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';
+@use 'app/shared//partials/sidebar-profile/sidebar-profile-settings/profile-image-picker/profile-image-picker.component.css';
 @use 'app/pages/tenant/tenant-management/view-tenant/view-tenant.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
@@ -146,7 +148,7 @@ html {
   background: #172235;
   scrollbar-width: none;
   overflow-x: hidden;
-  min-width: 350px!important;
+  min-width: 350px !important;
   scroll-behavior: smooth;
 }
 
@@ -154,7 +156,7 @@ body {
   margin: 0;
   background: #00000000;
   height: 100vh;
-  min-width: 350px!important;
+  min-width: 350px !important;
   min-height: 100vh;
   scrollbar-width: none;
 }

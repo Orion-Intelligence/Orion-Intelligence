@@ -1,11 +1,12 @@
-import {Injectable, signal} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AppSettingsModel, ConfigSettings, LocalSettingsModel} from '../../../shared/model/app/config';
-import {AppStorageService} from './app-storage.service';
-import {ApiService} from '../../../shared/services/api.service';
-import {HttpClient} from '@angular/common/http';
-import {tap} from 'rxjs/operators';
-import {search_filter_labels} from '../../../shared/constants/shared-enums';
+import { Injectable, Signal, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
+import { AppStorageService } from './app-storage.service';
+import { ApiService } from '../../../shared/services/api.service';
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs/operators';
+import { search_filter_labels } from '../../../shared/constants/shared-enums';
+import { CompanyProfile } from '../../../shared/model/company-profile/company.profile.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,17 @@ export class AppService {
   public entities = signal<any[]>([]);
 
   private entitiesCache: any[] | null = null;
+
+  public userProfile = signal<CompanyProfile>({
+    companyName: '',
+    email: '',
+    phone: null,
+    country: '',
+    city: '',
+    postalCode: '',
+    taxId: ''
+  });
+  public profileImageUrl = signal<string | null>(null);
 
   constructor(private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
     this.loadEntities()
@@ -51,8 +63,8 @@ export class AppService {
   set<T extends keyof (AppSettingsModel & LocalSettingsModel)>(key: T, value: (AppSettingsModel & LocalSettingsModel)[T]): void {
     this.configData.update(current => {
       const isAppSetting = key in current.appSettings;
-      const updatedAppSettings = isAppSetting ? {...current.appSettings, [key]: value} : current.appSettings;
-      const updatedLocalSettings = !isAppSetting ? {...current.localSettings, [key]: value} : current.localSettings;
+      const updatedAppSettings = isAppSetting ? { ...current.appSettings, [key]: value } : current.appSettings;
+      const updatedLocalSettings = !isAppSetting ? { ...current.localSettings, [key]: value } : current.localSettings;
       return new ConfigSettings(updatedAppSettings, updatedLocalSettings);
     });
   }
@@ -61,7 +73,7 @@ export class AppService {
     this.page.set(newPage);
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
-      queryParams: {...this.activatedRoute.snapshot.queryParams, page: newPage},
+      queryParams: { ...this.activatedRoute.snapshot.queryParams, page: newPage },
       replaceUrl: true
     }).then();
   }

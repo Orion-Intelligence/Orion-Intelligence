@@ -13,6 +13,11 @@ class db_tenant_model(Model):
     companyName: str
     iocs: List[IocCategory]
     userId:str=""
+    phone:str=""
+    country:str=""
+    city:str=""
+    postal_code:str=""
+    tax_id:str=""
 
 class TenantRequest(Model):
     companyName: str

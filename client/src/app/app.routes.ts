@@ -28,15 +28,17 @@ import { WelcomeComponent } from './pages/welcome/welcome.component';
 import { ForgotPasswordComponent } from './shared/partials/forgot-password/forgot-password.component';
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
 import { SidebarProfileHomepageComponent } from './shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
-import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
+import { SidebarProfileIocComponent } from './shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component';
 import { SidebarProfileDashboardComponent } from './shared/partials/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
 import { RoleGuard } from './shared/guards/role-guard.guard';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
-import {AuditlogComponent} from './pages/admin/auditlog/auditlog.component';
-import {DashboardResolver} from './shared/resolvers/dashboard.resolver';
-import {PaymentGatewayComponent} from './shared/partials/payment-gateway/payment-gateway.component';
-import {NotificationComponent} from './shared/partials/notification/notification.component';
-import {TrailNotificationComponent} from './shared/partials/trail-notification/trail-notification.component';
+import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
+import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
+import { PaymentGatewayComponent } from './shared/partials/payment-gateway/payment-gateway.component';
+import { NotificationComponent } from './shared/partials/notification/notification.component';
+import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
+import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
+import { ProfileResolver } from './shared/resolvers/profile.resolver';
 
 const consolidatedChildren = [
   {
@@ -559,7 +561,7 @@ export const routes: Routes = [
           },
           {
             path: 'ioc',
-            component: SidebarProfileSettingsComponent,
+            component: SidebarProfileIocComponent,
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {
@@ -571,6 +573,12 @@ export const routes: Routes = [
             path: 'auditlog',
             component: AuditlogComponent,
             data: { type: 'auditlog', animation: 'CategoryPage' }
+          },
+          {
+            path: 'settings',
+            component: SidebarProfileSettingsComponent,
+            resolve: { profile: ProfileResolver },
+            data: { type: 'settings', animation: 'CategoryPage' }
           }
         ]
       }
