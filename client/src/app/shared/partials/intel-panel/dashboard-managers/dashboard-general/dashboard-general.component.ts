@@ -62,13 +62,13 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
   }
 
   get currentResultCount(): number {
-    if (this.getRoute() == 'all') {
-      return this.discussionCallbackModel.Result.length / 15
+    if (this.getRoute() === 'all') {
+      return Math.ceil(this.discussionCallbackModel.Page_Count ?? 0);
     } else {
-      if (this.type == "Strategic") {
-        return this.dashboardService.generalCallbackModel.Page_Count ?? 0;
+      if (this.type === 'Strategic') {
+        return Math.ceil(this.dashboardService.generalCallbackModel.Page_Count ?? 0);
       } else {
-        return this.dashboardService.leakCallbackModel.Page_Count ?? 0;
+        return Math.ceil(this.dashboardService.leakCallbackModel.Page_Count ?? 0);
       }
     }
   }
