@@ -1,123 +1,125 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { TenantModel } from '../../../model/tenant/tenant.model';
-import { ApiService } from '../../../services/api.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
-import { HttpHeaders } from '@angular/common/http';
-import { NgIf, NgFor, CommonModule } from '@angular/common';
+import { Component, computed, effect, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { search_filter_labels } from '../../../constants/shared-enums';
+import { NgIf } from '@angular/common';
+import { ApiService } from '../../../services/api.service';
+import { CompanyProfile } from '../../../model/company-profile/company.profile.model';
+import { ProfileImagePickerComponent } from "./profile-image-picker/profile-image-picker.component";
+import { AppStorageService } from '../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../services/core/app/app.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
-  imports: [NgIf, NgFor, CommonModule, FormsModule],
-  templateUrl: './sidebar-profile-settings.component.html',
+  imports: [FormsModule, NgIf, CommonModule, ProfileImagePickerComponent],
+  templateUrl: './sidebar-profile-settings.component.html'
 })
 export class SidebarProfileSettingsComponent implements OnInit {
-  onboardingData?: TenantModel;
-  showLeftFade = false;
-  showRightFade = false;
-  selectedCategoryId = '';
-  addedIocs: { [key: string]: string[] } = {};
-  iocSearchText: string = '';
-  categories: Record<string, string[]> = {};
-  @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
-  constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
+  isProfileOpen = true;
+  is2FAOpen = true;
+  isThemeOpen = true;
+  isEditing = false;
+  profile: CompanyProfile;
+  twoFactorEnabled = true;
+  isDarkMode = true;
+  userId: string = '';
+  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService) { this.profile = this.appService.userProfile(); }
   ngOnInit(): void {
-    const search_filter_keys = Object.keys(search_filter_labels);
-    const token = this.authService.getToken()
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    this.apiService.post<TenantModel>('get/tenant', {})
-      .subscribe({
-        next: (backendData) => {
-          this.onboardingData = {
-            companyName: backendData.companyName,
-            iocs: Array.from(search_filter_keys).map(key => {
-              const backendIoc = backendData.iocs.find(i => i.ioc_id === key);
-              return {
-                ioc_id: key,
-                name: search_filter_labels[key] || key,
-                values: backendIoc ? backendIoc.values : []
-              };
-            })
-          };
-          this.selectedCategoryId = this.onboardingData?.iocs[0]?.ioc_id;
-          this.setIocLocal();
-        },
-        error: (err) => {
-          console.error('Error fetching onboarding:', err);
+    if (this.profile) {
+      this.setItemsFromPreferences();
+    }
+  }
+  setItemsFromPreferences() {
+    if (this.profile?.preferences?.["theme"]) {
+      this.isDarkMode = this.profile?.preferences?.["theme"] === 'dark-theme';
+    } else {
+      const storedTheme = this.appStorage.getTheme();
+      if (storedTheme === 'dark-theme') {
+        this.isDarkMode = true;
+      } else if (storedTheme === 'light-theme') {
+        this.isDarkMode = false;
+      }
+    }
+    if (this.profile?.preferences?.["twoFa"]) {
+      this.twoFactorEnabled = this.profile?.preferences?.["twoFa"] === 'true';
+    }
+    this.userId = this.profile?.preferences?.["userId"]
+  }
+  applyTheme() {
+    const body = document.body;
+    body.classList.remove('light-theme', 'dark-theme');
+    body.classList.add(this.isDarkMode ? 'dark-theme' : 'light-theme');
+  }
+  toggleSection(section: string) {
+    if (section === 'profile') this.isProfileOpen = !this.isProfileOpen;
+    if (section === 'twoFA') this.is2FAOpen = !this.is2FAOpen;
+    if (section === 'theme') this.isThemeOpen = !this.isThemeOpen;
+  }
+
+  toggleEdit(event: Event) {
+    event.stopPropagation();
+    if (this.isEditing) {
+      this.updateCompanyProfile()
+    }
+    this.isEditing = !this.isEditing;
+  }
+
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    const theme = this.isDarkMode ? 'dark-theme' : 'light-theme';
+
+    this.appStorage.setTheme(theme);
+
+    this.appService.userProfile.update(profile => {
+      if (!profile) return profile;
+      return {
+        ...profile,
+        preferences: {
+          ...profile.preferences,
+          theme: theme
         }
-      });
-  }
-  get filteredIocs() {
-    const search = this.iocSearchText?.toLowerCase() || '';
-    const iocs = (this.onboardingData?.iocs || []).filter(ioc =>
-      ioc.name.toLowerCase().includes(search)
-    );
-    return iocs
-  }
-  onCategoryClick(categoryId: string): void {
-    this.selectedCategoryId = categoryId;
-  }
-
-  addIoc(value: string): void {
-    if (!value.trim() || !this.selectedCategoryId) return;
-
-    const category = this.onboardingData?.iocs.find(c => c.ioc_id === this.selectedCategoryId);
-    if (category && !category.values.includes(value.trim())) {
-      category.values.push(value.trim());
-    }
-  }
-  removeIoc(iocId: string, value: string): void {
-    const ioc = this.onboardingData?.iocs.find(i => i.ioc_id === iocId);
-    if (ioc) {
-      ioc.values = ioc.values.filter(v => v !== value);
-    }
-  }
-  scrollLeft() {
-    this.categoryScroll.nativeElement.scrollBy({ left: -250, behavior: 'smooth' });
-  }
-
-  scrollRight() {
-    this.categoryScroll.nativeElement.scrollBy({ left: 250, behavior: 'smooth' });
-  }
-  hasIocsWithValues(): boolean {
-    return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
-  }
-  update() {
-    const filteredOnboardingData: TenantModel = {
-      companyName: this.onboardingData?.companyName || '',
-      iocs: this.onboardingData?.iocs.filter(ioc => ioc.values && ioc.values.length > 0) || []
-    };
-    this.setIocLocal();
-    const token = this.authService.getToken()
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+      };
     });
 
-    this.apiService.post('update/tenant', filteredOnboardingData).subscribe({
+    this.applyTheme();
+  }
+  toggleTwoFa() {
+    this.twoFactorEnabled = !this.twoFactorEnabled;
+
+    this.appService.userProfile.update(profile => {
+      if (!profile) return profile;
+      return {
+        ...profile,
+        preferences: {
+          ...profile.preferences,
+          twoFa: String(this.twoFactorEnabled)
+        }
+      };
+    });
+  }
+
+  getLocationDisplay(): string {
+    const profile = this.profile;
+    if (!profile) return '';
+
+    const { city, country } = profile;
+    if (city && country) return `${city}, ${country}`;
+    if (city) return city;
+    if (country) return country;
+    return '';
+  }
+
+  updateCompanyProfile() {
+    this.apiService.post('update/company/profile', this.profile).subscribe({
       next: () => {
-        this.authService.setOnboarding(true);
-        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error(err);
-        alert(err?.error?.detail || 'Onboarding failed');
+        alert(err?.error?.detail || 'save company profile failed');
       },
     });
   }
-  goBack() {
-    this.router.navigate(['/dashboard']);
-  }
-  setIocLocal() {
-    this.categories = {};
-    this.onboardingData?.iocs.forEach(ioc => {
-      this.categories[ioc.ioc_id] = ioc.values;
-    });
-    
-    this.appService.set('entityfilterCategories', this.categories);
+  cancelEdit(event: Event) {
+    event.stopPropagation();
+    this.isEditing = false;
   }
 }

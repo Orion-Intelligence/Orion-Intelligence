@@ -4,7 +4,7 @@ import pyotp
 
 from datetime import datetime, UTC
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict, Any
 from odmantic import Model, Field
 from passlib.context import CryptContext
 from pydantic import field_validator, model_validator
@@ -46,6 +46,7 @@ class db_user_account(Model):
 
     account_verify_at: Optional[datetime] = Field(default=None)
     subscription: bool = Field(default=False)
+    preferences: Optional[Dict[str, Any]] = {}
 
     @staticmethod
     def hash_password(password: str) -> str:

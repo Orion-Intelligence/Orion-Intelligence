@@ -183,9 +183,9 @@
       [title]="'Dump'"></app-dashboard-sidebar-collapsed>
     <ng-container *ngIf="authService.getRole() === 'admin'">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT" [icon]="'assets/images/sidebar/tenant.svg'"
-        [items]="tenantCategories" [routePrefix]="'tenant'" [selectionStore]="selectionStore"
-        [title]="'Tenant'"></app-dashboard-sidebar-collapsed>
+        (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
+        [icon]="'assets/images/sidebar/tenant.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
+        [selectionStore]="selectionStore" [title]="'Tenant'"></app-dashboard-sidebar-collapsed>
     </ng-container>
 
     <div class="sidebar__item">

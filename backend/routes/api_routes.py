@@ -2,7 +2,7 @@ import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, Body
-from fastapi import Depends, Query
+from fastapi import Depends, Query, UploadFile
 
 from configs.app_dependency import role_required, status_required, get_current_user
 from configs.limiter_dependency import limiter_dependency
@@ -32,6 +32,8 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
+from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 
 api_routes = APIRouter()
 
@@ -286,3 +288,20 @@ async def update_user(user: tenant_param_model):
 @api_routes.post("/api/audit/logs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.DEMO])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN]))])
 async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=Depends(get_current_user)):
     return await AuditLogManager.get_instance().get(param, current_user)
+
+@api_routes.post("/api/get/company/profile",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+async def get_company_profile(current_user = Depends(get_current_user)):
+    return await ProfileManager.get_instance().getCompanyProfileData(current_user)
+
+@api_routes.post("/api/update/company/profile",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+async def update_company_profile(data:ProfileParmaModel ,current_user = Depends(get_current_user)):
+    return await ProfileManager.get_instance().updateCompanyProfile(data,current_user)
+
+@api_routes.post("/api/get/image",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+async def upload_profile_image(current_user = Depends(get_current_user)):
+    return await ProfileManager.get_instance().getProfileImage(current_user)
+
+@api_routes.post("/api/upload/image",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+async def upload_profile_image(file: UploadFile, current_user = Depends(get_current_user)):
+    return await ProfileManager.get_instance().uploadProfileImage(file,current_user)
+

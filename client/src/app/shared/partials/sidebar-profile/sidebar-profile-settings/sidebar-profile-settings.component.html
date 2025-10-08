@@ -1,85 +1,135 @@
-<div class="sidebar-profile-settings-container">
-    <div class="onboarding-step2">
+<div class="company-profile_section">
+    <div class="company-profile_section-header" (click)="toggleSection('profile')">
+        <span class="company-profile_section-title">Company Profile</span>
 
-        <div class="onboarding-step2__description-row">
-            <h2 class="profile-ioc-title">Manage IOCs</h2>
-
-            <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
-                placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
-        </div>
-
-        <div class="onboarding-step2__category-scroll-container">
-            <div class="filter-panel__fade-left" *ngIf="showLeftFade"></div>
-
-            <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollLeft()">
-                <div class="filter-panel__click-hitbox filter-panel__show">
-                    <img src="../../../../../assets/images/shared/onboarding_leftButton.svg" alt="filter icon" />
-                </div>
-            </div>
-
-            <div class="onboarding-step2__category-scroll" #categoryScroll>
-                <ng-container *ngIf="filteredIocs.length > 0; else noEntity">
-                    <div *ngFor="let category of filteredIocs" class="onboarding-step2__tab"
-                        [class.selected]="category.ioc_id === selectedCategoryId"
-                        (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
-                        {{ category.name }}
+        <img src="../../../../../assets/images/shared/search_side_dropdown_icon_dark.svg"
+            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isProfileOpen" />
+    </div>
+    <span class="company-profile_section-description">Manage and edit your company details, including phone, address,
+        and profile information.</span>
+    <div *ngIf="isProfileOpen">
+        <div class="company-profile_card">
+            <div class="company-profile_info">
+                <div class="company-profile_avatar"><app-profile-image-picker
+                        [userId]="userId"></app-profile-image-picker></div>
+                <div>
+                    <div class="company-profile_company-name">
+                        <input type="text" [(ngModel)]="profile.companyName" class="company-profile_input" disabled
+                            placeholder="Enter company name" />
                     </div>
-                </ng-container>
-                <ng-template #noEntity>
-                    <div class="filter-panel__no-filters-text">No entity filters available.</div>
-                </ng-template>
-
-            </div>
-
-            <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollRight()">
-                <div class="filter-panel__click-hitbox filter-panel__show">
-                    <img src="../../../../../assets/images/shared/onboarding_rightButton.svg" alt="filter" />
+                    <div class="company-profile_company-location">
+                        {{ getLocationDisplay() || 'Location will appear here' }}
+                    </div>
                 </div>
             </div>
-
-            <div class="filter-panel__fade-right" *ngIf="showRightFade"></div>
+            <div class="company-profile_action-buttons">
+                <button class="company-profile_edit-btn" *ngIf="isEditing" (click)="cancelEdit($event)">
+                    <img src="../../../../../assets/images/shared/cross.svg" class="company-profile_edit-icon" />
+                    Cancel
+                </button>
+                <button class="company-profile_edit-btn" (click)="toggleEdit($event)">
+                    <img src="../../../../../assets/images/shared/company-profile-edit-icon.svg"
+                        class="company-profile_edit-icon" />
+                    <span>{{ isEditing ? 'Save' : 'Edit' }}</span>
+                </button>
+            </div>
         </div>
 
-        <div class="onboarding-step2__divider1"></div>
-
-        <label class="onboarding-step2__label">Enter IOCs</label>
-        <input type="text" class="onboarding-step2__input" placeholder="Type"
-            (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-
-        <div class="onboarding-step2__divider2"></div>
-
-        <p class="onboarding-step2__added-title">Added IOCs</p>
-        <div class="onboarding-step2__added profile-ioc-height">
-
-            <div *ngIf="hasIocsWithValues(); else _noEntity">
-                <div *ngFor="let ioc of onboardingData?.iocs">
-                    <ng-container *ngIf="ioc.values.length > 0">
-                        <p class="onboarding-step2__heading">{{ ioc.name }}</p>
-
-                        <div class="onboarding-step2__chips">
-                            <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
-                                <span>{{ value }}</span>
-                                <span class="onboarding-step2__chip-remove" (click)="removeIoc(ioc.ioc_id, value)">
-                                    ✕
-                                </span>
-                            </div>
-                        </div>
-                    </ng-container>
+        <div class="company-profile_box">
+            <div class="company-profile_box-header">Contacts</div>
+            <div class="company-profile_box-content">
+                <div class="company-profile_row">
+                    <div class="company-profile_info-item">
+                        <div class="company-profile_info-label">Email address</div>
+                        <input type="email" [(ngModel)]="profile.email" class="company-profile_info-value" disabled
+                            placeholder="Enter email" />
+                    </div>
+                    <div class="company-profile_info-item">
+                        <div class="company-profile_info-label">Phone</div>
+                        <input type="text" [(ngModel)]="profile.phone" class="company-profile_info-value"
+                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
+                            placeholder="Enter phone" />
+                    </div>
                 </div>
             </div>
-
-            <ng-template #_noEntity>
-                <div class="onboarding-step2__no-iocs">No IOCs added yet</div>
-            </ng-template>
         </div>
-        <div class="onboarding-box__actions mt-5">
-            <button class="onboarding-box__btn onboarding-box__btn--back" (click)="goBack()">
-                Back
-            </button>
 
-            <button class="sidebar-profile-settings-save-button" (click)="update()">
-                Update
-            </button>
+        <div class="company-profile_box">
+            <div class="company-profile_box-header">Address</div>
+            <div class="company-profile_box-content">
+                <div class="company-profile_row">
+                    <div class="company-profile_info-item">
+                        <div class="company-profile_info-label">Country</div>
+                        <input type="text" [(ngModel)]="profile.country" class="company-profile_info-value"
+                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
+                            placeholder="Enter country" />
+                    </div>
+
+                    <div class="company-profile_info-item">
+                        <div class="company-profile_info-label">City/State</div>
+                        <input type="text" [(ngModel)]="profile.city" class="company-profile_info-value"
+                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
+                            placeholder="Enter city/state" />
+                    </div>
+                </div>
+                <div class="company-profile_row">
+                    <div class="company-profile_info-item">
+                        <div class="company-profile_info-label">Postal Code</div>
+                        <input type="text" [(ngModel)]="profile.postalCode" class="company-profile_info-value"
+                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
+                            placeholder="Enter postal code" />
+                    </div>
+
+                    <div class="company-profile_info-item">
+                        <div class="company-profile_info-label">TAX ID</div>
+                        <input type="text" [(ngModel)]="profile.taxId" class="company-profile_info-value"
+                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
+                            placeholder="Enter tax ID" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="company-profile_section">
+    <div class="company-profile_section-header" (click)="toggleSection('twoFA')">
+        <span class="company-profile_section-title">2 Factor Authentication</span>
+        <img src="../../../../../assets/images/shared/search_side_dropdown_icon_dark.svg"
+            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="is2FAOpen" />
+    </div>
+    <span class="company-profile_section-description">Enhance your account security by enabling or managing two-factor
+        authentication settings.</span>
+    <div *ngIf="is2FAOpen">
+        <div class="company-profile_toggle-row">
+            <div class="company-profile_toggle-label">
+                {{ twoFactorEnabled ? 'Enabled' : 'Disabled' }}
+            </div>
+            <label class="company-profile_switch" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()">
+                <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()" />
+                <span class="company-profile_slider"></span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="company-profile_section">
+    <div class="company-profile_section-header" (click)="toggleSection('theme')">
+        <span class="company-profile_section-title">Theme</span>
+        <img src="../../../../../assets/images/shared/search_side_dropdown_icon_dark.svg"
+            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isThemeOpen" />
+    </div>
+    <span class="company-profile_section-description">Customize the look and feel of your dashboard by choosing between
+        available themes.</span>
+    <div *ngIf="isThemeOpen">
+        <div class="company-profile_toggle-row">
+            <div class="company-profile_toggle-label">Dark Mode</div>
+            <label class="company-profile_switch" [(ngModel)]="isDarkMode" (change)="toggleTheme()">
+                <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()" />
+                <span class="company-profile_slider"></span>
+            </label>
         </div>
     </div>
 </div>

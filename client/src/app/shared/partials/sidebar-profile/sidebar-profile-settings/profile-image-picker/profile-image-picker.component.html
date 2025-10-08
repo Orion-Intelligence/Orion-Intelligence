@@ -1,0 +1,11 @@
+<div class="profile-image-container" (click)="fileInput.click()">
+    <img *ngIf="previewUrl || currentImageUrl" [src]="previewUrl || currentImageUrl" alt="Profile Image"
+        class="profile-image" />
+
+    <div class="profile-image-overlay">
+        <img src="../../../../../assets/images/shared/image_pick_icon.svg" alt="Upload Icon"
+            class="profile-image-camera-icon" />
+    </div>
+
+    <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" hidden />
+</div>

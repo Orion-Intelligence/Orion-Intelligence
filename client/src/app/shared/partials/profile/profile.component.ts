@@ -1,5 +1,5 @@
-import {Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal} from '@angular/core';
-import {AsyncPipe, NgIf, NgOptimizedImage} from "@angular/common";
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, inject } from '@angular/core';
+import { AsyncPipe, NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Observable } from 'rxjs';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -16,7 +16,8 @@ import { AppStorageService } from '../../../services/core/app/app-storage.servic
     AsyncPipe,
     NgOptimizedImage,
     NgIf,
-    TooltipDirective
+    TooltipDirective,
+    NgClass
   ],
   templateUrl: './profile.component.html'
 })
@@ -24,6 +25,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   username$: Observable<string | null>;
   role$: Observable<string | null>;
 
+  currentImageUrl: any;
+  profileMail: string = '';
   dropdownOpen = signal(false);
   isDarkTheme = true;
 
@@ -41,6 +44,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
+    this.currentImageUrl = this.appService.profileImageUrl();
+    this.profileMail = this.appService.userProfile().email;
   }
 
   ngOnInit(): void {
@@ -87,6 +92,16 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleDropdown(event: Event) {
     event.stopPropagation();
     this.dropdownOpen.update(v => !v);
+  }
+
+  auditlog() {
+    this.router.navigate(['/dashboard/profile/auditlog']);
+  }
+  manageIocs() {
+    this.router.navigate(['/dashboard/profile/ioc']);
+  }
+  openAccountSettings() {
+    this.router.navigate(['/dashboard/profile/settings']);
   }
 
   logout() {
