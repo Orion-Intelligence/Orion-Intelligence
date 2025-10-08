@@ -1,4 +1,4 @@
-<app-result (onToggleSort)="onToggleSort($event)" [discussion]="false" (onToggleSwitch)="onToggleSubMenu($event)" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" [filterModel]="general_filters" [isLoading]="isResponseLoading()" [result_count]="Math.ceil(isConsolidatedResult() ? rankedResult.length : (onToggleDiscussion ? discussionCallbackModel.Result.length : currentCallbackModel.Result.length))" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [type]="type"></app-result>
+<app-result (onToggleSort)="onToggleSort($event)" [discussion]="false" (onToggleSwitch)="onToggleSubMenu($event)" (reloadData)="fetchSearchResults()" (reloadFilters)="reloadFilters($event)" (updateQuery)="onUpdateQuery($event)" [analyticsToggle]="false" [filterModel]="general_filters" [isLoading]="isResponseLoading()" [result_count]="Math.ceil(isConsolidatedResult() ? rankedResult.result.length : (onToggleDiscussion ? discussionCallbackModel.Result.length : currentCallbackModel.Result.length))" [searchQuery]="query" [suggestion]="currentCallbackModel.Suggestions[0]" [type]="type"></app-result>
 
 <div *ngIf="!isConsolidatedResult() && !isResponseLoading() && !onToggleAnalytics && !onToggleDiscussion" @fadeInDashboardItem>
   <app-dashboard-results-general-grid @fadeInDashboardItem [query]="currentQuery" [searchResults]="currentSearchResults" [type]="type"></app-dashboard-results-general-grid>
@@ -9,7 +9,7 @@
 </div>
 
 <div *ngIf="!isResponseLoading() && isConsolidatedResult() " @fadeInDashboardItem>
-  <div *ngFor="let item of rankedResult">
+  <div *ngFor="let item of rankedResult.result">
     <div class="dashboard__ranked-layout">
       <app-dashboard-results-general-grid *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query" [searchResults]="[item]" [isExpandAble]="false" [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
       <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-exploit>
@@ -18,6 +18,7 @@
     </div>
   </div>
 </div>
+
 
 <div *ngIf="!isResponseLoading() && (currentResultCount > 0)" @fadeInDashboardItem class="pagination-margin">
   <app-pagination (pageChange)="onPageChange($event)" [currentPage]="currentParamModel.page" [maxPages]="Math.floor(currentResultCount)"></app-pagination>

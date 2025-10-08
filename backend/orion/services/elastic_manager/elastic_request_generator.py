@@ -155,7 +155,7 @@ class elastic_request_generator:
             "explain": True
         }
 
-        if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+        if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1" and p_query_model.matchtype == "semantic":
             try:
                 semantic_boost = 100 if p_query_model.matchtype == "semantic" else 50
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)

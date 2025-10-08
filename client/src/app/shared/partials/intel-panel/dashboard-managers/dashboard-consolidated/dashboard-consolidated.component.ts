@@ -1,24 +1,25 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
-import { AppService } from '../../../../../services/core/app/app.service';
-import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
-import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
-import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
-import { ResultComponent } from '../../../result/result.component';
-import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
-import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
-import { DashboardResultExploitComponent } from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import { DashboardResultChatComponent } from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import { SortGroupedResultsPipe } from '../../../../pipes/sort-grouped-results.pipe';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../../constants/pages';
-import { SelectionStoreService } from '../../../../../services/dashboard/selection.service';
-import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
-import { DashboardResultSocialComponent } from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
-import { ResultInsightsComponent } from "../result-insights/result-insights.component";
-import { consolidated_filters } from '../../../../constants/filters';
-import { ALLOWED_CONSOLIDATED_RANKED_SINGLETON } from '../../../../constants/shared-enums';
-import { ThreatResultsComponent } from "./defacement-results/threat-results.component";
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
+import {AppService} from '../../../../../services/core/app/app.service';
+import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
+import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
+import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import {ResultComponent} from '../../../result/result.component';
+import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import {ConsolidatedCallbackModel} from '../../../../model/results/consolidated/consolidated.callback.model';
+import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import {SortGroupedResultsPipe} from '../../../../pipes/sort-grouped-results.pipe';
+import {ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory} from '../../../../constants/pages';
+import {SelectionStoreService} from '../../../../../services/dashboard/selection.service';
+import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
+import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import {ResultInsightsComponent} from "../result-insights/result-insights.component";
+import {consolidated_filters} from '../../../../constants/filters';
+import {ALLOWED_CONSOLIDATED_RANKED_SINGLETON} from '../../../../constants/shared-enums';
+import {ThreatResultsComponent} from "./defacement-results/threat-results.component";
+import {RankedCallbackModel} from '../../../../model/results/consolidated/ranked.callback.model';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -52,7 +53,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
-  rankedResult: any[] = [];
+  rankedResult:RankedCallbackModel = new RankedCallbackModel();
 
   constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService) {
     this.pageCounts = {};
@@ -105,7 +106,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!this.dashboardService.consolidatedParamModel.q) {
       this.isLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
-      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
+      this.router.navigate([], {queryParams: {}, queryParamsHandling: ''}).then();
     }
 
     this.isLoading.set(true);
@@ -157,16 +158,19 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   fetchRanked() {
     if (this.checkProfile() && !this.hasIOCs()) {
-      return
+      return;
     }
     this.isLoading.set(true);
-    this.rankedResult = []
-    this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
-      if (response.success && response.data) {
-        this.rankedResult = response.data;
-      }
-      this.isLoading.set(false);
-    });
+    this.rankedResult = new RankedCallbackModel();
+    this.dashboardService
+      .fetchConsolidatedRankededResults('search/consolidated/ranked', this.dashboardService.consolidatedParamModel)
+      .pipe(switchMap(response => timer(500).pipe(map(() => response))))
+      .subscribe(response => {
+        if (response.success && response.data) {
+          this.rankedResult = response.data;
+        }
+        this.isLoading.set(false);
+      });
   }
 
   populateGroupedResults(): void {
@@ -186,8 +190,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     ];
 
     models.forEach(model => {
-      const result = this.consolidatedCallbackModel[model]?.Result ?? [];
-      this.groupedResults[model] = result;
+      this.groupedResults[model] = this.consolidatedCallbackModel[model]?.Result ?? [];
       this.pageCounts[model] = this.consolidatedCallbackModel[model]?.Page_Count ?? 0;
     });
 
@@ -204,7 +207,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   getTotalResultCount(): number {
     const groupedCount = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
-    const rankedCount = this.rankedResult?.length || 0;
+    const rankedCount = this.rankedResult.pageCount;
     if (this.isGrouped) {
       return groupedCount
     } else {
@@ -254,7 +257,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
     this.router.navigate([routePrefix], {
-      queryParams: { page: 1 }, queryParamsHandling: 'merge'
+      queryParams: {page: 1}, queryParamsHandling: 'merge'
     }).then();
   }
 

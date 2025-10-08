@@ -1,11 +1,11 @@
-<app-result (onToggleSort)="onToggleSort($event)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" [filterModel]="filter" (reloadData)="fetchSearchResults()" (updateQuery)="onUpdateQuery($event)" [isLoading]="isLoading()" [result_count]="Math.ceil(this.dashboardService.socialCallbackModel.Result.length+this.dashboardService.rankedResult.length)" [searchQuery]="query" [showTabs]="false" [suggestion]="this.dashboardService.socialCallbackModel.Suggestions[0]"></app-result>
+<app-result (onToggleSort)="onToggleSort($event)" (reloadFilters)="reloadFilters($event)" (resetFilter)="resetFilters($event)" [filterModel]="filter" (reloadData)="fetchSearchResults()" (updateQuery)="onUpdateQuery($event)" [isLoading]="isLoading()" [result_count]="Math.ceil(this.dashboardService.socialCallbackModel.Result.length+this.dashboardService.rankedResult.result.length)" [searchQuery]="query" [showTabs]="false" [suggestion]="this.dashboardService.socialCallbackModel.Suggestions[0]"></app-result>
 
 <div *ngIf="!isLoading() && getRoute()!='all'" @fadeInDashboardItem>
   <app-dashboard-result-social [searchResults]="this.dashboardService.socialCallbackModel.Result"></app-dashboard-result-social>
 </div>
 
 <div *ngIf="!isLoading() && getRoute()=='all' " @fadeInDashboardItem>
-  <div *ngFor="let item of this.dashboardService.rankedResult">
+  <div *ngFor="let item of this.dashboardService.rankedResult.result">
     <div class="dashboard__ranked-layout">
       <app-dashboard-results-general-grid *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query" [searchResults]="[item]" [isExpandAble]="false" [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
       <app-dashboard-result-exploit *ngIf="item.rank_index === 'exploit_model'" [isExpandAble]="false" [searchResults]="[item]"></app-dashboard-result-exploit>

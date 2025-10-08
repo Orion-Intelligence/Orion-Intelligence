@@ -14,6 +14,7 @@ import {DefacementCallbackModel} from '../../shared/model/results/defacement/def
 import {HelperService} from '../../shared/services/helper.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AppService} from '../core/app/app.service';
+import {RankedCallbackModel} from '../../shared/model/results/consolidated/ranked.callback.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ import {AppService} from '../core/app/app.service';
 export class DashboardService {
   m_current_route = "";
 
-  rankedResult: any[] = [];
+  rankedResult: RankedCallbackModel = new RankedCallbackModel();
 
   consolidatedParamModel: ConsolidatedParamModel = new ConsolidatedParamModel();
   generalCallbackModel: GeneralCallbackModel = new GeneralCallbackModel();
@@ -98,7 +99,7 @@ export class DashboardService {
   fetchConsolidatedRankededResults(
     apiEndpoint: string,
     paramModel: any
-  ): Observable<{ success: boolean; isEmpty: boolean; data: any[] | null }> {
+  ): Observable<{ success: boolean; isEmpty: boolean; data: RankedCallbackModel | null }> {
     this.cancelOngoingRequest();
     const route: string = this.router.url.split('?')[0];
     this.m_current_route = String(route);
@@ -108,16 +109,14 @@ export class DashboardService {
     let baseParams: any = {...paramModel, ...this.selectedFilters()};
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     if (entityCategories) {
-      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
+      baseParams['entity_filter'] = Object.fromEntries(
+        Object.entries(entityCategories).filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : true))
+      );
     }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
 
-    let match_type = this.app_service.configData().localSettings.matchType
-    if (match_type) {
-      baseParams['matchtype'] = match_type;
-    } else {
-      baseParams['matchtype'] = this.app_service.configData().localSettings.matchType;
-    }
+    let match_type = this.app_service.configData().localSettings.matchType;
+    baseParams['matchtype'] = match_type ? match_type : this.app_service.configData().localSettings.matchType;
 
     const queryParamsForNav = {...baseParams};
     delete queryParamsForNav['entity_filter'];
@@ -127,14 +126,14 @@ export class DashboardService {
       replaceUrl: true
     }).then();
 
-    return this.apiService.post<any[]>(apiEndpoint, baseParams).pipe(
+    return this.apiService.post<any>(apiEndpoint, baseParams).pipe(
       takeUntil(this.cancelRequest$),
-      map((response: any[]) => {
-        const hasAnyResults = Array.isArray(response) && response.length > 0;
+      map((response: any) => {
+        const hasAnyResults = Array.isArray(response?.Result) && response.Result.length > 0;
         return {
           success: true,
           isEmpty: !hasAnyResults,
-          data: hasAnyResults ? response : null
+          data: hasAnyResults ? new RankedCallbackModel({result: response.Result, pageCount: response.Page_Count}) : null
         };
       }),
       catchError(() => of({success: false, isEmpty: false, data: null}))
@@ -253,7 +252,7 @@ export class DashboardService {
   }
 
   clearCallback(): void {
-    this.rankedResult = [];
+    this.rankedResult = new RankedCallbackModel();
     this.generalCallbackModel = new GeneralCallbackModel();
     this.chatCallbackModel = new ChatCallbackModel();
     this.defacementCallbackModel = new DefacementCallbackModel();

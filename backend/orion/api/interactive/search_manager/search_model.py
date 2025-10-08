@@ -168,7 +168,9 @@ class search_model:
         else:
             filter_dict = {}
 
-        indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(param, filter_dict, base_index, blocked_categories, allowed_categories)
+        indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
+            param, filter_dict, base_index, blocked_categories, allowed_categories
+        )
 
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
 
@@ -183,7 +185,17 @@ class search_model:
                 source["_rank"] = rank + 1
                 ranked_results.append(source)
 
-        return ranked_results
+        total = 0
+        if response and "hits" in response:
+            total_field = response["hits"].get("total", 0)
+            total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
+        size = int(query.get("size", 10))
+        total_pages = (total + size - 1) // size if size > 0 else 0
+
+        return {
+            "Result": ranked_results,
+            "Page_Count": total_pages
+        }
 
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):

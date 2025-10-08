@@ -21,6 +21,7 @@ import {SortType} from '../../../../constants/shared-enums';
 import {ConsolidatedParamModel} from '../../../../model/results/consolidated/consolidated.param.model';
 import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
+import {RankedCallbackModel} from '../../../../model/results/consolidated/ranked.callback.model';
 
 @Component({
   selector: 'app-dashboard-general',
@@ -41,7 +42,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   query = ""
   analyticsData = {} as Analytics;
-  rankedResult: any[] = [];
+  rankedResult: RankedCallbackModel = new RankedCallbackModel();
   type = Category.STRATEGIC
   discussionLoaded = false
 
@@ -62,9 +63,13 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
 
   get currentResultCount(): number {
     if (this.getRoute() == 'all') {
-      return this.discussionCallbackModel.Result.length/15
+      return this.discussionCallbackModel.Result.length / 15
     } else {
-      return this.dashboardService.generalCallbackModel.Page_Count ?? 0;
+      if (this.type == "Strategic") {
+        return this.dashboardService.generalCallbackModel.Page_Count ?? 0;
+      } else {
+        return this.dashboardService.leakCallbackModel.Page_Count ?? 0;
+      }
     }
   }
 
@@ -139,7 +144,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
     this.isResponseLoading.set(true);
 
     this.dashboardService.generalCallbackModel = new GeneralCallbackModel()
-    this.rankedResult = []
+    this.rankedResult = new RankedCallbackModel()
     if (this.isConsolidatedResult()) {
       const lastSegment = this.route.snapshot.url.at(-1)?.path;
       if (lastSegment) {
@@ -150,12 +155,15 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         api = "search/strategic"
       }
 
-      this.dashboardService.fetchConsolidatedRankededResults(api, this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
-        if (response.success && response.data) {
-          this.rankedResult = response.data;
-        }
-        this.isResponseLoading.set(false);
-      });
+      this.dashboardService
+        .fetchConsolidatedRankededResults(api, this.dashboardService.consolidatedParamModel)
+        .pipe(switchMap(response => timer(500).pipe(map(() => response))))
+        .subscribe(response => {
+          if (response.success && response.data) {
+            this.rankedResult = new RankedCallbackModel(response.data);
+          }
+          this.isResponseLoading.set(false);
+        });
     } else {
       const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
       this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.dashboardService.consolidatedParamModel)

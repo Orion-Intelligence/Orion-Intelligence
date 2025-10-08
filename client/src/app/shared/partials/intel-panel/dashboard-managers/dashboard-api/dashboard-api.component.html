@@ -3,18 +3,18 @@
     <div [ngClass]="(apiType === 'social' || apiType === 'cracked') ? 'col-xl-8 col-12 input-container' : 'col-xl-5 col-12 input-container'">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
-          <img alt="Search" height="20" ngSrc="../../../../../../assets/images/shared/user1.svg" priority width="20">
+          <img alt="Search" height="20" ngSrc="assets/images/shared/user1.svg" priority width="20">
         </div>
-        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input" [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : 'q1'))" [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : 'Query 1'))" [type]="apiType === 'cracked' ? 'url' : 'text'" required> <input type="hidden" value="1"> <span class="input-group-text"></span>
+        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input" [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : 'q1'))" [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : 'Query 1'))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="(apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))"> <input type="hidden" value="1"> <span class="input-group-text"></span>
       </div>
     </div>
 
     <div class="col-xl-5 col-12 mt-lg-0 mt-2 input-container" *ngIf="apiType !== 'social' && apiType !== 'cracked'">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
-          <img alt="Search" height="20" ngSrc="../../../../../../assets/images/shared/email.svg" priority width="20">
+          <img alt="Search" height="20" ngSrc="assets/images/shared/email.svg" priority width="20">
         </div>
-        <input [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="form-control default-input" email maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email"> <input type="hidden" value="1"> <span class="input-group-text"></span>
+        <input [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="form-control default-input" email maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email" [required]="apiType === 'email' ? true : !(q1 && q1.trim())"> <input type="hidden" value="1"> <span class="input-group-text"></span>
       </div>
     </div>
 

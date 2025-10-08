@@ -54,7 +54,7 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
 
   get currentResultCount(): number {
     if (this.getRoute() == 'all') {
-      return this.dashboardService.rankedResult.length/15
+      return this.dashboardService.rankedResult.pageCount
     } else {
       return this.dashboardService.socialCallbackModel.Page_Count ?? 0;
     }
@@ -133,12 +133,15 @@ export class DashboardSocialsComponent implements OnInit, AfterViewInit {
     const lastSegment = this.route.snapshot.url.at(-1)?.path;
     this.dashboardService.clearCallback()
     if (lastSegment == "all") {
-      this.dashboardService.fetchConsolidatedRankededResults('social/all', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
-        if (response.success && response.data) {
-          this.dashboardService.rankedResult = response.data;
-        }
-        this.isLoading.set(false);
-      });
+      this.dashboardService
+        .fetchConsolidatedRankededResults('social/all', this.dashboardService.consolidatedParamModel)
+        .pipe(switchMap(response => timer(500).pipe(map(() => response))))
+        .subscribe(response => {
+          if (response.success && response.data) {
+            this.dashboardService.rankedResult = response.data;
+          }
+          this.isLoading.set(false);
+        });
     } else {
       this.dashboardService
         .fetchSearchResults<SocialCallbackModel>('social', this.dashboardService.consolidatedParamModel)

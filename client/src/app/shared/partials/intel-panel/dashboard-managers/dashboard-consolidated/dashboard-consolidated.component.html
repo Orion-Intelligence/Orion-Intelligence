@@ -64,7 +64,7 @@
     </div>
   </div>
   <ng-template #rankedMode>
-    <div *ngFor="let item of rankedResult">
+    <div *ngFor="let item of rankedResult.result">
       <div class="dashboard__ranked-layout">
         <app-dashboard-results-general-grid
           *ngIf="item.rank_index === 'leak_model' || item.rank_index === 'generic_model'" [query]="query"
