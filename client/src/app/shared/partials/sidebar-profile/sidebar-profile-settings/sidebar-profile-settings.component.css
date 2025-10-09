@@ -206,7 +206,7 @@
     position: absolute;
     cursor: pointer;
     inset: 0;
-    background-color: #555;
+    background-color: #58a9ff;
     border-radius: 20px;
     transition: 0.3s;
 }
@@ -224,7 +224,7 @@
 }
 
 .company-profile_switch input:checked+.company-profile_slider {
-    background-color: #57A5EB;
+    background-color: #1b60a5;
 }
 
 .company-profile_switch input:checked+.company-profile_slider::before {

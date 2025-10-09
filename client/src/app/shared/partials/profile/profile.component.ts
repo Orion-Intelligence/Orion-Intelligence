@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, } from '@angular/core';
 import { AsyncPipe, NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Observable } from 'rxjs';
@@ -44,8 +44,11 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
-    this.currentImageUrl = this.appService.profileImageUrl();
-    this.profileMail = this.appService.userProfile().email;
+    effect(() => {
+      if (this.dropdownOpen()) {
+        this.onDropdownOpen();
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -70,7 +73,10 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollContainer.removeEventListener('scroll', this.scrollHandler);
     }
   }
-
+  onDropdownOpen() {
+    this.currentImageUrl = this.appService.profileImageUrl();
+    this.profileMail = this.appService.userProfile().email;
+  }
   toggleThemeByClick() {
     this.isDarkTheme = !this.isDarkTheme;
     const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';

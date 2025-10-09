@@ -13,10 +13,6 @@ from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogMan
 
 class ProfileManager:
     __instance = None
-    
-    BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-    IMAGE_DIR = BASE_DIR / "static" / "resource" / "company-profile-images"
-    IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def get_instance():
@@ -28,6 +24,9 @@ class ProfileManager:
         if ProfileManager.__instance is not None:
             raise Exception("This class is a singleton!")
         self._engine = mongo_controller.get_instance().get_engine()
+        self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
+        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "company-profile-images"
+        self.IMAGE_DIR.mkdir(parents=True, exist_ok=True)
         ProfileManager.__instance = self
 
     @staticmethod
@@ -102,52 +101,28 @@ class ProfileManager:
         dek = await self._dek(str(current_user.id))
         enc = Fernet(dek)
 
-        contents = await file.read()
         encrypted_data = enc.encrypt(contents)
-        print("encrypted_data image length:", len(encrypted_data))
         
         file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
         with open(file_path, "wb") as f:
             f.write(encrypted_data)
 
-        return {"image_url": file_path}
+        return {"Profile image": "upload complete"}
     
 
     async def getProfileImage(self, current_user):
-        print("=======================================")
         dek = await self._dek(str(current_user.id))
         enc = Fernet(dek)
 
         file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
-        print("Looking for:", file_path)
-
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="image not found")
 
-        try:
-            with open(file_path, "rb") as f:
-                encrypted_data = f.read()
+       
+        with open(file_path, "rb") as f:
+            encrypted_data = f.read()
 
-            decrypted = enc.decrypt(encrypted_data)
-        except Exception as e:
-            print("Error reading/decrypting:", e)
-            raise HTTPException(status_code=500, detail="Failed to read or decrypt image")
+        decrypted = enc.decrypt(encrypted_data)
 
-        print("Decrypted image length:", len(decrypted))
         return Response(content=decrypted, media_type="image/jpeg")
-
-
-    # async def getProfileImage(self,current_user):
-    #     dek = await self._dek(str(current_user.id))
-    #     enc = Fernet(dek)
-
-    #     file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
-    #     if not file_path.exists():
-    #         raise HTTPException(status_code=404, detail="image not found")
-
-    #     with open(file_path, "rb") as f:
-    #         encrypted_data = f.read()
-
-    #     decrypted = enc.decrypt(encrypted_data)
-
-    #     return Response(content=decrypted, media_type="image/jpeg")
+    

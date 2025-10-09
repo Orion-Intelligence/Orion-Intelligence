@@ -35,8 +35,11 @@ export class ProfileResolver implements Resolve<CompanyProfile> {
                         this.appService.userProfile.set(profile);
                     }
                     if (image) {
-                        const objectUrl = URL.createObjectURL(image as Blob);
-                        this.appService.profileImageUrl.set(objectUrl);
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            this.appService.profileImageUrl.set(reader.result as string);
+                        };
+                        reader.readAsDataURL(image as Blob);
                     }
                 }),
                 map(({ profile }) => profile),

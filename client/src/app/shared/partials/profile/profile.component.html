@@ -10,7 +10,7 @@
     <div class="profile-dropdown-arrow"></div>
     <ng-container *ngIf="isAdmin(); else profile">
       <li><a class="dropdown-item disabled"> <img alt="Settings" height="15" class="ml-0"
-            ngSrc="assets/images/shared/profile.svg" priority width="15" />{{ username$ | async }}</a></li>
+            ngSrc="assets/images/shared/profile.svg" priority width="15" />&nbsp;{{ username$ | async }}</a></li>
       <li class="dropdown-item d-flex align-items-center disabled">
         <span class="bg-success rounded-circle d-inline-block me-2 profile_user-active"></span> &nbsp;&nbsp;active
       </li>

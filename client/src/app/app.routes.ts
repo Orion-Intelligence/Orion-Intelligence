@@ -29,7 +29,6 @@ import { ForgotPasswordComponent } from './shared/partials/forgot-password/forgo
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
 import { SidebarProfileHomepageComponent } from './shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
 import { SidebarProfileIocComponent } from './shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component';
-import { SidebarProfileDashboardComponent } from './shared/partials/sidebar-profile/sidebar-profile-dashboard/sidebar-profile-dashboard.component';
 import { RoleGuard } from './shared/guards/role-guard.guard';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
@@ -154,7 +153,10 @@ export const routes: Routes = [
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [AuthGuard],
-    resolve: { session: DashboardResolver },
+    resolve: {
+      session: DashboardResolver,
+      profile: ProfileResolver
+    },
     data: { animation: 'DashboardPage' },
     children: [
       {
@@ -544,8 +546,6 @@ export const routes: Routes = [
           },
           {
             path: 'dashboard',
-            component: SidebarProfileDashboardComponent,
-            data: { type: 'dashboard', animation: 'HomePage' },
             children: [
               {
                 path: '',
@@ -579,7 +579,6 @@ export const routes: Routes = [
           {
             path: 'settings',
             component: SidebarProfileSettingsComponent,
-            resolve: { profile: ProfileResolver },
             data: { type: 'settings', animation: 'CategoryPage' }
           }
         ]
