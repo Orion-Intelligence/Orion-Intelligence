@@ -4,7 +4,7 @@
     border-radius: 16px;
     padding: 24px;
     margin: 24px;
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
 }
 
 .company-profile_section-header {
@@ -58,7 +58,7 @@
 }
 
 .company-profile_company-name {
-    color: #FFFFFF;
+    color: #FFF;
     font-weight: 600;
     font-size: 18px;
 }
@@ -108,7 +108,7 @@
 }
 
 .company-profile_box-header {
-    color: #FFFFFF;
+    color: #FFF;
     font-weight: 600;
     font-size: 18px;
     margin-bottom: 16px;
@@ -145,10 +145,9 @@
     border-radius: 12px;
     height: 36px;
     color: white;
-    font-family: Inter;
+    font-family: Inter, sans-serif;
     font-weight: 500;
     font-size: 14px;
-
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -162,8 +161,7 @@
 }
 
 .company-profile_editable {
-    background: rgba(252, 252, 252, 0.05);
-    border-color: #57a5eb;
+    background: rgb(252 252 252 / 5%);
     border: 1px solid #fcfcfc12;
     padding: 0 12px;
     margin-top: 10px;
@@ -189,7 +187,7 @@
 }
 
 .company-profile_toggle-label {
-    color: #FFFFFF;
+    color: #FFF;
     font-weight: 600;
     font-size: 18px;
 }
@@ -209,10 +207,7 @@
 .company-profile_slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-color: #555;
     border-radius: 20px;
     transition: 0.3s;

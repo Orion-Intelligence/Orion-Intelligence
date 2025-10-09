@@ -8,10 +8,5 @@ import { RouterOutlet } from '@angular/router';
   imports: [FormsModule, CommonModule, RouterOutlet],
   templateUrl: './sidebar-profile-dashboard.component.html'
 })
-export class SidebarProfileDashboardComponent implements OnInit {
-  searchQuery = '';
-  constructor() {
-  }
-  ngOnInit(): void {
-  }
+export class SidebarProfileDashboardComponent {
 }

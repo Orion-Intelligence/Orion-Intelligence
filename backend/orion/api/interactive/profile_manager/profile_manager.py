@@ -17,6 +17,7 @@ class ProfileManager:
     BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
     IMAGE_DIR = BASE_DIR / "static" / "resource" / "company-profile-images"
     IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
     @staticmethod
     def get_instance():
         if ProfileManager.__instance is None:

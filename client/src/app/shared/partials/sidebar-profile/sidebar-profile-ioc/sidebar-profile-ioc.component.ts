@@ -1,13 +1,12 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { TenantModel } from '../../../model/tenant/tenant.model';
-import { ApiService } from '../../../services/api.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
-import { HttpHeaders } from '@angular/common/http';
-import { NgIf, NgFor, CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { search_filter_labels } from '../../../constants/shared-enums';
-import { AppService } from '../../../../services/core/app/app.service';
-import { Router } from '@angular/router';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {TenantModel} from '../../../model/tenant/tenant.model';
+import {ApiService} from '../../../services/api.service';
+import {AuthService} from '../../../../services/authetication/auth.service';
+import {CommonModule, NgFor, NgIf} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {search_filter_labels} from '../../../constants/shared-enums';
+import {AppService} from '../../../../services/core/app/app.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-sidebar-profile-ioc',
@@ -19,14 +18,13 @@ export class SidebarProfileIocComponent implements OnInit {
   showLeftFade = false;
   showRightFade = false;
   selectedCategoryId = '';
-  addedIocs: { [key: string]: string[] } = {};
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
   @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
   constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
   ngOnInit(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
-    const token = this.authService.getToken()
+
     this.apiService.post<TenantModel>('get/tenant', {})
       .subscribe({
         next: (backendData) => {
@@ -51,10 +49,9 @@ export class SidebarProfileIocComponent implements OnInit {
   }
   get filteredIocs() {
     const search = this.iocSearchText?.toLowerCase() || '';
-    const iocs = (this.onboardingData?.iocs || []).filter(ioc =>
+    return (this.onboardingData?.iocs || []).filter(ioc =>
       ioc.name.toLowerCase().includes(search)
-    );
-    return iocs
+    )
   }
   onCategoryClick(categoryId: string): void {
     this.selectedCategoryId = categoryId;
@@ -90,15 +87,11 @@ export class SidebarProfileIocComponent implements OnInit {
       iocs: this.onboardingData?.iocs.filter(ioc => ioc.values && ioc.values.length > 0) || []
     };
     this.setIocLocal();
-    const token = this.authService.getToken()
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
 
     this.apiService.post('update/tenant', filteredOnboardingData).subscribe({
       next: () => {
         this.authService.setOnboarding(true);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard']).then();
       },
       error: (err) => {
         console.error(err);
@@ -107,7 +100,7 @@ export class SidebarProfileIocComponent implements OnInit {
     });
   }
   goBack() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/dashboard']).then();
   }
   setIocLocal() {
     this.categories = {};
