@@ -26,19 +26,15 @@ export class SidebarProfileIocComponent implements OnInit {
     const search_filter_keys = Object.keys(search_filter_labels);
     const backendData = this.appService.tenantData();
 
-    this.apiService.post<TenantModel>('get/tenant', {})
-      .subscribe({
-        next: (backendData) => {
-          this.onboardingData = {
-            companyName: backendData.companyName,
-            iocs: Array.from(search_filter_keys).map(key => {
-              const backendIoc = backendData.iocs.find(i => i.ioc_id === key);
-              return {
-                ioc_id: key,
-                name: search_filter_labels[key] || key,
-                values: backendIoc ? backendIoc.values : []
-              };
-            })
+    if (backendData) {
+      this.onboardingData = {
+        companyName: backendData.companyName,
+        iocs: Array.from(search_filter_keys).map(key => {
+          const backendIoc = backendData.iocs.find(i => i.ioc_id === key);
+          return {
+            ioc_id: key,
+            name: search_filter_labels[key] || key,
+            values: backendIoc ? backendIoc.values : []
           };
         })
       };
