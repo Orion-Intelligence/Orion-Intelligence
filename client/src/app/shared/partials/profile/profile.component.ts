@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, } from '@angular/core';
 import { AsyncPipe, NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { Observable } from 'rxjs';

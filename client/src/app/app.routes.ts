@@ -39,6 +39,7 @@ import { NotificationComponent } from './shared/partials/notification/notificati
 import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
 import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
 import { ProfileResolver } from './shared/resolvers/profile.resolver';
+import { IocResolver } from './shared/resolvers/ioc.resolver';
 
 const consolidatedChildren = [
   {
@@ -562,6 +563,7 @@ export const routes: Routes = [
           {
             path: 'ioc',
             component: SidebarProfileIocComponent,
+            resolve: { ioc: IocResolver },
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {

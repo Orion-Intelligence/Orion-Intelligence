@@ -37,7 +37,7 @@
     <ng-template #profile>
       <li class="profile-section">
         <div class="profile-avatar">
-          <img *ngIf="currentImageUrl" [src]="currentImageUrl" alt="Profile" />
+          <img [src]="currentImageUrl || '../../../../../assets/images/shared/default-profile.svg'" alt="Profile" />
         </div>
         <div class="profile-name-mail-container">
           <div class="profile-name">{{ username$ | async}}</div>

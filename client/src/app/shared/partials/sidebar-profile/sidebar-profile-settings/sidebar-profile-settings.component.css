@@ -78,16 +78,14 @@
 .company-profile_edit-btn {
     width: 84px;
     height: 36px;
-    border: 1px solid #FCFCFC12;
-    border-radius: 200px;
-    background-color: #FCFCFC0D;
-    color: #A0B8D1;
     font-size: 14px;
-    font-weight: 500;
-    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    border: 1px solid var(--color-divider);
+    background: linear-gradient(92.32deg, #4ea2f1 2.58%, #2c7ac5);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 6px;
 }
 
 .company-profile_edit-icon {

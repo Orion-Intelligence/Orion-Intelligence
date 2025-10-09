@@ -1,12 +1,12 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {TenantModel} from '../../../model/tenant/tenant.model';
-import {ApiService} from '../../../services/api.service';
-import {AuthService} from '../../../../services/authetication/auth.service';
-import {CommonModule, NgFor, NgIf} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {search_filter_labels} from '../../../constants/shared-enums';
-import {AppService} from '../../../../services/core/app/app.service';
-import {Router} from '@angular/router';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { TenantModel } from '../../../model/tenant/tenant.model';
+import { ApiService } from '../../../services/api.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { search_filter_labels } from '../../../constants/shared-enums';
+import { AppService } from '../../../../services/core/app/app.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar-profile-ioc',
@@ -14,7 +14,7 @@ import {Router} from '@angular/router';
   templateUrl: './sidebar-profile-ioc.component.html',
 })
 export class SidebarProfileIocComponent implements OnInit {
-  onboardingData?: TenantModel;
+  onboardingData!: TenantModel;
   showLeftFade = false;
   showRightFade = false;
   selectedCategoryId = '';
@@ -24,6 +24,7 @@ export class SidebarProfileIocComponent implements OnInit {
   constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
   ngOnInit(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
+    const backendData = this.appService.tenantData();
 
     this.apiService.post<TenantModel>('get/tenant', {})
       .subscribe({
@@ -39,13 +40,12 @@ export class SidebarProfileIocComponent implements OnInit {
               };
             })
           };
-          this.selectedCategoryId = this.onboardingData?.iocs[0]?.ioc_id;
-          this.setIocLocal();
-        },
-        error: (err) => {
-          console.error('Error fetching onboarding:', err);
-        }
-      });
+        })
+      };
+
+      this.selectedCategoryId = this.onboardingData?.iocs[0]?.ioc_id;
+      this.setIocLocal();
+    }
   }
   get filteredIocs() {
     const search = this.iocSearchText?.toLowerCase() || '';

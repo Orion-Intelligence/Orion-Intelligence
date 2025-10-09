@@ -3,7 +3,8 @@
         <span class="company-profile_section-title">Company Profile</span>
 
         <img src="../../../../../assets/images/shared/search_side_dropdown_icon_dark.svg"
-            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isProfileOpen"  alt="search side dropdown icon dark"/>
+            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isProfileOpen"
+            alt="search side dropdown icon dark" />
     </div>
     <span class="company-profile_section-description">Manage and edit your company details, including phone, address,
         and profile information.</span>
@@ -24,12 +25,9 @@
             </div>
             <div class="company-profile_action-buttons">
                 <button class="company-profile_edit-btn" *ngIf="isEditing" (click)="cancelEdit($event)">
-                    <img src="../../../../../assets/images/shared/cross.svg" class="company-profile_edit-icon" />
                     Cancel
                 </button>
                 <button class="company-profile_edit-btn" (click)="toggleEdit($event)">
-                    <img src="../../../../../assets/images/shared/company-profile-edit-icon.svg"
-                        class="company-profile_edit-icon" />
                     <span>{{ isEditing ? 'Save' : 'Edit' }}</span>
                 </button>
             </div>
@@ -98,7 +96,8 @@
     <div class="company-profile_section-header" (click)="toggleSection('twoFA')">
         <span class="company-profile_section-title">2 Factor Authentication</span>
         <img src="../../../../../assets/images/shared/search_side_dropdown_icon_dark.svg"
-            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="is2FAOpen" />
+            alt="search_side dropdown icon dark" class="company-profile_arrow-icon"
+            [class.company-profile_arrow-icon--rotated]="is2FAOpen" />
     </div>
     <span class="company-profile_section-description">Enhance your account security by enabling or managing two-factor
         authentication settings.</span>
@@ -107,7 +106,7 @@
             <div class="company-profile_toggle-label">
                 {{ twoFactorEnabled ? 'Enabled' : 'Disabled' }}
             </div>
-            <label class="company-profile_switch" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()">
+            <label class="company-profile_switch" (click)="toggleTwoFa()">
                 <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()" />
                 <span class="company-profile_slider"></span>
             </label>
@@ -119,14 +118,15 @@
     <div class="company-profile_section-header" (click)="toggleSection('theme')">
         <span class="company-profile_section-title">Theme</span>
         <img src="../../../../../assets/images/shared/search_side_dropdown_icon_dark.svg"
-            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isThemeOpen" />
+            alt="search side dropdown icon dark" class="company-profile_arrow-icon"
+            [class.company-profile_arrow-icon--rotated]="isThemeOpen" />
     </div>
     <span class="company-profile_section-description">Customize the look and feel of your dashboard by choosing between
         available themes.</span>
     <div *ngIf="isThemeOpen">
         <div class="company-profile_toggle-row">
             <div class="company-profile_toggle-label">Dark Mode</div>
-            <label class="company-profile_switch" [(ngModel)]="isDarkMode" (change)="toggleTheme()">
+            <label class="company-profile_switch" (click)="toggleTheme()">
                 <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()" />
                 <span class="company-profile_slider"></span>
             </label>

@@ -7,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { CompanyProfile } from '../../../shared/model/company-profile/company.profile.model';
+import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,10 @@ export class AppService {
     city: '',
     postalCode: '',
     taxId: ''
+  });
+  public tenantData = signal<TenantModel>({
+    companyName: '',
+    iocs: []
   });
   public profileImageUrl = signal<string | null>(null);
 

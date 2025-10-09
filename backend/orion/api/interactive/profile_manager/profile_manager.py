@@ -104,7 +104,7 @@ class ProfileManager:
 
         contents = await file.read()
         encrypted_data = enc.encrypt(contents)
-
+        print("encrypted_data image length:", len(encrypted_data))
         
         file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
         with open(file_path, "wb") as f:
@@ -112,17 +112,42 @@ class ProfileManager:
 
         return {"image_url": file_path}
     
-    async def getProfileImage(self,current_user):
+
+    async def getProfileImage(self, current_user):
+        print("=======================================")
         dek = await self._dek(str(current_user.id))
         enc = Fernet(dek)
 
         file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
+        print("Looking for:", file_path)
+
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="image not found")
 
-        with open(file_path, "rb") as f:
-            encrypted_data = f.read()
+        try:
+            with open(file_path, "rb") as f:
+                encrypted_data = f.read()
 
-        decrypted = enc.decrypt(encrypted_data)
+            decrypted = enc.decrypt(encrypted_data)
+        except Exception as e:
+            print("Error reading/decrypting:", e)
+            raise HTTPException(status_code=500, detail="Failed to read or decrypt image")
 
+        print("Decrypted image length:", len(decrypted))
         return Response(content=decrypted, media_type="image/jpeg")
+
+
+    # async def getProfileImage(self,current_user):
+    #     dek = await self._dek(str(current_user.id))
+    #     enc = Fernet(dek)
+
+    #     file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
+    #     if not file_path.exists():
+    #         raise HTTPException(status_code=404, detail="image not found")
+
+    #     with open(file_path, "rb") as f:
+    #         encrypted_data = f.read()
+
+    #     decrypted = enc.decrypt(encrypted_data)
+
+    #     return Response(content=decrypted, media_type="image/jpeg")

@@ -23,8 +23,8 @@
 }
 
 .profile-dropdown-width {
-  width: 275px;
-  padding: 16px;
+  width: 220px;
+  padding: 16px 16px 8px 16px;
 }
 
 .profile-dropdown.show {
@@ -123,6 +123,8 @@
   flex-direction: row;
   align-items: center;
   border-bottom: none;
+  min-width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-avatar {
@@ -132,6 +134,7 @@
   overflow: hidden;
   background-color: #e0e6ed;
   margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .profile-avatar img {
@@ -145,6 +148,8 @@
   flex-direction: column;
   border-bottom: none;
   padding: 12px;
+
+  overflow: hidden;
 }
 
 .profile-name {
