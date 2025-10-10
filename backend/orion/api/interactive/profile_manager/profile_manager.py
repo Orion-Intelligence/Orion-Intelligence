@@ -38,14 +38,22 @@ class ProfileManager:
         user=current_user
         dek = await self._dek(str(current_user.id))
         enc = Fernet(dek)
+        def safe_decrypt(value: str | None) -> str:
+            if not value:
+                return ""
+            try:
+                return enc.decrypt(value.encode()).decode()
+            except Exception:
+                return ""
+
         company = ProfileParmaModel(
-            companyName=enc.decrypt(profile.companyName.encode()).decode(), 
-            phone=enc.decrypt(profile.phone.encode()).decode(),
+            companyName=safe_decrypt(profile.companyName),
+            phone=safe_decrypt(profile.phone),
             email=user.email,
-            country=enc.decrypt(profile.country.encode()).decode(),
-            city=enc.decrypt(profile.city.encode()).decode(),
-            postalCode=enc.decrypt(profile.postal_code.encode()).decode(),
-            taxId=enc.decrypt(profile.tax_id.encode()).decode(),
+            country=safe_decrypt(profile.country),
+            city=safe_decrypt(profile.city),
+            postalCode=safe_decrypt(profile.postal_code),
+            taxId=safe_decrypt(profile.tax_id),
             preferences=deepcopy(user.preferences) or {}
         )
         for key, value in company.preferences.items():
@@ -106,7 +114,7 @@ class ProfileManager:
         file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
         with open(file_path, "wb") as f:
             f.write(encrypted_data)
-
+        await AuditLogManager.get_instance().register(str(current_user.id), "upload_image")
         return {"Profile image": "upload complete"}
     
 

@@ -121,7 +121,8 @@
             </div>
           </div>
         </ng-container>
-        <app-selected-filter-bar *ngIf="(entityFiltersCount() || sidebarFilterCount() || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='semantic')&&showSelectedFilters"
+        <app-selected-filter-bar
+          *ngIf="(entityFiltersCount() || sidebarFilterCount() || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='semantic')&&showSelectedFilters"
           (clearAll)="reloadFilter()"
           [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
       </div>
@@ -200,7 +201,8 @@
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
 
-<div *ngIf="result_count && !isLoading && result_count !== 0; else noResults" @fadeInDashboardItem>
+<div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkProfile() || hasIOCs()); else noResults"
+  @fadeInDashboardItem>
   <div class="right-text label-text">
     <span>{{ result_count }} Results Found</span>
   </div>
@@ -256,6 +258,6 @@
   </div>
 </ng-container>
 
-<div *ngIf="!isLoading && result_count>0 && !disableScroll">
+<div *ngIf="!isLoading && result_count>0 && !disableScroll && (!checkProfile() || hasIOCs())">
   <app-scroll-top></app-scroll-top>
 </div>

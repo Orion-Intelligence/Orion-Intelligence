@@ -83,7 +83,7 @@ export class SidebarProfileIocComponent implements OnInit {
       iocs: this.onboardingData?.iocs.filter(ioc => ioc.values && ioc.values.length > 0) || []
     };
     this.setIocLocal();
-
+    this.appService.tenantData.set({ ...filteredOnboardingData });
     this.apiService.post('update/tenant', filteredOnboardingData).subscribe({
       next: () => {
         this.authService.setOnboarding(true);

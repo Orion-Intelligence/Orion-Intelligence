@@ -13,7 +13,7 @@ import {
 
 } from '../../constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, take } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
 import { GeneralCallbackModel } from '../../model/results/general/general.callback.model';
@@ -80,9 +80,16 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   onSectionSelected(section: Category) {
     if (this.selectionStore.getSelectedSection() === section) {
-      this.selectionStore.setSelectedSection("");
-      this.selectionStore.setSelectedOption("");
-      this.router.navigateByUrl('/').then();
+      this.authService.getRole$().pipe(take(1)).subscribe((role) => {
+        if (role === 'profile') {
+          this.selectionStore.setSelectedSection('Profile');
+          this.selectionStore.setSelectedOption('Dashboard');
+        } else {
+          this.selectionStore.setSelectedSection('');
+          this.selectionStore.setSelectedOption('');
+        }
+        this.router.navigateByUrl('/').then();
+      });
     } else {
       this.dashboardService.resetParams()
       this.selectionStore.setSelectedSection(section);
