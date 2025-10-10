@@ -1247,7 +1247,8 @@ class elastic_request_generator:
         if category and category.lower() in ("log", "logs"):
             must_should: list[dict[str, Any]] = [{"term": {"type": "logs"}}]
         else:
-            must_should: list[dict[str, Any]] = [{"term": {"type": "credential"}}]
+            must_should: list[dict[str, Any]] = [{"term": {"type": "c"}}]
+
         date_range_filter: dict[str, Any] = {}
         if p_query_model.daterange:
             start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]

@@ -30,7 +30,7 @@ class ELASTIC_SEMANTIC:
 class ELASTIC_CONNECTIONS:
     S_DATABASE_NAME = 'orion-elastic-search'
     S_DATABASE_PORT = 9400
-    S_DATABASE_IP = 'http://elasticsearch'
+    S_DATABASE_IP = env_handler.get_instance().env('ELASTIC_ROOT_IP')
     S_ELASTIC_USERNAME = env_handler.get_instance().env('ELASTIC_ROOT_USERNAME')
     S_ELASTIC_PASSWORD = env_handler.get_instance().env('ELASTIC_ROOT_PASSWORD')
 

@@ -53,46 +53,6 @@ services:
       retries: 10
       start_period: 10s
 
-  elasticsearch:
-    container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
-    environment:
-      - cluster.routing.allocation.disk.threshold_enabled=false
-      - discovery.type=single-node
-      - network.host=0.0.0.0
-      - http.port=9400
-      - ELASTIC_USERNAME=${ELASTIC_ROOT_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
-      - xpack.security.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-      - indices.memory.index_buffer_size=5%
-      - node.store.allow_mmap=false
-    env_file:
-      - .env
-    ports:
-      - "9400:9400"
-    volumes:
-      - elastic:/usr/share/elasticsearch/data
-    healthcheck:
-      test: curl -f http://localhost:9400/_cluster/health || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
-    command:
-      - bash
-      - -c
-      - |
-        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m"
-        exec /usr/local/bin/docker-entrypoint.sh eswrapper
-    networks:
-      backend:
-        ipv4_address: 172.20.1.11
-    deploy:
-      resources:
-        limits:
-          memory: 45G
-
   redis_server:
     container_name: trusted-web-redis
     image: redis:7.4.0

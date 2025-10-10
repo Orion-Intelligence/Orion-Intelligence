@@ -78,11 +78,11 @@ if [ "$COMMAND" = "build" ]; then
             ;;
         -p)
             client_build "$FLAG"
-
             use_compose_file "production"
             cp nginx/nginx-prod.conf nginx/nginx.conf
             sudo mkdir -p /srv/elasticsearch/data
             sudo chown -R 1000:1000 /srv/elasticsearch/data
+            export ELASTIC_ROOT_IP="37.27.128.168"
             ;;
         *)
             echo "Unknown build flag: $FLAG"
