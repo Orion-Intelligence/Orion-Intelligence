@@ -4,6 +4,7 @@ from asyncio import sleep
 from jinja2 import Environment, FileSystemLoader
 
 from orion.api.server.config_manager.config_controller import config_controller
+from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.cronjob_manager import cronjob_manager
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -22,18 +23,23 @@ class service_manager:
             service_manager()
         return service_manager.__instance
 
-    def __init__(self, url="http://elasticsearch:9400/_cluster/health"):
+    def __init__(self, url=None):
         if service_manager.__instance is not None:
             return
 
         service_manager.__instance = self
-        self.__url = url
+        if url is None:
+            ip = env_handler.get_instance().env('ELASTIC_ROOT_IP')
+            self.__url = f"http://{ip}:9400/_cluster/health"
+        else:
+            self.__url = url
+
         self._is_available = False
 
     async def init_services(self):
         while not self._is_available:
             try:
-                _, writer = await asyncio.open_connection("elasticsearch", 9400)
+                _, writer = await asyncio.open_connection(env_handler.get_instance().env('ELASTIC_ROOT_IP'), 9400)
                 writer.close()
                 await writer.wait_closed()
 
