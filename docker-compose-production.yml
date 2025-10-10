@@ -11,6 +11,8 @@ services:
     depends_on:
       - mongo
       - arangodb
+    ports:
+      - "8070:8070"
     volumes:
       - ./backend/orion:/app/orion:cached
       - ./backend/routes:/app/routes:cached
