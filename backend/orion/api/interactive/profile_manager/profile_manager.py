@@ -106,7 +106,7 @@ class ProfileManager:
         file_path = self.IMAGE_DIR / f"{current_user.id}.enc"
         with open(file_path, "wb") as f:
             f.write(encrypted_data)
-
+        await AuditLogManager.get_instance().register(str(current_user.id), "upload_image")
         return {"Profile image": "upload complete"}
     
 
