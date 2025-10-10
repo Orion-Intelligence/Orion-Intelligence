@@ -39,13 +39,11 @@ class ProfileManager:
         dek = await self._dek(str(current_user.id))
         enc = Fernet(dek)
         def safe_decrypt(value: str | None) -> str:
-            """Decrypt only if value is non-empty and non-null."""
             if not value:
                 return ""
             try:
                 return enc.decrypt(value.encode()).decode()
             except Exception:
-            # In case decryption fails due to bad data, return empty
                 return ""
 
         company = ProfileParmaModel(
