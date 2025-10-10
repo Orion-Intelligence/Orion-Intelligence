@@ -5,9 +5,9 @@
   (resetFilter)="resetFilters($event)" [showSelectedFilters]="true"></app-result>
 
 <div *ngIf="!isLoading()" @fadeInDashboardItem>
-  <div class="dashboard__layout-wrapper">
-    <div class="dashboard__layout-left">
-      <ng-container *ngIf="shouldShowSection()">
+  <ng-container *ngIf="shouldShowSection()">
+    <div class="dashboard__layout-wrapper">
+      <div class="dashboard__layout-left">
         <ng-container *ngIf="isGrouped; else rankedMode">
           <app-defacement-results [isExpandable]="isIpReportExpandable()"
             [results_defacement]="consolidatedCallbackModel.defacement_model"
@@ -56,13 +56,13 @@
           </ng-container>
 
         </ng-container>
-      </ng-container>
+      </div>
+      <div class="dashboard__layout-right" *ngIf="getTotalResultCount()>0">
+        <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="response"
+          [rankedResults]="rankedResult" [isGrouped]="isGrouped"></app-result-insights>
+      </div>
     </div>
-    <div class="dashboard__layout-right" *ngIf="getTotalResultCount()>0">
-      <app-result-insights [consolidatedCallbackModel]="consolidatedCallbackModel" [results]="response"
-        [rankedResults]="rankedResult" [isGrouped]="isGrouped"></app-result-insights>
-    </div>
-  </div>
+  </ng-container>
   <ng-template #rankedMode>
     <div *ngFor="let item of rankedResult.result">
       <div class="dashboard__ranked-layout">
