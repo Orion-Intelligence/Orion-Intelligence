@@ -296,7 +296,7 @@ class elastic_controller:
 
         except Exception as ex:
             log.g().e(ex)
-            raise HTTPException(status_code=500, detail=f"Query embedding failed")
+            raise HTTPException(status_code=500, detail=str(ex))
 
     async def index_bulk_data(self, p_data):
         try:
@@ -304,4 +304,4 @@ class elastic_controller:
             return response
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
-            raise HTTPException(status_code=500, detail=f"Query embedding failed")
+            raise HTTPException(status_code=500, detail=str(ex))
