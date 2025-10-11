@@ -46,33 +46,33 @@ class elastic_controller:
             mapping_stealer_model = ELASTIC_ENUMS.mapping_stealer_log_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel)
-                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_LEAK_INDEX, body={"index.blocks.read_only_allow_delete": False})
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX, request_timeout=220):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_LEAK_INDEX, body=mapping_leakdatamodel, request_timeout=220)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_LEAK_INDEX, body={"index.blocks.read_only_allow_delete": False}, request_timeout=220)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_GENERIC_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=mapping_generic_model)
-                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_GENERIC_INDEX, body={"index.blocks.read_only_allow_delete": False})
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_GENERIC_INDEX, request_timeout=220):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_GENERIC_INDEX, body=mapping_generic_model, request_timeout=220)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_GENERIC_INDEX, body={"index.blocks.read_only_allow_delete": False}, request_timeout=220)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model)
-                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body={"index.blocks.read_only_allow_delete": False})
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, request_timeout=220):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=mapping_defacement_model, request_timeout=220)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body={"index.blocks.read_only_allow_delete": False}, request_timeout=220)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_EXPLOIT_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body=mapping_exploit_model)
-                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body={"index.blocks.read_only_allow_delete": False})
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, request_timeout=220):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body=mapping_exploit_model, request_timeout=220)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body={"index.blocks.read_only_allow_delete": False}, request_timeout=220)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model)
-                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_CHATS_INDEX, body={"index.blocks.read_only_allow_delete": False})
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_CHATS_INDEX, request_timeout=220):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_CHATS_INDEX, body=mapping_chat_model, request_timeout=220)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_CHATS_INDEX, body={"index.blocks.read_only_allow_delete": False}, request_timeout=220)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body=mapping_stealer_model)
-                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body={"index.blocks.read_only_allow_delete": False})
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, request_timeout=220):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body=mapping_stealer_model, request_timeout=220)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_STEALERLOGS_INDEX, body={"index.blocks.read_only_allow_delete": False}, request_timeout=220)
 
-            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_SOCIAL_INDEX):
-                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_SOCIAL_INDEX, body=mapping_social_model)
-                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_SOCIAL_INDEX, body={"index.blocks.read_only_allow_delete": False})
+            if not await self.__m_connection.indices.exists(index=ELASTIC_INDEX.S_SOCIAL_INDEX, request_timeout=220):
+                await self.__m_connection.indices.create(index=ELASTIC_INDEX.S_SOCIAL_INDEX, body=mapping_social_model, request_timeout=220)
+                await self.__m_connection.indices.put_settings(index=ELASTIC_INDEX.S_SOCIAL_INDEX, body={"index.blocks.read_only_allow_delete": False}, request_timeout=220)
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
@@ -92,7 +92,7 @@ class elastic_controller:
                 index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
                 body=m_request_stealer,
                 ignore=[404],
-                request_timeout=300
+                request_timeout=220
             )
 
             days_15_seconds = int(timedelta(days=15).total_seconds())
@@ -109,7 +109,7 @@ class elastic_controller:
                 index=ELASTIC_INDEX.S_DEFACEMENT_INDEX,
                 body=m_request_defacement,
                 ignore=[404],
-                request_timeout=300
+                request_timeout=220
             )
 
         except Exception as ex:
@@ -117,14 +117,14 @@ class elastic_controller:
 
     async def get_doc(self, index, doc_id: str):
         try:
-            result = await self.__m_connection.get(index=index, id=doc_id, ignore=[404])
+            result = await self.__m_connection.get(index=index, id=doc_id, ignore=[404], request_timeout=220)
             return [result["_source"]] if result and "_source" in result else []
         except Exception:
             return []
 
     async def search_query(self, document, data_filter):
         try:
-            m_data = await self.__m_connection.search(index=document, body=data_filter)
+            m_data = await self.__m_connection.search(index=document, body=data_filter, request_timeout=220)
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
@@ -134,7 +134,7 @@ class elastic_controller:
         try:
             if indices_boost:
                 query["indices_boost"] = indices_boost
-            res = await self.__m_connection.search(index=",".join(indices), body=query)
+            res = await self.__m_connection.search(index=",".join(indices), body=query, request_timeout=220)
             return res
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
@@ -144,7 +144,7 @@ class elastic_controller:
         results = []
         for index, query in zip(indices, queries):
             try:
-                res = await self.__m_connection.search(index=index, body=query)
+                res = await self.__m_connection.search(index=index, body=query, request_timeout=220)
                 results.append(res)
             except Exception as ex:
                 log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
@@ -159,7 +159,8 @@ class elastic_controller:
             for query in queries:
                 result = await self.__m_connection.search(
                     index=query[ELASTIC_KEYS.S_DOCUMENT],
-                    body=query[ELASTIC_KEYS.S_FILTER]
+                    body=query[ELASTIC_KEYS.S_FILTER],
+                    request_timeout=220
                 )
 
                 aggs = result.get("aggregations", {})
@@ -191,7 +192,8 @@ class elastic_controller:
             for query in queries:
                 result = await self.__m_connection.search(
                     index=query[ELASTIC_KEYS.S_DOCUMENT],
-                    body=query[ELASTIC_KEYS.S_FILTER]
+                    body=query[ELASTIC_KEYS.S_FILTER],
+                    request_timeout=220
                 )
 
                 aggs = result.get("aggregations", {})
@@ -257,7 +259,7 @@ class elastic_controller:
                         continue
 
                     index = entry[ELASTIC_KEYS.S_DOCUMENT]
-                    exists = await self.__m_connection.exists(index=index, id=doc_id)
+                    exists = await self.__m_connection.exists(index=index, id=doc_id, request_timeout=220)
 
                     if not exists and not bypass_empty_embedding:
                         emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
@@ -268,7 +270,8 @@ class elastic_controller:
                     await self.__m_connection.update(
                         index=index,
                         id=doc_id,
-                        body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
+                        body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
+                        request_timeout=220
                     )
 
             else:
@@ -279,7 +282,7 @@ class elastic_controller:
                     return False, "Missing m_hash in document"
 
                 index = p_data[ELASTIC_KEYS.S_DOCUMENT]
-                exists = await self.__m_connection.exists(index=index, id=doc_id)
+                exists = await self.__m_connection.exists(index=index, id=doc_id, request_timeout=220)
 
                 if not exists:
                     emb = p_data[ELASTIC_KEYS.S_VALUE].get("m_embedding")
@@ -289,7 +292,8 @@ class elastic_controller:
                 await self.__m_connection.update(
                     index=index,
                     id=doc_id,
-                    body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True}
+                    body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
+                    request_timeout=220
                 )
 
             return True, None
@@ -300,7 +304,7 @@ class elastic_controller:
 
     async def index_bulk_data(self, p_data):
         try:
-            response = await self.__m_connection.bulk(body=p_data)
+            response = await self.__m_connection.bulk(body=p_data, request_timeout=220)
             return response
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
