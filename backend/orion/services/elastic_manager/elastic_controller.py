@@ -353,7 +353,7 @@ class elastic_controller:
                             idx = meta.get("_index")
                             if idx:
                                 target_indices.add(idx)
-            conn = self.__conn_for_indices(target_indices)
+            conn = self.__m_dump_connection(target_indices)
             response = await conn.bulk(body=p_data, request_timeout=220)
             return response
         except Exception as ex:
