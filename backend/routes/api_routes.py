@@ -129,6 +129,16 @@ async def search_telegram(param: search_chat_param_model = Body(...)):
     return await search_model.getInstance().search_telegram_result(param)
 
 
+@api_routes.post("/api/search/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], bypass_roles=[user_role.ADMIN, user_role.DEMO]))],
+                 description="Search discussion (leak) intelligence reports using parameters such as company, country, or hash.")
+async def search_leak(param: search_leak_param_model = Body(...)):
+    base_index = [
+        ELASTIC_INDEX.S_CHATS_INDEX,
+        ELASTIC_INDEX.S_SOCIAL_INDEX,
+    ]
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+
+
 @api_routes.post("/api/exploit/discussion", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO]))])
 async def search_discussion(param: search_general_param_model = Body(...)):
     base_index = [
@@ -159,15 +169,9 @@ async def search_twitter(param: search_social_param_model = Body(...)):
 async def search_leak(param: search_leak_param_model = Body(...)):
     if param.category in ['all']:
         base_index = [
-            ELASTIC_INDEX.S_LEAK_INDEX,
-            ELASTIC_INDEX.S_CHATS_INDEX
+            ELASTIC_INDEX.S_LEAK_INDEX
         ]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ['news'], ["leaks", "tracking", "email", "logs", "warfare", "cloud"])
-    elif param.category in ["email", "logs", "warfare", "cloud"]:
-        base_index = [
-            ELASTIC_INDEX.S_CHATS_INDEX
-        ]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ['news'], ["leaks", "tracking"])
     else:
         return await search_model.getInstance().search_leak_result(param)
 
@@ -289,19 +293,22 @@ async def update_user(user: tenant_param_model):
 async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=Depends(get_current_user)):
     return await AuditLogManager.get_instance().get(param, current_user)
 
-@api_routes.post("/api/get/company/profile",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
-async def get_company_profile(current_user = Depends(get_current_user)):
+
+@api_routes.post("/api/get/company/profile", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def get_company_profile(current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().getCompanyProfileData(current_user)
 
-@api_routes.post("/api/update/company/profile",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
-async def update_company_profile(data:ProfileParmaModel ,current_user = Depends(get_current_user)):
-    return await ProfileManager.get_instance().updateCompanyProfile(data,current_user)
 
-@api_routes.post("/api/get/image",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
-async def upload_profile_image(current_user = Depends(get_current_user)):
+@api_routes.post("/api/update/company/profile", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def update_company_profile(data: ProfileParmaModel, current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().updateCompanyProfile(data, current_user)
+
+
+@api_routes.post("/api/get/image", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def upload_profile_image(current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().getProfileImage(current_user)
 
-@api_routes.post("/api/upload/image",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
-async def upload_profile_image(file: UploadFile, current_user = Depends(get_current_user)):
-    return await ProfileManager.get_instance().uploadProfileImage(file,current_user)
 
+@api_routes.post("/api/upload/image", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().uploadProfileImage(file, current_user)

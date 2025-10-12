@@ -2,6 +2,7 @@
 export enum Category {
   STRATEGIC = 'Strategic',
   BREACH = 'Breach',
+  DISCUSSION = 'Discussion',
   HOMEPAGE = 'Home',
   DIRECTORY = 'Directory',
   DUMP = 'Dump',
@@ -33,11 +34,30 @@ export enum GeneralSubCategory {
 export enum BreachSubCategory {
   ALL = 'All',
   DATABASES = 'Databases',
-  TRACKING = 'Tracking',
-  EMAIL = 'Email',
-  Logs = 'Logs',
-  WARFARE = 'Warfare',
+  TRACKING = 'Tracking'
+}
+
+export enum DiscussionSubCategory {
+  ALL = 'All',
+  war = 'Warfare',
   CLOUD = 'Cloud',
+  ddos = 'DDoS',
+  exploit = 'Exploit',
+  hack = 'Hack',
+  credentials_common = 'Credentials Common',
+  text = 'Text',
+  phishing = 'Phishing',
+  cve = 'CVE',
+  credential = 'Credential',
+  ransomware = 'Ransomware',
+  data = 'Data',
+  malware = 'Malware',
+  xss = 'XSS',
+  c2 = 'C2',
+  leak = 'Leak',
+  rce = 'RCE',
+  fraud = 'Fraud',
+  infostealer = 'Infostealer',
 }
 
 export enum DefacementSubCategory {

@@ -84,11 +84,11 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                     title_el = card.query_selector("thead th")
                     title = title_el.inner_text().strip() if title_el else "No Title"
 
-                    company_el = card.query_selector("tr:has(td.text--400:has-text('Company:')) td.text-green-400")
-                    weblink = company_el.inner_text().strip() if company_el else "No Company"
+                    company_el = card.query_selector("td.data-cell")
+                    weblink = company_el.inner_text().strip() if company_el else ""
 
-                    description_parts = card.query_selector_all("td .text-green-400")
-                    description = " ".join([d.inner_text().strip() for d in description_parts])
+                    description_parts = card.query_selector_all("td .data-cell")
+                    description = " ".join([d.inner_text().strip() for d in description_parts[1:]])  # skip domain
 
                     read_more_el = card.query_selector("a.database-link")
                     read_more_link = read_more_el.get_attribute("href") if read_more_el else ""
@@ -113,10 +113,9 @@ class _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd(leak_extractor_i
                         m_network=helper_method.get_network_type(self.base_url),
                         m_important_content=description[:500],
                         m_content_type=["leaks"],
-                        m_weblink=[weblink] if weblink else [],
                         m_leak_date=date,
                         m_data_size=None,
-                        m_dumplink=[read_more_link]
+                        m_weblink=[read_more_link]
                     )
 
                     entity_data = entity_model(

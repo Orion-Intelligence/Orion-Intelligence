@@ -37,6 +37,12 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
     if (this.currentUrl.includes('consolidated')) {
       this.currentUrl = this.currentUrl.replace("/all", "/chat");
     }
+    if (this.currentUrl.includes('social')) {
+      this.currentUrl = this.currentUrl.replace("/all", "/chat");
+    }
+    else if (this.currentUrl.includes('discussion')) {
+      this.currentUrl = this.currentUrl + '/chat';
+    }
 
     this.route.queryParams.subscribe(params => {
       this.queryParams = {

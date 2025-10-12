@@ -69,6 +69,9 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     if (this.currentUrl.includes('consolidated')) {
       this.currentUrl = this.currentUrl.replace('/all', '/social');
     }
+    else if (this.currentUrl.includes('discussion')) {
+      this.currentUrl = this.currentUrl + '/social';
+    }
 
     this.route.queryParams.subscribe(params => {
       this.queryParams = {

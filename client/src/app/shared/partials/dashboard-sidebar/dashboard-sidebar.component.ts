@@ -9,7 +9,7 @@ import {
   GeneralSubCategory, FeedSubCategory,
   SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory,
   TenantSubCategory,
-  ProfileSubCategory
+  ProfileSubCategory, DiscussionSubCategory
 
 } from '../../constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -44,6 +44,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   newsCategories = Object.values(FeedSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
+  discussionCategories = Object.values(DiscussionSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
   stealerlogsCategories = Object.values(StealerlogsSubCategory);
@@ -117,6 +118,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           firstSubcategory = this.tenantCategories[0];
           break;
         case Category.SCANNER:
+          firstSubcategory = this.scannerCategories[0];
+          break;
+        case Category.DISCUSSION:
           firstSubcategory = this.scannerCategories[0];
           break;
       }

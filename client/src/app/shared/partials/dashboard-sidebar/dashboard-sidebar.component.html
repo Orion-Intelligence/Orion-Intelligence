@@ -39,6 +39,10 @@
       [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [routePrefix]="'breach'"
       [title]="'Data Breach'"></app-dashboard-sidebar-items>
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
+      (sectionSelected)="onSectionSelected($event)" [category]="category.DISCUSSION"
+      [icon]="'assets/images/sidebar/data_breach.svg'" [items]="discussionCategories" [routePrefix]="'discussion'"
+      [title]="'Discussion'"></app-dashboard-sidebar-items>
+    <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
       (sectionSelected)="onSectionSelected($event)" [category]="category.DEFACEMENT"
       [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [routePrefix]="'defacement'"
       [title]="'Defacement'"></app-dashboard-sidebar-items>
@@ -68,7 +72,6 @@
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
       (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP" [icon]="'assets/images/sidebar/dump.svg'"
       [items]="dumpCategories" [routePrefix]="'dump'" [title]="'Dump'"></app-dashboard-sidebar-items>
-
     <ng-container *ngIf="authService.getRole() === 'admin'">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"

@@ -516,29 +516,24 @@ class elastic_request_generator:
                 }
             })
 
+        if p_query_model.category:
+            m_ctype = p_query_model.category
+        else:
+            m_ctype = "all"
+
         if allowed_categories:
             if p_query_model.category not in allowed_categories:
                 allowed_categories.append(p_query_model.category)
-            m_ctype = p_query_model.category
-            if m_ctype != "all":
-                allowed_categories = [m_ctype]
-            channel_ids = []
-            for c in allowed_categories:
-                channel_enum = ChannelTypeEnum.__members__.get(c.upper())
-                if channel_enum:
-                    v = channel_enum.value
-                    if isinstance(v, (list, tuple, set)):
-                        channel_ids.extend(list(v))
-                    else:
-                        channel_ids.append(v)
-            channel_ids = list({str(x) for x in channel_ids}) or [""]
+
+        if m_ctype != "all":
+            allowed_categories = [m_ctype]
             must_clauses.append({
                 "bool": {
                     "should": [
-                        {"bool": {"must_not": {"exists": {"field": "m_channel_id"}}}},
+                        {"bool": {"must_not": {"exists": {"field": "m_content_type"}}}},
                         {"bool": {"filter": [
-                            {"exists": {"field": "m_channel_id"}},
-                            {"terms": {"m_channel_id": channel_ids}}
+                            {"exists": {"field": "m_content_type"}},
+                            {"terms": {"m_content_type": allowed_categories}}
                         ]}}
                     ],
                     "minimum_should_match": 1

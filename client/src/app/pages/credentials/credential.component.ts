@@ -4,18 +4,19 @@ import {switchMap, timer, map, distinctUntilChanged, combineLatest} from 'rxjs';
 import {ResultComponent} from '../../shared/partials/result/result.component';
 import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
 import {DashboardService} from '../../services/dashboard/dashboard.service';
-import {NgOptimizedImage} from '@angular/common';
+import {NgIf, NgOptimizedImage} from '@angular/common';
 import {CredentialListComponent} from './credential-list/credential-list.component';
 import {StealerLogCallbackModel} from '../../shared/model/results/credentials/credential.callback.model';
 import {SortType} from '../../shared/constants/shared-enums';
 import {HelperService} from '../../shared/services/helper.service';
 import {stealer_filters} from '../../shared/constants/filters';
 import {FormsModule} from '@angular/forms';
+import {EmptyQueryComponent} from '../../shared/partials/empty-query/empty-query.component';
 
 @Component({
   selector: 'app-credential',
   standalone: true,
-  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage],
+  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage, EmptyQueryComponent, NgIf],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -52,15 +53,6 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
         this.dashboardService.consolidatedParamModel.url = params['url'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
-
-        if (this.dashboardService.consolidatedParamModel.category ==this.type && this.firstTrigger && this.stealerlogCallbackModel.Result.length > 0) {
-          this.isLoading = false;
-        } else if(this.dashboardService.consolidatedParamModel.category !=this.type){
-          this.cdr.detectChanges();
-          this.fetchSearchResults();
-        }
-
-        this.firstTrigger = false;
       });
   }
 
@@ -71,7 +63,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     this.dashboardService.consolidatedParamModel.url = this.url
     this.dashboardService.consolidatedParamModel.user = this.user
     this.dashboardService.consolidatedParamModel.category = this.type
-
+    this.firstTrigger = false
     if (this.isLoading) return;
 
     this.isLoading = true;

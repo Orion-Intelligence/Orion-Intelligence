@@ -113,7 +113,7 @@
 
 .sidebar__subitems.show {
   opacity: 1;
-  max-height: 500px;
+  max-height: 1500px;
   transform: translateY(0);
   margin-top: 15px;
   pointer-events: auto;

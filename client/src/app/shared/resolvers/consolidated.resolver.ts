@@ -18,7 +18,6 @@ export class ReportConsolidatedResolver implements Resolve<any> {
 
     let category = index.replace('_model', '').toLowerCase();
     let apiUrl = '';
-
     switch (category) {
       case 'leak':
       case 'tracking':
