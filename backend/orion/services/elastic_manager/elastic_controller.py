@@ -343,7 +343,7 @@ class elastic_controller:
             log.g().e(ex)
             raise HTTPException(status_code=500, detail=str(ex))
 
-    async def index_bulk_data(self, p_data):
+    async def index_dump(self, p_data):
         try:
             target_indices = set()
             for part in p_data:
@@ -353,8 +353,7 @@ class elastic_controller:
                             idx = meta.get("_index")
                             if idx:
                                 target_indices.add(idx)
-            conn = self.__m_dump_connection(target_indices)
-            response = await conn.bulk(body=p_data, request_timeout=220)
+            response = await self.__m_dump_connection.bulk(body=p_data, request_timeout=220)
             return response
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
