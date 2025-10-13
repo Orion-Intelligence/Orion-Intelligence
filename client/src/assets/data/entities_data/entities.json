@@ -2,6 +2,7 @@
   { "title": "Phone Numbers", "key": "m_phone_number" },
   { "title": "Emails", "key": "m_email" },
   { "title": "Domains", "key": "m_domain" },
+  { "title": "Country", "key": "m_country" },
   { "title": "URLs", "key": "m_url" },
   { "title": "CVE & CWE", "key": "m_cve" },
   { "title": "IP Addresses", "key": "m_ip" },
