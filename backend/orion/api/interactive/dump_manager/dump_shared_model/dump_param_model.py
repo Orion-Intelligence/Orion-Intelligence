@@ -7,6 +7,6 @@ class dump_param_model(BaseModel):
     page: int = 1
     source: Optional[str] = "all"
     group: Optional[str] = "all"
-    status: Optional[bool | str] = "all"
+    status: Optional[str] = "all"
     daterange: Optional[str] = ""
     q: Optional[str] = "*"

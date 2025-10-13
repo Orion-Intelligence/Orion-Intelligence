@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
-import { AsyncPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
-import { map, Observable, tap } from 'rxjs';
-import { DumpService } from '../../../services/dump/dump.service';
-import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
+import {map, Observable, tap} from 'rxjs';
+import {DumpService} from '../../../services/dump/dump.service';
+import {DumpCallbackModel} from '../../../shared/model/dump/dump.mode';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
@@ -41,7 +41,6 @@ export class DumpListComponent implements OnInit {
   }
 
   copyRowData(item: any): void {
-    const textToCopy = item;
-    navigator.clipboard.writeText(textToCopy).then();
+    navigator.clipboard.writeText(item).then();
   }
 }

@@ -120,6 +120,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.SCANNER:
           firstSubcategory = this.scannerCategories[0];
           break;
+        case Category.STEALERLOGS:
+          firstSubcategory = this.stealerlogsCategories[0];
+          break;
         case Category.DISCUSSION:
           firstSubcategory = this.scannerCategories[0];
           break;

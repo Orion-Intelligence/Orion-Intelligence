@@ -3,13 +3,14 @@ import {FormsModule} from '@angular/forms';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {PaginationComponent} from '../../../shared/partials/pagination/pagination.component';
 import {FiltersComponent} from '../../../shared/partials/filters/filters.component';
-import {Observable, BehaviorSubject} from 'rxjs';
+import {Observable, BehaviorSubject, take} from 'rxjs';
 import {FilterModel} from '../../../shared/model/filter/filter.model';
 import {audit_filters} from '../../../shared/constants/filters';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuditlogListComponent} from './auditlog-list/auditlog-list.component';
 import {AuditLogCallbackModel} from '../../../shared/model/auditlog/auditlog.model';
 import {AuditlogService} from '../../../services/auditlog/auditlog.service';
+import {DashboardService} from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-auditlog',
@@ -25,7 +26,7 @@ export class AuditlogComponent implements OnInit {
   isLoading = signal(false);
   isFilterOpen$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private auditService: AuditlogService, private route: ActivatedRoute, private router: Router) {
+  constructor(protected dashboard: DashboardService, private auditService: AuditlogService, private route: ActivatedRoute, private router: Router) {
     this.auditData$ = this.auditService.auditData$;
     this.auditData$.subscribe(data => {
       if (data) {
@@ -36,7 +37,7 @@ export class AuditlogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
       const baseFilters = this.filterModel.filters;
       const newFilters: any = {};
       const initialSelectedFilters: Record<string, string> = {};
@@ -60,7 +61,7 @@ export class AuditlogComponent implements OnInit {
 
       this.selectedFilters = initialSelectedFilters;
       this.searchQuery = params['q'] || '';
-      this.reloadAudit();
+      this.applyFilters(this.dashboard.selectedFilters())
     });
   }
 
@@ -81,19 +82,11 @@ export class AuditlogComponent implements OnInit {
   applyFilters(filters: Record<string, string | null>): void {
     this.selectedFilters = filters;
     this.auditService.reloadAuditData({ ...this.selectedFilters, page: 1 });
-  }
 
-  resetFilters(): void {
-    this.selectedFilters = {};
-    Object.keys(this.filterModel.filters).forEach(key => {
-      delete (this.filterModel.filters as any)[key].selected;
-    });
-    this.auditService.reloadAuditData({ ...this.selectedFilters, page: 1 });
-  }
-
-  private reloadAudit(): void {
     const filteredParams = Object.fromEntries(
-      Object.entries(this.selectedFilters).filter(([, value]) => value !== null && value !== '')
+      Object.entries(this.selectedFilters).filter(
+        ([, value]) => value !== null && value !== ''
+      )
     );
 
     this.isLoading.set(true);
@@ -103,13 +96,16 @@ export class AuditlogComponent implements OnInit {
       queryParams: filteredParams,
       queryParamsHandling: 'merge',
     }).then();
+  }
 
-    const q = this.route.snapshot.queryParamMap.get('q');
-
-    this.auditService.reloadAuditData({
-      ...filteredParams,
-      page: 1,
-      ...(q ? { q } : {}),
+  resetFilters(): void {
+    this.selectedFilters = {};
+    Object.keys(this.filterModel.filters).forEach(key => {
+      delete (this.filterModel.filters as any)[key].selected;
+    });
+    const currentUrl = this.router.url.split('?')[0];
+    this.router.navigateByUrl(currentUrl, {replaceUrl: true}).then(() => {
+      this.applyFilters(this.dashboard.selectedFilters())
     });
   }
 }

@@ -7,9 +7,10 @@ import {FilterModel} from '../../shared/model/filter/filter.model';
 import {dump_filters} from '../../shared/constants/filters';
 import {DumpListComponent} from './dump-list/dump-list.component';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs';
+import {Observable, take} from 'rxjs';
 import {DumpCallbackModel} from '../../shared/model/dump/dump.mode';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {DashboardService} from '../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-dump',
@@ -34,7 +35,7 @@ export class DumpComponent implements OnInit {
   searchQuery: any;
   isLoading = signal(false);
 
-  constructor(private dumpService: DumpService, private route: ActivatedRoute, private router: Router) {
+  constructor(protected dashboard: DashboardService, private dumpService: DumpService, private route: ActivatedRoute, private router: Router) {
     this.dumpData$ = this.dumpService.dumpData$;
     this.dumpData$.subscribe(data => {
       if (data) {
@@ -49,7 +50,7 @@ export class DumpComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
       const baseFilters = this.filterModel.filters;
       const newFilters: any = {};
       const initialSelectedFilters: Record<string, string> = {};
@@ -73,7 +74,7 @@ export class DumpComponent implements OnInit {
 
       this.selectedFilters = initialSelectedFilters;
       this.searchQuery = params['q'] || '';
-      this.reloadDump();
+      this.applyFilters(this.dashboard.selectedFilters())
     });
   }
 

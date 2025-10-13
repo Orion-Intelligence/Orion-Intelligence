@@ -25,20 +25,16 @@ class dump_model:
         query = {}
 
         if params.source != "all":
-            query["source"] = params.source
+            query["source"] = "leak" if params.source == "websites" else params.source
 
         if params.group != "all":
             query["group"] = params.group
 
         if params.status != "all":
-            if isinstance(params.status, str):
-                parsed = params.status.strip().lower()
-                if parsed == "true":
-                    query["parsed_status"] = True
-                elif parsed == "false":
-                    query["parsed_status"] = False
-            elif isinstance(params.status, bool):
-                query["parsed_status"] = params.status
+            print(":::::::::::::::::::::::::::::", flush=True)
+            print(params.status, flush=True)
+            print(":::::::::::::::::::::::::::::", flush=True)
+            query["parsed_status"] = True if params.status == "parsed" else False
 
         if params.daterange:
             start_str, end_str = [s.strip() for s in params.daterange.split(",")]

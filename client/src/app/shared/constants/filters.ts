@@ -24,8 +24,8 @@ export const dump_filters: FilterModel = {
       title: "Status",
       options: [
         { key: "all", label: "All" },
-        { key: "true", label: "True" },
-        { key: "false", label: "False" }
+        { key: "parsed", label: "True" },
+        { key: "unparsed", label: "False" }
       ],
       type: "dropdown",
       tooltip: "Status filter (True/False)",
