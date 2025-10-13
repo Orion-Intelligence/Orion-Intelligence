@@ -1,7 +1,7 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-from playwright.sync_api import Page
+from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -50,7 +50,7 @@ class _csocybercrime(leak_extractor_interface, ABC):
     def rule_config(self) -> RuleModel:
         return RuleModel(
             m_fetch_proxy=FetchProxy.NONE,
-            m_fetch_config=FetchConfig.PLAYRIGHT,
+            m_fetch_config=FetchConfig.REQUESTS,
             m_resoource_block=False,
             m_threat_type=ThreatType.NEWS
         )
@@ -82,64 +82,62 @@ class _csocybercrime(leak_extractor_interface, ABC):
             self._card_data.clear()
             self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         all_links = set()
-
         try:
+            session = page
+            r = session._seed_response
+            r.raise_for_status()
+            soup = BeautifulSoup(r.text, "html.parser")
             selectors = [
                 "div.river-well.article h3 a",
                 "h3 a[href*='/article/']",
                 "a[href*='/cybercrime/']",
                 ".content-listing a"
             ]
-
             for selector in selectors:
                 try:
-                    elements = page.query_selector_all(selector)
+                    elements = soup.select(selector)
                     if elements:
                         for el in elements[:10]:
-                            href = el.get_attribute("href")
+                            href = el.get("href")
                             if href and "/article/" in href:
                                 all_links.add(urljoin(self.base_url, href))
                         if all_links:
                             break
                 except:
                     continue
-
             if not all_links:
-                fallback_links = page.query_selector_all("a[href]")
+                fallback_links = soup.select("a[href]")
                 for el in fallback_links:
                     try:
-                        href = el.get_attribute("href")
+                        href = el.get("href")
                         if href and "/article/" in href:
                             all_links.add(urljoin(self.base_url, href))
                     except:
                         continue
-
             for idx, link in enumerate(list(all_links), 1):
                 try:
-                    page.goto(link, wait_until="commit", timeout=8000)
-
+                    resp = session.get(link, timeout=30)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
                     title = "Untitled Article"
-                    h1 = page.query_selector("h1")
+                    h1 = s.select_one("h1")
                     if h1:
-                        title = h1.inner_text().strip() or title
-
+                        t = h1.get_text(strip=True)
+                        title = t or title
                     article_date = datetime.now().date()
-
-                    paragraphs = page.query_selector_all("p")
-                    text_blocks = [
-                        p.inner_text().strip()
-                        for p in paragraphs[:3]
-                        if p.inner_text().strip() and len(p.inner_text()) > 20
-                    ]
+                    paragraphs = s.select("p")
+                    text_blocks = []
+                    for p in paragraphs[:3]:
+                        pt = p.get_text(strip=True)
+                        if pt and len(pt) > 20:
+                            text_blocks.append(pt)
                     if text_blocks:
                         content_text = "\n".join(text_blocks)
                     else:
                         continue
-
-                    summary = "\n".join(content_text.split('\n')[:2])
-
+                    summary = "\n".join(content_text.split("\n")[:2])
                     card = leak_model(
                         m_title=title,
                         m_weblink=[link],
@@ -152,18 +150,14 @@ class _csocybercrime(leak_extractor_interface, ABC):
                         m_content_type=["news"],
                         m_leak_date=article_date,
                     )
-
                     entity_data = entity_model(
                         m_scrap_file=self.__class__.__name__,
                         m_team="CSO Cybercrime Section",
                         m_country=["united kingdom"],
                     )
-
                     self.append_leak_data(card, entity_data)
-
                 except Exception as ex:
                     log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     continue
-
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR: {ex} [{self.__class__.__name__}]")

@@ -1,9 +1,8 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -57,7 +56,7 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.NEWS)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.NEWS)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -86,32 +85,41 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
-            selector = "h3.content-headline a"
-            page.wait_for_selector(selector, timeout=10000)
-            link_elements = page.locator(selector)
-
-            count = link_elements.count()
+            session = page
+            r = session._seed_response
+            r.raise_for_status()
+            soup = BeautifulSoup(r.text, "html.parser")
+            link_elements = soup.select("h3.content-headline a")
             urls = []
-            for i in range(count):
-                href = link_elements.nth(i).get_attribute("href")
+            for a in link_elements:
+                href = a.get("href")
                 if href:
-                    full_url = href if href.startswith("http") else self.base_url.rstrip("/") + href
+                    full_url = href if href.startswith("http") else urljoin(self.base_url.rstrip("/"), href)
                     if full_url not in urls:
                         urls.append(full_url)
-
-            for i, url in enumerate(urls):
-
-                page.goto(url, timeout=30000)
-                page.wait_for_selector("div.container h1", timeout=10000)
-
-                title = page.locator("div.container h1").inner_text()
-                content_node = page.locator("div.page-content")
-                description = content_node.inner_text() if content_node.count() else ""
-                article_date = datetime.strptime(page.get_attribute('div.article-meta time', 'datetime'), '%Y-%m-%dT%H:%M:%S').date()
-
-                card_data = leak_model(
+            for url in urls:
+                try:
+                    resp = session.get(url, timeout=60)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
+                    title_el = s.select_one("div.container h1")
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    content_node = s.select_one("div.page-content")
+                    description = content_node.get_text(" ", strip=True) if content_node else ""
+                    time_el = s.select_one("div.article-meta time")
+                    article_date = None
+                    if time_el and time_el.has_attr("datetime"):
+                        dt = time_el["datetime"].strip()
+                        try:
+                            article_date = datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S").date()
+                        except:
+                            try:
+                                article_date = datetime.fromisoformat(dt.replace("Z", "+00:00")).date()
+                            except:
+                                article_date = None
+                    card_data = leak_model(
                         m_title=title,
                         m_url=url,
                         m_base_url=self.base_url,
@@ -123,11 +131,13 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
                         m_dumplink=[],
                         m_content_type=["news"],
                     )
-
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="infosecuritymagazine")
-                self.append_leak_data(card_data, entity_data)
-
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="infosecuritymagazine"
+                    )
+                    self.append_leak_data(card_data, entity_data)
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                    continue
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

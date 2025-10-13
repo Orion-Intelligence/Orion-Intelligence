@@ -2,11 +2,12 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
-from playwright.sync_api import Page
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 
@@ -47,7 +48,7 @@ class _securityaffairs(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_threat_type=ThreatType.NEWS,m_fetch_proxy=FetchProxy.NONE,m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_threat_type=ThreatType.NEWS,m_fetch_proxy=FetchProxy.NONE,m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False)
 
     @property
     def card_data(self) -> List[RuleModel]:
@@ -74,63 +75,63 @@ class _securityaffairs(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         all_links = set()
-        for page_num in range(2, 7):
-            url = f"{self.base_url}?page={page_num}#latest_news_section"
-            page.goto(url, wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_load_state("networkidle")
+        session = page
+        try:
+            for page_num in range(2, 7):
+                url = f"{self.base_url}?page={page_num}#latest_news_section"
+                resp = session.get(url, timeout=60)
+                resp.raise_for_status()
+                soup = BeautifulSoup(resp.text, "html.parser")
+                for a in soup.select("#latest_news_section a[href*='/']"):
+                    href = a.get("href")
+                    if href:
+                        full_url = urljoin(self.base_url, href)
+                        if full_url.startswith(self.base_url):
+                            all_links.add(full_url)
 
-            links = page.locator("#latest_news_section a[href*='/']")
-            for i in range(links.count()):
-                href = links.nth(i).get_attribute("href")
-                if href:
-                    full_url = urljoin(self.base_url, href)
-                    if full_url.startswith(self.base_url):
-                        all_links.add(full_url)
-
-        for idx, link in enumerate(sorted(all_links), start=1):
-            page.goto(link, wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_load_state("networkidle")
-
-
-            title_selector = "div.common-heading.line-bottom.article-title.mb-3.wow.fadeInUp.animated > h2"
-            title = page.locator(title_selector).first.inner_text().strip() if page.locator(title_selector).count() > 0 else ""
-
-            date_selector = "div.post-time.mb-3 > span:nth-child(2)"
-            date_raw = page.locator(date_selector).first.inner_text().strip() if page.locator(date_selector).count() > 0 else ""
-
-            author_selector = "div.post-time.mb-3 > span:nth-child(1) > a"
-            author = page.locator(author_selector).first.inner_text().strip() if page.locator(author_selector).count() > 0 else ""
-
-            desc_selector = "div.article-details-block.wow.fadeInUp.animated > p:nth-child(6)"
-            description = page.locator(desc_selector).first.inner_text().strip() if page.locator(desc_selector).count() > 0 else ""
-
-            parsed_date = None
-            for fmt in ("%B %d, %Y", "%b %d, %Y"):
+            for idx, link in enumerate(sorted(all_links), start=1):
                 try:
-                    parsed_date = datetime.strptime(date_raw, fmt).date()
-                    break
-                except:
+                    r = session.get(link, timeout=60)
+                    r.raise_for_status()
+                    s = BeautifulSoup(r.text, "html.parser")
+                    title_selector = "div.common-heading.line-bottom.article-title.mb-3.wow.fadeInUp.animated > h2"
+                    date_selector = "div.post-time.mb-3 > span:nth-child(2)"
+                    desc_selector = "div.article-details-block.wow.fadeInUp.animated > p:nth-child(6)"
+                    title_el = s.select_one(title_selector)
+                    date_el = s.select_one(date_selector)
+                    desc_el = s.select_one(desc_selector)
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    date_raw = date_el.get_text(strip=True) if date_el else ""
+                    description = desc_el.get_text(strip=True) if desc_el else ""
+                    parsed_date = None
+                    for fmt in ("%B %d, %Y", "%b %d, %Y"):
+                        try:
+                            parsed_date = datetime.strptime(date_raw, fmt).date()
+                            break
+                        except:
+                            continue
+                    card = leak_model(
+                        m_screenshot="",
+                        m_title=title,
+                        m_weblink=[link],
+                        m_dumplink=[link],
+                        m_url=link,
+                        m_base_url=self.base_url,
+                        m_content=description,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=description,
+                        m_content_type=["news"],
+                        m_leak_date=parsed_date,
+                    )
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="securityaffairs news"
+                    )
+                    self.append_leak_data(card, entity_data)
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     continue
-
-            card = leak_model(
-                m_screenshot="",
-                m_title=title,
-                m_weblink=[link],
-                m_dumplink=[link],
-                m_url=link,
-                m_base_url=self.base_url,
-                m_content=description,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=description,
-                m_content_type=["news"],
-                m_leak_date=parsed_date,
-            )
-
-            entity_data = entity_model(
-                m_scrap_file=self.__class__.__name__,
-                m_team="securityaffairs news"
-            )
-
-            self.append_leak_data(card, entity_data)
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

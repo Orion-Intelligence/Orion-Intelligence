@@ -1,9 +1,8 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -58,7 +57,7 @@ class _securityweek(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -87,7 +86,7 @@ class _securityweek(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
             collected_urls = []
             max_clicks = 20
@@ -95,43 +94,54 @@ class _securityweek(leak_extractor_interface, ABC):
             if self.is_crawled:
                 max_clicks = 2
 
-            popup = page.locator("button.pum-close.popmake-close")
-            if popup.count():
-                popup.wait_for(state="visible", timeout=10000)
-                popup.click()
+            session = page
+            r = session._seed_response
+            r.raise_for_status()
+            html = r.text
+            soup = BeautifulSoup(html, "html.parser")
 
-            while clicks < max_clicks:
-                more_button = page.locator("a.zox-inf-more-but")
-                if more_button.count() == 0:
+            for _ in range(max_clicks):
+                more_button = soup.select_one("a.zox-inf-more-but")
+                if not more_button or not more_button.get("href"):
                     break
-
-                more_button.scroll_into_view_if_needed()
-                more_button.click()
-                page.wait_for_timeout(1000)
+                next_url = urljoin(self.base_url, more_button.get("href"))
+                resp = session.get(next_url, timeout=30)
+                if resp.status_code != 200:
+                    break
+                soup = BeautifulSoup(resp.text, "html.parser")
                 clicks += 1
 
-            post_links = page.locator("a:has(h2.zox-s-title2)")
-            for i in range(post_links.count()):
-                href = post_links.nth(i).get_attribute("href")
+            for a in soup.select("a:has(h2.zox-s-title2)"):
+                href = a.get("href")
                 if href and not href.startswith("#"):
                     collected_urls.append(href)
 
             for idx, url in enumerate(collected_urls):
                 try:
-                    page.goto(url,timeout=20000)
+                    resp = session.get(url, timeout=30)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
 
-                    title = page.locator("h1.zox-post-title.left.entry-title").inner_text() if page.locator(
-                        "h1.zox-post-title.left.entry-title").count() else ""
+                    title_el = s.select_one("h1.zox-post-title.left.entry-title")
+                    title = title_el.get_text(strip=True) if title_el else ""
+
                     description_text = ""
-
-                    if page.locator("span.zox-post-excerpt").count():
-                        description_text += page.locator("span.zox-post-excerpt").inner_text() + "\n"
-
-                    if page.locator("div.zox-post-body.left.zoxrel.zox100").count():
-                        description_text += page.locator("div.zox-post-body.left.zoxrel.zox100").inner_text()
+                    excerpt_el = s.select_one("span.zox-post-excerpt")
+                    if excerpt_el:
+                        description_text += excerpt_el.get_text(strip=True) + "\n"
+                    body_el = s.select_one("div.zox-post-body.left.zoxrel.zox100")
+                    if body_el:
+                        description_text += body_el.get_text(" ", strip=True)
 
                     short_description = " ".join(description_text.split()[:100])
-                    article_date = datetime.fromisoformat(page.get_attribute('time.post-date.updated', 'datetime')).date()
+
+                    date_el = s.select_one("time.post-date.updated")
+                    article_date = None
+                    if date_el and date_el.has_attr("datetime"):
+                        try:
+                            article_date = datetime.fromisoformat(date_el["datetime"]).date()
+                        except:
+                            article_date = None
 
                     card_data = leak_model(
                         m_title=title,
@@ -151,10 +161,11 @@ class _securityweek(leak_extractor_interface, ABC):
                         m_scrap_file=self.__class__.__name__,
                         m_team="securityweek"
                     )
+
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:
                     log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
+                    continue
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

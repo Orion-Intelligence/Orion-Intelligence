@@ -1,9 +1,8 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -57,8 +56,7 @@ class _krebsonsecurity(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-
-        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -87,48 +85,52 @@ class _krebsonsecurity(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
             all_links = []
             max_pages = 10
             current_page = 1
             if self.is_crawled:
                 max_pages = 2
-
+            session = page
+            url = session._seed_response.url
+            html = session._seed_response.text
             while current_page <= max_pages:
-                page.wait_for_selector("h2.entry-title a", timeout=10000)
-                links = page.locator("h2.entry-title a")
-                for i in range(links.count()):
-                    href = links.nth(i).get_attribute("href")
+                soup = BeautifulSoup(html, "html.parser")
+                links = soup.select("h2.entry-title a")
+                for a in links:
+                    href = a.get("href")
                     if href:
-                        all_links.append(href)
-
-                next_button = page.locator("div.pagination li a.inactive", has_text="next")
-                if next_button.count():
-                    next_button.first.scroll_into_view_if_needed()
-                    next_button.first.click()
-                    page.wait_for_load_state("networkidle")
+                        all_links.append(urljoin(url, href))
+                next_candidates = soup.select("div.pagination li a.inactive")
+                next_link = None
+                for a in next_candidates:
+                    if a.get_text(strip=True).lower() == "next":
+                        next_link = urljoin(url, a.get("href"))
+                        break
+                if next_link:
+                    url = next_link
+                    resp = session.get(url, timeout=30)
+                    resp.raise_for_status()
+                    html = resp.text
                     current_page += 1
                 else:
                     break
-
-            for idx, url in enumerate(all_links):
+            for idx, link in enumerate(all_links):
                 try:
-                    page.goto(url, timeout=30000)
-                    page.wait_for_load_state("domcontentloaded")
-
-                    title = page.locator("h1.entry-title")
-                    title_text = title.inner_text() if title.count() else "No title"
-
-                    content = page.locator("div.entry-content")
-                    content_text = content.first.inner_text() if content.count() else ""
-
+                    r = session.get(link, timeout=30)
+                    r.raise_for_status()
+                    s = BeautifulSoup(r.text, "html.parser")
+                    title_el = s.select("h1.entry-title")
+                    title_text = title_el[0].get_text(strip=True) if title_el else "No title"
+                    content_el = s.select("div.entry-content")
+                    content_text = content_el[0].get_text(" ", strip=True) if content_el else ""
                     short_content = " ".join(content_text.split()[:100])
-                    article_date = datetime.strptime(page.text_content('span.date.updated').strip(), '%B %d, %Y').date()
-
+                    date_el = s.select_one("span.date.updated")
+                    article_date = datetime.strptime(date_el.get_text(strip=True), "%B %d, %Y").date() if date_el else None
                     card_data = leak_model(
                         m_title=title_text,
-                        m_url=url,
+                        m_url=link,
                         m_base_url=self.base_url,
                         m_content=content_text,
                         m_network=helper_method.get_network_type(self.base_url),
@@ -143,9 +145,7 @@ class _krebsonsecurity(leak_extractor_interface, ABC):
                         m_team="krebson security"
                     )
                     self.append_leak_data(card_data, entity_data)
-
                 except Exception as ex:
                     log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

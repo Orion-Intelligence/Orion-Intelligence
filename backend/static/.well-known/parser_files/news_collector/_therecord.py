@@ -1,5 +1,4 @@
 from abc import ABC
-from datetime import datetime
 from typing import List, Set
 from playwright.sync_api import Page
 from urllib.parse import urljoin

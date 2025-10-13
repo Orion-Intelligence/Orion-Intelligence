@@ -1,9 +1,8 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -58,7 +57,7 @@ class _schneier(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_threat_type=ThreatType.NEWS, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_threat_type=ThreatType.NEWS, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -87,7 +86,7 @@ class _schneier(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
             all_links = []
             max_pages = 20
@@ -95,53 +94,59 @@ class _schneier(leak_extractor_interface, ABC):
             if self.is_crawled:
                 max_pages = 5
 
+            session = page
+            url = session._seed_response.url
+            html = session._seed_response.text
+
             while current_page <= max_pages:
-
-                page.wait_for_selector("h3.entry a", timeout=10000)
-                links = page.locator("h3.entry a")
-                for i in range(links.count()):
-                    href = links.nth(i).get_attribute("href")
+                soup = BeautifulSoup(html, "html.parser")
+                for a in soup.select("h3.entry a"):
+                    href = a.get("href")
                     if href:
-                        all_links.append(href)
+                        all_links.append(urljoin(url, href))
 
-                next_button = page.locator("a.next.page-numbers")
-                if next_button.count() and next_button.is_visible() and next_button.is_enabled():
-                    next_button.scroll_into_view_if_needed()
-                    next_button.click()
-                    page.wait_for_timeout(1000)
+                next_button = soup.select_one("a.next.page-numbers")
+                if next_button and next_button.get("href"):
+                    url = urljoin(url, next_button.get("href"))
+                    resp = session.get(url, timeout=30)
+                    resp.raise_for_status()
+                    html = resp.text
                     current_page += 1
                 else:
                     break
 
-            for idx, url in enumerate(list(all_links)):
+            for link in all_links:
                 try:
-                    page.goto(url,timeout=10000)
+                    resp = session.get(link, timeout=30)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
 
-                    title_locator = page.locator("h2.entry")
-                    title = (
-                        title_locator.inner_text()
-                        if title_locator.count()
-                        else ""
-                    )
+                    title_el = s.select_one("h2.entry")
+                    title = title_el.get_text(strip=True) if title_el else ""
 
-                    description = ""
-                    p_tag = page.locator("h2.entry ~ p").first
-                    if p_tag.count():
-                        description += p_tag.inner_text() + "\n"
-                    for bq in page.locator("h2.entry ~ blockquote").all():
-                        description += bq.inner_text() + "\n"
+                    description_parts = []
+                    first_p = s.select_one("h2.entry ~ p")
+                    if first_p:
+                        description_parts.append(first_p.get_text(strip=True))
+                    for bq in s.select("h2.entry ~ blockquote"):
+                        description_parts.append(bq.get_text(strip=True))
 
-                    full_description = description.strip()
-                    short_description = " ".join(description.strip().split()[:100])
+                    full_description = "\n".join(description_parts).strip()
+                    short_description = " ".join(full_description.split()[:100])
 
-                    date_text = page.locator('a[rel="bookmark"]').inner_text()
-                    date_str = date_text.replace("Posted on ", "").split(" at")[0]
-                    date_obj = datetime.strptime(date_str, "%B %d, %Y")
-
+                    date_el = s.select_one('a[rel="bookmark"]')
+                    date_obj = None
+                    if date_el:
+                        date_text = date_el.get_text(strip=True)
+                        date_str = date_text.replace("Posted on ", "").split(" at")[0]
+                        try:
+                            date_obj = datetime.strptime(date_str, "%B %d, %Y")
+                        except:
+                            date_obj = None
 
                     card_data = leak_model(
                         m_title=title.strip(),
-                        m_url=url,
+                        m_url=link,
                         m_base_url=self.base_url,
                         m_screenshot="",
                         m_content=full_description,
@@ -157,11 +162,11 @@ class _schneier(leak_extractor_interface, ABC):
                         m_scrap_file=self.__class__.__name__,
                         m_team="schneier"
                     )
+
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:
                     log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
+                    continue
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-

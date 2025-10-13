@@ -1,9 +1,10 @@
+import requests
+
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -13,6 +14,7 @@ from crawler.crawler_services.redis_manager.redis_controller import redis_contro
 from crawler.crawler_services.shared.helper_method import helper_method
 
 
+# noinspection PyUnresolvedReferences,PyProtectedMember
 class _bleepingcomputer(leak_extractor_interface, ABC):
     _instance = None
 
@@ -58,7 +60,7 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT)
+        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -87,54 +89,62 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
+            page: requests.Session
             all_links = []
             max_pages = 10
             current_page = 1
 
+            url = page._seed_response.url
+            html = page._seed_response.text
+
             while current_page <= max_pages:
+                soup = BeautifulSoup(html, "html.parser")
 
-                page.wait_for_selector("div.bc_latest_news_text h4 a", timeout=10000)
-                links = page.locator("div.bc_latest_news_text h4 a")
-                for i in range(links.count()):
-                    href = links.nth(i).get_attribute("href")
+                links = soup.select("div.bc_latest_news_text h4 a")
+                for a in links:
+                    href = a.get("href")
                     if href:
-                        all_links.append(href)
+                        all_links.append(urljoin(url, href))
 
-
-                page.wait_for_selector('a[aria-label="Next Page"]',timeout=10000)
-                next_btn = page.locator('a[aria-label="Next Page"]')
-                if next_btn.count() and next_btn.is_visible() and next_btn.is_enabled():
-                    next_btn.scroll_into_view_if_needed()
-                    next_btn.click()
+                next_btn = soup.select_one('a[aria-label="Next Page"]')
+                if next_btn and next_btn.get("href"):
+                    url = urljoin(url, next_btn.get("href"))
+                    response = page.get(url, timeout=30)
+                    response.raise_for_status()
+                    html = response.text
                     current_page += 1
                 else:
                     break
 
-            for idx, url in enumerate(all_links):
+            for link in all_links:
                 try:
-                    if not url.startswith(self.base_url):
+                    if not link.startswith(self.base_url):
                         continue
 
-                    page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                    response = page.get(link, timeout=30)
+                    response.raise_for_status()
+                    soup = BeautifulSoup(response.text, "html.parser")
 
-                    title = (
-                        page.locator("div.article_section h1").first.inner_text()
-                        if page.locator("div.article_section h1").count()
-                        else ""
-                    )
-                    description = (
-                        page.locator("div.articleBody").inner_text()
-                        if page.locator("div.articleBody").count()
-                        else ""
-                    )
+                    title_tag = soup.select_one("div.article_section h1")
+                    title = title_tag.get_text(strip=True) if title_tag else ""
+
+                    body_tag = soup.select_one("div.articleBody")
+                    description = body_tag.get_text(" ", strip=True) if body_tag else ""
                     short_description = " ".join(description.strip().split()[:100])
-                    article_date = datetime.strptime(page.text_content('li.cz-news-date').strip(), '%B %d, %Y').date()
+
+                    date_tag = soup.select_one("li.cz-news-date")
+                    article_date = None
+                    if date_tag:
+                        try:
+                            article_date = datetime.strptime(date_tag.get_text(strip=True), "%B %d, %Y").date()
+                        except:
+                            article_date = None
 
                     card_data = leak_model(
                         m_title=title.strip(),
-                        m_url=url,
+                        m_url=link,
                         m_leak_date=article_date,
                         m_base_url=self.base_url,
                         m_content=description.strip(),
@@ -149,6 +159,7 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
                         m_scrap_file=self.__class__.__name__,
                         m_team="bleeping computer"
                     )
+
                     self.append_leak_data(card_data, entity_data)
 
                 except Exception as ex:

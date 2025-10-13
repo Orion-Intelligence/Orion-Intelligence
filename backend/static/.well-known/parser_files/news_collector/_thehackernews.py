@@ -1,8 +1,10 @@
+import re
+import requests
+
 from abc import ABC
 from datetime import datetime
 from typing import List
-import re
-from playwright.sync_api import Page
+from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -46,7 +48,7 @@ class _thehackernews(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False)
+        return RuleModel(m_threat_type=ThreatType.NEWS, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_resoource_block=False)
 
     @property
     def card_data(self) -> List[RuleModel]:
@@ -76,88 +78,103 @@ class _thehackernews(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         all_links = set()
-        current_url = self.seed_url
-        max_pages = 5
-        if self.is_crawled:
-            max_pages = 2
+        try:
+            session = page
+            current_url = session._seed_response.url
+            max_pages = 5
+            if self.is_crawled:
+                max_pages = 2
 
-        for _ in range(max_pages):
-            page.goto(current_url, wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_load_state("networkidle")
+            for _ in range(max_pages):
+                resp = session.get(current_url, timeout=60)
+                resp.raise_for_status()
+                soup = BeautifulSoup(resp.text, "html.parser")
 
-            selectors = [
-                "a.story-link", "article h2 a", ".post-title a",
-                "h2.post-title a", "a[href*='/20']", ".article-title a",
-                "h3 a[href*='/']"
-            ]
-            for sel in selectors:
-                for i in range(page.locator(sel).count()):
-                    tag = page.locator(sel).nth(i)
-                    href = tag.get_attribute("href")
-                    if href:
-                        full_url = urljoin(self.base_url, href)
-                        if full_url.startswith(self.base_url) and "/20" in full_url and not any(
-                                x in full_url for x in ["tag", "search", "page"]
-                        ):
-                            all_links.add(full_url)
+                selectors = [
+                    "a.story-link", "article h2 a", ".post-title a",
+                    "h2.post-title a", "a[href*='/20']", ".article-title a",
+                    "h3 a[href*='/']"
+                ]
+                for sel in selectors:
+                    for tag in soup.select(sel):
+                        href = tag.get("href")
+                        if href:
+                            full_url = urljoin(self.base_url, href)
+                            if full_url.startswith(self.base_url) and "/20" in full_url and not any(x in full_url for x in ["tag", "search", "page"]):
+                                all_links.add(full_url)
 
-            next_page = page.locator("a.blog-pager-older-link, a[href*='max-results']")
-            if next_page.count() > 0:
-                current_url = urljoin(self.base_url, next_page.first.get_attribute("href"))
-            else:
-                break
-
-        for link in sorted(all_links):
-            page.goto(link, wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_load_state("networkidle")
-
-            title = page.locator("h1, .post-title, .entry-title, .article-title").first.inner_text(timeout=5000).strip()
-
-            date_raw = ""
-            date_locator = page.locator("span.author-url, .post-meta time, abbr.published")
-            if date_locator.count():
-                date_raw = date_locator.first.inner_text().strip()
-
-            content_tag = page.locator("div.articlebody, .post-body, .entry-content, .article-content")
-            full_text, first_two_sentences = "", "Content not found."
-            if content_tag.count():
-                full_text = content_tag.first.inner_text().strip().replace("\n", " ")
-                first_two_sentences = ". ".join(full_text.split(". ")[:2]).strip()
-                if not first_two_sentences.endswith("."):
-                    first_two_sentences += "."
-
-                if not date_raw:
-                    match = re.search(r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}",
-                                      first_two_sentences)
-                    if match:
-                        date_raw = match.group(0)
-
-            parsed_date = None
-            for fmt in ("%B %d, %Y", "%b %d, %Y", "%Y-%m-%d"):
-                try:
-                    parsed_date = datetime.strptime(date_raw, fmt).date()
+                next_tag = soup.select_one("a.blog-pager-older-link, a[href*='max-results']")
+                if next_tag and next_tag.get("href"):
+                    current_url = urljoin(self.base_url, next_tag.get("href"))
+                else:
                     break
-                except:
+
+            for link in sorted(all_links):
+                try:
+                    r = session.get(link, timeout=60)
+                    r.raise_for_status()
+                    s = BeautifulSoup(r.text, "html.parser")
+
+                    title_el = s.select_one("h1, .post-title, .entry-title, .article-title")
+                    title = title_el.get_text(strip=True) if title_el else ""
+
+                    date_raw = ""
+                    date_el = s.select_one("span.author-url, .post-meta time, abbr.published")
+                    if date_el:
+                        date_raw = date_el.get_text(strip=True)
+
+                    content_tag = None
+                    for sel in ["div.articlebody", ".post-body", ".entry-content", ".article-content"]:
+                        el = s.select_one(sel)
+                        if el:
+                            content_tag = el
+                            break
+
+                    full_text, first_two_sentences = "", "Content not found."
+                    if content_tag:
+                        full_text = content_tag.get_text(" ", strip=True).replace("\n", " ")
+                        first_two_sentences = ". ".join(full_text.split(". ")[:2]).strip()
+                        if not first_two_sentences.endswith("."):
+                            first_two_sentences += "."
+                        if not date_raw:
+                            m = re.search(r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}", first_two_sentences)
+                            if m:
+                                date_raw = m.group(0)
+
+                    parsed_date = None
+                    for fmt in ("%B %d, %Y", "%b %d, %Y", "%Y-%m-%d"):
+                        try:
+                            parsed_date = datetime.strptime(date_raw, fmt).date()
+                            break
+                        except:
+                            continue
+
+                    card = leak_model(
+                        m_screenshot="",
+                        m_title=title,
+                        m_weblink=[link],
+                        m_dumplink=[link],
+                        m_url=link,
+                        m_base_url=self.base_url,
+                        m_content=full_text,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=first_two_sentences,
+                        m_content_type=["news"],
+                        m_leak_date=parsed_date,
+                    )
+
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="hackernews live",
+                    )
+
+                    self.append_leak_data(card, entity_data)
+
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                     continue
 
-            card = leak_model(
-                m_screenshot="",
-                m_title=title,
-                m_weblink=[link],
-                m_dumplink=[link],
-                m_url=link,
-                m_base_url=self.base_url,
-                m_content=full_text,
-                m_network=helper_method.get_network_type(self.base_url),
-                m_important_content=first_two_sentences,
-                m_content_type=["news"],
-                m_leak_date=parsed_date,
-            )
-            entity_data = entity_model(
-                m_scrap_file=self.__class__.__name__,
-                m_team="hackernews live",
-            )
-
-            self.append_leak_data(card, entity_data)
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
