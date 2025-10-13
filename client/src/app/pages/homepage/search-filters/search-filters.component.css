@@ -474,7 +474,10 @@ button:focus {
 
 @media only screen and (width <=460px) {
   .filter-panel {
-    width: calc(100vw - 90px);
+    width: calc(100vw - 85px);
+    max-width: 350px;
+    position: fixed;
+    margin-left: -70px;
   }
 
   .filter-panel__top-row {

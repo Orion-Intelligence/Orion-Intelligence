@@ -1,23 +1,38 @@
 <div class="login-page-container">
   <div class="login-form-side">
     <div class="header-links">
-        <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank" class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank" class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank" class="header-link">About Us</a>
+      <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank"
+        class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank"
+        class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank"
+        class="header-link">About Us</a>
     </div>
 
     <div class="center-content-wrapper">
       <div class="login-content">
-        <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo"/>
+        <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo" />
         <div class="login-heading">Sign Up to get started!</div>
 
         <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="login-form">
           <label class="input-label">Username</label>
-          <input [(ngModel)]="user.username" placeholder="Enter your username" class="login-input username" name="username" required type="text"/>
+          <div class="input-with-icon">
+            <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="input-icon" />
+            <input [(ngModel)]="user.username" placeholder="Enter your username" class="login-input" name="username"
+              required type="text" />
+          </div>
 
           <label class="input-label mt-2">Company Mail</label>
-          <input [(ngModel)]="user.mail" placeholder="Enter your company mail" class="login-input email" name="companymail" required type="email"/>
+          <div class="input-with-icon">
+            <img src="/assets/images/shared/email.svg" alt="profile icon" class="input-icon" />
+            <input [(ngModel)]="user.mail" placeholder="Enter your company mail" class="login-input" name="companymail"
+              required type="email" />
+          </div>
 
           <label class="input-label mt-2 ">Password</label>
-          <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password" type="password" placeholder="Enter your password" class="login-input password mb-4" name="password" required/>
+          <div class="input-with-icon mb-4">
+            <img src="/assets/images/shared/lock.svg" alt="profile icon" class="input-icon" />
+            <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password" type="password"
+              placeholder="Enter your password" class="login-input" name="password" required />
+          </div>
 
           <div *ngIf="showPasswordMeter">
             <div class="password-strength-bar">
@@ -36,7 +51,10 @@
             {{ errorMessage }} </p>
 
           <div>
-            <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet" [class.login-button]="signUpForm.valid && allPasswordRequirementsMet" [class.login-button-disable]="!signUpForm.valid || !allPasswordRequirementsMet" type="submit" value="Sign Up"/>
+            <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet"
+              [class.login-button]="signUpForm.valid && allPasswordRequirementsMet"
+              [class.login-button-disable]="!signUpForm.valid || !allPasswordRequirementsMet" type="submit"
+              value="Sign Up" />
           </div>
         </form>
 
@@ -53,6 +71,6 @@
   </div>
 
   <div class="dashboard-preview-side">
-    <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="dashboard-visual"/>
+    <img src="/assets/images/shared/auth_dashboard_icon.svg" alt="Dashboard Preview" class="dashboard-visual" />
   </div>
 </div>

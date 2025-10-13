@@ -109,4 +109,11 @@ export class HomeSearchComponent implements OnInit {
     this.app_service.set('enable_advanced_tools', this.app_service.configData().localSettings.enable_advanced_tools);
     this.app_service.configData.set(cfg);
   }
+  onSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value?.trim();
+    if (value && window.innerWidth < 460) {
+      this.setFilterOverlay(false);
+    }
+  }
 }
