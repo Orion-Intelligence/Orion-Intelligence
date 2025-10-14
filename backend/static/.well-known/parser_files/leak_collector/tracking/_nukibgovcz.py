@@ -1,9 +1,8 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -52,7 +51,7 @@ class _nukibgovcz(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -76,67 +75,70 @@ class _nukibgovcz(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-        max_pages = 5
-        article_urls = []
-        current_page = 1
-        if self._is_crawled:
-            max_pages = 2
-
-        while current_page <= max_pages:
-
-            pagination = page.locator(f'a.page#page{current_page}')
-            if pagination.count() == 0:
-                break
-            pagination.click()
-            page.wait_for_load_state("domcontentloaded")
-
-            anchors = page.locator("h3.with-date a")
-            count = anchors.count()
-            for i in range(count):
-                href = anchors.nth(i).get_attribute("href")
-                if href:
-                    full_url = self.base_url + href
-                    article_urls.append(full_url)
-
-            current_page += 1
-
-        unique_urls = list(dict.fromkeys(article_urls))
-
-        for idx, url in enumerate(unique_urls):
-            try:
-                page.goto(url, timeout=20000)
-                page.wait_for_load_state("domcontentloaded")
-
-                title = page.locator("h1[itemprop='name']").inner_text().strip()
-
-                date_text = page.locator("time[itemprop='dateCreated']").inner_text().strip()
-                date_obj = datetime.strptime(date_text, "%d %B %Y").date()
-
-                content = page.locator("div[itemprop='articleBody']").inner_text().strip()
-                important_content = " ".join(content.split()[:200])
-
-
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=url,
-                    m_base_url=self.base_url,
-                    m_content=content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=important_content,
-                    m_content_type=["news", "tracking"],
-                    m_leak_date=date_obj,
-                )
-
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="nukib-gov-cz",
-                    m_country=["czech"]
-                )
-
-                self.append_leak_data(card_data, entity_data)
-
-            except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
-
+    def parse_leak_data(self, page):
+        try:
+            max_pages = 5
+            if self._is_crawled:
+                max_pages = 2
+            article_urls = []
+            current_page = 1
+            current_html = page._seed_response.text
+            soup = BeautifulSoup(current_html, "html.parser")
+            for page_number in range(1, max_pages + 1):
+                if page_number > 1:
+                    sel = soup.select_one(f"a.page#page{page_number}")
+                    if not sel or not sel.get("href"):
+                        break
+                    page_url = urljoin(self.seed_url, sel.get("href"))
+                    resp = page.get(page_url, timeout=60)
+                    resp.raise_for_status()
+                    current_html = resp.text
+                    soup = BeautifulSoup(current_html, "html.parser")
+                anchors = soup.select("h3.with-date a")
+                for a in anchors:
+                    href = a.get("href")
+                    if href:
+                        full_url = urljoin(self.base_url, href.strip())
+                        article_urls.append(full_url)
+                current_page += 1
+            unique_urls = list(dict.fromkeys(article_urls))
+            for url in unique_urls:
+                try:
+                    resp = page.get(url, timeout=60)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
+                    title_el = s.select_one("h1[itemprop='name']")
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    if not title:
+                        continue
+                    date_el = s.select_one("time[itemprop='dateCreated']")
+                    date_obj = None
+                    if date_el:
+                        date_text = date_el.get_text(strip=True)
+                        try:
+                            date_obj = datetime.strptime(date_text, "%d %B %Y").date()
+                        except Exception:
+                            date_obj = None
+                    content_el = s.select_one("div[itemprop='articleBody']")
+                    content = content_el.get_text(strip=True) if content_el else ""
+                    important_content = " ".join(content.split()[:200])
+                    card_data = leak_model(
+                        m_title=title,
+                        m_url=url,
+                        m_base_url=self.base_url,
+                        m_content=content,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=important_content,
+                        m_content_type=["news", "tracking"],
+                        m_leak_date=date_obj,
+                    )
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="nukib-gov-cz",
+                        m_country=["czech"]
+                    )
+                    self.append_leak_data(card_data, entity_data)
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

@@ -3,9 +3,7 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
-
-from playwright.sync_api import Page
-
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -54,7 +52,7 @@ class _ncsc_swed(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -78,63 +76,63 @@ class _ncsc_swed(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
-            all_links = []
             max_pages = 10
-            current_page = 1
             if self._is_crawled:
-                max_pages=2
-
-            while current_page <= max_pages:
-                page.wait_for_load_state("domcontentloaded")
-                links = page.locator("div.text-left h3 a")
-                for i in range(links.count()):
-                    href = links.nth(i).get_attribute("href")
-                    if href:
-                        full_url = href if href.startswith("http") else self.base_url.rstrip("/") + href
-                        all_links.append(full_url)
-
-                page.wait_for_selector("div.mod.mod-dynamic.loading", state="hidden")
-                next_btn = page.locator('li.separator-left a').first
-                if next_btn.count() == 0:
+                max_pages = 2
+            all_links = []
+            current_html = page._seed_response.text
+            base = self.base_url
+            page_count = 0
+            while page_count < max_pages:
+                soup = BeautifulSoup(current_html, "html.parser")
+                links = soup.select("div.text-left h3 a")
+                for a in links:
+                    href = a.get("href")
+                    if not href:
+                        continue
+                    full_url = href if href.startswith("http") else base.rstrip("/") + href
+                    all_links.append(full_url)
+                next_sel = soup.select_one("li.separator-left a")
+                if not next_sel or not next_sel.get("href"):
                     break
-                next_btn.wait_for(state="visible")
-                next_btn.scroll_into_view_if_needed()
-                next_btn.click(force=True)
-                page.wait_for_selector("div.mod.mod-dynamic.loading", state="hidden")
-                current_page += 1
-
-            for idx, link_url in enumerate(all_links):
+                next_href = next_sel.get("href")
+                next_url = next_href if next_href.startswith("http") else urljoin(base, next_href)
+                resp = page.get(next_url, timeout=60)
+                resp.raise_for_status()
+                current_html = resp.text
+                page_count += 1
+            for link_url in all_links:
                 try:
-                    page.goto(link_url)
-                    page.wait_for_load_state("domcontentloaded")
-
-                    title_elem = page.locator("h1.text-inline")
-                    title = title_elem.inner_text().strip()
-
-                    content_elem = page.locator("div.col-md-8.main-content.js-glossary-context")
-                    content = content_elem.inner_text()
-
+                    resp = page.get(link_url, timeout=60)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
+                    title_elem = s.select_one("h1.text-inline")
+                    title = title_elem.get_text(strip=True) if title_elem else ""
+                    content_elem = s.select_one("div.col-md-8.main-content.js-glossary-context")
+                    content = content_elem.get_text() if content_elem else ""
                     important_text = " ".join(content.split()[:200])
-
                     date = None
-                    blocks = page.locator('div.mod.mod-text')
-                    for i in range(blocks.count()):
-                        text = blocks.nth(i).inner_text().strip()
-                        match = re.search(r"\d{2}\.\d{2}\.\d{4}", text)
-                        if match:
-                            date = datetime.strptime(match.group(), "%d.%m.%Y").date()
-                            break
-
-                    image_elems = content_elem.locator("img").all()
-                    image_urls = [urljoin(self.base_url, img.get_attribute("src")) for img in image_elems if
-                    img.get_attribute("src")]
-
-
+                    blocks = s.select('div.mod.mod-text')
+                    for blk in blocks:
+                        text = blk.get_text(strip=True)
+                        m = re.search(r"\d{2}\.\d{2}\.\d{4}", text)
+                        if m:
+                            try:
+                                date = datetime.strptime(m.group(), "%d.%m.%Y").date()
+                                break
+                            except:
+                                continue
+                    image_urls = []
+                    if content_elem:
+                        for img in content_elem.select("img"):
+                            src = img.get("src")
+                            if src:
+                                image_urls.append(urljoin(base, src))
                     card_data = leak_model(
                         m_title=title,
-                        m_url=page.url,
+                        m_url=link_url,
                         m_base_url=self.base_url,
                         m_leak_date=date,
                         m_content=content,
@@ -143,18 +141,13 @@ class _ncsc_swed(leak_extractor_interface, ABC):
                         m_logo_or_images=image_urls,
                         m_content_type=['news', 'tracking'],
                     )
-
                     entity_data = entity_model(
                         m_scrap_file=self.__class__.__name__,
                         m_team="ncsc",
                         m_country=["switzerland"]
                     )
                     self.append_leak_data(card_data, entity_data)
-
                 except Exception as ex:
                     log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
-

@@ -150,7 +150,7 @@ class _certPK(leak_extractor_interface, ABC):
                         m_content=all_text,
                         m_network="clearnet",
                         m_important_content=all_text[:200],
-                        m_content_type=["tracking"],
+                        m_content_type=["news"],
                         m_leak_date=None,
                     )
                     entity = entity_model(

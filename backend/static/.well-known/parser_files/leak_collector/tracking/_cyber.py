@@ -2,11 +2,12 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
-from playwright.sync_api import Page
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 
@@ -56,7 +57,7 @@ class _cyber(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -85,65 +86,79 @@ class _cyber(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-        page_number = 0
-        while True:
-            current_url = f"{self.seed_url}?page={page_number}"
-            page.goto(current_url, timeout=30000)
+    def parse_leak_data(self, page):
+        try:
+            page_number = 0
+            while True:
+                current_url = f"{self.seed_url}?page={page_number}"
+                resp = page.get(current_url, timeout=30)
+                resp.raise_for_status()
+                list_soup = BeautifulSoup(resp.text, "html.parser")
 
-            post_links = []
-            rows = page.query_selector_all("div.views-row article.node a[href]")
-            for row in rows:
-                href = row.get_attribute("href")
-                if href:
-                    full_url = urljoin(self.base_url, href)
-                    post_links.append(full_url)
-
-            if not post_links:
-                break
-
-            for url in post_links:
-                page.goto(url, timeout=30000)
-
-                title_tag = page.query_selector("h1.node__title")
-                title = title_tag.inner_text().strip() if title_tag else "No title"
-                if title == "No title":
-                    continue
-
-                date_tag = page.query_selector(".date-wrapper .published-on")
-                date_text = date_tag.inner_text().replace("Publish the", "").strip() if date_tag else ""
-                date_obj = datetime.strptime(date_text, "%d %B %Y") if date_text else None
-
-                desc_paragraphs = page.query_selector_all("div.text-riche p")
-                description = "\n".join(p.inner_text().strip() for p in desc_paragraphs if p.inner_text().strip())
-
-                dump_links = []
-                link_elements = page.query_selector_all("div.paragraph--type--bouton a.btn")
-                for link in link_elements:
-                    href = link.get_attribute("href")
+                post_links = []
+                for a in list_soup.select("div.views-row article.node a[href]"):
+                    href = a.get("href")
                     if href:
-                        dump_links.append(urljoin(self.base_url, href))
+                        full_url = urljoin(self.base_url, href)
+                        post_links.append(full_url)
 
-                m_content = description
+                if not post_links:
+                    break
 
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=url,
-                    m_base_url=self.base_url,
-                    m_content=m_content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=description[:500],
-                    m_content_type=["news", "tracking"],
-                    m_leak_date=date_obj
-                )
+                for url in post_links:
+                    try:
+                        resp = page.get(url, timeout=30)
+                        resp.raise_for_status()
+                        s = BeautifulSoup(resp.text, "html.parser")
 
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="ANSSI - Agence nationale de la sécurité des systèmes d'information",
-                    m_author=["ANSSI Web Team"],
-                    m_country=["France"]
-                )
+                        title_tag = s.select_one("h1.node__title")
+                        title = title_tag.get_text(strip=True) if title_tag else "No title"
+                        if title == "No title":
+                            continue
 
-                self.append_leak_data(card_data, entity_data)
+                        date_tag = s.select_one(".date-wrapper .published-on")
+                        date_text = date_tag.get_text(strip=True).replace("Publish the", "").strip() if date_tag else ""
+                        date_obj = None
+                        if date_text:
+                            try:
+                                date_obj = datetime.strptime(date_text, "%d %B %Y").date()
+                            except Exception:
+                                date_obj = None
 
-            page_number += 1
+                        desc_paragraphs = s.select("div.text-riche p")
+                        description = "\n".join(p.get_text(strip=True) for p in desc_paragraphs if p.get_text(strip=True))
+
+                        dump_links = []
+                        for link in s.select("div.paragraph--type--bouton a.btn[href]"):
+                            href = link.get("href")
+                            if href:
+                                dump_links.append(urljoin(self.base_url, href))
+
+                        m_content = description
+
+                        card_data = leak_model(
+                            m_title=title,
+                            m_url=url,
+                            m_base_url=self.base_url,
+                            m_content=m_content,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=description[:500],
+                            m_content_type=["news", "tracking"],
+                            m_leak_date=date_obj
+                        )
+
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_team="ANSSI - Agence nationale de la sécurité des systèmes d'information",
+                            m_author=["ANSSI Web Team"],
+                            m_country=["France"]
+                        )
+
+                        self.append_leak_data(card_data, entity_data)
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                        continue
+
+                page_number += 1
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

@@ -2,12 +2,12 @@ from abc import ABC
 from typing import List
 from urllib.parse import urljoin
 from datetime import datetime
-from playwright.sync_api import Page
-
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 
@@ -58,7 +58,7 @@ class _acn(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -87,80 +87,71 @@ class _acn(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-
+    def parse_leak_data(self, page):
         max_pages = 2 if self._is_crawled else 49
-
         for page_number in range(1, max_pages + 1):
-            current_url = f"{self.seed_url}?start={page_number}"
-            page.goto(current_url, timeout=30000)
-
-            post_links = []
-            for card in page.locator("div.card-body h3.card-title a[href]").all():
-                href = card.get_attribute("href")
-                full_url = urljoin(self.base_url, href)
-                post_links.append(full_url)
-
-            if not post_links:
+            try:
+                current_url = f"{self.seed_url}?start={page_number}"
+                resp = page.get(current_url, timeout=30)
+                resp.raise_for_status()
+                list_soup = BeautifulSoup(resp.text, "html.parser")
+                post_links = []
+                for a in list_soup.select("div.card-body h3.card-title a[href]"):
+                    href = a.get("href")
+                    if not href:
+                        continue
+                    full_url = urljoin(self.base_url, href)
+                    post_links.append(full_url)
+                if not post_links:
+                    break
+                for url in post_links:
+                    try:
+                        resp = page.get(url, timeout=30)
+                        resp.raise_for_status()
+                        s = BeautifulSoup(resp.text, "html.parser")
+                        title_element = s.select_one("div.h1.text-white.mb-0")
+                        title = title_element.get_text(strip=True) if title_element and title_element.get_text(strip=True) else "No title"
+                        if title == "No title":
+                            continue
+                        date_container = s.select_one("div.mb-4")
+                        date_obj = None
+                        date_text = ""
+                        if date_container:
+                            inner_div = date_container.select_one("div")
+                            if inner_div:
+                                raw_date = inner_div.get_text(strip=True)
+                                try:
+                                    parsed_date = datetime.strptime(raw_date, "%d %B %Y")
+                                    date_obj = parsed_date.date()
+                                    date_text = parsed_date.strftime("%Y-%m-%d")
+                                except Exception:
+                                    date_obj = None
+                                    date_text = ""
+                        desc_elements = s.select("div.fs-lg.pb-5 p")
+                        description = "\n".join([elem.get_text(strip=True) for elem in desc_elements if elem.get_text(strip=True)])
+                        images = s.select("img.img-fluid")
+                        image_urls = [urljoin(self.base_url, img.get("src")) for img in images if img.get("src")]
+                        m_content = f"Title: {title}\n{description}\n\nPublished on: {date_text}\nImage URLs:\n" + "\n".join(image_urls)
+                        card_data = leak_model(
+                            m_title=title,
+                            m_url=url,
+                            m_base_url=self.base_url,
+                            m_content=m_content,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=description[:500],
+                            m_content_type=["news", "tracking"],
+                            m_logo_or_images=image_urls,
+                            m_leak_date=date_obj
+                        )
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_team="Agenzia per la Cybersicurezza Nazionale (ACN)",
+                            m_author=["ACN Web Team"],
+                            m_country=["italy"]
+                        )
+                        self.append_leak_data(card_data, entity_data)
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 break
-
-            for url in post_links:
-                page.goto(url, timeout=30000)
-
-                title_element = page.locator("div.h1.text-white.mb-0").first
-                title = title_element.text_content().strip() if title_element.is_visible() else "No title"
-                if title == "No title":
-                    continue
-
-                date_container = page.locator("div.mb-4").first
-                date_obj = None
-                date_text = ""
-                if date_container.is_visible():
-                    inner_div = date_container.locator("div").first
-                    if inner_div.is_visible():
-                        raw_date = inner_div.text_content().strip()
-                        try:
-                            parsed_date = datetime.strptime(raw_date, "%d %B %Y")
-                            date_obj = parsed_date.date()
-                            date_text = parsed_date.strftime("%Y-%m-%d")
-                        except ValueError:
-                            date_obj = None
-                            date_text = ""
-
-                desc_elements = page.locator("div.fs-lg.pb-5 p").all()
-                description = "\n".join(
-                    elem.text_content().strip() for elem in desc_elements if elem.text_content().strip()
-                )
-
-                images = page.locator("img.img-fluid").all()
-                image_urls = [
-                    urljoin(self.base_url, img.get_attribute("src"))
-                    for img in images
-                    if img.get_attribute("src")
-                ]
-                m_content = f"Title: {title}\n{description}\n\nPublished on: {date_text}\nImage URLs:\n" + "\n".join(
-                    image_urls)
-
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=url,
-                    m_base_url=self.base_url,
-                    m_content=m_content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=description[:500],
-                    m_content_type=["news", "tracking"],
-                    m_logo_or_images=image_urls,
-                    m_leak_date=date_obj
-                )
-
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="Agenzia per la Cybersicurezza Nazionale (ACN)",
-                    m_author=["ACN Web Team"],
-                    m_country=["italy"]
-                )
-
-                self.append_leak_data(card_data, entity_data)
-
-
-

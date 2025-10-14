@@ -1,8 +1,7 @@
 from abc import ABC
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -50,7 +49,7 @@ class _csa_gov_sg(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.TRACKING,m_resoource_block=False)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_threat_type=ThreatType.TRACKING,m_resoource_block=False)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -74,64 +73,73 @@ class _csa_gov_sg(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         max_pages = 20
         all_urls = set()
         current_page = 1
         if self._is_crawled:
-            max_pages=5
-
+            max_pages = 5
+        current_html = page._seed_response.text
         while current_page <= max_pages:
-            links = page.locator('a.outline.outline-offset-2.outline-link')
-            count = links.count()
-            for i in range(count):
-                href = links.nth(i).get_attribute("href")
+            soup = BeautifulSoup(current_html, "html.parser")
+            links = soup.select('a.outline.outline-offset-2.outline-link')
+            for a in links:
+                href = a.get("href")
                 if href and "/alerts-and-advisories/" in href:
-                    all_urls.add(self.base_url + href)
-
-            next_button = page.locator('li.flex button[aria-label="Go to next page"]')
-            if not next_button.is_visible():
+                    all_urls.add(urljoin(self.base_url, href))
+            next_btn = soup.select_one('li.flex button[aria-label="Go to next page"]')
+            next_url = None
+            if next_btn:
+                if next_btn.get("data-href"):
+                    next_url = urljoin(self.base_url, next_btn.get("data-href"))
+                else:
+                    parent = next_btn.find_parent("a")
+                    if parent and parent.get("href"):
+                        next_url = urljoin(self.base_url, parent.get("href"))
+                    else:
+                        onclick = next_btn.get("onclick") or ""
+                        import re
+                        m = re.search(r"location\.href\s*=\s*['\"]([^'\"]+)['\"]", onclick)
+                        if m:
+                            next_url = urljoin(self.base_url, m.group(1))
+            if not next_url:
+                a_next = soup.select_one('a[aria-label="Go to next page"], a[rel="next"]')
+                if a_next and a_next.get("href"):
+                    next_url = urljoin(self.base_url, a_next.get("href"))
+            if not next_url:
                 break
+            resp = page.get(next_url, timeout=60)
+            resp.raise_for_status()
+            current_html = resp.text
             current_page += 1
-            next_button.first.click()
-            page.wait_for_load_state("domcontentloaded")
-
         for article_url in all_urls:
-            page.goto(article_url, timeout=30000)
-
-            title = page.locator(
-                "h1.prose-display-md.break-words.text-base-content-strong"
-            ).first.inner_text() if page.locator(
-                "h1.prose-display-md.break-words.text-base-content-strong"
-            ).count() > 0 else ""
-
-            raw_date = page.locator(
-                "p.prose-label-sm-medium.text-base-content"
-            ).first.inner_text() if page.locator(
-                "p.prose-label-sm-medium.text-base-content"
-            ).count() > 0 else ""
+            resp = page.get(article_url, timeout=300)
+            resp.raise_for_status()
+            s = BeautifulSoup(resp.text, "html.parser")
+            title_el = s.select_one("h1.prose-display-md.break-words.text-base-content-strong")
+            title = title_el.get_text(strip=True) if title_el else ""
+            raw_date_el = s.select_one("p.prose-label-sm-medium.text-base-content")
+            raw_date = raw_date_el.get_text(strip=True) if raw_date_el else ""
             date = raw_date.strip() if raw_date else ""
-
             content_parts = []
-            for selector in [
-                "div.prose-title-lg.text-base-content-light",
-                "div.w-full.overflow-x-auto.break-words.lg\\:max-w-\\[660px\\]"
-            ]:
-                if page.locator(selector).count() > 0:
-                    content_parts.append(page.locator(selector).first.inner_text().strip())
+            sel1 = s.select_one("div.prose-title-lg.text-base-content-light")
+            if sel1:
+                t = sel1.get_text(strip=True)
+                if t:
+                    content_parts.append(t)
+            sel2 = s.select_one("div.w-full.overflow-x-auto.break-words.lg\\:max-w-\\[660px\\]")
+            if sel2:
+                t = sel2.get_text(strip=True)
+                if t:
+                    content_parts.append(t)
             content = "\n".join(content_parts)
-
             imp_content = " ".join(content.split()[:200])
-
             links_in_content = []
-            content_links_elem = page.locator(
-                "div.w-full.overflow-x-auto.break-words.lg\\:max-w-\\[660px\\]"
-            ).first
-            for link_elem in content_links_elem.locator("a").all():
-                link_href = link_elem.get_attribute("href")
-                if link_href:
-                    links_in_content.append(link_href)
-
+            if sel2:
+                for a in sel2.select("a[href]"):
+                    href = a.get("href")
+                    if href:
+                        links_in_content.append(urljoin(article_url, href))
             card_data = leak_model(
                 m_title=title,
                 m_url=article_url,
@@ -143,11 +151,9 @@ class _csa_gov_sg(leak_extractor_interface, ABC):
                 m_leak_date=helper_method.extract_and_convert_date(date),
                 m_weblink=links_in_content,
             )
-
             entity_data = entity_model(
                 m_scrap_file=self.__class__.__name__,
                 m_team="csa-gov-sg",
                 m_country=["Singapore"],
             )
-
             self.append_leak_data(card_data, entity_data)

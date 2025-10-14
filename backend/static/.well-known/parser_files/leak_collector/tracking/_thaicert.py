@@ -2,9 +2,7 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
-
-from playwright.sync_api import Page
-
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -58,7 +56,7 @@ class _thaicert(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_javascript=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -87,84 +85,83 @@ class _thaicert(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
+    def parse_leak_data(self, page):
+        try:
+            max_pages = 2 if self._is_crawled else 35
+            for page_number in range(1, max_pages + 1):
+                current_url = urljoin(self.seed_url, f"page/{page_number}/")
+                resp = page.get(current_url, timeout=30)
+                resp.raise_for_status()
+                list_soup = BeautifulSoup(resp.text, "html.parser")
 
+                post_links = []
+                for a in list_soup.select("header.entry-header h2.entry-title a[href]"):
+                    href = a.get("href")
+                    if href:
+                        post_links.append(href.strip())
 
-    def parse_leak_data(self, page: Page):
+                if not post_links:
+                    break
 
-        max_pages = 2 if self._is_crawled else 35
-
-        for page_number in range(1, max_pages + 1):
-            current_url = urljoin(self.seed_url, f"page/{page_number}/")
-
-            page.goto(current_url, timeout=30000)
-            page.wait_for_selector("header.entry-header h2.entry-title a[href]", timeout=10000)
-
-            post_links = []
-            for link in page.locator("header.entry-header h2.entry-title a[href]").all():
-                href = link.get_attribute("href")
-                if href:
-                    post_links.append(href.strip())
-
-            if not post_links:
-                break
-
-            for url in post_links:
-                full_url = urljoin(self.seed_url, url)
-
-                page.goto(full_url, timeout=30000)
-                page.wait_for_selector("div.main-title .title a", timeout=10000)
-
-
-                title_element = page.locator("div.main-title .title a").first
-                title = title_element.text_content().strip() if title_element.is_visible() else "No title"
-                if title == "No title":
-                    continue
-
-                date_element = page.locator("time.entry-date.published").first
-                date_text = date_element.text_content().strip() if date_element.is_visible() else ""
-                parsed_date = None
-                if date_text:
+                for url in post_links:
+                    full_url = urljoin(self.seed_url, url)
                     try:
-                        parsed_date = datetime.strptime(date_text, "%B %d, %Y").date()
-                    except ValueError:
+                        resp = page.get(full_url, timeout=30)
+                        resp.raise_for_status()
+                        s = BeautifulSoup(resp.text, "html.parser")
+
+                        title_el = s.select_one("div.main-title .title a")
+                        title = title_el.get_text(strip=True) if title_el and title_el.get_text(strip=True) else "No title"
+                        if title == "No title":
+                            continue
+
+                        date_el = s.select_one("time.entry-date.published")
                         parsed_date = None
+                        if date_el:
+                            date_text = date_el.get_text(strip=True)
+                            try:
+                                parsed_date = datetime.strptime(date_text, "%B %d, %Y").date()
+                            except Exception:
+                                parsed_date = None
 
-                desc_elements = page.locator("div.entry-content p").all()
-                description = "\n".join(
-                    p.text_content().strip() for p in desc_elements if p.text_content().strip()
-                ) if desc_elements else "No description found"
+                        desc_elements = s.select("div.entry-content p")
+                        description = "\n".join(p.get_text(strip=True) for p in desc_elements if p.get_text(strip=True)) if desc_elements else "No description found"
 
-                source_links = []
-                content_div = page.locator("div.entry-content").first
-                if content_div.is_visible():
-                    for p in content_div.locator("p").all():
-                        for a in p.locator("a[href]").all():
-                            href = a.get_attribute("href").strip()
-                            text = a.text_content().strip()
-                            if href == text:
-                                source_links.append(href)
-                source_links = list(set(source_links))
+                        source_links = []
+                        content_div = s.select_one("div.entry-content")
+                        if content_div:
+                            for p in content_div.select("p"):
+                                for a in p.select("a[href]"):
+                                    href = a.get("href").strip() if a.get("href") else ""
+                                    text = a.get_text(strip=True)
+                                    if href and text and href == text and href not in source_links:
+                                        source_links.append(href)
+                        source_links = list(dict.fromkeys(source_links))
 
-                m_content = description
+                        m_content = description
 
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=full_url,
-                    m_base_url=self.base_url,
-                    m_content=m_content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=description[:500],
-                    m_content_type=["news", "tracking"],
-                    m_weblink=source_links,
-                    m_leak_date=parsed_date
-                )
+                        card_data = leak_model(
+                            m_title=title,
+                            m_url=full_url,
+                            m_base_url=self.base_url,
+                            m_content=m_content,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=description[:500],
+                            m_content_type=["news", "tracking"],
+                            m_weblink=source_links,
+                            m_leak_date=parsed_date
+                        )
 
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="ThaiCERT - Thailand Computer Emergency Response Team",
-                    m_author=["ThaiCERT"],
-                    m_country=["Thailand"]
-                )
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_team="ThaiCERT - Thailand Computer Emergency Response Team",
+                            m_author=["ThaiCERT"],
+                            m_country=["Thailand"]
+                        )
 
-                self.append_leak_data(card_data, entity_data)
-
+                        self.append_leak_data(card_data, entity_data)
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                        continue
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

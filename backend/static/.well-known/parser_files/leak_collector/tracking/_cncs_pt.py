@@ -1,7 +1,7 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-from playwright.sync_api import Page
+from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -50,7 +50,7 @@ class _cncs_pt(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -74,7 +74,7 @@ class _cncs_pt(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
             base_url = self.base_url
             is_first_crawl = not self.is_crawled
@@ -82,26 +82,27 @@ class _cncs_pt(leak_extractor_interface, ABC):
             visited_urls = set()
             page_idx = 1
             has_next = True
+            current_html = page._seed_response.text
             while has_next:
-                page.wait_for_selector('.blog-posts .row.px-3 article.post', timeout=10000)
-                cards = page.query_selector_all('.blog-posts .row.px-3 article.post')
+                soup = BeautifulSoup(current_html, "html.parser")
+                cards = soup.select('.blog-posts .row.px-3 article.post')
                 found_valid_article = False
                 for card in cards:
-                    a_tag = card.query_selector('.post-meta a.btn')
-                    card_url = urljoin(base_url, a_tag.get_attribute("href")) if a_tag else None
+                    a_tag = card.select_one('.post-meta a.btn')
+                    card_url = urljoin(base_url, a_tag.get("href")) if a_tag and a_tag.get("href") else None
                     if not card_url or card_url in visited_urls:
                         continue
                     visited_urls.add(card_url)
-                    title_tag = card.query_selector('h2.news-title-2')
-                    title = title_tag.inner_text().strip() if title_tag else ""
-                    date_meta = card.query_selector('.post-date')
+                    title_tag = card.select_one('h2.news-title-2')
+                    title = title_tag.get_text(strip=True) if title_tag else ""
+                    date_meta = card.select_one('.post-date')
                     date_obj = None
                     if date_meta:
-                        day_elem = date_meta.query_selector('.day')
-                        month_elem = date_meta.query_selector('.month')
+                        day_elem = date_meta.select_one('.day')
+                        month_elem = date_meta.select_one('.month')
                         if day_elem and month_elem:
-                            day = day_elem.inner_text().strip()
-                            month_year = month_elem.inner_text().strip()
+                            day = day_elem.get_text(strip=True)
+                            month_year = month_elem.get_text(strip=True)
                             tokens = month_year.split()
                             if len(tokens) == 2:
                                 month_txt, year_txt = tokens
@@ -117,66 +118,71 @@ class _cncs_pt(leak_extractor_interface, ABC):
                                 month_num = pt_month_map.get(month_key, None)
                                 if month_num and day.isdigit() and year_txt.isdigit():
                                     try:
-                                        date_obj = datetime(
-                                            year=int(year_txt), month=month_num, day=int(day)
-                                        ).date()
+                                        date_obj = datetime(year=int(year_txt), month=month_num, day=int(day)).date()
                                     except Exception:
                                         date_obj = None
                     if not date_obj or date_obj.year < min_year:
                         continue
-                    tags_elem = card.query_selector('.post-meta span')
+                    tags_elem = card.select_one('.post-meta span')
                     tags = []
                     if tags_elem:
-                        tags_str = tags_elem.inner_text().strip()
+                        tags_str = tags_elem.get_text(strip=True)
                         tags_str = tags_str.replace('\uf02b', '')
                         tags = [t.strip() for t in tags_str.split(",") if t.strip()]
                     found_valid_article = True
-                    detail_page = page.context.new_page()
-                    detail_page.goto(card_url, wait_until="domcontentloaded")
-                    detail_page.wait_for_selector('.post-content', timeout=10000)
-                    content_elem = detail_page.query_selector('.post-content')
-                    content = content_elem.inner_text().strip() if content_elem else ""
-                    weblinks = []
-                    if content_elem:
-                        for a in content_elem.query_selector_all('a[href]'):
-                            href = a.get_attribute("href")
-                            if href and not href.startswith("#") and href not in weblinks:
-                                href = urljoin(card_url, href)
-                                weblinks.append(href)
-                    card_data = leak_model(
-                        m_title=title,
-                        m_url=card_url,
-                        m_base_url=base_url,
-                        m_content=content,
-                        m_network=helper_method.get_network_type(base_url),
-                        m_important_content=content[:500],
-                        m_weblink=weblinks,
-                        m_leak_date=date_obj,
-                        m_content_type=["news", "tracking"],
-                    )
-                    entity_data = entity_model(
-                        m_scrap_file=self.__class__.__name__,
-                        m_team="cncs",
-                        m_country=["portugal"],
-                        m_tags=tags,
-                    )
-                    self.append_leak_data(card_data, entity_data)
-                    detail_page.close()
+                    try:
+                        detail_resp = page.get(card_url, timeout=60)
+                        detail_resp.raise_for_status()
+                        detail_soup = BeautifulSoup(detail_resp.text, "html.parser")
+                        content_elem = detail_soup.select_one('.post-content')
+                        content = content_elem.get_text(strip=True) if content_elem else ""
+                        weblinks = []
+                        if content_elem:
+                            for a in content_elem.select('a[href]'):
+                                href = a.get("href")
+                                if href and not href.startswith("#") and href not in weblinks:
+                                    weblinks.append(urljoin(card_url, href))
+                        card_data = leak_model(
+                            m_title=title,
+                            m_url=card_url,
+                            m_base_url=base_url,
+                            m_content=content,
+                            m_network=helper_method.get_network_type(base_url),
+                            m_important_content=content[:500],
+                            m_weblink=weblinks,
+                            m_leak_date=date_obj,
+                            m_content_type=["news", "tracking"],
+                        )
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_team="cncs",
+                            m_country=["portugal"],
+                            m_tags=tags,
+                        )
+                        self.append_leak_data(card_data, entity_data)
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 if not found_valid_article:
                     break
-                active_li = page.query_selector('ul.pagination li.page-item.active')
+                active_li = soup.select_one('ul.pagination li.page-item.active')
                 has_next = False
                 if active_li:
-                    next_li = active_li.evaluate_handle('node => node.nextElementSibling')
+                    next_li = active_li.find_next_sibling("li")
                     if next_li:
-                        classes = next_li.get_attribute('class') or ''
+                        classes = " ".join(next_li.get("class") or [])
                         if 'invisible' not in classes and 'active' not in classes:
-                            next_link = next_li.query_selector('a.page-link')
-                            if next_link and next_link.is_enabled():
-                                next_link.click()
-                                page.wait_for_load_state("domcontentloaded")
-                                page_idx += 1
-                                has_next = True
-                                continue
+                            next_link = next_li.select_one('a.page-link')
+                            if next_link and next_link.get("href"):
+                                next_href = urljoin(self.seed_url, next_link.get("href"))
+                                try:
+                                    resp = page.get(next_href, timeout=60)
+                                    resp.raise_for_status()
+                                    current_html = resp.text
+                                    page_idx += 1
+                                    has_next = True
+                                    continue
+                                except Exception as ex:
+                                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                                    break
         except Exception as ex:
             log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

@@ -2,9 +2,7 @@ from abc import ABC
 from datetime import datetime
 from typing import List
 from urllib.parse import urljoin
-
-from playwright.sync_api import Page
-
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -53,7 +51,7 @@ class _jpcert(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -77,67 +75,72 @@ class _jpcert(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-        max_pages = 5
-        page_count = 1
-        all_urls = set()
+    def parse_leak_data(self, page):
+        try:
+            max_pages = 5
+            page_count = 1
+            all_urls = set()
+            if self._is_crawled:
+                max_pages = 2
 
-        if self._is_crawled:
-            max_pages = 2
+            current_html = page._seed_response.text
+            while page_count <= max_pages:
+                soup = BeautifulSoup(current_html, "html.parser")
+                for a in soup.select("div.entry-title a"):
+                    href = a.get("href")
+                    if href:
+                        all_urls.add(urljoin(self.base_url, href))
+                next_a = soup.select_one("li.page-navigation-list-item.page-navigation-next a")
+                if not next_a or not next_a.get("href"):
+                    break
+                next_href = urljoin(self.base_url, next_a.get("href"))
+                resp = page.get(next_href, timeout=60)
+                resp.raise_for_status()
+                current_html = resp.text
+                page_count += 1
 
-        while page_count <= max_pages:
-            page.wait_for_load_state("domcontentloaded")
-            links = page.locator("div.entry-title a")
-            count = links.count()
-            for i in range(count):
-                href = links.nth(i).get_attribute("href")
-                if href:
-                    all_urls.add(href)
-
-            next_button = page.locator("li.page-navigation-list-item.page-navigation-next a")
-            if not next_button.is_visible():
-              break
-            next_button.scroll_into_view_if_needed()
-            next_button.click()
-            page.wait_for_load_state("domcontentloaded")
-            page_count += 1
-
-        for idx, url in enumerate(all_urls):
-            try:
-                page.goto(url, timeout=60000)
-
-                title = page.locator("h2.entry-title").inner_text()
-
-                date_text = page.locator("div.entry-date time").inner_text()
-                date = datetime.strptime(date_text, "%B %d, %Y").date()
-
-                content= page.locator("section.entry-content.clearfix").inner_text()
-
-                images = page.locator("section.entry-content.clearfix img").all()
-                image_urls = [urljoin(self.base_url, img.get_attribute("src")) for img in images if
-                img.get_attribute("src")]
-
-                important_content = " ".join(content.split()[:200])
-
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=url,
-                    m_base_url=self.base_url,
-                    m_content=content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=important_content,
-                    m_content_type=["news", "tracking"],
-                    m_leak_date=date,
-                    m_logo_or_images=image_urls,
-                )
-
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="jpcert",
-                    m_country=["Japan"]
-                )
-
-                self.append_leak_data(card_data, entity_data)
-
-            except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+            for idx, url in enumerate(all_urls):
+                try:
+                    resp = page.get(url, timeout=60)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
+                    title_el = s.select_one("h2.entry-title")
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    date_el = s.select_one("div.entry-date time")
+                    date = None
+                    if date_el:
+                        date_text = date_el.get_text(strip=True)
+                        try:
+                            date = datetime.strptime(date_text, "%B %d, %Y").date()
+                        except Exception:
+                            date = None
+                    content_el = s.select_one("section.entry-content.clearfix")
+                    content = content_el.get_text("\n", strip=True) if content_el else ""
+                    images = []
+                    if content_el:
+                        for img in content_el.select("img"):
+                            src = img.get("src")
+                            if src:
+                                images.append(urljoin(self.base_url, src))
+                    important_content = " ".join(content.split()[:200])
+                    card_data = leak_model(
+                        m_title=title,
+                        m_url=url,
+                        m_base_url=self.base_url,
+                        m_content=content,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=important_content,
+                        m_content_type=["news", "tracking"],
+                        m_leak_date=date,
+                        m_logo_or_images=images,
+                    )
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="jpcert",
+                        m_country=["Japan"]
+                    )
+                    self.append_leak_data(card_data, entity_data)
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

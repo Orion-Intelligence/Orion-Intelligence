@@ -1,7 +1,8 @@
+import re
+
 from abc import ABC
 from typing import List
-from playwright.sync_api import Page
-import re
+from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
@@ -50,7 +51,7 @@ class _nsm(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -74,63 +75,54 @@ class _nsm(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
-            seed_url = self.seed_url
             base_url = self.base_url
             is_first_crawl = not self.is_crawled
             min_year = 2023 if is_first_crawl else 2024
-
             visited_urls = set()
-
-            page.goto(seed_url, wait_until="domcontentloaded")
-
+            current_html = page._seed_response.text
             has_next = True
             while has_next:
-                cards = page.query_selector_all("li.article article.card.list-view")
+                soup = BeautifulSoup(current_html, "html.parser")
+                cards = soup.select("li.article article.card.list-view")
                 found_valid_article = False
-
                 for card in cards:
-                    a_tag = card.query_selector("a[href]")
-                    card_url = urljoin(base_url, a_tag.get_attribute("href")) if a_tag else None
+                    a_tag = card.select_one("a[href]")
+                    card_url = urljoin(base_url, a_tag.get("href")) if a_tag and a_tag.get("href") else None
                     if not card_url or card_url in visited_urls:
                         continue
                     visited_urls.add(card_url)
-
-                    date_meta = card.query_selector('.articlelist__meta')
-                    date_text = date_meta.inner_text().strip() if date_meta else ""
+                    date_meta = card.select_one('.articlelist__meta')
+                    date_text = date_meta.get_text(strip=True) if date_meta else ""
                     m = re.search(r'(\d{4})', date_text)
                     if not m:
                         continue
                     year_str = m.group(1)
                     year = int(year_str)
-
                     if year < min_year:
                         continue
-
                     found_valid_article = True
-
-                    detail_page = page.context.new_page()
-                    detail_page.goto(card_url, wait_until="domcontentloaded")
-                    detail_page.wait_for_selector("article h1[property='headline']", timeout=8000)
-
-                    title_tag = detail_page.query_selector("article h1[property='headline']")
-                    title = title_tag.inner_text().strip() if title_tag else ""
-                    date_tag = detail_page.query_selector("div.published time")
-                    published_date = date_tag.get_attribute("datetime") if date_tag else date_text
+                    detail_resp = page.get(card_url, timeout=60)
+                    detail_resp.raise_for_status()
+                    detail_soup = BeautifulSoup(detail_resp.text, "html.parser")
+                    title_tag = detail_soup.select_one("article h1[property='headline']")
+                    title = title_tag.get_text(strip=True) if title_tag else ""
+                    date_tag = detail_soup.select_one("div.published time")
+                    published_date = date_tag.get("datetime") if date_tag and date_tag.get("datetime") else date_text
                     if published_date and "T" in published_date:
                         published_date = published_date.split("T")[0]
-                    digest_tag = detail_page.query_selector("div.digest")
-                    digest = digest_tag.inner_text().strip() if digest_tag else ""
-                    main_content_tag = detail_page.query_selector("div.main-content")
-                    main_content = main_content_tag.inner_text().strip() if main_content_tag else ""
+                    digest_tag = detail_soup.select_one("div.digest")
+                    digest = digest_tag.get_text(strip=True) if digest_tag else ""
+                    main_content_tag = detail_soup.select_one("div.main-content")
+                    main_content = main_content_tag.get_text(strip=True) if main_content_tag else ""
                     content = (digest + "\n\n" + main_content).strip() if main_content else digest
                     weblinks = []
                     if main_content_tag:
-                        for a in main_content_tag.query_selector_all('a[href]'):
-                            href = urljoin(base_url, a.get_attribute("href"))
-                            weblinks.append(href)
-
+                        for a in main_content_tag.select('a[href]'):
+                            href = a.get("href")
+                            if href:
+                                weblinks.append(urljoin(base_url, href))
                     card_data = leak_model(
                         m_title=title,
                         m_url=card_url,
@@ -147,17 +139,16 @@ class _nsm(leak_extractor_interface, ABC):
                         m_team="nsm",
                         m_country=["norway"]
                     )
-
                     self.append_leak_data(card_data, entity_data)
-                    detail_page.close()
-
                 if not found_valid_article:
                     break
-
-                next_btn = page.query_selector('a.next-page.page-link')
-                if next_btn and next_btn.is_enabled():
-                    next_url = urljoin(base_url, next_btn.get_attribute("href"))
-                    page.goto(next_url, wait_until="domcontentloaded")
+                next_btn = soup.select_one('a.next-page.page-link')
+                if next_btn and next_btn.get("href"):
+                    next_url = urljoin(base_url, next_btn.get("href"))
+                    resp = page.get(next_url, timeout=60)
+                    resp.raise_for_status()
+                    current_html = resp.text
+                    continue
                 else:
                     has_next = False
         except Exception as ex:

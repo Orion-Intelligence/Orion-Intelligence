@@ -2,8 +2,6 @@ import re
 from abc import ABC
 from datetime import date
 from typing import List
-from playwright.sync_api import Page
-
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
@@ -60,7 +58,7 @@ class _phishunt(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
 
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.DEFACEMENT)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.DEFACEMENT)
 
     @property
     def card_data(self) -> List[defacement_model]:
@@ -88,20 +86,20 @@ class _phishunt(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
-            text_content = page.content()
+            text_content = page._seed_response.text
             urls = re.findall(r'https?://[^\s"\'>]+', text_content)
 
             for i, link in enumerate(urls):
                 if not link.startswith(("http://", "https://")):
                     continue
 
-                content = helper_method.extract_refhtml(link, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                content = helper_method.extract_refhtml_requests(link, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                 card_data = defacement_model(
                     m_content=content,
-                    m_source_url=[page.url],
+                    m_source_url=[self.base_url],
                     m_base_url=self.base_url,
                     m_network=helper_method.get_network_type(self.base_url),
                     m_url=link,

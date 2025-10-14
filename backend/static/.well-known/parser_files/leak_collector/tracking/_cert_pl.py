@@ -1,11 +1,13 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-from playwright.sync_api import Page
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 
@@ -53,7 +55,7 @@ class _cert_pl(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -79,127 +81,105 @@ class _cert_pl(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         max_pages = 2 if self._is_crawled else 16
-
         for page_number in range(1, max_pages + 1):
-
-            if page_number == 1:
-                current_url = f"{self.seed_url}"
-            else:
-                current_url = f"{self.seed_url}/{page_number}/"
-
-            page.goto(current_url)
-            page.wait_for_selector("a.post-outer-container", timeout=10000)
-
-            post_links = []
-            for link in page.locator("a.post-outer-container").all():
-                href = link.get_attribute("href")
-                if not href:
-                    continue
-
-                if href.startswith("../"):
-                    href = href[2:]
-
-
-
-                full_url = f"{self.seed_url}/{href}"
-
-                post_links.append(full_url)
-
-
-            if not post_links:
-                print(f"No posts found on {current_url}, stopping")
-                break
-
-            for url in post_links:
-
-                try:
-                    page.goto(url, wait_until='domcontentloaded', timeout=30000)
-                except Exception as e:
-                    print(f"[WARN] Timeout or error on {url}: {e}, skipping...")
-                    return
-
-                page.wait_for_selector("div.cert-title", timeout=10000)
-
-                title_element = page.locator("div.cert-title").first
-                title = title_element.text_content().strip() if title_element.is_visible() else "No title"
-                if title == "No title":
-                    continue
-
-                date_element = page.locator("div.cert-subtitle").first
-                date_text = ""
-                parsed_date = None
-                if date_element.is_visible():
-                    raw_text = date_element.text_content().strip()
-                    date_text = raw_text.split("|")[0].strip()
+            try:
+                if page_number == 1:
+                    current_url = f"{self.seed_url}"
+                else:
+                    current_url = f"{self.seed_url}/{page_number}/"
+                resp = page.get(current_url, timeout=60)
+                resp.raise_for_status()
+                s = BeautifulSoup(resp.text, "html.parser")
+                post_links = []
+                for a in s.select("a.post-outer-container"):
+                    href = a.get("href")
+                    if not href:
+                        continue
+                    if href.startswith("../"):
+                        href = href[2:]
+                    full_url = urljoin(self.seed_url + "/", href)
+                    post_links.append(full_url)
+                if not post_links:
+                    print(f"No posts found on {current_url}, stopping")
+                    break
+                for url in post_links:
                     try:
-                        parsed_date = datetime.strptime(date_text, "%d %B %Y").date()
-                    except ValueError as e:
-                        print(f"[!] Failed to parse date '{date_text}' for {full_url}: {e}")
-
-                desc_elements = page.locator(
-                    "div.main.cell.entry div.article p, "
-                    "div.main.cell.entry div.article li, "
-                    "div.main.cell.entry div.article ul, "
-                    "div.main.cell.entry div.article ol, "
-                    "div.main.cell.entry div.article h2, "
-                    "div.main.cell.entry div.article h3, "
-                    "div.main.cell.entry div.article h4 "
-                ).all()
-
-                description_parts = []
-                for el in desc_elements:
-                    text = el.text_content().strip()
-                    if text:
-                        if el.evaluate("el => el.tagName.toLowerCase()") == "li":
-                            description_parts.append(f"- {text}")
-                        else:
-                            description_parts.append(text)
-
-                description = "\n".join(description_parts) if description_parts else "No description found"
-
-                if description == "No description found":
-                    print(f"No description found for {full_url}")
-
-                source_links = []
-                content_div = page.locator("div.main.cell.entry div.article").first
-                if content_div.is_visible():
-                    for a in content_div.locator("a[href]").all():
-                        href = a.get_attribute("href").strip()
-                        if href and (href == a.text_content().strip() or href.startswith('http')):
-                            source_links.append(href)
-                source_links = list(set(source_links))
-
-                image_urls = []
-                for img in page.locator("div.main.cell.entry div.article img").all():
-                    src = img.get_attribute("src")
-                    if src:
-                        image_urls.append(src if src.startswith('http') else f"{self.base_url}{src}")
-
-                m_content = f"Title: {title}\n{description}\n\nPublished on: {date_text}\nResources: {source_links}\nImages: {image_urls}"
-
-
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=full_url,
-                    m_base_url=self.base_url,
-                    m_content=m_content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=description[:500],
-                    m_content_type=["news", "tracking"],
-                    m_logo_or_images=image_urls,
-                    m_websites=source_links,
-                    m_leak_date=parsed_date
-                )
-
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="CERT Polska Team",
-                    m_author=["CERT Author"],
-                    m_country=["Poland"]
-                )
-
-                self.append_leak_data(card_data, entity_data)
-
+                        resp = page.get(url, timeout=60)
+                        resp.raise_for_status()
+                    except Exception as e:
+                        print(f"[WARN] Timeout or error on {url}: {e}, skipping...")
+                        return
+                    s = BeautifulSoup(resp.text, "html.parser")
+                    title_element = s.select_one("div.cert-title")
+                    title = title_element.get_text(strip=True) if title_element else "No title"
+                    if title == "No title":
+                        continue
+                    date_element = s.select_one("div.cert-subtitle")
+                    date_text = ""
+                    parsed_date = None
+                    if date_element:
+                        raw_text = date_element.get_text(strip=True)
+                        date_text = raw_text.split("|")[0].strip()
+                        try:
+                            parsed_date = datetime.strptime(date_text, "%d %B %Y").date()
+                        except ValueError as e:
+                            print(f"[!] Failed to parse date '{date_text}' for {url}: {e}")
+                    desc_selectors = [
+                        "div.main.cell.entry div.article p",
+                        "div.main.cell.entry div.article li",
+                        "div.main.cell.entry div.article ul",
+                        "div.main.cell.entry div.article ol",
+                        "div.main.cell.entry div.article h2",
+                        "div.main.cell.entry div.article h3",
+                        "div.main.cell.entry div.article h4"
+                    ]
+                    description_parts = []
+                    for sel in desc_selectors:
+                        for el in s.select(sel):
+                            text = el.get_text(strip=True)
+                            if text:
+                                if el.name.lower() == "li":
+                                    description_parts.append(f"- {text}")
+                                else:
+                                    description_parts.append(text)
+                    description = "\n".join(description_parts) if description_parts else "No description found"
+                    if description == "No description found":
+                        print(f"No description found for {url}")
+                    source_links = []
+                    content_div = s.select_one("div.main.cell.entry div.article")
+                    if content_div:
+                        for a in content_div.select("a[href]"):
+                            href = a.get("href").strip()
+                            if href and (href == a.get_text(strip=True) or href.startswith("http")):
+                                source_links.append(href)
+                    source_links = list(set(source_links))
+                    image_urls = []
+                    for img in s.select("div.main.cell.entry div.article img"):
+                        src = img.get("src")
+                        if src:
+                            image_urls.append(src if src.startswith("http") else urljoin(self.base_url, src))
+                    m_content = f"Title: {title}\n{description}\n\nPublished on: {date_text}\nResources: {source_links}\nImages: {image_urls}"
+                    card_data = leak_model(
+                        m_title=title,
+                        m_url=url,
+                        m_base_url=self.base_url,
+                        m_content=m_content,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=description[:500],
+                        m_content_type=["news", "tracking"],
+                        m_logo_or_images=image_urls,
+                        m_websites=source_links,
+                        m_leak_date=parsed_date
+                    )
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="CERT Polska Team",
+                        m_author=["CERT Author"],
+                        m_country=["Poland"]
+                    )
+                    self.append_leak_data(card_data, entity_data)
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                break

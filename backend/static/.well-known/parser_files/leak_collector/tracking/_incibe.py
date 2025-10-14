@@ -2,9 +2,8 @@ import re
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -53,7 +52,7 @@ class _incibe(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -77,72 +76,87 @@ class _incibe(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-        max_pages = 5
-        page_count = 0
-        blog_links = []
-        if self._is_crawled:
-            max_pages = 2
+    def parse_leak_data(self, page):
+        try:
+            max_pages = 5
+            page_count = 0
+            blog_links = []
+            if self._is_crawled:
+                max_pages = 2
 
-        while page_count < max_pages:
-            links = page.locator("h3 > a[rel='bookmark']")
-            for i in range(links.count()):
-                href = links.nth(i).get_attribute("href")
-                if href:
-                    full_url = page.url.split("/en/incibe-cert")[0] + href
-                    blog_links.append(full_url)
+            current_html = page._seed_response.text
+            base_root = page._seed_response.url.split("/en/incibe-cert")[0]
 
-            next_btn = page.locator("a.page-link[rel='next']")
-            if next_btn.count() == 0 or not next_btn.is_visible():
-                break
-            next_btn.click()
-            page.wait_for_load_state("domcontentloaded")
-            page_count += 1
+            while page_count < max_pages:
+                soup = BeautifulSoup(current_html, "html.parser")
+                for a in soup.select("h3 > a[rel='bookmark']"):
+                    href = a.get("href")
+                    if href:
+                        full_url = base_root + href
+                        blog_links.append(full_url)
 
-        for idx, url in enumerate(blog_links):
-            try:
-                page.goto(url, timeout=60000)
-                page.wait_for_load_state("domcontentloaded")
+                next_a = soup.select_one("a.page-link[rel='next']")
+                if not next_a or not next_a.get("href"):
+                    break
+                next_href = urljoin(base_root, next_a.get("href"))
+                resp = page.get(next_href, timeout=60)
+                resp.raise_for_status()
+                current_html = resp.text
+                page_count += 1
 
-                title_elem = page.locator("h1 span.field--name-title")
-                title = title_elem.inner_text().strip() if title_elem.count() > 0 else ""
+            for url in blog_links:
+                try:
+                    resp = page.get(url, timeout=60)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
 
-                author_elem = page.locator("div.field--name-field-autor div.field__item")
-                author = author_elem.inner_text().strip() if author_elem.count() > 0 else ""
+                    title_elem = s.select_one("h1 span.field--name-title")
+                    title = title_elem.get_text(strip=True) if title_elem else ""
 
-                content_elem = page.locator(
-                    "div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item"
-                )
-                content = content_elem.all_inner_texts() if content_elem.count() > 0 else ""
-                content = " ".join([c.strip() for c in content if c.strip()])
+                    author_elem = s.select_one("div.field--name-field-autor div.field__item")
+                    author = author_elem.get_text(strip=True) if author_elem else ""
 
-                date_text = page.locator(
-                    "div.node__content.field--type-text-with-summary div.field__item").inner_text().strip()
-                match = re.search(r"\d{2}/\d{2}/\d{4}", date_text)
-                date_str = match.group(0)
-                date_obj = datetime.strptime(date_str, "%d/%m/%Y").date()
+                    content_elem = s.select_one(
+                        "div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item"
+                    )
+                    if content_elem:
+                        content = " ".join([t.strip() for t in content_elem.stripped_strings if t.strip()])
+                    else:
+                        content = ""
 
-                important_content = " ".join(content.split()[:200])
+                    date_text_elem = s.select_one("div.node__content.field--type-text-with-summary div.field__item")
+                    date_text = date_text_elem.get_text(strip=True) if date_text_elem else ""
+                    match = re.search(r"\d{2}/\d{2}/\d{4}", date_text)
+                    date_obj = None
+                    if match:
+                        try:
+                            date_str = match.group(0)
+                            date_obj = datetime.strptime(date_str, "%d/%m/%Y").date()
+                        except Exception:
+                            date_obj = None
 
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=url,
-                    m_base_url=self.base_url,
-                    m_content=content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=important_content,
-                    m_content_type=["news", "tracking"],
-                    m_leak_date=date_obj,
-                )
+                    important_content = " ".join(content.split()[:200])
 
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="incibe-cert",
-                    m_author=[author],
-                    m_country=["spain"]
-                )
+                    card_data = leak_model(
+                        m_title=title,
+                        m_url=url,
+                        m_base_url=self.base_url,
+                        m_content=content,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=important_content,
+                        m_content_type=["news", "tracking"],
+                        m_leak_date=date_obj,
+                    )
 
-                self.append_leak_data(card_data, entity_data)
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="incibe-cert",
+                        m_author=[author] if author else [],
+                        m_country=["spain"]
+                    )
 
-            except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                    self.append_leak_data(card_data, entity_data)
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

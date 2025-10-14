@@ -2,9 +2,7 @@ import re
 from abc import ABC
 from datetime import datetime
 from typing import List
-
-from playwright.sync_api import Page
-
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -57,7 +55,7 @@ class _cert_cn(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -83,53 +81,47 @@ class _cert_cn(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
-
-        page.wait_for_selector('div.left.li a',timeout=10000)
-
-        links = page.query_selector_all('div.left.li a')
-        hrefs = [link.get_attribute('href') for link in links]
-
-        for href in hrefs:
-            full_url = self.base_url + href
-            try:
-                page.goto(full_url,timeout=10000)
-
-                title_element = page.query_selector('div.title')
-                title = title_element.inner_text() if title_element else ""
-
-                content_elements = page.query_selector_all('div.content p')
-                content_parts = [elem.inner_text().strip() for elem in content_elements if elem.inner_text().strip()]
-                content = ' '.join(content_parts)
-
-                img_elements = page.query_selector_all('div.content img')
-                img_srcs = [self.base_url + elem.get_attribute('src') for elem in img_elements if
-                            elem.get_attribute('src')]
-
-                date_obj = datetime.strptime(re.search(r"/(\d{8})\d+/", full_url).group(1), "%Y%m%d")
-
-                card_data = leak_model(
-                    m_title=title,
-                    m_url=full_url,
-                    m_base_url=self.base_url,
-                    m_content=content,
-                    m_network=helper_method.get_network_type(self.base_url),
-                    m_important_content=content[:500],
-                    m_content_type=["news", "tracking"],
-                    m_leak_date=date_obj,
-                    m_logo_or_images=img_srcs,
-                )
-
-                entity_data = entity_model(
-                    m_scrap_file=self.__class__.__name__,
-                    m_team="National Computer Network Emergency Response Technical Team",
-                    m_country=["CHINA"],
-                    m_author=["CNCERT/CC"]
-                )
-
-                self.append_leak_data(card_data, entity_data)
-
-
-            except Exception as ex:
-                log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
-
+    def parse_leak_data(self, page):
+        try:
+            seed_resp = getattr(page, "_seed_response", None)
+            current_html = seed_resp.text if seed_resp and hasattr(seed_resp, "text") else page.get(self.seed_url, timeout=60).text
+            soup = BeautifulSoup(current_html, "html.parser")
+            links = soup.select('div.left.li a')
+            hrefs = [a.get("href") for a in links if a.get("href")]
+            for href in hrefs:
+                full_url = self.base_url + href
+                try:
+                    resp = page.get(full_url, timeout=60)
+                    resp.raise_for_status()
+                    s = BeautifulSoup(resp.text, "html.parser")
+                    title_element = s.select_one('div.title')
+                    title = title_element.get_text(strip=True) if title_element else ""
+                    content_elements = s.select('div.content p')
+                    content_parts = [p.get_text(strip=True) for p in content_elements if p.get_text(strip=True)]
+                    content = ' '.join(content_parts)
+                    img_elements = s.select('div.content img')
+                    img_srcs = [self.base_url + img.get("src") for img in img_elements if img.get("src")]
+                    m = re.search(r"/(\d{8})\d+/", full_url)
+                    date_obj = datetime.strptime(m.group(1), "%Y%m%d") if m else None
+                    card_data = leak_model(
+                        m_title=title,
+                        m_url=full_url,
+                        m_base_url=self.base_url,
+                        m_content=content,
+                        m_network=helper_method.get_network_type(self.base_url),
+                        m_important_content=content[:500],
+                        m_content_type=["news", "tracking"],
+                        m_leak_date=date_obj,
+                        m_logo_or_images=img_srcs,
+                    )
+                    entity_data = entity_model(
+                        m_scrap_file=self.__class__.__name__,
+                        m_team="National Computer Network Emergency Response Technical Team",
+                        m_country=["CHINA"],
+                        m_author=["CNCERT/CC"]
+                    )
+                    self.append_leak_data(card_data, entity_data)
+                except Exception as ex:
+                    log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+        except Exception as ex:
+            log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))

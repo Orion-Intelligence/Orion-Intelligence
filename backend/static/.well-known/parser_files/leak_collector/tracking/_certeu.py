@@ -1,9 +1,8 @@
 from abc import ABC
 from typing import List
-from playwright.sync_api import Page
+from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from datetime import datetime
-
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -50,7 +49,7 @@ class _certeu(leak_extractor_interface, ABC):
     @property
     def rule_config(self) -> RuleModel:
         return RuleModel(
-            m_fetch_proxy=FetchProxy.NONE,m_fetch_config=FetchConfig.PLAYRIGHT,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+            m_fetch_proxy=FetchProxy.NONE,m_fetch_config=FetchConfig.REQUESTS,m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -84,7 +83,7 @@ class _certeu(leak_extractor_interface, ABC):
     def _format_date(dt: str) -> str:
         return datetime.fromisoformat(dt.replace("Z", "")).strftime("%Y-%m-%d")
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         targets = [
             {
                 "url": "https://cert.europa.eu/blog",
@@ -107,85 +106,77 @@ class _certeu(leak_extractor_interface, ABC):
                 "content_date_selector": ""
             }
         ]
-
         for target in targets:
-            page.goto(target["url"], wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_load_state("networkidle")
-
-            cards = page.query_selector_all(target["card_selector"])
-            articles = []
-
-            for card in cards[:30]:
-                try:
-                    link_elem = card.query_selector(target["link_selector"])
-                    if not link_elem:
+            try:
+                resp = page.get(target["url"], timeout=60)
+                resp.raise_for_status()
+                list_soup = BeautifulSoup(resp.text, "html.parser")
+                cards = list_soup.select(target["card_selector"])
+                articles = []
+                for card in cards[:30]:
+                    try:
+                        link_elem = card.select_one(target["link_selector"])
+                        if not link_elem:
+                            continue
+                        href = link_elem.get("href")
+                        url = urljoin(self.base_url, href) if href else None
+                        title = link_elem.get_text(strip=True)
+                        raw_date = ""
+                        if target["date_selector"]:
+                            date_elem = card.select_one(target["date_selector"])
+                            if target["date_format"] == "iso" and date_elem:
+                                raw_date = date_elem.get("datetime", "").strip()
+                            elif date_elem:
+                                raw_date = date_elem.get_text(strip=True)
+                        try:
+                            date = (
+                                datetime.fromisoformat(raw_date.replace("Z", "")).date()
+                                if target["date_format"] == "iso" and raw_date
+                                else datetime.strptime(raw_date, target["date_format"]).date()
+                            )
+                        except Exception:
+                            date = None
+                        articles.append((url, title, date, target["country"], target["team"], target["content_date_selector"]))
+                    except Exception:
                         continue
-
-                    url = urljoin(self.base_url, link_elem.get_attribute("href"))
-                    title = link_elem.inner_text().strip()
-
-                    raw_date = ""
-                    if target["date_selector"]:
-                        date_elem = card.query_selector(target["date_selector"])
-                        if target["date_format"] == "iso" and date_elem:
-                            raw_date = date_elem.get_attribute("datetime").strip()
-                        elif date_elem:
-                            raw_date = date_elem.inner_text().strip()
-
+                for index, (url, title, _, country, team, _) in enumerate(articles):
                     try:
-                        date = (
-                            datetime.fromisoformat(raw_date.replace("Z", "")).date()
-                            if target["date_format"] == "iso"
-                            else datetime.strptime(raw_date, target["date_format"]).date()
-                        )
-                    except Exception:
+                        if not url:
+                            continue
+                        resp = page.get(url, timeout=60)
+                        resp.raise_for_status()
+                        s = BeautifulSoup(resp.text, "html.parser")
                         date = None
-
-                    articles.append(
-                        (url, title, date, target["country"], target["team"], target["content_date_selector"]))
-                except Exception:
-                    continue
-
-            for index, (url, title, _, country, team, _) in enumerate(articles):
-                try:
-                    page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                    page.wait_for_load_state("networkidle")
-
-                    date = None
-                    try:
-                        content_date_elem = page.query_selector("time.text-grey[datetime]")
-                        if content_date_elem:
-                            content_date_raw = content_date_elem.get_attribute("datetime")
-                            if content_date_raw:
-                                date = datetime.fromisoformat(content_date_raw.replace("Z", "")).date()
-                    except Exception:
-                        pass
-
-                    content_elems = page.query_selector_all("main p, article p")
-                    paragraphs = [p.inner_text().strip() for p in content_elems if p.inner_text().strip()]
-                    full_content = "\n".join(paragraphs)
-
-                    leak_obj = leak_model(
-                        m_title=title,
-                        m_weblink=[url],
-                        m_dumplink=[url],
-                        m_url=url,
-                        m_base_url=self.base_url,
-                        m_content=full_content,
-                        m_network=helper_method.get_network_type(self.base_url),
-                        m_important_content=f"{title}\n{full_content}",
-                        m_content_type=["news", "tracking"],
-                        m_leak_date=date,
-                    )
-
-                    entity_data = entity_model(
-                        m_scrap_file=self.__class__.__name__,
-                        m_team=team,
-                        m_country=[country]
-                    )
-
-                    self.append_leak_data(leak_obj, entity_data)
-
-                except Exception as ex:
-                    log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")
-
+                        try:
+                            content_date_elem = s.select_one("time.text-grey[datetime]")
+                            if content_date_elem:
+                                content_date_raw = content_date_elem.get("datetime", "")
+                                if content_date_raw:
+                                    date = datetime.fromisoformat(content_date_raw.replace("Z", "")).date()
+                        except Exception:
+                            pass
+                        content_elems = s.select("main p, article p")
+                        paragraphs = [p.get_text(strip=True) for p in content_elems if p.get_text(strip=True)]
+                        full_content = "\n".join(paragraphs)
+                        leak_obj = leak_model(
+                            m_title=title,
+                            m_weblink=[url],
+                            m_dumplink=[url],
+                            m_url=url,
+                            m_base_url=self.base_url,
+                            m_content=full_content,
+                            m_network=helper_method.get_network_type(self.base_url),
+                            m_important_content=f"{title}\n{full_content}",
+                            m_content_type=["news", "tracking"],
+                            m_leak_date=date,
+                        )
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_team=team,
+                            m_country=[country]
+                        )
+                        self.append_leak_data(leak_obj, entity_data)
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")
+            except Exception as ex:
+                log.g().e(f"SCRIPT ERROR {ex} in {self.__class__.__name__}")

@@ -1,7 +1,8 @@
 from abc import ABC
 from datetime import datetime
 from typing import List
-from playwright.sync_api import Page
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
@@ -49,7 +50,7 @@ class _cert_at(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_resoource_block=False, m_threat_type=ThreatType.TRACKING)
 
     @property
     def card_data(self) -> List[leak_model]:
@@ -73,96 +74,111 @@ class _cert_at(leak_extractor_interface, ABC):
                 self._card_data.clear()
                 self._entity_data.clear()
 
-    def parse_leak_data(self, page: Page):
+    def parse_leak_data(self, page):
         try:
             seed_url = self.seed_url
             base_url = self.base_url
             is_first_crawl = not self.is_crawled
             min_year = 2023 if is_first_crawl else 2024
             visited_urls = set()
-            page.goto(seed_url, wait_until="domcontentloaded")
+            resp = getattr(page, "_seed_response", None)
+            if resp and hasattr(resp, "text"):
+                current_html = resp.text
+            else:
+                resp = page.get(seed_url, timeout=60)
+                resp.raise_for_status()
+                page._seed_response = resp
+                current_html = resp.text
             has_next = True
             while has_next:
-                rows = page.query_selector_all("div.row")
+                soup = BeautifulSoup(current_html, "html.parser")
+                rows = soup.select("div.row")
                 found_valid_article = False
                 for row in rows:
-                    read_more_link = row.query_selector("a#article-ref")
+                    read_more_link = row.select_one("a#article-ref")
                     if not read_more_link:
                         continue
-                    card_url = read_more_link.get_attribute("href")
+                    card_url = read_more_link.get("href")
+                    if card_url:
+                        card_url = urljoin(seed_url, card_url)
                     if not card_url or card_url in visited_urls:
                         continue
                     visited_urls.add(card_url)
-                    h2 = row.query_selector("div.col-sm-11 > h2")
+                    h2 = row.select_one("div.col-sm-11 > h2")
                     date_text = ""
                     if h2:
-                        small = h2.query_selector("small")
+                        small = h2.select_one("small")
                         if small:
-                            date_text = small.inner_text().strip()
+                            date_text = small.get_text(strip=True)
                     date_obj = None
                     if date_text:
                         try:
                             date_obj = datetime.strptime(date_text, "%d.%m.%Y %H:%M").date()
-                        except ValueError:
+                        except Exception:
                             try:
                                 date_obj = datetime.strptime(date_text, "%m/%d/%Y %I:%M %p").date()
-                            except ValueError:
-                                pass
+                            except Exception:
+                                date_obj = None
                     if not date_obj or date_obj.year < min_year:
                         continue
                     found_valid_article = True
-                    detail_page = page.context.new_page()
-                    detail_page.goto(card_url, wait_until="domcontentloaded")
-                    detail_page.wait_for_selector("h1", timeout=8000)
-                    h1 = detail_page.query_selector("h1")
-                    date_val = ""
-                    title = ""
-                    if h1:
-                        small = h1.query_selector("small")
-                        if small:
-                            date_val = small.inner_text().strip()
-                        all_text = h1.inner_text().strip()
-                        if date_val and all_text.startswith(date_val):
-                            title = all_text[len(date_val):].strip(" \n\r-")
-                        else:
-                            title = all_text
-                        title = " ".join(title.split())
-                    content_blocks = detail_page.query_selector_all("div.block p.block")
-                    content = "\n".join([p.inner_text().strip() for p in content_blocks]) if content_blocks else ""
-                    weblinks = []
-                    for p in content_blocks:
-                        for a in p.query_selector_all("a[href]"):
-                            href = a.get_attribute("href")
-                            if href:
-                                weblinks.append(href)
-                    card_data = leak_model(
-                        m_title=title,
-                        m_url=card_url,
-                        m_base_url=base_url,
-                        m_content=content,
-                        m_network=helper_method.get_network_type(base_url),
-                        m_important_content=content[:500],
-                        m_weblink=weblinks,
-                        m_leak_date=date_obj,
-                        m_content_type=["news", "tracking"],
-                    )
-                    entity_data = entity_model(
-                        m_scrap_file=self.__class__.__name__,
-                        m_team="cert.at",
-                        m_country=["austria"]
-                    )
-                    self.append_leak_data(card_data, entity_data)
-                    detail_page.close()
+                    try:
+                        detail_resp = page.get(card_url, timeout=60)
+                        detail_resp.raise_for_status()
+                        detail_soup = BeautifulSoup(detail_resp.text, "html.parser")
+                        h1 = detail_soup.select_one("h1")
+                        date_val = ""
+                        title = ""
+                        if h1:
+                            small = h1.select_one("small")
+                            if small:
+                                date_val = small.get_text(strip=True)
+                            all_text = h1.get_text(strip=True)
+                            if date_val and all_text.startswith(date_val):
+                                title = all_text[len(date_val):].lstrip(" \n\r-")
+                            else:
+                                title = all_text
+                            title = " ".join(title.split())
+                        content_blocks = detail_soup.select("div.block p.block")
+                        content = "\n".join([p.get_text(strip=True) for p in content_blocks]) if content_blocks else ""
+                        weblinks = []
+                        for p in content_blocks:
+                            for a in p.select("a[href]"):
+                                href = a.get("href")
+                                if href:
+                                    weblinks.append(urljoin(base_url, href) if not href.startswith("http") else href)
+                        card_data = leak_model(
+                            m_title=title,
+                            m_url=card_url,
+                            m_base_url=base_url,
+                            m_content=content,
+                            m_network=helper_method.get_network_type(base_url),
+                            m_important_content=content[:500],
+                            m_weblink=weblinks,
+                            m_leak_date=date_obj,
+                            m_content_type=["news", "tracking"],
+                        )
+                        entity_data = entity_model(
+                            m_scrap_file=self.__class__.__name__,
+                            m_team="cert.at",
+                            m_country=["austria"]
+                        )
+                        self.append_leak_data(card_data, entity_data)
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
                 if not found_valid_article:
                     has_next = False
                     continue
-                next_btn = page.query_selector('ul.pagination li.page-item a.page-link[rel="next"]')
-                if next_btn and next_btn.is_enabled():
-                    next_url = next_btn.get_attribute("href")
-                    if next_url:
-                        page.goto(next_url, wait_until="domcontentloaded")
-                    else:
-                        has_next = False
+                next_btn = soup.select_one('ul.pagination li.page-item a.page-link[rel="next"]')
+                if next_btn and next_btn.get("href"):
+                    next_url = urljoin(seed_url, next_btn.get("href"))
+                    try:
+                        resp = page.get(next_url, timeout=60)
+                        resp.raise_for_status()
+                        current_html = resp.text
+                    except Exception as ex:
+                        log.g().e(f"SCRIPT ERROR {ex} " + str(self.__class__.__name__))
+                        break
                 else:
                     has_next = False
         except Exception as ex:

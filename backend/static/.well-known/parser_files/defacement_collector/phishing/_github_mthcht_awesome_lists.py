@@ -1,8 +1,9 @@
+import json
 from abc import ABC
 from datetime import date
 from typing import List
-from playwright.sync_api import Page
 
+from bs4 import BeautifulSoup
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
@@ -54,7 +55,7 @@ class _github_mthcht_awesome_lists(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.DEFACEMENT)
+        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.REQUESTS, m_threat_type=ThreatType.DEFACEMENT)
 
     @property
     def card_data(self) -> List[defacement_model]:
@@ -78,23 +79,32 @@ class _github_mthcht_awesome_lists(leak_extractor_interface, ABC):
         if self.callback:
             self.callback()
 
-    def parse_leak_data(self, page: Page):
-        rows = page.locator('tr.react-csv-row')
-        page.wait_for_timeout(1000)
-        if rows.count() <= 1:
-            rows.first.wait_for(state="visible", timeout=5000)
-
-        count = rows.count()
-        for i in range(count):
-            row = rows.nth(i)
-            cells = row.locator('td.react-csv-cell')
-
-            if cells.count() < 2:
-                continue
-
-            url = cells.nth(0).inner_text().strip()
-            content = helper_method.extract_refhtml(url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
-
+    def parse_leak_data(self, page):
+        soup = BeautifulSoup(page._seed_response.text, "html.parser")
+        urls = []
+        script = soup.select_one('script[data-target="react-app.embeddedData"]')
+        if script and script.string:
+            try:
+                payload = json.loads(script.string)
+                csv_rows = payload.get("payload", {}).get("blob", {}).get("csv") or []
+                for r in csv_rows[1:]:
+                    if r and len(r) > 0:
+                        u = (r[0] or "").strip()
+                        if u:
+                            urls.append(u)
+            except Exception:
+                pass
+        if not urls:
+            rows = soup.select('tr.react-csv-row')
+            for row in rows:
+                cells = row.select('td.react-csv-cell')
+                if len(cells) < 1:
+                    continue
+                u = cells[0].get_text(strip=True)
+                if u:
+                    urls.append(u)
+        for url in urls:
+            content = helper_method.extract_refhtml_requests(url, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
             card_data = defacement_model(
                 m_content=content,
                 m_url=url,
@@ -103,10 +113,8 @@ class _github_mthcht_awesome_lists(leak_extractor_interface, ABC):
                 m_ioc_type=["phishing"],
                 m_leak_date=date.today()
             )
-
             entity_data = entity_model(
                 m_scrap_file=self.__class__.__name__,
                 m_team="mthcht",
             )
-
             self.append_leak_data(card_data, entity_data)
