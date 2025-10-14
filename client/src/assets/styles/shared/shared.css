@@ -679,7 +679,7 @@ table a:visited {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgb(0 0 0 / 70%);
   }
 
   .default-input-sub-container.mobile-overlay-active {
