@@ -1,21 +1,19 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal} from '@angular/core';
-import {AppService} from '../../../../../services/core/app/app.service';
-import {DashboardService} from '../../../../../services/dashboard/dashboard.service';
-import {ActivatedRoute, Router, UrlSegment} from '@angular/router';
-import {combineLatest, distinctUntilChanged, map, switchMap, timer} from 'rxjs';
-import {ChatCallbackModel} from '../../../../model/results/chat/chat.callback.model';
-import {NgForOf, NgIf} from '@angular/common';
-import {PaginationComponent} from '../../../pagination/pagination.component';
-import {ResultComponent} from '../../../result/result.component';
-import {DashboardResultChatComponent} from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
-import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
-import {chat_filters} from '../../../../constants/filters';
-import {SortType} from '../../../../constants/shared-enums';
-import {HelperService} from '../../../../services/helper.service';
-import {RankedCallbackModel} from '../../../../model/results/consolidated/ranked.callback.model';
-import {DashboardResultExploitComponent} from '../../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
-import {DashboardResultSocialComponent} from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
-import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { AppService } from '../../../../../services/core/app/app.service';
+import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
+import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
+import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
+import { ChatCallbackModel } from '../../../../model/results/chat/chat.callback.model';
+import { NgForOf, NgIf } from '@angular/common';
+import { PaginationComponent } from '../../../pagination/pagination.component';
+import { ResultComponent } from '../../../result/result.component';
+import { DashboardResultChatComponent } from '../../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
+import { chat_filters } from '../../../../constants/filters';
+import { SortType } from '../../../../constants/shared-enums';
+import { HelperService } from '../../../../services/helper.service';
+import { RankedCallbackModel } from '../../../../model/results/consolidated/ranked.callback.model';
+import { DashboardResultSocialComponent } from '../../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 
 @Component({
   selector: 'app-dashboard-discussion',
@@ -24,9 +22,7 @@ import {DashboardResultsGeneralGridComponent} from '../../dashboard-results/dash
     PaginationComponent,
     ResultComponent,
     DashboardResultChatComponent,
-    DashboardResultExploitComponent,
     DashboardResultSocialComponent,
-    DashboardResultsGeneralGridComponent,
     NgForOf
   ],
   templateUrl: './dashboard-discussion.component.html',
@@ -51,7 +47,7 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   get currentResultCount(): number {
     return this.discussionCallbackModel.pageCount ?? 0;
@@ -82,7 +78,7 @@ export class DashboardDiscussionComponent implements OnInit, AfterViewInit {
         } else if (!this.hasResultsInService()) {
           this.cdr.detectChanges();
           this.fetchSearchResults();
-        }else {
+        } else {
           this.fetchSearchResults();
         }
 

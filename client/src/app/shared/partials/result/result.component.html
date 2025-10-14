@@ -10,7 +10,8 @@
           </button>
           <input #searchInput class="search-trigger form-control default-input dashboard-general-input"
             [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="350" name="q"
-            placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" /> <input type="hidden" value="1">
+            placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
+          <input type="hidden" value="1">
           <button type="button" class="btn input-cross" aria-label="Clear"
             (click)="local_query=''; searchInput.focus();onFormSubmit()" [disabled]="!searchQuery"><img
               src="/assets/images/shared/cross-dark.svg" alt="" width="14" height="14"></button>

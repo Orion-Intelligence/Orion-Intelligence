@@ -9,6 +9,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
 import { AppStorageService } from '../../../services/core/app/app-storage.service';
 
+
 @Component({
   selector: 'app-profile',
   standalone: true,

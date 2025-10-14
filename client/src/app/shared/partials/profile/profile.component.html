@@ -37,11 +37,11 @@
     <ng-template #profile>
       <li class="profile-section">
         <div class="profile-avatar">
-          <img [src]="currentImageUrl || '../../../../../assets/images/shared/default-profile.svg'" alt="Profile" />
+          <img [src]="currentImageUrl || '../../../../../assets/images/shared/default-profile.svg'" alt="" />
         </div>
         <div class="profile-name-mail-container">
           <div class="profile-name">{{ username$ | async}}</div>
-          <div class="profile-email">{{ profileMail }}</div>
+          <div class="profile-email" appTooltip="{{profileMail}}">{{ profileMail }}</div>
         </div>
       </li>
 

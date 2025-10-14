@@ -281,4 +281,11 @@ export class ResultComponent implements OnInit, OnChanges {
       (arr: any) => Array.isArray(arr) && arr.length > 0
     );
   }
+  onSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value?.trim();
+    if (value && window.innerWidth < 460) {
+      this.setFilterOverlay(false);
+    }
+  }
 }
