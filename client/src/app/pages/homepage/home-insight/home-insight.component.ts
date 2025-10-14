@@ -32,7 +32,14 @@ export class HomeInsightComponent implements OnInit {
     this.insights = data.insights;
     this.latestDocuments = data.latestDocument;
     this.graphInsight = data.graph_insight;
-    this.latestDocumentModelKeys = (Object.keys(this.latestDocuments) as (keyof LatestDocumentCallbackModel)[]).filter(key => this.latestDocuments[key] && this.latestDocuments[key].length > 0);
+    this.latestDocumentModelKeys = (
+      Object.keys(this.latestDocuments) as (keyof LatestDocumentCallbackModel)[]
+    ).filter(
+      key =>
+        ['leak_model', 'chat_model', 'defacement_model'].includes(key) &&
+        this.latestDocuments[key] &&
+        this.latestDocuments[key].length > 0
+    );
     this.GraphData = this.transformToGraphDataList(data.graph_insight);
   }
 

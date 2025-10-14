@@ -1,7 +1,11 @@
 <form (submit)="onSearchSubmit()" class="home__form default-input-container w-90">
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
     <div class="col-md-12 col-sm-12 col-xs-12">
-      <div class="input-group default-input-sub-container">
+      <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
+      <div class="input-group default-input-sub-container" [ngClass]="{
+    'mobile-overlay-active': showFiltersOverlay,
+    'mobile-overlay-inactive': !showFiltersOverlay 
+  }">
         <button class="btn btn-primary default-input-button" (click)="onSearchSubmit()" type="submit">
           <img alt="Search" height="16" class="search-icon"
             ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority width="16">
@@ -9,7 +13,7 @@
 
         <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
           class="form-control default-input dashboard-general-input" maxlength="350" name="q" placeholder="Search ..."
-          type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)"> <input type="hidden"
+          type="search" (input)="setFilterOverlay(true)" (input)="onSearchInput($event)"> <input type="hidden"
           value="1">
 
         <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()"
