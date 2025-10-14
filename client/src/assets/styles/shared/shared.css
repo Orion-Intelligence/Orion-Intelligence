@@ -673,8 +673,27 @@ table a:visited {
     display: none !important;
   }
 
-  .default-input-sub-container {
+  .mobile-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  .default-input-sub-container.mobile-overlay-active {
+    position: fixed;
+    padding: 0 10px;
+    left: 0;
+    width: 100% !important;
+  }
+
+  .default-input-sub-container.mobile-overlay-inactive {
     width: calc(100% - 95px) !important;
+    position: relative;
+    padding: 0;
+    left: auto;
   }
 
   .home__form .default-input-sub-container {

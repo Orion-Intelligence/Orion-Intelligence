@@ -47,7 +47,7 @@
   scrollbar-color: var(--color-blue-880) transparent;
 }
 
-.search__result-detail-extended{
+.search__result-detail-extended {
   max-height: 60vh;
 }
 
@@ -420,7 +420,7 @@
   flex-wrap: wrap;
 }
 
-.dashboard__search-tag-item{
+.dashboard__search-tag-item {
   max-width: 80%;
 }
 
@@ -551,7 +551,7 @@
   color: #9fb3c8;
 }
 
-.dashboard__search-container .collapsible-container{
+.dashboard__search-container .collapsible-container {
   height: 150px;
   overflow: clip;
   margin-left: -7px !important;
@@ -561,7 +561,7 @@
   box-shadow: inset 0 -40px 40px -40px rgb(0 0 0 / 30%) !important;
 }
 
-.dashboard__search-container code{
+.dashboard__search-container code {
   color: #ffffff90 !important;
 }
 

@@ -3,14 +3,18 @@
     class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
     <div class="d-flex align-items-start default-input-container-justify w-100 flex-wrap">
       <div class="col-sm-12 col-xs-12 default-input-container-mobile">
-        <div class="input-group default-input-sub-container">
+        <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
+        <div class="input-group default-input-sub-container" [ngClass]="{
+    'mobile-overlay-active': showFiltersOverlay,
+    'mobile-overlay-inactive': !showFiltersOverlay 
+  }">
           <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
             <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority
               width="16">
           </button>
           <input #searchInput class="search-trigger form-control default-input dashboard-general-input"
             [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="350" name="q"
-            placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
+            placeholder="Search..." type="search" (click)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
           <input type="hidden" value="1">
           <button type="button" class="btn input-cross" aria-label="Clear"
             (click)="local_query=''; searchInput.focus();onFormSubmit()" [disabled]="!searchQuery"><img
@@ -156,7 +160,7 @@
   </form>
 </ng-container>
 <ng-template #profile>
-  <ng-container *ngIf="!hasIOCs() && !isLoading; else hasIocs" @fadeInDashboardItem>
+  <ng-container *ngIf="!hasIOCs() && !isLoading; else hasIocs">
     <app-empty-ioc></app-empty-ioc>
   </ng-container>
   <ng-template #hasIocs>
