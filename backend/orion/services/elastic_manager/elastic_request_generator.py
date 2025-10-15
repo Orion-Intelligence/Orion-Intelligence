@@ -1651,16 +1651,16 @@ class elastic_request_generator:
 
     @staticmethod
     def index_query_stealerlog(p_index_data):
-        import random
-        from datetime import datetime
+        import uuid
+        from datetime import datetime, timezone
 
         bulk_entries = []
 
         for log in p_index_data.get("logs", []):
             doc = {k: v for k, v in log.items() if v is not None}
 
-            now = datetime.utcnow()
-            _id = f"{random.randint(0, 99999):05d}_{now.strftime('%m')}_{now.strftime('%Y')}"
+            now = datetime.now(timezone.utc)
+            _id = f"{now.strftime('%Y%m%d_%H%M%S_%f')}_UTC_{uuid.uuid4().hex}"
 
             bulk_entries.append({
                 "create": {

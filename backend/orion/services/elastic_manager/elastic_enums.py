@@ -548,9 +548,8 @@ class ELASTIC_ENUMS:
 
     mapping_stealer_log_model = {
         "settings": {
-            "number_of_shards": 1,
+            "number_of_shards": 150,
             "number_of_replicas": 0,
-            "max_result_window": 1000000,
             "analysis": {
                 "analyzer": {
                     "url_path_analyzer": {
@@ -574,7 +573,7 @@ class ELASTIC_ENUMS:
                 "type": {"type": "keyword"},
                 "raw": {"type": "text"},
                 "channel": {"type": "keyword"},
-                "filename": {"type": "keyword"},
+                "filename": {"type": "keyword"}
             }
         }
     }
