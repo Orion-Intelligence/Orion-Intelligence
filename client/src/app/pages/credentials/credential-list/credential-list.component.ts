@@ -25,15 +25,14 @@ export class CredentialListComponent {
   formatIdDate(id: string): string {
     if (!id) return '';
     const parts = id.split('_');
-    if (parts.length < 2) return id;
-    const dateStr = parts[0] + parts[1]; // "20251016143022"
-    const year = +dateStr.slice(0, 4);
-    const month = +dateStr.slice(4, 6) - 1;
-    const day = +dateStr.slice(6, 8);
-    const hour = +dateStr.slice(8, 10);
-    const minute = +dateStr.slice(10, 12);
-    const second = +dateStr.slice(12, 14);
-    return new Date(Date.UTC(year, month, day, hour, minute, second)).toLocaleString();
+    if (parts.length < 1) return id;
+
+    const yearStr = parts[0];
+    const year = parseInt(yearStr, 10);
+
+    if (isNaN(year)) return id;
+    const date = new Date(Date.UTC(year, 0, 1));
+    return date.toLocaleDateString();
   }
 
   toggleRow(i: number): void {

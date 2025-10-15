@@ -1657,10 +1657,11 @@ class elastic_request_generator:
         bulk_entries = []
 
         for log in p_index_data.get("logs", []):
+            m_hash = hashlib.sha256(str(log.get("raw", "")).encode("utf-8", "ignore")).hexdigest()
             doc = {k: v for k, v in log.items() if v is not None}
 
             now = datetime.now(timezone.utc)
-            _id = f"{now.strftime('%Y%m%d_%H%M%S_%f')}_UTC_{uuid.uuid4().hex}"
+            _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
 
             bulk_entries.append({
                 "create": {
