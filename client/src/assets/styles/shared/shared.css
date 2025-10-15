@@ -680,6 +680,7 @@ table a:visited {
     width: 100vw;
     height: 100vh;
     background: rgb(0 0 0 / 70%);
+    z-index: 1;
   }
 
   .default-input-sub-container.mobile-overlay-active {
@@ -687,6 +688,7 @@ table a:visited {
     padding: 0 10px;
     left: 0;
     width: 100% !important;
+    z-index: 2;
   }
 
   .default-input-sub-container.mobile-overlay-inactive {
@@ -696,9 +698,9 @@ table a:visited {
     left: auto;
   }
 
-  .home__form .default-input-sub-container {
+  /* .home__form .default-input-sub-container {
     width: calc(100% - 65px) !important;
-  }
+  } */
 
 }
 

@@ -13,7 +13,7 @@
 
         <input #searchInput [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off"
           class="form-control default-input dashboard-general-input" maxlength="350" name="q" placeholder="Search ..."
-          type="search" (input)="setFilterOverlay(true)" (input)="onSearchInput($event)"> <input type="hidden"
+          type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)"> <input type="hidden"
           value="1">
 
         <button type="button" class="btn input-cross" aria-label="Clear" (click)="searchQuery=''; searchInput.focus()"
