@@ -11,12 +11,11 @@ class suggestion(BaseModel):
 
 
 class stealerlog_result_item(BaseModel):
+    _id: Optional[str] = None
     type: Optional[str] = None
     raw: Optional[str] = None
     channel: Optional[str] = None
     filename: Optional[str] = None
-    log_hash: Optional[str] = None
-    timestamp: Optional[str] = None
 
     class Config:
         extra = Extra.allow

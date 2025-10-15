@@ -575,9 +575,6 @@ class ELASTIC_ENUMS:
                 "raw": {"type": "text"},
                 "channel": {"type": "keyword"},
                 "filename": {"type": "keyword"},
-                "log_hash": {"type": "keyword"},
-                "timestamp": {"type": "date"},
-                "m_hash": {"type": "keyword"}
             }
         }
     }

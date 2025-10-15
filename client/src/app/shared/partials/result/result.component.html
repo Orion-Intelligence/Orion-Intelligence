@@ -6,7 +6,7 @@
         <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
         <div class="input-group default-input-sub-container" [ngClass]="{
     'mobile-overlay-active': showFiltersOverlay,
-    'mobile-overlay-inactive': !showFiltersOverlay 
+    'mobile-overlay-inactive': !showFiltersOverlay
   }">
           <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
             <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority
@@ -206,18 +206,20 @@
   <app-suggestion (update_query)="onUpdateSuggestion($event)" [suggestion]="onGetSuggestion()"></app-suggestion>
 </ng-container>
 
-<div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkProfile() || hasIOCs()); else noResults"
-  @fadeInDashboardItem>
-  <div class="right-text label-text">
-    <span>{{ result_count }} Results Found</span>
+<ng-container *ngIf="result_count_enabled">
+  <div *ngIf="result_count && !isLoading && result_count !== 0 && (!checkProfile() || hasIOCs()); else noResults"
+    @fadeInDashboardItem>
+    <div class="right-text label-text">
+      <span>{{ result_count }} Results Found</span>
+    </div>
   </div>
-</div>
 
-<ng-template #noResults>
-  <div *ngIf="(!checkProfile() || hasIOCs())" class="right-text label-text">
-    <span>No result found</span>
-  </div>
-</ng-template>
+  <ng-template #noResults>
+    <div *ngIf="(!checkProfile() || hasIOCs())" class="right-text label-text">
+      <span>No result found</span>
+    </div>
+  </ng-template>
+</ng-container>
 
 <div *ngIf="filterModel && !shrinkmenu" [class.sidebar_container-disable]="!(isFilterOpen$ | async)"
   [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">

@@ -1230,68 +1230,61 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model):
-        from typing import Any
-
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         raw_url = p_query_model.url.strip() if p_query_model.url else ""
         url_query = ""
         if raw_url:
             u = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', raw_url)
             url_query = re.split(r'[/:?#]', u)[0].lower()
+
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
-            must_should: list[dict[str, Any]] = [{"term": {"type": "logs"}}]
+            must_should = [{"term": {"type.keyword": "logs"}}]
         else:
-            must_should: list[dict[str, Any]] = [{"term": {"type": "c"}}]
-        date_range_filter: dict[str, Any] = {}
-        if p_query_model.daterange:
-            start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
-            date_range_filter = {"range": {"timestamp": {"gte": start_date, "lte": end_date}}}
-        should_clauses: list[dict[str, Any]] = []
+            must_should = [{"term": {"type.keyword": "c"}}]
+
+        date_range_filter = {}
+
+        should_clauses = []
+
         if p_query_model.fullsearch:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
                 for quoted, unquoted in terms:
                     term = quoted or unquoted
-                    clause: dict[str, Any] = {
+                    clause = {
                         "bool": {
                             "should": [
-                                {"wildcard": {"email": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"username": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"domain": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"ip": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"type": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"raw": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"channel": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"filename": {"value": f"*{term}*", "case_insensitive": True}}}
+                                {"wildcard": {"raw.keyword": {"value": f"*{term}*", "case_insensitive": True}}}
                             ],
                             "minimum_should_match": 1
                         }
                     }
                     must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain": url_query}})
+                should_clauses.append({"term": {"domain.keyword": url_query}})
         else:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
                 for quoted, unquoted in terms:
                     term = quoted or unquoted
-                    clause: dict[str, Any] = {
+                    clause = {
                         "bool": {
                             "should": [
-                                {"term": {"email": term}},
-                                {"term": {"username": term}},
-                                {"term": {"domain": term}}
+                                {"term": {"email.keyword": term}},
+                                {"term": {"username.keyword": term}},
+                                {"term": {"domain.keyword": term}}
                             ],
                             "minimum_should_match": 1
                         }
                     }
                     must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain": url_query}})
-        bool_query: dict[str, Any] = {}
+                should_clauses.append({"term": {"domain.keyword": url_query}})
+
+        bool_query = {}
         if must_should:
             bool_query["must"] = must_should
         if should_clauses:
@@ -1299,14 +1292,18 @@ class elastic_request_generator:
             bool_query["minimum_should_match"] = 1
         if date_range_filter:
             bool_query.setdefault("filter", []).append(date_range_filter)
-        query: dict[str, Any] = {
+
+        query = {
             "query": {"bool": bool_query},
             "from": 0,
             "size": 100,
-            "track_total_hits": True,
-            "sort": [{"timestamp": {"order": "desc"}}],
-            "_source": True
+            "track_total_hits": False,
+            "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id"]
         }
+
+        if not user_query and not url_query:
+            query["sort"] = ["_doc"]
+
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
@@ -1654,16 +1651,21 @@ class elastic_request_generator:
 
     @staticmethod
     def index_query_stealerlog(p_index_data):
+        import random
+        from datetime import datetime
+
         bulk_entries = []
 
         for log in p_index_data.get("logs", []):
-            doc = {
-                **{k: v for k, v in log.items() if v is not None}
-            }
+            doc = {k: v for k, v in log.items() if v is not None}
+
+            now = datetime.utcnow()
+            _id = f"{random.randint(0, 99999):05d}_{now.strftime('%m')}_{now.strftime('%Y')}"
 
             bulk_entries.append({
                 "create": {
                     "_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX,
+                    "_id": _id
                 }
             })
             bulk_entries.append(doc)

@@ -26,7 +26,6 @@ import { HelperService } from '../../services/helper.service';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { EmptyIocComponent } from "../empty-ioc/empty-ioc.component";
-import { NgbSlide } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap/carousel/carousel";
 
 @Component({
   selector: 'app-result',
@@ -36,6 +35,7 @@ import { NgbSlide } from "../../../../../node_modules/@ng-bootstrap/ng-bootstrap
   imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, SuggestionComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, EmptyIocComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
+  @Input() result_count_enabled: boolean = true;
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
   @Input() isList!: boolean;
