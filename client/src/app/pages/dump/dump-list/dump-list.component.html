@@ -11,7 +11,7 @@
     </tr>
     </thead>
     <tbody *ngIf="!isLoading && (dumpData$ | async) as dumpData" @fadeInDashboardItem>
-      <tr *ngFor="let item of dumpData.mDumpCallbackLinks; let i = index" [hidden]="(item.leak_url?.length || 0) <= 5">
+      <tr *ngFor="let item of dumpData.mDumpCallbackLinks; let i = index" [hidden]="(item.leak_url.length || 0) <= 5">
         <td>{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</td>
         <td (click)="copyRowData(item.leak_url)" class="cursor-pointer">{{ item.leak_url }}</td>
         <td>{{ item.source }}</td>
