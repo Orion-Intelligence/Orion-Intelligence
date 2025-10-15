@@ -477,7 +477,7 @@ button:focus {
     position: fixed;
     top: 125px;
     left: 0;
-    width: 95%;
+    width: calc(100% - 20px) !important;
     margin: 0 10px;
   }
 
