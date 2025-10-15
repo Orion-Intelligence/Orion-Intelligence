@@ -1242,7 +1242,7 @@ class elastic_request_generator:
         if category and category.lower() in ("log", "logs"):
             must_should: list[dict[str, Any]] = [{"term": {"type": "logs"}}]
         else:
-            must_should: list[dict[str, Any]] = [{"term": {"type": "credential"}}]
+            must_should: list[dict[str, Any]] = [{"term": {"type": "c"}}]
         date_range_filter: dict[str, Any] = {}
         if p_query_model.daterange:
             start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
@@ -1654,25 +1654,16 @@ class elastic_request_generator:
 
     @staticmethod
     def index_query_stealerlog(p_index_data):
-        now = datetime.now(timezone.utc).isoformat()
         bulk_entries = []
 
         for log in p_index_data.get("logs", []):
-            m_hash = hashlib.sha256(str(log.get("raw", "")).encode("utf-8", "ignore")).hexdigest()
-
             doc = {
-                **{k: v for k, v in log.items() if v is not None},
-                "log_hash": m_hash,
-                "timestamp": now,
-                "m_index": "stealer_model",
-                "m_sub_host": "/",
-                "m_hash": m_hash
+                **{k: v for k, v in log.items() if v is not None}
             }
 
             bulk_entries.append({
                 "create": {
                     "_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX,
-                    "_id": m_hash
                 }
             })
             bulk_entries.append(doc)
