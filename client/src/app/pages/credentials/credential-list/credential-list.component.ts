@@ -22,6 +22,20 @@ export class CredentialListComponent {
     });
   }
 
+  formatIdDate(id: string): string {
+    if (!id) return '';
+    const parts = id.split('_');
+    if (parts.length < 2) return id;
+    const dateStr = parts[0] + parts[1]; // "20251016143022"
+    const year = +dateStr.slice(0, 4);
+    const month = +dateStr.slice(4, 6) - 1;
+    const day = +dateStr.slice(6, 8);
+    const hour = +dateStr.slice(8, 10);
+    const minute = +dateStr.slice(10, 12);
+    const second = +dateStr.slice(12, 14);
+    return new Date(Date.UTC(year, month, day, hour, minute, second)).toLocaleString();
+  }
+
   toggleRow(i: number): void {
     this.expandedIndex = this.expandedIndex === i ? null : i;
   }
