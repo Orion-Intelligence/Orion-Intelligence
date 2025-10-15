@@ -8,7 +8,7 @@ import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.ani
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem],
-  imports: [NgForOf, NgIf, KeyValuePipe, TitleCasePipe]
+  imports: [NgForOf, NgIf, DatePipe, KeyValuePipe, TitleCasePipe]
 })
 export class CredentialListComponent {
   @Input() stealerData$!: StealerLogCallbackModel;
@@ -20,19 +20,6 @@ export class CredentialListComponent {
   copyRowData(data: string): void {
     navigator.clipboard.writeText(data).catch(() => {
     });
-  }
-
-  formatIdDate(id: string): string {
-    if (!id) return '';
-    const parts = id.split('_');
-    if (parts.length < 1) return id;
-
-    const yearStr = parts[0];
-    const year = parseInt(yearStr, 10);
-
-    if (isNaN(year)) return id;
-    const date = new Date(Date.UTC(year, 0, 1));
-    return date.toLocaleDateString();
   }
 
   toggleRow(i: number): void {
