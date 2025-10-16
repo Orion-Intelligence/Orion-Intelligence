@@ -1651,7 +1651,6 @@ class elastic_request_generator:
 
     @staticmethod
     def index_query_stealerlog(p_index_data):
-        import uuid
         from datetime import datetime, timezone
 
         bulk_entries = []
