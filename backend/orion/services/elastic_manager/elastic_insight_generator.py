@@ -17,6 +17,7 @@ class elastic_insight_generator:
         query_statement = {
             "query": {"bool": {"must": [
                 {"exists": {"field": "m_domain"}},
+                {"term": {"m_category": "databases"}},
                 {"script": {"script": "doc['m_domain'].size()==1"}}
             ]}},
             "sort": [{"m_update_date": {"order": "desc"}}],
@@ -115,6 +116,7 @@ class elastic_insight_generator:
 
         return ELASTIC_INDEX.S_CHATS_INDEX, query_statement
 
+
     @staticmethod
     def on_insight_consolidated_data():
         queries = []
@@ -127,14 +129,6 @@ class elastic_insight_generator:
         i2, q2 = elastic_insight_generator.on_insight_general_data()
         queries.append(elastic_insight_generator._strip_query(q2))
         indices.append(i2)
-
-        i3, q3 = elastic_insight_generator.on_insight_exploitdata()
-        queries.append(elastic_insight_generator._strip_query(q3))
-        indices.append(i3)
-
-        i4, q4 = elastic_insight_generator.on_insight_telegram_data()
-        queries.append(elastic_insight_generator._strip_query(q4))
-        indices.append(i4)
 
         i5, q5 = elastic_insight_generator.on_insight_defacement_data()
         queries.append(elastic_insight_generator._strip_query(q5))

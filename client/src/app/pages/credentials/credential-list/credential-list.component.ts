@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {DatePipe, KeyValuePipe, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import {KeyValuePipe, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
 import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
 import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
 
@@ -8,7 +8,7 @@ import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.ani
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem],
-  imports: [NgForOf, NgIf, DatePipe, KeyValuePipe, TitleCasePipe]
+  imports: [NgForOf, NgIf, KeyValuePipe, TitleCasePipe]
 })
 export class CredentialListComponent {
   @Input() stealerData$!: StealerLogCallbackModel;
