@@ -607,6 +607,12 @@ class elastic_request_generator:
             {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}
         ] if next(iter(b)) in base_index]
 
+        print(":::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::", flush=True)
+        print(query, flush=True)
+        print(":::::::::::::::::::::::::", flush=True)
+        print(":::::::::::::::::::::::::", flush=True)
+
         return query
 
     def on_search_consolidated_data(self, p_query_model, pFilter=None):

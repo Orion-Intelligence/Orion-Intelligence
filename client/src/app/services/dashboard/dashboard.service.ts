@@ -107,13 +107,13 @@ export class DashboardService {
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
 
     let baseParams: any = {...paramModel, ...this.selectedFilters()};
-    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     if (entityCategories) {
       baseParams['entity_filter'] = Object.fromEntries(
         Object.entries(entityCategories).filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : true))
       );
     }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
+    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
 
     let match_type = this.app_service.configData().localSettings.matchType;
     baseParams['matchtype'] = match_type ? match_type : this.app_service.configData().localSettings.matchType;

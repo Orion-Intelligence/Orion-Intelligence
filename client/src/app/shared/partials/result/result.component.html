@@ -215,8 +215,11 @@
   </div>
 
   <ng-template #noResults>
-    <div *ngIf="(!checkProfile() || hasIOCs())" class="right-text label-text">
-      <span>No result found</span>
+    <div *ngIf="(!checkProfile() || hasIOCs()) && !isLoading" class="right-text label-text">
+      <span>No result found</span><br><br>
+    </div>
+    <div *ngIf="(!checkProfile() || hasIOCs()) && isLoading" class="right-text label-text">
+      <span>Searching for results ...</span><br><br>
     </div>
   </ng-template>
 </ng-container>
