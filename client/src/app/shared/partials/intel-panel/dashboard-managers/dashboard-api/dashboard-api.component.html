@@ -1,11 +1,19 @@
-<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" class="default-input-container" enctype="multipart/form-data" method="GET">
-  <div class="row dashboard__api-search-input-div">
-    <div [ngClass]="(apiType === 'social' || apiType === 'cracked') ? 'col-xl-8 col-12 input-container' : 'col-xl-5 col-12 input-container'">
+<form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" class="default-input-container"
+  enctype="multipart/form-data" method="GET">
+  <div class="row dashboard__api-search-input-div" [ngClass]="{ 'email-search': apiType === 'user' }">
+    <div
+      [ngClass]="(apiType === 'social' || apiType === 'cracked') ? 'col-xl-8 col-12 input-container' : 'col-xl-5 col-12 input-container'">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/user1.svg" priority width="20">
         </div>
-        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input" [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : 'q1'))" [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : 'Query 1'))" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="(apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))"> <input type="hidden" value="1"> <span class="input-group-text"></span>
+        <input [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="form-control default-input"
+          [ngClass]="{'dash-api_single-search': apiType === 'social' || apiType === 'cracked'}" maxlength="150"
+          [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'cracked' ? 'playstore' : 'q1'))"
+          [placeholder]="apiType === 'user' ? 'Username' : (apiType === 'social' ? 'Username' : (apiType === 'cracked' ? 'Package / Playstore URL' : 'Query 1'))"
+          [type]="apiType === 'cracked' ? 'url' : 'text'"
+          [required]="(apiType === 'cracked' || apiType === 'social') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))">
+        <input type="hidden" value="1"> <span class="input-group-text"></span>
       </div>
     </div>
 
@@ -14,12 +22,16 @@
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/email.svg" priority width="20">
         </div>
-        <input [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="form-control default-input" email maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email" [required]="apiType === 'email' ? true : !(q1 && q1.trim())"> <input type="hidden" value="1"> <span class="input-group-text"></span>
+        <input [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="form-control default-input" email
+          maxlength="150" name="q2" [placeholder]="apiType === 'user' ? 'Email' : 'Query 2'" type="email"
+          [required]="apiType === 'email' ? true : !(q1 && q1.trim())"> <input type="hidden" value="1"> <span
+          class="input-group-text"></span>
       </div>
     </div>
 
     <div class="col-2 mt-lg-0 mt-2">
-      <button [disabled]="!searchForm.valid || (apiType === 'cracked' && !crackedValid)" class="dash-search-button">Search</button>
+      <button [disabled]="!searchForm.valid || (apiType === 'cracked' && !crackedValid)"
+        class="dash-search-button">Search</button>
     </div>
   </div>
 </form>
@@ -36,23 +48,24 @@
 <div class="ml-lg-4 dash-api_hint">
   <div class="default-notification-banner default-notification-banner-stealer">
     <span>
-      <img alt="Info Icon" class="default-notification-banner-icon" src="/assets/images/shared/hint.svg"/>
+      <img alt="Info Icon" class="default-notification-banner-icon" src="/assets/images/shared/hint.svg" />
       <span>
         {{
-          apiType === 'user'
-            ? 'Determines whether the specified user has a presence on any (clearnet) platform.'
-            : apiType === 'social'
-              ? 'Determines whether the provided username exists on (clearnet) social platforms.'
-              : apiType === 'cracked'
-                ? 'Checks for cracked key signals for the provided Play Store URL.'
-                : ''
+        apiType === 'user'
+        ? 'Determines whether the specified user has a presence on any (clearnet) platform.'
+        : apiType === 'social'
+        ? 'Determines whether the provided username exists on (clearnet) social platforms.'
+        : apiType === 'cracked'
+        ? 'Checks for cracked key signals for the provided Play Store URL.'
+        : ''
         }}
       </span>
     </span>
   </div>
 </div>
 
-<div class="search__result-detail search__result-detail-extended" *ngIf="query_triggered && !loading && emailCallbackbackModel.cards_data.length > 0" @fadeInDashboardItem>
+<div class="search__result-detail search__result-detail-extended"
+  *ngIf="query_triggered && !loading && emailCallbackbackModel.cards_data.length > 0" @fadeInDashboardItem>
 
   <ng-container *ngIf="apiType === 'cracked'; else nonCrackedSwitch">
     <div class="flex-col-gap-12">
@@ -81,7 +94,9 @@
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Download Links</div>
         <div class="flex-wrap-gap-8">
-          <a *ngFor="let d of item?.m_download_link" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d }}</a> <span *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0" class="text-white">not available</span>
+          <a *ngFor="let d of item?.m_download_link" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d
+            }}</a> <span *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0" class="text-white">not
+            available</span>
         </div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">APK Size</div>
@@ -114,7 +129,9 @@
 
           <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Links</div>
           <div class="flex-wrap-gap-8">
-            <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a> <a *ngFor="let d of item?.m_dumplink" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d }}</a>
+            <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a>
+            <a *ngFor="let d of item?.m_dumplink" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d
+              }}</a>
           </div>
 
           <hr class="dashboard-header-divider" *ngIf="!last">
@@ -127,7 +144,7 @@
     <div class="report__defacement-detail-header-url dashboard-header-header">
       {{ breachData?.m_url }}
     </div>
-    <hr class="dashboard-header-divider"/>
+    <hr class="dashboard-header-divider" />
     <div class="report__defacement-detail-header-items mb-1 dashboard-header-label">Content Type:</div>
     <span class="text-white">stolen</span>
     <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">

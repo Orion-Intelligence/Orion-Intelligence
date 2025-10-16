@@ -68,9 +68,9 @@ export enum DefacementSubCategory {
 }
 
 export enum ApiSubCategory {
-  EMAIL = 'Email',
-  SOCIAL = 'Social',
-  CRACKED = 'Cracked',
+  EMAIL = 'Email-Breach',
+  SOCIAL = 'Social-Scanner',
+  CRACKED = 'Cracked-Scanner',
 }
 
 export enum SocialSubCategory {
