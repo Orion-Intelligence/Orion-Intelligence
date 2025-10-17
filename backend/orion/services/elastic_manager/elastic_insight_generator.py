@@ -17,6 +17,7 @@ class elastic_insight_generator:
         query_statement = {
             "query": {"bool": {"must": [
                 {"exists": {"field": "m_domain"}},
+                {"term": {"m_content_type": "databases"}},
                 {"script": {"script": "doc['m_domain'].size()==1"}}
             ]}},
             "sort": [{"m_update_date": {"order": "desc"}}],
