@@ -133,6 +133,10 @@ class elastic_insight_generator:
         queries.append(elastic_insight_generator._strip_query(q3))
         indices.append(i3)
 
+        i4, q4 = elastic_insight_generator.on_insight_telegram_data()
+        queries.append(elastic_insight_generator._strip_query(q4))
+        indices.append(i4)
+
         i5, q5 = elastic_insight_generator.on_insight_defacement_data()
         queries.append(elastic_insight_generator._strip_query(q5))
         indices.append(i5)
