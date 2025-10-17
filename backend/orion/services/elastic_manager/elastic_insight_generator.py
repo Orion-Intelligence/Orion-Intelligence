@@ -19,7 +19,7 @@ class elastic_insight_generator:
                 {"exists": {"field": "m_domain"}},
                 {"script": {"script": "doc['m_domain'].size()==1"}}
             ], "must_not": [
-                {"term": {"m_content_type": "news"}}
+                {"terms": {"m_content_type": ["news", "tracking"]}}
             ]}},
             "sort": [{"m_update_date": {"order": "desc"}}],
             "from": from_,
@@ -129,14 +129,6 @@ class elastic_insight_generator:
         i2, q2 = elastic_insight_generator.on_insight_general_data()
         queries.append(elastic_insight_generator._strip_query(q2))
         indices.append(i2)
-
-        i3, q3 = elastic_insight_generator.on_insight_exploitdata()
-        queries.append(elastic_insight_generator._strip_query(q3))
-        indices.append(i3)
-
-        i4, q4 = elastic_insight_generator.on_insight_telegram_data()
-        queries.append(elastic_insight_generator._strip_query(q4))
-        indices.append(i4)
 
         i5, q5 = elastic_insight_generator.on_insight_defacement_data()
         queries.append(elastic_insight_generator._strip_query(q5))
