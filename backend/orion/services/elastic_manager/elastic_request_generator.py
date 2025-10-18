@@ -1546,7 +1546,7 @@ class elastic_request_generator:
                             "query_vector": qvec
                         }
                     }
-                    query_statement["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
+                    query_statement["query"] = knn_clause
             except Exception:
                 pass
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
