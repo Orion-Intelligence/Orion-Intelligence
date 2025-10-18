@@ -496,6 +496,10 @@ class elastic_request_generator:
                                 {"bool": {"filter": [
                                     {"exists": {"field": "m_leak_date"}},
                                     {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}}
+                                ]}},
+                                {"bool": {"filter": [
+                                    {"exists": {"field": "m_creation_date"}},
+                                    {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}}
                                 ]}}
                             ],
                             "minimum_should_match": 1
@@ -516,6 +520,10 @@ class elastic_request_generator:
                         {"bool": {"filter": [
                             {"exists": {"field": "m_leak_date"}},
                             {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}}
+                        ]}},
+                        {"bool": {"filter": [
+                            {"exists": {"field": "m_creation_date"}},
+                            {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}}
                         ]}}
                     ],
                     "minimum_should_match": 1

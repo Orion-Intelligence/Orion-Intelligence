@@ -265,7 +265,7 @@ class elastic_controller:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, None
 
-    async def index_data(self, p_data, bypass_empty_embedding = False):
+    async def index_data(self, p_data, bypass_empty_embedding=False):
         try:
             def ensure_creation_date(p_entry):
                 data = p_entry[ELASTIC_KEYS.S_VALUE]
