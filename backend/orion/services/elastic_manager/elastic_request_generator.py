@@ -1457,7 +1457,17 @@ class elastic_request_generator:
         must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
         query_statement = {
             "min_score": 0,
-            
+            "query": {
+                "bool": {
+                    "must": [content_query] if isinstance(content_query, dict) else [],
+                    "filter": must_clauses + must_filter_clauses,
+                    "must_not": must_not_clause,
+                    **({
+                           "should": should_filter_clauses,
+                           "minimum_should_match": 1
+                       } if not p_query_model.must and should_filter_clauses else {})
+                }
+            },
             "highlight": {} if raw_query == "*" else {
                 "fields": {
                     "m_content": {
@@ -1504,11 +1514,11 @@ class elastic_request_generator:
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
                             "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 10000,
+                            "num_candidates": 1000,
                             "query_vector": qvec
                         }
                     }
-                    query_statement["query"]["query"]["bool"]["must"].append(knn_clause)
+                    query_statement["query"]["bool"]["must"].append(knn_clause)
             except Exception:
                 pass
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
