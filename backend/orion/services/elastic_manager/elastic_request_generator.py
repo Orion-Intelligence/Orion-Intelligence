@@ -1460,40 +1460,7 @@ class elastic_request_generator:
             "query": {
                 "function_score": {
                     "query": {
-                        "bool": {
-                            "must": [content_query] if isinstance(content_query, dict) else [],
-                            "filter": must_clauses + must_filter_clauses,
-                            "must_not": must_not_clause,
-                            **({
-                                   "should": should_filter_clauses,
-                                   "minimum_should_match": 1
-                               } if not p_query_model.must and should_filter_clauses else {})
-                        }
                     },
-                    "functions": [
-                        {
-                            "gauss": {
-                                "m_update_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "10d",
-                                    "decay": 0.5,
-                                }
-                            },
-                            "weight": 2,
-                        }, {
-                            "gauss": {
-                                "m_update_date": {
-                                    "origin": "now",
-                                    "scale": "90d",
-                                    "offset": "10d",
-                                    "decay": 0.5
-                                }
-                            },
-                            "weight": 2
-                        }
-                    ],
-                    "boost_mode": "sum",
                 }
             },
             "highlight": {} if raw_query == "*" else {
