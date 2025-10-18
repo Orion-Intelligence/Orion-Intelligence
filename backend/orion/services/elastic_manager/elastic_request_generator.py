@@ -1191,7 +1191,7 @@ class elastic_request_generator:
             "explain": True
         }
 
-        if raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+        if raw_query!="" and raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
             try:
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
                 if qvec:
@@ -1199,7 +1199,7 @@ class elastic_request_generator:
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
                             "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 10000,
+                            "num_candidates": 1000,
                             "query_vector": qvec
                         }
                     }
@@ -1534,7 +1534,7 @@ class elastic_request_generator:
             "explain": True
         }
 
-        if raw_query != "*" and p_query_model.matchtype=="semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
+        if raw_query!="" and raw_query != "*" and p_query_model.matchtype=="semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
             try:
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
                 if qvec:
@@ -1542,7 +1542,7 @@ class elastic_request_generator:
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
                             "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 50000,
+                            "num_candidates": 10000,
                             "query_vector": qvec
                         }
                     }
