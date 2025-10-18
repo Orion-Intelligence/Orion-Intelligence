@@ -1542,11 +1542,11 @@ class elastic_request_generator:
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
                             "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 1000,
+                            "num_candidates": 10000,
                             "query_vector": qvec
                         }
                     }
-                    query_statement["query"]["query"]["bool"]["must"].append(knn_clause)
+                    query_statement["query"]["function_score"]["query"]["bool"]["must"].append(knn_clause)
             except Exception:
                 pass
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
