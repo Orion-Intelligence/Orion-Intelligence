@@ -1542,7 +1542,7 @@ class elastic_request_generator:
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
                             "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 50000,
+                            "num_candidates": 100,
                             "query_vector": qvec
                         }
                     }
