@@ -1397,6 +1397,62 @@ class elastic_request_generator:
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
+        if p_query_model.matchtype == "semantic":
+            content_query = {"match_all": {}}
+        elif raw_query == "*":
+            content_query = {"match_all": {}}
+        else:
+            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+            if quoted_value:
+                raw_query = raw_query.strip('"')
+                for phrase in exact_phrases:
+                    content_query["bool"]["should"].append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
+                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_meta_description": {"query": phrase, "boost": 1.5}}},
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
+            else:
+                content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+                for phrase in exact_phrases:
+                    must_clauses.append({
+                        "bool": {
+                            "should": [
+                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
+                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
+                                {"match_phrase": {"m_meta_description": {"query": phrase, "boost": 1.5}}},
+                            ],
+                            "minimum_should_match": 1
+                        }
+                    })
+
+                for term in loose_terms:
+                    content_query["bool"]["should"].append({
+                        "query_string": {
+                            "query": term.lower() + "*",
+                            "fields": ["*"],
+                            "default_operator": "OR",
+                            "lenient": True,
+                            "analyze_wildcard": True,
+                            "boost": 2
+                        }
+                    })
+
+                if not exact_phrases and not loose_terms:
+                    content_query = {
+                        "query_string": {
+                            "query": raw_query.lower().rstrip("/") + "*",
+                            "fields": ["*"],
+                            "default_operator": "OR",
+                            "lenient": True,
+                            "analyze_wildcard": True,
+                            "boost": 2
+                        }
+                    }
 
         phrase_fields = [
             ("m_title", 5),
