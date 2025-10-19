@@ -48,11 +48,12 @@ export class CredentialComponent implements OnInit, AfterViewInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params]) => {
-        this.url = params['url'];
+        this.url = params['domain'];
         this.user = params['user'];
 
-        this.dashboardService.consolidatedParamModel.url = params['url'] || '';
+        this.dashboardService.consolidatedParamModel.url = params['domain'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
+        this.fetchSearchResults(false)
       });
   }
 

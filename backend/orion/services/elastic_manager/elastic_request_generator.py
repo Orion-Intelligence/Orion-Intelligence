@@ -665,7 +665,7 @@ class elastic_request_generator:
         labels.append("social_model")
 
         m8 = helper_controller.clone_model(p_query_model)
-        i8, q8 = self.on_search_stealer_alert(m8, pFilter)
+        i8, q8 = self.on_search_stealerlogs_data(m8, pFilter)
         queries.append(helper_controller.strip_query(q8))
         indices.append(i8)
         labels.append("stealer_model")
@@ -1248,13 +1248,30 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model):
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter):
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         raw_url = p_query_model.url.strip() if p_query_model.url else ""
         url_query = ""
         if raw_url:
             u = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', raw_url)
             url_query = re.split(r'[/:?#]', u)[0].lower()
+
+        extra_user_terms = []
+        extra_domains = []
+        if pFilter:
+            if pFilter.get('m_username'):
+                extra_user_terms.extend([str(v).strip() for v in pFilter['m_username'] if v and str(v).strip()])
+            for key in ('m_url', 'm_domain', 'm_search_all'):
+                vals = pFilter.get(key)
+                if vals:
+                    for v in vals:
+                        s = str(v).strip()
+                        if not s:
+                            continue
+                        u2 = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', s)
+                        d2 = re.split(r'[/:?#]', u2)[0].lower()
+                        if re.match(r'^[a-z0-9.-]+\.[a-z]{2,}$', d2):
+                            extra_domains.append(d2)
 
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
@@ -1281,8 +1298,20 @@ class elastic_request_generator:
                         }
                     }
                     must_should.append(clause)
+            for t in extra_user_terms:
+                clause = {
+                    "bool": {
+                        "should": [
+                            {"wildcard": {"raw.keyword": {"value": f"*{t}*", "case_insensitive": True}}}
+                        ],
+                        "minimum_should_match": 1
+                    }
+                }
+                must_should.append(clause)
             if url_query:
                 should_clauses.append({"term": {"domain.keyword": url_query}})
+            for d in extra_domains:
+                should_clauses.append({"term": {"domain.keyword": d}})
         else:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
@@ -1300,8 +1329,22 @@ class elastic_request_generator:
                         }
                     }
                     must_should.append(clause)
+            for t in extra_user_terms:
+                clause = {
+                    "bool": {
+                        "should": [
+                            {"term": {"email.keyword": t}},
+                            {"term": {"username.keyword": t}},
+                            {"term": {"domain.keyword": t}}
+                        ],
+                        "minimum_should_match": 1
+                    }
+                }
+                must_should.append(clause)
             if url_query:
                 should_clauses.append({"term": {"domain.keyword": url_query}})
+            for d in extra_domains:
+                should_clauses.append({"term": {"domain.keyword": d}})
 
         bool_query = {}
         if must_should:
@@ -1320,11 +1363,10 @@ class elastic_request_generator:
             "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id"]
         }
 
-        if not user_query and not url_query:
+        if not (user_query or url_query or extra_user_terms or extra_domains):
             query["sort"] = ["_doc"]
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
-
 
     def on_search_general_data(self, p_query_model, pfilter=None):
         if p_query_model.matchtype:

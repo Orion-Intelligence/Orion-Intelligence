@@ -6,7 +6,7 @@
         <div class="home-defacement-result__actions">
             <ng-container *ngIf="results_defacement && (threatTypeCounts | keyvalue).length > 0">
                 <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue">
-                    {{ type.key | titlecase }} ({{ type.value }})
+                    {{ type.key }} ({{ type.value }})
                 </div>
             </ng-container>
             <div class="home-defacement-result__expand-icon" [ngClass]="{ 'expand': isExpandable }">
@@ -17,12 +17,11 @@
 
     <ng-container *ngIf="isExpandable && results_defacement && results_defacement.Result">
         <ng-container *ngFor="let item of results_defacement.Result.slice(0,10); let last = last">
-            <div class="home-defacement-result-divider" *ngIf="!last"></div>
             <div class="home_defacement_result__container mt-4">
                 <div class="home-defacement-result-card-container">
                     <div class="d-flex justify-content-between w-100 mb-2">
                         <div>
-                            <b>IOC THREAT | {{ item.m_ioc_type[0] | titlecase }}</b>
+                            <b>IOC THREAT | {{ item.m_ioc_type[0] }}</b>
                         </div>
                         <div (click)="explore(item.m_ioc_type[0], item.m_url)">
                             <span class="right-content home-defacement-explore cursor-pointer">
@@ -86,22 +85,20 @@
                     </div>
                 </div>
             </div>
-            <br>
-            <div class="home-defacement-result-divider" *ngIf="!last"></div>
+            <div class="home-defacement-result-divider mt-0" *ngIf="!last"></div>
         </ng-container>
         <br>
     </ng-container>
 
     <ng-container *ngIf="isExpandable && results_stealerlog && results_stealerlog.Result">
         <ng-container *ngFor="let item of results_stealerlog.Result.slice(0,3); let last = last">
-            <div class="home-defacement-result-divider" *ngIf="!last"></div>
             <div class="home_defacement_result__container mt-4">
                 <div class="home-defacement-result-card-container">
                     <div class="d-flex justify-content-between w-100 mb-2">
                         <div>
-                            <b>Log Type | {{ item['domain'] ? (item['domain'] | titlecase) : 'Unknown' }}</b>
+                            <b>Log Type | {{ item['domain'] ? (item['domain'] ) : 'Unknown' }}</b>
                         </div>
-                        <div (click)="exploreStealer(item['url'], item['username'])">
+                        <div (click)="exploreStealer(item['domain'], item['username'])">
                             <span class="right-content home-defacement-explore cursor-pointer">
                                 Explore
                                 <button appTooltip="Open Page" class="p-0 expand-toggle-btn">
@@ -163,8 +160,7 @@
                     </div>
                 </div>
             </div>
-            <br>
-            <div class="home-defacement-result-divider" *ngIf="!last"></div>
+            <div class="home-defacement-result-divider mt-0" *ngIf="!last"></div>
         </ng-container>
         <br>
     </ng-container>

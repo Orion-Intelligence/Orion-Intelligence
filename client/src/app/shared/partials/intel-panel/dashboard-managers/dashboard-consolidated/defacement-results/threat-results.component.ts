@@ -63,7 +63,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   exploreStealer(url: string, username: string) {
     const encodedUrl = encodeURIComponent(url || '');
     const encodedUser = encodeURIComponent(username || '');
-    const finalUrl = `/dashboard/stealerlogs?url=${encodedUrl}&user=${encodedUser}`;
+    const finalUrl = `/dashboard/stealerlogs?domain=${encodedUrl}&user=${encodedUser}`;
     window.open(finalUrl, '_blank');
   }
 
