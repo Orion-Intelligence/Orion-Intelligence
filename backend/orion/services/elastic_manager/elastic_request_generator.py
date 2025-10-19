@@ -1320,8 +1320,8 @@ class elastic_request_generator:
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
-    @staticmethod
-    def on_search_general_data(p_query_model, pfilter=None):
+
+    def on_search_general_data(self, p_query_model, pfilter=None):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -1454,36 +1454,27 @@ class elastic_request_generator:
                         }
                     }
 
-        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(pfilter, p_query_model, allowed_keys)
-        query_statement = {
-            "min_score": 0,
-            "query": {
-                "bool": {
-                    "must": [],
-                }
-            },
-            "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
-            "size": 50 if raw_query == "*" else CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-            "track_total_hits": True,
-            "explain": True
-        }
+        phrase_fields = [
+            ("m_title", 5),
+            ("m_content", 3),
+            ("m_url", 2),
+            ("m_base_url", 1),
+        ]
 
-        if len(p_query_model.q)>2 and raw_query != "*" and p_query_model.matchtype=="semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
-            try:
-                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
-                if qvec:
-                    knn_clause = {
-                        "knn": {
-                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
-                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 10000,
-                            "query_vector": qvec
-                        }
-                    }
-                    query_statement["query"]["bool"]["must"].append(knn_clause)
-            except Exception:
-                pass
-        return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
+        query_statement = self._build_query_block(
+            p_query_model=p_query_model,
+            pfilter=pfilter,
+            raw_query=raw_query,
+            quoted_value=quoted_value,
+            exact_phrases=exact_phrases,
+            loose_terms=loose_terms,
+            phrase_fields=phrase_fields,
+            must_clauses=must_clauses,
+            must_not_clause=must_not_clause,
+            m_page_number=m_page_number,
+            date_field="m_leak_date"
+        )
+        return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     @staticmethod
     def clear_expire_index():
