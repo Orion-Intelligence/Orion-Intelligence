@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from orion.helper_manager.helper_controller import helper_controller
 
 class search_defacement_param_model(BaseModel,helper_controller):
-    q: Optional[str] = Field("", max_length=150)
+    q: Optional[str] = Field("")
     category: Optional[str] = "all"
     page: Optional[int] = 1
     network: str = "all"

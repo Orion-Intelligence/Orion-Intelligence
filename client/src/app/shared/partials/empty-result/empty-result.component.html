@@ -1,15 +1,27 @@
 <div class="empty-result_main-container">
   <div class="empty-result_suggestion">
-    <div>
-      <p class="empty-result_suggestion-header"> Your search <strong>{{ query }}</strong> did not match any documents in <strong>hidden</strong> network </p>
+    <img alt="no-input" height="40" src="assets/images/shared/no-input.svg" width="40">
+    <p class="empty-result_suggestion-header m-0">No Results Found!</p>
+    <p class="empty-result_suggestion-text">Your search did not return any documents in the current network.</p>
+    <p class="empty-result_suggestion-text text-white">To achieve the best results, try the following:</p>
+    <ul class="empty-result_suggestion-container">
+      <li class="empty-result_suggestion-item"><span class="text-white">Check Your Network Filter</span>: Results for this search might be available in Clearnet or Onion networks.</li>
+      <li class="empty-result_suggestion-item"><span class="text-white">Verify Spelling</span>: Ensure your company name or keyword is spelled correctly.</li>
+      <li class="empty-result_suggestion-item"><span class="text-white">Use Broader Terms</span>: Try a more general keyword to cast a wider net.</li>
+      <li class="empty-result_suggestion-item"><span class="text-white">Refine Your Query</span>: If your term is too generic, try adding an industry or specific date.</li>
+    </ul>
 
-      <p class="empty-result_suggestion-text">Suggestions:</p>
-      <ul class="empty-result_suggestion-container">
-        <li class="empty-result_suggestion-item">Try changing network type</li>
-        <li class="empty-result_suggestion-item">Make sure spellings are correct.</li>
-        <li class="empty-result_suggestion-item">Try different keywords.</li>
-        <li class="empty-result_suggestion-item">Try more general keywords.</li>
-      </ul>
-    </div>
+    <!--    <div>-->
+    <!--      <p class="empty-query_container-header">No Keyword Entered Yet!</p>-->
+    <!--      <p class="empty-query_container-description">Enter a keyword to see results</p>-->
+
+    <!--      <p class="empty-result_suggestion-text">Suggestions:</p>-->
+    <!--      <ul class="empty-result_suggestion-container">-->
+    <!--        <li class="empty-result_suggestion-item">Try changing network type</li>-->
+    <!--        <li class="empty-result_suggestion-item">Make sure spellings are correct.</li>-->
+    <!--        <li class="empty-result_suggestion-item">Try different keywords.</li>-->
+    <!--        <li class="empty-result_suggestion-item">Try more general keywords.</li>-->
+    <!--      </ul>-->
+    <!--    </div>-->
   </div>
 </div>

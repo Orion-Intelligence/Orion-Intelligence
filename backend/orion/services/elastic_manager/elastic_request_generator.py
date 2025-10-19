@@ -157,28 +157,33 @@ class elastic_request_generator:
 
         if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1" and p_query_model.matchtype == "semantic":
             try:
-                semantic_boost = 100 if p_query_model.matchtype == "semantic" else 50
                 qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
                 if qvec:
                     knn_clause = {
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
                             "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 10000,
+                            "num_candidates": 1000,
                             "query_vector": qvec,
-                            "boost": semantic_boost,
                             "filter": {
                                 "bool": {
-                                    "filter": must_clauses + must_filter_clauses,
-                                    "must_not": must_not_clause
+                                    "filter": must_filter_clauses
                                 }
                             }
                         }
                     }
-                    qb = query_statement["query"]["function_score"]["query"]["bool"]
-                    qb.setdefault("should", []).append(knn_clause)
-                    query_statement["query"]["function_score"]["boost_mode"] = "sum"
-                    query_statement["min_score"] = 2
+                    a_val = 10.0
+                    t_val = 0.8
+                    query_statement["query"]["function_score"]["query"] = knn_clause
+                    query_statement["query"]["function_score"]["script_score"] = {
+                        "script": {
+                            "source": "double s=_score; double eps=1e-9; s=Math.max(eps, Math.min(1.0-eps, s)); double a=params.a; double t=params.t; double z=0.5*(1.0+Math.tanh(a*(s-t))); return z;",
+                            "params": {"a": a_val, "t": t_val}
+                        }
+                    }
+                    query_statement["query"]["function_score"]["score_mode"] = "sum"
+                    query_statement["query"]["function_score"]["boost_mode"] = "replace"
+                    query_statement["min_score"] = 0.4
             except Exception as _:
                 pass
 
@@ -1329,8 +1334,8 @@ class elastic_request_generator:
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
             raw_query = "*"
-        if raw_query == "":
-            raw_query = "data"
+        if p_query_model.q == "":
+            raw_query = "*"
         if not raw_query or raw_query == "":
             raw_query = "*"
         if not raw_query:
@@ -1397,62 +1402,6 @@ class elastic_request_generator:
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
-        if p_query_model.matchtype == "semantic":
-            content_query = {"match_all": {}}
-        elif raw_query == "*":
-            content_query = {"match_all": {}}
-        else:
-            content_query = {"bool": {"should": [], "minimum_should_match": 1}}
-            if quoted_value:
-                raw_query = raw_query.strip('"')
-                for phrase in exact_phrases:
-                    content_query["bool"]["should"].append({
-                        "bool": {
-                            "should": [
-                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
-                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_meta_description": {"query": phrase, "boost": 1.5}}},
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    })
-            else:
-                content_query = {"bool": {"should": [], "minimum_should_match": 1}}
-                for phrase in exact_phrases:
-                    must_clauses.append({
-                        "bool": {
-                            "should": [
-                                {"match_phrase": {"m_title": {"query": phrase, "boost": 6}}},
-                                {"match_phrase": {"m_content": {"query": phrase, "boost": 1.5}}},
-                                {"match_phrase": {"m_meta_description": {"query": phrase, "boost": 1.5}}},
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    })
-
-                for term in loose_terms:
-                    content_query["bool"]["should"].append({
-                        "query_string": {
-                            "query": term.lower() + "*",
-                            "fields": ["*"],
-                            "default_operator": "OR",
-                            "lenient": True,
-                            "analyze_wildcard": True,
-                            "boost": 2
-                        }
-                    })
-
-                if not exact_phrases and not loose_terms:
-                    content_query = {
-                        "query_string": {
-                            "query": raw_query.lower().rstrip("/") + "*",
-                            "fields": ["*"],
-                            "default_operator": "OR",
-                            "lenient": True,
-                            "analyze_wildcard": True,
-                            "boost": 2
-                        }
-                    }
 
         phrase_fields = [
             ("m_title", 5),
@@ -1472,9 +1421,9 @@ class elastic_request_generator:
             must_clauses=must_clauses,
             must_not_clause=must_not_clause,
             m_page_number=m_page_number,
-            date_field="m_leak_date"
+            date_field="m_creation_date"
         )
-        return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
+        return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
     @staticmethod
     def clear_expire_index():
