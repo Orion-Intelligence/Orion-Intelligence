@@ -1459,13 +1459,7 @@ class elastic_request_generator:
             "min_score": 0,
             "query": {
                 "bool": {
-                    "must": [content_query] if isinstance(content_query, dict) else [],
-                    "filter": must_clauses + must_filter_clauses,
-                    "must_not": must_not_clause,
-                    **({
-                           "should": should_filter_clauses,
-                           "minimum_should_match": 1
-                       } if not p_query_model.must and should_filter_clauses else {})
+                    "must": [],
                 }
             },
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
