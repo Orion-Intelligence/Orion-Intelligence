@@ -1468,38 +1468,6 @@ class elastic_request_generator:
                        } if not p_query_model.must and should_filter_clauses else {})
                 }
             },
-            "highlight": {} if raw_query == "*" else {
-                "fields": {
-                    "m_content": {
-                        "fragment_size": 200,
-                        "number_of_fragments": 3,
-                        "pre_tags": ["<em>"],
-                        "post_tags": ["</em>"]
-                    }
-                }
-            },
-            "suggest": {
-                "important_content_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_important_content",
-                        "min_word_length": 4,
-                        "max_term_freq": 0.01,
-                        "sort": "score",
-                        "string_distance": "internal",
-                    }
-                },
-                "content_suggestion": {
-                    "text": raw_query,
-                    "term": {
-                        "field": "m_content",
-                        "min_word_length": 4,
-                        "max_term_freq": 0.01,
-                        "sort": "score",
-                        "string_distance": "internal",
-                    }
-                }
-            },
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
             "size": 50 if raw_query == "*" else CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
             "track_total_hits": True,
@@ -1514,7 +1482,7 @@ class elastic_request_generator:
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
                             "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 1000,
+                            "num_candidates": 10000,
                             "query_vector": qvec
                         }
                     }
