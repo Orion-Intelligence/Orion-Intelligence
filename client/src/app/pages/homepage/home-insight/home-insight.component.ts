@@ -94,6 +94,11 @@ export class HomeInsightComponent implements OnInit {
     return `${newBase}/consolidated/${model}/${hash}?ci=${model}&q=${title}`;
   }
 
+  trimUrl(url: string, maxLength: number = 24): string {
+    if (!url) return '';
+    const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
+    return cleanUrl.length > maxLength ? cleanUrl.slice(0, maxLength) + '...' : cleanUrl;
+  }
   protected readonly String = String;
 
 }

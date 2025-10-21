@@ -1,9 +1,9 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {AsyncPipe, NgClass, NgForOf, NgOptimizedImage} from '@angular/common';
-import {RouterLink} from '@angular/router';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
-import {LowerPipe} from '../../../pipes/lower.pipe';
-import {SelectionStoreService} from '../../../../services/dashboard/selection.service';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AsyncPipe, NgClass, NgForOf, NgOptimizedImage } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { LowerPipe } from '../../../pipes/lower.pipe';
+import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
 
 @Component({
   selector: 'app-dashboard-sidebar-items',
@@ -31,6 +31,10 @@ export class DashboardSidebarItemsComponent {
 
   selectOption(item: string) {
     this.optionSelected.emit(item);
+  }
+  replaceDashWithSpace(value: string): string {
+    if (!value) return '';
+    return value.replace(/-/g, ' ');
   }
 
 }

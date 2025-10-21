@@ -97,4 +97,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.authSubscription) this.authSubscription.unsubscribe();
   }
+  demoLogin() {
+    this.authService.demoLogin();
+  }
 }

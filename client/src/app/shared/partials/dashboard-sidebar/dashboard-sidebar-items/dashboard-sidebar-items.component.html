@@ -18,7 +18,7 @@
         <div
           [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
           class="sidebar__subitem-content">
-          {{ item }}
+          {{ replaceDashWithSpace(item) }}
         </div>
       </div>
     </li>

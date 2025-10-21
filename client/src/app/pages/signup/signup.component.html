@@ -12,10 +12,10 @@
         <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo" />
         <div class="login-heading">Sign Up to get started!</div>
 
-        <ng-container>
-          <div class="demo-note">
+        <ng-container *ngIf="isMobile">
+          <div class="demo-note" (click)="demoLogin()">
             <img src="/assets/images/shared/info.svg" class="info-icon">
-            <span>Want to explor first? <strong>user / password</strong></span>
+            <span>Want to explor first? <strong>Try demo</strong></span>
           </div>
         </ng-container>
 

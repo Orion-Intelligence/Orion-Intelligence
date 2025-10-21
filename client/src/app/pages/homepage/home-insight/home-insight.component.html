@@ -16,7 +16,7 @@
               <div class="home-insight-card-label">Title</div>
               <div class="home-insight-card-value">
                 {{item.title.slice(0, 20)}}
-                <span *ngIf="item.title.length > 20">…</span>
+                <span *ngIf="item.title.length > 30">…</span>
               </div>
             </div>
             <div class="home-insight-card-attacker-info">
@@ -40,7 +40,7 @@
                 <div class="home-insight-card-country-info">
                   <div class="home-insight-card-label">URL</div>
                   <div class="home-insight-card-value" *ngIf="item.url[0]">
-                    {{ item.url[0].length > 24 ? item.url[0].slice(0, 24) + '...' : item.url[0] }}
+                    {{ trimUrl(item.url[0]) }}
                   </div>
                 </div>
               </ng-container>

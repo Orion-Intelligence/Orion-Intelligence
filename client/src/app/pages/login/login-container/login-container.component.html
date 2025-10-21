@@ -15,7 +15,7 @@
           <div class="login-heading">Login to get started!</div>
 
           <ng-container *ngIf="isMobile">
-            <div class="demo-note">
+            <div class="demo-note" (click)="demoLogin()">
               <img src="/assets/images/shared/info.svg" class="info-icon">
               <span>Want to explor first? <strong>user / password</strong></span>
             </div>
