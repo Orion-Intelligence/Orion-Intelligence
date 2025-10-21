@@ -95,4 +95,7 @@ export class SignupComponent implements OnInit {
   goToLogin() {
     this.router.navigate(['/login']).then();
   }
+  demoLogin() {
+    this.auth_service.demoLogin();
+  }
 }

@@ -106,9 +106,9 @@
   max-height: 0;
   transform: translateY(-10px);
   transition: opacity 0.2s ease,
-  max-height 0.2s ease-out,
-  transform 0.2s ease-out,
-  margin-top 0.2s ease-out;
+    max-height 0.2s ease-out,
+    transform 0.2s ease-out,
+    margin-top 0.2s ease-out;
 }
 
 .sidebar__subitems.show {
@@ -124,9 +124,9 @@
   margin-top: 0 !important;
   pointer-events: none;
   transition: opacity 0.3s ease,
-  max-height 0.3s ease-in,
-  transform 0.3s ease-in,
-  margin-top 0.3s ease-in;
+    max-height 0.3s ease-in,
+    transform 0.3s ease-in,
+    margin-top 0.3s ease-in;
 }
 
 .sidebar__subitems-fast:not(.show) {
@@ -186,7 +186,7 @@
 }
 
 .sidebar__selected {
-  border-left: 1px solid #fff;
+  border-left: 2px solid #fff;
   color: white;
   font-weight: 500;
   height: 43px;
@@ -273,7 +273,7 @@
   margin-top: -10px;
 }
 
-.sidebar-collapsed .sidebar__item_break{
+.sidebar-collapsed .sidebar__item_break {
   width: 50px;
 }
 
@@ -364,13 +364,13 @@
   height: 40px !important;
 }
 
-@media only screen and (width <= 700px) {
+@media only screen and (width <=700px) {
   .sidebar__content-container {
     max-width: 350px;
   }
 }
 
-@media only screen and (width <= 1050px) {
+@media only screen and (width <=1050px) {
   .sidebar__logo-container p {
     margin-left: 40px;
   }
@@ -391,14 +391,14 @@
     left: 24px;
   }
 
-  #sidebar__container-main .sidebar__menu-checkbox:checked + .sidebar__container {
+  #sidebar__container-main .sidebar__menu-checkbox:checked+.sidebar__container {
     right: 0;
     transition: right 1s ease;
   }
 
 }
 
-@media only screen and (height <= 943px) {
+@media only screen and (height <=943px) {
   .sidebar__items {
     list-style: none;
     overflow-y: auto;
@@ -412,7 +412,7 @@
 
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .sidebar__item .sidebar__item-dropdown {
     width: 100% !important;
   }
@@ -423,7 +423,7 @@
   }
 }
 
-@media only screen and (width <= 600px) {
+@media only screen and (width <=600px) {
   .sidebar__content-container {
     max-width: 100vw;
     height: 100vh;
@@ -435,7 +435,7 @@
   }
 }
 
-@media (height <= 749px) {
+@media (height <=749px) {
   .sidebar-hotlinks {
     display: none !important;
   }

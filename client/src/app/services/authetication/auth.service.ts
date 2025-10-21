@@ -1,14 +1,14 @@
-import {Injectable, signal} from '@angular/core';
-import {BehaviorSubject, map, Observable, tap} from 'rxjs';
-import {ApiService} from '../../shared/services/api.service';
-import {Router} from '@angular/router';
-import {AuthModel} from '../../shared/model/auth/auth.model';
-import {TokenRefreshService} from './token-refresh.service';
-import {HttpHeaders} from '@angular/common/http';
-import {AppStorageService} from '../core/app/app-storage.service';
-import {AppService} from '../core/app/app.service';
+import { Injectable, signal } from '@angular/core';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { ApiService } from '../../shared/services/api.service';
+import { Router } from '@angular/router';
+import { AuthModel } from '../../shared/model/auth/auth.model';
+import { TokenRefreshService } from './token-refresh.service';
+import { HttpHeaders } from '@angular/common/http';
+import { AppStorageService } from '../core/app/app-storage.service';
+import { AppService } from '../core/app/app.service';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private username = signal<string>('');
   private role = signal<string | null>(null);
@@ -18,7 +18,7 @@ export class AuthService {
 
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
-  constructor(private appService:AppService, private appStorageService:AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
+  constructor(private appService: AppService, private appStorageService: AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
     if (this.isAuthenticated()) {
       const needsSession = !this.username() && !this.role() && !this.verificationDate();
       if (needsSession) this.refreshToken().subscribe();
@@ -42,24 +42,24 @@ export class AuthService {
     const body = new URLSearchParams();
     body.set('username', username);
     body.set('password', password);
-    const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
 
-    return this.apiService.post<any>('token', body.toString(), {headers}).pipe(
+    return this.apiService.post<any>('token', body.toString(), { headers }).pipe(
       tap({
         next: (response) => {
           if (response.twofa_required) {
-            this.authState.next({token: null, username, role: null, isAuthenticated: false, onboarding: null, error: '2FA required'});
+            this.authState.next({ token: null, username, role: null, isAuthenticated: false, onboarding: null, error: '2FA required' });
             return response.provisioning_uri || null;
           }
 
           if (!response?.access_token) {
-            this.authState.next({token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!'});
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!' });
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!'});
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!' });
             return;
           }
 
@@ -71,10 +71,10 @@ export class AuthService {
 
           this.setToken(response.access_token);
           this.startTokenRefresh();
-          this.router.navigate(['/dashboard'], {replaceUrl: true}).then();
+          this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
         },
         error: () => {
-          this.authState.next({token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied!', onboarding: null});
+          this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied!', onboarding: null });
         }
       })
     );
@@ -86,18 +86,18 @@ export class AuthService {
       observer.complete();
     });
 
-    const headers = new HttpHeaders({'Content-Type': 'application/json', 'Authorization': `Bearer ${tempToken}`});
-    return this.apiService.post<any>('token/2fa/verify', {code}, {headers}).pipe(
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${tempToken}` });
+    return this.apiService.post<any>('token/2fa/verify', { code }, { headers }).pipe(
       tap({
         next: (response) => {
           if (!response?.access_token) {
-            this.authState.next({token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code'});
+            this.authState.next({ token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code' });
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!'});
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!' });
             return;
           }
 
@@ -111,7 +111,7 @@ export class AuthService {
           this.startTokenRefresh();
         },
         error: () => {
-          this.authState.next({token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code'});
+          this.authState.next({ token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code' });
         }
       })
     );
@@ -126,23 +126,29 @@ export class AuthService {
     this.onboarding.set(false);
     this.subscription.set(false);
     this.verificationDate.set('');
-    this.authState.next({token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null});
+    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null });
     this.tokenRefreshService.stopTokenRefresh();
     this.router.navigate(['/login']).then();
     this.appStorageService.clearStorage()
     this.appService.clearAll()
   }
 
+  demoLogin(): void {
+    const demoUserName = 'demo';
+    const demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw';
+    this.login(demoUserName, demoPassword).subscribe(async (res) => { });
+  }
+
   signup(username: string, email: string, password: string): Observable<any> {
-    return this.apiService.post('signup', {username, email, password});
+    return this.apiService.post('signup', { username, email, password });
   }
 
   forgotPassword(email: string): Observable<any> {
-    return this.apiService.post('forgot', {email});
+    return this.apiService.post('forgot', { email });
   }
 
   updatePassword(token: string, password: string): Observable<any> {
-    return this.apiService.post('updatePassword', {token, password});
+    return this.apiService.post('updatePassword', { token, password });
   }
 
   getToken(): string | null {
@@ -177,7 +183,7 @@ export class AuthService {
     const isAuthenticated = !!this.getStoredToken();
     const hasSession =
       !!this.username() || !!this.role() || !!this.verificationDate();
-    return {isAuthenticated, hasSession};
+    return { isAuthenticated, hasSession };
   }
 
   setOnboarding(value: boolean): void {
@@ -186,7 +192,7 @@ export class AuthService {
 
   private setToken(token: string): void {
     localStorage.setItem('token', token);
-    this.authState.next({token, username: this.username(), role: this.role(), isAuthenticated: true, onboarding: String(this.onboarding()), error: null});
+    this.authState.next({ token, username: this.username(), role: this.role(), isAuthenticated: true, onboarding: String(this.onboarding()), error: null });
   }
 
   private getStoredToken(): string | null {
@@ -195,7 +201,7 @@ export class AuthService {
 
   private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
-    return {token, username: this.username(), role: this.role(), isAuthenticated: !!token, onboarding: String(this.onboarding()), error: null};
+    return { token, username: this.username(), role: this.role(), isAuthenticated: !!token, onboarding: String(this.onboarding()), error: null };
   }
 
   private startTokenRefresh(): void {
@@ -211,8 +217,8 @@ export class AuthService {
 
     return this.apiService.post<{ access_token: string, session?: any }>(
       'token/refresh',
-      {token: currentToken},
-      {headers: new HttpHeaders({'Authorization': `Bearer ${currentToken}`})}
+      { token: currentToken },
+      { headers: new HttpHeaders({ 'Authorization': `Bearer ${currentToken}` }) }
     ).pipe(
       tap((response) => {
         if (response?.session) {
