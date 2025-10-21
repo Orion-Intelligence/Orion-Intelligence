@@ -5,6 +5,8 @@ import { GeneralCallbackModel } from '../general/general.callback.model';
 import { SocialCallbackModel } from '../social/social.callback.model';
 import { DefacementCallbackModel } from '../defacement/defacement.callback.model';
 import { StealerLogCallbackModel } from '../credentials/credential.callback.model';
+import { SearchDynamicEmailCallbackModel } from '../../api/email/search_dynamic_email_callback_model';
+import { UrlScanMeta } from '../../security-scan/security.scan.results.model';
 
 export class ConsolidatedCallbackModel {
   leak_model?: LeakCallbackModel;
@@ -29,4 +31,25 @@ export class ConsolidatedCallbackModel {
       this.news_model = init.news_model ? new LeakCallbackModel(init.news_model) : undefined;
     }
   }
+}
+
+export type ConsolidatedLiveApis = {
+  type: 'user' | 'social' | 'cracked';
+  q1: string;
+  q2?: string;
+};
+
+export type ConsolidatedLiveApiResults = {
+  input: ConsolidatedLiveApis;
+  status: 'pending' | 'success' | 'error';
+  resultData: SearchDynamicEmailCallbackModel | null;
+  errorMessage: string | null;
+};
+
+export type ConsolidatedScanResults = {
+  domain: string;
+  meta: UrlScanMeta | null;
+  grade: string;
+  hasError: boolean;
+  errorMessage: string;
 }
