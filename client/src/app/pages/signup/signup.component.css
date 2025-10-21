@@ -3,8 +3,8 @@
     height: calc(100vh - 60px);
     width: 100vw;
     margin-top: 100px;
-  background: url('/assets/images/shared/Bg.webp') no-repeat center 100px;
-  background-size: cover;
+    background: url('/assets/images/shared/Bg.webp') no-repeat center 100px;
+    background-size: cover;
 }
 
 .auth-wrapper__left {
@@ -17,9 +17,9 @@
     align-items: center;
 }
 
-.auth-wrapper__left > * {
-  position: relative;
-  top: -5vh;
+.auth-wrapper__left>* {
+    position: relative;
+    top: -5vh;
 }
 
 .auth-wrapper__right {
@@ -232,6 +232,34 @@
     margin-top: 10px;
     margin-bottom: -10px;
 }
+
+.demo-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9fafb;
+    border: 1px solid #f3f4f6;
+    color: #4b5563;
+    font-size: 14px;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    max-width: 320px;
+}
+
+.demo-note .info-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.4;
+}
+
+.demo-note strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
 
 @media screen and (width <=1300px) {
     .auth-wrapper__right {

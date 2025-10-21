@@ -14,6 +14,13 @@
 
           <div class="login-heading">Login to get started!</div>
 
+          <ng-container *ngIf="isMobile">
+            <div class="demo-note">
+              <img src="/assets/images/shared/info.svg" class="info-icon">
+              <span>Want to explor first? <strong>user / password</strong></span>
+            </div>
+          </ng-container>
+
           <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="login-form">
             <label for="username" class="input-label">Email</label>
             <div class="input-with-icon">

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../services/authetication/auth.service';
@@ -10,7 +10,7 @@ import { AuthService } from '../../services/authetication/auth.service';
   imports: [FormsModule, CommonModule],
   templateUrl: './signup.component.html'
 })
-export class SignupComponent {
+export class SignupComponent implements OnInit {
   user = { username: '', mail: '', password: '' };
   errorMessage: string | null = null;
   passwordStrength: 'weak' | 'medium' | 'strong' | null = null;
@@ -23,8 +23,14 @@ export class SignupComponent {
     specialChar: false
   };
   currentUnmetCheck: string | null = null;
-
-  constructor(private router: Router, public auth_service: AuthService) {}
+  isMobile = false;
+  constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute) { }
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const d = params['d_key'];
+      this.isMobile = d !== undefined && d !== null && d.trim() !== '';
+    });
+  }
 
   validateFields() {
     const usernamePattern = /^[a-zA-Z0-9]+$/;
