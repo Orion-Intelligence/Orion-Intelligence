@@ -78,6 +78,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   liveApiResults: ConsolidatedLiveApiResults[] = [];
   isProcessing = false;
 
+
+  private scannedEmails = new Set<string>();
+  private scannedUsers = new Set<string>();
+  private scannedPlaystore = new Set<string>();
+  private scannedDomains = new Set<string>();
+
   constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, private apiService: ApiService, private helperService: HelperService, private liveApiService: ConsolidatedApiService) {
     this.pageCounts = {};
   }
@@ -134,6 +140,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (this.checkProfile() && !this.hasIOCs()) {
       return
     }
+    this.initEntities();
     if (!this.isGrouped) {
       this.fetchRanked()
       return
@@ -351,53 +358,130 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
 
-  initEntities() {
+  initEntities(): void {
     const filters = this.appService.configData().localSettings.entityfilterCategories;
-    const queryDomains = this.helperService.extractLinks('') || [];
-    const filterDomains = Array.isArray(filters['m_domain'])
-      ? filters['m_domain'].map((domain: string) => `https://${domain}`)
-      : [];
-    this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
+
     const unique = (key: string): string[] =>
       Array.isArray(filters[key]) ? Array.from(new Set(filters[key])) : [];
-    const scanEmails = unique('m_email');
-    const scanUsers = unique('m_social_media_profiles');
-    const scanPlaystoreUrls = unique('m_url').filter(url =>
-      url.includes('play.google.com/store/apps')
+
+    const filterDomains = unique('m_domain');
+    const filterEmails = unique('m_email');
+    const filterUsers = unique('m_social_media_profiles');
+    const filterUrls = unique('m_url');
+
+    const searchAll = filters['m_search_all'] || '';
+    const queryInput = (this.query || '').trim();
+    const combinedText = [searchAll, queryInput].filter(Boolean).join(' ');
+    const extractedDomains = this.helperService.extractLinks(combinedText);
+    const extractedEmails = this.helperService.extractEmails(combinedText);
+    const extractedPlaystoreUrls = extractedDomains.filter((d: string) =>
+      d.includes('play.google.com/store/apps')
     );
+
+    const extractedUsernamesFromEmails = extractedEmails.map(email => email.split('@')[0]);
+
+    const possibleUsernames = combinedText
+      .split(/[\s,;]+/)
+      .filter(w => w.length >= 3 && !w.includes('@') && !w.includes('.') && !w.startsWith('http'))
+      .map(w => w.trim());
+
+    const currentDomains = Array.from(new Set([
+      ...filterDomains,
+      ...extractedDomains,
+      ...extractedPlaystoreUrls.map(() => 'play.google.com')
+    ]));
+
+    const currentEmails = Array.from(new Set([
+      ...filterEmails,
+      ...extractedEmails
+    ]));
+
+    const currentUsers = Array.from(new Set([
+      ...filterUsers,
+      ...extractedUsernamesFromEmails,
+      ...possibleUsernames
+    ]));
+
+    const currentPlaystore = Array.from(new Set([
+      ...filterUrls.filter((url: string) => url.includes('play.google.com/store/apps')),
+      ...extractedPlaystoreUrls
+    ]));
+
+    this.cleanScannedSetAndResults('email', this.scannedEmails, currentEmails);
+    this.cleanScannedSetAndResults('user', this.scannedUsers, currentUsers);
+    this.cleanScannedSetAndResults('playstore', this.scannedPlaystore, currentPlaystore);
+    this.cleanScannedSetAndResults('domain', this.scannedDomains, currentDomains);
+
+    const newEmails = currentEmails.filter(e => !this.scannedEmails.has(e));
+    const newUsers = currentUsers.filter(u => !this.scannedUsers.has(u));
+    const newPlaystore = currentPlaystore.filter(p => !this.scannedPlaystore.has(p));
+    const newDomains = currentDomains.filter(d => !this.scannedDomains.has(d));
+
+    newEmails.forEach(e => this.scannedEmails.add(e));
+    newUsers.forEach(u => this.scannedUsers.add(u));
+    newPlaystore.forEach(p => this.scannedPlaystore.add(p));
+    newDomains.forEach(d => this.scannedDomains.add(d));
     this.liveApiEntities = [
-      ...scanEmails.map(email => ({
+      ...newEmails.map(email => ({
         type: 'user' as const,
         q1: '',
         q2: email
       })),
-      ...scanUsers.map(userHandle => ({
+      ...newUsers.map(userHandle => ({
         type: 'social' as const,
         q1: userHandle
       })),
-      ...scanPlaystoreUrls.map(url => ({
+      ...newPlaystore.map(url => ({
         type: 'cracked' as const,
         q1: url
       }))
     ];
+
+    this.scandomains = Array.from(new Set([...this.scandomains, ...newDomains]));
+
+    if (this.liveApiEntities.length > 0) {
+      this.LiveApisSearch();
+    }
+    if (newDomains.length > 0) {
+      this.runDomainScan();
+    }
+  }
+
+  private cleanScannedSetAndResults(
+    type: 'email' | 'user' | 'playstore' | 'domain',
+    set: Set<string>,
+    currentItems: string[]
+  ): void {
+    for (const item of Array.from(set)) {
+      if (!currentItems.includes(item)) {
+        set.delete(item);
+        if (type === 'domain') {
+          this.scanResults = this.scanResults.filter(r => r.domain !== item);
+        } else {
+          this.liveApiResults = this.liveApiResults.filter(r => {
+            const q = r.input.q1 || r.input.q2 || '';
+            return !q.includes(item);
+          });
+        }
+      }
+    }
   }
 
   runDomainScan() {
+    if (!this.scandomains || this.scandomains.length === 0) return;
+
     this.isScanLoading = true;
-    this.scanResults = [];
     this.liveApiService.runScanDomains(this.scandomains)
-      .pipe(
-        finalize(() => {
-          this.isScanLoading = false;
-        })
-      )
+      .pipe(finalize(() => (this.isScanLoading = false)))
       .subscribe({
         next: (results: ConsolidatedScanResults[]) => {
-          this.scanResults = results;
+          results.forEach(r => {
+            const existing = this.scanResults.find(x => x.domain === r.domain);
+            if (existing) Object.assign(existing, r);
+            else this.scanResults.push(r);
+          });
         },
-        error: (err) => {
-          this.isScanLoading = false;
-        }
+        error: () => (this.isScanLoading = false)
       });
   }
   extractHost(url: string): string {
@@ -419,31 +503,24 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
 
   LiveApisSearch(): void {
-    if (!this.liveApiEntities || this.liveApiEntities.length === 0) {
-      return;
-    }
+    if (!this.liveApiEntities || this.liveApiEntities.length === 0) return;
 
     this.isProcessing = true;
-    this.liveApiResults = this.liveApiEntities.map(input => ({
-      input,
-      status: 'pending',
-      resultData: null,
-      errorMessage: null,
-    }));
-
     this.liveApiService.runLiveApiSearch(this.liveApiEntities)
-      .pipe(
-        finalize(() => {
-          this.isProcessing = false;
-        })
-      )
+      .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({
-        next: (finalResults: ConsolidatedLiveApiResults[]) => {
-          this.liveApiResults = finalResults;
+        next: (results: ConsolidatedLiveApiResults[]) => {
+          results.forEach(r => {
+            const q1 = r.input.q1 || '';
+            const q2 = r.input.q2 || '';
+            const existing = this.liveApiResults.find(
+              x => (x.input.q1 === q1 && x.input.q2 === q2)
+            );
+            if (existing) Object.assign(existing, r);
+            else this.liveApiResults.push(r);
+          });
         },
-        error: (err) => {
-          this.isProcessing = false;
-        }
+        error: () => (this.isProcessing = false)
       });
   }
 }
