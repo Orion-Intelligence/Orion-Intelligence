@@ -391,26 +391,20 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       ...extractedPlaystoreUrls.map(() => 'play.google.com')
     ]));
 
-    const currentEmails = Array.from(new Set([
-      ...filterEmails,
-      ...extractedEmails
-    ]));
+    const currentEmails = Array.from(new Set([...filterEmails, ...extractedEmails]));
 
-    const currentUsers = Array.from(new Set([
-      ...filterUsers,
-      ...extractedUsernamesFromEmails,
-      ...possibleUsernames
-    ]));
+    const currentUsers = Array.from(new Set([...filterUsers, ...extractedUsernamesFromEmails, ...possibleUsernames]));
 
-    const currentPlaystore = Array.from(new Set([
-      ...filterUrls.filter((url: string) => url.includes('play.google.com/store/apps')),
-      ...extractedPlaystoreUrls
-    ]));
+    const currentPlaystore = Array.from(new Set([...filterUrls.filter((url: string) => url.includes('play.google.com/store/apps')), ...extractedPlaystoreUrls]));
 
     this.cleanScannedSetAndResults('email', this.scannedEmails, currentEmails);
     this.cleanScannedSetAndResults('user', this.scannedUsers, currentUsers);
     this.cleanScannedSetAndResults('playstore', this.scannedPlaystore, currentPlaystore);
     this.cleanScannedSetAndResults('domain', this.scannedDomains, currentDomains);
+
+    const activeDomains = new Set(currentDomains);
+    this.scanResults = this.scanResults.filter(r => activeDomains.has(r.domain));
+    this.scandomains = this.scandomains.filter(domain => activeDomains.has(domain));
 
     const newEmails = currentEmails.filter(e => !this.scannedEmails.has(e));
     const newUsers = currentUsers.filter(u => !this.scannedUsers.has(u));
@@ -421,6 +415,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     newUsers.forEach(u => this.scannedUsers.add(u));
     newPlaystore.forEach(p => this.scannedPlaystore.add(p));
     newDomains.forEach(d => this.scannedDomains.add(d));
+
     this.liveApiEntities = [
       ...newEmails.map(email => ({
         type: 'user' as const,
@@ -447,23 +442,31 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
+
   private cleanScannedSetAndResults(
     type: 'email' | 'user' | 'playstore' | 'domain',
-    set: Set<string>,
-    currentItems: string[]
+    scannedSet: Set<string>,
+    currentList: string[]
   ): void {
-    for (const item of Array.from(set)) {
-      if (!currentItems.includes(item)) {
-        set.delete(item);
-        if (type === 'domain') {
-          this.scanResults = this.scanResults.filter(r => r.domain !== item);
-        } else {
-          this.liveApiResults = this.liveApiResults.filter(r => {
-            const q = r.input.q1 || r.input.q2 || '';
-            return !q.includes(item);
-          });
-        }
-      }
+    const currentSet = new Set(currentList);
+    const toRemove = Array.from(scannedSet).filter(x => !currentSet.has(x));
+
+    toRemove.forEach(x => scannedSet.delete(x));
+
+    if (type === 'domain') {
+      this.scanResults = this.scanResults.filter(r => currentSet.has(r.domain));
+      this.scandomains = this.scandomains.filter(d => currentSet.has(d));
+    }
+
+    if (['email', 'user', 'playstore'].includes(type)) {
+      this.liveApiResults = this.liveApiResults.filter(r => {
+        const input = r.input;
+        if (!input) return true;
+        if (type === 'email' && input.q2) currentSet.has(input.q2);
+        if (type === 'user' && input.q1 && !input.q2) return currentSet.has(input.q1);
+        if (type === 'playstore' && input.q1?.includes('play.google.com')) return currentSet.has(input.q1);
+        return true;
+      })
     }
   }
 
