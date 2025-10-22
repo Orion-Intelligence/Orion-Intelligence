@@ -209,9 +209,9 @@ export const routes: Routes = [
             data: { animation: 'SocialAPI', type: 'social' }
           },
           {
-            path: 'cracked-scanner',
+            path: 'playstore-scanner',
             component: DashboardApiComponent,
-            data: { animation: 'CrackedAPI', type: 'cracked' }
+            data: { animation: 'CrackedAPI', type: 'playstore' }
           }
         ]
       },

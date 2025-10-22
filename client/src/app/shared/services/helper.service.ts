@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {franc} from 'franc-min';
-import {LANGUAGE_MAP} from '../constants/shared-enums';
-import {ConsolidatedParamModel} from '../model/results/consolidated/consolidated.param.model';
+import { Injectable } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { franc } from 'franc-min';
+import { LANGUAGE_MAP } from '../constants/shared-enums';
+import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
 
 @Injectable({
   providedIn: 'root'
@@ -45,9 +45,17 @@ export class HelperService {
     }).filter((v): v is string => !!v);
   }
 
+  extractEmails(text: string): string[] {
+    if (!text) return [];
+    const emailRegex =
+      /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    const matches = text.match(emailRegex) || [];
+    return Array.from(new Set(matches.map(e => e.toLowerCase().trim())));
+  }
+
   downloadAsCSV(data: any) {
     const csvContent = this.convertToCSV(data);
-    const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
@@ -181,7 +189,7 @@ export class HelperService {
 
       const strA = aVal.toString();
       const strB = bVal.toString();
-      const comparison = strA.localeCompare(strB, undefined, {sensitivity: 'base'});
+      const comparison = strA.localeCompare(strB, undefined, { sensitivity: 'base' });
 
       return order === 'asc' ? comparison : -comparison;
     });
