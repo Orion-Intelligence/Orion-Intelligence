@@ -9,18 +9,19 @@
   <ul
     [ngClass]="{'sidebar__subitems-fast': items.length < 4, 'show': (selectionStore.selectedSection$ | async) === category}"
     class="sidebar__subitems">
-    <li *ngFor="let item of items">
-
-      <div (click)="selectOption(item)"
-        [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
-        [queryParams]="{ page: 1 }" [routerLink]="[routePrefix, item.toLowerCase()]" class="sidebar__subitem"
-        queryParamsHandling="merge">
-        <div
-          [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
-          class="sidebar__subitem-content">
-          {{ replaceDashWithSpace(item) }}
+    <div class="sidebar__subitems-container">
+      <li *ngFor="let item of items">
+        <div (click)="selectOption(item)"
+          [ngClass]="{'sidebar__selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
+          [queryParams]="{ page: 1 }" [routerLink]="[routePrefix, item.toLowerCase()]" class="sidebar__subitem"
+          queryParamsHandling="merge">
+          <div
+            [ngClass]="{'sidebar__subitem-selected': (selectionStore.selectedOption$ | async | lower) === (item | lower)}"
+            class="sidebar__subitem-content">
+            {{ replaceDashWithSpace(item) }}
+          </div>
         </div>
-      </div>
-    </li>
+      </li>
+    </div>
   </ul>
 </li>

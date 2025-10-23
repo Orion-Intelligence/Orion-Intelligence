@@ -70,7 +70,7 @@ export enum DefacementSubCategory {
 export enum ApiSubCategory {
   EMAIL = 'Email-Breach',
   SOCIAL = 'Social-Scanner',
-  CRACKED = 'Cracked-Scanner',
+  CRACKED = 'Playstore-Scanner',
 }
 
 export enum SocialSubCategory {

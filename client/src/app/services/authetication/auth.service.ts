@@ -135,7 +135,7 @@ export class AuthService {
 
   demoLogin(): void {
     const demoUserName = 'demo';
-    const demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw';
+    const demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw@';
     this.login(demoUserName, demoPassword).subscribe(async (res) => { });
   }
 
