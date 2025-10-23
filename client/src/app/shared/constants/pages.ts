@@ -95,8 +95,9 @@ export enum FeedSubCategory {
 }
 
 export enum ScannerSubCategory {
-  BASIC = 'Basic',
-  FULL = 'Full',
+  BASIC = 'Basic-Scan',
+  FULL = 'Port-Scan',
+  REPOSITORY = 'Repository-Scan',
 }
 
 export enum DumpSubCategory {

@@ -53,7 +53,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
         this.dashboardService.consolidatedParamModel.url = params['domain'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
-        this.fetchSearchResults(false)
+        if(this.dashboardService.consolidatedParamModel.url || this.dashboardService.consolidatedParamModel.user){
+          this.fetchSearchResults(false)
+        }
       });
   }
 
