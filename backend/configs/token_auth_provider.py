@@ -14,6 +14,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import db_user_acc
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.services.session_manager.session_manager import session_manager
 
 
@@ -105,5 +106,6 @@ def setup_admin(engine: AIOEngine) -> Admin:
     admin.add_view(ModelView(db_system_model, icon="fa fa-cog", label="System Settings", name="system_settings"))
     admin.add_view(ModelView(db_url_data_model, icon="fa fa-link", label="URL Data", name="url_data"))
     admin.add_view(ModelView(db_tenant_model, icon="fa fa-users", label="Onboarding Data", name="onboarding_data"))
+    admin.add_view(ModelView(db_alert_model,icon="fa fa-users", label="Alerts Data", name="onboarding_data"))
 
     return admin
