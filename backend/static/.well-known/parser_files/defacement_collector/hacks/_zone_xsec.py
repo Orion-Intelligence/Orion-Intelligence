@@ -110,10 +110,10 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
                 for link in links:
                     try:
-                        response = requests.get(link, timeout=10)
-                        response.raise_for_status()
-
-                        page.set_content(response.text.replace("iframe", "safeframe"))
+                        page.goto(link, wait_until="load", timeout=60000)
+                        page.wait_for_load_state("load", timeout=60000)
+                        html = page.content()
+                        page.set_content(html.replace("iframe", "safeframe"))
                         page.wait_for_selector(".panel.panel-danger", timeout=15000)
 
                         url_span = page.query_selector("span#url")
@@ -133,7 +133,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
                             if iframe_src:
                                 m_mirror = iframe_src
 
-                        content = helper_method.extract_refhtml(ip, self.invoke_db, REDIS_COMMANDS,CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
+                        content = helper_method.extract_refhtml(ip, self.invoke_db, REDIS_COMMANDS, CUSTOM_SCRIPT_REDIS_KEYS, RAW_PATH_CONSTANTS, page)
 
                         card_data = defacement_model(
                             m_web_server=[web_server],
