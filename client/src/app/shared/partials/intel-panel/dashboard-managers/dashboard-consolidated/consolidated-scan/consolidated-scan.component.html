@@ -1,0 +1,87 @@
+<div class="domain-scan-container" *ngIf="showComponent">
+    <div class="scan_report-section-main" [ngClass]="{ 
+            'scan_report-section-collapsed': !isExpanded, 
+            'scan_report-section-loading': isProcessing,
+            'scan_report-section-loaded': !isProcessing && (scanResult$ | async)
+        }">
+
+        <div class="scan_loading-header">
+
+            <div class="loading-circle" *ngIf="isProcessing"></div>
+
+            <div class="scan_section-title">
+                Domain Scan: {{ query }}
+            </div>
+
+            <button class="expand-collapse-btn" [ngClass]="{'is-disabled': isProcessing}" [disabled]="isProcessing"
+                (click)="toggleCollapse()">
+                <img src="assets/images/shared/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
+            </button>
+        </div>
+
+        <ng-container *ngIf="isProcessing">
+            <div class="wait-message">Scanning in progress... Please wait.</div>
+        </ng-container>
+
+        <ng-container *ngIf="!isProcessing && (scanResult$ | async) as result">
+            <div *ngIf="isExpanded" class="scan_content-wrapper">
+
+                <div class="scan_report-section grade-summary" [ngClass]="getGradeClass(result.grade)">
+                    <ng-container *ngIf="!result.hasError && result.meta; else errorBlock">
+                        <div class="grade-report-title">
+                            Security Scan Report for
+                            <a [href]="result.meta.URL" target="_blank">
+                                {{ result.meta.Host || extractHost(result.meta.URL) }}
+                            </a>
+                        </div>
+                    </ng-container>
+                    <ng-template #errorBlock>
+                        <div class="error-text">
+                            {{ result.domain }} - {{ result.errorMessage || 'No data found.' }}
+                        </div>
+                    </ng-template>
+
+                    <div class="scan_divider"></div>
+
+                    <ng-container *ngIf="result.meta">
+                        <div class="scan_scan-meta-grid">
+                            <div class="scan_meta-card">
+                                <p class="scan_meta-value scan_meta-value-large">
+                                    {{ result.grade || '—' }} Grade
+                                </p>
+                            </div>
+                            <div class="scan_meta-card">
+                                <p class="scan_meta-label">URL</p>
+                                <p class="scan_meta-value">{{ result.meta.URL }}</p>
+                            </div>
+                            <div class="scan_meta-card">
+                                <p class="scan_meta-label">Host</p>
+                                <p class="scan_meta-value">
+                                    {{ result.meta.Host || extractHost(result.meta.URL) }}
+                                </p>
+                            </div>
+                            <div class="scan_meta-card">
+                                <p class="scan_meta-label">Port</p>
+                                <p class="scan_meta-value">
+                                    {{ result.meta.Port }}
+                                    <span *ngIf="result.meta.Port?.includes('SSL')" class="scan_ssl-tag">SSL</span>
+                                </p>
+                            </div>
+                            <div class="scan_meta-card">
+                                <p class="scan_meta-label">Scanned on</p>
+                                <p class="scan_meta-value">{{ result.meta.Scanned_on_date }}</p>
+                            </div>
+                            <div class="scan_meta-card">
+                                <p class="scan_meta-label">Scanned by</p>
+                                <p class="scan_meta-value">{{ result.meta.Scanned_by }}</p>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <ng-container *ngIf="!result.meta && !result.hasError">
+                        <p>No detailed metadata available for this domain.</p>
+                    </ng-container>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

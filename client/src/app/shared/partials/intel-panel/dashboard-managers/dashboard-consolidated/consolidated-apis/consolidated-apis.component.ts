@@ -1,0 +1,122 @@
+import { Component } from '@angular/core';
+import { NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass } from '@angular/common';
+import { ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../../model/results/consolidated/consolidated.callback.model';
+import { ConsolidatedApiService } from '../../../../../services/consolidated.api.service';
+import { finalize } from 'rxjs';
+
+@Component({
+  selector: 'app-consolidated-apis',
+  imports: [NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass],
+  templateUrl: './consolidated-apis.component.html'
+})
+export class ConsolidatedApisComponent {
+  query: string = '';
+
+  searchResults: ConsolidatedLiveApiResults[] = [];
+  liveApiEntities: ConsolidatedLiveApis[] = [];
+  isProcessing: boolean = false;
+  showComponent: boolean = false;
+  isExpanded: boolean = true;
+
+  constructor(private liveApiService: ConsolidatedApiService) { }
+
+  ngOnInit(): void {
+
+    if (!this.query) {
+      this.showComponent = false;
+    }
+  }
+
+  public toggleCollapse(): void {
+    if (!this.isProcessing) {
+      this.isExpanded = !this.isExpanded;
+    }
+  }
+
+  public runSearch(newQuery: string): void {
+    const validQuery = this.validateQuery(newQuery);
+
+    if (!validQuery) {
+      this.showComponent = false;
+      this.isProcessing = false;
+      this.searchResults = [];
+      return;
+    }
+    this.isExpanded = false;
+    this.query = validQuery;
+
+    this.initAndSearch();
+  }
+
+  private validateQuery(q: string): string | null {
+    if (!q) { return null; }
+    const trimmed = q.trim();
+    if (trimmed && !/\s/.test(trimmed)) {
+      return trimmed;
+    }
+    return null;
+  }
+
+  private extractEntities(validQuery: string): ConsolidatedLiveApis[] {
+    const entities: ConsolidatedLiveApis[] = [];
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(validQuery);
+    if (isEmail) {
+      const username = validQuery.split('@')[0];
+      const email = validQuery;
+      entities.push({ type: 'user', q1: username, q2: email } as ConsolidatedLiveApis);
+      entities.push({ type: 'social', q1: username } as ConsolidatedLiveApis);
+    } else {
+      const isPlaystore = validQuery.includes('play.google.com/store/apps');
+      if (isPlaystore) {
+        entities.push({ type: 'cracked', q1: validQuery } as ConsolidatedLiveApis);
+      }
+      if (!isEmail && !isPlaystore) {
+        if (validQuery.length >= 3 && !validQuery.includes('.')) {
+          entities.push({ type: 'social', q1: validQuery } as ConsolidatedLiveApis);
+        }
+      }
+    }
+    if (entities.length > 0) {
+      this.showComponent = true;
+    }
+    return entities;
+  }
+
+  initAndSearch(): void {
+    this.searchResults = [];
+
+    const validQuery = this.validateQuery(this.query);
+
+    if (!validQuery) {
+      this.isProcessing = false;
+      return;
+    }
+
+    this.liveApiEntities = this.extractEntities(validQuery);
+
+    if (this.liveApiEntities.length === 0) {
+      this.isProcessing = false;
+      return;
+    }
+
+    this.isProcessing = true;
+    this.isExpanded = false;
+
+    this.liveApiService.runLiveApiSearch(this.liveApiEntities)
+      .pipe(
+        finalize(() => {
+          this.isProcessing = false;
+        })
+      )
+      .subscribe({
+        next: (results) => {
+          this.searchResults = results;
+          this.isExpanded = true;
+        },
+        error: (err) => {
+          console.error("Live API Batch Search failed:", err);
+          this.isProcessing = false;
+        }
+      });
+  }
+}
