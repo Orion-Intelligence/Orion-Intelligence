@@ -499,6 +499,11 @@ export const routes: Routes = [
             path: 'repository-scan',
             component: SecurityScanResultsComponent,
             data: { type: 'repo', animation: 'CategoryPage' }
+          },
+          {
+            path: 'seo-scan',
+            component: SecurityScanResultsComponent,
+            data: { type: 'seo', animation: 'CategoryPage' }
           }
         ]
       },

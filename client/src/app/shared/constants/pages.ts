@@ -98,6 +98,7 @@ export enum ScannerSubCategory {
   BASIC = 'Basic-Scan',
   FULL = 'Port-Scan',
   REPOSITORY = 'Repository-Scan',
+  SEO = 'SEO-Scan',
 }
 
 export enum DumpSubCategory {
