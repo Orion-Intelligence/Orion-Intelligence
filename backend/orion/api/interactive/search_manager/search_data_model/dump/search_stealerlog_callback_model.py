@@ -15,7 +15,7 @@ class stealerlog_result_item(BaseModel):
     type: Optional[str] = None
     raw: Optional[str] = None
     channel: Optional[str] = None
-    filename: Optional[str] = None
+    file: Optional[str] = None
 
     class Config:
         extra = Extra.allow

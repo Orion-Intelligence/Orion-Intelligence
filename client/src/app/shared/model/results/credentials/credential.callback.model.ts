@@ -4,7 +4,7 @@ export class StealerLogResultItem {
   type?: string;
   raw?: string;
   channel?: string;
-  filename?: string;
+  file?: string;
   log_hash?: string;
   timestamp?: string;
   [key: string]: any;

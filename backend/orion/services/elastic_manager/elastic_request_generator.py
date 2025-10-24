@@ -1360,7 +1360,7 @@ class elastic_request_generator:
             "from": 0,
             "size": 100,
             "track_total_hits": False,
-            "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id"]
+            "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]
         }
 
         if not (user_query or url_query or extra_user_terms or extra_domains):
