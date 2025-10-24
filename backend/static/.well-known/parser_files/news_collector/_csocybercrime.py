@@ -36,7 +36,7 @@ class _csocybercrime(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://www.csoonline.com/uk/cybercrime/"
+        return "https://www.csoonline.com/"
 
     @property
     def base_url(self) -> str:

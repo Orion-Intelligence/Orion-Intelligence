@@ -36,7 +36,7 @@ class _therecord(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://therecord.media/news"
+        return "https://therecord.media/news/cybercrime"
 
     @property
     def base_url(self) -> str:

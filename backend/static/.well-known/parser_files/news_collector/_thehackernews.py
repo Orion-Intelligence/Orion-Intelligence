@@ -1,6 +1,4 @@
 import re
-import requests
-
 from abc import ABC
 from datetime import datetime
 from typing import List
@@ -10,6 +8,7 @@ from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interfac
 from crawler.crawler_instance.local_shared_model.data_model.entity_model import entity_model
 from crawler.crawler_instance.local_shared_model.data_model.leak_model import leak_model
 from crawler.crawler_instance.local_shared_model.rule_model import RuleModel, FetchProxy, FetchConfig, ThreatType
+from crawler.crawler_services.log_manager.log_controller import log
 from crawler.crawler_services.redis_manager.redis_controller import redis_controller
 from crawler.crawler_services.shared.helper_method import helper_method
 
@@ -93,9 +92,14 @@ class _thehackernews(leak_extractor_interface, ABC):
                 soup = BeautifulSoup(resp.text, "html.parser")
 
                 selectors = [
-                    "a.story-link", "article h2 a", ".post-title a",
-                    "h2.post-title a", "a[href*='/20']", ".article-title a",
-                    "h3 a[href*='/']"
+                    ".blog-posts .body-post a.story-link[href]",
+                    ".body-post a.story-link[href]",
+                    "article h2 a[href]",
+                    ".post-title a[href]",
+                    "h2.post-title a[href]",
+                    "a[href*='/20']",
+                    ".article-title a[href]",
+                    "h3 a[href*='/']",
                 ]
                 for sel in selectors:
                     for tag in soup.select(sel):

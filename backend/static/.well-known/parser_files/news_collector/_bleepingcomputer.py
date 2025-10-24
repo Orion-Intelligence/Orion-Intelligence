@@ -45,8 +45,7 @@ class _bleepingcomputer(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-
-        return "https://www.bleepingcomputer.com/news/security/"
+        return "https://www.bleepingcomputer.com/"
 
     @property
     def developer_signature(self) -> str:

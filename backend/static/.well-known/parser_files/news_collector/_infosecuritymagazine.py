@@ -42,8 +42,7 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-
-        return "https://www.infosecurity-magazine.com/data-breaches/"
+        return "https://www.infosecurity-magazine.com/news/"
 
     @property
     def developer_signature(self) -> str:
@@ -91,7 +90,7 @@ class _infosecuritymagazine(leak_extractor_interface, ABC):
             r = session._seed_response
             r.raise_for_status()
             soup = BeautifulSoup(r.text, "html.parser")
-            link_elements = soup.select("h3.content-headline a")
+            link_elements = soup.select("li.webpage-item a")
             urls = []
             for a in link_elements:
                 href = a.get("href")

@@ -43,7 +43,7 @@ class _securityweek(leak_extractor_interface, ABC):
     @property
     def seed_url(self) -> str:
 
-        return "https://www.securityweek.com/category/data-breaches/"
+        return "https://securityweek.com/"
 
     @property
     def developer_signature(self) -> str:
@@ -89,10 +89,6 @@ class _securityweek(leak_extractor_interface, ABC):
     def parse_leak_data(self, page):
         try:
             collected_urls = []
-            max_clicks = 20
-            clicks = 0
-            if self.is_crawled:
-                max_clicks = 2
 
             session = page
             r = session._seed_response
@@ -100,18 +96,7 @@ class _securityweek(leak_extractor_interface, ABC):
             html = r.text
             soup = BeautifulSoup(html, "html.parser")
 
-            for _ in range(max_clicks):
-                more_button = soup.select_one("a.zox-inf-more-but")
-                if not more_button or not more_button.get("href"):
-                    break
-                next_url = urljoin(self.base_url, more_button.get("href"))
-                resp = session.get(next_url, timeout=30)
-                if resp.status_code != 200:
-                    break
-                soup = BeautifulSoup(resp.text, "html.parser")
-                clicks += 1
-
-            for a in soup.select("a:has(h2.zox-s-title2)"):
+            for a in soup.select("section.zox-art-wrap.zox-art-small .zox-art-title a[href]"):
                 href = a.get("href")
                 if href and not href.startswith("#"):
                     collected_urls.append(href)

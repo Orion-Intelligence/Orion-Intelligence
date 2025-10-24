@@ -79,12 +79,12 @@ class _securityaffairs(leak_extractor_interface, ABC):
         all_links = set()
         session = page
         try:
-            for page_num in range(2, 7):
-                url = f"{self.base_url}?page={page_num}#latest_news_section"
+            for page_num in range(1, 4):
+                url = f"{self.base_url}?page={page_num}"
                 resp = session.get(url, timeout=60)
                 resp.raise_for_status()
                 soup = BeautifulSoup(resp.text, "html.parser")
-                for a in soup.select("#latest_news_section a[href*='/']"):
+                for a in soup.select(".latest-news-block .news-card h5 a[href]"):
                     href = a.get("href")
                     if href:
                         full_url = urljoin(self.base_url, href)

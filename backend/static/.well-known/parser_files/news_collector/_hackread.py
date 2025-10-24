@@ -39,7 +39,7 @@ class _hackread(leak_extractor_interface, ABC):
 
     @property
     def seed_url(self) -> str:
-        return "https://hackread.com/category/hacking-news/leaks-affairs/"
+        return "https://hackread.com/category/hacking-news/"
 
     @property
     def developer_signature(self) -> str:
@@ -82,26 +82,32 @@ class _hackread(leak_extractor_interface, ABC):
                 page_range = 1
             session = page
             urls_to_visit = []
-            base = self.base_url.rstrip("/")
-            r = session._seed_response
-            if r.status_code == 200:
-                soup = BeautifulSoup(r.text, "html.parser")
-                link_elements = soup.select("h2.cs-entry__title a")
-                for a in link_elements:
-                    href = a.get("href")
-                    if href:
-                        urls_to_visit.append(urljoin(base, href))
-            for i in range(1, page_range):
-                list_url = f"{base}/page/{i + 1}/"
-                resp = session.get(list_url, timeout=60)
-                if resp.status_code != 200:
-                    break
-                soup = BeautifulSoup(resp.text, "html.parser")
-                link_elements = soup.select("h2.cs-entry__title a")
-                for a in link_elements:
-                    href = a.get("href")
-                    if href:
-                        urls_to_visit.append(urljoin(list_url, href))
+            categories = [
+                "https://hackread.com/category/latest-cyber-crime/",
+                "https://hackread.com/category/security/",
+                "https://hackread.com/category/hacking-news/",
+            ]
+            for seed in categories:
+                base = seed.rstrip("/")
+                r = session.get(base, timeout=60)
+                if r.status_code == 200:
+                    soup = BeautifulSoup(r.text, "html.parser")
+                    link_elements = soup.select("h2.cs-entry__title a")
+                    for a in link_elements:
+                        href = a.get("href")
+                        if href:
+                            urls_to_visit.append(urljoin(base, href))
+                for i in range(1, page_range):
+                    list_url = f"{base}/page/{i + 1}/"
+                    resp = session.get(list_url, timeout=60)
+                    if resp.status_code != 200:
+                        break
+                    soup = BeautifulSoup(resp.text, "html.parser")
+                    link_elements = soup.select("h2.cs-entry__title a")
+                    for a in link_elements:
+                        href = a.get("href")
+                        if href:
+                            urls_to_visit.append(urljoin(list_url, href))
             for link_url in urls_to_visit:
                 try:
                     resp = session.get(link_url, timeout=60)
