@@ -1,11 +1,10 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal, ViewChild } from '@angular/core';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, distinctUntilChanged, map, switchMap, timer } from 'rxjs';
-import { finalize } from 'rxjs/operators';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
-import { NgClass, NgForOf, NgIf, NgSwitch, NgSwitchCase, TitleCasePipe } from '@angular/common';
+import { NgForOf, NgIf, TitleCasePipe } from '@angular/common';
 import { ResultComponent } from '../../../result/result.component';
 import { DashboardResultsGeneralGridComponent } from '../../dashboard-results/dashboard-results-general-grid/dashboard-results-general-grid.component';
 import { ConsolidatedCallbackModel } from '../../../../model/results/consolidated/consolidated.callback.model';
@@ -24,16 +23,14 @@ import { RankedCallbackModel } from '../../../../model/results/consolidated/rank
 import { ApiService } from '../../../../services/api.service';
 import { HelperService } from '../../../../services/helper.service';
 import { HttpClient } from '@angular/common/http';
-import { ConsolidatedLiveApis } from '../../../../model/results/consolidated/consolidated.callback.model';
-import { ConsolidatedLiveApiResults } from '../../../../model/results/consolidated/consolidated.callback.model';
-import { ConsolidatedApiService } from '../../../../services/consolidated.api.service';
-import { ConsolidatedScanResults } from '../../../../model/results/consolidated/consolidated.callback.model';
+import { ConsolidatedApisComponent } from './consolidated-apis/consolidated-apis.component';
+import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
 
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgClass, NgIf, NgSwitch, NgSwitchCase, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -51,7 +48,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   public pageCounts: { [key: string]: number } = {};
 
   isGrouped = true
-  query = '';
+  query: string = '';
   isLoading = signal(false);
   firstTrigger = true;
   result_count = 0;
@@ -64,27 +61,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   defacementCategories = Object.values(DefacementSubCategory);
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
 
-  scandomains: string[] = [];
-  scanEmails: string[] = [];
-  scanUsers: string[] = [];
-  scanPlaystoreUrls: string[] = [];
-
-  scanResults: ConsolidatedScanResults[] = [];
-  isScanLoading = false;
-  private scanTriggered = false;
-
-  liveApiEntities: ConsolidatedLiveApis[] = [];
-
-  liveApiResults: ConsolidatedLiveApiResults[] = [];
-  isProcessing = false;
+  @ViewChild('liveApiSearch') liveApiSearchComponent!: ConsolidatedApisComponent;
+  @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
 
 
-  private scannedEmails = new Set<string>();
-  private scannedUsers = new Set<string>();
-  private scannedPlaystore = new Set<string>();
-  private scannedDomains = new Set<string>();
 
-  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, private apiService: ApiService, private helperService: HelperService, private liveApiService: ConsolidatedApiService) {
+  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, private apiService: ApiService, private helperService: HelperService) {
     this.pageCounts = {};
   }
 
@@ -119,28 +101,14 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
       this.firstTrigger = false;
     });
-
-    this.initEntities();
-    if (this.liveApiEntities && this.liveApiEntities.length > 0) {
-      this.LiveApisSearch();
-    }
-
-    if (this.scandomains.length === 0) {
-      return;
-    }
-    if (this.scanTriggered) {
-      return;
-    }
-    this.scanTriggered = true;
-    this.runDomainScan();
-
   }
 
   fetchSearchResults(_ = false): void {
     if (this.checkProfile() && !this.hasIOCs()) {
       return
     }
-    this.initEntities();
+    this.liveApiSearchComponent.runSearch(this.dashboardService.consolidatedParamModel.q)
+    this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     if (!this.isGrouped) {
       this.fetchRanked()
       return
@@ -355,175 +323,5 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       return hasAnyData;
     }
     return hasAnyData && this.hasIOCs();
-  }
-
-
-  initEntities(): void {
-    const filters = this.appService.configData().localSettings.entityfilterCategories;
-
-    const unique = (key: string): string[] =>
-      Array.isArray(filters[key]) ? Array.from(new Set(filters[key])) : [];
-
-    const filterDomains = unique('m_domain');
-    const filterEmails = unique('m_email');
-    const filterUsers = unique('m_social_media_profiles');
-    const filterUrls = unique('m_url');
-
-    const searchAll = filters['m_search_all'] || '';
-    const queryInput = (this.query || '').trim();
-    const combinedText = [searchAll, queryInput].filter(Boolean).join(' ');
-    const extractedDomains = this.helperService.extractLinks(combinedText);
-    const extractedEmails = this.helperService.extractEmails(combinedText);
-    const extractedPlaystoreUrls = extractedDomains.filter((d: string) =>
-      d.includes('play.google.com/store/apps')
-    );
-
-    const extractedUsernamesFromEmails = extractedEmails.map(email => email.split('@')[0]);
-
-    const possibleUsernames = combinedText
-      .split(/[\s,;]+/)
-      .filter(w => w.length >= 3 && !w.includes('@') && !w.includes('.') && !w.startsWith('http'))
-      .map(w => w.trim());
-
-    const currentDomains = Array.from(new Set([
-      ...filterDomains,
-      ...extractedDomains,
-      ...extractedPlaystoreUrls.map(() => 'play.google.com')
-    ]));
-
-    const currentEmails = Array.from(new Set([...filterEmails, ...extractedEmails]));
-
-    const currentUsers = Array.from(new Set([...filterUsers, ...extractedUsernamesFromEmails, ...possibleUsernames]));
-
-    const currentPlaystore = Array.from(new Set([...filterUrls.filter((url: string) => url.includes('play.google.com/store/apps')), ...extractedPlaystoreUrls]));
-
-    this.cleanScannedSetAndResults('email', this.scannedEmails, currentEmails);
-    this.cleanScannedSetAndResults('user', this.scannedUsers, currentUsers);
-    this.cleanScannedSetAndResults('playstore', this.scannedPlaystore, currentPlaystore);
-    this.cleanScannedSetAndResults('domain', this.scannedDomains, currentDomains);
-
-    const activeDomains = new Set(currentDomains);
-    this.scanResults = this.scanResults.filter(r => activeDomains.has(r.domain));
-    this.scandomains = this.scandomains.filter(domain => activeDomains.has(domain));
-
-    const newEmails = currentEmails.filter(e => !this.scannedEmails.has(e));
-    const newUsers = currentUsers.filter(u => !this.scannedUsers.has(u));
-    const newPlaystore = currentPlaystore.filter(p => !this.scannedPlaystore.has(p));
-    const newDomains = currentDomains.filter(d => !this.scannedDomains.has(d));
-
-    newEmails.forEach(e => this.scannedEmails.add(e));
-    newUsers.forEach(u => this.scannedUsers.add(u));
-    newPlaystore.forEach(p => this.scannedPlaystore.add(p));
-    newDomains.forEach(d => this.scannedDomains.add(d));
-
-    this.liveApiEntities = [
-      ...newEmails.map(email => ({
-        type: 'user' as const,
-        q1: '',
-        q2: email
-      })),
-      ...newUsers.map(userHandle => ({
-        type: 'social' as const,
-        q1: userHandle
-      })),
-      ...newPlaystore.map(url => ({
-        type: 'cracked' as const,
-        q1: url
-      }))
-    ];
-
-    this.scandomains = Array.from(new Set([...this.scandomains, ...newDomains]));
-
-    if (this.liveApiEntities.length > 0) {
-      this.LiveApisSearch();
-    }
-    if (newDomains.length > 0) {
-      this.runDomainScan();
-    }
-  }
-
-
-  private cleanScannedSetAndResults(
-    type: 'email' | 'user' | 'playstore' | 'domain',
-    scannedSet: Set<string>,
-    currentList: string[]
-  ): void {
-    const currentSet = new Set(currentList);
-    const toRemove = Array.from(scannedSet).filter(x => !currentSet.has(x));
-
-    toRemove.forEach(x => scannedSet.delete(x));
-
-    if (type === 'domain') {
-      this.scanResults = this.scanResults.filter(r => currentSet.has(r.domain));
-      this.scandomains = this.scandomains.filter(d => currentSet.has(d));
-    }
-
-    if (['email', 'user', 'playstore'].includes(type)) {
-      this.liveApiResults = this.liveApiResults.filter(r => {
-        const input = r.input;
-        if (!input) return true;
-        if (type === 'email' && input.q2) currentSet.has(input.q2);
-        if (type === 'user' && input.q1 && !input.q2) return currentSet.has(input.q1);
-        if (type === 'playstore' && input.q1?.includes('play.google.com')) return currentSet.has(input.q1);
-        return true;
-      })
-    }
-  }
-
-  runDomainScan() {
-    if (!this.scandomains || this.scandomains.length === 0) return;
-
-    this.isScanLoading = true;
-    this.liveApiService.runScanDomains(this.scandomains)
-      .pipe(finalize(() => (this.isScanLoading = false)))
-      .subscribe({
-        next: (results: ConsolidatedScanResults[]) => {
-          results.forEach(r => {
-            const existing = this.scanResults.find(x => x.domain === r.domain);
-            if (existing) Object.assign(existing, r);
-            else this.scanResults.push(r);
-          });
-        },
-        error: () => (this.isScanLoading = false)
-      });
-  }
-  extractHost(url: string): string {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return url;
-    }
-  }
-
-  getGradeClass(grade: string): string {
-    if (['D', 'F'].includes(grade)) return 'scan_report-section-danger';
-    if (grade === 'C') return 'scan_report-section-warning';
-    return '';
-  }
-  getScanResult(domain: string) {
-    return this.scanResults.find(r => r.domain === domain) || null;
-  }
-
-
-  LiveApisSearch(): void {
-    if (!this.liveApiEntities || this.liveApiEntities.length === 0) return;
-
-    this.isProcessing = true;
-    this.liveApiService.runLiveApiSearch(this.liveApiEntities)
-      .pipe(finalize(() => (this.isProcessing = false)))
-      .subscribe({
-        next: (results: ConsolidatedLiveApiResults[]) => {
-          results.forEach(r => {
-            const q1 = r.input.q1 || '';
-            const q2 = r.input.q2 || '';
-            const existing = this.liveApiResults.find(
-              x => (x.input.q1 === q1 && x.input.q2 === q2)
-            );
-            if (existing) Object.assign(existing, r);
-            else this.liveApiResults.push(r);
-          });
-        },
-        error: () => (this.isProcessing = false)
-      });
   }
 }

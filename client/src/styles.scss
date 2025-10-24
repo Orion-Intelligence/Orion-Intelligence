@@ -47,6 +47,8 @@
 @use 'app/shared/partials/intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-api/dashboard-api.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/result-insights/result-insights.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-apis/consolidated-apis.component.css';
+@use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/consolidated-scan/consolidated-scan.component.css';
 @use 'app/shared/partials/intel-panel/dashboard-managers/dashboard-consolidated/defacement-results/threat-results.component.css';
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
 @use 'app/shared/partials/security-scan-results/security-scan-export-component/security-scan-export-component.component.css';

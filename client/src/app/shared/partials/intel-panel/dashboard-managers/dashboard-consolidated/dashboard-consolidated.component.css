@@ -14,9 +14,6 @@
   color: #888;
 }
 
-.consolidated_scan_results {
-  margin: 0px 35px;
-}
 
 @media only screen and (width <=460px) {
   .consolidated_container {

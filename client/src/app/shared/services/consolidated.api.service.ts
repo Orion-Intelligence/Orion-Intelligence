@@ -100,7 +100,7 @@ export class ConsolidatedApiService {
         return forkJoin(searchObservables);
     }
 
-    private scanDomain(domain: string): Observable<ConsolidatedScanResults> {
+    public scanDomain(domain: string): Observable<ConsolidatedScanResults> {
         return this.apiService
             .post<any>('urlscan/domain', { domain, scanType: 'basic' })
             .pipe(
@@ -141,9 +141,5 @@ export class ConsolidatedApiService {
                 })
             );
     }
-    public runScanDomains(domains: string[]): Observable<ConsolidatedScanResults[]> {
-        const scanObservables = domains
-            .map((domain) => this.scanDomain(domain));
-        return forkJoin(scanObservables);
-    }
+
 }
