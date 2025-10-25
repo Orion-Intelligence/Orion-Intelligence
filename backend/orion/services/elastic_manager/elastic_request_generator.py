@@ -665,7 +665,7 @@ class elastic_request_generator:
         labels.append("social_model")
 
         m8 = helper_controller.clone_model(p_query_model)
-        i8, q8 = self.on_search_stealerlogs_data(m8, pFilter)
+        i8, q8 = self.on_search_stealerlogs_data(m8, pFilter, True)
         if i8 or q8:
             queries.append(helper_controller.strip_query(q8))
             indices.append(i8)
@@ -1249,7 +1249,7 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter):
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated = False):
 
         print("2 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
         print(p_query_model.url, flush=True)
@@ -1265,7 +1265,7 @@ class elastic_request_generator:
         if len(url)>0:
             p_query_model.user = user
 
-        if not p_query_model.url and not p_query_model.user:
+        if not p_query_model.url and not p_query_model.user and not consolidated:
             return None, None
 
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
