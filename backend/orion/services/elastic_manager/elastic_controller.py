@@ -218,6 +218,13 @@ class elastic_controller:
         for index, query in zip(indices, queries):
             try:
                 conn = self.__conn_for_index(index)
+
+                print(":::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+                print(query, flush=True)
+                print(":::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+                print(index, flush=True)
+                print(":::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+
                 res = await conn.search(index=index, body=query, request_timeout=220)
                 results.append(res)
             except Exception as ex:
