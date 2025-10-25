@@ -144,11 +144,11 @@ class elastic_controller:
     async def search_query(self, document, data_filter):
         try:
             conn = self.__conn_for_index(document)
-            print(":::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+            print("1 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
             print(document, flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+            print("1 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
             print(data_filter, flush=True)
-            print(":::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+            print("1 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
 
             m_data = await conn.search(index=document, body=data_filter, request_timeout=220)
             return True, m_data
