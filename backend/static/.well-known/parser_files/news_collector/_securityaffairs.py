@@ -84,7 +84,7 @@ class _securityaffairs(leak_extractor_interface, ABC):
                 resp = session.get(url, timeout=60)
                 resp.raise_for_status()
                 soup = BeautifulSoup(resp.text, "html.parser")
-                for a in soup.select(".latest-news-block .news-card h5 a[href]"):
+                for a in soup.select(".latest-news-block .news-card h5 a[href], .news-card h5 a[href]"):
                     href = a.get("href")
                     if href:
                         full_url = urljoin(self.base_url, href)
@@ -96,15 +96,19 @@ class _securityaffairs(leak_extractor_interface, ABC):
                     r = session.get(link, timeout=60)
                     r.raise_for_status()
                     s = BeautifulSoup(r.text, "html.parser")
-                    title_selector = "div.common-heading.line-bottom.article-title.mb-3.wow.fadeInUp.animated > h2"
+                    title_selector = "div.common-heading.line-bottom.article-title.mb-3.wow.fadeInUp > h2"
                     date_selector = "div.post-time.mb-3 > span:nth-child(2)"
-                    desc_selector = "div.article-details-block.wow.fadeInUp.animated > p:nth-child(6)"
+                    desc_nodes_selector = "div.article-details-block.wow.fadeInUp p"
                     title_el = s.select_one(title_selector)
                     date_el = s.select_one(date_selector)
-                    desc_el = s.select_one(desc_selector)
                     title = title_el.get_text(strip=True) if title_el else ""
                     date_raw = date_el.get_text(strip=True) if date_el else ""
-                    description = desc_el.get_text(strip=True) if desc_el else ""
+                    description = ""
+                    for p in s.select(desc_nodes_selector):
+                        text = p.get_text(strip=True)
+                        if text:
+                            description = text
+                            break
                     parsed_date = None
                     for fmt in ("%B %d, %Y", "%b %d, %Y"):
                         try:
