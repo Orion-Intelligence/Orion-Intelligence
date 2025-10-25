@@ -23,12 +23,6 @@ def clean_traceback(exc: Exception):
 
 
 async def global_exception_handler(_: Request, exc: Exception):
-    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
-    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
-    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
-    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
-    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
-    print("::::::::::::::::::::::::::::::::::::::::", flush=True)
     status_code = exc.status_code if isinstance(exc, HTTPException) else HTTP_500_INTERNAL_SERVER_ERROR
 
     if config.DEBUG:
