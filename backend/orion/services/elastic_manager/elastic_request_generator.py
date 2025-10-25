@@ -665,9 +665,8 @@ class elastic_request_generator:
         labels.append("social_model")
 
         m8 = helper_controller.clone_model(p_query_model)
-        response = self.on_search_stealerlogs_data(m8, pFilter)
-        if response:
-            i8, q8 = response
+        i8, q8 = self.on_search_stealerlogs_data(m8, pFilter)
+        if i8 or q8:
             queries.append(helper_controller.strip_query(q8))
             indices.append(i8)
             labels.append("stealer_model")
@@ -1261,7 +1260,7 @@ class elastic_request_generator:
             p_query_model.user = user
 
         if not p_query_model.url and not p_query_model.user:
-            return
+            return None, None
 
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         raw_url = p_query_model.url.strip() if p_query_model.url else ""
