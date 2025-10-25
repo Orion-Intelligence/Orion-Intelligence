@@ -1265,7 +1265,7 @@ class elastic_request_generator:
         if len(url)>0:
             p_query_model.user = user
 
-        if not p_query_model.url and not p_query_model.user and not consolidated:
+        if not p_query_model.url and not p_query_model.user and consolidated:
             return None, None
 
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
