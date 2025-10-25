@@ -1251,6 +1251,12 @@ class elastic_request_generator:
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter):
 
+        print("2 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(p_query_model.url, flush=True)
+        print("2 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+        print(p_query_model.user, flush=True)
+        print("2 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
+
         url = helper_controller.extract_domains_from_text(p_query_model.q)
         if len(url)>0:
             p_query_model.url = url[0]
