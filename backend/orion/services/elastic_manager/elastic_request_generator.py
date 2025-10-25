@@ -1380,7 +1380,7 @@ class elastic_request_generator:
         if not (user_query or url_query or extra_user_terms or extra_domains):
             query["sort"] = ["_doc"]
 
-        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+        return "stealer_model,stealer_model-*", query
 
     def on_search_general_data(self, p_query_model, pfilter=None):
         if p_query_model.matchtype:

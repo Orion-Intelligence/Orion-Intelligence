@@ -160,13 +160,6 @@ class elastic_controller:
                 query["indices_boost"] = indices_boost
 
             read_indices = [self._read_index(i) for i in indices]
-
-            print(":::::::::::::::::::::::::", flush=True)
-            print(":::::::::::::::::::::::::", flush=True)
-            print(read_indices, flush=True)
-            print(":::::::::::::::::::::::::", flush=True)
-            print(":::::::::::::::::::::::::", flush=True)
-
             only_stealer = all(i == ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
             none_stealer = all(i != ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
 
