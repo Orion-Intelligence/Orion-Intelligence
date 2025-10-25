@@ -1250,13 +1250,6 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated = False):
-
-        print("2 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(p_query_model.url, flush=True)
-        print("2 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(p_query_model.user, flush=True)
-        print("2 :::::::::::::::::::::::::::::::::::::::::::::::", flush=True)
-
         url = helper_controller.extract_domains_from_text(p_query_model.q)
         if len(url)>0:
             p_query_model.url = url[0]
@@ -1385,7 +1378,7 @@ class elastic_request_generator:
         if not (user_query or url_query or extra_user_terms or extra_domains):
             query["sort"] = ["_doc"]
 
-        return "stealer_model,stealer_model-*", query
+        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     def on_search_general_data(self, p_query_model, pfilter=None):
         if p_query_model.matchtype:
