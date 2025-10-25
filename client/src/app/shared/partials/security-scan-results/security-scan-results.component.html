@@ -55,7 +55,7 @@
 
 <div class="scan_report-section" [ngClass]="{ 'scan_report-section-danger': grade === 'D' || grade === 'F', 'scan_report-section-warning': grade === 'C' }" *ngIf="!hasError">
   <h3 class="scan_section-title">
-        <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton">
+        <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton" class="text-white">
           Security Scan Report for 〡 <a [href]="meta.URL">{{ displayHost }}</a>
         </ng-container>
       </h3>

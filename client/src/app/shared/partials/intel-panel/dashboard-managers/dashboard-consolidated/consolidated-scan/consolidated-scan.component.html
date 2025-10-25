@@ -1,13 +1,13 @@
 <div class="domain-scan-container" *ngIf="showComponent">
   <div
-    class="scan_report-section-main"
+    class="scan_report-section-main" *ngIf="!isLoading"
     [ngClass]="{
       'scan_report-section-collapsed': !isExpanded,
       'scan_report-section-loading': isProcessing,
       'scan_report-section-loaded': !isProcessing && (scanResult$ | async)
     }"
   >
-    <div class="scan_loading-header">
+    <div class="scan_loading-header" *ngIf="!isLoading">
       <div class="loading-circle" *ngIf="isProcessing"></div>
       <div class="scan_section-title">
         Domain Scan: {{ query }}
@@ -22,21 +22,21 @@
       </button>
     </div>
 
-    <ng-container *ngIf="isProcessing">
+    <ng-container *ngIf="isProcessing && !isLoading" >
       <div class="wait-message">Scanning in progress... Please wait.</div>
     </ng-container>
 
-    <ng-container *ngIf="!isProcessing && (scanResult$ | async) as result">
+    <ng-container *ngIf="!isProcessing && !isLoading && (scanResult$ | async) as result" >
       <a
         class="right-content text-white cursor-pointer"
-        *ngIf="isExpanded"
+        *ngIf="isExpanded && !result.hasError && result.meta"
         @fadeInDashboardItem
         [routerLink]="['/dashboard/scanner/basic-scan']"
         [queryParams]="{
           q: 'msmannan00@gmail.com',
           page: 1,
           matchtype: 'or',
-          domain: 'https://bbc.com/',
+          domain: query,
           scanType: 'basic'
         }"
         target="_blank"
@@ -48,25 +48,16 @@
       </a>
 
       <div *ngIf="isExpanded" class="scan_content-wrapper" @fadeInDashboardItem>
-        <div class="scan_report-section mt-3 mb-0 grade-summary" [ngClass]="getGradeClass(result.grade)">
-          <ng-container *ngIf="!result.hasError && result.meta; else errorBlock">
-            <div class="grade-report-title">
-              Security Scan Report for
+        <ng-container *ngIf="!result.hasError && result.meta; else errorBlock">
+          <div class="scan_report-section mt-3 mb-0 grade-summary" [ngClass]="getGradeClass(result.grade)">
+            <div class="grade-report-title text-white">
+              Security Scan Report for 〡
               <a [href]="result.meta.URL" target="_blank">
                 {{ result.meta.Host || extractHost(result.meta.URL) }}
               </a>
             </div>
-          </ng-container>
-          <ng-template #errorBlock>
-            <div class="error-text">
-              {{ result.domain }} - {{ result.errorMessage || 'No data found.' }}
-            </div>
-          </ng-template>
 
-          <div class="scan_divider"></div>
-
-          <ng-container *ngIf="result.meta">
-            <div class="scan_scan-meta-grid">
+            <div class="scan_scan-meta-grid mt-2">
               <div class="scan_meta-card">
                 <p class="scan_meta-value scan_meta-value-large">
                   {{ result.grade || '—' }} Grade
@@ -98,12 +89,14 @@
                 <p class="scan_meta-value">{{ result.meta.Scanned_by }}</p>
               </div>
             </div>
-          </ng-container>
+          </div>
+        </ng-container>
 
-          <ng-container *ngIf="!result.meta && !result.hasError">
-            <p>No detailed metadata available for this domain.</p>
-          </ng-container>
-        </div>
+        <ng-template #errorBlock>
+          <div class="text-info">
+            {{ result.domain }} - {{ result.errorMessage || 'No data found.' }}
+          </div>
+        </ng-template>
       </div>
     </ng-container>
   </div>

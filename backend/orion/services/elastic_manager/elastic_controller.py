@@ -2,7 +2,6 @@ from datetime import datetime, timezone, timedelta
 from string import capwords
 from elasticsearch import AsyncElasticsearch
 from fastapi import HTTPException
-from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
@@ -98,21 +97,21 @@ class elastic_controller:
 
     async def purge_old_records(self):
         try:
-            m_request_stealer = {
-                "query": {
-                    "range": {
-                        "timestamp": {
-                            "lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"
-                        }
-                    }
-                }
-            }
-            await self.__m_dump_connection.delete_by_query(
-                index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
-                body=m_request_stealer,
-                ignore=[404],
-                request_timeout=220
-            )
+            # m_request_stealer = {
+            #     "query": {
+            #         "range": {
+            #             "timestamp": {
+            #                 "lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"
+            #             }
+            #         }
+            #     }
+            # }
+            # await self.__m_dump_connection.delete_by_query(
+            #     index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
+            #     body=m_request_stealer,
+            #     ignore=[404],
+            #     request_timeout=220
+            # )
 
             days_15_seconds = int(timedelta(days=15).total_seconds())
             m_request_defacement = {
@@ -151,20 +150,59 @@ class elastic_controller:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
+    # MINIMAL READ-ONLY CHANGES
+
+    @staticmethod
+    def _read_index(i: str) -> str:
+        return "stealer_model,stealer_model-*" if i == ELASTIC_INDEX.S_STEALERLOGS_INDEX else i
+
     async def search_consolidated_ranked_query(self, indices, query, indices_boost=None):
         try:
             if indices_boost:
                 query["indices_boost"] = indices_boost
+
+            # expand indices for reads
+            read_indices = [self._read_index(i) for i in indices]
             only_stealer = all(i == ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
             none_stealer = all(i != ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
+
             if only_stealer:
-                return await self.__m_dump_connection.search(index=",".join(indices), body=query, request_timeout=220)
+                return await self.__m_dump_connection.search(
+                    index=",".join(read_indices),
+                    body=query,
+                    request_timeout=220,
+                    allow_no_indices=True,
+                    ignore_unavailable=True,
+                )
+
             if none_stealer:
-                return await self.__m_core_connection.search(index=",".join(indices), body=query, request_timeout=220)
-            core_indices = [i for i in indices if i != ELASTIC_INDEX.S_STEALERLOGS_INDEX]
-            dump_indices = [ELASTIC_INDEX.S_STEALERLOGS_INDEX]
-            core_res = await self.__m_core_connection.search(index=",".join(core_indices), body=query, request_timeout=220) if core_indices else {"hits": {"hits": []}}
-            dump_res = await self.__m_dump_connection.search(index=",".join(dump_indices), body=query, request_timeout=220)
+                return await self.__m_core_connection.search(
+                    index=",".join(read_indices),
+                    body=query,
+                    request_timeout=220,
+                    allow_no_indices=True,
+                    ignore_unavailable=True,
+                )
+
+            core_indices = [self._read_index(i) for i in indices if i != ELASTIC_INDEX.S_STEALERLOGS_INDEX]
+            dump_indices = ["stealer_model,stealer_model-*"]
+
+            core_res = await self.__m_core_connection.search(
+                index=",".join(core_indices),
+                body=query,
+                request_timeout=220,
+                allow_no_indices=True,
+                ignore_unavailable=True,
+            ) if core_indices else {"hits": {"hits": []}}
+
+            dump_res = await self.__m_dump_connection.search(
+                index=",".join(dump_indices),
+                body=query,
+                request_timeout=220,
+                allow_no_indices=True,
+                ignore_unavailable=True,
+            )
+
             merged = core_res if core_indices else dump_res
             core_hits = core_res.get("hits", {}).get("hits", []) if core_res else []
             dump_hits = dump_res.get("hits", {}).get("hits", []) if dump_res else []

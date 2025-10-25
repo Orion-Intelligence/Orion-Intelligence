@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import { NgIf, NgClass, AsyncPipe } from '@angular/common';
 import { ConsolidatedApiService } from '../../../../../services/consolidated.api.service';
 import { ConsolidatedScanResults } from '../../../../../model/results/consolidated/consolidated.callback.model';
@@ -20,6 +20,7 @@ export class ConsolidatedScanComponent {
   isProcessing: boolean = false;
   isExpanded: boolean = false;
   showComponent: boolean = false;
+  @Input() isLoading!: boolean;
 
   constructor(private liveApiService: ConsolidatedApiService) {}
 

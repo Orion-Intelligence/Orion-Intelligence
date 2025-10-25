@@ -4,9 +4,9 @@
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)"
   (resetFilter)="resetFilters($event)" [showSelectedFilters]="true"></app-result>
 
-<app-consolidated-scan #domainScan></app-consolidated-scan>
+<app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
 <br>
-<app-consolidated-apis #liveApiSearch></app-consolidated-apis>
+<app-consolidated-apis [isLoading]="isLoading()" #liveApiSearch></app-consolidated-apis>
 
 <div *ngIf="!isLoading()" @fadeInDashboardItem>
   <ng-container *ngIf="shouldShowSection()">

@@ -1,10 +1,10 @@
 <div class="live-api-results-container" *ngIf="showComponent" [class.is-loading]="isProcessing">
-  <div class="live-api_report-section-main" [ngClass]="{
+  <div class="live-api_report-section-main" *ngIf="!isLoading" [ngClass]="{
                 'scan_report-section-collapsed': !isExpanded,
                 'scan_report-section-loading': isProcessing,
                 'scan_report-section-loaded': !isProcessing && searchResults.length > 0
             }">
-    <div class="scan_loading-header">
+    <div class="scan_loading-header" *ngIf="!isLoading">
 
       <div class="loading-circle" *ngIf="isProcessing"></div>
 
@@ -18,11 +18,11 @@
       </button>
     </div>
 
-    <ng-container *ngIf="isProcessing">
-      <p class="text-white">Getting data for {{ liveApiEntities.length }} items... Please wait.</p>
+    <ng-container *ngIf="isProcessing && !isLoading">
+      <p class="wait-message mt-2 mb-0">Getting data for {{ liveApiEntities.length }} items... Please wait.</p>
     </ng-container>
 
-    <ng-container *ngIf="!isProcessing && isExpanded">
+    <ng-container *ngIf="!isProcessing && isExpanded && !isLoading">
 
       <div *ngIf="searchResults.length === 0" class="text-info mt-3 p-2">
         No results found for query: {{ query }}
@@ -36,8 +36,6 @@
             Search {{ i + 1 }} ({{ result.input.type }}) - Input: {{ result.input.q1 }}
             <span *ngIf="result.input.q2">/ {{ result.input.q2 }}</span>
           </div>
-          <hr class="dashboard-header-divider"/>
-
           <ng-container [ngSwitch]="result.status">
             <div *ngSwitchCase="'pending'" class="text-warning">Status: Pending...</div>
 

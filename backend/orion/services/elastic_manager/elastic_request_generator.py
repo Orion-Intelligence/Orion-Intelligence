@@ -665,10 +665,12 @@ class elastic_request_generator:
         labels.append("social_model")
 
         m8 = helper_controller.clone_model(p_query_model)
-        i8, q8 = self.on_search_stealerlogs_data(m8, pFilter)
-        queries.append(helper_controller.strip_query(q8))
-        indices.append(i8)
-        labels.append("stealer_model")
+        response = self.on_search_stealerlogs_data(m8, pFilter)
+        if response:
+            i8, q8 = response
+            queries.append(helper_controller.strip_query(q8))
+            indices.append(i8)
+            labels.append("stealer_model")
 
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
@@ -1249,6 +1251,18 @@ class elastic_request_generator:
 
     @staticmethod
     def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter):
+
+        url = helper_controller.extract_domains_from_text(p_query_model.q)
+        if len(url)>0:
+            p_query_model.url = url[0]
+
+        user = helper_controller.extract_first_email(p_query_model.q)
+        if len(url)>0:
+            p_query_model.user = user
+
+        if not p_query_model.url and not p_query_model.user:
+            return
+
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
         raw_url = p_query_model.url.strip() if p_query_model.url else ""
         url_query = ""

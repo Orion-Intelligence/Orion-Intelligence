@@ -1,10 +1,7 @@
 import datetime
-import requests
-
 from abc import ABC
 from typing import List
 from urllib.parse import urljoin
-
 from crawler.constants.constant import RAW_PATH_CONSTANTS
 from crawler.crawler_instance.local_interface_model.leak.leak_extractor_interface import leak_extractor_interface
 from crawler.crawler_instance.local_shared_model.data_model.defacement_model import defacement_model
@@ -56,7 +53,7 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
     @property
     def rule_config(self) -> RuleModel:
-        return RuleModel(m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.DEFACEMENT)
+        return RuleModel(m_timeout=4800000, m_fetch_proxy=FetchProxy.NONE, m_fetch_config=FetchConfig.PLAYRIGHT, m_threat_type=ThreatType.DEFACEMENT)
 
     @property
     def card_data(self) -> List[defacement_model]:
@@ -110,10 +107,10 @@ class _zone_xsec(leak_extractor_interface, ABC):
 
                 for link in links:
                     try:
-                        page.goto(link, wait_until="load", timeout=60000)
-                        page.wait_for_load_state("load", timeout=60000)
-                        html = page.content()
-                        page.set_content(html.replace("iframe", "safeframe"))
+                        # <-- minimal change: use Playwright page navigation (no requests)
+                        page.goto(link, wait_until="load", timeout=100000)
+                        page.wait_for_load_state("load")
+
                         page.wait_for_selector(".panel.panel-danger", timeout=15000)
 
                         url_span = page.query_selector("span#url")

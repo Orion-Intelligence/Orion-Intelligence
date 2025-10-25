@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 class search_credential_param_model(BaseModel):
     daterange: Optional[str] = ""
+    q: Optional[str] = ""
     url: Optional[str] = ""
     user: Optional[str] = ""
     category: Optional[str] = ""

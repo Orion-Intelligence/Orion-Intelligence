@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import { NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass } from '@angular/common';
 import { ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../../model/results/consolidated/consolidated.callback.model';
 import { ConsolidatedApiService } from '../../../../../services/consolidated.api.service';
@@ -17,6 +17,7 @@ export class ConsolidatedApisComponent {
   isProcessing: boolean = false;
   showComponent: boolean = false;
   isExpanded: boolean = true;
+  @Input() isLoading!: boolean;
 
   constructor(private liveApiService: ConsolidatedApiService) { }
 
