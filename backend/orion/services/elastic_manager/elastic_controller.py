@@ -150,8 +150,6 @@ class elastic_controller:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
-    # MINIMAL READ-ONLY CHANGES
-
     @staticmethod
     def _read_index(i: str) -> str:
         return "stealer_model,stealer_model-*" if i == ELASTIC_INDEX.S_STEALERLOGS_INDEX else i
@@ -161,8 +159,14 @@ class elastic_controller:
             if indices_boost:
                 query["indices_boost"] = indices_boost
 
-            # expand indices for reads
             read_indices = [self._read_index(i) for i in indices]
+
+            print(":::::::::::::::::::::::::", flush=True)
+            print(":::::::::::::::::::::::::", flush=True)
+            print(read_indices, flush=True)
+            print(":::::::::::::::::::::::::", flush=True)
+            print(":::::::::::::::::::::::::", flush=True)
+
             only_stealer = all(i == ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
             none_stealer = all(i != ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
 
