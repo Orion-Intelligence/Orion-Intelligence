@@ -211,7 +211,7 @@ export const routes: Routes = [
           {
             path: 'playstore-scanner',
             component: DashboardApiComponent,
-            data: { animation: 'CrackedAPI', type: 'playstore' }
+            data: { animation: 'CrackedAPI', type: 'cracked' }
           }
         ]
       },
