@@ -151,13 +151,13 @@ export class DashboardService {
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
 
     let payload: any = {...paramModel, ...this.selectedFilters()};
-    payload['must'] = this.app_service.configData().localSettings.entityFilterCondition;
 
     if (entityCategories) {
       payload['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
     }
     payload = this.helperService.removeEmptyOrNullValues(payload);
 
+    payload['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     const queryParamsForNav = {...payload};
     delete queryParamsForNav['entity_filter'];
 
