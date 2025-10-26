@@ -16,6 +16,11 @@ export class SubscriptionService {
     return this.authService.getSubscriptionStatus();
   }
 
+  public isProfile(): boolean {
+    const role = this.authService.getRole();
+    return role === 'profile';
+  }
+
   public checkAdmin(): boolean {
     const role = this.authService.getRole();
     return role === 'admin';

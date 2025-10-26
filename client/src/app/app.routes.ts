@@ -472,11 +472,13 @@ export const routes: Routes = [
         ]
       },
       {
+        canActivate: [subscriptionGuard],
         path: 'consolidated',
         data: { animation: 'ConsolidatedPage' },
         children: consolidatedChildren
       },
       {
+        canActivate: [subscriptionGuard],
         path: 'scanner',
         data: { animation: 'ScannerPage' },
         children: [
@@ -508,6 +510,7 @@ export const routes: Routes = [
         ]
       },
       {
+        canActivate: [subscriptionGuard],
         path: 'dump',
         data: { animation: 'DumpPage' },
         children: [
@@ -552,6 +555,7 @@ export const routes: Routes = [
       },
       {
         path: 'tenant',
+        canActivate: [subscriptionGuard],
         data: { animation: 'TenantPage' },
         children: [
           {
@@ -573,6 +577,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        canActivate: [subscriptionGuard],
         data: { animation: 'ProifilePage' },
         children: [
           {

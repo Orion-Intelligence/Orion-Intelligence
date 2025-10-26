@@ -151,10 +151,6 @@ export class AuthService {
     return this.apiService.post('updatePassword', { token, password });
   }
 
-  getToken(): string | null {
-    return this.getStoredToken();
-  }
-
   getRole(): string | null {
     return this.role();
   }
