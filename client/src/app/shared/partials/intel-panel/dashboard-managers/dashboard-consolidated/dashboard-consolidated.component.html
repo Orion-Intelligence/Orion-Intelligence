@@ -1,15 +1,15 @@
-<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false"
+<app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [discussion]="false" [showNoResult]="false"
   (reloadData)="fetchSearchResults(true)" class="consolidated_container-main" (updateQuery)="onUpdateQuery($event)"
   [analyticsToggle]="false" (onToggleSwitch)="onToggleMenu($event)" [isLoading]="isLoading()" [searchQuery]="query"
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters" (reloadFilters)="reloadFilters($event)"
   (resetFilter)="resetFilters($event)" [showSelectedFilters]="true"></app-result>
 
-<app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
 <br>
+<app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
 <app-consolidated-apis [isLoading]="isLoading()" #liveApiSearch></app-consolidated-apis>
 
 <div *ngIf="!isLoading()" @fadeInDashboardItem>
-  <ng-container *ngIf="shouldShowSection()">
+  <ng-container>
     <div class="dashboard__layout-wrapper">
       <div class="dashboard__layout-left">
         <ng-container *ngIf="isGrouped; else rankedMode">

@@ -38,6 +38,7 @@ export class ResultComponent implements OnInit, OnChanges {
   @Input() result_count_enabled: boolean = true;
   @Input() result_count!: number;
   @Input() isLoading!: boolean;
+  @Input() showNoResult: boolean = true;
   @Input() isList!: boolean;
   @Input() isTool: boolean = true;
   @Input() suggestion!: Suggestion | undefined;

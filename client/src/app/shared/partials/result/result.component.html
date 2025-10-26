@@ -215,9 +215,6 @@
   </div>
 
   <ng-template #noResults>
-<!--    <div *ngIf="(!checkProfile() || hasIOCs()) && !isLoading" class="right-text label-text">-->
-<!--      <span>No result found</span><br><br>-->
-<!--    </div>-->
     <div *ngIf="(!checkProfile() || hasIOCs()) && isLoading" class="right-text label-text">
       <span>Searching for results ...</span><br><br>
     </div>
@@ -238,6 +235,7 @@
 </div>
 
 <div *ngIf="!(checkProfile() && !hasIOCs())
+         && showNoResult
          && isLoading!=null
          && (this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0)
          && !isLoading
