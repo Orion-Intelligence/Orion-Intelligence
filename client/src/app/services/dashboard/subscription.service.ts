@@ -16,9 +16,9 @@ export class SubscriptionService {
     return this.authService.getSubscriptionStatus();
   }
 
-  public isProfile(): boolean {
+  public isDemo(): boolean {
     const role = this.authService.getRole();
-    return role === 'profile';
+    return role === 'demo';
   }
 
   public checkAdmin(): boolean {

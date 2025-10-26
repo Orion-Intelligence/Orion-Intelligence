@@ -14,7 +14,7 @@ export class subscriptionGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
-    if (this.subscriptionService.accountExpirable() && this.subscriptionService.isProfile()) {
+    if (this.subscriptionService.accountExpirable() && !(this.subscriptionService.isDemo())) {
       return true;
     }
     this.dashboardService.showSubscription.set(true);
