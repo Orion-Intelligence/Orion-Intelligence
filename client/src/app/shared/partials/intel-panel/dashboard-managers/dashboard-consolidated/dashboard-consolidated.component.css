@@ -14,6 +14,52 @@
   color: #888;
 }
 
+.consolidated-defacement-card {
+  background: var(--color-blue-890);
+  max-width: 800px;
+  min-width: 150px;
+  border-radius: 15px;
+  padding: 16px 20px;
+  margin-left: 35px;
+  border: 1px solid #ffffff07;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.consolidated-defacement-card__content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.consolidated-defacement-card__loader {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.consolidated-defacement-card__text {
+  flex: 1;
+}
+
+.consolidated-defacement-card__text strong {
+  font-size: 15px;
+  color: #ffffff;
+}
+
+.consolidated-defacement-card__text div {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+
+
+
 
 @media only screen and (width <=460px) {
   .consolidated_container {

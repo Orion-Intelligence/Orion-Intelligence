@@ -100,16 +100,20 @@ export class ConsolidatedApiService {
         return forkJoin(searchObservables);
     }
 
-    public scanDomain(domain: string): Observable<ConsolidatedScanResults> {
+    public scan(target: string, scanType: 'basic' | 'seo' | 'repo'): Observable<ConsolidatedScanResults> {
+        const endpoint = 'urlscan/domain';
+        const payloadKey = 'domain';
+        const payload = { [payloadKey]: target, scanType };
+
         return this.apiService
-            .post<any>('urlscan/domain', { domain, scanType: 'basic' })
+            .post<any>(endpoint, payload)
             .pipe(
                 expand((res) => {
                     const isPending = res?.status === 'pending' || res?.step === 'queued' || res?.result?.status === 'pending';
                     if (isPending) {
                         return timer(5000).pipe(
                             switchMap(() =>
-                                this.apiService.post<any>('urlscan/domain', { domain, scanType: 'basic' })
+                                this.apiService.post<any>(endpoint, payload)
                             )
                         );
                     }
@@ -126,20 +130,35 @@ export class ConsolidatedApiService {
                     const meta = res?.result?.meta ?? null;
                     const grade = res?.result?.grade ?? res?.result?.meta?.grade ?? '—';
 
-                    return { domain, meta, grade, hasError: false, errorMessage: '' } as ConsolidatedScanResults;
+                    return {
+                        domain: target,
+                        scanType,
+                        meta,
+                        grade,
+                        hasError: false,
+                        errorMessage: ''
+                    } as ConsolidatedScanResults;
                 }),
                 filter((res): res is ConsolidatedScanResults => res !== null),
 
                 catchError((err) => {
                     return of({
-                        domain,
+                        domain: target,
+                        scanType,
                         meta: null,
                         grade: '—',
                         hasError: true,
-                        errorMessage: err?.error?.detail || 'Failed to scan domain.',
+                        errorMessage: err?.error?.detail || `Failed to scan ${scanType}.`,
                     } as ConsolidatedScanResults);
                 })
             );
+    }
+    public scanDomain(domain: string, scanType: 'basic' | 'seo'): Observable<ConsolidatedScanResults> {
+        return this.scan(domain, scanType);
+    }
+
+    public scanForRepo(repoPath: string, scanType: 'repo'): Observable<ConsolidatedScanResults> {
+        return this.scan(repoPath, scanType);
     }
 
 }

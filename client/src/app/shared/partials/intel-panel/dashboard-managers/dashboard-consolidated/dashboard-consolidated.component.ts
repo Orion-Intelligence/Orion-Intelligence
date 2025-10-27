@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, ViewChild } from '@angular/core';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,6 +25,7 @@ import { HelperService } from '../../../../services/helper.service';
 import { HttpClient } from '@angular/common/http';
 import { ConsolidatedApisComponent } from './consolidated-apis/consolidated-apis.component';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
+import { StealerLogCallbackModel } from '../../../../model/results/credentials/credential.callback.model';
 
 
 @Component({
@@ -43,6 +44,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
 
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
+  public stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   public groupedResults: { [index: string]: any[] } = {};
   public response: any;
   public pageCounts: { [key: string]: number } = {};
@@ -50,6 +52,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   isGrouped = true
   query: string = '';
   isLoading = signal(false);
+  isStealerLogLoading = signal(false);
   firstTrigger = true;
   result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
@@ -118,6 +121,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
     if (!this.dashboardService.consolidatedParamModel.q) {
       this.isLoading.set(false);
+      this.isStealerLogLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
       this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
     }
@@ -158,6 +162,18 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
       this.isLoading.set(false);
     });
+    if (this.isEmailOrUrl(this.dashboardService.consolidatedParamModel.q)) {
+      this.isStealerLogLoading.set(true);
+      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.dashboardService.consolidatedParamModel)
+        .pipe(switchMap(response => timer(300).pipe(map(() => response))))
+        .subscribe(response => {
+          if (response.success && response.data) {
+            this.stealerlogCallbackModel = response.data;
+            this.dashboardService.stealerlogCallbackModel = response.data;
+          }
+          this.isStealerLogLoading.set(false);
+        });
+    }
   }
 
   resetFilters(_: void) {
@@ -324,4 +340,33 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     return hasAnyData && this.hasIOCs();
   }
+  isEmailOrUrl(query: string): boolean {
+    if (!query) {
+      return false;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const urlRegex = /^(https?:\/\/|www\.)[^\s/$.?#].[^\s]*$/i;
+
+    if (emailRegex.test(query)) {
+      return true;
+    }
+    if (urlRegex.test(query)) {
+      return true;
+    }
+    return false;
+  }
+  showScanCard = computed(() => {
+    const isLoading = this.isLoading();
+    const isStealerLogLoading = this.isStealerLogLoading();
+    const defacementData = this.consolidatedCallbackModel?.defacement_model?.Result ?? [];
+    const hasDefacementData = defacementData.length > 0;
+    const hasDefacementModel = !!this.consolidatedCallbackModel?.defacement_model;
+    const hasStealerLogModel = !!this.stealerlogCallbackModel;
+
+    if (isLoading && isStealerLogLoading) return true;
+    if (!isLoading && defacementData.length === 0 && isStealerLogLoading) return true;
+    if (isLoading && hasDefacementData && isStealerLogLoading) return true;
+    if (!isLoading && !isStealerLogLoading && !hasDefacementModel && !hasStealerLogModel) return false;
+    return false;
+  });
 }

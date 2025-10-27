@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
+import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
@@ -13,7 +13,7 @@ import QRCode from 'qrcode';
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, NgIf, NgClass],
+  imports: [FormsModule, NgIf, NgClass, CommonModule],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
@@ -28,10 +28,14 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   otpUri: string | null = null;
   otpDataUrl: string | null = null;
   otpSecret: string | null = null;
-  isMobile = false;
 
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
+  isMobile = false;
+  demoUser = 'demo';
+  demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw';
+  userCopied = false;
+  passwordCopied = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) {
   }
@@ -48,8 +52,8 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       }
     });
     this.route.queryParams.subscribe(params => {
-      const d = params['d_key'];
-      this.isMobile = d !== undefined && d !== null && d.trim() !== '';
+      const isScreenMobile = window.innerWidth <= 480;
+      this.isMobile = isScreenMobile;
     });
   }
 
@@ -99,5 +103,19 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
   demoLogin() {
     this.authService.demoLogin();
+  }
+  copy(type: string) {
+    if (type === 'user') {
+      navigator.clipboard.writeText(this.demoUser).then(() => {
+        this.userCopied = true;
+        setTimeout(() => this.userCopied = false, 1500);
+      });
+    }
+    else if (type === 'password') {
+      navigator.clipboard.writeText(this.demoPassword).then(() => {
+        this.passwordCopied = true;
+        setTimeout(() => this.passwordCopied = false, 1500);
+      });
+    }
   }
 }

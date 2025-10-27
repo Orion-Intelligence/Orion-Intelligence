@@ -24,11 +24,15 @@ export class SignupComponent implements OnInit {
   };
   currentUnmetCheck: string | null = null;
   isMobile = false;
+  demoUser = 'demo';
+  demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw';
+  userCopied = false;
+  passwordCopied = false;
   constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute) { }
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      const d = params['d_key'];
-      this.isMobile = d !== undefined && d !== null && d.trim() !== '';
+      const isScreenMobile = window.innerWidth <= 480;
+      this.isMobile = isScreenMobile;
     });
   }
 
@@ -97,5 +101,19 @@ export class SignupComponent implements OnInit {
   }
   demoLogin() {
     this.auth_service.demoLogin();
+  }
+  copy(type: string) {
+    if (type === 'user') {
+      navigator.clipboard.writeText(this.demoUser).then(() => {
+        this.userCopied = true;
+        setTimeout(() => this.userCopied = false, 1500);
+      });
+    }
+    else if (type === 'password') {
+      navigator.clipboard.writeText(this.demoPassword).then(() => {
+        this.passwordCopied = true;
+        setTimeout(() => this.passwordCopied = false, 1500);
+      });
+    }
   }
 }

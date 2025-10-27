@@ -221,7 +221,6 @@ class search_model:
         chat_data = {}
         defacement_data = {}
         social_data = {}
-        stealer_data = {}
         tracking_data={}
         news_data={}
 
@@ -254,8 +253,6 @@ class search_model:
                 chat_data = data
             elif label == "social_model":
                 social_data = data
-            elif label == "stealer_model":
-                stealer_data = data
             elif label == "defacement_model":
                 defacement_data = data
             elif label == "tracking_model":
@@ -270,7 +267,6 @@ class search_model:
             generic_model=search_general_callback_model(**general_data),
             defacement_model=search_defacement_callback_model(**defacement_data),
             social_model=search_social_callback_model(**social_data),
-            stealer_model = search_stealerlog_callback_model(**stealer_data),
             tracking_model=search_leak_callback_model(**tracking_data),
             news_model=search_leak_callback_model(**news_data)
         )

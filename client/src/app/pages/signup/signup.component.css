@@ -17,7 +17,7 @@
   align-items: center;
 }
 
-.auth-wrapper__left > * {
+.auth-wrapper__left>* {
   position: relative;
   top: -5vh;
 }
@@ -235,19 +235,20 @@
 
 .demo-note {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
   border: 1px solid #f3f4f6;
   color: #4b5563;
   font-size: 14px;
   border-radius: 8px;
   margin-bottom: 16px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
-  text-align: center;
   width: 100%;
   background: #ffc10790;
-  padding: 8px 16px 8px 0;
-  gap: 10px;
+  padding: 10px 16px;
+  gap: 6px;
 }
 
 .demo-note :hover {
@@ -265,8 +266,87 @@
   font-weight: 600;
 }
 
+.demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
 
-@media screen and (width <= 1300px) {
+.demo-credentials {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.password-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.copy-tooltip {
+  position: absolute;
+  top: -26px;
+  background-color: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  animation: fadeTooltip 1.2s ease-out forwards;
+}
+
+@keyframes fadeTooltip {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+.password-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.password-text {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+@keyframes fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+
+@media screen and (width <=1300px) {
   .auth-wrapper__right {
     display: none;
   }
@@ -284,34 +364,34 @@
   }
 }
 
-@media screen and (width <= 1600px) {
+@media screen and (width <=1600px) {
   .auth-wrapper__image {
     width: 747px;
     height: 578px;
   }
 }
 
-@media screen and (height <= 950px) {
+@media screen and (height <=950px) {
   .ai-summary {
     display: none;
   }
 }
 
-@media screen and (height <= 730px) {
+@media screen and (height <=730px) {
   .auth-wrapper__image {
     width: 747px;
     height: 578px;
   }
 }
 
-@media screen and (height <= 690px) {
+@media screen and (height <=690px) {
   .auth-wrapper__image {
     width: 672px;
     height: 520px;
   }
 }
 
-@media screen and (height <= 620px) {
+@media screen and (height <=620px) {
   .auth-wrapper__image {
     width: 560px;
     height: 433px;

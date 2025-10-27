@@ -664,13 +664,6 @@ class elastic_request_generator:
         indices.append(i6)
         labels.append("social_model")
 
-        m8 = helper_controller.clone_model(p_query_model)
-        i8, q8 = self.on_search_stealerlogs_data(m8, pFilter, True)
-        if i8 or q8:
-            queries.append(helper_controller.strip_query(q8))
-            indices.append(i8)
-            labels.append("stealer_model")
-
         domain_query_index, domain_query = self.on_bulk_domain_lookup(p_query_model, pFilter)
         queries.append(domain_query)
         indices.append(domain_query_index)

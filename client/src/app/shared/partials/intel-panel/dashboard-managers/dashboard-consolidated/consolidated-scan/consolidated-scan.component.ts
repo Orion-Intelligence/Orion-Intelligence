@@ -1,8 +1,8 @@
-import {Component, Input} from '@angular/core';
-import { NgIf, NgClass, AsyncPipe } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { NgIf, NgFor, NgClass, AsyncPipe, CommonModule } from '@angular/common';
 import { ConsolidatedApiService } from '../../../../../services/consolidated.api.service';
 import { ConsolidatedScanResults } from '../../../../../model/results/consolidated/consolidated.callback.model';
-import { finalize, Observable, of } from 'rxjs';
+import { finalize, forkJoin, Observable, of } from 'rxjs';
 import { TooltipDirective } from '../../../../../directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../../../animations/dashboard.item.animation';
 import { RouterLink } from '@angular/router';
@@ -10,33 +10,68 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-consolidated-scan',
   standalone: true,
-  imports: [NgIf, NgClass, AsyncPipe, TooltipDirective, RouterLink],
+  imports: [CommonModule, NgIf, NgFor, NgClass, AsyncPipe, TooltipDirective, RouterLink],
   templateUrl: './consolidated-scan.component.html',
   animations: [fadeInDashboardItem]
 })
 export class ConsolidatedScanComponent {
   query: string = '';
-  scanResult$: Observable<ConsolidatedScanResults | null> = of(null);
+  scanResult$: Observable<ConsolidatedScanResults[] | null> = of(null);
   isProcessing: boolean = false;
   isExpanded: boolean = false;
   showComponent: boolean = false;
   @Input() isLoading!: boolean;
 
-  constructor(private liveApiService: ConsolidatedApiService) {}
+  constructor(private liveApiService: ConsolidatedApiService) { }
 
+  private getQueryType(q: string): 'repo' | 'domain' | 'invalid' {
+    const trimmed = q.trim().toLowerCase();
+    if (!trimmed) return 'invalid';
+    if (trimmed.includes('github.com/') && trimmed.includes('/', trimmed.indexOf('github.com/') + 12)) {
+      return 'repo';
+    }
+    if (this.validateAndExtractDomain(q)) {
+      return 'domain';
+    }
+
+    return 'invalid';
+  }
+  private extractRepoPath(q: string): string {
+    const trimmed = q.trim();
+    if (trimmed.includes('github.com/')) {
+      const parts = trimmed.split('github.com/')[1]?.split('/');
+      if (parts && parts.length >= 2 && parts[0] && parts[1]) {
+        return `${parts[0]}/${parts[1]}`;
+      }
+    }
+    return '';
+  }
   public runScan(newQuery: string): void {
     this.query = newQuery;
-    const domain = this.validateAndExtractDomain(newQuery);
-    if (!domain) {
+    let queryType = this.getQueryType(newQuery);
+
+    let target: string | null = null;
+    if (queryType === 'repo') {
+      target = newQuery.trim();
+      if (!this.extractRepoPath(target)) {
+        queryType = 'invalid';
+      }
+
+    } else if (queryType === 'domain') {
+      target = this.validateAndExtractDomain(newQuery);
+    }
+
+    if (queryType === 'invalid' || !target) {
       this.showComponent = false;
       this.isExpanded = false;
       this.isProcessing = false;
       this.scanResult$ = of(null);
       return;
     }
+
     this.isExpanded = false;
     this.showComponent = true;
-    this.initAndScan();
+    this.initAndScan(target, queryType);
   }
 
   private validateAndExtractDomain(q: string): string {
@@ -76,26 +111,32 @@ export class ConsolidatedScanComponent {
     return trimmed;
   }
 
-  initAndScan(): void {
-    const domain = this.validateAndExtractDomain(this.query);
+  public initAndScan(target: string, type: 'repo' | 'domain'): void {
     this.scanResult$ = of(null);
-    if (!domain) {
-      this.showComponent = false;
-      this.isProcessing = false;
-      this.isExpanded = false;
-      return;
-    }
     this.isProcessing = true;
-    this.liveApiService.scanDomain(domain)
+
+    let scanObservables: Observable<ConsolidatedScanResults>[];
+
+    if (type === 'repo') {
+      scanObservables = [this.liveApiService.scanForRepo(target, 'repo')];
+    } else {
+      scanObservables = [
+        this.liveApiService.scanDomain(target, 'basic'),
+        this.liveApiService.scanDomain(target, 'seo'),
+      ];
+    }
+
+    forkJoin(scanObservables)
       .pipe(finalize(() => { this.isProcessing = false; }))
       .subscribe({
-        next: (result) => {
-          this.scanResult$ = of(result);
+        next: (results) => {
+          this.scanResult$ = of(results);
           this.isExpanded = true;
         },
         error: (err) => {
-          console.error('Domain Scan failed:', err);
+          console.error('Scan failed:', err);
           this.isProcessing = false;
+          this.scanResult$ = of(null);
         }
       });
   }

@@ -13,11 +13,26 @@
     <div class="dashboard__layout-wrapper">
       <div class="dashboard__layout-left">
         <ng-container *ngIf="isGrouped; else rankedMode">
-          <app-defacement-results [isExpandable]="isIpReportExpandable()"
-            [results_defacement]="consolidatedCallbackModel.defacement_model"
-            [results_stealerlog]="consolidatedCallbackModel.stealer_model"
-            *ngIf="!isLoading() && getTotalResultCount()>0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || consolidatedCallbackModel.stealer_model?.Result?.length ?? 0) > 0"></app-defacement-results>
+          <div class="consolidated-defacement-card" *ngIf="showScanCard(); else showResults">
+            <div class="consolidated-defacement-card__content">
+              <div class="loading-circle"></div>
+              <div class="consolidated-defacement-card__text">
+                <strong>IP Threads or Stealerlogs</strong>
+                <div>Searching in progress... Please wait.</div>
+              </div>
+              <button class="expand-collapse-btn is-disabled" [disabled]="">
+                <img src="assets/images/shared/cheveron-right.svg" alt="Toggle">
+              </button>
+            </div>
+          </div>
 
+          <ng-template #showResults>
+            <app-defacement-results [isExpandable]="isIpReportExpandable()"
+              [results_defacement]="consolidatedCallbackModel.defacement_model"
+              [results_stealerlog]="stealerlogCallbackModel"
+              *ngIf="!isLoading() && getTotalResultCount() > 0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || stealerlogCallbackModel?.Result?.length ?? 0) > 0">
+            </app-defacement-results>
+          </ng-template>
           <ng-container *ngFor="let index of groupedResults | sortGroupedResults">
             <div class="consolidated_container"
               *ngIf="index.key !== 'defacement_model' && index.key !== 'stealer_model'">
