@@ -13,31 +13,10 @@
             class="orion-logo" />
 
           <div class="login-heading">Login to get started!</div>
+
           <ng-container *ngIf="isMobile">
-            <div class="demo-note">
-              <div class="demo-header">
-                <img src="/assets/images/shared/info.svg" class="info-icon" />
-                <span>Want to explore first? <strong>Try demo</strong></span>
-              </div>
-              <div class="demo-credentials">
-                <div class="password-container">
-                  <div class="copy-tooltip" *ngIf="userCopied">Copied!</div>
-
-                  <div class="password-line" (click)="copy('user')">
-                    <strong>User:</strong>
-                    <span class="password-text">{{ demoUser }}</span>
-                  </div>
-                </div>
-                <div class="password-container">
-                  <div class="copy-tooltip" *ngIf="passwordCopied">Copied!</div>
-
-                  <div class="password-line" (click)="copy('password')">
-                    <strong>Password:</strong>
-                    <span class="password-text">{{ demoPassword | slice:0:10 }}...</span>
-                  </div>
-                </div>
-
-              </div>
+            <div class="d-flex align-items-center gap-2 demo-note" (click)="demoLogin()">
+              <span><img src="/assets/images/shared/info.svg" class="info-icon info-icon-demo" alt=""> &nbsp; Want to explore first? <strong>Try Demo</strong></span>
             </div>
           </ng-container>
 

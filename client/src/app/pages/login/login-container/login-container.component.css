@@ -12,6 +12,10 @@
   pointer-events: none;
 }
 
+.info-icon-demo{
+  margin-top: -2px
+}
+
 .twofaextend .login_box {
   width: 700px;
   margin-top: -15vh;
