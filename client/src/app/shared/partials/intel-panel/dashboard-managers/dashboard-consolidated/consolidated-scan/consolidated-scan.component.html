@@ -1,4 +1,4 @@
-<div class="domain-scan-container" *ngIf="showComponent">
+<div class="domain-scan-container" *ngIf="showComponent && !isLoading">
   <div class="scan_report-section-main" [ngClass]="{
       'scan_report-section-collapsed': !isExpanded,
       'scan_report-section-loading': isProcessing,
@@ -23,21 +23,21 @@
       <div class="scan_content-wrapper" @fadeInDashboardItem>
 
         <ng-container *ngFor="let result of results">
-          <a class="right-content text-white cursor-pointer" *ngIf="!result.hasError && result.meta"
+          <div class="right-content text-white cursor-pointer explore" *ngIf="!result.hasError && result.meta"
             @fadeInDashboardItem [routerLink]="['/dashboard/scanner/basic-scan']" [queryParams]="{
                         q: 'msmannan00@gmail.com',
                         page: 1,
                         matchtype: 'or',
                         domain: result.domain,
-                        scanType: result.scanType 
+                        scanType: result.scanType
                     }" target="_blank">
             Explore {{ result.scanType | uppercase }}
             <button appTooltip="Open Page" class="p-0 expand-toggle-btn">
               <img alt="background" height="20" src="/assets/images/shared/explore_icon.svg" width="20">
             </button>
-          </a>
+          </div>
 
-          <div class="scan_report-section mt-3 mb-0 grade-summary" [ngClass]="getGradeClass(result.grade)">
+          <div class="scan_report-section mb-2 grade-summary" [ngClass]="getGradeClass(result.grade)">
             <div class="grade-report-title text-white">
               {{ result.scanType | uppercase }} Scan Report for 〡
               <a [href]="result.meta?.URL || '#'" target="_blank">

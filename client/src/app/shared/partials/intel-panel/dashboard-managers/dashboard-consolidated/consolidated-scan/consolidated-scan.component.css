@@ -14,6 +14,13 @@
   margin-right: 50px;
 }
 
+@media only screen and (width <=800px) {
+  .scan_report-section-main {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
+
 .scan_loading-header {
   display: flex;
   align-items: center;
@@ -67,6 +74,10 @@
 .scan_report-section-main.scan_report-section-loading {
   opacity: 0.4;
   cursor: wait;
+}
+
+.explore{
+  margin-top: 10px;
 }
 
 .expand-collapse-btn.is-disabled {
