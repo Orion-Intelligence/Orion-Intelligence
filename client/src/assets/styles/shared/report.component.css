@@ -13,7 +13,7 @@
 
 .report-menu-divider {
   width: 1px;
-  background: #ffffff10;
+  background: var(--color-border);
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -23,7 +23,7 @@
 }
 
 .report-menu-option-container {
-  border: 1px solid #ffffff15;
+  border: 1px solid var(--color-border);
   border-radius: 7px;
   margin-right: 35px;
   background: var(--color-blue-750);
@@ -38,7 +38,7 @@
   box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
   margin: 15px 32px;
   min-height: auto;
-  border: 1px solid #ffffff15;
+  border: 1px solid var(--color-border);
   height: auto !important;
   display: block;
   max-height: 40vh;
@@ -79,13 +79,13 @@
   border-radius: 25px;
   padding: 5px 10px;
   font-weight: 400;
-  color: #D4D4D4;
+  color: var(--color-text3);
 }
 
 .tag-item-content {
   position: relative;
   display: inline-block;
-  background: #ffffff15;
+  background: var(--color-tags);
   border-radius: 8px;
   padding: 5px 10px;
   transition: background 0.3s ease;
@@ -110,7 +110,7 @@
 }
 
 .search__result-detail .tag-item {
-  background: #ffffff15;
+  background: var(--color-tags);
   border-radius: 25px;
   padding: 5px 10px;
 }
@@ -135,7 +135,7 @@
   font-weight: 500;
   font-family: Roboto, sans-serif;
   font-style: normal;
-  color: #fff;
+  color: var(--color-text1);
   margin-bottom: 24px;
 }
 
@@ -153,7 +153,7 @@
 .search__result-detail-meta-divs span {
   font-size: 14px;
   font-weight: 400;
-  color: #fff;
+  color: var(--color-text1);
   overflow: hidden;
 }
 
@@ -425,12 +425,12 @@
 }
 
 .dashboard__tag {
-  background-color: #ffffff15;
+  background-color: var(--color-tags);
   padding: 6px 13px;
   border-radius: 25px;
   font-size: 12px;
   font-weight: 400;
-  color: #D4D4D4;
+  color: var(--color-text3);
   height: 31px;
 }
 
@@ -438,7 +438,7 @@
   font-size: 24px;
   font-weight: 500;
   margin-bottom: 12px;
-  color: #fff;
+  color: var(--color-text1);
   max-width: 700px !important;
   white-space: nowrap;
   overflow: hidden;
@@ -450,7 +450,7 @@
 .dashboard__search-description {
   font-size: 14px;
   font-weight: 400;
-  color: #D0D0D0;
+  color: var(--color-text2);
   margin-bottom: 12px;
   overflow: hidden;
   margin-top: 10px;
@@ -465,7 +465,7 @@
 
 .dashboard__search-link {
   display: block;
-  color: #D0D0D0;
+  color: var(--color-text1);
   font-size: 12px;
   font-weight: 500;
   text-decoration: none !important;
@@ -474,11 +474,11 @@
 }
 
 .dashboard__search-link:not([href]) {
-  color: #D0D0D0;
+  color: var(--color-text1);
 }
 
 .dashboard__search-link:not([href]):hover {
-  color: #D0D0D0;
+  color: var(--color-text1);
   ;
 }
 
@@ -508,12 +508,12 @@
 }
 
 .dashboard__info-label {
-  color: #9fb3c8;
+  color: var(--color-text4);
 }
 
 .dashboard__info-value {
   font-weight: 500;
-  color: white;
+  color: var(--color-text1);
 }
 
 .dashboard__search-status {
@@ -586,7 +586,7 @@
   height: auto;
   margin-bottom: 20px;
   padding: 15px 20px 20px;
-  border: 1px solid #ffffff15;
+  border: 1px solid var(--color-border);
   transition: all 0.3s ease-in-out;
   overflow: hidden;
 }

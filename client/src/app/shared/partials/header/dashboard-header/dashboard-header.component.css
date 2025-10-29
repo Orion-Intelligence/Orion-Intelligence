@@ -24,7 +24,7 @@
 }
 
 .breadcrumb-item {
-  color: #ffffff90;
+  color: var(--color-header);
   font-size: 16px;
   font-weight: 500;
   font-family: Inter, sans-serif;
@@ -36,7 +36,7 @@
 }
 
 .breadcrumb-active {
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .header-bar__breadcrum {
@@ -75,7 +75,7 @@
   pointer-events: none;
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .header-bar_title-container {
     margin-left: 0;
   }

@@ -3,7 +3,7 @@
   max-width: 800px;
   min-width: 150px;
   border-radius: 15px;
-  border: 1px solid #ffffff07;
+  border: 1px solid var(--color-border);
   margin: 35px;
   padding: 0 20px 5px;
 }
@@ -21,7 +21,7 @@
   border-radius: 15px;
   padding: 16px 20px;
   margin-left: 35px;
-  border: 1px solid #ffffff07;
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;

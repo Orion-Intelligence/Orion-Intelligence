@@ -7,7 +7,7 @@
   width: 100%;
 }
 
-.scan-default-input-container{
+.scan-default-input-container {
   margin-left: 22px !important;
 }
 
@@ -168,7 +168,7 @@
 }
 
 .scan_finding-card {
-  border: 1px solid #ffffff07;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 15px;
   transition: all 0.3s ease;
@@ -421,7 +421,7 @@
 }
 
 .scan_finding-card {
-  border: 1px solid #ffffff07;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 15px;
   transition: all 0.3s ease;
@@ -479,7 +479,8 @@
 
 .skeleton {
   position: relative;
-  background: #1e293b; /* Dark shimmer background */
+  background: #1e293b;
+  /* Dark shimmer background */
   border-radius: 6px;
   overflow: hidden;
 }
@@ -664,7 +665,7 @@
   color: #17a2b8;
 }
 
-.scan_container .search__result-detail{
+.scan_container .search__result-detail {
   margin-left: 0;
   margin-right: 0;
 }
@@ -710,11 +711,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgb(255 255 255 / 35%) 0 10px,
-    rgb(255 255 255 / 15%) 10px 20px
-  );
+  background-image: repeating-linear-gradient(45deg,
+      rgb(255 255 255 / 35%) 0 10px,
+      rgb(255 255 255 / 15%) 10px 20px);
   animation: scan-progress-stripes 1s linear infinite;
   pointer-events: none;
 }
@@ -740,15 +739,18 @@
   }
 
   .scan_progress-fill::after {
-    background-image: repeating-linear-gradient(
-      45deg,
-      rgb(255 255 255 / 25%) 0 10px,
-      rgb(255 255 255 / 10%) 10px 20px
-    );
+    background-image: repeating-linear-gradient(45deg,
+        rgb(255 255 255 / 25%) 0 10px,
+        rgb(255 255 255 / 10%) 10px 20px);
   }
 }
 
 @keyframes scan-progress-stripes {
-  from { background-position: 0 0; }
-  to   { background-position: 40px 0; }
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 40px 0;
+  }
 }

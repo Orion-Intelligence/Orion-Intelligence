@@ -112,7 +112,7 @@
     <div class="scroll-fade-container">
       <div class="scrollable" *ngIf="isSectionExpanded(section.key)">
         <div class="url-item" *ngFor="let item of section.data; let isLast = last" [ngClass]="{ 'no-border': isLast }">
-          <span>{{ item }}</span>
+          <span class="value">{{ item }}</span>
         </div>
       </div>
     </div>

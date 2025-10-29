@@ -27,7 +27,7 @@
   padding: 8px 8px 0;
   font-size: 12px;
   font-weight: 400;
-  color: #fff;
+  color: var(--color-text3);
   display: flex;
   align-items: center;
 }
@@ -38,7 +38,7 @@
   color: #fff;
 }
 
-@media (width <= 768px) {
+@media (width <=768px) {
   .result-list_section-content .grid-list {
     grid-template-columns: repeat(1, 1fr);
   }
@@ -71,7 +71,7 @@
 .result-list_section-content p {
   font-size: 14px;
   font-weight: 400;
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .result-list_section-content h3 {

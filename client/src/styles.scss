@@ -69,7 +69,7 @@
 
 :root {
   --color-blue-900: #172235;
-  --color-blue-890: #0e2d4d70;
+  --color-blue-890: #ffffff;
   --color-blue-880: #2A578459;
   --color-blue-870: #2A578435;
   --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
@@ -77,16 +77,16 @@
   --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
   --color-blue-830: #F6F8FB;
   --color-blue-820: #10335699;
-  --color-blue-820-light: #0e2d4d70;
+  --color-blue-820-light: #ffffff;
   --color-blue-810: #103356;
   --color-blue-800: #fff;
   --color-blue-790: #fff;
   --color-blue-780: #0f335775;
-  --color-blue-770: #234d79;
-  --color-blue-760: linear-gradient(to right, #234d79 50%, #2d5c91 70%, #234d79 80%, #234d79 100%);
-  --color-blue-750: #143352;
+  --color-blue-770: #ffffff64;
+  --color-blue-760: linear-gradient(to right, #00000050 50%, #00000040 70%, #00000030 80%, #00000020 100%);
+  --color-blue-750: #fff;
   --color-blue-740: #0f263e;
-  --color-blue-730: #143352;
+  --color-blue-730: #fff;
   --color-blue-720: #12335450;
   --color-blue-710: #214b75;
   --color-blue-700: #1e456c;
@@ -106,7 +106,14 @@
   --color-white: white;
   --color-border: #E4E7EC;
   --color-divider: #ffffff15;
+  --color-tags: #ECF3FF;
+  --color-header: #00000090;
   --color-text1: #373637;
+  --color-text2: #373637;
+  --color-text3: #172235;
+  --color-text4: #667085;
+  --color-text5: #57A5EB;
+  --color-text6: #37363675;
 }
 
 .dark-theme {
@@ -148,7 +155,14 @@
   --color-mono: #00000000;
   --color-white: #172235;
   --color-divider: #1f3043b6;
+  --color-tags: #ffffff15;
+  --color-header: #ffffff90;
   --color-text1: #fff;
+  --color-text2: #D0D0D0;
+  --color-text3: #D4D4D4;
+  --color-text4: #9fb3c8;
+  --color-text5: #ffffff;
+  --color-text6: #A0B8D190;
 }
 
 svg:not(.dashboard_sidebar svg) [fill="#fff"],

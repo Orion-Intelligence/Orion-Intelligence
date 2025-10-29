@@ -4,8 +4,8 @@
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
-  color: #fffc;
-  border: 1px solid #ffffff20;
+  color: var(--color-text5);
+  border: 1px solid var(--color-border);
   font-family: 'Segoe UI', sans-serif;
   transition: all 0.3s ease;
   font-size: 14px;
@@ -34,9 +34,9 @@
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
-  background: var(--color-blue-820);
+  background: var(--color-blue-820-light);
   border-radius: 8px;
-  border: 1px solid #ffffff20;
+  border: 1px solid var(--color-border);
   padding: 1rem;
 }
 
@@ -66,6 +66,7 @@
 .insight-card .card-body .stat-item .stat-value {
   font-size: 1.5rem;
   font-weight: bold;
+  color: var(--color-text1);
 }
 
 .insight-card .card-body .stat-item .stat-label {
@@ -74,16 +75,17 @@
   margin-top: 0.3rem;
   display: flex;
   align-items: center;
+  color: var(--color-text1);
 }
 
 .search-bar {
   width: 100%;
   display: flex;
   align-items: center;
-  background: var(--color-blue-820);
+  background: var(--color-blue-820-light);
   border-radius: 8px;
   padding: 0.5rem 1rem;
-  border: 1px solid #ffffff20;
+  border: 1px solid var(--color-border);
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -97,7 +99,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #fff;
+  color: var(--color-text1);
   flex: 1;
   font-size: 1rem;
 }
@@ -126,7 +128,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .search-result mark {
@@ -178,12 +180,12 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .scrollable .url-item .url-link {
   font-size: 0.9rem;
-  color: #c2d4e8;
+  color: var(--color-text4);
   word-break: break-all;
 }
 
@@ -192,6 +194,10 @@
   height: 8px;
   border-radius: 50%;
   display: inline-block;
+}
+
+.scrollable .url-item .value {
+  color: var(--color-text1);
 }
 
 @media (width <=1299px) {

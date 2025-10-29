@@ -40,13 +40,13 @@
 
 .nav-tabs .nav-link.active {
   background-color: var(--color-blue-820-light);
-  border: 1px solid #ffffff08;
+  border: 1px solid var(--color-border);
   font-size: 14px;
   font-weight: 500;
-  border-bottom: 2px solid #fff;
+  border-bottom: 2px solid var(--color-text1);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .nav-tabs .nav-link:not(.active):hover {
@@ -77,15 +77,17 @@
 .input-group .input-group-text,
 .input-group .default-input-button,
 .input-group .input-cross,
-.input-group > .form-control{
-  border-top:1px solid var(--color-border)!important;
-  border-bottom:1px solid var(--color-border)!important;
+.input-group>.form-control {
+  border-top: 1px solid var(--color-border) !important;
+  border-bottom: 1px solid var(--color-border) !important;
 }
-.input-group .input-group-text{
-  border-right:1px solid var(--color-border)!important;
+
+.input-group .input-group-text {
+  border-right: 1px solid var(--color-border) !important;
 }
-.input-group .default-input-button{
-  border-left:1px solid var(--color-border)!important;
+
+.input-group .default-input-button {
+  border-left: 1px solid var(--color-border) !important;
 }
 
 .default-input {
@@ -177,7 +179,7 @@
 }
 
 .label-text {
-  color: #fff;
+  color: var(--color-text1);
   margin-left: 35px;
   margin-top: 30px;
   margin-bottom: 10px;

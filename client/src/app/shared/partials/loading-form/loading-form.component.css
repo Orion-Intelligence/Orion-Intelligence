@@ -13,8 +13,8 @@
   gap: 20px;
   padding: 24px;
   position: relative;
-  background-color: var(--color-blue-780);
-  border: 1px solid #fbfbfb12;
+  background-color: var(--color-blue-820-light);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   margin-right: 50px;
 }
@@ -148,7 +148,7 @@
   background-size: 200% 100%;
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .skeleton_loader {
     width: calc(100% - 30px);
     margin-left: 15px;
