@@ -5,8 +5,7 @@
   height: 240px;
   background-color: var(--color-blue-800);
   border-radius: 10px;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%),
-    0 4px 6px -2px rgb(0 0 0 / 5%);
+  box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
   padding: 24px 24px 24px 18px;
   position: relative;
   border: 1px solid #ffffff20;

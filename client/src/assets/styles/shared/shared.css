@@ -236,7 +236,7 @@ thead th {
 }
 
 tbody td {
-  color: #fff;
+  color: var(--color-text3) !important;
   font-size: 15px;
   font-weight: 400;
 }
@@ -305,7 +305,7 @@ table a:visited {
 .side-menu-container .filters-button {
   border-radius: 4px;
   background: var(--color-blue-680);
-  border: none;
+  border: 1px solid var(--color-border);
   padding: 9px 12px;
   display: flex;
   justify-content: center;

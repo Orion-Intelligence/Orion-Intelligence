@@ -237,9 +237,9 @@
 .sidebar_container {
   width: 300px;
   position: fixed;
-  top: 1px;
+  top: 0px;
   background: #2A5784;
-  height: 95vh;
+  height: 96vh;
   border-bottom-left-radius: 0;
   border-top-left-radius: 15px;
   box-shadow: rgb(0 0 0 / 24%) 0 3px 8px;
@@ -252,6 +252,7 @@
   height: 100vh;
   z-index: -5;
   left: 0;
+  top:0;
   position: fixed;
 }
 

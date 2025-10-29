@@ -7,6 +7,10 @@
   margin-right: 5px;
 }
 
+#dropdownMenuStatus3{
+  color: var(--color-text3) !important;
+}
+
 .list__content-category {
   font-weight: 500;
   margin-top: 5px;
