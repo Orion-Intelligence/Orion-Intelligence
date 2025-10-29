@@ -20,7 +20,7 @@
   margin-bottom: 32px;
   font-size: 20px;
   font-weight: 500;
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .report__defacement-detail-header-items {
@@ -45,7 +45,7 @@
   color: #D0D0D0;
 }
 
-@media only screen and (width <= 1000px) {
+@media only screen and (width <=1000px) {
   .report__defacement-detail-header-row {
     display: grid;
   }

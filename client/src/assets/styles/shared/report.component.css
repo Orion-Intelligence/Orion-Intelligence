@@ -94,7 +94,7 @@
 }
 
 .tag-item-content:hover {
-  background: #ffffff25;
+  background: var(--color-blue-810);
 }
 
 .tag-item-content:active {
@@ -144,7 +144,7 @@
 .search__result-detail-meta-divs p {
   font-size: 12px;
   font-weight: 400;
-  color: #A0B8D1;
+  color: var(--color-text4);
   margin-bottom: 8px;
 }
 
@@ -255,7 +255,7 @@
   padding-right: 5px !important;
   margin-top: 1px !important;
   outline: none !important;
-  color: #A0B8D1 !important;
+  color: var(--color-text4) !important;
   transition: border-bottom 0.2s ease-in-out, color 0.2s ease-in-out !important;
   border-bottom: 3px solid #fff0 !important;
 }
@@ -269,7 +269,7 @@
 }
 
 .search__result-tabs-line {
-  background-color: var(--color-divider);
+  background-color: var(--color-border);
   height: 1px;
   width: 100%;
 }
@@ -300,8 +300,8 @@
 
 .search__result-tabs:hover,
 .search__result-tabs.active {
-  color: #fff !important;
-  border-bottom: 2px solid #fff !important;
+  color: var(--color-text1) !important;
+  border-bottom: 2px solid var(--color-text1) !important;
 }
 
 
@@ -726,7 +726,7 @@
   font-size: 12px;
   margin-top: 6px;
   margin-bottom: 10px;
-  color: #A0B8D1;
+  color: var(--color-text4);
 }
 
 .report-mapping-empty-body-nopadding {

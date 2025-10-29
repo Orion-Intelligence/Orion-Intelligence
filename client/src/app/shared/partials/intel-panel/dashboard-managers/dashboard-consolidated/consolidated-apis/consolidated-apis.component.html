@@ -13,7 +13,7 @@
       </h3>
 
       <button class="expand-collapse-btn" [ngClass]="{'is-disabled': isProcessing}" [disabled]="isProcessing"
-              (click)="toggleCollapse()">
+        (click)="toggleCollapse()">
         <img src="assets/images/shared/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
       </button>
     </div>
@@ -29,8 +29,7 @@
       </div>
 
       <div class="results-list">
-        <div *ngFor="let result of searchResults; let i = index"
-             class="bulk-result-item dashboard-result-card mt-3">
+        <div *ngFor="let result of searchResults; let i = index" class="bulk-result-item dashboard-result-card mt-3">
 
           <div class="report__defacement-detail-header-url dashboard-header-header">
             Search {{ i + 1 }} ({{ result.input.type }}) - Input: {{ result.input.q1 }}
@@ -54,7 +53,8 @@
                     </div>
 
                     <div class="mt-1">
-                      <a class="text-white" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url }}</a>
+                      <a class="text-white" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url
+                        }}</a>
                     </div>
 
                     <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
@@ -67,7 +67,7 @@
                     </div>
                     <pre class="text-white pre-wrap-m0">{{ item?.m_mod_features }}</pre>
 
-                    <hr class="dashboard-header-divider"/>
+                    <hr class="dashboard-header-divider" />
                   </div>
                 </div>
               </ng-container>
@@ -79,22 +79,23 @@
                       {{ item?.m_title }}
                     </div>
                     <div class="mt-1">
-                      <a class="text-white" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
+                      <a class="color-text1" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
                     </div>
 
                     <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
                       Found On
                     </div>
-                    <div class="text-white">{{ item?.m_base_url }}</div>
+                    <div class="color-text1">{{ item?.m_base_url }}</div>
 
                     <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">
                       Links
                     </div>
                     <div class="flex-wrap-gap-8">
-                      <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank" rel="noopener">{{ w }}</a>
+                      <a *ngFor="let w of item?.m_weblink" class="badge-red" [href]="w" target="_blank"
+                        rel="noopener">{{ w }}</a>
                     </div>
 
-                    <hr class="dashboard-header-divider"/>
+                    <hr class="dashboard-header-divider" />
                   </div>
                 </div>
               </ng-container>
@@ -104,19 +105,20 @@
                   <div class="report__defacement-detail-header-url dashboard-header-header">
                     {{ breachData?.m_url }}
                   </div>
-                  <hr class="dashboard-header-divider"/>
+                  <hr class="dashboard-header-divider" />
                   <div class="report__defacement-detail-header-items mb-1 dashboard-header-label">
                     Content Type:
                   </div>
-                  <span class="text-white">stolen</span>
+                  <span class="color-text1">stolen</span>
                   <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
                     Username:
                   </div>
-                  <span class="text-white">{{ result.input.q1 || 'not found' }}</span>
-                  <div *ngIf="result.input.q2" class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
+                  <span class="color-text1">{{ result.input.q1 || 'not found' }}</span>
+                  <div *ngIf="result.input.q2"
+                    class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
                     Email Address:
                   </div>
-                  <span *ngIf="result.input.q2" class="text-white">{{ result.input.q2 || 'not found' }}</span>
+                  <span *ngIf="result.input.q2" class="color-text1">{{ result.input.q2 || 'not found' }}</span>
                   <div class="report__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">
                     Breaches:
                   </div>
@@ -124,7 +126,8 @@
                     <span *ngFor="let item of breachData?.m_dumplink" class="badge-red">{{ item }}</span>
                   </div>
                 </div>
-                <div *ngIf="!result.resultData?.cards_data?.length" class="text-info">No data found for this query.</div>
+                <div *ngIf="!result.resultData?.cards_data?.length" class="text-info">No data found for this query.
+                </div>
               </ng-container>
             </ng-container>
           </ng-container>

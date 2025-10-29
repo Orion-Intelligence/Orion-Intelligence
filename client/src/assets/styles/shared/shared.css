@@ -22,7 +22,7 @@
   margin-top: 32px;
   margin-left: 32px;
   margin-right: 32px;
-  border-bottom: 1px solid #fcfcfc15;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .default-input-container-tab .nav-link {
@@ -311,7 +311,7 @@ table a:visited {
   justify-content: center;
   align-items: center;
   font-family: Inter, sans-serif;
-  color: rgb(255 255 255 / 100%);
+  color: var(--color-text1);
   font-weight: 500;
   font-size: 15px;
 }
@@ -344,7 +344,7 @@ table a:visited {
 .default-notification-banner {
   display: flex;
   flex-wrap: inherit;
-  background: #FFC1071A;
+  background: var(--color-banner);
   max-width: 800px;
   width: calc(100% - 60px);
   padding: 10px;
@@ -505,6 +505,10 @@ table a:visited {
 
 .scan-shrink {
   display: inherit;
+}
+
+.color-text1 {
+  color: var(--color-text1) !important;
 }
 
 @media (width <=460px) {

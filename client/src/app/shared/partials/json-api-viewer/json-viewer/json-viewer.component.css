@@ -58,7 +58,7 @@
 
 .json-tree_value {
   font-family: Inter, sans-serif;
-  color: rgb(211 211 211);
+  color: var(--color-text2);
   font-size: 12px;
   margin-left: 17px;
   display: flex;

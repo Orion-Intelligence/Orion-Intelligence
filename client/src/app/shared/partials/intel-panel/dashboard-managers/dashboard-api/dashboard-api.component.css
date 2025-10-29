@@ -99,8 +99,8 @@
 
 .badge-red {
   display: inline-block;
-  background-color: #ffffff20;
-  color: white;
+  background-color: var(--color-tags);
+  color: var(--color-text1);
   padding: 4px 8px;
   border-radius: 7px;
   margin: 2px;

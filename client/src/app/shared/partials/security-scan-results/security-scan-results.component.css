@@ -187,7 +187,7 @@
 .scan_finding-title {
   margin: 0;
   font-size: 16px;
-  color: #fff;
+  color: var(--color-text1);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -210,7 +210,7 @@
 .scan_finding-description {
   margin: 10px 0 15px;
   font-size: 14px;
-  color: #e2e8f0;
+  color: var(--color-text4);
   line-height: 1.5;
 }
 
@@ -230,7 +230,7 @@
 }
 
 .scan_severity-badge {
-  background: #ffffff12;
+  background: var(--color-tags);
   padding: 4px 13px;
   border-radius: 25px;
   font-size: 14px;
@@ -247,6 +247,10 @@
 
 .scan_severity-badge.scan_low {
   color: #4caf50;
+}
+
+.scan_severity-badge.scan_info {
+  color: #17a2b8;
 }
 
 .scan_instances {
@@ -435,15 +439,8 @@
 .scan_finding-title {
   margin: 0;
   font-size: 16px;
-  color: #fff;
+  color: var(--color-text1);
   font-weight: 600;
-}
-
-.scan_finding-description {
-  margin: 10px 0 15px;
-  font-size: 14px;
-  color: #e2e8f0;
-  line-height: 1.5;
 }
 
 .scan_finding-meta {
@@ -453,33 +450,12 @@
   align-items: center;
 }
 
-.scan_severity-badge {
-  background: #ffffff12;
-  padding: 4px 13px;
-  border-radius: 25px;
-  font-size: 14px;
-  font-weight: 500;
-}
 
-.scan_severity-badge.scan_high {
-  color: #dc3545;
-}
-
-.scan_severity-badge.scan_medium {
-  color: #ffc107;
-}
-
-.scan_severity-badge.scan_low {
-  color: #4caf50;
-}
-
-.scan_severity-badge.scan_info {
-  color: #17a2b8;
-}
 
 .skeleton {
   position: relative;
-  background: #1e293b;
+  background: var(--color-blue-760);
+  /* #1e293b; */
   /* Dark shimmer background */
   border-radius: 6px;
   overflow: hidden;
@@ -686,7 +662,7 @@
 .scan_progress-text {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--color-text1);
   line-height: 1.25rem;
 }
 
@@ -720,13 +696,13 @@
 
 @media (prefers-color-scheme: dark) {
   .scan_progress-top {
-    background: #0b1020;
-    border-color: #1f2937;
+    background: var(--color-blur-910);
+    border-color: var(--color-border);
     box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
   }
 
   .scan_progress-text {
-    color: #e5e7eb;
+    color: var(--color-text1);
   }
 
   .scan_progress-bar {
