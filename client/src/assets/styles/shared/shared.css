@@ -74,6 +74,20 @@
   width: auto !important;
 }
 
+.input-group .input-group-text,
+.input-group .default-input-button,
+.input-group .input-cross,
+.input-group > .form-control{
+  border-top:1px solid var(--color-border)!important;
+  border-bottom:1px solid var(--color-border)!important;
+}
+.input-group .input-group-text{
+  border-right:1px solid var(--color-border)!important;
+}
+.input-group .default-input-button{
+  border-left:1px solid var(--color-border)!important;
+}
+
 .default-input {
   align-self: center;
   border-radius: 0 !important;

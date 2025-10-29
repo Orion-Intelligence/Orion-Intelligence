@@ -116,7 +116,7 @@ class helper_controller:
     @staticmethod
     def extract_domains_from_text(text: str) -> list[str]:
         url_regex = re.compile(
-            r'\b(?:https?://)?(?:www\.)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?][^\s]*)?',
+            r'(?:https?://)?(?:www\.)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?][^\s]*)?',
             re.IGNORECASE
         )
         matches = url_regex.findall(text)

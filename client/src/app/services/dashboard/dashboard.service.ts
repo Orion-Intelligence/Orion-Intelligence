@@ -248,7 +248,7 @@ export class DashboardService {
   }
 
   private cancelOngoingRequest() {
-    this.cancelRequest$.next();
+//     this.cancelRequest$.next();
   }
 
   clearCallback(): void {

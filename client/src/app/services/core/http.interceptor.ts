@@ -1,12 +1,13 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, throwError, TimeoutError } from 'rxjs';
-import { catchError, finalize, timeout } from 'rxjs/operators';
+import { Observable, throwError, TimeoutError, Subject } from 'rxjs';
+import { catchError, finalize, timeout, takeUntil } from 'rxjs/operators';
 import { LoadingService } from '../../shared/services/loading.service';
 
 let activeRequests = 0;
 let hideTimeout: any = null;
+const inFlightCancels = new Map<string, Subject<void>>();
 
 const GLOBAL_TIMEOUT = 150000;
 
@@ -23,14 +24,31 @@ export const httpInterceptor: HttpInterceptorFn = (
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` }, withCredentials: true })
     : req.clone({ withCredentials: true });
 
+  const key = authReq.url.startsWith('api/') ? authReq.url : null;
+  let cancel$: Subject<void> | null = null;
+  if (key) {
+    const existing = inFlightCancels.get(key);
+    if (existing) {
+      existing.next();
+      existing.complete();
+    }
+    cancel$ = new Subject<void>();
+    inFlightCancels.set(key, cancel$);
+  }
+
   if (activeRequests === 0) loadingService.show();
   activeRequests++;
 
   if (hideTimeout) clearTimeout(hideTimeout);
 
   return next(authReq).pipe(
+    cancel$ ? takeUntil(cancel$) : (s) => s,
     timeout<HttpEvent<any>>(GLOBAL_TIMEOUT),
     finalize(() => {
+      if (key) {
+        const current = inFlightCancels.get(key);
+        if (current === cancel$) inFlightCancels.delete(key);
+      }
       activeRequests--;
       if (activeRequests === 0) {
         hideTimeout = setTimeout(() => {

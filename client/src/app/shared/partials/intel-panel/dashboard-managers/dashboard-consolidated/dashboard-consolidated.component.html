@@ -27,10 +27,10 @@
           </div>
 
           <ng-template #showResults>
-            <app-defacement-results [isExpandable]="isIpReportExpandable()"
+            <app-defacement-results [isExpandable]="false" @fadeInDashboardItem
               [results_defacement]="consolidatedCallbackModel.defacement_model"
               [results_stealerlog]="stealerlogCallbackModel"
-              *ngIf="!isLoading() && getTotalResultCount() > 0 && (consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || stealerlogCallbackModel?.Result?.length ?? 0) > 0">
+              *ngIf="(consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || stealerlogCallbackModel?.Result?.length ?? 0) > 0">
             </app-defacement-results>
           </ng-template>
           <ng-container *ngFor="let index of groupedResults | sortGroupedResults">

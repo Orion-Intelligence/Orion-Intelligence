@@ -2,10 +2,11 @@
   width: 100%;
   overflow: visible;
   height: 60px;
-  border-bottom: 1px solid #FCFCFC12;
+  border-bottom: 1px solid var(--color-border);
   padding: 0;
   display: flex;
   justify-content: space-between;
+  background: var(--color-mono);
   align-items: center;
 }
 

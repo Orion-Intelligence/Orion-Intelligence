@@ -68,19 +68,19 @@
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
 
 :root {
-  --color-blue-900: linear-gradient(to bottom, #0E2D4D 0%, #144170 100%);
+  --color-blue-900: #172235;
   --color-blue-890: #0e2d4d70;
   --color-blue-880: #2A578459;
   --color-blue-870: #2A578435;
   --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
-  --color-blue-850: #0E1626;
+  --color-blue-850: #F6F8FB;
   --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
-  --color-blue-830: linear-gradient(to bottom, rgb(18 52 84 / 100%), rgb(41 87 132 / 100%) 100%);
+  --color-blue-830: #F6F8FB;
   --color-blue-820: #10335699;
   --color-blue-820-light: #0e2d4d70;
   --color-blue-810: #103356;
-  --color-blue-800: #0f335780;
-  --color-blue-790: #17406999;
+  --color-blue-800: #fff;
+  --color-blue-790: #fff;
   --color-blue-780: #0f335775;
   --color-blue-770: #234d79;
   --color-blue-760: linear-gradient(to right, #234d79 50%, #2d5c91 70%, #234d79 80%, #234d79 100%);
@@ -101,9 +101,12 @@
   --color-blue-610: #295785;
   --color-blue-600: #153454;
   --color-gray-100: #f2f2f2;
-  --color-gray-900: #3c3c43;
+  --color-gray-900: #A0B8D1;
+  --color-mono: white;
   --color-white: white;
+  --color-border: #E4E7EC;
   --color-divider: #ffffff15;
+  --color-text1: #373637;
 }
 
 .dark-theme {
@@ -141,8 +144,27 @@
   --color-blue-600: #294170;
   --color-gray-100: #f2f2f2;
   --color-gray-900: #A0B8D1;
+  --color-border: #FCFCFC12;
+  --color-mono: #00000000;
   --color-white: #172235;
   --color-divider: #1f3043b6;
+  --color-text1: #fff;
+}
+
+svg:not(.dashboard_sidebar svg) [fill="#fff"],
+svg:not(.dashboard_sidebar svg) [fill="#ffffff"],
+svg:not(.dashboard_sidebar svg) [stroke="#fff"],
+svg:not(.dashboard_sidebar svg) [stroke="#ffffff"],
+img[src$=".svg"]:not(.dashboard_sidebar img) {
+  filter: brightness(0.3) contrast(95%) drop-shadow(0 0 0 var(--color-text1)) !important;
+}
+
+.dark-theme svg:not(.dashboard_sidebar svg) [fill="#fff"],
+.dark-theme svg:not(.dashboard_sidebar svg) [fill="#ffffff"],
+.dark-theme svg:not(.dashboard_sidebar svg) [stroke="#fff"],
+.dark-theme svg:not(.dashboard_sidebar svg) [stroke="#ffffff"],
+.dark-theme img[src$=".svg"]:not(.dashboard_sidebar img) {
+  filter: drop-shadow(0 0 0 var(--color-text1)) !important;
 }
 
 html {

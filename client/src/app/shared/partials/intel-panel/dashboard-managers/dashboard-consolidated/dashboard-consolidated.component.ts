@@ -95,12 +95,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
 
       if (this.firstTrigger && Object.keys(this.groupedResults).length > 0) {
-        this.isLoading.set(false);
         this.query = this.dashboardService.consolidatedParamModel.q;
       } else {
         this.cdr.detectChanges();
         this.fetchSearchResults();
       }
+      this.isLoading.set(false);
 
       this.firstTrigger = false;
     });
@@ -126,8 +126,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
     }
 
-    this.isLoading.set(true);
-
     const cleanedParams: any = {};
 
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
@@ -149,7 +147,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.dashboardService.consolidatedParamModel.profile = true
     }
 
-    this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(500).pipe(map(() => response)))).subscribe(response => {
+    this.isLoading.set(true);
+    this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(0).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.response = response.data
         this.consolidatedCallbackModel = this.response;
@@ -340,12 +339,13 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     return hasAnyData && this.hasIOCs();
   }
+
   isEmailOrUrl(query: string): boolean {
     if (!query) {
       return false;
     }
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const urlRegex = /^(https?:\/\/|www\.)[^\s/$.?#].[^\s]*$/i;
+    const urlRegex = /^(https?:\/\/|www\.|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?#][^\s]*)?$/i;
 
     if (emailRegex.test(query)) {
       return true;
@@ -355,6 +355,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
     return false;
   }
+
   showScanCard = computed(() => {
     const isLoading = this.isLoading();
     const isStealerLogLoading = this.isStealerLogLoading();

@@ -1251,6 +1251,14 @@ class elastic_request_generator:
         if len(url)>0:
             p_query_model.user = user
 
+        print(":::::::::::::::::::::::::", flush=True)
+        print(p_query_model.q, flush=True)
+        print(":::::::::::::::::::::::::", flush=True)
+        print(url, flush=True)
+        print(":::::::::::::::::::::::::", flush=True)
+        print(user, flush=True)
+        print(":::::::::::::::::::::::::", flush=True)
+
         if not p_query_model.url and not p_query_model.user and consolidated:
             return None, None
 

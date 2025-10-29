@@ -26,7 +26,7 @@
   position: absolute;
   top: 33px;
   left: 16px;
-  color: white;
+  color: var(--color-text1);
   font-size: 18px;
   font-weight: 700;
   white-space: nowrap;
