@@ -77,7 +77,7 @@
   --color-blue-850: #F6F8FB;
   --color-blue-840: linear-gradient(90deg, rgb(21 52 84 / 100%) 0%, rgb(22 56 88 / 100%) 100%);
   --color-blue-830: #F6F8FB;
-  --color-blue-820: #10335699;
+  --color-blue-820: #10335619;
   --color-blue-820-light: #ffffff;
   --color-blue-810: #00000010;
   --color-blue-800: #fff;
@@ -101,13 +101,15 @@
   --color-blue-620: #1176d4;
   --color-blue-610: #295785;
   --color-blue-600: #153454;
-  --color-gray-100: #373637;
+  --color-gray-100: #ececec;
   --color-gray-900: #A0B8D1;
-  --color-red-100: #b05050;
+  --color-red-100: #f9e6e6;
+  --color-red-200: #7a1c1c30;
   --color-green-100: #ceca5f;
   --color-mono: white;
   --color-white: white;
   --color-border: #E4E7EC;
+  --color-border-red: #7a1c1c15;
   --color-divider: #ffffff15;
   --color-tags: #ECF3FF;
   --color-header: #00000090;
@@ -120,6 +122,7 @@
   --color-text6: #37363675;
   --color-pagination: #ffffff;
   --color-pagination-hover: #cccccc;
+  --color-scan-light: #c2c2c2;
 }
 
 .dark-theme {
@@ -163,6 +166,7 @@
   --color-border: #FCFCFC12;
   --color-mono: #00000000;
   --color-white: #172235;
+  --color-border-red: #7a1c1c;
   --color-divider: #1f3043b6;
   --color-tags: #ffffff15;
   --color-header: #ffffff90;
@@ -175,24 +179,16 @@
   --color-text6: #A0B8D190;
   --color-pagination: #15345475;
   --color-pagination-hover: #102A4685;
+  --color-scan-light: #172235;
 }
 
-svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [fill="#fff"],
-svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [fill="#ffffff"],
-svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [stroke="#fff"],
-svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [stroke="#ffffff"],
-img[src$=".svg"]:not(.dashboard_sidebar img):not(.sidebar_container img):not([src*="no-input.svg"]):not([src*="hint.svg"]) {
+img[src*="assets/images/shared/theme/"] {
   filter: brightness(0.3) contrast(95%) drop-shadow(0 0 0 var(--color-text1)) !important;
 }
 
-.dark-theme svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [fill="#fff"],
-.dark-theme svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [fill="#ffffff"],
-.dark-theme svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [stroke="#fff"],
-.dark-theme svg:not(.dashboard_sidebar svg):not(.sidebar_container svg) [stroke="#ffffff"],
-.dark-theme img[src$=".svg"]:not(.dashboard_sidebar img):not(.sidebar_container img):not([src*="no-input.svg"]):not([src*="hint.svg"]) {
+.dark-theme img[src*="assets/images/shared/theme/"] {
   filter: drop-shadow(0 0 0 var(--color-text1)) !important;
 }
-
 
 html {
   background: #172235;

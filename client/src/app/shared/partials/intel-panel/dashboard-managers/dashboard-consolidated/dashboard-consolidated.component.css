@@ -49,7 +49,7 @@
 
 .consolidated-defacement-card__text strong {
   font-size: 15px;
-  color: #ffffff;
+  color: var(--color-text1);
 }
 
 .consolidated-defacement-card__text div {

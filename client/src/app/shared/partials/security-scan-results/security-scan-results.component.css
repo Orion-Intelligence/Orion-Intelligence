@@ -21,7 +21,7 @@
 }
 
 .scan_report-section-danger {
-  border: 2px solid #7a1c1c !important;
+  border: 2px solid var(--color-border-red) !important;
   background-color: var(--color-red-100) !important;
   color: #f8d7da !important;
   transition: all 0.2s ease-in-out !important;
@@ -32,8 +32,8 @@
 }
 
 .scan_report-section-danger .scan_meta-card {
-  background: rgb(122 28 28 / 40%);
-  border: 1px solid #7a1c1c;
+  background-color: var(--color-red-200) !important;
+  border: 1px solid var(--color-border-red) !important;
 }
 
 .scan_report-section-danger a {
@@ -386,12 +386,10 @@
 
 .scan_meta-card {
   padding: 20px;
-  background: var(--color-blue-820-light);
+  background: var(--color-scan-light);
   border-radius: 6px;
   border: 1px solid #ffffff07;
 }
-
-
 
 .scan_meta-value-large {
   font-size: 32px !important;
