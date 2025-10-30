@@ -1,6 +1,6 @@
 .home-defacement-result {
   background-color: var(--color-blue-890);
-  border: 1px solid #ffffff12;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 17px 24px 17px 17px;
   font-family: Inter, sans-serif;
@@ -8,6 +8,8 @@
   margin: 35px 10px -20px 35px;
   max-width: 800px;
   min-width: 150px;
+  max-height: 850px;
+  overflow: auto;
 }
 
 .home-defacement-result__top-row {
@@ -140,7 +142,7 @@
 .home-defacement-result-divider {
   border: none;
   border-top: 1px solid var(--color-border);
-  margin-top: 27px;
+  margin-top: 40px;
 }
 
 @media only screen and (width <=1000px) {

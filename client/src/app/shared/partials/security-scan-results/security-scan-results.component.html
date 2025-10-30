@@ -1,11 +1,15 @@
-<form #searchForm="ngForm" (submit)="onSearchSubmit()" action="" class="default-input-container directory-listing-search" enctype="multipart/form-data" method="GET">
+<form #searchForm="ngForm" (submit)="onSearchSubmit()" action=""
+  class="default-input-container directory-listing-search" enctype="multipart/form-data" method="GET">
   <div class="row dashboard__api-search-input-div">
     <div class="col-xl-9 col-12 input-container">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/domain.svg" priority width="20">
         </div>
-        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
+        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input"
+          maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url"
+          required
+          pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
         <input type="hidden" value="1">
         <span class="input-group-text"></span>
       </div>
@@ -29,12 +33,13 @@
   <div class="d-flex justify-content-end" *ngIf="!hasError && !isLoading">
     <div class="btn-group report-menu-option-container">
       <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
-        <img alt="Download" height="25" ngSrc="assets/images/shared/download.svg" width="25"/>
+        <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" />
       </button>
       <div class="vr report-menu-divider"></div>
 
-      <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="p-0 report-menu-option">
-        <img alt="Print" height="25" ngSrc="assets/images/shared/print.svg" width="25"/>
+      <button ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print"
+        class="p-0 report-menu-option">
+        <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" />
       </button>
     </div>
   </div>
@@ -53,8 +58,10 @@
       </div>
     </div>
 
-<div class="scan_report-section" [ngClass]="{ 'scan_report-section-danger': grade === 'D' || grade === 'F', 'scan_report-section-warning': grade === 'C' }" *ngIf="!hasError">
-  <h3 class="scan_section-title">
+    <div class="scan_report-section"
+      [ngClass]="{ 'scan_report-section-danger': grade === 'D' || grade === 'F', 'scan_report-section-warning': grade === 'C' }"
+      *ngIf="!hasError">
+      <h3 class="scan_section-title">
         <ng-container *ngIf="!isLoading && meta; else metaTitleSkeleton" class="text-white">
           Security Scan Report for 〡 <a [href]="meta.URL">{{ displayHost }}</a>
         </ng-container>
@@ -101,24 +108,25 @@
             <div class="scan_finding-card" *ngFor="let item of cat.items; trackBy: trackByItem" @fadeInDashboardItem>
               <div class="scan_finding-header">
                 <h4 class="scan_finding-title">
-                <span class="scan_status-dot" [ngClass]="{
+                  <span class="scan_status-dot" [ngClass]="{
                     'scan_high': item.risk.toLowerCase() === 'high',
                     'scan_medium': item.risk.toLowerCase() === 'medium',
                     'scan_low': item.risk.toLowerCase() === 'low',
                     'scan_info': item.risk.toLowerCase() === 'informational'
-                  }"></span>{{ item.header }} </h4>
+                  }"></span>{{ item.header }}
+                </h4>
               </div>
 
               <p class="scan_finding-description">{{ item.description }}</p>
               <div class="scan_finding-meta">
-              <span class="scan_severity-badge" [ngClass]="{
+                <span class="scan_severity-badge" [ngClass]="{
                   'scan_high': item.risk.toLowerCase() === 'high',
                   'scan_medium': item.risk.toLowerCase() === 'medium',
                   'scan_low': item.risk.toLowerCase() === 'low',
                   'scan_info': item.risk.toLowerCase() === 'informational'
                 }">
-                {{ item.risk }} Risk ({{ item.confidence }} Confidence)
-              </span>
+                  {{ item.risk }} Risk ({{ item.confidence }} Confidence)
+                </span>
               </div>
               <app-code-block [code]="item.proof" *ngIf="item.proof"></app-code-block>
               <div class="scan_divider-light"></div>
@@ -187,6 +195,7 @@
   </div>
 
   <div id="scanReport" class="d-none">
-    <app-security-scan-export-component *ngIf="meta" [meta]="meta" [categories]="categories"></app-security-scan-export-component>
+    <app-security-scan-export-component *ngIf="meta" [meta]="meta"
+      [categories]="categories"></app-security-scan-export-component>
   </div>
 </ng-container>

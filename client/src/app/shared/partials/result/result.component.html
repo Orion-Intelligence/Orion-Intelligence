@@ -9,8 +9,8 @@
     'mobile-overlay-inactive': !showFiltersOverlay
   }">
           <button class="btn btn-primary default-input-button default-input-button-icon" type="submit">
-            <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/magnifyingglassblack.svg" priority
-              width="16">
+            <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg"
+              priority width="16">
           </button>
           <input #searchInput class="search-trigger form-control default-input dashboard-general-input"
             [(ngModel)]="local_query" autocapitalize="none" autocomplete="off" maxlength="350" name="q"
@@ -37,7 +37,7 @@
                   <span (click)="onToolToggle($event)">
                     Tools
                     <div class="expand-icon">
-                      <img src="assets/images/shared/cheveron-right.svg" width="27" height="27" alt="Toggle Icon"
+                      <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon"
                         [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools"
                         class="transition-transform" />
                     </div>
@@ -81,7 +81,7 @@
               <span class="label-text-dropdown" role="button" id="dropdownMenu1" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 sort by <b>({{ selectedSortBy }})</b>
-                <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16"
+                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16"
                   height="16">
               </span>
               <ul class="dropdown-menu mt-3 rounded-4 fade" aria-labelledby="dropdownMenu1">
@@ -97,7 +97,7 @@
               <span class="label-text-dropdown" role="button" id="dropdownMenu2" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 search by <b>({{ matchTypeLabel() }})</b>
-                <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16"
+                <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16"
                   height="16">
               </span>
               <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
@@ -136,7 +136,7 @@
         class="side-menu-container d-flex align-items-start justify-content-start gap-3">
         <label (click)="sidebarService.openSidebar()" appTooltip="Customize Results"
           class="filters-button d-flex align-items-center"> <img alt="Filter Icon" height="24"
-            ngSrc="../../../../assets/images/shared/filter_icon.svg" priority width="24"> <span
+            ngSrc="../../../../assets/images/shared/theme/filter_icon.svg" priority width="24"> <span
             class="ms-2">Filter</span>
         </label>
       </div>

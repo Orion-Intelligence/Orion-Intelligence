@@ -5,7 +5,7 @@
     <h2 class="sidebar_heading">Filters</h2>
   </div>
   <div class="col-12 d-flex justify-content-end sidebar_close-label">
-    <img alt="close" height="16" ngSrc="assets/images/shared/nav-next.svg" priority width="16">
+    <img alt="close" height="16" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="16">
   </div>
 </label>
 
@@ -13,37 +13,44 @@
   <div class="sidebar_content">
     <div *ngFor="let key of Object.keys(filterModel.filters)">
       <label appTooltip="{{filterModel.filters[key].tooltip}}" class="sidebar_label"> {{
-          filterModel.filters[key].title
+        filterModel.filters[key].title
         }} </label>
       <ng-container *ngIf="filterModel.filters[key].type === 'daterange'">
-        <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)" [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
+        <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)"
+          [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
       </ng-container>
       <ng-container *ngIf="filterModel.filters[key].type === 'dropdown'">
         <div class="dropdown">
-          <button aria-expanded="false" class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select" data-bs-toggle="dropdown" id="dropdown{{ key }}" type="button">
+          <button aria-expanded="false"
+            class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+            data-bs-toggle="dropdown" id="dropdown{{ key }}" type="button">
             {{ getOptionLabel(key) }}
           </button>
-          <ul [attr.aria-labelledby]="'dropdown' + key" class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
+          <ul [attr.aria-labelledby]="'dropdown' + key"
+            class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3">
             <li *ngFor="let option of filterModel.filters[key].options; let last = last">
               <a (click)="onSelectionChange(key, option.key)" class="dropdown-item py-0 d-flex align-items-center"> {{
-                  option.label
+                option.label
                 }} </a>
               <ng-container *ngIf="!last">
-                <li class="dropdown-divider m-0 mx-3"></li>
-              </ng-container>
-            </li>
-          </ul>
-        </div>
+            <li class="dropdown-divider m-0 mx-3"></li>
       </ng-container>
-      <ng-container *ngIf="filterModel.filters[key].type === 'multiSelection'">
-        <app-multiple-selection (selectedFiltersChange)="updateFilter($event)" [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-multiple-selection>
-      </ng-container>
-      <ng-container *ngIf="filterModel.filters[key].type === 'text'">
-        <div class="mb-2">
-          <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="sidebar_input w-100 text-start d-flex justify-content-between align-items-center" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text"/>
-        </div>
-      </ng-container>
+      </li>
+      </ul>
     </div>
+    </ng-container>
+    <ng-container *ngIf="filterModel.filters[key].type === 'multiSelection'">
+      <app-multiple-selection (selectedFiltersChange)="updateFilter($event)" [filterModel]="filterModel" [key]="key"
+        [mSelectedFilters]="selectedFilters"></app-multiple-selection>
+    </ng-container>
+    <ng-container *ngIf="filterModel.filters[key].type === 'text'">
+      <div class="mb-2">
+        <input (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]"
+          class="sidebar_input w-100 text-start d-flex justify-content-between align-items-center" name="{{ key }}"
+          placeholder="{{ filterModel.filters[key].title }}" type="text" />
+      </div>
+    </ng-container>
+  </div>
   </div>
 
   <div class="sidebar_submit d-flex flex-column">

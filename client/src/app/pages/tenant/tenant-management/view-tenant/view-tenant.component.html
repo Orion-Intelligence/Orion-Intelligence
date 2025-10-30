@@ -35,47 +35,57 @@
                     <td data-label="Role">{{ getRoleLabel(user.role) }}</td>
                     <td data-label="Status">
                       <div class="dropdown mt-2 view-tenant_dropdown-wrapper">
-                        <span class="label-text-dropdown no-chevron"
-                              role="button"
-                              id="dropdownMenuStatus{{i}}"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                              [ngClass]="{
+                        <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuStatus{{i}}"
+                          data-bs-toggle="dropdown" aria-expanded="false" [ngClass]="{
                                 'status-active': user.status === 'active',
                                 'status-disabled': user.status === 'disable',
                                 'status-other': user.status !== 'active' && user.status !== 'disable'
                               }">
-                          <span class="list__status-default-pointer"></span>{{ user.status === 'verification_pending' ? 'verification' : user.status }}
-                          <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
+                          <span class="list__status-default-pointer"></span>{{ user.status === 'verification_pending' ?
+                          'verification' : user.status }}
+                          <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron"
+                            width="16" height="16">
                         </span>
                         <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuStatus' + i">
                           <li><a class="dropdown-item disabled" tabindex="-1">Verification Pending</a></li>
-                          <li><hr class="dropdown-divider mx-3"></li>
+                          <li>
+                            <hr class="dropdown-divider mx-3">
+                          </li>
                           <li><a class="dropdown-item disabled" tabindex="-1">Onboarding</a></li>
-                          <li><hr class="dropdown-divider mx-3"></li>
+                          <li>
+                            <hr class="dropdown-divider mx-3">
+                          </li>
                           <li><a class="dropdown-item" (click)="user.status='active'">Active</a></li>
-                          <li><hr class="dropdown-divider mx-3"></li>
+                          <li>
+                            <hr class="dropdown-divider mx-3">
+                          </li>
                           <li><a class="dropdown-item" (click)="user.status='disable'">Disable</a></li>
                         </ul>
                       </div>
                     </td>
                     <td data-label="Subscription">
                       <div class="dropdown mt-2 view-tenant_dropdown-wrapper">
-                        <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuSub{{i}}" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuSub{{i}}"
+                          data-bs-toggle="dropdown" aria-expanded="false">
                           <span class="list__status-default-pointer"></span>{{ user.subscription ? 'Paid' : 'Free' }}
-                          <img src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
+                          <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron"
+                            width="16" height="16">
                         </span>
                         <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuSub' + i">
                           <li><a class="dropdown-item" (click)="user.subscription=true">Paid</a></li>
-                          <li><hr class="dropdown-divider mx-3"></li>
+                          <li>
+                            <hr class="dropdown-divider mx-3">
+                          </li>
                           <li><a class="dropdown-item" (click)="user.subscription=false">Free</a></li>
                         </ul>
                       </div>
                     </td>
                     <td data-label="Action">
-                      <div class="dropdown view-tenant_dropdown-wrapper view-tenant_dropdown-wrapper-min d-flex justify-content-center align-items-center"
-                           role="button" id="dropdownMenuAction{{i}}" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="/assets/images/shared/tenant-management-action-icon.svg" alt="menu" class="action-icon">
+                      <div
+                        class="dropdown view-tenant_dropdown-wrapper view-tenant_dropdown-wrapper-min d-flex justify-content-center align-items-center"
+                        role="button" id="dropdownMenuAction{{i}}" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="/assets/images/shared/tenant-management-action-icon.svg" alt="menu"
+                          class="action-icon">
                         <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuAction' + i">
                           <li><a class="dropdown-item" (click)="updateUser(user)">Update</a></li>
                         </ul>
@@ -102,22 +112,50 @@
               </thead>
               <tbody @fadeInDashboardItem>
                 <tr>
-                  <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-75"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-100"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-75"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-50"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-50"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-50"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-25"></div>
+                  </td>
                 </tr>
                 <tr>
-                  <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                  <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-75"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-100"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-75"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-50"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-50"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-50"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton_shimmer shimmer-line w-25"></div>
+                  </td>
                 </tr>
               </tbody>
             </table>

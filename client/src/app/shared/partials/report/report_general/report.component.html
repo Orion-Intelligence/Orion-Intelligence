@@ -82,12 +82,12 @@
 <div class="search__result-detail">
   <div (click)="metaadataToggleContent()" class="search__result__section__heading">
     <div class="left-content">
-      Metadata <img src="/assets/images/shared/info.svg" alt="Icon"
+      Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon"
         appTooltip="The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements">
     </div>
     <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
       <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
-        src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+        src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 
@@ -121,12 +121,12 @@
 <div *ngIf="type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!=''"
   class="search__result-detail">
   <div (click)="screenshootToggleContent()" class="search__result__section__heading">
-    <div class="left-content">Leak Screenshot <img src="/assets/images/shared/info.svg" alt="Icon"
+    <div class="left-content">Leak Screenshot <img src="/assets/images/shared/theme/info.svg" alt="Icon"
         appTooltip="Leak Screenshot">
     </div>
     <div [attr.aria-label]="isExpandedScreenshoot ? 'Collapse' : 'Expand'" class="toggle-btn">
       <img [ngClass]="{ 'rotated': !isExpandedScreenshoot }" alt="toggle icon"
-        src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+        src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
   <div *ngIf="isExpandedScreenshoot">

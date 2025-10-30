@@ -209,7 +209,7 @@
 }
 
 .filter-panel__tag-input-magnifier {
-  background: transparent url('../../../../assets/images/shared/magnifyingglassblack.svg') no-repeat right 8px center;
+  background: transparent url('../../../../assets/images/shared/theme/magnifyingglassblack.svg') no-repeat right 8px center;
 }
 
 .filter-input-wrapper {

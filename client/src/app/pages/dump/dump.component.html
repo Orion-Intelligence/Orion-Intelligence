@@ -1,11 +1,13 @@
-<form (submit)="onSearchSubmit()" action="" class="default-input-container directory-listing-search" enctype="multipart/form-data" method="GET">
+<form (submit)="onSearchSubmit()" action="" class="default-input-container directory-listing-search"
+  enctype="multipart/form-data" method="GET">
   <div class="row dashboard__api-search-input-div">
     <div class="col-xl-9 col-12 input-container">
       <div class="input-group default-input-sub-container">
         <div class="btn btn-primary default-input-button default-input-button-light">
           <img alt="Search" height="20" ngSrc="assets/images/shared/domain.svg" priority width="20">
         </div>
-        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input" maxlength="150" name="username" placeholder="Leak URL" type="text">
+        <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="form-control default-input"
+          maxlength="150" name="username" placeholder="Leak URL" type="text">
         <input type="hidden" value="1">
         <span class="input-group-text"></span>
       </div>
@@ -27,9 +29,13 @@
           </div>
           <div class="directory-listing_pagination col-7"></div>
           <div class="side-menu-container">
-            <label (click)="openSidebar()" class="filters-button"> <img alt="Filter Icon" height="24" ngSrc="assets/images/shared/filter_icon.svg" priority width="24"> Filter </label>
-            <div [class.sidebar_container-disable]="!(isFilterOpen$ | async)" [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
-              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()" (filterReset)="resetFilters()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+            <label (click)="openSidebar()" class="filters-button"> <img alt="Filter Icon" height="24"
+                ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="24"> Filter </label>
+            <div [class.sidebar_container-disable]="!(isFilterOpen$ | async)"
+              [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
+              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
+                (filterReset)="resetFilters()" [filterModel]="filterModel"
+                [isFilterOpen]="isFilterOpen$ | async"></app-filters>
             </div>
           </div>
         </div>

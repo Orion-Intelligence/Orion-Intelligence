@@ -1,6 +1,6 @@
 <div class="chat-support" [class.chat-support--open]="chatOpen">
   <button *ngIf="!chatOpen" class="chat-support__toggle chat-support__push" (click)="openChat()" type="button">
-    <span><img src="assets/images/shared/chat.svg" alt="chat" /></span>
+    <span><img src="assets/images/shared/theme/chat.svg" alt="chat" /></span>
   </button>
 
   <div *ngIf="chatOpen" class="chat-support__overlay">
@@ -16,7 +16,8 @@
         </div>
       </div>
 
-      <div #messagesContainer class="chat-support__messages chat-support__messages--scroll" (scroll)="onMessagesScroll()">
+      <div #messagesContainer class="chat-support__messages chat-support__messages--scroll"
+        (scroll)="onMessagesScroll()">
         <div *ngFor="let msg of chatMessages; trackBy: trackByIndex">
           <ng-container [ngSwitch]="msg.sender">
             <div *ngSwitchCase="'user'" class="chat-support__message-container">

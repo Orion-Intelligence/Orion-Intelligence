@@ -24,7 +24,7 @@
   font-family: Inter, sans-serif;
   font-size: 20px;
   font-weight: 500;
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .empty-query_container-description {

@@ -7,7 +7,8 @@
 
   <div class="report__defacement-detail-header-row">
     <div class="report__defacement-detail-header-items">
-      <strong>Saved on:</strong>{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}
+      <strong>Saved on:</strong>{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-'
+      }}
     </div>
 
     <div class="report__defacement-detail-header-items" *ngIf="!defacementData?.m_ioc_type?.length">
@@ -27,7 +28,8 @@
     </div>
     <ng-template #iocTypeTpl>
       <div class="report__defacement-detail-header-items">
-        <strong>IOC Type:</strong> <span class="report__defacement-truncate">{{ defacementData?.m_ioc_type?.join(', ') }}</span>
+        <strong>IOC Type:</strong> <span class="report__defacement-truncate">{{ defacementData?.m_ioc_type?.join(', ')
+          }}</span>
       </div>
     </ng-template>
 
@@ -54,17 +56,21 @@
 <div class="search__result-detail" *ngIf="filteredArrayKeys.length">
   <div (click)="metaadataToggleContent()" class="search__result__section__heading">
     <div class="left-content">
-      Metadata <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
+      Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon"
+        appTooltip="The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements">
     </div>
     <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-      <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+      <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
+        src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 
   <div *ngIf="isExpandedMetadata">
     <div class="tabs d-flex align-items-center search__result-detail-container">
       <ng-container *ngFor="let key of filteredArrayKeys; let last = last">
-        <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
+        <button (click)="setActiveTab(key)" [class.active]="activeTab === key"
+          appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}"
+          class="search__result-tabs">
           {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
         </button>
         <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
@@ -77,11 +83,13 @@
 
     <app-result-section *ngIf="activeTab === 'm_section'" [listItems]="listItems"></app-result-section>
 
-    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
+    <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'"
+      class="report-mapping-empty-body report-mapping-empty-body-nopadding">
       Names of people, organizations, and entities are handled separately, but may overlap in the results.
     </div>
 
-    <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+    <app-result-list *ngIf="activeTab !== 'm_section' && activeTab !== 'm_content'" [activeTab]="activeTab"
+      [listItems]="listItems"></app-result-list>
   </div>
 </div>
 

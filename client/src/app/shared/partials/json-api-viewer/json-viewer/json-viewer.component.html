@@ -3,16 +3,21 @@
     <li [class.json-tree__node--last]="last" class="json-tree_node">
       <div (click)="isCollapsible(json[key]) && toggle(pathKey(parentPath, key))" class="json-tree_line">
         <span *ngIf="isCollapsible(json[key])" class="json-tree_toggle">
-          <img *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedIcon" src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="Expanded" width="20" height="20"/>
+          <img *ngIf="isExpanded(pathKey(parentPath, key)); else collapsedIcon"
+            src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Expanded" width="20"
+            height="20" />
           <ng-template #collapsedIcon>
-            <img [ngClass]="{ 'rotated': !isExpanded(pathKey(parentPath, key)) }" src="/assets/images/shared/search_side_dropdown_icon_dark.svg" alt="Collapsed" width="20" height="20"/>
+            <img [ngClass]="{ 'rotated': !isExpanded(pathKey(parentPath, key)) }"
+              src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="Collapsed" width="20"
+              height="20" />
           </ng-template>
         </span> <span class="json-tree_key json-tree_key-faded ms-1">{{ key }}</span>
       </div>
 
       <div *ngIf="isExpanded(pathKey(parentPath, key))" class="json-tree_children">
         <ng-container *ngIf="isObject(json[key]); else jsonLeaf">
-          <app-json-viewer [json]="json[key]" [level]="level + 1" [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
+          <app-json-viewer [json]="json[key]" [level]="level + 1"
+            [parentPath]="pathKey(parentPath, key)"></app-json-viewer>
         </ng-container>
 
         <ng-template #jsonLeaf>

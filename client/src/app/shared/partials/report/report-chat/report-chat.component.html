@@ -1,12 +1,15 @@
-<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_channel_url" [content]="resultItem?.m_content"></app-report-header>
+<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_channel_url"
+  [content]="resultItem?.m_content"></app-report-header>
 
 <div *ngIf="resultItem">
   <div class="search__result-detail">
     <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_name">
-      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_name.length || 'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
+      {{ (resultItem.m_channel_name || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_name.length ||
+      'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
 
     <p class="search__result-detail-heading" *ngIf="resultItem.m_channel_url">
-      {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_url.length || 'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
+      {{ (resultItem.m_channel_url || 'Untitled Channel') | slice:0:550 }}{{ (resultItem.m_channel_url.length ||
+      'Untitled Channel'.length) > 550 ? '...' : '' }} </p>
 
     <ng-container *ngIf="hasCodeType(resultItem); else showSections">
       <div class="result-list_section-content">
@@ -36,7 +39,8 @@
     </ng-container>
 
     <p *ngIf="resultItem.m_message_sharable_link" class="search__result-detail-url-p text-truncate">
-      <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank"> {{ resultItem.m_message_sharable_link }} </a>
+      <a [href]="resultItem.m_message_sharable_link" class="search__result-detail-url text-truncate" target="_blank"> {{
+        resultItem.m_message_sharable_link }} </a>
     </p>
 
     <div class="search__result-detail-meta report_chat">
@@ -115,16 +119,19 @@
     <div class="search__result-detail">
       <div (click)="metaadataToggleContent()" class="search__result__section__heading">
         <div class="left-content">
-          Metadata <img src="/assets/images/shared/info.svg" alt="Icon" appTooltip="Metadata">
+          Metadata <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Metadata">
         </div>
         <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="toggle-btn">
-          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon" src="/assets/images/shared/search_side_dropdown_icon_dark.svg">
+          <img [ngClass]="{ 'rotated': !isExpandedMetadata }" alt="toggle icon"
+            src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
         </div>
       </div>
       <ng-container *ngIf="isExpandedMetadata">
         <div class="tabs d-flex align-items-center search__result-detail-container">
           <ng-container *ngFor="let key of arrayKeys; let last = last">
-            <button (click)="setActiveTab(key)" [class.active]="activeTab === key" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="search__result-tabs">
+            <button (click)="setActiveTab(key)" [class.active]="activeTab === key"
+              appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}"
+              class="search__result-tabs">
               {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
             </button>
             <div *ngIf="!last" class="search__result-tabs-border border-start bg-secondary"></div>
@@ -132,15 +139,19 @@
         </div>
 
         <div class="search__result-tabs-line"></div>
-        <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
-        <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'" class="report-mapping-empty-body report-mapping-empty-body-nopadding">
+        <app-result-section *ngIf="activeTab === 'm_content' || activeTab === 'm_summary'" @fadeInDashboardItem
+          [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
+        <div *ngIf="activeTab === 'm_org' || activeTab === 'm_person'"
+          class="report-mapping-empty-body report-mapping-empty-body-nopadding">
           Names of people, organizations, and entities are handled separately, but may overlap in the results.
         </div>
-        <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+        <app-result-list *ngIf="activeTab !== 'm_content' && activeTab !== 'm_summary'" @fadeInDashboardItem
+          [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
       </ng-container>
     </div>
   </div>
 
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
 </div>
-<app-chat-widget [reportText]="resultItem?.m_content" *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>
+<app-chat-widget [reportText]="resultItem?.m_content"
+  *ngIf="appService.getConfig().appSettings.ai_endpoint"></app-chat-widget>
