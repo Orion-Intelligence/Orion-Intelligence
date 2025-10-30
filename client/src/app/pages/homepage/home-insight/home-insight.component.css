@@ -155,7 +155,7 @@
 .home-insight-card-label {
   font-family: Roboto, sans-serif;
   font-size: 12px;
-  color: #ffffffd3;
+  color: var(--color-text4);
   margin-bottom: 1px;
 }
 
@@ -177,7 +177,7 @@
 
 .home_insight__divider {
   border: none;
-  border-top: 1px solid #FFFFFF1A;
+  border-top: 1px solid var(--color-border);
 }
 
 .home-insight-card-footer-section {

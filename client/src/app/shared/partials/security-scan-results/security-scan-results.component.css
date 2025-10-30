@@ -22,7 +22,7 @@
 
 .scan_report-section-danger {
   border: 2px solid #7a1c1c !important;
-  background-color: #2b0f0f !important;
+  background-color: var(--color-red-100) !important;
   color: #f8d7da !important;
   transition: all 0.2s ease-in-out !important;
 }
@@ -60,7 +60,7 @@
 
 .scan_report-section-warning {
   border: 2px solid #7a6a1c !important;
-  background-color: #2b2a0f !important;
+  background-color: var(--color-green-100) !important;
   color: #fff8d7 !important;
   transition: all 0.2s ease-in-out !important;
 }
@@ -126,7 +126,7 @@
 .scan_meta-label {
   margin: 0 0 12px;
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--color-text3);
   font-weight: bold;
 }
 
@@ -391,12 +391,7 @@
   border: 1px solid #ffffff07;
 }
 
-.scan_meta-label {
-  margin: 0 0 12px;
-  font-size: 13px;
-  color: #94a3b8;
-  font-weight: bold;
-}
+
 
 .scan_meta-value-large {
   font-size: 32px !important;

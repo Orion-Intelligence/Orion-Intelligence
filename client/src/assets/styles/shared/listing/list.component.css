@@ -7,7 +7,7 @@
   margin-right: 5px;
 }
 
-#dropdownMenuStatus3{
+#dropdownMenuStatus3 {
   color: var(--color-text3) !important;
 }
 
@@ -16,7 +16,7 @@
   margin-top: 5px;
   color: #D4D4D4;
   border-radius: 100px;
-  background: #FCFCFC0D;
+  background: var(--color-tags);
   font-size: 12px;
   font-family: Roboto, sans-serif;
   margin-right: 10px;

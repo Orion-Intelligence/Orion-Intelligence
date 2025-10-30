@@ -23,7 +23,7 @@
       <div class="scan_content-wrapper" @fadeInDashboardItem>
 
         <ng-container *ngFor="let result of results">
-          <div class="right-content text-white cursor-pointer explore" *ngIf="!result.hasError && result.meta"
+          <div class="right-content color-text1 cursor-pointer explore" *ngIf="!result.hasError && result.meta"
             @fadeInDashboardItem [routerLink]="['/dashboard/scanner/basic-scan']" [queryParams]="{
                         q: 'msmannan00@gmail.com',
                         page: 1,
@@ -38,7 +38,7 @@
           </div>
 
           <div class="scan_report-section mb-2 grade-summary" [ngClass]="getGradeClass(result.grade)">
-            <div class="grade-report-title text-white">
+            <div class="grade-report-title color-text1">
               {{ result.scanType | uppercase }} Scan Report for 〡
               <a [href]="result.meta?.URL || '#'" target="_blank">
                 {{ result.meta?.Host || result.domain || 'N/A' }}

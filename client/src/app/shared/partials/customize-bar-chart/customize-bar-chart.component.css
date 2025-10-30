@@ -40,7 +40,7 @@
   left: 15px;
   width: calc(100% - 35px);
   height: 1px;
-  background-color: #ffffff20;
+  background-color: var(--color-border);
 }
 
 .bar-chart_grid {
@@ -88,7 +88,7 @@
   position: relative;
   width: 30px;
   height: 100px;
-  background-color: white;
+  background-color: var(--color-gray-100);
   border-radius: 215px;
   overflow: hidden;
   display: flex;
@@ -145,7 +145,7 @@
   margin-top: 7px;
   width: 100%;
   border-top: 1px dashed transparent;
-  border-image: repeating-linear-gradient(to right, #ffffff20 0 6px, transparent 6px 12px) 100% 1;
+  border-image: repeating-linear-gradient(to right, var(--color-border) 0 6px, transparent 6px 12px) 100% 1;
   height: 0;
 }
 
@@ -171,7 +171,7 @@
     min-width: 150px;
   }
 
-  .bar-chart_bars{
+  .bar-chart_bars {
     gap: 15px;
   }
 }
