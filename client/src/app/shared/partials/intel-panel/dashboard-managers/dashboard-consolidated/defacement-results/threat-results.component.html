@@ -5,8 +5,9 @@
         </div>
         <div class="home-defacement-result__actions">
             <ng-container *ngIf="results_defacement && (threatTypeCounts | keyvalue).length > 0">
-                <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue">
-                    {{ type.key }} ({{ type.value }})
+                <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue"
+                    (click)="onFilterTypeClick(type.key, $event)">
+                    {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
                 </div>
             </ng-container>
             <div class="home-defacement-result__expand-icon" [ngClass]="{ 'expand': isExpandable }">
@@ -150,14 +151,14 @@
                         </div>
                     </div>
 
-<!--                    <div class="home-defacement-result-detail-row">-->
-<!--                        <div class="home-defacement-result-card-date-time-info">-->
-<!--                            <div class="home-defacement-result-card-label">Date</div>-->
-<!--                            <div class="home-defacement-result-card-value">-->
-<!--                                {{ item.timestamp || '-' }}-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!--                    <div class="home-defacement-result-detail-row">-->
+                    <!--                        <div class="home-defacement-result-card-date-time-info">-->
+                    <!--                            <div class="home-defacement-result-card-label">Date</div>-->
+                    <!--                            <div class="home-defacement-result-card-value">-->
+                    <!--                                {{ item.timestamp || '-' }}-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
                 </div>
             </div>
             <div class="home-defacement-result-divider" *ngIf="!last"></div>

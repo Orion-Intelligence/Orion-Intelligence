@@ -1,22 +1,23 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {switchMap, timer, map, distinctUntilChanged, combineLatest} from 'rxjs';
-import {ResultComponent} from '../../shared/partials/result/result.component';
-import {fadeInDashboardItem} from '../../shared/animations/dashboard.item.animation';
-import {DashboardService} from '../../services/dashboard/dashboard.service';
-import {NgIf, NgOptimizedImage} from '@angular/common';
-import {CredentialListComponent} from './credential-list/credential-list.component';
-import {StealerLogCallbackModel} from '../../shared/model/results/credentials/credential.callback.model';
-import {SortType} from '../../shared/constants/shared-enums';
-import {HelperService} from '../../shared/services/helper.service';
-import {stealer_filters} from '../../shared/constants/filters';
-import {FormsModule} from '@angular/forms';
-import {EmptyQueryComponent} from '../../shared/partials/empty-query/empty-query.component';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
+import { ResultComponent } from '../../shared/partials/result/result.component';
+import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { NgIf, NgOptimizedImage } from '@angular/common';
+import { CredentialListComponent } from './credential-list/credential-list.component';
+import { StealerLogCallbackModel } from '../../shared/model/results/credentials/credential.callback.model';
+import { SortType } from '../../shared/constants/shared-enums';
+import { HelperService } from '../../shared/services/helper.service';
+import { stealer_filters } from '../../shared/constants/filters';
+import { FormsModule } from '@angular/forms';
+import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
+import { PaginationComponent } from "../../shared/partials/pagination/pagination.component";
 
 @Component({
   selector: 'app-credential',
   standalone: true,
-  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage, EmptyQueryComponent, NgIf],
+  imports: [ResultComponent, CredentialListComponent, FormsModule, NgOptimizedImage, EmptyQueryComponent, NgIf, PaginationComponent],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -42,7 +43,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.stealerlogCallbackModel = {...this.dashboardService.stealerlogCallbackModel};
+    this.stealerlogCallbackModel = { ...this.dashboardService.stealerlogCallbackModel };
     this.dashboardService.consolidatedParamModel.fullsearch = false;
 
     combineLatest([this.route.queryParams, this.route.url])
@@ -53,7 +54,7 @@ export class CredentialComponent implements OnInit, AfterViewInit {
 
         this.dashboardService.consolidatedParamModel.url = params['url'] || '';
         this.dashboardService.consolidatedParamModel.user = params['user'] || '';
-        if(this.dashboardService.consolidatedParamModel.url || this.dashboardService.consolidatedParamModel.user){
+        if (this.dashboardService.consolidatedParamModel.url || this.dashboardService.consolidatedParamModel.user) {
           this.fetchSearchResults(false)
         }
       });
@@ -134,5 +135,9 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   onToggleAnalyticsTrigger($event: string) {
     this.dashboardService.consolidatedParamModel.fullsearch = $event == "Full Search";
     this.fetchSearchResults(true);
+  }
+  onPageChange(step: number) {
+    this.dashboardService.consolidatedParamModel.page = step;
+    this.fetchSearchResults();
   }
 }
