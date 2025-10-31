@@ -672,7 +672,6 @@
   }
 
   .scan_progress-bar {
-    background: var(--color-progress);
     box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
   }
 
