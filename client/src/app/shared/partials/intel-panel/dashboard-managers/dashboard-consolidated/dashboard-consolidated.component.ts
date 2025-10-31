@@ -119,8 +119,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
     if (this.isLoading()) return;
 
+    this.isLoading.set(false);
     if (!this.dashboardService.consolidatedParamModel.q) {
-      this.isLoading.set(false);
       this.isStealerLogLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
       this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
