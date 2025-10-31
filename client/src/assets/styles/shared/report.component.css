@@ -580,7 +580,7 @@
 }
 
 .dashboard__search-main-div {
-  background-color: var(--color-consolidated-primary);
+  background-color: var(--color-consolidated-secondary);
   border-radius: 15px;
   width: 100%;
   height: auto;
@@ -589,6 +589,10 @@
   border: 1px solid var(--color-border);
   transition: all 0.3s ease-in-out;
   overflow: hidden;
+}
+
+.consolidated_container .dashboard__search-main-div{
+  background-color: var(--color-consolidated-secondary) !important;
 }
 
 .dashboard__search-main-div:hover {
