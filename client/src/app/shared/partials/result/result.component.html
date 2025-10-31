@@ -102,7 +102,7 @@
               </span>
               <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu2">
                 <li><a class="dropdown-item"
-                    (click)="selectedSearchBy = 'Match Semantic';onSetMatchType('semantic');onFormSubmit();"> Match
+                    (click)="selectedSearchBy = 'Match Semantic';onSetMatchType('or');onFormSubmit();"> Match
                     Semantic</a></li>
                 <li>
                   <hr class="dropdown-divider mx-3">
@@ -127,7 +127,7 @@
           </div>
         </ng-container>
         <app-selected-filter-bar
-          *ngIf="(entityFiltersCount() || sidebarFilterCount() || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='semantic')&&showSelectedFilters"
+          *ngIf="(entityFiltersCount() || sidebarFilterCount() || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or')&&showSelectedFilters"
           (clearAll)="reloadFilter()"
           [showSorting]="app_service.configData().localSettings.enable_advanced_tools"></app-selected-filter-bar>
       </div>

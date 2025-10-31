@@ -90,7 +90,7 @@ export class SelectedFilterBarComponent implements OnInit {
   sidebarFilterCount(all: boolean = false): number {
     if (all) {
       return Object.entries(this.dashboardService.selectedFilters())
-        .filter(([key, value]) => key !== 'matchtype' || value !== 'semantic')
+        .filter(([key, value]) => key !== 'matchtype' || value !== 'or')
         .length;
     } else {
       return Object.entries(this.dashboardService.selectedFilters())

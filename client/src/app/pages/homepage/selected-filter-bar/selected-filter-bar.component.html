@@ -1,6 +1,6 @@
 <div [ngClass]="{ 'selected-filter-bar__top-space': showSorting }" @fadeInDashboardItem>
   <div class="selected-filter-bar selected-filter-bar__left-space"
-    *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='semantic'">
+    *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
     <div class="selected-filter-bar__top-row">
       <div class="selected-filter-bar__title">Filters</div>
       <div class="selected-filter-bar__actions">
@@ -20,7 +20,7 @@
             class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close" />
         </div>
         <div class="selected-filter-bar__filter-type"
-          *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='semantic'">
+          *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
           Search Type ({{ this.app_service.getConfig().localSettings.matchType }}) <img
             src="../../../../assets/images/shared/searchFilter_clossButton_white.svg"
             class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close" />
