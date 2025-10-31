@@ -63,6 +63,11 @@ export class CredentialComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
   }
 
+  triggerSearch(): void {
+    this.dashboardService.consolidatedParamModel.page = 1
+    this.fetchSearchResults()
+  }
+
   fetchSearchResults(reset = true): void {
     this.dashboardService.consolidatedParamModel.url = this.url
     this.dashboardService.consolidatedParamModel.user = this.user
