@@ -100,7 +100,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
         this.fetchSearchResults();
       }
-      this.isLoading.set(false);
+      // this.isLoading.set(false);
 
       this.firstTrigger = false;
     });
@@ -119,7 +119,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
     if (this.isLoading()) return;
 
-    this.isLoading.set(false);
+    this.isLoading.set(true);
     if (!this.dashboardService.consolidatedParamModel.q) {
       this.isStealerLogLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
