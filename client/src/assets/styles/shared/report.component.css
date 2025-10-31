@@ -580,7 +580,7 @@
 }
 
 .dashboard__search-main-div {
-  background-color: var(--color-consolidated-secondary);
+  background-color: var(--color-consolidated-primary);
   border-radius: 15px;
   width: 100%;
   height: auto;
