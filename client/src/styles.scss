@@ -68,6 +68,7 @@
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
 
 :root {
+  --color-blur-920: #fff;
   --color-blur-910: #fff;
   --color-blue-900: #172235;
   --color-blue-890: #F4F7FA;
@@ -146,6 +147,7 @@
 }
 
 .dark-theme {
+  --color-blur-920: #172235;
   --color-blur-910: #0b1020;
   --color-blue-900: #172235;
   --color-blue-890: #17223550;

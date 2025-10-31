@@ -39,7 +39,7 @@
 }
 
 .nav-tabs .nav-link.active {
-  background-color: var(--color-blur-910);
+  background-color: var(--color-blur-920);
   border: 1px solid var(--color-border);
   font-size: 14px;
   font-weight: 500;
