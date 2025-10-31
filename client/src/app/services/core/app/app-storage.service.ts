@@ -33,7 +33,7 @@ export class AppStorageService {
       entityFilterCondition: this.getFromStorage<boolean>('entityFilterCondition'),
       entityfilterCategories: this.getFromStorage('entityfilterCategories', true) || {},
       isSidebarOpen: this.getFromStorage('isSidebarOpen', true),
-      matchType: this.getFromStorage<string>('matchType') || 'semantic',
+      matchType: this.getFromStorage<string>('matchType') || 'or',
       sortType: this.getFromStorage<string>('sortType'),
     };
   }

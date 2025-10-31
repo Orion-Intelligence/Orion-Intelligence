@@ -11,17 +11,8 @@
   margin-left: 22px !important;
 }
 
-.scan_report-section {
-  background: var(--color-blue-890);
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 1px solid #ffffff07;
-}
-
 .scan_report-section-danger {
-  border: 2px solid var(--color-border-red) !important;
+  border: 1px solid var(--color-border-red) !important;
   background-color: var(--color-red-100) !important;
   color: #f8d7da !important;
   transition: all 0.2s ease-in-out !important;
@@ -59,41 +50,41 @@
 }
 
 .scan_report-section-warning {
-  border: 2px solid #7a6a1c !important;
-  background-color: var(--color-green-100) !important;
-  color: #fff8d7 !important;
+  border: 1px solid var(--color-border-orange) !important;
+  background-color: var(--color-orange-100) !important;
+  color: #8C4B16 !important;
   transition: all 0.2s ease-in-out !important;
 }
 
 .scan_report-section-warning .scan_section-title {
-  color: #ffe68a;
+  color: #A85E1A;
 }
 
 .scan_report-section-warning .scan_meta-card {
-  background: rgb(122 106 28 / 40%);
-  border: 1px solid #7a6a1c;
+  background-color: var(--color-orange-200) !important;
+  border: 1px solid var(--color-border-orange) !important;
 }
 
 .scan_report-section-warning a {
-  color: #ffe68a;
+  color: #B76A1C;
 }
 
 .scan_report-section-warning a:hover {
-  color: #ffd24d;
+  color: #CC7A1C;
   text-decoration: underline;
 }
 
 .scan_report-section-warning .scan_btn,
 .scan_report-section-warning button {
-  background-color: #7a6a1c;
+  background-color: #8C4B16;
   color: #fff;
-  border: 1px solid #a88a32;
+  border: 1px solid #A85E1A;
 }
 
 .scan_report-section-warning .scan_btn:hover,
 .scan_report-section-warning button:hover {
-  background-color: #a88a32;
-  border-color: #ffd24d;
+  background-color: #A85E1A;
+  border-color: #CC7A1C;
 }
 
 .scan_section-title {
@@ -116,13 +107,6 @@
   gap: 15px;
 }
 
-.scan_meta-card {
-  padding: 20px;
-  background: var(--color-blue-820-light);
-  border-radius: 6px;
-  border: 1px solid #ffffff07;
-}
-
 .scan_meta-label {
   margin: 0 0 12px;
   font-size: 13px;
@@ -130,10 +114,18 @@
   font-weight: bold;
 }
 
+.scan_report-section-danger .scan_meta-value{
+  color: var(--color-text7);
+}
+
+.scan_report-section-warning .scan_meta-value{
+  color: var(--color-text1);
+}
+
 .scan_meta-value {
   margin: 0;
   font-size: 14px;
-  color: #f8fafc;
+  color: var(--color-text4);
 }
 
 .scan_ssl-tag {
@@ -165,18 +157,6 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
-}
-
-.scan_finding-card {
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 15px;
-  transition: all 0.3s ease;
-  background: var(--color-blue-820-light);
-}
-
-.scan_finding-card.scan_expanded {
-  box-shadow: 0 4px 8px rgb(0 0 0 / 20%);
 }
 
 .scan_finding-header {
@@ -356,12 +336,16 @@
 }
 
 .scan_report-section {
-  background: var(--color-blue-890);
+  background: var(--color-consolidated-primary);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
+  box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
   padding: 20px;
   margin-bottom: 20px;
-  border: 1px solid #ffffff07;
+  border: 1px solid var(--color-border);
+}
+
+.scan_explore-icon{
+  margin-top: -5px;
 }
 
 .scan_section-title {
@@ -386,20 +370,14 @@
 
 .scan_meta-card {
   padding: 20px;
-  background: var(--color-scan-light);
+  background: var(--color-scan-light-200);
   border-radius: 6px;
-  border: 1px solid #ffffff07;
+  border: 1px solid var(--color-border-scan-light);
 }
 
 .scan_meta-value-large {
   font-size: 32px !important;
   font-weight: bold;
-}
-
-.scan_meta-value {
-  margin: 0;
-  font-size: 14px;
-  color: #f8fafc;
 }
 
 .scan_ssl-tag {
@@ -422,11 +400,11 @@
   border-radius: 6px;
   padding: 15px;
   transition: all 0.3s ease;
-  background: var(--color-blue-820-light);
+  background: var(--color-consolidated-secondary);
 }
 
 .scan_finding-card.scan_expanded {
-  box-shadow: 0 4px 8px rgb(0 0 0 / 20%);
+  box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
 }
 
 .scan_finding-title {
@@ -443,13 +421,9 @@
   align-items: center;
 }
 
-
-
 .skeleton {
   position: relative;
   background: var(--color-blue-760);
-  /* #1e293b; */
-  /* Dark shimmer background */
   border-radius: 6px;
   overflow: hidden;
 }
@@ -639,7 +613,6 @@
   margin-right: 0;
 }
 
-
 .scan_progress-top {
   z-index: 20;
   display: grid;
@@ -649,7 +622,7 @@
   border-radius: 8px;
   background: #fff;
   margin: 15px 20px 16px 27px;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+  box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
 }
 
 .scan_progress-text {
@@ -662,10 +635,10 @@
 .scan_progress-bar {
   width: 100%;
   height: 10px;
-  background: #eef2f7;
+  background: var(--color-progress);
   border-radius: 9999px;
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / 6%);
+  box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
 }
 
 .scan_progress-fill {
@@ -681,8 +654,8 @@
   position: absolute;
   inset: 0;
   background-image: repeating-linear-gradient(45deg,
-      rgb(255 255 255 / 35%) 0 10px,
-      rgb(255 255 255 / 15%) 10px 20px);
+  rgb(255 255 255 / 35%) 0 10px,
+  rgb(255 255 255 / 15%) 10px 20px);
   animation: scan-progress-stripes 1s linear infinite;
   pointer-events: none;
 }
@@ -691,7 +664,7 @@
   .scan_progress-top {
     background: var(--color-blur-910);
     border-color: var(--color-border);
-    box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+    box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
   }
 
   .scan_progress-text {
@@ -699,8 +672,8 @@
   }
 
   .scan_progress-bar {
-    background: #111827;
-    box-shadow: inset 0 1px 3px rgb(0 0 0 / 50%);
+    background: var(--color-progress);
+    box-shadow: rgb(0 0 0/10%) 0 1px 3px, rgb(0 0 0/10%) 0 1px 3px;
   }
 
   .scan_progress-fill {
@@ -709,8 +682,8 @@
 
   .scan_progress-fill::after {
     background-image: repeating-linear-gradient(45deg,
-        rgb(255 255 255 / 25%) 0 10px,
-        rgb(255 255 255 / 10%) 10px 20px);
+    rgb(255 255 255 / 25%) 0 10px,
+    rgb(255 255 255 / 10%) 10px 20px);
   }
 }
 

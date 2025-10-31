@@ -10,7 +10,7 @@
         Scan Results for: {{ query }}
       </div>
       <button class="expand-collapse-btn" [ngClass]="{ 'is-disabled': isProcessing }" [disabled]="isProcessing"
-        (click)="toggleCollapse()">
+              (click)="toggleCollapse()">
         <img src="assets/images/shared/theme/cheveron-right.svg" [class.rotated]="isExpanded" alt="Toggle">
       </button>
     </div>
@@ -22,9 +22,9 @@
     <ng-container *ngIf="!isProcessing && isExpanded && (scanResult$ | async) as results">
       <div class="scan_content-wrapper" @fadeInDashboardItem>
 
-        <ng-container *ngFor="let result of results">
+        <ng-container *ngFor="let result of results; let first = first">
           <div class="right-content color-text1 cursor-pointer explore" *ngIf="!result.hasError && result.meta"
-            @fadeInDashboardItem [routerLink]="['/dashboard/scanner/basic-scan']" [queryParams]="{
+               @fadeInDashboardItem [routerLink]="['/dashboard/scanner/basic-scan']" [queryParams]="{
                         q: 'msmannan00@gmail.com',
                         page: 1,
                         matchtype: 'or',
@@ -32,10 +32,12 @@
                         scanType: result.scanType
                     }" target="_blank">
             Explore {{ result.scanType | uppercase }}
-            <button appTooltip="Open Page" class="ml-2 p-0 expand-toggle-btn">
-              <img alt="background" height="20" src="/assets/images/shared/theme/explore_icon.svg" width="20">
+            <button appTooltip="Open Page" class="ml-2 p-0 mt-0 expand-toggle-btn">
+              <img alt="background" class="scan_explore-icon" height="20" src="/assets/images/shared/theme/explore_icon.svg" width="20">
             </button>
           </div>
+
+          <hr *ngIf="!first" class="mb-4 mt-0 home-defacement-result-divider">
 
           <div class="scan_report-section mb-2 grade-summary" [ngClass]="getGradeClass(result.grade)">
             <div class="grade-report-title color-text1">

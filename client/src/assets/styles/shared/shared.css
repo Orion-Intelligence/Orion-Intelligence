@@ -39,7 +39,7 @@
 }
 
 .nav-tabs .nav-link.active {
-  background-color: var(--color-blue-820-light);
+  background-color: var(--color-blur-910);
   border: 1px solid var(--color-border);
   font-size: 14px;
   font-weight: 500;
@@ -50,12 +50,12 @@
 }
 
 .nav-tabs .nav-link:not(.active):hover {
-  background-color: #17223560;
+  background-color: var(--color-blue-810);
   border: 1px solid #ffffff08;
-  border-bottom: 2px solid #ffffff60;
+  border-bottom: 2px solid var(--color-divider-dark);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  color: #fff;
+  color: var(--color-text1);
 }
 
 .default-input-sub-container-padded {

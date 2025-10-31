@@ -70,7 +70,7 @@
 :root {
   --color-blur-910: #fff;
   --color-blue-900: #172235;
-  --color-blue-890: #ffffff;
+  --color-blue-890: #F4F7FA;
   --color-blue-880: #2A578459;
   --color-blue-870: #2A578435;
   --color-blue-860: linear-gradient(to bottom, #0E2D4D, #144170);
@@ -79,7 +79,7 @@
   --color-blue-830: #F6F8FB;
   --color-blue-820: #10335619;
   --color-blue-820-light: #ffffff;
-  --color-blue-810: #00000010;
+  --color-blue-810: #E3E8EE;
   --color-blue-800: #fff;
   --color-blue-790: #fff;
   --color-blue-780: #0f335775;
@@ -103,14 +103,12 @@
   --color-blue-600: #153454;
   --color-gray-100: #ececec;
   --color-gray-900: #A0B8D1;
-  --color-red-100: #f9e6e6;
-  --color-red-200: #7a1c1c30;
   --color-green-100: #ceca5f;
   --color-mono: white;
   --color-white: white;
   --color-border: #E4E7EC;
-  --color-border-red: #7a1c1c15;
   --color-divider: #ffffff15;
+  --color-divider-dark: #00000035;
   --color-tags: #ECF3FF;
   --color-header: #00000090;
   --color-banner: rgb(170 128 0 / 40%);
@@ -120,9 +118,31 @@
   --color-text4: #667085;
   --color-text5: #57A5EB;
   --color-text6: #37363675;
+  --color-text7: #8E1E1E;
   --color-pagination: #ffffff;
-  --color-pagination-hover: #cccccc;
+  --color-pagination-hover: #E3E8EE;
   --color-scan-light: #c2c2c2;
+  --color-consolidated-primary: #fff;
+  --color-consolidated-secondary: #F4F7FA;
+
+  --color-red-100: #FFF5F5;
+  --color-red-200: #FDE8E8;
+  --color-border-red: #F5B5B5;
+
+  --color-scan-light-100: #F6F8FB;
+  --color-scan-light-200: #E7EBF2;
+  --color-border-scan-light: #D6DBE3;
+  --color-text-scan-light: #2E3A59;
+
+  --color-orange-100: #FFF9F3;
+  --color-orange-200: #FFF1E0;
+  --color-border-orange: #F5CBA7;
+  --color-progress: #E7EBF2;
+  --color-placeholder: linear-gradient(90deg,
+    rgba(14, 22, 38, 0) 0%,
+    rgba(14, 22, 38, 0.45) 50%,
+    rgba(14, 22, 38, 0) 100%);
+
 }
 
 .dark-theme {
@@ -161,13 +181,12 @@
   --color-blue-600: #294170;
   --color-gray-100: #f2f2f2;
   --color-gray-900: #A0B8D1;
-  --color-red-100: #2b0f0f;
   --color-green-100: #2b2a0f;
   --color-border: #FCFCFC12;
   --color-mono: #00000000;
   --color-white: #172235;
-  --color-border-red: #7a1c1c;
   --color-divider: #1f3043b6;
+  --color-divider-dark: #1f3043b6;
   --color-tags: #ffffff15;
   --color-header: #ffffff90;
   --color-banner: rgb(255 193 7 / 10%);
@@ -177,18 +196,40 @@
   --color-text4: #9fb3c8;
   --color-text5: #ffffff;
   --color-text6: #A0B8D190;
+  --color-text7: #fff;
   --color-pagination: #15345475;
   --color-pagination-hover: #102A4685;
   --color-scan-light: #172235;
+  --color-consolidated-primary: #17223550;
+  --color-consolidated-secondary: #172235;
+
+  --color-red-100: #2b0f0f;
+  --color-red-200: #7a1c1c30;
+  --color-border-red: #7a1c1c;
+
+  --color-scan-light-200: #172235;
+  --color-border-scan-light: rgba(255,255,255,.0274509804);
+  --color-text-scan-light: #fff;
+
+  --color-orange-100: #2b2a0f;
+  --color-orange-200: rgb(122 106 28 / 40%);
+  --color-border-orange: #7a6a1c;
+  --color-border-progress: #111827;
+  --color-placeholder: linear-gradient(90deg,
+    rgba(14, 22, 38, 0) 0%,
+    rgba(14, 22, 38, 0.45) 50%,
+    rgba(14, 22, 38, 0) 100%);
+
 }
 
-img[src*="assets/images/shared/theme/"] {
-  filter: brightness(0.3) contrast(95%) drop-shadow(0 0 0 var(--color-text1)) !important;
-}
+img[src*="assets/images/shared/theme"]:not([data-ph]),
+img[src*="assets/images/sidebar/theme"]:not([data-ph]),
+img[src*="assets/images/statistics/"]:not([data-ph]) { filter: brightness(0.3) contrast(95%) drop-shadow(0 0 0 var(--color-text1)) !important; }
 
-.dark-theme img[src*="assets/images/shared/theme/"] {
-  filter: drop-shadow(0 0 0 var(--color-text1)) !important;
-}
+.dark-theme img[src*="assets/images/shared/theme"]:not([data-ph]),
+.dark-theme img[src*="assets/images/sidebar/theme"]:not([data-ph]),
+.dark-theme img[src*="assets/images/statistics/"]:not([data-ph]) { filter: drop-shadow(0 0 0 var(--color-text1)) !important; }
+
 
 html {
   background: #172235;
@@ -243,16 +284,19 @@ html::-webkit-scrollbar {
 
 img[data-ph] {
   background:
-    linear-gradient(90deg,
-      rgba(14, 22, 38, 0) 0%,
-      rgba(14, 22, 38, 0.45) 50%,
-      rgba(14, 22, 38, 0) 100%),
+    var(--color-placeholder),
     url('/assets/images/shared/placeholder.svg') center/cover no-repeat;
   object-fit: cover;
   border-radius: 8px;
   opacity: 0.85;
   background-size: 200% 100%, cover;
   animation: shimmer-dark 1.6s linear infinite;
+}
+
+.dark-theme img[data-ph] {
+  background:
+    var(--color-placeholder),
+    url('/assets/images/shared/theme/placeholder.svg') center/cover no-repeat;
 }
 
 @keyframes shimmer-dark {
