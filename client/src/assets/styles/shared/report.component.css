@@ -562,7 +562,8 @@
 }
 
 .dashboard__search-container code {
-  color: #ffffff90 !important;
+  color:var(--color-text1);
+  background-color: var(--color-consolidated-secondary);
 }
 
 .dashboard__search-container {
