@@ -148,6 +148,7 @@
 .home-defacement-result-divider {
   border: none;
   border-top: 1px solid var(--color-border);
+  margin-top: 40px;
 }
 
 @media only screen and (width <=1000px) {
