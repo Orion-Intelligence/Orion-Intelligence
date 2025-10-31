@@ -558,12 +558,12 @@
   margin-right: -7px !important;
   border-radius: 12px;
   border: none;
-  box-shadow: inset 0 -40px 40px -40px rgb(0 0 0 / 30%) !important;
+  box-shadow: none !important;
 }
 
 .dark-theme .dashboard__search-container .collapsible-container{
   background-color: var(--color-consolidated-secondary);
-  box-shadow: none;
+  box-shadow: inset 0 -40px 40px -40px rgb(0 0 0 / 30%) !important;
 }
 
 .dashboard__search-container code {
