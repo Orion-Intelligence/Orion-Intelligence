@@ -1251,14 +1251,6 @@ class elastic_request_generator:
         if len(url)>0:
             p_query_model.user = user
 
-        print(":::::::::::::::::::::::::", flush=True)
-        print(p_query_model.q, flush=True)
-        print(":::::::::::::::::::::::::", flush=True)
-        print(url, flush=True)
-        print(":::::::::::::::::::::::::", flush=True)
-        print(user, flush=True)
-        print(":::::::::::::::::::::::::", flush=True)
-
         if not p_query_model.url and not p_query_model.user and consolidated:
             return None, None
 
@@ -1368,16 +1360,24 @@ class elastic_request_generator:
         if date_range_filter:
             bool_query.setdefault("filter", []).append(date_range_filter)
 
+        page = getattr(p_query_model, "page", 1) or 1
+        size = getattr(p_query_model, "size", 100) or 100
+        frm = (page - 1) * size
+        if frm < 0:
+            frm = 0
+
         query = {
             "query": {"bool": bool_query},
-            "from": 0,
-            "size": 100,
-            "track_total_hits": False,
+            "from": frm,
+            "size": size,
+            "track_total_hits": True,
             "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]
         }
 
         if not (user_query or url_query or extra_user_terms or extra_domains):
             query["sort"] = ["_doc"]
+
+        total = getattr(p_query_model, "total", None)
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
