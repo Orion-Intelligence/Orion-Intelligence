@@ -17,7 +17,7 @@
           <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph"
             class="dashboard__search-button">
             <div class="dashboard__search-button-inner">
-              <img height="20" src="/client/src/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
+              <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
 
@@ -31,7 +31,7 @@
       </div>
 
       <div class="d-flex align-items-center gap-2">
-        <img alt="Channel" height="20" src="/client/src/assets/images/shared/theme/channel.svg" width="20" />
+        <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" />
         <h2 class="dashboard__search-title mb-0 ml-2">
           <div *ngIf="item.m_sender_name as senderName; else showTitle">
             {{ senderName.substring(1) }}
