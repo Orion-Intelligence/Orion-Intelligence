@@ -8,6 +8,8 @@
                 <div class="home-defacement-result__filter-type" *ngFor="let type of threatTypeCounts | keyvalue"
                     (click)="onFilterTypeClick(type.key, $event)">
                     {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
+                    <img src="assets/images/shared/theme/magnifyingglassblack.svg" alt="icon"
+                        class="home-defacement-result__filter-type__filter-icon">
                 </div>
             </ng-container>
             <div class="home-defacement-result__expand-icon" [ngClass]="{ 'expand': isExpandable }">

@@ -49,10 +49,17 @@
   align-self: flex-start;
   margin-top: 1px;
   cursor: pointer;
+  gap: 6px;
 }
 
 .home-defacement-result__filter-type:hover {
   background: var(--color-blue-810);
+}
+
+.home-defacement-result__filter-type__filter-icon {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
 }
 
 .home-defacement-result__expand-icon {
