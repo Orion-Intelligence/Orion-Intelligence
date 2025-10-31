@@ -559,10 +559,10 @@
   border-radius: 12px;
   border: none;
   box-shadow: none !important;
+  background-color: var(--color-consolidated-secondary);
 }
 
 .dark-theme .dashboard__search-container .collapsible-container{
-  background-color: var(--color-consolidated-secondary);
   box-shadow: inset 0 -40px 40px -40px rgb(0 0 0 / 30%) !important;
 }
 
