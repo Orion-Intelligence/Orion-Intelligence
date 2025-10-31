@@ -73,7 +73,11 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
   onFilterTypeClick(type: string, event: MouseEvent): void {
     event.stopPropagation();
-    if (type === "phishing" || type === "hacked" || type === "databases") {
+    if (type === "phishing" || type === "hacked" || type === "databases" || type === "scam" || type === "crack") {
+      if (type === "scam")
+        type = "database";
+      else if (type === "crack")
+        type = "hacked";
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/${type}?q=${encodeURIComponent(query)}`;
       window.open(url, '_blank');
