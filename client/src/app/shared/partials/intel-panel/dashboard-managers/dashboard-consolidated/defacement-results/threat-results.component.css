@@ -10,6 +10,7 @@
   min-width: 150px;
   max-height: 850px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .home-defacement-result__top-row {
@@ -47,6 +48,11 @@
   justify-content: center;
   align-self: flex-start;
   margin-top: 1px;
+  cursor: pointer;
+}
+
+.home-defacement-result__filter-type:hover {
+  background: var(--color-blue-810);
 }
 
 .home-defacement-result__expand-icon {

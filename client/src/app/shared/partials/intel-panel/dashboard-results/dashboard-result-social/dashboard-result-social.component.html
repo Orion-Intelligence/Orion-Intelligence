@@ -6,7 +6,7 @@
       <div class="dashboard__search-tags">
         <div class="dashboard__search-tags dashboard__search-tag-item">
           <ng-container *ngIf="item.m_content_type?.length; else unknownTag">
-            <span *ngFor="let tag of item.m_content_type" class="dashboard__tag">{{ tag }}</span>
+            <span *ngFor="let tag of item.m_content_type | slice:0:15" class="dashboard__tag">{{ tag }}</span>
           </ng-container>
           <ng-template #unknownTag>
             <span class="dashboard__tag">unknown</span>

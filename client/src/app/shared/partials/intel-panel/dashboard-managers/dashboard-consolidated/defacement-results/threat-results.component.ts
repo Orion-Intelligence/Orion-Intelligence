@@ -1,9 +1,10 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {DefacementCallbackModel, DefacementResultItem} from '../../../../../model/results/defacement/defacement.callback.model';
-import {TooltipDirective} from '../../../../../directive/tooltip-directive.directive';
-import {HelperService} from '../../../../../services/helper.service';
-import {StealerLogCallbackModel, StealerLogResultItem} from '../../../../../model/results/credentials/credential.callback.model';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DefacementCallbackModel, DefacementResultItem } from '../../../../../model/results/defacement/defacement.callback.model';
+import { TooltipDirective } from '../../../../../directive/tooltip-directive.directive';
+import { HelperService } from '../../../../../services/helper.service';
+import { StealerLogCallbackModel, StealerLogResultItem } from '../../../../../model/results/credentials/credential.callback.model';
+import { DashboardService } from '../../../../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-defacement-results',
@@ -17,7 +18,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   threatTypeCounts: { [key: string]: number } = {};
 
-  constructor(protected helperService: HelperService) {
+  constructor(protected helperService: HelperService, private dashboardService: DashboardService) {
   }
 
   ngOnInit(): void {
@@ -45,7 +46,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   updateStealerTypeCounts(results: StealerLogResultItem[]) {
-      this.threatTypeCounts["stealerlog"] = results.length;
+    this.threatTypeCounts["stealerlog"] = results.length;
   }
 
   explore(route: string, q: string) {
@@ -69,5 +70,18 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   toggleResultsBarCollapse(): void {
     this.isExpandable = !this.isExpandable;
+  }
+  onFilterTypeClick(type: string, event: MouseEvent): void {
+    event.stopPropagation();
+    if (type === "phishing" || type === "hacked" || type === "databases") {
+      let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
+      const url = `/dashboard/defacement/${type}?q=${encodeURIComponent(query)}`;
+      window.open(url, '_blank');
+    }
+    else if (type === "stealerlog") {
+      let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
+      const finalUrl = `/dashboard/stealerlogs?domain=${encodeURIComponent(query)}&user=${''}`;
+      window.open(finalUrl, '_blank');
+    }
   }
 }
