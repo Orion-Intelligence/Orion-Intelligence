@@ -1506,7 +1506,7 @@ class elastic_request_generator:
             now = datetime.now(timezone.utc)
             _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
 
-            if bf.isduplicate(_id):
+            if bf.isduplicate(m_hash):
                 continue
 
             doc = {k: v for k, v in log.items() if v is not None}
