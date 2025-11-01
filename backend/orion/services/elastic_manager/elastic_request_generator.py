@@ -1507,10 +1507,7 @@ class elastic_request_generator:
             _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
 
             if bf.isduplicate(_id):
-                print("::::::::::::::::::::::: 2 " + _id, flush=True)
                 continue
-            else:
-                print("::::::::::::::::::::::: 1 " + _id, flush=True)
 
             doc = {k: v for k, v in log.items() if v is not None}
             bulk_entries.append({
