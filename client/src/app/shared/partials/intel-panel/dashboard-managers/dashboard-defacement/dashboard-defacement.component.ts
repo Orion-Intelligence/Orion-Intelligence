@@ -91,7 +91,7 @@ export class DashboardDefacementComponent implements OnInit, AfterViewInit {
       this.dashboardService.consolidatedParamModel.content = lastSegment
 
     let matchtype = ""
-    if(this.isList && this.app_service.configData().localSettings.matchType=="semantic"){
+    if(this.isList && this.app_service.configData().localSettings.matchType=="or"){
       matchtype = "or"
     }
 

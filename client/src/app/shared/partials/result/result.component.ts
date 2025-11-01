@@ -107,8 +107,8 @@ export class ResultComponent implements OnInit, OnChanges {
     const matchtype = this.dashboardService.selectedFilters()["matchtype"];
     if (matchtype === "full") return "Match full query";
     if (matchtype === "and") return "Match individual terms";
-    if (matchtype === "or") return "Match any term";
-    return "Match semantic query";
+    if (matchtype === "semantic") return "Match semantic query";
+    return "Match any term";
   });
 
   ngOnInit(): void {

@@ -12,7 +12,7 @@ class search_general_param_model(BaseModel,helper_controller):
     safe: bool = False
     must: bool = False
     network: str = "all"
-    matchtype: Optional[str] = "semantic"
+    matchtype: Optional[str] = "or"
     daterange: Optional[str] = ""
     content: Optional[str] = "all"
     profile: bool = False

@@ -46,7 +46,7 @@ export class SelectedFilterBarComponent implements OnInit {
       delete updated["matchtype"];
       return updated;
     });
-    this.app_service.set('matchType', "semantic");
+    this.app_service.set('matchType', "or");
     this.clearAll.emit();
   }
 
@@ -60,7 +60,7 @@ export class SelectedFilterBarComponent implements OnInit {
         this.app_service.set('entityfilterCategories', {});
       }
     }
-    this.app_service.set('matchType', "semantic");
+    this.app_service.set('matchType', "or");
     this.clearAll.emit();
   }
 
