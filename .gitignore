@@ -3,6 +3,7 @@ TrustlySearchServices/raw/classifier_output/training_data.csv
 */.dll
 */.pyc
 **/_pycache_/
+bloom_data/*
 .idea/*
 env/*
 backend/env/*

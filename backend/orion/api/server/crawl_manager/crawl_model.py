@@ -162,6 +162,8 @@ class crawl_model:
     @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):
         m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
+        if not m_data:
+            return {"parsed": "empty unqiue"}
 
         await elastic_controller.get_instance().index_dump(m_data)
         return {"parsed":"true"}

@@ -9,6 +9,7 @@ from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.constants.enum import ChannelTypeEnum
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
+from orion.services.bloom_manager.bloom_controller import bloom_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC
 from datetime import datetime
 from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
@@ -297,103 +298,6 @@ class elastic_request_generator:
         }
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
-
-    @staticmethod
-    def on_search_stealer_alert(p_query_model: search_consolidated_param_model, pFilter):
-        user_query = []
-        url_query = []
-        date_range_filter = {}
-
-        if p_query_model.user:
-            parts = [p.strip() for p in str(p_query_model.user).split(" ") if p.strip()]
-            user_query.extend(parts)
-
-        if p_query_model.url:
-            parts = [p.strip() for p in str(p_query_model.url).split(" ") if p.strip()]
-            url_query.extend(parts)
-
-        domains = helper_controller.extract_domains_from_text(p_query_model.q)
-        url_query.extend(domains)
-
-        if isinstance(pFilter, dict):
-            if pFilter.get('m_username'):
-                user_query.extend([v for v in pFilter['m_username'] if v])
-            for key in ('m_url', 'm_domain', 'm_search_all'):
-                if pFilter.get(key):
-                    if key == 'm_search_all':
-                        url_query.extend([v for v in pFilter[key] if re.search(r'(https?://|[a-z0-9.-]+\.[a-z]{2,})', str(v), re.I)])
-                    else:
-                        url_query.extend([v for v in pFilter[key] if v])
-
-        if not user_query and not url_query:
-            return ELASTIC_INDEX.S_STEALERLOGS_INDEX, {
-                "query": {"bool": {"must_not": [{"match_all": {}}]}},
-                "from": 0,
-                "size": 0
-            }
-
-        if p_query_model.daterange:
-            start_date, end_date = [d.strip() for d in p_query_model.daterange.split(",")]
-            date_range_filter = {
-                "range": {
-                    "timestamp": {
-                        "gte": start_date,
-                        "lte": end_date
-                    }
-                }
-            }
-
-        must_should = []
-        should_clauses = []
-
-        if user_query:
-            for uq in user_query:
-                uq = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), uq)
-                terms = re.findall(r'"([^"]+)"|(\S+)', uq)
-                for quoted, unquoted in terms:
-                    term = quoted or unquoted
-                    clause = {
-                        "bool": {
-                            "should": [
-                                {"term": {"username": term}},
-                                {"term": {"domain": term}},
-                                {"term": {"url.raw": term}},
-                                {"match_phrase": {"url": term.lower()}}
-                            ]
-                        }
-                    }
-                    must_should.append(clause)
-
-        if url_query:
-            for uq in url_query:
-                url_clause = {
-                    "bool": {
-                        "should": [
-                            {"term": {"url.raw": uq}},
-                            {"match_phrase": {"url": uq.lower()}}
-                        ]
-                    }
-                }
-                should_clauses.append(url_clause)
-
-        bool_query = {}
-        if must_should:
-            bool_query["must"] = must_should
-        if should_clauses:
-            bool_query["should"] = should_clauses
-        if date_range_filter:
-            bool_query.setdefault("filter", []).append(date_range_filter)
-
-        query = {
-            "query": {"bool": bool_query},
-            "from": 0,
-            "size": 100,
-            "track_total_hits": True,
-            "sort": [{"timestamp": {"order": "desc"}}],
-            "_source": ["url", "username", "domain", "password", "timestamp", "log_hash", "m_hash"]
-        }
-
-        return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     def on_search_defacement_data(self, p_query_model: search_defacement_param_model, pfilter=None):
         raw_query = p_query_model.q.lower()
@@ -1377,8 +1281,6 @@ class elastic_request_generator:
         if not (user_query or url_query or extra_user_terms or extra_domains):
             query["sort"] = ["_doc"]
 
-        total = getattr(p_query_model, "total", None)
-
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     def on_search_general_data(self, p_query_model, pfilter=None):
@@ -1597,14 +1499,20 @@ class elastic_request_generator:
         from datetime import datetime, timezone
 
         bulk_entries = []
+        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data.get("logs", []):
             m_hash = hashlib.sha256(str(log.get("raw", "")).encode("utf-8", "ignore")).hexdigest()
-            doc = {k: v for k, v in log.items() if v is not None}
-
             now = datetime.now(timezone.utc)
             _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
 
+            if bf.isduplicate(_id):
+                print("::::::::::::::::::::::: 2 " + _id, flush=True)
+                continue
+            else:
+                print("::::::::::::::::::::::: 1 " + _id, flush=True)
+
+            doc = {k: v for k, v in log.items() if v is not None}
             bulk_entries.append({
                 "create": {
                     "_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX,
@@ -1613,6 +1521,7 @@ class elastic_request_generator:
             })
             bulk_entries.append(doc)
 
+        bf.flush()
         return bulk_entries
 
     @staticmethod
