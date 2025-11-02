@@ -1509,8 +1509,8 @@ class elastic_request_generator:
             if bf.isduplicate(m_hash):
                 print("::::::::::::::::::::::::::::::::: 1", flush=True)
                 continue
-            else:
-                print("::::::::::::::::::::::::::::::::: 2", flush=True)
+            # else:
+            #     print("::::::::::::::::::::::::::::::::: 2", flush=True)
 
             doc = {k: v for k, v in log.items() if v is not None}
             bulk_entries.append({
