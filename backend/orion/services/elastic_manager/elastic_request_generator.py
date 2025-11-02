@@ -1147,13 +1147,13 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated = False):
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False):
         url = helper_controller.extract_domains_from_text(p_query_model.q)
-        if len(url)>0:
+        if len(url) > 0:
             p_query_model.url = url[0]
 
         user = helper_controller.extract_first_email(p_query_model.q)
-        if len(url)>0:
+        if len(url) > 0:
             p_query_model.user = user
 
         if not p_query_model.url and not p_query_model.user and consolidated:
@@ -1185,9 +1185,9 @@ class elastic_request_generator:
 
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
-            must_should = [{"term": {"type.keyword": "logs"}}]
+            must_should = [{"wildcard": {"type.keyword": {"value": "logs", "case_insensitive": True}}}]
         else:
-            must_should = [{"term": {"type.keyword": "c"}}]
+            must_should = [{"wildcard": {"type.keyword": {"value": "c", "case_insensitive": True}}}]
 
         date_range_filter = {}
 
@@ -1219,9 +1219,10 @@ class elastic_request_generator:
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain.keyword": url_query}})
+                should_clauses.append(
+                    {"wildcard": {"domain.keyword": {"value": f"*{url_query}*", "case_insensitive": True}}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain.keyword": d}})
+                should_clauses.append({"wildcard": {"domain.keyword": {"value": f"*{d}*", "case_insensitive": True}}})
         else:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
@@ -1231,9 +1232,9 @@ class elastic_request_generator:
                     clause = {
                         "bool": {
                             "should": [
-                                {"term": {"email.keyword": term}},
-                                {"term": {"username.keyword": term}},
-                                {"term": {"domain.keyword": term}}
+                                {"wildcard": {"email.keyword": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"username.keyword": {"value": f"*{term}*", "case_insensitive": True}}},
+                                {"wildcard": {"domain.keyword": {"value": f"*{term}*", "case_insensitive": True}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1243,18 +1244,19 @@ class elastic_request_generator:
                 clause = {
                     "bool": {
                         "should": [
-                            {"term": {"email.keyword": t}},
-                            {"term": {"username.keyword": t}},
-                            {"term": {"domain.keyword": t}}
+                            {"wildcard": {"email.keyword": {"value": f"*{t}*", "case_insensitive": True}}},
+                            {"wildcard": {"username.keyword": {"value": f"*{t}*", "case_insensitive": True}}},
+                            {"wildcard": {"domain.keyword": {"value": f"*{t}*", "case_insensitive": True}}}
                         ],
                         "minimum_should_match": 1
                     }
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain.keyword": url_query}})
+                should_clauses.append(
+                    {"wildcard": {"domain.keyword": {"value": f"*{url_query}*", "case_insensitive": True}}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain.keyword": d}})
+                should_clauses.append({"wildcard": {"domain.keyword": {"value": f"*{d}*", "case_insensitive": True}}})
 
         bool_query = {}
         if must_should:
@@ -1498,7 +1500,7 @@ class elastic_request_generator:
     @staticmethod
     def index_query_stealerlog(p_index_data):
         bulk_entries = []
-        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=1)
+        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
             email = log["email"][0] if "email" in log and log["email"] else None
@@ -1507,7 +1509,7 @@ class elastic_request_generator:
             ip = log["ip"][0] if "ip" in log and log["ip"] else None
             channel = log["channel"] if "channel" in log else None
 
-            if p_index_data["type"] == "c":
+            if log["type"] == 'c':
                 if not email:
                     continue
                 seed = str(email) + "|" + str(channel or "")
@@ -1517,10 +1519,10 @@ class elastic_request_generator:
                 val = email or username or domain or ip or channel
                 seed = str(val) + "|" + str(channel or "")
 
-            m_hash = hashlib.sha256(seed.encode("utf-8", "ignore")).hexdigest()
+            m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
-            if bf.isduplicate(m_hash.lower()):
+            if bf.isduplicate(m_hash):
                 continue
 
             doc = {}

@@ -7,6 +7,7 @@ class search_credential_param_model(BaseModel):
     q: Optional[str] = ""
     url: Optional[str] = ""
     user: Optional[str] = ""
+    type: Optional[str] = "c"
     page: Optional[int] = 1
     category: Optional[str] = ""
     fullsearch: Optional[bool] = False
