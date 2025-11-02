@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import re
 
@@ -1513,7 +1514,7 @@ class elastic_request_generator:
             print("::::::::::::::::::::::::::::::::: cc1 " + _id, flush=True)
             print("::::::::::::::::::::::::::::::::: cc1 " + m_hash, flush=True)
 
-            if bf.isduplicate(m_hash):
+            if bf.isduplicate(copy.deepcopy(m_hash)):
                 print("::::::::::::::::::::::::::::::::: 1 " + log.get("raw", "") + m_hash, flush=True)
                 continue
             else:
