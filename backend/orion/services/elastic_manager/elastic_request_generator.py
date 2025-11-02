@@ -1185,12 +1185,11 @@ class elastic_request_generator:
 
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
-            must_should = [{"wildcard": {"type.keyword": {"value": "logs", "case_insensitive": True}}}]
+            must_should = [{"term": {"type.keyword": {"value": "logs", "case_insensitive": True}}}]
         else:
-            must_should = [{"wildcard": {"type.keyword": {"value": "c", "case_insensitive": True}}}]
+            must_should = [{"term": {"type.keyword": {"value": "c", "case_insensitive": True}}}]
 
         date_range_filter = {}
-
         should_clauses = []
 
         if p_query_model.fullsearch:
@@ -1219,10 +1218,9 @@ class elastic_request_generator:
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append(
-                    {"wildcard": {"domain.keyword": {"value": f"*{url_query}*", "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": {"value": url_query, "case_insensitive": True}}})
             for d in extra_domains:
-                should_clauses.append({"wildcard": {"domain.keyword": {"value": f"*{d}*", "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": {"value": d, "case_insensitive": True}}})
         else:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
@@ -1232,9 +1230,9 @@ class elastic_request_generator:
                     clause = {
                         "bool": {
                             "should": [
-                                {"wildcard": {"email.keyword": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"username.keyword": {"value": f"*{term}*", "case_insensitive": True}}},
-                                {"wildcard": {"domain.keyword": {"value": f"*{term}*", "case_insensitive": True}}}
+                                {"term": {"email.keyword": {"value": term, "case_insensitive": True}}},
+                                {"term": {"username.keyword": {"value": term, "case_insensitive": True}}},
+                                {"term": {"domain.keyword": {"value": term, "case_insensitive": True}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1244,19 +1242,18 @@ class elastic_request_generator:
                 clause = {
                     "bool": {
                         "should": [
-                            {"wildcard": {"email.keyword": {"value": f"*{t}*", "case_insensitive": True}}},
-                            {"wildcard": {"username.keyword": {"value": f"*{t}*", "case_insensitive": True}}},
-                            {"wildcard": {"domain.keyword": {"value": f"*{t}*", "case_insensitive": True}}}
+                            {"term": {"email.keyword": {"value": t, "case_insensitive": True}}},
+                            {"term": {"username.keyword": {"value": t, "case_insensitive": True}}},
+                            {"term": {"domain.keyword": {"value": t, "case_insensitive": True}}}
                         ],
                         "minimum_should_match": 1
                     }
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append(
-                    {"wildcard": {"domain.keyword": {"value": f"*{url_query}*", "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": {"value": url_query, "case_insensitive": True}}})
             for d in extra_domains:
-                should_clauses.append({"wildcard": {"domain.keyword": {"value": f"*{d}*", "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": {"value": d, "case_insensitive": True}}})
 
         bool_query = {}
         if must_should:
