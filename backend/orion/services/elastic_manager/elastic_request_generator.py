@@ -1504,10 +1504,14 @@ class elastic_request_generator:
         for log in p_index_data.get("logs", []):
             m_hash = hashlib.sha256(str(log.get("raw", "")).encode("utf-8", "ignore")).hexdigest()
             now = datetime.now(timezone.utc)
-            _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
 
             if "IK@inter88.com" not in str(log.get("raw", "")):
                 continue
+
+            print("::::::::::::::::::::::::::::::::: cc1 " + m_hash, flush=True)
+            _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
+            print("::::::::::::::::::::::::::::::::: cc1 " + _id, flush=True)
+            print("::::::::::::::::::::::::::::::::: cc1 " + m_hash, flush=True)
 
             if bf.isduplicate(m_hash):
                 print("::::::::::::::::::::::::::::::::: 1 " + log.get("raw", "") + m_hash, flush=True)
