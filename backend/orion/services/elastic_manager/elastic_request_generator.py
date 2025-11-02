@@ -1497,21 +1497,37 @@ class elastic_request_generator:
 
     @staticmethod
     def index_query_stealerlog(p_index_data):
-        from datetime import datetime, timezone
-
         bulk_entries = []
         bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=1)
 
-        for log in p_index_data.get("logs", []):
-            m_hash = hashlib.sha256(str(log.get("raw", "")).encode("utf-8", "ignore")).hexdigest()
-            now = datetime.now(timezone.utc)
+        for log in p_index_data["logs"]:
+            email = log["email"][0] if "email" in log and log["email"] else None
+            username = log["username"][0] if "username" in log and log["username"] else None
+            domain = log["domain"][0] if "domain" in log and log["domain"] else None
+            ip = log["ip"][0] if "ip" in log and log["ip"] else None
+            channel = log["channel"] if "channel" in log else None
 
-            _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
+            if p_index_data["type"] == "c":
+                if not email:
+                    continue
+                seed = str(email) + "|" + str(channel or "")
+            else:
+                if not (email or username or domain or ip or channel):
+                    continue
+                val = email or username or domain or ip or channel
+                seed = str(val) + "|" + str(channel or "")
 
-            if bf.isduplicate(copy.deepcopy(m_hash.lower())):
+            m_hash = hashlib.sha256(seed.encode("utf-8", "ignore")).hexdigest()
+            _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
+
+            if bf.isduplicate(m_hash.lower()):
                 continue
 
-            doc = {k: v for k, v in log.items() if v is not None}
+            doc = {}
+            for k in log:
+                if log[k] is not None:
+                    doc[k] = log[k]
+
             bulk_entries.append({
                 "create": {
                     "_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX,
