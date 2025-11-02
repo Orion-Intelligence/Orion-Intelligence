@@ -1507,10 +1507,10 @@ class elastic_request_generator:
             _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
 
             if bf.isduplicate(m_hash):
-                print("::::::::::::::::::::::::::::::::: 1 " + log.get("raw", ""), flush=True)
+                print("::::::::::::::::::::::::::::::::: 1 " + log.get("raw", "") + m_hash, flush=True)
                 continue
             else:
-                print("::::::::::::::::::::::::::::::::: 2 " + log.get("raw", ""), flush=True)
+                print("::::::::::::::::::::::::::::::::: 2 " + log.get("raw", "") + m_hash, flush=True)
 
             doc = {k: v for k, v in log.items() if v is not None}
             bulk_entries.append({
