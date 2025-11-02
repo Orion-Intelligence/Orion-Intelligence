@@ -1500,25 +1500,16 @@ class elastic_request_generator:
         from datetime import datetime, timezone
 
         bulk_entries = []
-        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
+        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=1)
 
         for log in p_index_data.get("logs", []):
             m_hash = hashlib.sha256(str(log.get("raw", "")).encode("utf-8", "ignore")).hexdigest()
             now = datetime.now(timezone.utc)
 
-            if "IK@inter88.com" not in str(log.get("raw", "")):
-                continue
-
-            print("::::::::::::::::::::::::::::::::: cc1 " + m_hash, flush=True)
             _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
-            print("::::::::::::::::::::::::::::::::: cc2 " + _id, flush=True)
-            print("::::::::::::::::::::::::::::::::: cc3 " + m_hash, flush=True)
 
-            if bf.isduplicate(copy.deepcopy(m_hash)):
-                print("::::::::::::::::::::::::::::::::: cc5 " + m_hash, flush=True)
+            if bf.isduplicate(copy.deepcopy(m_hash.lower())):
                 continue
-            else:
-                print("::::::::::::::::::::::::::::::::: cc6 " + m_hash, flush=True)
 
             doc = {k: v for k, v in log.items() if v is not None}
             bulk_entries.append({
