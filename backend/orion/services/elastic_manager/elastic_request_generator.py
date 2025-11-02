@@ -1147,13 +1147,13 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False):
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated = False):
         url = helper_controller.extract_domains_from_text(p_query_model.q)
-        if len(url) > 0:
+        if len(url)>0:
             p_query_model.url = url[0]
 
         user = helper_controller.extract_first_email(p_query_model.q)
-        if len(url) > 0:
+        if len(url)>0:
             p_query_model.user = user
 
         if not p_query_model.url and not p_query_model.user and consolidated:
@@ -1185,11 +1185,12 @@ class elastic_request_generator:
 
         category = (p_query_model.category or "").strip()
         if category and category.lower() in ("log", "logs"):
-            must_should = [{"term": {"type.keyword": {"value": "logs", "case_insensitive": True}}}]
+            must_should = [{"term": {"type.keyword": "logs"}}]
         else:
-            must_should = [{"term": {"type.keyword": {"value": "c", "case_insensitive": True}}}]
+            must_should = [{"term": {"type.keyword": "c"}}]
 
         date_range_filter = {}
+
         should_clauses = []
 
         if p_query_model.fullsearch:
@@ -1218,9 +1219,9 @@ class elastic_request_generator:
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain.keyword": {"value": url_query, "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": url_query}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain.keyword": {"value": d, "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": d}})
         else:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
@@ -1230,9 +1231,9 @@ class elastic_request_generator:
                     clause = {
                         "bool": {
                             "should": [
-                                {"term": {"email.keyword": {"value": term, "case_insensitive": True}}},
-                                {"term": {"username.keyword": {"value": term, "case_insensitive": True}}},
-                                {"term": {"domain.keyword": {"value": term, "case_insensitive": True}}}
+                                {"term": {"email.keyword": term}},
+                                {"term": {"username.keyword": term}},
+                                {"term": {"domain.keyword": term}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -1242,18 +1243,18 @@ class elastic_request_generator:
                 clause = {
                     "bool": {
                         "should": [
-                            {"term": {"email.keyword": {"value": t, "case_insensitive": True}}},
-                            {"term": {"username.keyword": {"value": t, "case_insensitive": True}}},
-                            {"term": {"domain.keyword": {"value": t, "case_insensitive": True}}}
+                            {"term": {"email.keyword": t}},
+                            {"term": {"username.keyword": t}},
+                            {"term": {"domain.keyword": t}}
                         ],
                         "minimum_should_match": 1
                     }
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain.keyword": {"value": url_query, "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": url_query}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain.keyword": {"value": d, "case_insensitive": True}}})
+                should_clauses.append({"term": {"domain.keyword": d}})
 
         bool_query = {}
         if must_should:
