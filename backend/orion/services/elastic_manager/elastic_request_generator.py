@@ -1506,6 +1506,9 @@ class elastic_request_generator:
             now = datetime.now(timezone.utc)
             _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
 
+            if "IK@inter88.com" not in str(log.get("raw", "")):
+                continue
+
             if bf.isduplicate(m_hash):
                 print("::::::::::::::::::::::::::::::::: 1 " + log.get("raw", "") + m_hash, flush=True)
                 continue
