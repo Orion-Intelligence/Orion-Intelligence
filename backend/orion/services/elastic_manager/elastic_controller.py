@@ -392,8 +392,10 @@ class elastic_controller:
                             idx = meta.get("_index")
                             if idx:
                                 target_indices.add(idx)
-            print("::::::::::::::::::::::::::::::::: x1 ", flush=True)
             response = await self.__m_dump_connection.bulk(body=p_data, request_timeout=220)
+            print("::::::::::::::::::::::::::::::::: x1 ", flush=True)
+            print(response, flush=True)
+            print("::::::::::::::::::::::::::::::::: x1 ", flush=True)
             return response
         except Exception as ex:
             print("::::::::::::::::::::::::::::::::: x2 ", flush=True)
