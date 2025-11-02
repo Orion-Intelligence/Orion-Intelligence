@@ -1511,14 +1511,14 @@ class elastic_request_generator:
 
             print("::::::::::::::::::::::::::::::::: cc1 " + m_hash, flush=True)
             _id = f"{now.strftime('%Y')}_UTC_{m_hash}"
-            print("::::::::::::::::::::::::::::::::: cc1 " + _id, flush=True)
-            print("::::::::::::::::::::::::::::::::: cc1 " + m_hash, flush=True)
+            print("::::::::::::::::::::::::::::::::: cc2 " + _id, flush=True)
+            print("::::::::::::::::::::::::::::::::: cc3 " + m_hash, flush=True)
 
             if bf.isduplicate(copy.deepcopy(m_hash)):
-                print("::::::::::::::::::::::::::::::::: 1 " + log.get("raw", "") + m_hash, flush=True)
+                print("::::::::::::::::::::::::::::::::: cc5 " + m_hash, flush=True)
                 continue
             else:
-                print("::::::::::::::::::::::::::::::::: 2 " + log.get("raw", "") + m_hash, flush=True)
+                print("::::::::::::::::::::::::::::::::: cc6 " + m_hash, flush=True)
 
             doc = {k: v for k, v in log.items() if v is not None}
             bulk_entries.append({

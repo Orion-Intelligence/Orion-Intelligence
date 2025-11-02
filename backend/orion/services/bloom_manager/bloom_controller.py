@@ -146,6 +146,7 @@ class bloom_controller:
 
     def isduplicate(self,text):
         data=self._to_bytes(text)
+        print("::::::::::::::::::::::::::::::::: cc4 " + text, flush=True)
         for L in reversed(self.layers):
             if self._contains_layer_blocked(L,data): return True
         L=self.layers[-1]; self._add_layer_blocked(L,data)
