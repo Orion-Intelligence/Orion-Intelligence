@@ -1525,7 +1525,7 @@ class elastic_request_generator:
 
             if bf.isduplicate(m_hash):
                 print("::::::::::::::::::::::::::::::::::::::: vv2", flush=True)
-                print(m_hash, flush=True)
+                print(log["raw"], flush=True)
                 print("::::::::::::::::::::::::::::::::::::::: vv2", flush=True)
                 continue
 
