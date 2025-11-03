@@ -1192,7 +1192,7 @@ class elastic_request_generator:
         if category and category.lower() in ("log", "logs"):
             must_should = [{"term": {"type.keyword": "logs"}}]
         else:
-            must_should = [{"term": {"type.keyword": "c"}}]
+            must_should = [{"terms": {"type.keyword": ["c", "credential"]}}]
 
         date_range_filter = {}
 
