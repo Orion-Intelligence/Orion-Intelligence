@@ -147,12 +147,6 @@ class search_model:
         document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
-        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(m_documents, flush=True)
-        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print(":::::::::::::::::::::::::::::::::::::::::", flush=True)
-
         return await self.__search_callback.search_handler(
             m_status, m_documents,
             search_general_callback_model,

@@ -31,9 +31,6 @@ class dump_model:
             query["group"] = params.group
 
         if params.status != "all":
-            print(":::::::::::::::::::::::::::::", flush=True)
-            print(params.status, flush=True)
-            print(":::::::::::::::::::::::::::::", flush=True)
             query["parsed_status"] = True if params.status == "parsed" else False
 
         if params.daterange:

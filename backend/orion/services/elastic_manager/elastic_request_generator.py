@@ -1163,6 +1163,7 @@ class elastic_request_generator:
             return None, None
 
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
+
         raw_url = p_query_model.url.strip() if p_query_model.url else ""
         url_query = ""
         if raw_url:
@@ -1171,6 +1172,13 @@ class elastic_request_generator:
 
         extra_user_terms = []
         extra_domains = []
+
+        print("::::::::::::::::::::::", flush=True)
+        print(p_query_model.user, flush=True)
+        print(user_query, flush=True)
+        print(raw_url, flush=True)
+        print("::::::::::::::::::::::", flush=True)
+
         if pFilter:
             if pFilter.get('m_username'):
                 extra_user_terms.extend([str(v).strip().lower() for v in pFilter['m_username'] if v and str(v).strip()])
