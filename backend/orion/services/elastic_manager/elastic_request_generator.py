@@ -1524,6 +1524,7 @@ class elastic_request_generator:
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
             if bf.isduplicate(m_hash):
+                print("pppp ::::::::::::::::::::::::::::: ")
                 continue
 
             doc = {}
