@@ -1153,7 +1153,13 @@ class elastic_request_generator:
             p_query_model.url = url[0]
 
         user = helper_controller.extract_first_email(p_query_model.q)
-        if p_query_model.q and len(url) > 0:
+
+        print("::::::::::::::::::::::", flush=True)
+        print(p_query_model.user, flush=True)
+        print(user, flush=True)
+        print("::::::::::::::::::::::", flush=True)
+
+        if not p_query_model.user and user:
             p_query_model.user = user
 
         if not p_query_model.url and not p_query_model.user and consolidated:
