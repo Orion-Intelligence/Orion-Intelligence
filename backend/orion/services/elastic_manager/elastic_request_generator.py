@@ -1526,10 +1526,10 @@ class elastic_request_generator:
 
             print("Bloom Filter Settings:", flush=True)
             print(f"  Directory: {bf.dirpath if hasattr(bf, 'dirpath') else 'N/A'}", flush=True)
-            print(f"  Capacity: {bf.capacity if hasattr(bf, 'capacity') else 'N/A'}", flush=True)
-            print(f"  Error Rate: {bf.error_rate if hasattr(bf, 'error_rate') else 'N/A'}", flush=True)
-            print(f"  Count: {bf.count if hasattr(bf, 'count') else 'N/A'}", flush=True)
-            print(f"  Bit Size: {bf.num_bits if hasattr(bf, 'num_bits') else 'N/A'}", flush=True)
+            print(f"  Capacity: {bf.capacity0 if hasattr(bf, 'capacity0') else 'N/A'}", flush=True)
+            print(f"  Error Rate: {bf.total_p if hasattr(bf, 'total_p') else 'N/A'}", flush=True)
+            print(f"  Count: {sum(L['bit_count'] for L in bf.layers) if hasattr(bf, 'layers') else 'N/A'}", flush=True)
+            print(f"  Bit Size: {sum(L['m'] for L in bf.layers) if hasattr(bf, 'layers') else 'N/A'}", flush=True)
 
             if bf.isduplicate(m_hash):
                 print("::::::::::::::::::::::::::::::::::::::: vv1" + log["raw"], flush=True)
