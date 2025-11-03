@@ -173,13 +173,18 @@ class bloom_controller:
             if self._contains_layer_blocked(L,data): return True
         return False
 
-    def isduplicate(self,text):
-        data=self._to_bytes(text)
+    def isduplicate(self, text):
+        import random
+        text = f"{text}_{random.random()}"
+        data = self._to_bytes(text)
         for L in reversed(self.layers):
-            if self._contains_layer_blocked(L,data): return True
-        L=self.layers[-1]; self._add_layer_blocked(L,data)
-        if self._layer_fill(L)>=self.max_fill:
-            self._add_layer(len(self.layers)); self._persist_manifest()
+            if self._contains_layer_blocked(L, data):
+                return True
+        L = self.layers[-1]
+        self._add_layer_blocked(L, data)
+        if self._layer_fill(L) >= self.max_fill:
+            self._add_layer(len(self.layers))
+            self._persist_manifest()
         return False
 
     def flush(self):
