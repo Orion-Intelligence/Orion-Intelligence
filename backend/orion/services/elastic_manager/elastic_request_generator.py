@@ -1542,7 +1542,6 @@ class elastic_request_generator:
             })
             bulk_entries.append(doc)
 
-        bf.flush()
         return bulk_entries
 
     @staticmethod
