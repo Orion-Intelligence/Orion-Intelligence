@@ -173,30 +173,46 @@ class bloom_controller:
     def _layer_fill(L):
         return L["bit_count"]/L["m"]
 
-    def add(self,item):
-        data=self._to_bytes(item); L=self.layers[-1]
-        self._add_layer_blocked(L,data)
-        if self._layer_fill(L)>=self.max_fill:
-            self._add_layer(len(self.layers)); self._persist_manifest()
+    def _recount_bits(self, L):
+        mm = L["mm"];
+        n = len(mm);
+        s = 0
+        for i in range(0, n, 8):
+            s += int.from_bytes(mm[i:i + 8], "little").bit_count()
+        L["bit_count"] = s
+        return s
 
-    def __contains__(self,item):
-        data=self._to_bytes(item)
-        for L in reversed(self.layers):
-            if self._contains_layer_blocked(L,data): return True
-        return False
+    def add(self, item):
+        data = self._to_bytes(item)
+        L = self.layers[-1]
+        self._add_layer_blocked(L, data)
+
+        # near-threshold: verify from mmap before deciding to grow
+        if L["bit_count"] / L["m"] >= self.max_fill * 0.95:
+            self._recount_bits(L)
+        if L["bit_count"] / L["m"] >= self.max_fill:
+            self._add_layer(len(self.layers))
+            self._persist_manifest()
 
     def isduplicate(self, text):
-        import random
-        text = f"{text}_{random.random()}"
         data = self._to_bytes(text)
+
+        # membership check across layers (newest first)
         for L in reversed(self.layers):
             if self._contains_layer_blocked(L, data):
                 return True
+
+        # not found -> insert into hottest (last) layer
         L = self.layers[-1]
         self._add_layer_blocked(L, data)
-        if self._layer_fill(L) >= self.max_fill:
+
+        # near-threshold: verify from mmap before deciding to grow
+        if L["bit_count"] / L["m"] >= self.max_fill * 0.95:
+            self._recount_bits(L)
+        if L["bit_count"] / L["m"] >= self.max_fill:
             self._add_layer(len(self.layers))
             self._persist_manifest()
+
         return False
 
     def flush(self):
