@@ -1511,16 +1511,17 @@ class elastic_request_generator:
 
             if log["type"] == 'c':
                 if not email and not username:
-                    print("::::::::::::::::::::::::::::::::::::::: vv1", flush=True)
                     continue
 
                 val = email or username
                 seed = str(val) + "|" + str(channel or "")
+                print("::::::::::::::::::::::::::::::::::::::: vv1", flush=True)
             else:
                 if not any([email, username, domain, ip, channel]):
                     continue
                 val = email or username or domain or ip or channel
                 seed = str(val) + "|" + str(channel or "")
+                print("::::::::::::::::::::::::::::::::::::::: vv2", flush=True)
 
             m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
