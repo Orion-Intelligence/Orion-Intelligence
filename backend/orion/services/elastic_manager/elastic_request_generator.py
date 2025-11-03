@@ -1538,6 +1538,7 @@ class elastic_request_generator:
             bulk_entries.append(doc)
 
         bf.flush()
+        print("dddd ::::::::::::::::::::::::::::: " + str(len(bulk_entries)))
         return bulk_entries
 
     @staticmethod

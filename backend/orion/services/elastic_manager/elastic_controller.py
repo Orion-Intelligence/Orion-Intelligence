@@ -392,5 +392,6 @@ class elastic_controller:
             print("pppp ::::::::::::::::::::::::::::: " + str(response))
             return response
         except Exception as ex:
+            print("cccc ::::::::::::::::::::::::::::: " + str(ex))
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
             raise HTTPException(status_code=500, detail=str(ex))
