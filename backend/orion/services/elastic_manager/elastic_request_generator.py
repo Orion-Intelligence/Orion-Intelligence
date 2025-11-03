@@ -1508,7 +1508,10 @@ class elastic_request_generator:
 
             if log["type"] == 'c' or log["type"] == 'credential':
                 if not email and not username:
+                    print("xxxx ::::::::::::::::::::::::::::: ")
                     continue
+                else:
+                    print("zzzz ::::::::::::::::::::::::::::: ")
 
                 val = email or username
                 seed = str(val) + "|" + str(channel or "")
