@@ -1512,6 +1512,7 @@ class elastic_request_generator:
             if log["type"] == 'c':
                 if not email:
                     continue
+                print("::::::::::::::::::::::::::::::::::::::: vv1", flush=True)
                 seed = str(email) + "|" + str(channel or "")
             else:
                 if not (email or username or domain or ip or channel):

@@ -144,7 +144,6 @@ class elastic_controller:
     async def search_query(self, document, data_filter):
         try:
             conn = self.__conn_for_index(document)
-
             m_data = await conn.search(index=document, body=data_filter, request_timeout=220)
             return True, m_data
         except Exception as ex:
@@ -390,7 +389,11 @@ class elastic_controller:
                             if idx:
                                 target_indices.add(idx)
             response = await self.__m_dump_connection.bulk(body=p_data, request_timeout=220)
+            print("::::::::::::::::::::::::::::::::: x1 ", flush=True)
+            print(response, flush=True)
+            print("::::::::::::::::::::::::::::::::: x1 ", flush=True)
             return response
         except Exception as ex:
+            print("::::::::::::::::::::::::::::::::: x2 ", flush=True)
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
             raise HTTPException(status_code=500, detail=str(ex))
