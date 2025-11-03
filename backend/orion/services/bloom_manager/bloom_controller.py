@@ -10,7 +10,7 @@ class bloom_controller:
                 cls.__instance=super().__new__(cls)
             return cls.__instance
 
-    def __init__(self, capacity=100_000_000_000, error_rate=0.05, growth=2.0, tighten=0.5, max_fill=0.5, block_bytes=64,
+    def __init__(self, capacity=100_000_000_000, error_rate=0.01, growth=2.0, tighten=0.5, max_fill=0.5, block_bytes=64,
                  stripes=256, dirpath=None, hot_ratio=0.01):
         if getattr(self, "_initialized", False): return
         if dirpath is None:

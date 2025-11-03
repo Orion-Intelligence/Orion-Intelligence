@@ -1497,7 +1497,7 @@ class elastic_request_generator:
     @staticmethod
     def index_query_stealerlog(p_index_data):
         bulk_entries = []
-        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.005)
+        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
             log["raw"] = "https://adobeid-na1.services.adobe.com/renga-idprovider/pages/create_account tberraz@speedy.com.ar:13Dic2003"
@@ -1507,7 +1507,7 @@ class elastic_request_generator:
             ip = log["ip"][0] if "ip" in log and log["ip"] else None
             channel = log["channel"] if "channel" in log else None
 
-            if log["type"] == 'c':
+            if log["type"] == 'c' or log["type"] == 'credential':
                 if not email and not username:
                     continue
 
