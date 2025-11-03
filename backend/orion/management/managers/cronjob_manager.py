@@ -1,5 +1,6 @@
 import asyncio
 from orion.management.jobs.insight_job import insight_job
+from orion.management.jobs.alert_job import alert_job
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
@@ -30,4 +31,11 @@ class cronjob_manager:
 
     async def init_jobs(self):
         asyncio.create_task(cronjob_manager.purge_loop())
+        asyncio.create_task(cronjob_manager.iocs_alert_loop())
         await self.__init_handles()
+
+    @staticmethod
+    async def iocs_alert_loop():
+        while True:
+            await alert_job.get_instance().run_daily_check()
+            await asyncio.sleep(20)

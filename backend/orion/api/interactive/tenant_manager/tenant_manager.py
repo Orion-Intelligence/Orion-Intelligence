@@ -1,8 +1,9 @@
-# orion/api/interactive/tenant_manager/tenant_manager.py
+from datetime import datetime
 import threading
 from typing import List
 from fastapi import HTTPException
 from starlette import status
+from cryptography.fernet import Fernet
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
@@ -36,7 +37,7 @@ class TenantManager:
 
     async def create_tenant(self, data: TenantRequest, current_user):
         dek = await self._dek(str(current_user.id))
-        from cryptography.fernet import Fernet
+        
         enc = Fernet(dek)
         encrypted_company = enc.encrypt(data.companyName.encode()).decode()
         encrypted_iocs = [
@@ -65,7 +66,6 @@ class TenantManager:
             await AuditLogManager.get_instance().register(str(current_user.id), "get_tenant_failed")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
         dek = await TenantKeyManager.get_instance().get_dek(str(current_user.id))
-        from cryptography.fernet import Fernet
         enc = Fernet(dek)
         ioc_models = [
             IocCategory(
@@ -87,7 +87,6 @@ class TenantManager:
             await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant_failed")
             raise HTTPException(status_code=404, detail="Onboarding record not found for this user.")
         dek = await TenantKeyManager.get_instance().get_dek(str(current_user.id))
-        from cryptography.fernet import Fernet
         enc = Fernet(dek)
         onboarding.companyName = enc.encrypt(data.companyName.encode()).decode()
         onboarding.iocs = [
@@ -119,3 +118,19 @@ class TenantManager:
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(str(user.id), "update_user")
         return {"message": "User updated successfully"}
+    
+    async def get_all_tenant(self)->List[db_tenant_model]:
+        tenant=await self._engine.find(db_tenant_model)
+        return tenant
+    
+    async def decrypt_iocs_for_tenant(self, tenant: db_tenant_model) -> List[IocCategory]:
+        dek = await TenantKeyManager.get_instance().get_dek(tenant.userId)
+        enc = Fernet(dek)
+        decrypted_iocs = []
+        for ioc in tenant.iocs or []:
+            decrypted_iocs.append(IocCategory(
+                ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
+                name=enc.decrypt(ioc.name.encode()).decode(),
+                values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]
+            ))
+        return decrypted_iocs
