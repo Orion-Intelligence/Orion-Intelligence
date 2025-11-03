@@ -1531,13 +1531,14 @@ class elastic_request_generator:
             print(f"  Count: {sum(L['bit_count'] for L in bf.layers) if hasattr(bf, 'layers') else 'N/A'}", flush=True)
             print(f"  Bit Size: {sum(L['m'] for L in bf.layers) if hasattr(bf, 'layers') else 'N/A'}", flush=True)
 
-            if bf.isduplicate(m_hash):
-                print("::::::::::::::::::::::::::::::::::::::: vv1" + log["raw"], flush=True)
-                continue
-            else:
-                print("::::::::::::::::::::::::::::::::::::::: vv2" + log["raw"], flush=True)
+            # if bf.isduplicate(m_hash):
+            #     print("::::::::::::::::::::::::::::::::::::::: vv1" + log["raw"], flush=True)
+            #     continue
+            # else:
+            #     print("::::::::::::::::::::::::::::::::::::::: vv2" + log["raw"], flush=True)
 
 
+            print("::::::::::::::::::::::::::::::::::::::: vv1" + log["raw"], flush=True)
             doc = {}
             for k in log:
                 if log[k] is not None:
