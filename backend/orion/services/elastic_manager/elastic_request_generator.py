@@ -1515,16 +1515,21 @@ class elastic_request_generator:
 
                 val = email or username
                 seed = str(val) + "|" + str(channel or "")
-                print("::::::::::::::::::::::::::::::::::::::: vv1", flush=True)
             else:
                 if not any([email, username, domain, ip, channel]):
                     continue
                 val = email or username or domain or ip or channel
                 seed = str(val) + "|" + str(channel or "")
-                print("::::::::::::::::::::::::::::::::::::::: vv2", flush=True)
 
             m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
+
+            print("Bloom Filter Settings:", flush=True)
+            print(f"  Directory: {bf.dirpath if hasattr(bf, 'dirpath') else 'N/A'}", flush=True)
+            print(f"  Capacity: {bf.capacity if hasattr(bf, 'capacity') else 'N/A'}", flush=True)
+            print(f"  Error Rate: {bf.error_rate if hasattr(bf, 'error_rate') else 'N/A'}", flush=True)
+            print(f"  Count: {bf.count if hasattr(bf, 'count') else 'N/A'}", flush=True)
+            print(f"  Bit Size: {bf.num_bits if hasattr(bf, 'num_bits') else 'N/A'}", flush=True)
 
             if bf.isduplicate(m_hash):
                 print("::::::::::::::::::::::::::::::::::::::: vv1" + log["raw"], flush=True)
@@ -1547,6 +1552,7 @@ class elastic_request_generator:
             bulk_entries.append(doc)
 
         bf.flush()
+        print("::::::::::::::::::::::::::::::::::::::: xxx" + str(len(bulk_entries)), flush=True)
         return bulk_entries
 
     @staticmethod
