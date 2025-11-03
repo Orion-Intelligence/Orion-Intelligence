@@ -1522,7 +1522,10 @@ class elastic_request_generator:
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
             if bf.isduplicate(m_hash):
+                print("pppp ::::::::::::::::::::::::::::: ")
                 continue
+            else:
+                print("zzzz ::::::::::::::::::::::::::::: ")
 
             doc = {}
             for k in log:
@@ -1538,7 +1541,6 @@ class elastic_request_generator:
             bulk_entries.append(doc)
 
         bf.flush()
-        print("dddd ::::::::::::::::::::::::::::: " + str(len(bulk_entries)))
         return bulk_entries
 
     @staticmethod

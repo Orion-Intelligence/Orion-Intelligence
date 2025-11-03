@@ -389,9 +389,7 @@ class elastic_controller:
                             if idx:
                                 target_indices.add(idx)
             response = await self.__m_dump_connection.bulk(body=p_data, request_timeout=220)
-            print("pppp ::::::::::::::::::::::::::::: " + str(response))
             return response
         except Exception as ex:
-            print("cccc ::::::::::::::::::::::::::::: " + str(ex))
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
             raise HTTPException(status_code=500, detail=str(ex))
