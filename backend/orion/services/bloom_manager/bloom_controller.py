@@ -1,4 +1,4 @@
-import os, json, math, threading, hashlib, mmap
+import os, json, math, threading, hashlib, mmap, tempfile, fcntl
 
 class bloom_controller:
     __instance=None
@@ -56,9 +56,28 @@ class bloom_controller:
         meta={"capacity0":self.capacity0,"total_p":self.total_p,"growth":self.growth,"tighten":self.tighten,"max_fill":self.max_fill,
               "block_bits":self.block_bits,"stripes":self.stripes,"hot_ratio":self.hot_ratio,
               "layers":[{"n":L["n"],"p":L["p"],"m":L["m"],"k":L["k"],"path":L["path"],"bit_count":L["bit_count"]} for L in self.layers]}
-        tmp=self.manifest_path+".tmp"
-        with open(tmp,"w") as f: json.dump(meta,f)
-        os.replace(tmp,self.manifest_path)
+        parent=os.path.dirname(self.manifest_path) or "."
+        os.makedirs(parent,exist_ok=True)
+        lock_path=self.manifest_path+".lock"
+        with open(lock_path,"a+") as lf:
+            fcntl.flock(lf.fileno(), fcntl.LOCK_EX)
+            try:
+                fd,tmp=tempfile.mkstemp(dir=parent,prefix=".manifest.",suffix=".tmp")
+                try:
+                    with os.fdopen(fd,"w",encoding="utf-8") as f:
+                        json.dump(meta,f,ensure_ascii=False,separators=(",",":"))
+                        f.flush()
+                        os.fsync(f.fileno())
+                    os.replace(tmp,self.manifest_path)
+                finally:
+                    if os.path.exists(tmp):
+                        try: os.unlink(tmp)
+                        except OSError: pass
+                dfd=os.open(parent,os.O_DIRECTORY)
+                try: os.fsync(dfd)
+                finally: os.close(dfd)
+            finally:
+                fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
 
     def _load_from_manifest(self):
         with open(self.manifest_path,"r") as f: meta=json.load(f)
