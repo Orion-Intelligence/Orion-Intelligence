@@ -1232,6 +1232,10 @@ class elastic_request_generator:
             if user_query:
                 user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query).lower()
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
+                print("::::::::::::::::::::::", flush=True)
+                print(terms, flush=True)
+                print("::::::::::::::::::::::", flush=True)
+
                 for quoted, unquoted in terms:
                     term = (quoted or unquoted).lower()
                     clause = {
@@ -1245,10 +1249,6 @@ class elastic_request_generator:
                         }
                     }
                     must_should.append(clause)
-
-            print("::::::::::::::::::::::", flush=True)
-            print(clause, flush=True)
-            print("::::::::::::::::::::::", flush=True)
 
             for t in extra_user_terms:
                 t = t.lower()
