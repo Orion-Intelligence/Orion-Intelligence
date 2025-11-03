@@ -1529,6 +1529,8 @@ class elastic_request_generator:
             m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()+''.join(random.choices(string.ascii_letters + string.digits, k=20))
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
+            print(bf.isduplicate(m_hash), flush=True)
+            print(m_hash, flush=True)
             if bf.isduplicate(m_hash):
                 # print("pppp ::::::::::::::::::::::::::::: ")
                 continue
