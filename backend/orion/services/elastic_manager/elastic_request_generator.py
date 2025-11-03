@@ -1503,6 +1503,7 @@ class elastic_request_generator:
         bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.005)
 
         for log in p_index_data["logs"]:
+            log["raw"] = "https://adobeid-na1.services.adobe.com/renga-idprovider/pages/create_account tberraz@speedy.com.ar:13Dic2003"
             email = log["email"][0] if "email" in log and log["email"] else None
             username = log["username"][0] if "username" in log and log["username"] else None
             domain = log["domain"][0] if "domain" in log and log["domain"] else None
@@ -1523,13 +1524,6 @@ class elastic_request_generator:
 
             m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
-
-            print("Bloom Filter Settings:", flush=True)
-            print(f"  Directory: {bf.dirpath if hasattr(bf, 'dirpath') else 'N/A'}", flush=True)
-            print(f"  Capacity: {bf.capacity0 if hasattr(bf, 'capacity0') else 'N/A'}", flush=True)
-            print(f"  Error Rate: {bf.total_p if hasattr(bf, 'total_p') else 'N/A'}", flush=True)
-            print(f"  Count: {sum(L['bit_count'] for L in bf.layers) if hasattr(bf, 'layers') else 'N/A'}", flush=True)
-            print(f"  Bit Size: {sum(L['m'] for L in bf.layers) if hasattr(bf, 'layers') else 'N/A'}", flush=True)
 
             # if bf.isduplicate(m_hash):
             #     print("::::::::::::::::::::::::::::::::::::::: vv1" + log["raw"], flush=True)
