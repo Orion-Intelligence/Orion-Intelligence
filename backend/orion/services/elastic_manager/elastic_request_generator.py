@@ -1147,13 +1147,17 @@ class elastic_request_generator:
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
 
     @staticmethod
-    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated = False):
+    def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False):
         url = helper_controller.extract_domains_from_text(p_query_model.q)
-        if len(url)>0:
+        if len(url) > 0:
             p_query_model.url = url[0]
 
         user = helper_controller.extract_first_email(p_query_model.q)
-        if len(url)>0:
+        print("::::::::::::::::::::::::::", flush=True)
+        print(user, flush=True)
+        print(p_query_model.q, flush=True)
+        print("::::::::::::::::::::::::::", flush=True)
+        if len(url) > 0:
             p_query_model.user = user
 
         if not p_query_model.url and not p_query_model.user and consolidated:
@@ -1170,7 +1174,7 @@ class elastic_request_generator:
         extra_domains = []
         if pFilter:
             if pFilter.get('m_username'):
-                extra_user_terms.extend([str(v).strip() for v in pFilter['m_username'] if v and str(v).strip()])
+                extra_user_terms.extend([str(v).strip().lower() for v in pFilter['m_username'] if v and str(v).strip()])
             for key in ('m_url', 'm_domain', 'm_search_all'):
                 vals = pFilter.get(key)
                 if vals:
@@ -1195,10 +1199,10 @@ class elastic_request_generator:
 
         if p_query_model.fullsearch:
             if user_query:
-                user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
+                user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query).lower()
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
                 for quoted, unquoted in terms:
-                    term = quoted or unquoted
+                    term = (quoted or unquoted).lower()
                     clause = {
                         "bool": {
                             "should": [
@@ -1209,6 +1213,7 @@ class elastic_request_generator:
                     }
                     must_should.append(clause)
             for t in extra_user_terms:
+                t = t.lower()
                 clause = {
                     "bool": {
                         "should": [
@@ -1219,42 +1224,43 @@ class elastic_request_generator:
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain.keyword": url_query}})
+                should_clauses.append({"term": {"domain": url_query}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain.keyword": d}})
+                should_clauses.append({"term": {"domain": d}})
         else:
             if user_query:
-                user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query)
+                user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query).lower()
                 terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
                 for quoted, unquoted in terms:
-                    term = quoted or unquoted
+                    term = (quoted or unquoted).lower()
                     clause = {
                         "bool": {
                             "should": [
-                                {"term": {"email.keyword": term}},
-                                {"term": {"username.keyword": term}},
-                                {"term": {"domain.keyword": term}}
+                                {"term": {"email": term}},
+                                {"term": {"username": term}},
+                                {"term": {"domain": term}}
                             ],
                             "minimum_should_match": 1
                         }
                     }
                     must_should.append(clause)
             for t in extra_user_terms:
+                t = t.lower()
                 clause = {
                     "bool": {
                         "should": [
-                            {"term": {"email.keyword": t}},
-                            {"term": {"username.keyword": t}},
-                            {"term": {"domain.keyword": t}}
+                            {"term": {"email": t}},
+                            {"term": {"username": t}},
+                            {"term": {"domain": t}}
                         ],
                         "minimum_should_match": 1
                     }
                 }
                 must_should.append(clause)
             if url_query:
-                should_clauses.append({"term": {"domain.keyword": url_query}})
+                should_clauses.append({"term": {"domain": url_query}})
             for d in extra_domains:
-                should_clauses.append({"term": {"domain.keyword": d}})
+                should_clauses.append({"term": {"domain": d}})
 
         bool_query = {}
         if must_should:
@@ -1530,7 +1536,6 @@ class elastic_request_generator:
             #     print("::::::::::::::::::::::::::::::::::::::: vv2" + log["raw"], flush=True)
 
 
-            print("::::::::::::::::::::::::::::::::::::::: vv1" + log["raw"], flush=True)
             doc = {}
             for k in log:
                 if log[k] is not None:
@@ -1545,7 +1550,6 @@ class elastic_request_generator:
             bulk_entries.append(doc)
 
         bf.flush()
-        print("::::::::::::::::::::::::::::::::::::::: xxx" + str(len(bulk_entries)), flush=True)
         return bulk_entries
 
     @staticmethod
