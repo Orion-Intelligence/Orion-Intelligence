@@ -1247,7 +1247,7 @@ class elastic_request_generator:
                     must_should.append(clause)
 
             print("::::::::::::::::::::::", flush=True)
-            print(clause.user, flush=True)
+            print(clause, flush=True)
             print("::::::::::::::::::::::", flush=True)
 
             for t in extra_user_terms:
