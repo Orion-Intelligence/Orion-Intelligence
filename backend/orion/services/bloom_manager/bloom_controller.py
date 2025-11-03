@@ -90,18 +90,30 @@ class bloom_controller:
                 fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
 
     def _load_from_manifest(self):
-        with open(self.manifest_path,"r") as f: meta=json.load(f)
-        self.capacity0=meta["capacity0"]; self.total_p=meta["total_p"]; self.growth=meta["growth"]; self.tighten=meta["tighten"]
-        self.max_fill=meta["max_fill"]; self.block_bits=meta["block_bits"]; self.stripes=meta["stripes"]; self.hot_ratio=meta.get("hot_ratio",0.01)
-        self.p0=self.total_p*(1.0-self.tighten)
-        self.layers=[]
-        for i,Lm in enumerate(meta["layers"]):
-            path=Lm["path"]; size_bytes=self._rounded_bits(Lm["m"])//8
-            os.makedirs(os.path.dirname(path),exist_ok=True)
-            fd=os.open(path,os.O_RDWR|os.O_CREAT); st=os.fstat(fd)
-            if st.st_size!=size_bytes: os.ftruncate(fd,size_bytes)
-            mm=mmap.mmap(fd,size_bytes,access=mmap.ACCESS_WRITE); os.close(fd)
-            self.layers.append({"n":Lm["n"],"p":Lm["p"],"m":Lm["m"],"k":Lm["k"],"mm":mm,"path":path,"bit_count":int(Lm.get("bit_count",0))})
+        with open(self.manifest_path, "r") as f:
+            meta = json.load(f)
+        self.capacity0 = meta["capacity0"];
+        self.total_p = meta["total_p"];
+        self.growth = meta["growth"];
+        self.tighten = meta["tighten"]
+        self.max_fill = meta["max_fill"];
+        self.block_bits = meta["block_bits"];
+        self.stripes = meta["stripes"];
+        self.hot_ratio = meta.get("hot_ratio", 0.01)
+        self.p0 = self.total_p * (1.0 - self.tighten)
+        self.layers = []
+        for i, Lm in enumerate(meta["layers"]):
+            path = Lm["path"];
+            size_bytes = self._rounded_bits(Lm["m"]) // 8
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            fd = os.open(path, os.O_RDWR | os.O_CREAT);
+            st = os.fstat(fd)
+            if st.st_size != size_bytes: os.ftruncate(fd, size_bytes)
+            mm = mmap.mmap(fd, size_bytes, access=mmap.ACCESS_WRITE);
+            os.close(fd)
+            actual_bits = sum(int.from_bytes(mm[j:j + 8], "little").bit_count() for j in range(0, size_bytes, 8))
+            self.layers.append({"n": Lm["n"], "p": Lm["p"], "m": Lm["m"], "k": Lm["k"], "mm": mm, "path": path,
+                                "bit_count": actual_bits})
 
     def _add_layer(self,i,hot=False):
         if hot:
