@@ -1525,6 +1525,8 @@ class elastic_request_generator:
 
             if bf.isduplicate(m_hash):
                 continue
+            else:
+                print("zzzz ::::::::::::::::::::::::::::: ")
 
             doc = {}
             for k in log:
