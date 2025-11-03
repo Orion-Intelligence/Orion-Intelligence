@@ -1154,15 +1154,12 @@ class elastic_request_generator:
 
         user = helper_controller.extract_first_email(p_query_model.q)
 
-        print("::::::::::::::::::::::", flush=True)
-        print(p_query_model.user, flush=True)
-        print(user, flush=True)
-        print("::::::::::::::::::::::", flush=True)
-
         if not p_query_model.user and user:
+            print("::::::::::::::::::::::", flush=True)
             p_query_model.user = user
 
         if not p_query_model.url and not p_query_model.user and consolidated:
+            print("::::::::::::::::::::::", flush=True)
             return None, None
 
         user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
@@ -1289,6 +1286,10 @@ class elastic_request_generator:
 
         if not (user_query or url_query or extra_user_terms or extra_domains):
             query["sort"] = ["_doc"]
+
+        print("::::::::::::::::::::::3", flush=True)
+        print(query, flush=True)
+        print("::::::::::::::::::::::3", flush=True)
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
