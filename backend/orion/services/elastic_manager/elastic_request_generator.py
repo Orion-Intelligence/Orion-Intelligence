@@ -1504,9 +1504,9 @@ class elastic_request_generator:
 
         for log in p_index_data["logs"]:
             log["raw"] = "https://adobeid-na1.services.adobe.com/renga-idprovider/pages/create_account tberraz@speedy.com.ar:13Dic2003"
-            email = log["email"][0] if "email" in log and log["email"] else None
-            username = log["username"][0] if "username" in log and log["username"] else None
-            domain = log["domain"][0] if "domain" in log and log["domain"] else None
+            email = "tberraz@speedy.com.ar"
+            username = "tberraz"
+            domain = "speedy.com.ar"
             ip = log["ip"][0] if "ip" in log and log["ip"] else None
             channel = log["channel"] if "channel" in log else None
 
