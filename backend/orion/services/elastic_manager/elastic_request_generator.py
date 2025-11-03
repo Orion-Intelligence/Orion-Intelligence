@@ -1511,8 +1511,8 @@ class elastic_request_generator:
 
             if log["type"] == 'c':
                 if not email:
+                    print("::::::::::::::::::::::::::::::::::::::: vv1", flush=True)
                     continue
-                print("::::::::::::::::::::::::::::::::::::::: vv1", flush=True)
                 seed = str(email) + "|" + str(channel or "")
             else:
                 if not (email or username or domain or ip or channel):
@@ -1524,6 +1524,9 @@ class elastic_request_generator:
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
             if bf.isduplicate(m_hash):
+                print("::::::::::::::::::::::::::::::::::::::: vv2", flush=True)
+                print(m_hash, flush=True)
+                print("::::::::::::::::::::::::::::::::::::::: vv2", flush=True)
                 continue
 
             doc = {}
