@@ -10,24 +10,34 @@ class bloom_controller:
                 cls.__instance=super().__new__(cls)
             return cls.__instance
 
-    def __init__(self,capacity=100_000_000_000,error_rate=0.01,growth=2.0,tighten=0.5,max_fill=0.5,block_bytes=64,stripes=256,dirpath=None,hot_ratio=0.01):
-        if getattr(self,"_initialized",False): return
+    def __init__(self, capacity=100_000_000_000, error_rate=0.05, growth=2.0, tighten=0.5, max_fill=0.5, block_bytes=64,
+                 stripes=256, dirpath=None, hot_ratio=0.01):
+        if getattr(self, "_initialized", False): return
         if dirpath is None:
-            base=os.environ.get("BLOOM_DIR") or os.getcwd()
-            dirpath=os.path.abspath(os.path.join(base,"data","bloom_data"))
-        os.makedirs(dirpath,exist_ok=True)
-        if capacity<=0 or not(0<error_rate<1) or growth<=1.0 or not(0<tighten<1) or not(0<max_fill<1) or block_bytes<=0 or stripes<=0:
+            dirpath = os.path.abspath(os.path.join(os.getcwd(), "bloom_data"))
+        os.makedirs(dirpath, exist_ok=True)
+        if capacity <= 0 or not (0 < error_rate < 1) or growth <= 1.0 or not (0 < tighten < 1) or not (
+                0 < max_fill < 1) or block_bytes <= 0 or stripes <= 0:
             raise ValueError("invalid params")
-        self.capacity0=int(capacity); self.total_p=float(error_rate); self.growth=float(growth); self.tighten=float(tighten)
-        self.max_fill=float(max_fill); self.block_bits=block_bytes*8; self.stripes=int(stripes); self.dirpath=dirpath; self.hot_ratio=float(hot_ratio)
-        self.manifest_path=os.path.join(self.dirpath,"manifest.json")
-        self.layers=[]; self._stripe_locks=[threading.Lock() for _ in range(self.stripes)]
-        if os.path.exists(self.manifest_path): self._load_from_manifest()
+        self.capacity0 = int(capacity)
+        self.total_p = float(error_rate)
+        self.growth = float(growth)
+        self.tighten = float(tighten)
+        self.max_fill = float(max_fill)
+        self.block_bits = block_bytes * 8
+        self.stripes = int(stripes)
+        self.dirpath = dirpath
+        self.hot_ratio = float(hot_ratio)
+        self.manifest_path = os.path.join(self.dirpath, "manifest.json")
+        self.layers = []
+        self._stripe_locks = [threading.Lock() for _ in range(self.stripes)]
+        if os.path.exists(self.manifest_path):
+            self._load_from_manifest()
         else:
-            self.p0=self.total_p*(1.0-self.tighten)
-            self._add_layer(0,hot=True if self.hot_ratio<1.0 else False)
+            self.p0 = self.total_p * (1.0 - self.tighten)
+            self._add_layer(0, hot=True if self.hot_ratio < 1.0 else False)
             self._persist_manifest()
-        self._initialized=True
+        self._initialized = True
 
     @staticmethod
     def g(**kw): return bloom_controller(**kw)
@@ -179,7 +189,6 @@ class bloom_controller:
     @staticmethod
     def load(dirpath=None):
         if dirpath is None:
-            base=os.environ.get("BLOOM_DIR") or os.getcwd()
-            dirpath=os.path.abspath(os.path.join(base,"data","bloom_data"))
-        os.makedirs(dirpath,exist_ok=True)
+            dirpath = os.path.abspath(os.path.join(os.getcwd(), "bloom_data"))
+        os.makedirs(dirpath, exist_ok=True)
         return bloom_controller.g(dirpath=dirpath)
