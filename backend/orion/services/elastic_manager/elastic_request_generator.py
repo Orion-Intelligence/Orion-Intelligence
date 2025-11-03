@@ -1230,24 +1230,13 @@ class elastic_request_generator:
                 should_clauses.append({"term": {"domain": d}})
         else:
             if user_query:
-                user_query = re.sub(r'(\S+@\S+)', lambda m: m.group(1).replace('@', ' '), user_query).lower()
-                terms = re.findall(r'"([^"]+)"|(\S+)', user_query)
-                print("::::::::::::::::::::::", flush=True)
-                print(terms, flush=True)
-                print("::::::::::::::::::::::", flush=True)
-
+                terms = re.findall(r'"([^"]+)"|(\S+)', user_query.lower())
                 for quoted, unquoted in terms:
                     term = (quoted or unquoted).lower()
-                    clause = {
-                        "bool": {
-                            "should": [
-                                {"term": {"email": term}},
-                                {"term": {"username": term}},
-                                {"term": {"domain": term}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    }
+                    if '@' in term:
+                        clause = {"bool": {"should": [{"term": {"email.keyword": term}}], "minimum_should_match": 1}}
+                    else:
+                        clause = {"bool": {"should": [{"term": {"username.keyword": term}}], "minimum_should_match": 1}}
                     must_should.append(clause)
 
             for t in extra_user_terms:
