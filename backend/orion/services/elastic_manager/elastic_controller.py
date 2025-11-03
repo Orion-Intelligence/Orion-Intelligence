@@ -379,17 +379,18 @@ class elastic_controller:
             raise HTTPException(status_code=500, detail=str(ex))
 
     async def index_dump(self, p_data):
-        try:
-            target_indices = set()
-            for part in p_data:
-                if isinstance(part, dict):
-                    for _, meta in part.items():
-                        if isinstance(meta, dict):
-                            idx = meta.get("_index")
-                            if idx:
-                                target_indices.add(idx)
-            response = await self.__m_dump_connection.bulk(body=p_data, request_timeout=220)
-            return response
-        except Exception as ex:
-            log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
-            raise HTTPException(status_code=500, detail=str(ex))
+        pass
+        # try:
+        #     target_indices = set()
+        #     for part in p_data:
+        #         if isinstance(part, dict):
+        #             for _, meta in part.items():
+        #                 if isinstance(meta, dict):
+        #                     idx = meta.get("_index")
+        #                     if idx:
+        #                         target_indices.add(idx)
+        #     response = await self.__m_dump_connection.bulk(body=p_data, request_timeout=220)
+        #     return response
+        # except Exception as ex:
+        #     log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
+        #     raise HTTPException(status_code=500, detail=str(ex))

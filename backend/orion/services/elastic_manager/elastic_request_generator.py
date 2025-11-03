@@ -1,6 +1,8 @@
 import copy
 import hashlib
+import random
 import re
+import string
 
 from datetime import timedelta, timezone
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
@@ -1518,7 +1520,7 @@ class elastic_request_generator:
                 val = email or username or domain or ip or channel
                 seed = str(val) + "|" + str(channel or "")
 
-            m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()
+            m_hash = hashlib.sha256(seed.lower().encode("utf-8", "ignore")).hexdigest()+''.join(random.choices(string.ascii_letters + string.digits, k=20))
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
 
             if bf.isduplicate(m_hash):
