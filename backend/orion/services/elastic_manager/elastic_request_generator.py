@@ -1499,13 +1499,7 @@ class elastic_request_generator:
     @staticmethod
     def index_query_stealerlog(p_index_data):
         bulk_entries = []
-        bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
-        for i, L in enumerate(bf.layers):
-            fill_ratio = L["bit_count"] / L["m"]
-            print(f"Layer {i}: fill={fill_ratio:.6f}, bits={L['bit_count']}/{L['m']}, k={L['k']}, path={L['path']}", flush=True)
-
-        print("::::::::::::::::::::::::::::::::::::::::", flush=True)
-        print("::::::::::::::::::::::::::::::::::::::::", flush=True)
+        bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
             email = log["email"][0] if "email" in log and log["email"] else None
