@@ -1173,12 +1173,6 @@ class elastic_request_generator:
         extra_user_terms = []
         extra_domains = []
 
-        print("::::::::::::::::::::::", flush=True)
-        print(p_query_model.user, flush=True)
-        print(user_query, flush=True)
-        print(raw_url, flush=True)
-        print("::::::::::::::::::::::", flush=True)
-
         if pFilter:
             if pFilter.get('m_username'):
                 extra_user_terms.extend([str(v).strip().lower() for v in pFilter['m_username'] if v and str(v).strip()])
@@ -1251,6 +1245,11 @@ class elastic_request_generator:
                         }
                     }
                     must_should.append(clause)
+
+            print("::::::::::::::::::::::", flush=True)
+            print(clause.user, flush=True)
+            print("::::::::::::::::::::::", flush=True)
+
             for t in extra_user_terms:
                 t = t.lower()
                 clause = {
