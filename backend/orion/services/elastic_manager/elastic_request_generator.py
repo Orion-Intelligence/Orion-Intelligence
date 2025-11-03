@@ -1500,7 +1500,6 @@ class elastic_request_generator:
         bf = bloom_controller.g(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
 
         for log in p_index_data["logs"]:
-            log["raw"] = "https://adobeid-na1.services.adobe.com/renga-idprovider/pages/create_account tberraz@speedy.com.ar:13Dic2003"
             email = log["email"][0] if "email" in log and log["email"] else None
             username = log["username"][0] if "username" in log and log["username"] else None
             domain = log["domain"][0] if "domain" in log and log["domain"] else None
