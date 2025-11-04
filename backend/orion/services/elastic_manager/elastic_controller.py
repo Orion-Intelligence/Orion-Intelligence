@@ -339,7 +339,6 @@ class elastic_controller:
                     if not exists and not bypass_empty_embedding:
                         emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
                         if not (isinstance(emb, list) and len(emb) > 0):
-                            log.g().w(f"Skipping insert without non-empty embedding: {doc_id}")
                             continue
 
                     await conn.update(
