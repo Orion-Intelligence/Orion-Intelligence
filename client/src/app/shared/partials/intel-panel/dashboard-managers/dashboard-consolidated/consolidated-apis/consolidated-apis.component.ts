@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass } from '@angular/common';
 import { ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../../model/results/consolidated/consolidated.callback.model';
 import { ConsolidatedApiService } from '../../../../../services/consolidated.api.service';
@@ -23,9 +23,6 @@ export class ConsolidatedApisComponent {
 
   ngOnInit(): void {
 
-    if (!this.query) {
-      this.showComponent = false;
-    }
   }
 
   public toggleCollapse(): void {
@@ -36,7 +33,6 @@ export class ConsolidatedApisComponent {
 
   public runSearch(newQuery: string): void {
     const validQuery = this.validateQuery(newQuery);
-
     if (!validQuery) {
       this.showComponent = false;
       this.isProcessing = false;
@@ -57,10 +53,10 @@ export class ConsolidatedApisComponent {
     }
     return null;
   }
-
   private extractEntities(validQuery: string): ConsolidatedLiveApis[] {
     const entities: ConsolidatedLiveApis[] = [];
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(validQuery);
+
     if (isEmail) {
       const username = validQuery.split('@')[0];
       const email = validQuery;
@@ -68,18 +64,35 @@ export class ConsolidatedApisComponent {
       entities.push({ type: 'social', q1: username } as ConsolidatedLiveApis);
     } else {
       const isPlaystore = validQuery.includes('play.google.com/store/apps');
+
       if (isPlaystore) {
         entities.push({ type: 'cracked', q1: validQuery } as ConsolidatedLiveApis);
       }
-      if (!isEmail && !isPlaystore) {
-        if (validQuery.length >= 3 && !validQuery.includes('.')) {
-          entities.push({ type: 'social', q1: validQuery } as ConsolidatedLiveApis);
+
+      try {
+        const url = new URL(validQuery);
+        const hostname = url.hostname.replace('www.', '');
+        const domainName = hostname.split('.')[0];
+
+        if (domainName.length >= 1) {
+          entities.push({ type: 'social', q1: domainName } as ConsolidatedLiveApis);
+        }
+      } catch {
+        if (validQuery.length >= 1) {
+          if (validQuery.includes('.')) {
+            validQuery = validQuery.split('.')[0];
+          }
+          if (validQuery) {
+            entities.push({ type: 'social', q1: validQuery } as ConsolidatedLiveApis);
+          }
         }
       }
     }
+
     if (entities.length > 0) {
       this.showComponent = true;
     }
+
     return entities;
   }
 

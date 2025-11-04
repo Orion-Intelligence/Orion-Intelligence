@@ -1,6 +1,6 @@
 .company-profile_section {
-    background-color: var(--color-blue-890);
-    border: 1px solid #FCFCFC12;
+    background-color: var(--color-consolidated-primary);
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     padding: 24px;
     margin: 24px;
@@ -26,7 +26,7 @@
 }
 
 .company-profile_section-description {
-    color: #A0B8D1;
+    color: var(--color-text6);
     font-size: 12px;
     font-weight: 400;
 }
@@ -35,7 +35,7 @@
     margin-top: 20px;
     height: 128px;
     background-color: var(--color-blue-820-light);
-    border: 1px solid #FCFCFC12;
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     display: flex;
     justify-content: space-between;
@@ -64,7 +64,7 @@
 }
 
 .company-profile_company-location {
-    color: #A0B8D1;
+    color: var(--color-text6);
     font-weight: 400;
     font-size: 14px;
 }
@@ -100,13 +100,13 @@
 .company-profile_box {
     margin-top: 20px;
     background-color: var(--color-blue-820-light);
-    border: 1px solid #FCFCFC12;
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     padding: 20px;
 }
 
 .company-profile_box-header {
-    color: #FFF;
+    color: var(--color-text1);
     font-weight: 600;
     font-size: 18px;
     margin-bottom: 16px;
@@ -131,7 +131,7 @@
 }
 
 .company-profile_info-label {
-    color: #A0B8D1;
+    color: var(--color-text6);
     font-size: 12px;
     font-weight: 400;
 }
@@ -142,7 +142,7 @@
     border: none;
     border-radius: 12px;
     height: 36px;
-    color: white;
+    color: var(--color-text1);
     font-family: Inter, sans-serif;
     font-weight: 500;
     font-size: 14px;
@@ -155,12 +155,12 @@
 
 .company-profile_info-value::placeholder,
 .company-profile_input::placeholder {
-    color: #ffffff5e;
+    color: var(--color-text4)
 }
 
 .company-profile_editable {
-    background: rgb(252 252 252 / 5%);
-    border: 1px solid #fcfcfc12;
+    background: var(--color-blue-820-light);
+    border: 1px solid var(--color-border);
     padding: 0 12px;
     margin-top: 10px;
 }
@@ -185,7 +185,7 @@
 }
 
 .company-profile_toggle-label {
-    color: #FFF;
+    color: var(--color-text1);
     font-weight: 600;
     font-size: 18px;
 }

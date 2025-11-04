@@ -10,9 +10,9 @@ class IocCategory(EmbeddedModel):
         return f"{self.name} ({len(self.values)} values)"
 
 class db_tenant_model(Model):
-    companyName: str
-    iocs: List[IocCategory]
     userId:str=""
+    iocs: List[IocCategory]
+    companyName: str
     phone:str=""
     country:str=""
     city:str=""

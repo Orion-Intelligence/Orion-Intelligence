@@ -192,7 +192,6 @@ class search_model:
             total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
         size = int(query.get("size", 10))
         total_pages = (total + size - 1) // size if size > 0 else 0
-
         return {
             "Result": ranked_results,
             "Page_Count": total_pages
@@ -325,7 +324,6 @@ class search_model:
     async def search_defacement_result(self, param: search_defacement_param_model):
         document, data_filter = elastic_request_generator().on_search_defacement_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-
         return await self.__search_callback.search_handler(
             m_status, m_documents,
             search_defacement_callback_model,

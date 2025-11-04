@@ -75,17 +75,17 @@
         </div>
 
         <div class="mt-1">
-          <a class="text-white" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url }}</a>
+          <a class="color-text1" [href]="item?.m_app_url" target="_blank" rel="noopener">{{ item?.m_app_url }}</a>
         </div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Package ID</div>
-        <div class="text-white">{{ item?.m_package_id }}</div>
+        <div class="color-text1">{{ item?.m_package_id }}</div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Network</div>
-        <div class="text-white">{{ item?.m_network }}</div>
+        <div class="color-text1">{{ item?.m_network }}</div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Version</div>
-        <div class="text-white">{{ item?.m_version }}</div>
+        <div class="color-text1">{{ item?.m_version }}</div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Content Type</div>
         <div class="flex-wrap-gap-8">
@@ -95,18 +95,18 @@
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Download Links</div>
         <div class="flex-wrap-gap-8">
           <a *ngFor="let d of item?.m_download_link" class="badge-red" [href]="d" target="_blank" rel="noopener">{{ d
-            }}</a> <span *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0" class="text-white">not
+            }}</a> <span *ngIf="!item?.m_download_link || item?.m_download_link?.length === 0" class="color-text1">not
             available</span>
         </div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">APK Size</div>
-        <div class="text-white">{{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}</div>
+        <div class="color-text1">{{ item?.m_apk_size ? item?.m_apk_size : 'not available' }}</div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Latest Date</div>
-        <div class="text-white">{{ item?.m_latest_date }}</div>
+        <div class="color-text1">{{ item?.m_latest_date }}</div>
 
         <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Mod Features</div>
-        <pre class="text-white pre-wrap-m0">{{ item?.m_mod_features }}</pre>
+        <pre class="color-text1 pre-wrap-m0">{{ item?.m_mod_features }}</pre>
 
         <hr class="dashboard-header-divider" *ngIf="!last">
       </div>
@@ -121,11 +121,11 @@
             {{ item?.m_title }}
           </div>
           <div class="mt-1">
-            <a class="text-white" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
+            <a class="color-text1" [href]="item?.m_url" target="_blank" rel="noopener">{{ item?.m_url }}</a>
           </div>
 
           <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Found On</div>
-          <div class="text-white">{{ item?.m_base_url }}</div>
+          <div class="color-text1">{{ item?.m_base_url }}</div>
 
           <div class="report__defacement-detail-header-items mt-3 mb-1 dashboard-header-label">Links</div>
           <div class="flex-wrap-gap-8">
@@ -146,16 +146,16 @@
     </div>
     <hr class="dashboard-header-divider" />
     <div class="report__defacement-detail-header-items mb-1 dashboard-header-label">Content Type:</div>
-    <span class="text-white">stolen</span>
+    <span class="color-text1">stolen</span>
     <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
       {{ apiType === 'user' ? 'Username:' : 'Query 1:' }}
     </div>
-    <span class="text-white">{{ displayQ1 && displayQ1.trim() !== '' ? displayQ1 : 'not found' }}</span>
+    <span class="color-text1">{{ displayQ1 && displayQ1.trim() !== '' ? displayQ1 : 'not found' }}</span>
     <ng-container *ngIf="apiType !== 'social' && apiType !== 'cracked'">
       <div class="report__defacement-detail-header-items mt-4 mb-1 dashboard-header-label">
         {{ apiType === 'user' ? 'Email Address:' : 'Query 2:' }}
       </div>
-      <span class="text-white">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</span>
+      <span class="color-text1">{{ displayQ2 && displayQ2.trim() !== '' ? displayQ2 : 'not found' }}</span>
     </ng-container>
     <div class="report__defacement-detail-header-items mt-4 mb-2 dashboard-header-label">Breaches:</div>
     <div class="flex-wrap-gap-8">

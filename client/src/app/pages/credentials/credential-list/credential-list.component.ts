@@ -1,7 +1,7 @@
-import {Component, Input} from '@angular/core';
-import {KeyValuePipe, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
-import {StealerLogCallbackModel} from '../../../shared/model/results/credentials/credential.callback.model';
-import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.animation';
+import { Component, Input } from '@angular/core';
+import { KeyValuePipe, NgForOf, NgIf, TitleCasePipe } from '@angular/common';
+import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-credential-list',
@@ -12,10 +12,12 @@ import {fadeInDashboardItem} from '../../../shared/animations/dashboard.item.ani
 })
 export class CredentialListComponent {
   @Input() stealerData$!: StealerLogCallbackModel;
+  @Input() currentPage: number = 1;
   @Input() type: string = 'credential';
   @Input() isLoading!: boolean;
 
   expandedIndex: number | null = null;
+  pageSize: number = 100;
 
   copyRowData(data: string): void {
     navigator.clipboard.writeText(data).catch(() => {

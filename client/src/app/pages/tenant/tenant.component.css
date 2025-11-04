@@ -193,8 +193,8 @@
   width: 280px;
   height: 40px;
   border-radius: 8px;
-  color: #fff;
-  border: 1px solid #ffffff20;
+  color: var(--color-text1);
+  border: 1px solid var(--color-border);
   outline: none;
   padding: 6px 12px;
   background-color: var(--color-blue-810);
@@ -226,7 +226,7 @@
   font-family: Inter, sans-serif;
   font-weight: 400;
   font-size: 14px;
-  color: #a0b8d1;
+  color: var(--color-text6);
   cursor: pointer;
   padding-bottom: 6px;
   border-bottom: 2px solid #0000;
@@ -238,8 +238,8 @@
 }
 
 .onboarding-step2__tab.selected {
-  color: #fff;
-  border-bottom: 2px solid #fff;
+  color: var(--color-text1);
+  border-bottom: 2px solid var(--color-text1);
 }
 
 
@@ -255,14 +255,14 @@
 .onboarding-step2__divider1 {
   width: 100%;
   height: 2px;
-  background: #fcfcfc0d;
+  background: var(--color-border);
   margin-bottom: 16px;
 }
 
 .onboarding-step2__divider2 {
   width: 100%;
   height: 2px;
-  background: #fcfcfc0d;
+  background: var(--color-border);
   margin: 16px 0;
 }
 
@@ -319,10 +319,10 @@
   display: flex;
   align-items: center;
   background: #FCFCFC0D;
-  border: 1px solid #FCFCFC12;
+  border: 1px solid var(--color-border);
   border-radius: 5px;
   padding: 4px 10px;
-  color: white;
+  color: var(--color-text1);
   font-family: Inter, sans-serif;
   font-weight: 400;
   font-size: 12px;
@@ -339,7 +339,7 @@
 
 .onboarding-step2__no-iocs {
   font-size: 14px;
-  color: #fff;
+  color: var(--color-text1);
   margin-top: 0;
 }
 
@@ -385,7 +385,7 @@
   font-family: Inter, sans-serif;
 }
 
-@media (width <= 1024px) {
+@media (width <=1024px) {
   .onboarding-box {
     width: 90%;
     height: auto;
