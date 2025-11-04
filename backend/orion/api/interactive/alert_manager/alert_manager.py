@@ -60,7 +60,6 @@ class AlertManager:
                     
                     alert.last_seen = datetime.utcnow()
                     alert_updated = True
-                    print(f"DEBUG: Alert updated (last_seen set) for Hash: {data_hash}")
                     break
         
         if not alert_updated:
@@ -74,7 +73,6 @@ class AlertManager:
                 first_seen=datetime.utcnow(),
                 last_seen=datetime.utcnow(),
             )
-            print(f"DEBUG: New alert created for Hash: {data_hash}")
 
             if existing_doc:
                 existing_doc.alerts.append(new_alert)

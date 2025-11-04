@@ -198,7 +198,7 @@
 .result__entity-condition {
   font-size: 12px;
   font-weight: 400;
-  color: #ffffff;
+  color: var(--color-text1);
   width: 80px;
   text-align: center;
   display: inline-block;

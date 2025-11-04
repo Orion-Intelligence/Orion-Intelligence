@@ -75,11 +75,35 @@ export class ConsolidatedScanComponent {
   }
 
   private validateAndExtractDomain(q: string): string {
+    if (!q) return '';
     let trimmed = q.trim().toLowerCase();
-    if (!trimmed || /\s/.test(trimmed) || trimmed.includes('/')) return '';
+
+    const isURL = trimmed.startsWith('http://') || trimmed.startsWith('https://');
+    if (isURL) {
+      trimmed = trimmed.replace(/^https?:\/\//, '');
+      if (trimmed.includes('/')) {
+        trimmed = trimmed.split('/')[0];
+      }
+    }
+
+    if (trimmed.startsWith('www.')) {
+      trimmed = trimmed.slice(4);
+    }
+
+    if (!trimmed || /\s/.test(trimmed) || !trimmed.includes('.')) {
+      return '';
+    }
+
     const atIdx = trimmed.lastIndexOf('@');
-    if (atIdx !== -1) trimmed = trimmed.slice(atIdx + 1);
-    if (!trimmed.includes('.')) return '';
+    if (atIdx !== -1) {
+      trimmed = trimmed.slice(atIdx + 1);
+    }
+
+    const labels = trimmed.split('.').filter(Boolean);
+    if (labels.length < 2) return '';
+
+    const rootDomain = labels.slice(-2).join('.');
+
     const blockedDomains = new Set([
       'google.com', 'bing.com', 'yahoo.com', 'duckduckgo.com', 'baidu.com', 'yandex.ru', 'ask.com',
       'facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'linkedin.com', 'reddit.com', 'tiktok.com',
@@ -104,12 +128,13 @@ export class ConsolidatedScanComponent {
       'wikipedia.org', 'wikimedia.org', 'tumblr.com', 'fandom.com', 'soundcloud.com', 'bandcamp.com',
       'deviantart.com', 'behance.net', 'dribbble.com'
     ]);
-    const labels = trimmed.split('.').filter(Boolean);
-    if (labels.length < 2) return '';
-    const rootDomain = labels.slice(-2).join('.');
-    if (blockedDomains.has(rootDomain)) return '';
-    return trimmed;
+    if (blockedDomains.has(rootDomain)) {
+      return '';
+    }
+
+    return rootDomain;
   }
+
 
   public initAndScan(target: string, type: 'repo' | 'domain'): void {
     this.scanResult$ = of(null);

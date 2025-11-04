@@ -15,7 +15,7 @@
             <div class="home-insight-card-company-info">
               <div class="home-insight-card-label">Title</div>
               <div class="home-insight-card-value">
-                {{item.title.slice(0, 20)}}
+                {{ item.title.replace('https://', '').slice(0, 20) }}
                 <span *ngIf="item.title.length > 30">…</span>
               </div>
             </div>
