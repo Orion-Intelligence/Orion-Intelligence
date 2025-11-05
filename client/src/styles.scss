@@ -103,7 +103,7 @@
   --color-blue-610: #295785;
   --color-blue-600: #153454;
   --color-gray-100: #ececec;
-  --color-gray-900: #A0B8D1;
+  --color-gray-900: #667085;
   --color-green-100: #ceca5f;
   --color-mono: white;
   --color-white: white;
@@ -120,6 +120,7 @@
   --color-text5: #57A5EB;
   --color-text6: #37363675;
   --color-text7: #8E1E1E;
+  --color-text8: #969696;
   --color-pagination: #ffffff;
   --color-pagination-hover: #E3E8EE;
   --color-scan-light: #c2c2c2;
@@ -140,9 +141,11 @@
   --color-border-orange: #F5CBA7;
   --color-progress: #E7EBF2;
   --color-placeholder: linear-gradient(90deg,
-    rgba(14, 22, 38, 0) 0%,
-    rgba(14, 22, 38, 0.45) 50%,
-    rgba(14, 22, 38, 0) 100%);
+      rgba(14, 22, 38, 0) 0%,
+      rgba(14, 22, 38, 0.45) 50%,
+      rgba(14, 22, 38, 0) 100%);
+
+  --filter-dropdown-icon: url('/assets/images/shared/theme/filter-dropdown-light-icon.svg');
 
 }
 
@@ -199,6 +202,7 @@
   --color-text5: #ffffff;
   --color-text6: #A0B8D190;
   --color-text7: #fff;
+  --color-text8: #D0D0D0;
   --color-pagination: #15345475;
   --color-pagination-hover: #102A4685;
   --color-scan-light: #172235;
@@ -210,7 +214,7 @@
   --color-border-red: #7a1c1c;
 
   --color-scan-light-200: #172235;
-  --color-border-scan-light: rgba(255,255,255,.0274509804);
+  --color-border-scan-light: rgba(255, 255, 255, .0274509804);
   --color-text-scan-light: #fff;
 
   --color-orange-100: #2b2a0f;
@@ -219,19 +223,24 @@
   --color-border-progress: #111827;
   --color-progress: #111827;
   --color-placeholder: linear-gradient(90deg,
-    rgba(14, 22, 38, 0) 0%,
-    rgba(14, 22, 38, 0.45) 50%,
-    rgba(14, 22, 38, 0) 100%);
+      rgba(14, 22, 38, 0) 0%,
+      rgba(14, 22, 38, 0.45) 50%,
+      rgba(14, 22, 38, 0) 100%);
 
+  --filter-dropdown-icon: url('/assets/images/shared/theme/filter-dropdown-dark-icon.svg');
 }
 
 img[src*="assets/images/shared/theme"]:not([data-ph]),
 img[src*="assets/images/sidebar/theme"]:not([data-ph]),
-img[src*="assets/images/statistics/"]:not([data-ph]) { filter: brightness(0.3) contrast(95%) drop-shadow(0 0 0 var(--color-text1)) !important; }
+img[src*="assets/images/statistics/"]:not([data-ph]) {
+  filter: brightness(0.3) contrast(95%) drop-shadow(0 0 0 var(--color-text1)) !important;
+}
 
 .dark-theme img[src*="assets/images/shared/theme"]:not([data-ph]),
 .dark-theme img[src*="assets/images/sidebar/theme"]:not([data-ph]),
-.dark-theme img[src*="assets/images/statistics/"]:not([data-ph]) { filter: drop-shadow(0 0 0 var(--color-text1)) !important; }
+.dark-theme img[src*="assets/images/statistics/"]:not([data-ph]) {
+  filter: drop-shadow(0 0 0 var(--color-text1)) !important;
+}
 
 
 html {

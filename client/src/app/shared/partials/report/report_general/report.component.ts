@@ -1,23 +1,23 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
-import {ResultListComponent} from '../../result-components/result-list/result-list.component';
-import {CommonModule} from '@angular/common';
-import {last, Observable} from 'rxjs';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {HelperService} from '../../../services/helper.service';
-import {AppService} from '../../../../services/core/app/app.service';
-import {Category} from '../../../constants/pages';
-import {ApiService} from '../../../services/api.service';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
-import {NgbCollapseModule} from '@ng-bootstrap/ng-bootstrap';
-import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
-import {ReportMappingComponent} from "../../report-mapping/report-mapping.component";
-import {AuthService} from '../../../../services/authetication/auth.service';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {ReportHeaderComponent} from '../../report-header/report-header.component';
-import {ChatWidgetComponent} from '../../chat-widget/chat-widget.component';
-import {CodeBlockComponent} from '../../code-block/code-block.component';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
+import { ResultListComponent } from '../../result-components/result-list/result-list.component';
+import { CommonModule } from '@angular/common';
+import { last, Observable } from 'rxjs';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { HelperService } from '../../../services/helper.service';
+import { AppService } from '../../../../services/core/app/app.service';
+import { Category } from '../../../constants/pages';
+import { ApiService } from '../../../services/api.service';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
+import { ReportMappingComponent } from "../../report-mapping/report-mapping.component";
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { ReportHeaderComponent } from '../../report-header/report-header.component';
+import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
+import { CodeBlockComponent } from '../../code-block/code-block.component';
 
 @Component({
   selector: 'app-result-panel',
@@ -44,7 +44,7 @@ export class ReportComponent implements OnInit {
   username$!: Observable<string | null>;
   role$!: Observable<string | null>;
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService,protected appService: AppService, protected authService: AuthService) {
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, protected authService: AuthService) {
     this.lang = appService.getConfig().appSettings.language_allowed
     this.lang_detected = appService.getConfig().appSettings.language_allowed
     this.username$ = this.authService.getUsername$();
@@ -63,7 +63,7 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({reportdata, type}) => {
+    this.route.data.subscribe(({ reportdata, type }) => {
       this.resultItem = reportdata;
       this.type = type;
       this.processResultItem();
@@ -82,7 +82,7 @@ export class ReportComponent implements OnInit {
     });
   }
 
-  langUpdate(result:any) {
+  langUpdate(result: any) {
     this.resultItem = result;
     this.processResultItem();
 

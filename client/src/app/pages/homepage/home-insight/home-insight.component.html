@@ -15,7 +15,7 @@
             <div class="home-insight-card-company-info">
               <div class="home-insight-card-label">Title</div>
               <div class="home-insight-card-value">
-                {{ item.title.replace('https://', '').slice(0, 20) }}
+                {{ trimUrl(item.title) }}
                 <span *ngIf="item.title.length > 30">…</span>
               </div>
             </div>
@@ -40,7 +40,7 @@
                 <div class="home-insight-card-country-info">
                   <div class="home-insight-card-label">URL</div>
                   <div class="home-insight-card-value" *ngIf="item.url[0]">
-                    {{ trimUrl(item.url[0]) }}
+                    {{ trimUrl(item.url[0],40) }}
                   </div>
                 </div>
               </ng-container>

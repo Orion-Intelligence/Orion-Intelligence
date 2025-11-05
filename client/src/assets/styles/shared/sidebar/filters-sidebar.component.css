@@ -1,8 +1,8 @@
 .sidebar_header {
   cursor: pointer;
-  background: var(--color-blue-650);
+  background: var(--color-blue-820-light);
   padding: 13px 20px;
-  border-bottom: 1px solid #092137;
+  border-bottom: 1px solid var(--color-border);
   border-top-left-radius: 15px;
   margin: 0;
 }
@@ -11,7 +11,7 @@
   font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 16px;
-  color: #fff;
+  color: var(--color-text1);
   margin-bottom: 0;
 }
 
@@ -31,7 +31,7 @@
   height: 100%;
   padding: 0 20px;
   overflow-y: auto;
-  background: var(--color-blue-660);
+  background: var(--color-blue-830);
 }
 
 .sidebar_content {
@@ -42,7 +42,7 @@
   font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #fff;
+  color: var(--color-text1);
   margin-bottom: 10px;
   margin-top: 20px;
 }
@@ -93,7 +93,7 @@
   height: 40px;
   text-align: left;
   box-shadow: 0 1px 2px 0 #1018280d;
-  border: 1px solid #ffffff12 !important;
+  border: 1px solid var(--color-border) !important;
   width: 100%;
   caret-color: var(--color-gray-900);
 }
@@ -130,7 +130,7 @@
 .sidebar_submit-button {
   background: var(--color-blue-640);
   font-family: Inter, sans-serif;
-  color: white;
+  color: var(--color-text1);
   border: 0;
   font-weight: 500;
   font-size: 14px;
@@ -214,6 +214,7 @@
 .sidebar_form .dropdown-select {
   border: none;
   outline: none;
+  position: relative;
 }
 
 .sidebar_form .dropdown-select:focus {
@@ -221,8 +222,18 @@
   color: #fff;
 }
 
-.sidebar_overlay .dropdown-select:focus::after {
-  background-image: url('/assets/images/shared/search_side_dropdown_icon.svg');
+.sidebar_form .dropdown-select::after {
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-left: 4px;
+  vertical-align: 4px;
+  background-image: var(--filter-dropdown-icon);
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: contain;
+  border: 0;
 }
 
 .sidebar_form .dropdown-menu .dropdown-item:hover {
@@ -252,7 +263,7 @@
   height: 100vh;
   z-index: -5;
   left: 0;
-  top:0;
+  top: 0;
   position: fixed;
 }
 
@@ -275,4 +286,3 @@
     transition: none;
   }
 }
-
