@@ -1,0 +1,100 @@
+<div class="category_report">
+
+    <div class="category_report_searchbar">
+        <div class="category_report_searchbar-input">
+            <img src="../../../../assets/images/shared/theme/magnifyingglassblack.svg" alt="search" />
+            <input type="text" placeholder="Search..." [(ngModel)]="searchText" />
+            <button *ngIf="searchText" class="category_report_searchbar-clear" (click)="searchText = ''"><img
+                    src="/assets/images/shared/cross-dark.svg"></button>
+        </div>
+
+        <button class="category_report_searchbar-btn" (click)="addCustomAlert()"><img
+                src="/assets/images/shared/theme/add_icon.svg"></button>
+    </div>
+
+    <div class="category_report_summary-header">
+        <span class="category_report_summary-title">Summary</span>
+    </div>
+
+    <div class="category_report_summary-row">
+        <div class="category_report_summary-card">
+            <span class="category_report_summary-card-heading">Total IOC</span>
+            <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(alerts)}}</span>
+        </div>
+
+        <div class="category_report_summary-card">
+            <span class="category_report_summary-card-heading">Newly Found</span>
+            <span class="category_report_summary-card-value">2435</span>
+        </div>
+
+        <div class="category_report_summary-card">
+            <span class="category_report_summary-card-heading">Last Update</span>
+            <span class="category_report_summary-card-value">{{getLatestDetectedDate(alerts)}}</span>
+        </div>
+
+        <div class="category_report_summary-card">
+            <span class="category_report_summary-card-heading">Sources</span>
+            <span class="category_report_summary-card-value">{{countUniqueSources(alerts)}}</span>
+        </div>
+    </div>
+
+    <div class="category_report_alerts">
+        <div class="category_report_alert-card" *ngFor="let item of alerts">
+            <div class="category_report_alert-card-top">
+                <span [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
+                    {{ item.risk }} Risk
+                </span>
+            </div>
+
+            <span class="category_report_alert-title">{{ sliceString(item.title,54) }}</span>
+            <span class="category_report_alert-subtitle">{{ sliceString(item.description,60) }}</span>
+
+            <div class="category_report_alert-divider"></div>
+
+            <div class="category_report_alert-field">
+                <span class="category_report_alert-field-heading">Url</span>
+                <span class="category_report_alert-field-value">{{ sliceString(item.url,70) }}</span>
+            </div>
+
+            <div class="category_report_alert-row">
+                <div class="category_report_alert-field">
+                    <span class="category_report_alert-field-heading">Category</span>
+                    <span class="category_report_alert-field-value">{{ item.category }}</span>
+                </div>
+
+                <div class="category_report_alert-field">
+                    <span class="category_report_alert-field-heading">Source</span>
+                    <span class="category_report_alert-field-value">{{ item.source }}</span>
+                </div>
+
+                <div class="category_report_alert-field">
+                    <span class="category_report_alert-field-heading">Entity</span>
+                    <span class="category_report_alert-field-value">{{ item.entity }}</span>
+                </div>
+
+                <div class="category_report_alert-field">
+                    <span class="category_report_alert-field-heading">Detected On</span>
+                    <span class="category_report_alert-field-value">{{ item.detectedOn| date:'MM/dd/yyyy' }}</span>
+                </div>
+            </div>
+
+            <div class="category_report_alert-iocs">
+                <span class="category_report_alert-iocs-heading">IOCs</span>
+                <div class="category_report_alert-iocs-tags">
+                    <div class="category_report_alert-iocs-tag" *ngFor="let ioc of getFilteredIocs(item.allIOC)">
+                        {{ ioc.label }}({{ ioc.count }})
+                    </div>
+                </div>
+            </div>
+
+            <div class="category_report_alert-footer">
+                <div class="category_report_alert-divider"></div>
+                <div class="category_report_alert-footer-buttons">
+                    <div class="category_report_alert-btn">IOCs Summary</div>
+                    <div class="category_report_alert-divider-vertical"></div>
+                    <div class="category_report_alert-btn" (click)="seeDetails(item.hash)">See Details</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

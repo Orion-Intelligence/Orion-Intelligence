@@ -50,6 +50,10 @@ export class SelectionStoreService {
       if ((!option && section !== 'home' && section !== 'directory') || (currentSection === section && currentOption === option)) {
         return;
       }
+      if (this.router.url.includes('/profile/consolidated') || this.router.url.includes('/profile/alerts') || this.router.url.includes('/profile/addCustomAlert')) {
+        this.setSelectedOption('Dashboard');
+        return;
+      }
 
       if (shouldRedirectToHome && this.router.url !== '/dashboard/home') {
         this.router.navigate(['/dashboard', 'home'], {

@@ -1,0 +1,63 @@
+<div class="company-profile_section">
+    <div class="company-profile_section-header">
+        <span class="company-profile_section-title">Add Custom Alert</span>
+        <div class="company-profile_action-buttons">
+            <button class="company-profile_edit-btn" (click)="saveAlert()">
+                Save
+            </button>
+        </div>
+
+    </div>
+    <span class="company-profile_section-description">Create and manage custom alerts by defining the type, IOC details,
+        and activity dates.</span>
+    <div class="company-profile_box">
+        <div class="company-profile_box-header">Alert Details</div>
+        <div class="company-profile_box-content">
+            <div class="company-profile_row">
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">Type</div>
+                    <select [(ngModel)]="alert.type" class="company-profile_info-value company-profile_editable">
+                        <option value="" disabled selected>Select type</option>
+                        <option value="general">General</option>
+                        <option value="breach">Breach</option>
+                        <option value="exploit">Exploit</option>
+                        <option value="social">Social</option>
+                        <option value="defacement">Defacement</option>
+                    </select>
+                </div>
+
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">IOC Type</div>
+                    <select [(ngModel)]="alert.ioc_type" class="company-profile_info-value company-profile_editable">
+                        <option value="" disabled selected>Select IOC type</option>
+                        <option *ngFor="let key of (iocTypes | keyvalue)" [value]="key.key">
+                            {{ key.value }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="company-profile_row">
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">IOC Value</div>
+                    <input type="text" [(ngModel)]="alert.ioc_value"
+                        class="company-profile_info-value company-profile_editable" placeholder="Enter IOC value" />
+                </div>
+
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">Data Hash</div>
+                    <input type="text" [(ngModel)]="alert.data_hash"
+                        class="company-profile_info-value company-profile_editable" placeholder="Enter data hash" />
+                </div>
+            </div>
+
+            <div class="company-profile_row">
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">First Seen</div>
+                    <input type="date" [(ngModel)]="alert.first_seen" (ngModelChange)="setLastSeen($event)"
+                        class="company-profile_info-value company-profile_editable" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

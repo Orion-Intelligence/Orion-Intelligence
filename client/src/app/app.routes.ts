@@ -40,6 +40,9 @@ import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profi
 import { ProfileResolver } from './shared/resolvers/profile.resolver';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
+import { SidebarProfileAlertsComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component';
+import { CategoryAlertReportComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component';
+import { AddCustomAlertComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component';
 
 const consolidatedChildren = [
   {
@@ -586,14 +589,25 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            canActivate: [subscriptionGuard],
+            path: 'consolidated',
+            data: { animation: 'ConsolidatedPage' },
+            children: consolidatedChildren
+          },
+          {
+            path: 'alerts/:type',
+            component: CategoryAlertReportComponent,
+            data: { type: 'alert', animation: 'AlertPage' },
+          },
+          {
+            path: 'addcustomalert',
+            component: AddCustomAlertComponent,
+            data: { type: 'alert', animation: 'AlertPage' },
+          },
+          {
             path: 'dashboard',
-            children: [
-              {
-                path: '',
-                redirectTo: 'all',
-                pathMatch: 'full'
-              },
-              ...consolidatedChildren]
+            component: SidebarProfileAlertsComponent,
+            data: { type: 'dashboard', animation: 'DashboardPage' },
           },
           {
             path: 'statistics',

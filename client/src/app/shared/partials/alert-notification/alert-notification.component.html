@@ -1,0 +1,39 @@
+<div (click)="close()" *ngIf="isNotificationOpen" @filterAnimation class="sidebar_overlay"></div>
+
+<div *ngIf="isNotificationOpen" class="notification_sidebar">
+
+    <div class="notification_sidebar-header">
+        <span class="notification_sidebar-title">Notifications</span>
+        <img src="assets/images/shared/theme/searchFilter_clossButton_white.svg" alt="close"
+            class="notification_sidebar-close-icon" (click)="close()" />
+    </div>
+
+    <div class="notification_sidebar-list">
+        <div class="notification_sidebar-item" *ngFor="let n of alertNotifications">
+            <div class="notification_sidebar-item-header">
+                <span class="notification_sidebar-item-category">{{ n.categoryName.charAt(0).toUpperCase() +
+                    n.categoryName.slice(1) }}
+                </span>
+                <span class="notification_sidebar-item-risk_tag"
+                    [ngClass]="'notification_sidebar-item-risk_tag-' + n.risk.toLowerCase()">
+                    {{ n.risk }} Risk
+                </span>
+            </div>
+
+            <div class="notification_sidebar-item-message">
+                New leak found on dark web mentioning
+                <span class="ioc-names">{{ n.iocNames.join(', ') }}</span>.
+            </div>
+
+            <div class="notification_sidebar-item-footer">
+                <div class="notification_sidebar-item-footer-left">
+                    <span class="subcategory">{{ n.subCategory }}</span>
+                    <span class="notification_sidebar-item-footer-dot"></span>
+                    <span class="time">{{ timeAgo(n.lastSeen) }}</span>
+                </div>
+                <button class="notification_sidebar-item-see_details" (click)="seeDetails(n.categoryName,n.hash)">See
+                    Details</button>
+            </div>
+        </div>
+    </div>
+</div>

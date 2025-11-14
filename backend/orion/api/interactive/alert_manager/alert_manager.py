@@ -1,10 +1,10 @@
-# orion/api/interactive/tenant_manager/tenant_manager.py
+
 from datetime import datetime
 import threading
 from typing import List
 
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_alert_model import alert_status, db_alert_model, AlertModel
+from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
 
 class AlertManager:
     __instance = None
@@ -26,32 +26,12 @@ class AlertManager:
 
     async def get_user_alerts(self, user_id: str) -> db_alert_model | None:
         return await self._engine.find_one(db_alert_model, db_alert_model.userId == user_id)
-
-    async def save_alerts(self, userId: str, new_alerts: List[AlertModel]):
-        if not new_alerts:
-            return
-        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.userId == userId)
-
-        if existing_doc:
-            update_result = await self._engine.update(
-                db_alert_model,
-                db_alert_model.userId == userId,
-                {"$push": {"alerts": {"$each": [alert.dict(by_alias=True) for alert in new_alerts]}}}
-            )
-            return update_result
-        else:
-            new_doc = db_alert_model(
-                userId=userId,
-                alerts=new_alerts
-            )
-            return await self._engine.save(new_doc)
     
 
-    async def upsert_alert(self, userId: str, data_hash: str, category: str, ioc_type: str, ioc_value: str):
+    async def upsert_alert(self, userId: str, data_hash: str, category: str, ioc_type: str, ioc_value: str,
+                           title:str,url:str,description:str,source:str,all_ioc:List[alert_all_ioc]=[], content_types: List[str] = []):
         existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.userId == userId)
-        
         alert_updated = False
-        
         if existing_doc and existing_doc.alerts:
             for alert in existing_doc.alerts:
                 if (alert.data_hash == data_hash and 
@@ -69,9 +49,15 @@ class AlertManager:
                 ioc_type=ioc_type,
                 ioc_value=ioc_value,
                 data_hash=data_hash,
+                title=title,
+                description=description,
+                url=url,
+                source=source,
+                content_types=content_types,
                 status=alert_status.ACTIVE,
                 first_seen=datetime.utcnow(),
                 last_seen=datetime.utcnow(),
+                all_ioc=all_ioc
             )
 
             if existing_doc:
@@ -90,3 +76,54 @@ class AlertManager:
         save_result = await self._engine.save(doc_to_save)
         
         return "Updated" if alert_updated else "Created"
+    
+    
+    async def add_custom_alert(self, data: AlertModel, current_user):
+        userId = str(current_user.id)
+        alert_id = data.alert_id or f"{data.data_hash}-{data.ioc_value}"
+        new_alert = AlertModel(
+            alert_id=alert_id,
+            type=data.type or '',
+            ioc_type=data.ioc_type or '',
+            ioc_value=data.ioc_value or '',
+            data_hash=data.data_hash or '',
+            title=data.title or '',
+            description=data.description or '',
+            source=data.source or '',
+            url=data.url or '',
+            
+            all_ioc=data.all_ioc or [],
+            content_types=data.content_types or [],
+            
+            status=data.status or alert_status.ACTIVE,
+        
+            first_seen=datetime.utcnow(),
+            last_seen=datetime.utcnow(),
+        )
+
+        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.userId == userId)
+
+        exists = False
+        if existing_doc and existing_doc.alerts:
+            for alert in existing_doc.alerts:
+                if (alert.data_hash == new_alert.data_hash and
+                    alert.ioc_value == new_alert.ioc_value and
+                    alert.type == new_alert.type):
+                    exists = True
+                    break
+        
+        if exists:
+            return "Already Exists"
+
+        if existing_doc:
+            existing_doc.alerts.append(new_alert)
+            save_doc = existing_doc
+        else:
+            save_doc = db_alert_model(
+                userId=userId,
+                alerts=[new_alert]
+            )
+
+        await self._engine.save(save_doc)
+        return "Created"
+

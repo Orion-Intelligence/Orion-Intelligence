@@ -34,6 +34,8 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequ
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
+from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
+from orion.api.interactive.alert_manager.alert_manager import AlertManager
 
 api_routes = APIRouter()
 
@@ -312,3 +314,7 @@ async def upload_profile_image(current_user=Depends(get_current_user)):
 @api_routes.post("/api/upload/image", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().uploadProfileImage(file, current_user)
+
+@api_routes.post("/api/add/alert", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().add_custom_alert(data, current_user)
