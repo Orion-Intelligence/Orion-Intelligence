@@ -2,7 +2,7 @@ import { AlertAllIoc } from "../company-profile/company.profile.model";
 
 export interface AlertCategorySummary {
     categoryName: string;
-    risk: AlertRiskLevel;
+    risk: string;
     iocCount: number;
     detectedDate: Date;
     tags: string[];
@@ -10,14 +10,16 @@ export interface AlertCategorySummary {
 
 export interface AlertNotification {
     categoryName: string;
-    risk: AlertRiskLevel;
+    risk: string;
     iocNames: string[];
     subCategory: string;
     lastSeen: Date;
     hash: string;
 }
 export interface CategoryAlerts {
-    risk: AlertRiskLevel;
+    custom: boolean;
+    seen: boolean;
+    risk: string;
     category: string;
     title: string;
     description: string;
@@ -28,4 +30,3 @@ export interface CategoryAlerts {
     allIOC: AlertAllIoc[];
     detectedOn: Date;
 }
-export type AlertRiskLevel = 'Low' | 'Medium' | 'High' | 'Critical';

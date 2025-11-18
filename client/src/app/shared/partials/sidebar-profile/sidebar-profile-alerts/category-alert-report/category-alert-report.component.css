@@ -9,6 +9,25 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 20px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.category_report_left-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-with-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.category_report_flex {
+    display: flex;
+    gap: 10px;
 }
 
 .category_report_searchbar-input {
@@ -55,6 +74,9 @@
 .category_report_searchbar-btn {
     background: none;
     border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 .category_report_searchbar-btn img {
@@ -123,6 +145,7 @@
     flex-direction: column;
     justify-content: space-between;
     background: var(--color-blue-820-light);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 16px;
     box-sizing: border-box;
@@ -173,6 +196,10 @@
     font-size: 12px;
 }
 
+.category_report_status-icon img {
+    width: 16px;
+    height: 16px;
+}
 
 .category_report_alert-title {
     display: block;

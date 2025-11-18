@@ -140,4 +140,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   closeNotifications(): void {
     this.isNotificationOpen$.next(false);
   }
+  getUnseenAlertCount(): number {
+    return this.appService.userProfile().alerts.filter(alert => !alert.report_seen).length;
+  }
+
 }

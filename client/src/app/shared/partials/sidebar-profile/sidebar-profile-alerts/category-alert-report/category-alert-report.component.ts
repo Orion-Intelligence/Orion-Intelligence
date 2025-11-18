@@ -4,21 +4,36 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryAlerts } from '../../../../model/alert-notification/alert.notification.model';
 import { AlertAllIoc, AlertModel } from '../../../../model/company-profile/company.profile.model';
-import { map } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../../constants/shared-enums';
+import { AddCustomAlertComponent } from "../add-custom-alert/add-custom-alert.component";
+import { SidebarService } from '../../../../services/sidebar.service';
+import { FilterModel } from '../../../../model/filter/filter.model';
+import { alert_filters } from '../../../../constants/filters';
+import { FiltersComponent } from "../../../filters/filters.component";
+import { ApiService } from '../../../../services/api.service';
+import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [NgFor, NgIf, CommonModule, FormsModule],
+  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent],
   templateUrl: './category-alert-report.component.html'
 })
 export class CategoryAlertReportComponent implements OnInit {
+  filterModel: FilterModel = alert_filters;
   alerts: CategoryAlerts[] = []
+  filteredAlerts: CategoryAlerts[] = []
   searchText: string = '';
   category: string = '';
   iocTypes: Record<string, string> = {};
-  constructor(public router: Router, public route: ActivatedRoute, public appService: AppService) { }
+  showCustomAlertPopup: boolean = false;
+  showEditAlertPopup: boolean = false;
+  isFilterOpen$: Observable<boolean>;
+  selectedAlert!: AlertModel;
+  constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService) {
+    this.isFilterOpen$ = this.sidebarService.sidebarState$;
+  }
   ngOnInit(): void {
     this.route.url.pipe(
       map(segments => {
@@ -32,20 +47,75 @@ export class CategoryAlertReportComponent implements OnInit {
     });
     this.iocTypes = { ...search_filter_labels };
     this.alerts = this.convertAlertsList(this.appService.userProfile().alerts, this.category);
+    this.filteredAlerts = this.alerts;
   }
 
-  addCustomAlert() {
-    const currentUrl = this.router.url;
-    this.router.navigateByUrl(`dashboard/profile/addcustomalert`);
+  showAlertPopup(action: string, hash: string) {
+    switch (action) {
+      case 'edit':
+        const alert = this.appService.userProfile().alerts.find(a => a.data_hash === hash);
+        if (alert) {
+          this.selectedAlert = alert;
+          this.showEditAlertPopup = true;
+        }
+        break;
+
+      case 'add':
+        this.showCustomAlertPopup = true;
+        break;
+
+      default:
+        console.warn(`Unknown action: ${action}`);
+        break;
+    }
+  }
+
+  cancleAlertPopup(refresh: boolean) {
+    if (refresh)
+      this.getLatestAlerts();
+    this.filteredAlerts = this.alerts;
+    this.showCustomAlertPopup = false;
+    this.showEditAlertPopup = false;
+  }
+  deleteCustomAlert(hash: string) {
+    this.apiService.post('alert/delete', hash).subscribe({
+      next: () => {
+        this.messageNotificationService.show("Alert deleted successfully!")
+        this.getLatestAlerts();
+      },
+      error: (err) => {
+        const mess = err?.error?.detail || 'delete alert failed'
+        this.messageNotificationService.show(mess)
+      },
+    });
+  }
+  getLatestAlerts() {
+    this.apiService.get<any>('profile/alerts').subscribe({
+      next: response => {
+        this.appService.userProfile().alerts = response
+        this.alerts = this.convertAlertsList(this.appService.userProfile().alerts, this.category);
+        this.filteredAlerts = this.alerts;
+      }
+    })
   }
   seeDetails(hash: string) {
     this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
+    const alerts = this.appService.userProfile().alerts;
+    const _alert = alerts.find(a => a.data_hash === hash);
+
+    if (_alert) {
+      _alert.report_seen = true;
+    }
+    this.apiService.post('alert/seen', [_alert]).subscribe({
+      next: () => {
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err?.error?.detail || 'Update failed');
+      },
+    });
   }
-  alertRist(type: string): string {
-    if (type == "breach")
-      return "cretical";
-    return "low";
-  }
+
   convertAlertsList(alerts: AlertModel[], targetType: string): CategoryAlerts[] {
     if (!alerts || alerts.length === 0) {
       return [];
@@ -58,7 +128,9 @@ export class CategoryAlertReportComponent implements OnInit {
     const entity = alert.ioc_value || 'N/A';
 
     return {
-      risk: 'High',
+      seen: alert.report_seen || false,
+      custom: alert.custom_alert || false,
+      risk: this.getRiskLevel(alert.type!),
       category: alert.type || 'unknown',
       title: alert.title || 'No Title',
       description: alert.description || 'No description provided.',
@@ -70,6 +142,26 @@ export class CategoryAlertReportComponent implements OnInit {
       allIOC: alert.all_ioc || [],
       detectedOn: alert.first_seen || new Date(),
     };
+  }
+  getRiskLevel(type: string): string {
+    const normalized = type.toLowerCase();
+    switch (normalized) {
+      case 'general':
+        return 'Low';
+
+      case 'breach':
+      case 'exploit':
+        return 'Critical';
+
+      case 'defacement':
+        return 'High';
+
+      case 'social':
+        return 'Medium';
+
+      default:
+        return 'Unknown';
+    }
   }
   sliceString(text: string, maxLength: number): string {
     if (typeof text !== 'string' || text === null || text === undefined) {
@@ -171,6 +263,30 @@ export class CategoryAlertReportComponent implements OnInit {
 
     return totalUniqueValues.size;
   }
+  getNewAlertCount(): number {
+    return this.filteredAlerts.filter(alert => !alert.seen).length;
+  }
+  applyFilter(filters: Record<string, string | null>) {
+    const range = filters['daterange'];
 
+    if (!range) {
+      this.filteredAlerts = [...this.alerts];
+      return;
+    }
 
+    const [startStr, endStr] = range.split(',');
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
+    this.filterByDate(startDate, endDate);
+  }
+  filterByDate(start: Date, end: Date) {
+    const inclusiveEnd = new Date(end);
+    inclusiveEnd.setHours(23, 59, 59, 999);
+
+    this.filteredAlerts = this.alerts.filter(alert => {
+      const lastSeenDate = new Date(alert.detectedOn);
+      return lastSeenDate >= start && lastSeenDate <= inclusiveEnd;
+    });
+  }
 }

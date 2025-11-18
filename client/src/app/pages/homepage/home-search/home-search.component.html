@@ -1,6 +1,6 @@
 <form (submit)="onSearchSubmit()" class="home__form default-input-container w-90">
   <div class="d-flex align-items-start justify-content-between w-100 flex-wrap">
-    <div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-12 col-sm-12 col-xs-12 default-input-container-mobile">
       <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
       <div class="input-group default-input-sub-container"
         [ngClass]="{'mobile-overlay-active': showFiltersOverlay,'mobile-overlay-inactive': !showFiltersOverlay }">

@@ -19,6 +19,8 @@ export interface AlertAllIoc {
 
 export interface AlertModel {
     alert_id?: string;
+    report_seen?: boolean;
+    custom_alert?: boolean;
     type?: string;
     ioc_type?: string;
     ioc_value?: string;

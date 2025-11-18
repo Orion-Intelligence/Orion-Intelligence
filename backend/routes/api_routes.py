@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Body
 from fastapi import Depends, Query, UploadFile
@@ -315,6 +315,22 @@ async def upload_profile_image(current_user=Depends(get_current_user)):
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().uploadProfileImage(file, current_user)
 
-@api_routes.post("/api/add/alert", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/alert/add", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
 async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_user)):
     return await AlertManager.get_instance().add_custom_alert(data, current_user)
+
+@api_routes.post("/api/alert/seen", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def add_custom_alert(data: list[AlertModel], current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().set_alert_seen(data, current_user)
+
+@api_routes.post("/api/alert/delete",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+async def delete_alert(hash: str = Body(...), current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().delete_alert(hash, current_user)
+
+@api_routes.post("/api/alert/update", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().update_alert(data, current_user)
+
+@api_routes.get("/api/profile/alerts", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def get_user_alerts(current_user = Depends(get_current_user)):
+    return await AlertManager.get_instance().getAllAlerts(current_user)

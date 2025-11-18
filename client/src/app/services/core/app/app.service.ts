@@ -27,7 +27,8 @@ export class AppService {
     country: '',
     city: '',
     postalCode: '',
-    taxId: ''
+    taxId: '',
+    alerts: []
   });
   public tenantData = signal<TenantModel>({
     companyName: '',

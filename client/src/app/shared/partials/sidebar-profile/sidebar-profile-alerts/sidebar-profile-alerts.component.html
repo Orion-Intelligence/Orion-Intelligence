@@ -6,7 +6,7 @@
         <div class="ioc-container_header-title">IOC’s</div>
 
         <div class="ioc-container_header-actions">
-            <button class="ioc-container_header-actions-entity-btn">Entity (14)</button>
+            <button class="ioc-container_header-actions-entity-btn">Entity ({{entityFiltersCount()}})</button>
 
             <button class="ioc-container_header-actions-edit-btn" (click)="editIocs()">
                 <img alt="edit-icon" src="../../../../../../assets/images/shared/theme/edit.svg">
@@ -17,22 +17,22 @@
 
     <div class="ioc-container_alerts">
         <div class="ioc-container_alerts-card critical">
-            <div class="ioc-container_alerts-card-count">0</div>
+            <div class="ioc-container_alerts-card-count">{{criticalRisks}}</div>
             <div class="ioc-container_alerts-card-label">Critical Alerts</div>
         </div>
 
         <div class="ioc-container_alerts-card high">
-            <div class="ioc-container_alerts-card-count">9</div>
+            <div class="ioc-container_alerts-card-count">{{highRisks}}</div>
             <div class="ioc-container_alerts-card-label">High Risk Alerts</div>
         </div>
 
         <div class="ioc-container_alerts-card medium">
-            <div class="ioc-container_alerts-card-count">21</div>
+            <div class="ioc-container_alerts-card-count">{{mediumRisks}}</div>
             <div class="ioc-container_alerts-card-label">Medium Risk</div>
         </div>
 
         <div class="ioc-container_alerts-card low">
-            <div class="ioc-container_alerts-card-count">342</div>
+            <div class="ioc-container_alerts-card-count">{{lowRisks}}</div>
             <div class="ioc-container_alerts-card-label">Low Risk</div>
         </div>
     </div>
@@ -73,5 +73,3 @@
     </div>
 
 </div>
-
-<router-outlet></router-outlet>

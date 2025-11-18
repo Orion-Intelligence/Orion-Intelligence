@@ -1,63 +1,97 @@
-<div class="company-profile_section">
-    <div class="company-profile_section-header">
-        <span class="company-profile_section-title">Add Custom Alert</span>
-        <div class="company-profile_action-buttons">
-            <button class="company-profile_edit-btn" (click)="saveAlert()">
-                Save
-            </button>
+<div class="add-alert-wrapper">
+    <div class="add-alert-container">
+        <div class="add-alert-header">
+            <span class="add-alert-heading">{{heading}}</span>
+            <span class="add-alert-close" (click)="cancleAlert(false)">✕</span>
         </div>
 
-    </div>
-    <span class="company-profile_section-description">Create and manage custom alerts by defining the type, IOC details,
-        and activity dates.</span>
-    <div class="company-profile_box">
-        <div class="company-profile_box-header">Alert Details</div>
-        <div class="company-profile_box-content">
-            <div class="company-profile_row">
-                <div class="company-profile_info-item">
-                    <div class="company-profile_info-label">Type</div>
-                    <select [(ngModel)]="alert.type" class="company-profile_info-value company-profile_editable">
-                        <option value="" disabled selected>Select type</option>
-                        <option value="general">General</option>
-                        <option value="breach">Breach</option>
-                        <option value="exploit">Exploit</option>
-                        <option value="social">Social</option>
-                        <option value="defacement">Defacement</option>
-                    </select>
-                </div>
 
-                <div class="company-profile_info-item">
-                    <div class="company-profile_info-label">IOC Type</div>
-                    <select [(ngModel)]="alert.ioc_type" class="company-profile_info-value company-profile_editable">
-                        <option value="" disabled selected>Select IOC type</option>
-                        <option *ngFor="let key of (iocTypes | keyvalue)" [value]="key.key">
-                            {{ key.value }}
-                        </option>
-                    </select>
+        <div class="add-alert-description">{{description}}</div>
+
+        <div class="add-alert-row">
+            <div class="add-alert-column">
+                <div class="add-alert-field-title">Select Type</div>
+                <div class="dropdown">
+                    <button aria-expanded="false"
+                        class="btn dropdown-toggle add-alert-input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+                        data-bs-toggle="dropdown" id="alertTypeDropdown" type="button">
+                        {{ getAlertTypeLabel(alert.type!.toLowerCase()) }}
+                    </button>
+
+                    <ul [attr.aria-labelledby]="'alertTypeDropdown'"
+                        class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3 dropdown-scroll">
+
+                        <li *ngFor="let t of alertTypes; let last = last">
+                            <a (click)="onAlertTypeChange(t.key)" class="dropdown-item py-0 d-flex align-items-center">
+                                {{ t.label }}
+                            </a>
+
+                            <ng-container *ngIf="!last">
+                        <li class="dropdown-divider m-0 mx-3"></li>
+                        </ng-container>
+                        </li>
+                    </ul>
                 </div>
             </div>
+            <div class="add-alert-column">
+                <div class="add-alert-field-title">Hash</div>
+                <input [(ngModel)]="alert.data_hash" class="add-alert-input" type="text"
+                    placeholder="Enter hash value" />
+            </div>
+        </div>
 
-            <div class="company-profile_row">
-                <div class="company-profile_info-item">
-                    <div class="company-profile_info-label">IOC Value</div>
-                    <input type="text" [(ngModel)]="alert.ioc_value"
-                        class="company-profile_info-value company-profile_editable" placeholder="Enter IOC value" />
-                </div>
+        <div class="add-alert-row">
+            <div class="add-alert-column">
+                <div class="add-alert-field-title">Select IOC Type</div>
 
-                <div class="company-profile_info-item">
-                    <div class="company-profile_info-label">Data Hash</div>
-                    <input type="text" [(ngModel)]="alert.data_hash"
-                        class="company-profile_info-value company-profile_editable" placeholder="Enter data hash" />
+                <div class="dropdown">
+                    <button aria-expanded="false"
+                        class="btn dropdown-toggle add-alert-input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+                        data-bs-toggle="dropdown" id="iocTypeDropdown" type="button">
+                        {{ getIOCTypeLabel(alert.ioc_type!) }}
+                    </button>
+
+                    <ul [attr.aria-labelledby]="'iocTypeDropdown'"
+                        class="dropdown-menu w-100 p-1 mt-2 border-0 shadow sidebar_dropdown-animation rounded-3 dropdown-scroll">
+
+                        <li *ngFor="let item of (iocTypes | keyvalue); let last = last">
+                            <a (click)="onIOCTypeChange(item.key)" class="dropdown-item py-0 d-flex align-items-center">
+                                {{ item.value }}
+                            </a>
+
+                            <ng-container *ngIf="!last">
+                        <li class="dropdown-divider m-0 mx-3"></li>
+                        </ng-container>
+                        </li>
+
+                    </ul>
                 </div>
             </div>
-
-            <div class="company-profile_row">
-                <div class="company-profile_info-item">
-                    <div class="company-profile_info-label">First Seen</div>
-                    <input type="date" [(ngModel)]="alert.first_seen" (ngModelChange)="setLastSeen($event)"
-                        class="company-profile_info-value company-profile_editable" />
-                </div>
+            <div class="add-alert-column">
+                <div class="add-alert-field-title">Ioc Value</div>
+                <input [(ngModel)]="alert.ioc_value" class="add-alert-input" type="text"
+                    placeholder="Enter Ioc value" />
             </div>
+        </div>
+
+
+        <div class="add-alert-row">
+            <div class="add-alert-column">
+                <div class="add-alert-field-title">First Seen</div>
+                <input type="date" [(ngModel)]="alert.first_seen" (ngModelChange)="setLastSeen($event)"
+                    class="add-alert-input" />
+            </div>
+            <div class="add-alert-column">
+            </div>
+        </div>
+
+
+        <div class="add-alert-footer">
+            <button class="add-alert-btn cancel" (click)="cancleAlert(false)">Cancel</button>
+            <button class="add-alert-btn add" (click)="saveAlert()">
+                {{ edit ? 'Save Alert' : 'Add Alert' }}
+            </button>
+
         </div>
     </div>
 </div>

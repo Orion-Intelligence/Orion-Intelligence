@@ -7,9 +7,19 @@
             <button *ngIf="searchText" class="category_report_searchbar-clear" (click)="searchText = ''"><img
                     src="/assets/images/shared/cross-dark.svg"></button>
         </div>
-
-        <button class="category_report_searchbar-btn" (click)="addCustomAlert()"><img
-                src="/assets/images/shared/theme/add_icon.svg"></button>
+        <div class="category_report_flex">
+            <span class="category_report_searchbar-btn" (click)="showAlertPopup('add','')">
+                <img src="/assets/images/shared/theme/add_icon.svg">
+            </span>
+            <div (click)="sidebarService.openSidebar()"
+                class="side-menu-container d-flex align-items-start justify-content-start gap-3">
+                <label appTooltip="Customize Results" class="filters-button d-flex align-items-center"> <img
+                        alt="Filter Icon" height="24" src="/assets/images/shared/theme/filter_icon.svg" priority
+                        width="24">
+                    <span class="ms-2">Filter</span>
+                </label>
+            </div>
+        </div>
     </div>
 
     <div class="category_report_summary-header">
@@ -19,31 +29,50 @@
     <div class="category_report_summary-row">
         <div class="category_report_summary-card">
             <span class="category_report_summary-card-heading">Total IOC</span>
-            <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(alerts)}}</span>
+            <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(filteredAlerts)}}</span>
         </div>
 
         <div class="category_report_summary-card">
             <span class="category_report_summary-card-heading">Newly Found</span>
-            <span class="category_report_summary-card-value">2435</span>
+            <span class="category_report_summary-card-value">{{getNewAlertCount()}}</span>
         </div>
 
         <div class="category_report_summary-card">
             <span class="category_report_summary-card-heading">Last Update</span>
-            <span class="category_report_summary-card-value">{{getLatestDetectedDate(alerts)}}</span>
+            <span class="category_report_summary-card-value">{{getLatestDetectedDate(filteredAlerts)}}</span>
         </div>
 
         <div class="category_report_summary-card">
             <span class="category_report_summary-card-heading">Sources</span>
-            <span class="category_report_summary-card-value">{{countUniqueSources(alerts)}}</span>
+            <span class="category_report_summary-card-value">{{countUniqueSources(filteredAlerts)}}</span>
         </div>
     </div>
 
     <div class="category_report_alerts">
-        <div class="category_report_alert-card" *ngFor="let item of alerts">
-            <div class="category_report_alert-card-top">
-                <span [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
-                    {{ item.risk }} Risk
-                </span>
+        <div class="category_report_alert-card" *ngFor="let item of filteredAlerts">
+            <div class="category_report_searchbar">
+                <div class="category_report_alert-card-top">
+                    <span [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
+                        {{ item.risk }} Risk
+                    </span>
+                </div>
+                <div class="category_report_flex">
+                    <div *ngIf="!item.seen" class="category_report_status-icon"><img
+                            src="/assets/images/shared/exclamation.svg"></div>
+                    <div *ngIf="item.custom" class="dropdown">
+                        <span class="category_report_status-icon" role="button" id="dropdownMenu"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/assets/images/shared/theme/three_dot_round.svg">
+                        </span>
+                        <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu">
+                            <li><a class="dropdown-item" (click)="showAlertPopup('edit',item.hash)"> Edit Alert</a></li>
+                            <li>
+                                <hr class="dropdown-divider mx-3">
+                            </li>
+                            <li><a class="dropdown-item" (click)="deleteCustomAlert(item.hash)"> Delete Alert</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <span class="category_report_alert-title">{{ sliceString(item.title,54) }}</span>
@@ -95,6 +124,24 @@
                     <div class="category_report_alert-btn" (click)="seeDetails(item.hash)">See Details</div>
                 </div>
             </div>
+
+
         </div>
     </div>
+</div>
+
+<ng-container *ngIf="showCustomAlertPopup">
+    <app-add-custom-alert (cancle)="cancleAlertPopup($event)" [heading]="'Add Custom Alert'"
+        [description]="'Create custom alerts by defining the type, IOC details, and activity dates.'"></app-add-custom-alert>
+</ng-container>
+<ng-container *ngIf="showEditAlertPopup">
+    <app-add-custom-alert (cancle)="cancleAlertPopup($event)" [edit]="true" [heading]="'Edite Custom Alert'"
+        [description]="'Edite custom alert by editing the type, IOC details, and activity dates.'"
+        [editAlertData]="selectedAlert"></app-add-custom-alert>
+</ng-container>
+
+<div *ngIf="filterModel" [class.sidebar_container-disable]="!(isFilterOpen$ | async)"
+    [class.filter__container-enable]="isFilterOpen$ | async" class="sidebar_container">
+    <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel"
+        (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>

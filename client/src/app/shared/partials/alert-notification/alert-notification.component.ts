@@ -5,6 +5,8 @@ import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
 import { AlertModel } from '../../model/company-profile/company.profile.model';
+import { ApiService } from '../../services/api.service';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 
 
 @Component({
@@ -19,7 +21,7 @@ export class AlertNotificationComponent implements OnInit {
   @Output() closeNotification = new EventEmitter<void>();
   alertNotifications: AlertNotification[] = [];
 
-  constructor(public appService: AppService, public router: Router) {
+  constructor(public appService: AppService, public router: Router, public apiService: ApiService, private messageNotificationService: MessageNotificationService) {
   }
 
   ngOnInit(): void {
@@ -28,11 +30,12 @@ export class AlertNotificationComponent implements OnInit {
 
   convertToAlertNotifications(alerts: AlertModel[]): AlertNotification[] {
     return alerts
-      .filter(alert => alert.type && alert.ioc_value && alert.last_seen && alert.data_hash)
+      .filter(alert => alert.type && alert.ioc_value && alert.last_seen && alert.data_hash &&
+        !alert.report_seen)
       .map(alert => {
         const notification: AlertNotification = {
           categoryName: alert.type!,
-          risk: 'Medium',
+          risk: this.getRiskLevel(alert.type!),
           iocNames: [alert.ioc_type!],
           subCategory: alert.content_types?.[0]!,
           lastSeen: new Date(alert.last_seen!),
@@ -42,7 +45,26 @@ export class AlertNotificationComponent implements OnInit {
         return notification;
       });
   }
+  getRiskLevel(type: string): string {
+    const normalized = type.toLowerCase();
+    switch (normalized) {
+      case 'general':
+        return 'Low';
 
+      case 'breach':
+      case 'exploit':
+        return 'Critical';
+
+      case 'defacement':
+        return 'High';
+
+      case 'social':
+        return 'Medium';
+
+      default:
+        return 'Unknown';
+    }
+  }
   timeAgo(date: Date | string): string {
     if (!date) return '';
     const d = new Date(date);
@@ -65,9 +87,47 @@ export class AlertNotificationComponent implements OnInit {
   seeDetails(category: string, hash: string) {
     this.close();
     this.router.navigate([`/dashboard/${category}/all/${hash}`]);
+    const alerts = this.appService.userProfile().alerts;
+    const alert = alerts.find(a => a.data_hash === hash);
+
+    if (alert) {
+      alert.report_seen = true;
+    }
   }
 
   close() {
     this.closeNotification.emit();
+  }
+  clearAll() {
+    const alerts = this.appService.userProfile().alerts;
+
+    if (!alerts) return;
+
+    alerts.forEach(alert => {
+      alert.report_seen = true;
+    });
+
+    this.apiService.post('alert/seen', alerts).subscribe({
+      next: () => {
+        this.getLatestAlerts()
+        this.messageNotificationService.show("Clear all alerts successfully!")
+        this.close();
+      },
+      error: (err) => {
+        const mess = err?.error?.detail || 'Clear all alerts failed'
+        this.messageNotificationService.show(mess)
+      },
+    });
+
+
+
+  }
+  getLatestAlerts() {
+    this.apiService.get<any>('profile/alerts').subscribe({
+      next: response => {
+        this.appService.userProfile().alerts = response
+        this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
+      }
+    })
   }
 }

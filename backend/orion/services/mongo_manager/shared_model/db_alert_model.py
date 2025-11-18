@@ -14,6 +14,8 @@ class alert_all_ioc(EmbeddedModel):
 
 class AlertModel(EmbeddedModel):
     alert_id: str=''
+    report_seen:bool=False
+    custom_alert:bool=False
     type: str=''                 
     ioc_type: str = ''    
     ioc_value: str = ''
