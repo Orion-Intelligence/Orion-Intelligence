@@ -1,0 +1,45 @@
+.notification-wrapper {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    pointer-events: none;
+}
+
+.notification-card {
+    background: #172235;
+    padding: 12px 24px;
+    color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ffffff22;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: fadeInOut 3s forwards ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}

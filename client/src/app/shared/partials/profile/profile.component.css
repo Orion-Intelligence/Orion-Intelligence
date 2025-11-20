@@ -20,6 +20,7 @@
   box-shadow: 0 4px 10px #0000001a;
   transform: translateY(10px);
   margin-right: 0;
+  top: calc(100% + 8px);
 }
 
 .profile-dropdown-width {
@@ -84,7 +85,10 @@
 }
 
 .profile {
-  display: inline;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: relative;
 }
 
 .profile_logout_icon {
@@ -204,4 +208,25 @@
   height: 1px;
   background-color: #e5e7eb;
   margin: 6px 0;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #FF0000;
+  color: white;
+  font-size: 6px;
+  font-weight: 600;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.notification-icon {
+  position: relative;
 }

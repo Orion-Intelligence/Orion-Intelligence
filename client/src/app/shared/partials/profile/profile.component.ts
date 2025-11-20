@@ -1,13 +1,14 @@
 import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, } from '@angular/core';
 import { AsyncPipe, NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { Router } from '@angular/router';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
 import { AppStorageService } from '../../../services/core/app/app-storage.service';
+import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
 
 
 @Component({
@@ -18,13 +19,15 @@ import { AppStorageService } from '../../../services/core/app/app-storage.servic
     NgOptimizedImage,
     NgIf,
     TooltipDirective,
-    NgClass
+    NgClass,
+    AlertNotificationComponent
   ],
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   username$: Observable<string | null>;
   role$: Observable<string | null>;
+  isNotificationOpen$ = new BehaviorSubject<boolean>(false);
 
   currentImageUrl: any;
   profileMail: string = '';
@@ -95,6 +98,10 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     const currentRole = this.authService.getRole();
     return currentRole === 'admin';
   }
+  isProfile(): boolean {
+    const currentRole = this.authService.getRole();
+    return currentRole === 'profile';
+  }
 
   toggleDropdown(event: Event) {
     event.stopPropagation();
@@ -126,4 +133,15 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       this.dropdownOpen.set(false);
     }
   }
+
+  openNotifications(): void {
+    this.isNotificationOpen$.next(true);
+  }
+  closeNotifications(): void {
+    this.isNotificationOpen$.next(false);
+  }
+  getUnseenAlertCount(): number {
+    return this.appService.userProfile().alerts.filter(alert => !alert.report_seen).length;
+  }
+
 }

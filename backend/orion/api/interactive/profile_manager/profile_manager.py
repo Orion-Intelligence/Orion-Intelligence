@@ -7,6 +7,7 @@ from orion.services.encryption_manager.tenant_key_manager import TenantKeyManage
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
+from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 
 
@@ -35,6 +36,7 @@ class ProfileManager:
 
     async def getCompanyProfileData(self,current_user)  -> ProfileParmaModel:
         profile = await self._engine.find_one(db_tenant_model, db_tenant_model.userId == str(current_user.id))
+        _alerts=await self._engine.find_one(db_alert_model,db_alert_model.userId == str(current_user.id))
         user=current_user
         dek = await self._dek(str(current_user.id))
         enc = Fernet(dek)
@@ -54,7 +56,8 @@ class ProfileManager:
             city=safe_decrypt(profile.city),
             postalCode=safe_decrypt(profile.postal_code),
             taxId=safe_decrypt(profile.tax_id),
-            preferences=deepcopy(user.preferences) or {}
+            preferences=deepcopy(user.preferences) or {},
+            alerts=_alerts.alerts
         )
         for key, value in company.preferences.items():
                 if value:

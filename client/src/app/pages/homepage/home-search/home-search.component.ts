@@ -30,9 +30,9 @@ export class HomeSearchComponent implements OnInit {
     const cfg = this.app_service.configData();
     const matchtype = cfg.localSettings.matchType;
     this.onSetMatchType(matchtype)
-    if (!this.isRoleAdmin) {
-      this.onSearchSubmit();
-    }
+    // if (!this.isRoleAdmin) {
+    //   this.onSearchSubmit();
+    // }
   }
 
   onSetMatchType(type: string) {
@@ -57,7 +57,7 @@ export class HomeSearchComponent implements OnInit {
         queryParamsHandling: 'merge'
       }).then();
     } else {
-      this.router.navigate(['/dashboard/profile/dashboard/all'], {
+      this.router.navigate(['/dashboard/profile/consolidated/all'], {
         queryParams,
         queryParamsHandling: 'merge'
       }).then();

@@ -8,6 +8,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription/pro-subscription.component';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
+import { MessageNotificationComponent } from "../../shared/partials/message-notification/message-notification.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -19,7 +20,8 @@ import { AppService } from '../../services/core/app/app.service';
     RouterOutlet,
     ScrollingModule,
     NgIf,
-    ProSubscriptionComponent
+    ProSubscriptionComponent,
+    MessageNotificationComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]

@@ -1,4 +1,4 @@
-<ng-container *ngIf="!checkProfile(); else profile">
+<ng-container>
   <form (submit)="onFormSubmit()" @fadeInDashboardItem
     class="default-input-container default-input-sub-container-padded w-90" *ngIf="!domain">
     <div class="d-flex align-items-start default-input-container-justify w-100 flex-wrap">
@@ -159,21 +159,6 @@
     </div>
   </form>
 </ng-container>
-<ng-template #profile>
-  <ng-container *ngIf="!hasIOCs() && !isLoading; else hasIocs">
-    <app-empty-ioc></app-empty-ioc>
-  </ng-container>
-  <ng-template #hasIocs>
-    <div class="result__match-row">
-      <label class="result__toggle-switch"> <input type="checkbox"
-          [(ngModel)]="app_service.configData().localSettings.entityFilterCondition"
-          (ngModelChange)="onEntityFilterToggle($event)" /> <span class="result__slider"></span> </label>
-      <div class="result__entity-condition">
-        {{ app_service.configData().localSettings.entityFilterCondition ? 'Exact Match' : 'Partial Match' }}
-      </div>
-    </div>
-  </ng-template>
-</ng-template>
 <ul
   *ngIf="showTabs && (list_grid || analyticsToggle || domain || discussion || consolidated) &&(!checkProfile() || hasIOCs())"
   class="nav nav-tabs default-input-container-tab" (click)="onTabClick($event)">
@@ -242,11 +227,6 @@
          && result_count==0" @fadeInDashboardItem>
   <app-empty-result [searchQuery]="local_query"></app-empty-result>
 </div>
-<!-- <div
-  *ngIf="isLoading!=null && (this.result_triggered || entityFiltersCount()>0 || sidebarFilterCount()>0) && !isLoading && result_count==0"
-  @fadeInDashboardItem>
-  <app-empty-result [searchQuery]="local_query"></app-empty-result>
-</div> -->
 
 <ng-container *ngIf="result_count && !isLoading && !(result_count==0) && type == Category.STRATEGIC">
   <div class="default-notification-banner">

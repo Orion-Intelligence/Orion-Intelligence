@@ -322,6 +322,18 @@ export const consolidated_filters: FilterModel = {
   }
 };
 
+export const alert_filters: FilterModel = {
+  filters: {
+    daterange: {
+      title: "Date Range",
+      options: [],
+      type: 'daterange',
+      tooltip: "Date Range",
+      selected: ""
+    },
+  }
+};
+
 export const filter_mapping: Record<string, string> = {
   source: "Source",
   daterange: "Date Range",

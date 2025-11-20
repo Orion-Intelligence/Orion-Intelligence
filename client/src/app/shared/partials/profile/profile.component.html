@@ -1,11 +1,15 @@
 <div *ngIf="this.username$|async" class="profile">
-  <a *ngIf="router.url !== '/login'" (click)="toggleDropdown($event)" appTooltip="This is a secure tooltip"
-    class="profile-dropdown-toggle">
+  <a *ngIf="isProfile()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
+    <div class="profile_category profile_logout_icon">
+      <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24">
+      <span class="notification-badge">{{getUnseenAlertCount()}}</span>
+    </div>
+  </a>
+  <a *ngIf="router.url !== '/login'" (click)="toggleDropdown($event)" appTooltip="" class="profile-dropdown-toggle">
     <div class="profile_category profile_logout_icon">
       <img alt="Logout" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24">
     </div>
   </a>
-
   <ul [class.show]="dropdownOpen()" class="profile-dropdown" [ngClass]="{'profile-dropdown-width': !isAdmin()}">
     <div class="profile-dropdown-arrow"></div>
     <ng-container *ngIf="isAdmin(); else profile">
@@ -70,4 +74,9 @@
       </li>
     </ng-template>
   </ul>
+  <div [class.sidebar_container-disable]="!(isNotificationOpen$ | async)"
+    [class.filter__container-enable]="isNotificationOpen$ | async" class="sidebar_container">
+    <app-alert-notification [isNotificationOpen]="isNotificationOpen$ |async"
+      (closeNotification)="closeNotifications()"></app-alert-notification>
+  </div>
 </div>

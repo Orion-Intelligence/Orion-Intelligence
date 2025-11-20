@@ -2,6 +2,7 @@
 @use 'assets/styles/shared/shared.css';
 @use 'assets/styles/shared/override.scss';
 @use 'assets/styles/fonts.scss';
+@use 'app/shared/partials/alert-notification/alert-notification.component.css';
 @use 'app/shared/partials/error-handler/error-handler.component.css';
 @use 'app/pages/homepage/homepage.component.css';
 @use 'app/shared/partials/chat-widget/chat-widget.component.css';
@@ -10,6 +11,9 @@
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/pages/tenant/tenant.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';

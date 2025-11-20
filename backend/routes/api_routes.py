@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Body
 from fastapi import Depends, Query, UploadFile
@@ -34,6 +34,8 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequ
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
+from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
+from orion.api.interactive.alert_manager.alert_manager import AlertManager
 
 api_routes = APIRouter()
 
@@ -312,3 +314,23 @@ async def upload_profile_image(current_user=Depends(get_current_user)):
 @api_routes.post("/api/upload/image", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().uploadProfileImage(file, current_user)
+
+@api_routes.post("/api/alert/add", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().add_custom_alert(data, current_user)
+
+@api_routes.post("/api/alert/seen", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def add_custom_alert(data: list[AlertModel], current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().set_alert_seen(data, current_user)
+
+@api_routes.post("/api/alert/delete",dependencies=[Depends(role_required([user_role.PROFILE])),Depends(status_required([UserStatus.ACTIVE]))])
+async def delete_alert(hash: str = Body(...), current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().delete_alert(hash, current_user)
+
+@api_routes.post("/api/alert/update", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().update_alert(data, current_user)
+
+@api_routes.get("/api/profile/alerts", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+async def get_user_alerts(current_user = Depends(get_current_user)):
+    return await AlertManager.get_instance().getAllAlerts(current_user)
