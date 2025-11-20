@@ -24,6 +24,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -53,7 +54,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   prfileCategories = Object.values(ProfileSubCategory)
   category = Category;
 
-  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService) {
+  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
 
   ngOnInit() {

@@ -1,11 +1,13 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
+import { LicenseService } from '../../services/licenses/licenses.service';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollService {
 
-  constructor() {
+  constructor(protected licenseService: LicenseService, protected dashboardService: DashboardService) {
     this.resetOnReload();
   }
 
@@ -33,6 +35,10 @@ export class ScrollService {
   }
 
   openCTI(event: MouseEvent, itemId: string): void {
+    if (!this.licenseService.canUseCtiGraph()) {
+      this.dashboardService.showSubscription.set(true);
+      return
+    }
     event.stopPropagation()
     if (itemId) {
       const baseUrl = `${window.location.origin}/dashboard/ctigraph`;
@@ -58,7 +64,7 @@ export class ScrollService {
       if (scrollableContainer) {
         scrollableContainer.scrollTop = position;
       } else {
-        window.scrollTo({top: position, behavior: 'auto'});
+        window.scrollTo({ top: position, behavior: 'auto' });
       }
     }
   }

@@ -15,6 +15,7 @@ export class AuthService {
   private onboarding = signal<boolean>(false);
   private subscription = signal<boolean>(false);
   private verificationDate = signal<string>('');
+  private licenses = signal<string[]>([]);
 
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
@@ -68,6 +69,7 @@ export class AuthService {
           this.onboarding.set(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
           this.subscription.set(this.toBool(sessionData?.subscription));
           this.verificationDate.set(sessionData?.verificationDate ?? '');
+          this.licenses.set(sessionData?.licenses ?? []);
 
           this.setToken(response.access_token);
           this.startTokenRefresh();
@@ -106,6 +108,7 @@ export class AuthService {
           this.onboarding.set(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
           this.subscription.set(this.toBool(sessionData?.subscription));
           this.verificationDate.set(sessionData?.verificationDate ?? '');
+          this.licenses.set(sessionData?.licenses ?? []);
 
           this.setToken(response.access_token);
           this.startTokenRefresh();
@@ -126,7 +129,8 @@ export class AuthService {
     this.onboarding.set(false);
     this.subscription.set(false);
     this.verificationDate.set('');
-    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null });
+    this.licenses.set([]);
+    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null, licenses: [] });
     this.tokenRefreshService.stopTokenRefresh();
     this.router.navigate(['/login']).then();
     this.appStorageService.clearStorage()
@@ -171,6 +175,10 @@ export class AuthService {
     return this.verificationDate();
   }
 
+  getLicenses(): string[] {
+    return this.licenses();
+  }
+
   isAuthenticated(): boolean {
     return !!this.getStoredToken();
   }
@@ -188,7 +196,7 @@ export class AuthService {
 
   private setToken(token: string): void {
     localStorage.setItem('token', token);
-    this.authState.next({ token, username: this.username(), role: this.role(), isAuthenticated: true, onboarding: String(this.onboarding()), error: null });
+    this.authState.next({ token, username: this.username(), role: this.role(), isAuthenticated: true, onboarding: String(this.onboarding()), error: null, licenses: this.licenses(), });
   }
 
   private getStoredToken(): string | null {
@@ -197,7 +205,7 @@ export class AuthService {
 
   private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
-    return { token, username: this.username(), role: this.role(), isAuthenticated: !!token, onboarding: String(this.onboarding()), error: null };
+    return { token, username: this.username(), role: this.role(), isAuthenticated: !!token, onboarding: String(this.onboarding()), error: null, licenses: this.licenses() };
   }
 
   private startTokenRefresh(): void {
@@ -224,6 +232,7 @@ export class AuthService {
           this.onboarding.set(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding ?? this.onboarding()));
           this.subscription.set(this.toBool(sessionData?.subscription ?? this.subscription()));
           this.verificationDate.set(sessionData?.verificationDate ?? this.verificationDate());
+          this.licenses.set(sessionData?.licenses ?? []);
         }
         if (response?.access_token) this.setToken(response.access_token);
       }),

@@ -41,8 +41,8 @@
             <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
               {{ errorMessage }} </p>
             <div>
-              <input [disabled]="!loginForm.valid" [class.login-button]="loginForm.valid"
-                [class.login-button-disable]="!loginForm.valid" type="submit" value="Sign In" />
+              <input [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid"
+                type="submit" value="Sign In" />
             </div>
           </form>
 

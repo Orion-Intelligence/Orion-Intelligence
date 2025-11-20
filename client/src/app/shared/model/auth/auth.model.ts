@@ -5,4 +5,5 @@ export interface AuthModel {
   isAuthenticated: boolean;
   onboarding: string | null;
   error: string | null;
+  licenses?: string[];
 }

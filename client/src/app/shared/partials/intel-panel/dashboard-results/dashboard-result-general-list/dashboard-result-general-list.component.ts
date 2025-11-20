@@ -1,10 +1,10 @@
-import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
-import {CommonModule, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {ScrollService} from '../../../../services/scroll.service';
-import {DefacementResultItem} from '../../../../model/results/defacement/defacement.callback.model';
-import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
-import {fadeInDashboardItem} from '../../../../animations/dashboard.item.animation';
+import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { CommonModule, DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ScrollService } from '../../../../services/scroll.service';
+import { DefacementResultItem } from '../../../../model/results/defacement/defacement.callback.model';
+import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
+import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-dashboard-result-general-list',
@@ -34,7 +34,7 @@ export class DashboardResultGeneralListComponent implements OnInit, AfterViewIni
     }
 
     this.route.queryParams.subscribe(_ => {
-      this.queryParams = {ci: 'defacement'};
+      this.queryParams = { ci: 'defacement' };
     });
   }
 

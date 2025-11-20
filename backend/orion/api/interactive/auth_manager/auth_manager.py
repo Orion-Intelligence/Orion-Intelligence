@@ -92,6 +92,7 @@ class auth_manager:
             "hasOnboarding": onboarding_exists,
             "subscription": subscription,
             "verificationDate": verificationDate,
+            "licenses": [license.value for license in user.licenses],
         }
 
         return {

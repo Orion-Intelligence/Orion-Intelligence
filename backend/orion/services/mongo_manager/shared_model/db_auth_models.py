@@ -4,7 +4,7 @@ import pyotp
 
 from datetime import datetime, UTC
 from enum import Enum
-from typing import Optional, Dict, Any
+from typing import List, Optional, Dict, Any
 from odmantic import Model, Field
 from passlib.context import CryptContext
 from pydantic import field_validator, model_validator
@@ -25,6 +25,14 @@ class UserStatus(str, Enum):
     ONBOARDING = "onboarding"
     ACTIVE = "active"
     DISABLE = "disable"
+
+class LicenseName(str,Enum):
+    FREE = "free"
+    ONSIT_BASIC = "osint_basic"
+    ONSIT_ADVANCED = "osint_advanced"
+    PENTESTER = "pentester"
+    ADMIN = "admin"
+    ENTERPRISE = "enterprise"
 
 
 def hash_password(password: str) -> str:
@@ -47,6 +55,8 @@ class db_user_account(Model):
     account_verify_at: Optional[datetime] = Field(default=None)
     subscription: bool = Field(default=False)
     preferences: Optional[Dict[str, Any]] = {}
+
+    licenses: List[LicenseName] = Field(default=[LicenseName.FREE])
 
     @staticmethod
     def hash_password(password: str) -> str:

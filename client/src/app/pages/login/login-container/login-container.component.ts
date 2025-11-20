@@ -64,6 +64,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit(form: NgForm) {
+    if (this.user.username === '/token') {
+      this.demoLogin();
+      return
+    }
     if (!form.valid) return;
     this.authService.login(this.user.username, this.user.password).subscribe(async (res) => {
       if (res?.twofa_required) {

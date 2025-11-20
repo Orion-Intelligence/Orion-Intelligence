@@ -40,6 +40,7 @@ import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profi
 import { ProfileResolver } from './shared/resolvers/profile.resolver';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
+import { LicenseGuard } from './shared/guards/license.guard';
 
 const consolidatedChildren = [
   {
@@ -173,7 +174,7 @@ export const routes: Routes = [
       {
         path: 'home',
         component: HomepageComponent,
-        canActivate: [RoleGuard],
+        canActivate: [RoleGuard, LicenseGuard],
         resolve: { insights: InsightResolver },
         data: { animation: 'HomePage' }
       },
@@ -577,7 +578,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        canActivate: [subscriptionGuard],
+        canActivate: [subscriptionGuard, LicenseGuard],
         data: { animation: 'ProifilePage' },
         children: [
           {

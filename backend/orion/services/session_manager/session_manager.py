@@ -143,6 +143,7 @@ class session_manager:
                 "hasOnboarding": onboarding_exists,
                 "subscription": user.subscription,
                 "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
+                "licenses": [license.value for license in user.licenses],
             }
             return {"access_token": access_token, "token_type": "bearer", "session": session}
 
@@ -192,6 +193,7 @@ class session_manager:
                 "hasOnboarding": onboarding_exists,
                 "subscription": user.subscription,
                 "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
+                "licenses": [license.value for license in user.licenses],
             }
 
             return {"access_token": new_token, "token_type": "bearer", "session": session}
