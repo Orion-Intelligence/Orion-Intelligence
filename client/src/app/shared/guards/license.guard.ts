@@ -9,7 +9,7 @@ export class LicenseGuard implements CanActivate {
     constructor(private router: Router, private licenseService: LicenseService) { }
 
     canActivate(): boolean {
-        if (this.licenseService.isAdmin())
+        if (this.licenseService.isDataManager())
             return true;
         else {
             this.router.navigate(['dashboard/strategic']);

@@ -16,4 +16,5 @@ export interface User {
     status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
     subscription: boolean;
     verificationDate: string;
+    licenses: string[];
 }

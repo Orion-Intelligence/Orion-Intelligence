@@ -31,7 +31,7 @@ class LicenseName(str,Enum):
     ONSIT_BASIC = "osint_basic"
     ONSIT_ADVANCED = "osint_advanced"
     PENTESTER = "pentester"
-    ADMIN = "admin"
+    DATA_MANAGER = "data_manager"
     ENTERPRISE = "enterprise"
 
 

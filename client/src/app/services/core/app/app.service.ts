@@ -5,7 +5,7 @@ import { AppStorageService } from './app-storage.service';
 import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
-import { search_filter_labels } from '../../../shared/constants/shared-enums';
+import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
 import { CompanyProfile } from '../../../shared/model/company-profile/company.profile.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 
@@ -37,6 +37,7 @@ export class AppService {
 
   constructor(private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
     this.loadEntities()
+    this.loadLicenseRules()
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) this.updatePage(pageParam);
@@ -96,6 +97,16 @@ export class AppService {
         for (const e of data) {
           const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
           search_filter_labels[key] = e.title;
+        }
+      })
+    ).subscribe();
+  }
+
+  loadLicenseRules(): void {
+    this.http.get<any>('assets/data/licenses/license_rules.json').pipe(
+      tap(data => {
+        for (const key in data) {
+          license_rules[key] = data[key];
         }
       })
     ).subscribe();

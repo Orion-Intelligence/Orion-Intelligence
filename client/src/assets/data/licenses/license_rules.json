@@ -1,0 +1,63 @@
+{
+    "free": {
+        "modules": [
+            "general"
+        ],
+        "cti_graph": false,
+        "mapping": false,
+        "scanning": false,
+        "data_manager": false
+    },
+    "osint_basic": {
+        "modules": [
+            "general",
+            "breach",
+            "exploit",
+            "discussion",
+            "defacement",
+            "social",
+            "feed",
+            "dumps"
+        ],
+        "cti_graph": false,
+        "mapping": false,
+        "scanning": false,
+        "data_manager": false
+    },
+    "osint_advanced": {
+        "modules": [
+            "general",
+            "breach",
+            "exploit",
+            "discussion",
+            "defacement",
+            "social",
+            "feed",
+            "dumps",
+            "stealer_logs"
+        ],
+        "cti_graph": true,
+        "mapping": true,
+        "scanning": false,
+        "data_manager": false
+    },
+    "pentester": {
+        "modules": [],
+        "scanning": true,
+        "cti_graph": false,
+        "data_manager": false
+    },
+    "data_manager": {
+        "modules": [],
+        "data_manager": true,
+        "scanning": false,
+        "cti_graph": false
+    },
+    "enterprise": {
+        "modules": "all",
+        "scanning": true,
+        "cti_graph": true,
+        "mapping": true,
+        "data_manager": true
+    }
+}

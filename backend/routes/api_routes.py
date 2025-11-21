@@ -55,7 +55,7 @@ async def get_directory(param: dump_param_model = Depends()):
     return await dump_model.getInstance().invoke_dump(param)
 
 
-@api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("admin"))],
+@api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("data_manager"))],
                 description="Retrieve analytics and strategic insights for dashboard overview.")
 async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
@@ -105,13 +105,13 @@ async def search_consolidated(param: search_credential_param_model = Body(...)):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
 
-@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("admin"))],
+@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("data_manager"))],
                  description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     return await search_model.getInstance().search_consolidated_result(param)
 
 
-@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("admin"))],
+@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("data_manager"))],
                  description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     base_index = [
@@ -274,12 +274,12 @@ async def get_tenant(current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_tenant(current_user)
 
 
-@api_routes.post("/api/update/tenant", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("admin"))], )
+@api_routes.post("/api/update/tenant", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("data_manager"))], )
 async def update_tenant(data: TenantRequest, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().update_tenant(data, current_user)
 
 
-@api_routes.post("/api/users", dependencies=[Depends(role_required([user_role.ADMIN])),Depends(license_required("scanning"))])
+@api_routes.post("/api/users", dependencies=[Depends(role_required([user_role.ADMIN])),Depends(license_required("data_manager"))])
 async def get_all_users():
     return await TenantManager.get_instance().get_all_users()
 
@@ -294,12 +294,12 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     return await AuditLogManager.get_instance().get(param, current_user)
 
 
-@api_routes.post("/api/get/company/profile", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("admin"))])
+@api_routes.post("/api/get/company/profile", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("data_manager"))])
 async def get_company_profile(current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().getCompanyProfileData(current_user)
 
 
-@api_routes.post("/api/update/company/profile", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("admin"))])
+@api_routes.post("/api/update/company/profile", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("data_manager"))])
 async def update_company_profile(data: ProfileParmaModel, current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().updateCompanyProfile(data, current_user)
 
@@ -309,6 +309,6 @@ async def upload_profile_image(current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().getProfileImage(current_user)
 
 
-@api_routes.post("/api/upload/image", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
+@api_routes.post("/api/upload/image", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("data_manager"))])
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().uploadProfileImage(file, current_user)

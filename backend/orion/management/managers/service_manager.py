@@ -77,6 +77,10 @@ class service_manager:
             if "key" in item:
                 allowed_keys.add(item["key"])
 
-        env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"))
-        constant.mail_template = env.get_template("mail_template.html")
+        mail_templete_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"))
+        constant.mail_template = mail_templete_env.get_template("mail_template.html")
+        license_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"))
+        license_rules_template = license_rules_env.get_template("license_rules.json")
+        license_rules_json_str = license_rules_template.render() 
+        constant.license_rules = json.loads(license_rules_json_str)
         

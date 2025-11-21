@@ -21,6 +21,7 @@
                   <th class="list__column-url-status" scope="col">Role</th>
                   <th class="list__column-leak-status" scope="col">Status</th>
                   <th class="list__column-network-type" scope="col">Subscription</th>
+                  <th class="list__column-license" scope="col">Licenses</th>
                   <th class="list__column-id-min">Action</th>
                 </tr>
               </thead>
@@ -80,6 +81,27 @@
                         </ul>
                       </div>
                     </td>
+                    <td data-label="License">
+                      <div class="dropdown mt-2 view-tenant_dropdown-wrapper">
+                        <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuLicense{{i}}"
+                          data-bs-toggle="dropdown" aria-expanded="false">
+                          <span class="list__status-default-pointer"></span>
+                          {{ getUserLicensesLabel(user) }}
+                          <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron"
+                            width="16" height="16">
+                        </span>
+                        <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuLicense' + i">
+                          <li *ngFor="let license of licenseList">
+                            <a class="dropdown-item" (click)="toggleUserLicense(user, license)">
+                              <input type="checkbox" [checked]="user.licenses?.includes(license)"
+                                (change)="toggleUserLicense(user, license)" />
+                              {{getLicenseLabel(license) }}
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </td>
+
                     <td data-label="Action">
                       <div
                         class="dropdown view-tenant_dropdown-wrapper view-tenant_dropdown-wrapper-min d-flex justify-content-center align-items-center"
@@ -107,6 +129,7 @@
                   <th class="list__column-url-status" scope="col">Role</th>
                   <th class="list__column-leak-status" scope="col">Status</th>
                   <th class="list__column-network-type" scope="col">Subscription</th>
+                  <th class="list__column-network-type" scope="col">Licenses</th>
                   <th class="list__column-id-min">Action</th>
                 </tr>
               </thead>

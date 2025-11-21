@@ -115,6 +115,7 @@ class TenantManager:
             raise HTTPException(status_code=403, detail="Only profile users can be updated")
         user.status = request.status
         user.subscription = request.subscription
+        user.licenses=request.licenses
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(str(user.id), "update_user")
         return {"message": "User updated successfully"}

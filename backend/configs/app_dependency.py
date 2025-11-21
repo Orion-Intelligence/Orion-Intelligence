@@ -5,7 +5,8 @@ from fastapi.security import OAuth2PasswordBearer
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.session_manager.session_manager import session_manager
-from orion.api.interactive.auth_manager.rules.license_rules import LICENSE_RULES
+# from orion.api.interactive.auth_manager.rules.license_rules import LICENSE_RULES
+from orion.constants import constant
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
@@ -76,11 +77,11 @@ def get_user_permissions(user):
         "cti_graph": False,
         "mapping": False,
         "scanning": False,
-        "admin": False
+        "data_manager": False
     }
 
     for lic in user.licenses:
-        rules = LICENSE_RULES.get(lic, {})
+        rules = constant.license_rules.get(lic, {})
         if rules.get("modules") == "all":
             final["modules"] = "all"
         elif final["modules"] != "all":
@@ -89,6 +90,6 @@ def get_user_permissions(user):
         final["cti_graph"] |= rules.get("cti_graph", False)
         final["mapping"] |= rules.get("mapping", False)
         final["scanning"] |= rules.get("scanning", False)
-        final["admin"] |= rules.get("admin", False)
+        final["data_manager"] |= rules.get("data_manager", False)
 
     return final
