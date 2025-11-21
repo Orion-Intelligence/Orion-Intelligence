@@ -172,51 +172,92 @@
     </ng-template>
 
 
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('general')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
-      [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [routePrefix]="'strategic'"
-      [selectionStore]="selectionStore" [title]="'General Intelligence'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('breach')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.BREACH"
-      [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [routePrefix]="'breach'"
-      [selectionStore]="selectionStore" [title]="'Data Breach'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('defacement')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.DEFACEMENT"
-      [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [routePrefix]="'defacement'"
-      [selectionStore]="selectionStore" [title]="'Defacement'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('social')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.SOCIAL"
-      [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories" [routePrefix]="'social'"
-      [selectionStore]="selectionStore" [title]="'Social'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('exploit')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.EXPLOIT"
-      [icon]="'assets/images/sidebar/exploits.svg'" [items]="exploitCategories" [routePrefix]="'exploit'"
-      [selectionStore]="selectionStore" [title]="'Exploit'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('feed')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.FEED" [icon]="'assets/images/sidebar/news.svg'"
-      [items]="newsCategories" [routePrefix]="'feed'" [selectionStore]="selectionStore"
-      [title]="'feed'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('stealer_logs')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS"
-      [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'"
-      [selectionStore]="selectionStore" [title]="'Stealerlogs'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" *ngIf="licenseService.canUseScanning() && appService.getConfig().appSettings.api_allowed"
-      [category]="category.API" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories"
-      [routePrefix]="'api'" [selectionStore]="selectionStore" [title]="'Live APIs'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseScanning()" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.SCANNER"
-      [icon]="'assets/images/sidebar/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
-      [selectionStore]="selectionStore" [title]="'Scanner'"></app-dashboard-sidebar-collapsed>
-    <app-dashboard-sidebar-collapsed *ngIf="licenseService.canUseModule('dumps')" (optionSelected)="onOptionSelected($event)"
-      (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP" [icon]="'assets/images/sidebar/dump.svg'"
-      [items]="dumpCategories" [routePrefix]="'dump'" [selectionStore]="selectionStore"
-      [title]="'Dump'"></app-dashboard-sidebar-collapsed>
+    <ng-container *ngIf="licenseService.canUseModule('general')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.STRATEGIC"
+        [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [routePrefix]="'strategic'"
+        [selectionStore]="selectionStore" [title]="'General Intelligence'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseModule('breach')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.BREACH"
+        [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [routePrefix]="'breach'"
+        [selectionStore]="selectionStore" [title]="'Data Breach'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseModule('defacement')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.DEFACEMENT"
+        [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [routePrefix]="'defacement'"
+        [selectionStore]="selectionStore" [title]="'Defacement'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseModule('social')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.SOCIAL"
+        [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories" [routePrefix]="'social'"
+        [selectionStore]="selectionStore" [title]="'Social'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseModule('exploit')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.EXPLOIT"
+        [icon]="'assets/images/sidebar/exploits.svg'" [items]="exploitCategories" [routePrefix]="'exploit'"
+        [selectionStore]="selectionStore" [title]="'Exploit'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseModule('feed')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.FEED"
+        [icon]="'assets/images/sidebar/news.svg'" [items]="newsCategories" [routePrefix]="'feed'"
+        [selectionStore]="selectionStore" [title]="'feed'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseModule('stealer_logs')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS"
+        [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'"
+        [selectionStore]="selectionStore" [title]="'Stealerlogs'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseScanning() && appService.getConfig().appSettings.api_allowed">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.API"
+        [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
+        [selectionStore]="selectionStore" [title]="'Live APIs'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseScanning()">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.SCANNER"
+        [icon]="'assets/images/sidebar/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
+        [selectionStore]="selectionStore" [title]="'Scanner'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
+    <ng-container *ngIf="licenseService.canUseModule('dumps')">
+      <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
+        (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
+        [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'"
+        [selectionStore]="selectionStore" [title]="'Dump'">
+      </app-dashboard-sidebar-collapsed>
+    </ng-container>
+
     <ng-container *ngIf="authService.getRole() === 'admin'">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
         [icon]="'assets/images/sidebar/tenant.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"
-        [selectionStore]="selectionStore" [title]="'Tenant'"></app-dashboard-sidebar-collapsed>
+        [selectionStore]="selectionStore" [title]="'Tenant'">
+      </app-dashboard-sidebar-collapsed>
     </ng-container>
 
     <div class="sidebar__item" *ngIf="licenseService.canUseCtiGraph()">

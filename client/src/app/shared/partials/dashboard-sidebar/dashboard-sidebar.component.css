@@ -303,7 +303,7 @@
 .sidebar-collapsed .sidebar__subitem-content {
   width: 30px;
   height: 30px;
-  margin-left: -5px;
+  margin-left: 5px;
   padding: 20px;
 }
 
