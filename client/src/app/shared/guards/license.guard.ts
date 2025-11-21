@@ -16,5 +16,4 @@ export class LicenseGuard implements CanActivate {
             return false;
         }
     }
-
 }
