@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, NgClass, NgIf } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../../services/authetication/auth.service';
-import { Subscription } from 'rxjs';
-import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
-import { AppService } from '../../../services/core/app/app.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {CommonModule, NgClass, NgIf} from '@angular/common';
+import {FormsModule, NgForm} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AuthService} from '../../../services/authetication/auth.service';
+import {Subscription} from 'rxjs';
+import {HeaderComponent} from '../../../shared/partials/header/login-header/header.component';
+import {AppService} from '../../../services/core/app/app.service';
 
 import QRCode from 'qrcode';
 
@@ -16,7 +16,7 @@ import QRCode from 'qrcode';
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
-  user = { username: '', password: '' };
+  user = {username: '', password: ''};
   errorMessage: string | null = null;
   authenticated = true;
   copied = false;
@@ -41,12 +41,13 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     private router: Router,
     protected appService: AppService,
     private route: ActivatedRoute
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.router.navigate(['dashboard'], { replaceUrl: true }).then();
+        this.router.navigate(['dashboard'], {replaceUrl: true}).then();
       } else {
         this.authenticated = false;
       }
@@ -57,7 +58,12 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe(params => {
       const isScreenMobile = window.innerWidth <= 480;
       this.isMobile = isScreenMobile;
-      if (params['mode'] === 'free') {
+      let mode = params['mode'];
+      if (!mode && params['redirect']) {
+        const tree = this.router.parseUrl(params['redirect']);
+        mode = tree.queryParams['mode'];
+      }
+      if (mode === 'free') {
         this.demoLogin();
       }
     });
