@@ -9,7 +9,6 @@ import { AppService } from '../../../services/core/app/app.service';
 
 import QRCode from 'qrcode';
 
-
 @Component({
   selector: 'app-login-container',
   standalone: true,
@@ -33,12 +32,16 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   private pendingUsername: string | null = null;
   isMobile = false;
   demoUser = 'demo';
-  demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw';
+  demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw!';
   userCopied = false;
   passwordCopied = false;
 
-  constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) {
-  }
+  constructor(
+    public authService: AuthService,
+    private router: Router,
+    protected appService: AppService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
@@ -47,13 +50,16 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       } else {
         this.authenticated = false;
       }
-      if (authState.error != "2FA required") {
+      if (authState.error != '2FA required') {
         this.errorMessage = authState.error ?? null;
       }
     });
     this.route.queryParams.subscribe(params => {
       const isScreenMobile = window.innerWidth <= 480;
       this.isMobile = isScreenMobile;
+      if (params['mode'] === 'free') {
+        this.demoLogin();
+      }
     });
   }
 
@@ -64,12 +70,8 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit(form: NgForm) {
-    if (this.user.username === '/token') {
-      this.demoLogin();
-      return
-    }
     if (!form.valid) return;
-    this.authService.login(this.user.username, this.user.password).subscribe(async (res) => {
+    this.authService.login(this.user.username, this.user.password).subscribe(async res => {
       if (res?.twofa_required) {
         this.twofaRequired = true;
         this.pendingUsername = this.user.username;
@@ -98,6 +100,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   goToSignUp() {
     this.router.navigate(['/signup']).then();
   }
+
   goToForgot() {
     this.router.navigate(['/forgot']).then();
   }
@@ -105,20 +108,21 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.authSubscription) this.authSubscription.unsubscribe();
   }
+
   demoLogin() {
     this.authService.demoLogin();
   }
+
   copy(type: string) {
     if (type === 'user') {
       navigator.clipboard.writeText(this.demoUser).then(() => {
         this.userCopied = true;
-        setTimeout(() => this.userCopied = false, 1500);
+        setTimeout(() => (this.userCopied = false), 1500);
       });
-    }
-    else if (type === 'password') {
+    } else if (type === 'password') {
       navigator.clipboard.writeText(this.demoPassword).then(() => {
         this.passwordCopied = true;
-        setTimeout(() => this.passwordCopied = false, 1500);
+        setTimeout(() => (this.passwordCopied = false), 1500);
       });
     }
   }
