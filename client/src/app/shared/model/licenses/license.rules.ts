@@ -3,7 +3,7 @@ export enum LicenseName {
     OSINT_BASIC = 'osint_basic',
     OSINT_ADVANCED = 'osint_advanced',
     PENTESTER = 'pentester',
-    DATA_MANAGER = 'data_manager',
+    MAINTAINER = 'maintainer',
     ENTERPRISE = 'enterprise'
 }
 
@@ -13,5 +13,5 @@ export interface LicenseRuleModel {
     cti_graph: boolean;
     mapping: boolean;
     scanning: boolean;
-    data_manager: boolean;
+    maintainer: boolean;
 }

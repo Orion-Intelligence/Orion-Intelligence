@@ -9,6 +9,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
 import { AppStorageService } from '../../../services/core/app/app-storage.service';
 import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
+import { LicenseService } from '../../../services/licenses/licenses.service';
 
 
 @Component({
@@ -30,7 +31,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   isNotificationOpen$ = new BehaviorSubject<boolean>(false);
 
   currentImageUrl: any;
-  profileMail: string = '';
+  licences: string = '';
   dropdownOpen = signal(false);
   isDarkTheme = true;
 
@@ -44,7 +45,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     public router: Router,
     public dashboardService: DashboardService,
     public appService: AppService,
-    private appStorage: AppStorageService
+    private appStorage: AppStorageService,
+    protected licenseService: LicenseService
   ) {
     this.username$ = this.authService.getUsername$();
     this.role$ = this.authService.getRole$();
@@ -79,8 +81,22 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   onDropdownOpen() {
     this.currentImageUrl = this.appService.profileImageUrl();
-    this.profileMail = this.appService.userProfile().email;
+    const rawLicenses = this.authService.getLicenses();
+    this.licences = rawLicenses.map(l => this.getLicenseLabel(l)).join(', ');
   }
+  getLicenseLabel(name: string): string {
+    const labels: Record<string, string> = {
+      free: 'Free',
+      osint_basic: 'OSINT Basic',
+      osint_advanced: 'OSINT Advanced',
+      pentester: 'Pentester',
+      maintainer: 'Maintainer',
+      enterprise: 'Enterprise'
+    };
+
+    return labels[name] ?? name;
+  }
+
   toggleThemeByClick() {
     this.isDarkTheme = !this.isDarkTheme;
     const theme = this.isDarkTheme ? 'dark-theme' : 'light-theme';

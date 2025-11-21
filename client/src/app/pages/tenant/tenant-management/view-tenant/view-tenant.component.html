@@ -82,7 +82,7 @@
                       </div>
                     </td>
                     <td data-label="License">
-                      <div class="dropdown mt-2 view-tenant_dropdown-wrapper">
+                      <div class="dropdown mt-2 view-tenant_dropdown-wrapper" data-bs-auto-close="outside">
                         <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuLicense{{i}}"
                           data-bs-toggle="dropdown" aria-expanded="false">
                           <span class="list__status-default-pointer"></span>
@@ -92,10 +92,10 @@
                         </span>
                         <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuLicense' + i">
                           <li *ngFor="let license of licenseList">
-                            <a class="dropdown-item" (click)="toggleUserLicense(user, license)">
-                              <input type="checkbox" [checked]="user.licenses?.includes(license)"
-                                (change)="toggleUserLicense(user, license)" />
-                              {{getLicenseLabel(license) }}
+                            <a class="dropdown-item" href="#"
+                              (click)="toggleUserLicense(user, license); $event.stopPropagation(); $event.preventDefault();">
+                              <input type="checkbox" [checked]="user.licenses?.includes(license)" /> {{
+                              getLicenseLabel(license) }}
                             </a>
                           </li>
                         </ul>

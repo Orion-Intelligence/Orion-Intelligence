@@ -24,8 +24,8 @@ class AlertModel(EmbeddedModel):
     description:str=''
     source:str=''
     url:str=''
-    all_ioc:List[alert_all_ioc]
-    content_types:List[str]=Field(default_factory=list)
+    all_ioc:List[alert_all_ioc]=[]
+    content_types:List[str]=[]
     status: alert_status = Field(default=alert_status.ACTIVE)
     first_seen: datetime= Field(default=datetime.utcnow)
     last_seen: datetime = Field(default=datetime.utcnow)

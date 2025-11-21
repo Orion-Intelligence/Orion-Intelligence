@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { LicenseName } from '../../shared/model/licenses/license.rules';
 import { license_rules } from '../../shared/constants/shared-enums';
 import { AuthService } from '../authetication/auth.service';
+import { Observable, of } from 'rxjs';
 
 type CombinedRule = {
     modules: Set<string> | 'all';
     cti_graph: boolean;
     mapping: boolean;
     scanning: boolean;
-    data_manager: boolean;
+    maintainer: boolean;
 };
 
 @Injectable({
@@ -22,15 +23,20 @@ export class LicenseService {
         return this.auth.getLicenses() ?? [];
     }
 
+    loadLicenses(): Observable<string[]> {
+        return of(this.getLicenses());
+    }
+
     private getCombinedRule(): CombinedRule {
         const userLicenses = this.getLicenses();
+        console.log("license: " + userLicenses)
 
         const combined: CombinedRule = {
             modules: new Set<string>(),
             cti_graph: false,
             mapping: false,
             scanning: false,
-            data_manager: false
+            maintainer: false
         };
 
         for (const lic of userLicenses) {
@@ -48,7 +54,7 @@ export class LicenseService {
             combined.cti_graph = rule.cti_graph;
             combined.mapping = rule.mapping;
             combined.scanning = rule.scanning;
-            combined.data_manager = rule.admin;
+            combined.maintainer = rule.maintainer;
         }
 
         return combined;
@@ -71,7 +77,8 @@ export class LicenseService {
         return this.getCombinedRule().scanning;
     }
 
-    isDataManager(): boolean {
-        return this.getCombinedRule().data_manager;
+    isMaintainer(): boolean {
+        console.log(this.getCombinedRule().maintainer);
+        return this.getCombinedRule().maintainer;
     }
 }

@@ -1,10 +1,12 @@
 <div *ngIf="this.username$|async" class="profile">
-  <a *ngIf="isProfile()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
-    <div class="profile_category profile_logout_icon">
-      <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24">
-      <span class="notification-badge">{{getUnseenAlertCount()}}</span>
-    </div>
-  </a>
+  <ng-container *ngIf="licenseService.isMaintainer()">
+    <a *ngIf="isProfile()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
+      <div class="profile_category profile_logout_icon">
+        <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24">
+        <span class="notification-badge">{{getUnseenAlertCount()}}</span>
+      </div>
+    </a>
+  </ng-container>
   <a *ngIf="router.url !== '/login'" (click)="toggleDropdown($event)" appTooltip="" class="profile-dropdown-toggle">
     <div class="profile_category profile_logout_icon">
       <img alt="Logout" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24">
@@ -45,7 +47,7 @@
         </div>
         <div class="profile-name-mail-container">
           <div class="profile-name">{{ username$ | async}}</div>
-          <div class="profile-email" appTooltip="{{profileMail}}">{{ profileMail }}</div>
+          <div class="profile-email" appTooltip="Active License">{{ licences }}</div>
         </div>
       </li>
 

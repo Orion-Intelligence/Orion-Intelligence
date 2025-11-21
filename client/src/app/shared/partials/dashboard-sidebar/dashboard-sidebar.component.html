@@ -9,7 +9,7 @@
 
   <ul class="sidebar__items">
     <ng-container *ngIf="authService.getRole() === 'profile'; else homeTemplate">
-      <ng-container *ngIf="licenseService.isDataManager()">
+      <ng-container *ngIf="licenseService.isMaintainer()">
         <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
           [icon]="'assets/images/sidebar/dump.svg'" [items]="prfileCategories" [routePrefix]="'profile'"
@@ -18,7 +18,7 @@
       </ng-container></ng-container>
 
     <ng-template #homeTemplate>
-      <ng-container *ngIf="licenseService.isDataManager()">
+      <ng-container *ngIf="licenseService.isMaintainer()">
         <li class="sidebar__item">
           <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{
         'active':

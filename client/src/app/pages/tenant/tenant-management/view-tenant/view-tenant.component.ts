@@ -71,7 +71,7 @@ export class ViewTenantComponent implements OnInit {
       case LicenseName.OSINT_BASIC: return 'OSINT Basic';
       case LicenseName.OSINT_ADVANCED: return 'OSINT Advanced';
       case LicenseName.PENTESTER: return 'Pentester';
-      case LicenseName.DATA_MANAGER: return 'Data Manager';
+      case LicenseName.MAINTAINER: return 'Maintainer';
       case LicenseName.ENTERPRISE: return 'Enterprise';
       default: return license;
     }
@@ -87,7 +87,8 @@ export class ViewTenantComponent implements OnInit {
   }
   getUserLicensesLabel(user: any): string {
     if (!user.licenses || user.licenses.length === 0) return 'None';
-    return user.licenses.map((l: LicenseName) => this.getLicenseLabel(l)).join(', ');
+    const names = user.licenses.map((l: LicenseName) => this.getLicenseLabel(l)).join(', ');
+    return (names.length <= 15) ? names : names.slice(0, 15) + ('...');
   }
 
 }

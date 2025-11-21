@@ -26,12 +26,14 @@ import { HttpClient } from '@angular/common/http';
 import { ConsolidatedApisComponent } from './consolidated-apis/consolidated-apis.component';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
 import { StealerLogCallbackModel } from '../../../../model/results/credentials/credential.callback.model';
+import { NgbAccordionModule } from "@ng-bootstrap/ng-bootstrap";
+import { LicenseService } from '../../../../../services/licenses/licenses.service';
 
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent],
+  imports: [NgIf, ResultComponent, DashboardResultsGeneralGridComponent, NgForOf, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedApisComponent, NgbAccordionModule],
   templateUrl: './dashboard-consolidated.component.html',
   styleUrl: './dashboard-consolidated.component.css',
   animations: [fadeInDashboardItem]
@@ -69,7 +71,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
 
 
-  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, private apiService: ApiService, private helperService: HelperService) {
+  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, private apiService: ApiService, private helperService: HelperService, protected licenseService: LicenseService) {
     this.pageCounts = {};
   }
 

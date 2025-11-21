@@ -46,27 +46,30 @@
               </ng-container>
             </ng-container>
           </span>
-          <div class="gc-clear-selection d-flex align-items-center scan-shrink dashboard-general-scan dropdown"
-            *ngIf="scandomains.length > 0" (click)="toggleScan()">
-            <div class="dashboard-general-scan-text">
-              <span class="dashboard-general-scan-header">Run Scan</span> <small
-                class="dashboard-general-scan-desc text-muted"> <span
-                  class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }} Resources
-                Found </small>
+          <ng-container *ngIf="licenseService.canUseScanning()">
+            <div class="gc-clear-selection d-flex align-items-center scan-shrink dashboard-general-scan dropdown"
+              *ngIf="scandomains.length > 0" (click)="toggleScan()">
+              <div class="dashboard-general-scan-text">
+                <span class="dashboard-general-scan-header">Run Scan</span> <small
+                  class="dashboard-general-scan-desc text-muted"> <span
+                    class="d-inline-block me-1 bg-primary rounded-circle notify"></span>{{ scandomains.length }}
+                  Resources
+                  Found </small>
+              </div>
+              <img src="../../../../assets/images/shared/security-scan-arrow.svg" alt="arrow"
+                class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans" />
+              <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
+                <li class="selected-urls"></li>
+                <ng-container *ngFor="let domain of scandomains; let last = last">
+                  <li @fadeInDashboardItem>
+                    <span class="bullet"></span> <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain
+                      }}</span>
+                  </li>
+                  <hr *ngIf="!last" class="dropdown-divider mx-3">
+                </ng-container>
+              </ul>
             </div>
-            <img src="../../../../assets/images/shared/security-scan-arrow.svg" alt="arrow"
-              class="dashboard-general-scan-arrow-icon" [class.rotated]="showScans" />
-            <ul class="dropdown-menu mt-3" [class.show]="showScans" @fadeInDashboardItem>
-              <li class="selected-urls"></li>
-              <ng-container *ngFor="let domain of scandomains; let last = last">
-                <li @fadeInDashboardItem>
-                  <span class="bullet"></span> <span class="dropdown-item" (click)="onScanSelected(domain)">{{ domain
-                    }}</span>
-                </li>
-                <hr *ngIf="!last" class="dropdown-divider mx-3">
-              </ng-container>
-            </ul>
-          </div>
+          </ng-container>
         </div>
         <div class="col-md-12 col-sm-12 col-xs-12">
           <div #filtersWrapper class="filters-overlay search-trigger"
@@ -140,7 +143,7 @@
             class="ms-2">Filter</span>
         </label>
       </div>
-      <div *ngIf="!shrinkmenu"
+      <div *ngIf="!shrinkmenu && licenseService.canUseScanning()"
         class="side-menu-container tools-shrink d-flex align-items-start justify-content-start mt-2 gap-3">
         <div class="gc-clear-selection d-flex flex-column align-items-center dashboard-general-scan dropdown"
           *ngIf="scandomains.length > 0" (click)="toggleScan()">

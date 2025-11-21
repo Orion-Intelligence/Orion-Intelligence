@@ -6,7 +6,7 @@
         "cti_graph": false,
         "mapping": false,
         "scanning": false,
-        "data_manager": false
+        "maintainer": false
     },
     "osint_basic": {
         "modules": [
@@ -22,7 +22,7 @@
         "cti_graph": false,
         "mapping": false,
         "scanning": false,
-        "data_manager": false
+        "maintainer": false
     },
     "osint_advanced": {
         "modules": [
@@ -39,17 +39,17 @@
         "cti_graph": true,
         "mapping": true,
         "scanning": false,
-        "data_manager": false
+        "maintainer": false
     },
     "pentester": {
         "modules": [],
         "scanning": true,
         "cti_graph": false,
-        "data_manager": false
+        "maintainer": false
     },
-    "data_manager": {
+    "maintainer": {
         "modules": [],
-        "data_manager": true,
+        "maintainer": true,
         "scanning": false,
         "cti_graph": false
     },
@@ -58,6 +58,6 @@
         "scanning": true,
         "cti_graph": true,
         "mapping": true,
-        "data_manager": true
+        "maintainer": true
     }
 }

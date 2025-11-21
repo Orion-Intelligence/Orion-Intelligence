@@ -77,7 +77,7 @@ def get_user_permissions(user):
         "cti_graph": False,
         "mapping": False,
         "scanning": False,
-        "data_manager": False
+        "maintainer": False
     }
 
     for lic in user.licenses:
@@ -90,6 +90,6 @@ def get_user_permissions(user):
         final["cti_graph"] |= rules.get("cti_graph", False)
         final["mapping"] |= rules.get("mapping", False)
         final["scanning"] |= rules.get("scanning", False)
-        final["data_manager"] |= rules.get("data_manager", False)
+        final["maintainer"] |= rules.get("maintainer", False)
 
     return final

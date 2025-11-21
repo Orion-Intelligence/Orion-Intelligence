@@ -4,12 +4,11 @@ import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs';
 import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [FormsModule, ProfileComponent, NgIf, NgForOf, TitleCasePipe, NgOptimizedImage, TooltipDirective],
+  imports: [FormsModule, ProfileComponent, NgIf, NgForOf, TitleCasePipe, NgOptimizedImage],
   templateUrl: './dashboard-header.component.html',
 })
 export class DashboardHeaderComponent implements OnInit {

@@ -5,8 +5,10 @@
   (resetFilter)="resetFilters($event)" [showSelectedFilters]="true"></app-result>
 
 <br>
-<app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
-<app-consolidated-apis [isLoading]="isLoading()" #liveApiSearch></app-consolidated-apis>
+<ng-container *ngIf="licenseService.canUseScanning()">
+  <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
+  <app-consolidated-apis [isLoading]="isLoading()" #liveApiSearch></app-consolidated-apis>
+</ng-container>
 
 <div *ngIf="!isLoading()" @fadeInDashboardItem>
   <ng-container>

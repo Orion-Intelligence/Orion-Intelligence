@@ -47,7 +47,7 @@ class ProfileManager:
                 return enc.decrypt(value.encode()).decode()
             except Exception:
                 return ""
-
+        alerts_list = _alerts.alerts if _alerts and _alerts.alerts else []
         company = ProfileParmaModel(
             companyName=safe_decrypt(profile.companyName),
             phone=safe_decrypt(profile.phone),
@@ -57,7 +57,7 @@ class ProfileManager:
             postalCode=safe_decrypt(profile.postal_code),
             taxId=safe_decrypt(profile.tax_id),
             preferences=deepcopy(user.preferences) or {},
-            alerts=_alerts.alerts
+            alerts=alerts_list
         )
         for key, value in company.preferences.items():
                 if value:
