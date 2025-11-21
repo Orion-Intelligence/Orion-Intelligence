@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { LICENSE_RULES, LicenseName } from '../../shared/model/licenses/license.rules';
+import { LicenseName } from '../../shared/model/licenses/license.rules';
+import { license_rules } from '../../shared/constants/shared-enums';
 import { AuthService } from '../authetication/auth.service';
 
 type CombinedRule = {
@@ -7,7 +8,7 @@ type CombinedRule = {
     cti_graph: boolean;
     mapping: boolean;
     scanning: boolean;
-    admin: boolean;
+    data_manager: boolean;
 };
 
 @Injectable({
@@ -29,11 +30,11 @@ export class LicenseService {
             cti_graph: false,
             mapping: false,
             scanning: false,
-            admin: false
+            data_manager: false
         };
 
         for (const lic of userLicenses) {
-            const rule = LICENSE_RULES[lic as LicenseName];
+            const rule = license_rules[lic as LicenseName];
             if (!rule) continue;
 
             if (rule.modules === 'all') {
@@ -47,7 +48,7 @@ export class LicenseService {
             combined.cti_graph = rule.cti_graph;
             combined.mapping = rule.mapping;
             combined.scanning = rule.scanning;
-            combined.admin = rule.admin;
+            combined.data_manager = rule.admin;
         }
 
         return combined;
@@ -70,7 +71,7 @@ export class LicenseService {
         return this.getCombinedRule().scanning;
     }
 
-    isAdmin(): boolean {
-        return this.getCombinedRule().admin;
+    isDataManager(): boolean {
+        return this.getCombinedRule().data_manager;
     }
 }

@@ -7,6 +7,7 @@ import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 
 @Component({
   selector: 'app-view-tenant',
@@ -16,6 +17,7 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 })
 export class ViewTenantComponent implements OnInit {
   users: User[] = [];
+  licenseList = Object.values(LicenseName);
   isLoading = true;
   selectedUserId: string | null = null;
 
@@ -63,4 +65,29 @@ export class ViewTenantComponent implements OnInit {
       this.selectedUserId = null;
     }
   }
+  getLicenseLabel(license: LicenseName) {
+    switch (license) {
+      case LicenseName.FREE: return 'Free';
+      case LicenseName.OSINT_BASIC: return 'OSINT Basic';
+      case LicenseName.OSINT_ADVANCED: return 'OSINT Advanced';
+      case LicenseName.PENTESTER: return 'Pentester';
+      case LicenseName.DATA_MANAGER: return 'Data Manager';
+      case LicenseName.ENTERPRISE: return 'Enterprise';
+      default: return license;
+    }
+  }
+  toggleUserLicense(user: any, license: LicenseName) {
+    if (!user.licenses) user.licenses = [];
+    const index = user.licenses.indexOf(license);
+    if (index > -1) {
+      user.licenses.splice(index, 1);
+    } else {
+      user.licenses.push(license);
+    }
+  }
+  getUserLicensesLabel(user: any): string {
+    if (!user.licenses || user.licenses.length === 0) return 'None';
+    return user.licenses.map((l: LicenseName) => this.getLicenseLabel(l)).join(', ');
+  }
+
 }

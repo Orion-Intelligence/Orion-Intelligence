@@ -26,3 +26,4 @@ class CONSTANTS:
 
 allowed_keys: set[str] = set()
 mail_template = None
+license_rules = {}

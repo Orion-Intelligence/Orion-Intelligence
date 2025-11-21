@@ -1,4 +1,5 @@
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from typing import List
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role
 from pydantic import BaseModel
 from enum import Enum
 
@@ -11,3 +12,4 @@ class tenant_param_model(BaseModel):
     email: str
     status: UserStatus
     subscription:bool
+    licenses: List[LicenseName] 
