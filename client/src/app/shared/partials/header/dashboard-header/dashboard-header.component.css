@@ -20,6 +20,8 @@
   color: #fff;
   margin-left: 20px;
   font-size: 15px;
+  max-width: 80vw;
+  overflow: hidden;
   align-items: center;
 }
 
