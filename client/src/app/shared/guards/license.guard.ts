@@ -13,7 +13,7 @@ export class LicenseGuard implements CanActivate {
         return this.licenseService.loadLicenses().pipe(
             map(() => {
                 if (this.licenseService.isMaintainer()) return true;
-                this.router.navigate(['dashboard/strategic']);
+                this.router.navigate(['dashboard/strategic']).then();
                 return false;
             })
         );
