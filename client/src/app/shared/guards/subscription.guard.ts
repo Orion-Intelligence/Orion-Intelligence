@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTr
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import {SubscriptionService} from '../../services/dashboard/subscription.service';
 import {LicenseService} from '../../services/licenses/licenses.service';
+import {AuthService} from '../../services/authetication/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +12,12 @@ export class subscriptionGuard implements CanActivate {
   constructor(
     private subscriptionService: SubscriptionService,
     private router: Router,
-    private licenseService: LicenseService,
+    private authService: AuthService,
     protected dashboardService: DashboardService
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
-    if (this.subscriptionService.accountExpirable() && !(this.subscriptionService.isDemo() || this.licenseService.isMaintainer())) {
+    if (this.subscriptionService.accountExpirable() && !(this.subscriptionService.isDemo()) || (this.authService.getLicenses().length>0 && "enterprise" == this.authService.getLicenses().at(0))) {
       return true;
     }
     this.dashboardService.showSubscription.set(true);
