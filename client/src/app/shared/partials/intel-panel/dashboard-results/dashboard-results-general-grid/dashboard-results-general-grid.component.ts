@@ -25,6 +25,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
   currentUrl = '';
   queryParams: any = {};
   isCollapsed = true;
+  isFreeStrategic = false;
 
   constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
@@ -57,5 +58,16 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
         ci
       };
     });
+    const params = new URLSearchParams(window.location.search);
+
+    const isFree = params.get('mode') === 'free';
+    const url = window.location.href.toLowerCase();
+    const hasStrategic = url.includes('strategic');
+    this.isFreeStrategic = isFree && hasStrategic;
   }
+  openURL(item: any) {
+    if (!item?.m_url) return;
+    window.location.href = item.m_url;
+  }
+
 }

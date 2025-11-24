@@ -4,7 +4,7 @@ export interface AlertCategorySummary {
     categoryName: string;
     risk: string;
     iocCount: number;
-    detectedDate: Date;
+    detectedDate: Date | null;
     tags: string[];
 }
 

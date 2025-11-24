@@ -214,7 +214,6 @@
   position: absolute;
   top: 18px;
   right: 18px;
-  background: #FF0000;
   color: white;
   font-size: 6px;
   font-weight: 600;
@@ -225,6 +224,14 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+}
+
+.green-badge {
+  background: #00C853;
+}
+
+.red-badge {
+  background: #FF0000;
 }
 
 .notification-icon {

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { LicenseName } from '../../shared/model/licenses/license.rules';
 import { license_rules } from '../../shared/constants/shared-enums';
 import { AuthService } from '../authetication/auth.service';
-import { Observable, of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 
 type CombinedRule = {
     modules: Set<string> | 'all';
@@ -24,12 +24,16 @@ export class LicenseService {
     }
 
     loadLicenses(): Observable<string[]> {
-        return of(this.getLicenses());
+        if (this.auth.getLicenses().length > 0) {
+            return of(this.auth.getLicenses());
+        }
+        return this.auth.refreshToken().pipe(
+            map(() => this.auth.getLicenses())
+        );
     }
 
     private getCombinedRule(): CombinedRule {
         const userLicenses = this.getLicenses();
-        console.log("license: " + userLicenses)
 
         const combined: CombinedRule = {
             modules: new Set<string>(),
@@ -78,7 +82,6 @@ export class LicenseService {
     }
 
     isMaintainer(): boolean {
-        console.log(this.getCombinedRule().maintainer);
         return this.getCombinedRule().maintainer;
     }
 }

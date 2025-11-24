@@ -3,7 +3,9 @@
     <a *ngIf="isProfile()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
       <div class="profile_category profile_logout_icon">
         <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24">
-        <span class="notification-badge">{{getUnseenAlertCount()}}</span>
+        <span class="notification-badge" [ngClass]="getUnseenAlertCount() === 0 ? 'green-badge' : 'red-badge'">
+          {{ getUnseenAlertCount() }}
+        </span>
       </div>
     </a>
   </ng-container>

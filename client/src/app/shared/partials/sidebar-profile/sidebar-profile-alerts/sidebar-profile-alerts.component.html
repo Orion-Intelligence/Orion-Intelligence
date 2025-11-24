@@ -60,7 +60,9 @@
 
                 <div class="ioc-container_cards-card-row">
                     <span>Detected on</span>
-                    <span class="value">{{ category.detectedDate | date: 'dd/MM/yyyy' }}</span>
+                    <span class="value">
+                        {{ category.detectedDate ? (category.detectedDate | date:'dd/MM/yyyy') : '-' }}
+                    </span>
                 </div>
 
                 <div class="ioc-container_cards-card-tags">

@@ -30,31 +30,50 @@ export class SidebarProfileAlertsComponent implements OnInit {
     const activeAlerts = alerts.filter(a => a.status !== 'ignore');
     const grouped: Record<string, AlertModel[]> = {};
     for (const alert of activeAlerts) {
-      const risk = this.getRiskLevel(alert.type || 'Unknown', true);
       const key = alert.type || 'Unknown';
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(alert);
     }
-    const summaries: AlertCategorySummary[] = Object.entries(grouped).map(([category, group]) => {
-      const uniqueIocs = Array.from(new Set(group.map(a => a.ioc_value)));
-      const oldest = group
-        .map(a => new Date(a.first_seen || new Date()))
-        .sort((a, b) => a.getTime() - b.getTime())[0];
-      const tags = Array.from(
-        new Set(
-          group.flatMap(a => a.content_types || []).filter(Boolean)
-        )
-      );
-      return {
-        categoryName: category,
-        risk: this.getRiskLevel(category),
-        iocCount: uniqueIocs.length,
-        detectedDate: oldest,
-        tags
-      };
-    });
+    const summaries: AlertCategorySummary[] = Object.entries(grouped).map(
+      ([category, group]) => {
+        const uniqueIocs = Array.from(new Set(group.map(a => a.ioc_value)));
+        const oldest = group
+          .map(a => new Date(a.first_seen || new Date()))
+          .sort((a, b) => a.getTime() - b.getTime())[0];
+        const tags = Array.from(
+          new Set(group.flatMap(a => a.content_types || []).filter(Boolean))
+        );
+        return {
+          categoryName: category,
+          risk: this.getRiskLevel(category),
+          iocCount: uniqueIocs.length,
+          detectedDate: oldest,
+          tags
+        };
+      }
+    );
+    const ALL_CATEGORIES = [
+      "general",
+      "defacement",
+      "breach",
+      "exploit",
+      "social"
+    ];
+    for (const cat of ALL_CATEGORIES) {
+      if (!summaries.find(s => s.categoryName === cat)) {
+        summaries.push({
+          categoryName: cat,
+          risk: this.getRiskLevel(cat),
+          iocCount: 0,
+          detectedDate: null,
+          tags: []
+        });
+      }
+    }
+
     return summaries;
   }
+
 
   getRiskLevel(type: string, count: boolean = false): string {
     const normalized = type.toLowerCase();
