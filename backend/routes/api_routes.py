@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Body
 from fastapi import Depends, Query, UploadFile
@@ -24,6 +24,7 @@ from orion.api.interactive.search_manager.search_data_model.social.search_social
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.api.server.config_manager.config_controller import config_controller
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -102,18 +103,20 @@ async def search_general(param: search_general_param_model = Body(...)):
         return await search_model.getInstance().search_general_result(param)
 
 
-@api_routes.post("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("module:stealer_logs"))])
+@api_routes.post("/api/search/stealerlogs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.DEMO])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("module:stealer_logs"))])
 async def search_consolidated(param: search_credential_param_model = Body(...)):
+    print("cc:::::::::::::::::::::::::::::::", flush=True)
+    print(":cc::::::::::::::::::::::::::::::", flush=True)
     return await search_model.getInstance().search_stealerlogs_result(param)
 
 
-@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("maintainer"))],
+@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("maintainer"))],
                  description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     return await search_model.getInstance().search_consolidated_result(param)
 
 
-@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("maintainer"))],
+@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("maintainer"))],
                  description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     base_index = [
@@ -230,7 +233,7 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, al
     return await search_model.getInstance().request_general_doc(doc_id, lang)
 
 
-@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("module:social"))],
+@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("module:social"))],
                 description="Get a specific strategic report document by its document ID and optional language.")
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
@@ -242,19 +245,22 @@ async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, ali
     return await search_model.getInstance().request_social_doc(doc_id, lang)
 
 
-@api_routes.post("/api/dynamic/user", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("scanning"))],
+@api_routes.post("/api/dynamic/user", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("scanning"))],
                  description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "user")
 
 
-@api_routes.post("/api/dynamic/cracked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("scanning"))],
+@api_routes.post("/api/dynamic/cracked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("scanning"))],
                  description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "cracked")
 
+@api_routes.post("/api/urlscan/domain", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO])), Depends(limiter_dependency),Depends(license_required("scanning"))])
+async def parse_text(payload: DomainScanRequest):
+    return await crawl_model.getInstance().scan_domain(payload)
 
-@api_routes.post("/api/dynamic/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("scanning"))],
+@api_routes.post("/api/dynamic/social", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE], [user_role.ADMIN, user_role.DEMO])),Depends(license_required("scanning"))],
                  description="Perform a dynamic search for emails found in breach and defacement data.")
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "social")
