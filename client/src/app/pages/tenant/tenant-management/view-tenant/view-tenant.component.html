@@ -95,8 +95,11 @@
                       <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuLicense' + i">
                         <li *ngFor="let license of licenseList">
                           <a class="dropdown-item" href="#"
+                             [ngClass]="{ 'text-muted': isLicenseDisabled(user, license) }"
                              (click)="toggleUserLicense(user, license); $event.stopPropagation(); $event.preventDefault();">
-                            <input type="checkbox" [checked]="user.licenses?.includes(license)"/>
+                            <input [checked]="user.licenses?.includes(license)"
+                                   [disabled]="isLicenseDisabled(user, license)"
+                                   type="checkbox"/>
                             {{ getLicenseLabel(license) }}
                           </a>
                         </li>

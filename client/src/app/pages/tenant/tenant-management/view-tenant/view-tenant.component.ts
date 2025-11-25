@@ -1,4 +1,3 @@
-
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../shared/services/api.service';
@@ -47,7 +46,11 @@ export class ViewTenantComponent implements OnInit {
       default: return '';
     }
   }
+
   updateUser(user: User) {
+    if (!user.licenses || user.licenses.length === 0) {
+      user.licenses = [LicenseName.FREE];
+    }
     this.isLoading = true;
     this.apiService.post('update/user', user).subscribe({
       next: () => {
@@ -58,6 +61,7 @@ export class ViewTenantComponent implements OnInit {
       },
     });
   }
+
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -65,6 +69,7 @@ export class ViewTenantComponent implements OnInit {
       this.selectedUserId = null;
     }
   }
+
   getLicenseLabel(license: LicenseName) {
     switch (license) {
       case LicenseName.FREE: return 'Free';
@@ -76,7 +81,45 @@ export class ViewTenantComponent implements OnInit {
       default: return license;
     }
   }
+
+  isLicenseDisabled(user: any, license: LicenseName): boolean {
+    const licenses: LicenseName[] = user.licenses || [];
+    const hasFree = licenses.includes(LicenseName.FREE);
+    const hasEnterprise = licenses.includes(LicenseName.ENTERPRISE);
+    const hasBasic = licenses.includes(LicenseName.OSINT_BASIC);
+    const hasAdvanced = licenses.includes(LicenseName.OSINT_ADVANCED);
+
+    if (license === LicenseName.FREE) {
+      return licenses.length > 0 && !hasFree;
+    }
+
+    if (hasFree && license !== LicenseName.FREE.valueOf()) {
+      return true;
+    }
+
+    if (license === LicenseName.ENTERPRISE) {
+      return licenses.length > 1 || (licenses.length === 1 && !hasEnterprise);
+    }
+
+    if (hasEnterprise && license !== LicenseName.ENTERPRISE.valueOf()) {
+      return true;
+    }
+
+    if (license === LicenseName.OSINT_BASIC && hasAdvanced && !hasBasic) {
+      return true;
+    }
+
+    if (license === LicenseName.OSINT_ADVANCED && hasBasic && !hasAdvanced) {
+      return true;
+    }
+
+    return false;
+  }
+
   toggleUserLicense(user: any, license: LicenseName) {
+    if (this.isLicenseDisabled(user, license)) {
+      return;
+    }
     if (!user.licenses) user.licenses = [];
     const index = user.licenses.indexOf(license);
     if (index > -1) {
@@ -85,6 +128,7 @@ export class ViewTenantComponent implements OnInit {
       user.licenses.push(license);
     }
   }
+
   getUserLicensesLabel(user: any): string {
     if (!user.licenses || user.licenses.length === 0) return 'None';
     const names = user.licenses.map((l: LicenseName) => this.getLicenseLabel(l)).join(', ');

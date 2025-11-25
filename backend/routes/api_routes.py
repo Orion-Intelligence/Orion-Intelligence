@@ -280,12 +280,12 @@ async def get_tenant(current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_tenant(current_user)
 
 
-@api_routes.post("/api/update/tenant", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer"))], )
+@api_routes.post("/api/update/tenant", dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer"))], )
 async def update_tenant(data: TenantRequest, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().update_tenant(data, current_user)
 
 
-@api_routes.post("/api/users", dependencies=[Depends(role_required([user_role.ADMIN])),Depends(license_required("maintainer"))])
+@api_routes.post("/api/users", dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN]))])
 async def get_all_users():
     return await TenantManager.get_instance().get_all_users()
 

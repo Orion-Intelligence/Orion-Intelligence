@@ -113,11 +113,23 @@ class db_user_account(Model):
     def validate_licenses(cls, values):
         role = values.get("role")
         licenses = values.get("licenses")
+
         if licenses is not None:
             if not licenses:
                 raise FormValidationError({"licenses": "At least one license is required"})
+
+            if LicenseName.FREE in licenses and len(licenses) > 1:
+                raise FormValidationError({"licenses": "Free license cannot be combined with other licenses"})
+
+            if LicenseName.ONSIT_BASIC in licenses and LicenseName.ONSIT_ADVANCED in licenses:
+                raise FormValidationError({"licenses": "osint_basic and osint_advanced cannot both be assigned"})
+
+            if LicenseName.ENTERPRISE in licenses and len(licenses) > 1:
+                raise FormValidationError({"licenses": "Enterprise license must be the only license"})
+
             if any(l == LicenseName.MAINTAINER for l in licenses) and role != user_role.PROFILE:
                 raise FormValidationError({"licenses": "Only profile users can have maintainer license"})
+
         return values
 
     @staticmethod

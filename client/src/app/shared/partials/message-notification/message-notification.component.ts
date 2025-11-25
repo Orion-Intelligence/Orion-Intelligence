@@ -6,8 +6,7 @@ import { MessageNotificationService } from '../../../services/message_notificati
 @Component({
   selector: 'app-message-notification',
   imports: [NgIf, CommonModule],
-  templateUrl: './message-notification.component.html',
-  styleUrl: './message-notification.component.css'
+  templateUrl: './message-notification.component.html'
 })
 export class MessageNotificationComponent {
   message$;

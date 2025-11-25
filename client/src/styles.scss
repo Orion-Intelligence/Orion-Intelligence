@@ -17,7 +17,6 @@
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';
-@use 'app/shared//partials/sidebar-profile/sidebar-profile-settings/profile-image-picker/profile-image-picker.component.css';
 @use 'app/pages/tenant/tenant-management/view-tenant/view-tenant.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
@@ -57,6 +56,7 @@
 @use 'app/shared/partials/scroll-top/scroll-top.component.css';
 @use 'app/shared/partials/security-scan-results/security-scan-export-component/security-scan-export-component.component.css';
 @use 'app/shared/partials/trail-notification/trail-notification.component.css';
+@use 'app/shared/partials/message-notification/message-notification.component.css';
 @use 'app/pages/graphs/graphs.component.css';
 @use 'app/pages/graphs/graph-info/graph-info.component.css';
 @use 'app/pages/graphs/listings/graph-listings.component.css';
@@ -70,6 +70,7 @@
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-month';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation';
 @use 'assets/styles/ng-bootstrap/datepicker/datepicker-navigation-select';
+
 
 :root {
   --color-blur-920: #fff;
@@ -330,4 +331,9 @@ img[data-ph]:not([width], [height]) {
   min-width: 24px;
   min-height: 24px;
   display: inline-block;
+}
+
+.dropdown-item.text-muted {
+  opacity: 0.60;
+  pointer-events: none;
 }
