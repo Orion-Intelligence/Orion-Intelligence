@@ -33,9 +33,13 @@ const sets = [
 const map: Record<string, string> = {};
 
 for (const set of sets) {
-  const limit = Math.min(set.length, base.length);
-  for (let i = 0; i < limit; i++) {
-    map[set[i]] = base[i];
+  let i = 0;
+  for (const ch of set) {
+    if (i >= base.length) {
+      break;
+    }
+    map[ch] = base[i];
+    i++;
   }
 }
 
