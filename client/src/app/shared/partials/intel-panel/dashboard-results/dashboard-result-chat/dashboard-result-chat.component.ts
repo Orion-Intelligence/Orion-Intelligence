@@ -4,6 +4,7 @@ import { ChatResultItem } from '../../../../model/results/chat/chat.callback.mod
 import { DatePipe, NgForOf, NgIf, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../services/scroll.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
+import {NormalizeUnicodePipe} from '../../../../pipes/normalize-unicode.pipe';
 
 @Component({
   selector: 'app-dashboard-result-chat',
@@ -12,7 +13,7 @@ import { TooltipDirective } from '../../../../directive/tooltip-directive.direct
     DatePipe,
     NgIf,
     SlicePipe,
-    TooltipDirective, CommonModule
+    TooltipDirective, CommonModule, NormalizeUnicodePipe
   ],
   templateUrl: './dashboard-result-chat.component.html'
 })

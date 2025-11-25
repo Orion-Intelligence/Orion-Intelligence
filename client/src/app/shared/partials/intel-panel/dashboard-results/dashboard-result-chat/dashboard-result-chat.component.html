@@ -51,7 +51,7 @@
           <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5">
             <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Media Caption</h5>
             <div class="dashboard__search-link">
-              {{ item.m_media_caption.slice(0, 300) }}...
+              {{ item.m_media_caption.slice(0, 300) | normalizeUnicode}}...
             </div>
           </ng-container>
           <ng-container *ngIf="item.m_content">
