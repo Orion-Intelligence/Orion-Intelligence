@@ -14,69 +14,132 @@
       <img alt="Logout" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24">
     </div>
   </a>
-  <ul [class.show]="dropdownOpen()" class="profile-dropdown" [ngClass]="{'profile-dropdown-width': !isAdmin()}">
+  <ul [class.show]="dropdownOpen()" class="profile-dropdown"
+    [ngClass]="{'profile-dropdown-width': !isAdmin() && licenseService.isMaintainer()}">
     <div class="profile-dropdown-arrow"></div>
-    <ng-container *ngIf="isAdmin(); else profile">
-      <li><a class="dropdown-item disabled"> <img alt="Settings" height="15" class="ml-0"
-            ngSrc="assets/images/shared/profile.svg" priority width="15" />&nbsp;{{ username$ | async }}</a></li>
-      <li class="dropdown-item d-flex align-items-center disabled">
-        <span class="bg-success rounded-circle d-inline-block me-2 profile_user-active"></span> &nbsp;&nbsp;active
-      </li>
+    <ng-container *ngIf="isAdmin(); else notAdmin">
       <li>
-        <hr class="dropdown-divider mx-3">
+        <a class="dropdown-item disabled">
+          <img alt="Settings" height="15" ngSrc="assets/images/shared/profile.svg" width="15" />
+          &nbsp;{{ username$ | async }}
+        </a>
       </li>
+
+      <li class="dropdown-item d-flex align-items-center disabled">
+        <span class="bg-success rounded-circle d-inline-block me-2 profile_user-active"></span>
+        &nbsp;&nbsp;active
+      </li>
+
+      <li>
+        <hr class="dropdown-divider mx-3" />
+      </li>
+
       <li (click)="toggleThemeByClick()">
         <div class="dropdown-item profile_theme-toggle">
-          <img alt="Settings" (click)="toggleThemeByClick()" height="15" ngSrc="assets/images/shared/theme.svg" priority
-            width="15"> &nbsp; Theme &nbsp; <label class="small-switch"> <span [class.active]="isDarkTheme"
-              class="small-slider round"></span> </label>
+          <img alt="Theme" height="15" ngSrc="assets/images/shared/theme.svg" width="15" />
+          &nbsp; Theme
+          <label class="small-switch">
+            <span [class.active]="isDarkTheme" class="small-slider round"></span>
+          </label>
         </div>
       </li>
-      <li><a *ngIf="isAdmin()" class="dropdown-item" href="admin/" target="_blank"> <img alt="Settings" height="15"
-            ngSrc="assets/images/shared/settings.svg" priority width="15"> &nbsp; Settings</a>
-      </li>
-      <li *ngIf="isAdmin()">
-        <hr class="dropdown-divider mx-3">
-      </li>
-      <li><a (click)="logout()" class="dropdown-item" id="logout-button"> <img alt="Logout" height="15" class="ml-0"
-            ngSrc="assets/images/shared/logout.svg" priority width="15"> &nbsp; Logout</a>
-      </li>
-    </ng-container>
-    <ng-template #profile>
-      <li class="profile-section">
-        <div class="profile-avatar">
-          <img [src]="currentImageUrl || 'assets/images/shared/default-profile.svg'" alt="" />
-        </div>
-        <div class="profile-name-mail-container">
-          <div class="profile-name">{{ username$ | async}}</div>
-          <div class="profile-email" appTooltip="Active License">{{ licences }}</div>
-        </div>
-      </li>
-
-      <li class="profile-item" (click)="auditlog()">
-        <img src="assets/images/shared/profile.svg" alt="Auditlog" />
-        <span>Auditlog</span>
-      </li>
-
-      <li class="profile-item" (click)="manageIocs()">
-        <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" />
-        <span>Manage IOC’s</span>
-      </li>
-
-      <li class="profile-item" (click)="openAccountSettings()">
-        <img src="assets/images/shared/settings.svg" alt="Account settings" />
-        <span>Account settings</span>
+      <li>
+        <a class="dropdown-item" href="admin/" target="_blank">
+          <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" width="15" />
+          &nbsp; Settings
+        </a>
       </li>
 
       <li>
-        <hr class="profile-divider" />
+        <hr class="dropdown-divider mx-3" />
       </li>
 
-      <li class="profile-item" (click)="logout()">
-        <img src="assets/images/shared/logout.svg" alt="Sign out" />
-        <span>Sign out</span>
+      <li>
+        <a (click)="logout()" class="dropdown-item">
+          <img alt="Logout" height="15" ngSrc="assets/images/shared/logout.svg" width="15" />
+          &nbsp; Logout
+        </a>
       </li>
+    </ng-container>
+
+    <ng-template #notAdmin>
+
+      <ng-container *ngIf="licenseService.isMaintainer(); else notMaintainer">
+        <li class="profile-section">
+          <div class="profile-avatar">
+            <img [src]="currentImageUrl || 'assets/images/shared/default-profile.svg'" alt="" />
+          </div>
+          <div class="profile-name-mail-container">
+            <div class="profile-name">{{ username$ | async }}</div>
+            <div class="profile-email" appTooltip="Active License">{{ licences }}</div>
+          </div>
+        </li>
+
+        <li class="profile-item" (click)="auditlog()">
+          <img src="assets/images/shared/profile.svg" alt="Auditlog" />
+          <span>Auditlog</span>
+        </li>
+
+        <li class="profile-item" (click)="manageIocs()">
+          <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" />
+          <span>Manage IOC’s</span>
+        </li>
+
+        <li class="profile-item" (click)="openAccountSettings()">
+          <img src="assets/images/shared/settings.svg" alt="Account settings" />
+          <span>Account settings</span>
+        </li>
+
+        <li>
+          <hr class="profile-divider" />
+        </li>
+
+        <li class="profile-item" (click)="logout()">
+          <img src="assets/images/shared/logout.svg" alt="Sign out" />
+          <span>Sign out</span>
+        </li>
+      </ng-container>
+
+      <ng-template #notMaintainer>
+        <li>
+          <a class="dropdown-item disabled">
+            <img alt="User" height="15" ngSrc="assets/images/shared/profile.svg" width="15" />
+            &nbsp;{{ username$ | async }}
+          </a>
+        </li>
+
+        <li class="dropdown-item d-flex align-items-center disabled">
+          <span class="bg-success rounded-circle d-inline-block me-2 profile_user-active"></span>
+          &nbsp;&nbsp;{{ licences }}
+        </li>
+
+        <li>
+          <hr class="dropdown-divider mx-3" />
+        </li>
+
+        <li (click)="toggleThemeByClick()">
+          <div class="dropdown-item profile_theme-toggle">
+            <img alt="Theme" height="15" ngSrc="assets/images/shared/theme.svg" width="15" />
+            &nbsp; Theme
+            <label class="small-switch">
+              <span [class.active]="isDarkTheme" class="small-slider round"></span>
+            </label>
+          </div>
+        </li>
+        <li>
+          <hr class="dropdown-divider mx-3" />
+        </li>
+
+        <li>
+          <a (click)="logout()" class="dropdown-item">
+            <img alt="Logout" height="15" ngSrc="assets/images/shared/logout.svg" width="15" />
+            &nbsp; Logout
+          </a>
+        </li>
+      </ng-template>
+
     </ng-template>
+
   </ul>
   <div [class.sidebar_container-disable]="!(isNotificationOpen$ | async)"
     [class.filter__container-enable]="isNotificationOpen$ | async" class="sidebar_container">

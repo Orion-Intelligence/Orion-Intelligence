@@ -39,6 +39,17 @@ class cronjob_manager:
 
     @staticmethod
     async def iocs_alert_loop():
+        while True:
+            try:
+                print(f"[{datetime.utcnow()}] Running all category alert jobs (test mode, every 10 seconds)")
+                await alert_job.get_instance().run_all_categories()
+
+            except Exception as e:
+                print(f"[{datetime.utcnow()}] ALERT JOB ERROR: {e}")
+
+            # Sleep for 10 seconds
+            await asyncio.sleep(10)
+
         tz = ZoneInfo("Australia/Sydney")
         while True:
             now_local = datetime.now(tz)
