@@ -57,7 +57,10 @@ export class SidebarProfileAlertsComponent implements OnInit {
       "defacement",
       "breach",
       "exploit",
-      "social"
+      "social",
+      "discussion",
+      "stealerlogs",
+      "feed",
     ];
     for (const cat of ALL_CATEGORIES) {
       if (!summaries.find(s => s.categoryName === cat)) {

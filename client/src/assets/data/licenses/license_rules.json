@@ -48,10 +48,11 @@
         "maintainer": false
     },
     "maintainer": {
-        "modules": [],
-        "maintainer": true,
-        "scanning": false,
-        "cti_graph": false
+        "modules": "all",
+        "scanning": true,
+        "cti_graph": true,
+        "mapping": true,
+        "maintainer": true
     },
     "enterprise": {
         "modules": "all",

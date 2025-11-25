@@ -1,6 +1,7 @@
 import asyncio
 from typing import List, Dict, Any
 from datetime import datetime
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
@@ -19,7 +20,10 @@ ALERT_CATEGORIES = [
     "defacement",
     "breach",
     "exploit",
-    "social"
+    "social",
+    "discussion",
+    "stealerlogs",
+    "feed",
 ]
 
 class alert_job:
@@ -78,11 +82,15 @@ class alert_job:
                 return
 
             new_alerts: List[AlertModel] = []
-            
+            search_data_category='all'
             if category == "defacement":
                 ParamModel = search_defacement_param_model
                 search_func = self._search_model.search_defacement_result
             elif category =="breach":
+                ParamModel = search_leak_param_model
+                search_func = self._search_model.search_leak_result
+            elif category =="feed":
+                search_data_category='news'
                 ParamModel = search_leak_param_model
                 search_func = self._search_model.search_leak_result
             elif category=="social":
@@ -98,6 +106,17 @@ class alert_job:
             elif category=="general":
                 ParamModel=search_general_param_model
                 search_func=self._search_model.search_general_result
+            elif category=="discussion":
+                search_data_category=''
+                base_index = [
+                    ELASTIC_INDEX.S_CHATS_INDEX,
+                    ELASTIC_INDEX.S_SOCIAL_INDEX
+                ]
+                ParamModel=search_leak_param_model
+                search_func=self._search_model.search_consolidated_ranked_result
+            elif category=="stealerlogs":
+                ParamModel=search_credential_param_model
+                search_func=self._search_model.search_stealerlogs_result
             else:
                 return
 
@@ -110,15 +129,18 @@ class alert_job:
 
                     search_data = {
                         "entity_filter": {ioc_type_name: [ioc_value]},
-                        "category": 'all',
+                        "category": search_data_category,
                         "page": 1,
                         "size": 100, 
-                        "matchtype": 'or'
+                        "matchtype": 'or',
+                        "fullsearch": True,
                     }
                     
                     try:
                         search_param = ParamModel(**search_data)
                         if category=="social":
+                            es_response = await search_func(search_param,base_index,[],[])
+                        elif category=="discussion":
                             es_response = await search_func(search_param,base_index,[],[])
                         else:
                             es_response = await search_func(search_param)
