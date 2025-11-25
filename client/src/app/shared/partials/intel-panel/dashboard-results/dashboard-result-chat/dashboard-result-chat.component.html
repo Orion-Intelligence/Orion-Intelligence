@@ -31,7 +31,7 @@
       <ng-container *ngIf="item.m_summary && item.m_summary[0] && item.m_summary[0].length > 5">
         <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">AI Summary</h5>
         <div class="dashboard__search-link">
-          {{ item.m_summary[0].slice(0, 500) }}...
+          {{ item.m_summary[0].slice(0, 500) | normalizeUnicode}}...
         </div>
       </ng-container>
 
@@ -39,7 +39,7 @@
         <h5 class="dashboard__search-title dashboard__search-title-secondary">Embedded Files</h5>
         <div *ngFor="let file of item.m_file_name | slice:0:3" class="dashboard__search-link">
           <ng-container *ngFor="let part of file.split(' - ')">
-            <div>{{ part }}</div>
+            <div>{{ part | normalizeUnicode}}</div>
           </ng-container>
         </div>
       </ng-container>
@@ -47,7 +47,7 @@
       <ng-container *ngIf="item">
         <ng-container *ngIf="item.m_caption && item.m_caption.length > 5; else checkMedia">
           <p class="dashboard__search-description highlight mt-2">
-            {{ item.m_caption.slice(0, 300) }}... </p>
+            {{ item.m_caption.slice(0, 300) | normalizeUnicode}}... </p>
           <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5">
             <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Media Caption</h5>
             <div class="dashboard__search-link">
@@ -58,7 +58,7 @@
             <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Raw Data Content</h5>
             <p class="dashboard__search-description highlight mt-2">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                {{ part }}<br *ngIf="!last" />...
+                {{ part | normalizeUnicode }} nor<br *ngIf="!last" />...
               </ng-container>
               <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
             </p>
@@ -68,13 +68,13 @@
         <ng-template #checkMedia>
           <ng-container *ngIf="item.m_media_caption && item.m_media_caption.length > 5; else checkContent">
             <p class="dashboard__search-description highlight mt-2">
-              {{ item.m_media_caption.slice(0, 300) }}... </p>
+              {{ item.m_media_caption.slice(0, 300) | normalizeUnicode }}... </p>
             <ng-container *ngIf="item.m_content">
               <h5 class="dashboard__search-title dashboard__search-title-secondary mt-3">Raw Data Content</h5>
               <p class="dashboard__search-description highlight mt-2">
                 <ng-container
                   *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                  {{ part }}<br *ngIf="!last" />...
+                  {{ part | normalizeUnicode }}<br *ngIf="!last" />...
                 </ng-container>
                 <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
               </p>
@@ -86,7 +86,7 @@
           <ng-container *ngIf="item.m_content; else noContent">
             <p class="dashboard__search-description highlight mt-2">
               <ng-container *ngFor="let part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; let last = last">
-                {{ part }}<br *ngIf="!last" />...
+                {{ part | normalizeUnicode}}<br *ngIf="!last" />...
               </ng-container>
               <span *ngIf="item.m_content.slice(0, 300).split(' - ').length > 5">...</span>
             </p>
