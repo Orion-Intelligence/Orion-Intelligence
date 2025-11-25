@@ -1,4 +1,4 @@
-<li class="sidebar__item">
+<li class="sidebar__item" (click)="licenseService.demoSubscription(category)">
   <div (click)="selectSection()" [ngClass]="{'active': (selectionStore.selectedSection$ | async) === category}"
     [queryParams]="{ page: 1 }" [routerLink]="[routePrefix]" appTooltip="{{tooltip}}" class="sidebar__item-dropdown"
     queryParamsHandling="merge">

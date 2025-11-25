@@ -26,7 +26,8 @@ class UserStatus(str, Enum):
     ACTIVE = "active"
     DISABLE = "disable"
 
-class LicenseName(str,Enum):
+
+class LicenseName(str, Enum):
     FREE = "free"
     ONSIT_BASIC = "osint_basic"
     ONSIT_ADVANCED = "osint_advanced"
@@ -80,7 +81,6 @@ class db_user_account(Model):
 
         password = str(value)
 
-        # Combined regex check for all 5 conditions
         if len(password) < 8:
             raise ValueError("Password must be at least 8 characters long")
         if not re.search(r"[a-z]", password):
@@ -107,6 +107,17 @@ class db_user_account(Model):
         elif email:
             if "@" not in email or "." not in email.split("@")[-1]:
                 raise FormValidationError({"email": "Invalid email format"})
+        return values
+
+    @model_validator(mode="before")
+    def validate_licenses(cls, values):
+        role = values.get("role")
+        licenses = values.get("licenses")
+        if licenses is not None:
+            if not licenses:
+                raise FormValidationError({"licenses": "At least one license is required"})
+            if any(l == LicenseName.MAINTAINER for l in licenses) and role != user_role.PROFILE:
+                raise FormValidationError({"licenses": "Only profile users can have maintainer license"})
         return values
 
     @staticmethod

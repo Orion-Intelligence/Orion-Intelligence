@@ -3,8 +3,8 @@ from odmantic import AIOEngine
 from odmantic.exceptions import DuplicateKeyError
 
 from orion.services.log_manager.log_controller import log
-from orion.services.mongo_manager.mongo_enums import (MONGO_CONNECTIONS)
-from orion.services.mongo_manager.shared_model.db_auth_models import (db_user_account, user_role)
+from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
@@ -43,13 +43,21 @@ class mongo_controller:
             log.g().e(f"MONGO CONNECTION ERROR: {ex}")
 
     async def ensure_indexes(self):
-        await self.__engine.get_collection(db_user_account).create_index([("username", 1)], unique=True)
+        user_collection = self.__engine.get_collection(db_user_account)
+        await user_collection.create_index([("username", 1)], unique=True)
+        await user_collection.create_index(
+            [("role", 1)],
+            unique=True,
+            partialFilterExpression={"role": user_role.ADMIN.value},
+            name="unique_admin_role",
+        )
         await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
 
     def get_engine(self) -> AIOEngine:
         return self.__engine
 
     async def initialize(self):
+        await self.ensure_indexes()
         existing_admin = await self.__engine.find_one(db_user_account, db_user_account.role == user_role.ADMIN)
         if not existing_admin:
             try:
@@ -76,5 +84,4 @@ class mongo_controller:
         admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_tenant_model, icon="fa fa-link"))
-
         return admin

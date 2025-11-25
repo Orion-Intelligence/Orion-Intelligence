@@ -20,7 +20,8 @@ export class subscriptionGuard implements CanActivate {
     if (this.subscriptionService.accountExpirable() && !(this.subscriptionService.isDemo()) || (this.authService.getLicenses().length>0 && "enterprise" == this.authService.getLicenses().at(0))) {
       return true;
     }
-    this.dashboardService.showSubscription.set(true);
-    return this.router.parseUrl('/');
+    return true;
+    // this.dashboardService.showSubscription.set(true);
+    // return this.router.parseUrl('/');
   }
 }
