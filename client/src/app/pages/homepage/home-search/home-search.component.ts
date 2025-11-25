@@ -5,13 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { SearchFiltersComponent } from "../search-filters/search-filters.component";
-import { HomeInsightComponent } from "../home-insight/home-insight.component";
 import { AppService } from '../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, CommonModule, SearchFiltersComponent, HomeInsightComponent],
+  imports: [FormsModule, NgOptimizedImage, CommonModule, SearchFiltersComponent],
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {

@@ -3,9 +3,9 @@ import { LicenseName } from '../../shared/model/licenses/license.rules';
 import { license_rules } from '../../shared/constants/shared-enums';
 import { AuthService } from '../authetication/auth.service';
 import { map, Observable, of } from 'rxjs';
-import {SubscriptionService} from '../dashboard/subscription.service';
-import {Router} from '@angular/router';
-import {DashboardService} from '../dashboard/dashboard.service';
+import { SubscriptionService } from '../dashboard/subscription.service';
+import { Router } from '@angular/router';
+import { DashboardService } from '../dashboard/dashboard.service';
 
 type CombinedRule = {
     modules: Set<string> | 'all';
@@ -69,28 +69,28 @@ export class LicenseService {
     }
 
     demoSubscription(moduleName: string) {
-        if(moduleName=="Stealerlogs"){
-          moduleName = "stealer_logs"
+        if (moduleName == "Stealerlogs") {
+            moduleName = "stealer_logs"
         }
-        if(moduleName=="Strategic"){
-          moduleName = "general"
+        if (moduleName == "Strategic") {
+            moduleName = "general"
         }
 
         const rule = this.getCombinedRule();
         let key = moduleName.toLowerCase()
         let access = (rule.modules === 'all' || rule.modules.has(key))
-        if(this.subscriptionService.isDemo() && !access){
-          this.dashboardService.showSubscription.set(true);
-          this.router.navigate(['/']).then();
+        if (this.subscriptionService.isDemo() && !access) {
+            this.dashboardService.showSubscription.set(true);
+            this.router.navigate(['/']).then();
         }
     }
 
     canUseModule(moduleName: string): boolean {
         const rule = this.getCombinedRule();
-        if(this.subscriptionService.isDemo()){
-          return true
-        }else
-          return (rule.modules === 'all' || rule.modules.has(moduleName))
+        if (this.subscriptionService.isDemo()) {
+            return true
+        } else
+            return (rule.modules === 'all' || rule.modules.has(moduleName))
     }
 
     canUseCtiGraph(): boolean {

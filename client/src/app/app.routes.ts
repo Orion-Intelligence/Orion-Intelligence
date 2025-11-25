@@ -44,6 +44,7 @@ import { LicenseGuard } from './shared/guards/license.guard';
 import { SidebarProfileAlertsComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component';
 import { CategoryAlertReportComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component';
 import { AddCustomAlertComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component';
+import { HomeAccessGuard } from './shared/guards/home-access.guard';
 
 const consolidatedChildren = [
   {
@@ -177,7 +178,7 @@ export const routes: Routes = [
       {
         path: 'home',
         component: HomepageComponent,
-        canActivate: [RoleGuard, LicenseGuard],
+        canActivate: [HomeAccessGuard],
         resolve: { insights: InsightResolver },
         data: { animation: 'HomePage' }
       },

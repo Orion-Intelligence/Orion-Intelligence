@@ -44,7 +44,6 @@ export class AuthService {
     body.set('username', username);
     body.set('password', password);
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-
     return this.apiService.post<any>('token', body.toString(), { headers }).pipe(
       tap({
         next: (response) => {

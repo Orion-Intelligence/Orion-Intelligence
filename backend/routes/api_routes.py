@@ -58,7 +58,7 @@ async def get_directory(param: dump_param_model = Depends()):
     return await dump_model.getInstance().invoke_dump(param)
 
 
-@api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])),Depends(license_required("maintainer"))],
+@api_routes.get("/api/insight", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE]))],
                 description="Retrieve analytics and strategic insights for dashboard overview.")
 async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
@@ -199,13 +199,13 @@ async def search_defacement(param: search_defacement_param_model = Body(...)):
 
 
 @api_routes.get("/api/search/defacement/{doc_id}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(license_required("module:defacement"))],
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE]))],
                 description="Get a specific defacement document by its document ID.")
 async def get_defacement_document(doc_id: str):
     return await search_model.getInstance().request_defacement_doc(doc_id)
 
 
-@api_routes.get("/api/search/breach/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])),Depends(license_required("module:breach"))],
+@api_routes.get("/api/search/breach/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE]))],
                 description="Get a specific breach (leak) document by its document ID and optional language.")
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
@@ -218,26 +218,26 @@ async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias
 
 
 @api_routes.get("/api/search/exploit/{doc_id}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])),Depends(license_required("module:exploit"))],
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE]))],
                 description="Get a specific breach (leak) document by its document ID and optional language.")
 async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
 
 
 @api_routes.get("/api/search/strategic/{doc_id}",
-                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(license_required("module:general"))],
+                dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE]))],
                 description="Get a specific strategic report document by its document ID and optional language.")
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_general_doc(doc_id, lang)
 
 
-@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(license_required("module:social"))],
+@api_routes.get("/api/search/chat/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE]))],
                 description="Get a specific strategic report document by its document ID and optional language.")
 async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
 
-@api_routes.get("/api/search/social/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(license_required("module:social"))],
+@api_routes.get("/api/search/social/{doc_id}", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE]))],
                 description="Get a specific strategic report document by its document ID and optional language.")
 async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang")):
     return await search_model.getInstance().request_social_doc(doc_id, lang)
