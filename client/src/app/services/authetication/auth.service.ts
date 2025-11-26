@@ -39,12 +39,18 @@ export class AuthService {
     return this.authState$.pipe(map((state) => state.role));
   }
 
-  login(username: string, password: string): Observable<any> {
+  login(username: string, password: string, isDemo:boolean=false): Observable<any> {
     const body = new URLSearchParams();
-    body.set('username', username);
-    body.set('password', password);
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-    return this.apiService.post<any>('token', body.toString(), { headers }).pipe(
+    let route = 'token'
+    if(isDemo){
+      route = 'token/demo'
+    }else {
+      body.set('username', username);
+      body.set('password', password);
+    }
+
+    return this.apiService.post<any>(route, body.toString(), { headers }).pipe(
       tap({
         next: (response) => {
           if (response.twofa_required) {
@@ -137,10 +143,9 @@ export class AuthService {
   }
 
   demoLogin(): void {
-    const demoUserName = 'demo';
-    const demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw!';
-    this.login(demoUserName, demoPassword).subscribe(async (res) => { });
+    this.login("_", "_", true).subscribe(async (res) => { });
   }
+
 
   signup(username: string, email: string, password: string): Observable<any> {
     return this.apiService.post('signup', { username, email, password });

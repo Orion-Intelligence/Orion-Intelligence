@@ -17,10 +17,16 @@ export class HomeAccessGuard implements CanActivate {
     ) { }
 
     canActivate(): Observable<boolean | UrlTree> {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+
         return this.authService.getRole$().pipe(
             filter((role): role is string => role !== null),
             take(1),
             switchMap((role) => {
+                if (role === 'demo' && mode === 'free') {
+                    return of(this.router.createUrlTree(['dashboard/strategic/all']));
+                }
                 if (role === 'admin' || role === 'demo') {
                     return of(true);
                 }
@@ -28,7 +34,6 @@ export class HomeAccessGuard implements CanActivate {
                     return this.licenseService.loadLicenses().pipe(
                         map(() => {
                             const isMaintainer = this.licenseService.isMaintainer();
-
                             if (isMaintainer) {
                                 return this.router.createUrlTree(['dashboard/profile/dashboard']);
                             }

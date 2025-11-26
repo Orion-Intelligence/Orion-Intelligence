@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { NgClass, NgIf } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
@@ -30,7 +30,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
   animationState: any;
 
-  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, private appService: AppService) {
+  constructor(private activatedRoute: ActivatedRoute, protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, private appService: AppService) {
   }
   ngOnInit(): void {
     this.appService.set('isSidebarOpen', this.isMenuOpen);
@@ -57,4 +57,9 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   hideSubscription() {
     this.dashboardService.showSubscription.set(false)
   }
+
+  isMobileMode(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+  }
+
 }

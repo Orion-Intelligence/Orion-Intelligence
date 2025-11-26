@@ -510,12 +510,6 @@ table a:visited {
   color: var(--color-text1) !important;
 }
 
-@media (width <=460px) {
-  .default-input-container .input-group-text {
-    width: 0 !important;
-  }
-}
-
 .default-input-container .input-group-text {
   background: #fff;
   border: 0;
@@ -678,7 +672,8 @@ table a:visited {
 
 @media only screen and (width <=1000px) {
   .default-input-container-mobile {
-    width: 100vw !important;
+    width: calc(100vw - 30px) !important;
+
   }
 
   .default-notification-banner {
@@ -687,7 +682,13 @@ table a:visited {
   }
 }
 
-@media only screen and (width <=460px) {
+@media (width <=550px) {
+  .default-input-container .input-group-text {
+    width: 0 !important;
+  }
+}
+
+@media only screen and (width <=550px) {
   .side-menu-container {
     display: none !important;
   }

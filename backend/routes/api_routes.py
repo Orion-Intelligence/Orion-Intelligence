@@ -39,9 +39,10 @@ from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+public_routes = APIRouter()
 
 
-@api_routes.get("/api/public", description="Get publicly exposed configuration values for frontend initialization.")
+@public_routes.get("/api/public", description="Get publicly exposed configuration values for frontend initialization.")
 async def get_public_config():
     return await config_controller.getInstance().get_all()
 

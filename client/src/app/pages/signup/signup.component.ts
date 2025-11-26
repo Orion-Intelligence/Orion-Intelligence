@@ -99,9 +99,7 @@ export class SignupComponent implements OnInit {
   goToLogin() {
     this.router.navigate(['/login']).then();
   }
-  demoLogin() {
-    this.auth_service.demoLogin();
-  }
+
   copy(type: string) {
     if (type === 'user') {
       navigator.clipboard.writeText(this.demoUser).then(() => {

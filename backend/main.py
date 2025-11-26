@@ -14,7 +14,7 @@ from orion.middleware.middleware_setup import setup_middlewares
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from routes.admin_routes import admin_routes
 from routes.api_micros import micro_routes
-from routes.api_routes import api_routes
+from routes.api_routes import api_routes, public_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 
@@ -42,6 +42,7 @@ configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
+app.include_router(public_routes, include_in_schema=False)
 app.include_router(micro_routes)
 app.include_router(api_routes)
 

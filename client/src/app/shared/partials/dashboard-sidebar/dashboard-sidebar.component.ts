@@ -12,7 +12,7 @@ import {
   ProfileSubCategory, DiscussionSubCategory
 
 } from '../../constants/pages';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router, RouterLink} from '@angular/router';
 import { filter, take } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
@@ -54,7 +54,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   prfileCategories = Object.values(ProfileSubCategory)
   category = Category;
 
-  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(private activatedRoute: ActivatedRoute, protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
 
   ngOnInit() {

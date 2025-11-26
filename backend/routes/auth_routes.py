@@ -4,6 +4,7 @@ from starlette.responses import JSONResponse
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager
+from orion.helper_manager.env_handler import env_handler
 from orion.services.session_manager.session_manager import session_manager
 from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
 from orion.api.interactive.signup_manager.signup_manager import SignupManager
@@ -46,6 +47,19 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends(), response: Resp
 
     return result
 
+@auth_router.post("/api/token/demo")
+async def token(response: Response = None):
+    DEMO_USERNAME = env_handler.get_instance().env("DEMO_USERNAME")
+    DEMO_PASSWORD = env_handler.get_instance().env("DEMO_PASSWORD")
+
+    result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD)
+    access_token = result.get("access_token")
+    twofa_required = result.get("twofa_required")
+
+    if access_token and not twofa_required:
+        set_access_cookie(response, access_token)
+
+    return result
 
 @auth_router.post("/api/token/2fa/verify")
 async def verify_2fa(code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None):
@@ -84,7 +98,6 @@ async def signup(data: SignupRequest):
 @auth_router.post("/api/verify/{token}")
 async def verifyUser(token: str):
     return await auth_manager.verify_user(token)
-
 
 @auth_router.post("/api/forgot")
 async def forgotPassword(request: ForgotPasswordRequest):

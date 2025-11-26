@@ -29,7 +29,6 @@ import { ForgotPasswordComponent } from './shared/partials/forgot-password/forgo
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
 import { SidebarProfileHomepageComponent } from './shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
 import { SidebarProfileIocComponent } from './shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component';
-import { RoleGuard } from './shared/guards/role-guard.guard';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
 import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
