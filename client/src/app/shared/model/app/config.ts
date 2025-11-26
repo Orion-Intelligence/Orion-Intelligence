@@ -1,5 +1,4 @@
 export class AppSettingsModel {
-  api_allowed: boolean = false;
   ai_endpoint: string = '';
   telegram_allowed: boolean = false;
   version: string = '1.0.0';
@@ -8,7 +7,6 @@ export class AppSettingsModel {
 
   constructor(data?: Partial<Record<keyof AppSettingsModel, string | boolean>>) {
     if (data) {
-      this.api_allowed = data.api_allowed === '1' || data.api_allowed === true;
       this.ai_endpoint = (data.ai_endpoint as string) || this.ai_endpoint;
       this.telegram_allowed = data.telegram_allowed === '1' || data.telegram_allowed === true;
       this.version = (data.version as string) || this.version;

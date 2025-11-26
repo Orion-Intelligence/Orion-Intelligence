@@ -1,6 +1,6 @@
 <div [ngClass]="{ 'selected-filter-bar__top-space': showSorting }" @fadeInDashboardItem>
   <div class="selected-filter-bar selected-filter-bar__left-space"
-    *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
+       *ngIf="sidebarFilterCount(true)>0 || entityFiltersCount()>0 || this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
     <div class="selected-filter-bar__top-row">
       <div class="selected-filter-bar__title">Filters</div>
       <div class="selected-filter-bar__actions">
@@ -10,25 +10,25 @@
           </div>
           <div class="selected-filter-bar__filter-type" *ngIf="entityFiltersCount()>0">
             Entity({{ entityFiltersCount() }}) <img
-              src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg"
-              class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close" />
+            src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg"
+            class="selected-filter-bar__remove-x" (click)="clearFilters('entity')" alt="close"/>
           </div>
         </ng-container>
         <div class="selected-filter-bar__filter-type" *ngIf="sidebarFilterCount()>0">
           Sidebar({{ sidebarFilterCount() }}) <img
-            src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg"
-            class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close" />
+          src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg"
+          class="selected-filter-bar__remove-x" (click)="clearFilters('sidebar')" alt="close"/>
         </div>
         <div class="selected-filter-bar__filter-type"
-          *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
+             *ngIf="this.app_service.getConfig().localSettings.matchType && this.app_service.getConfig().localSettings.matchType!='or'">
           Search Type ({{ this.app_service.getConfig().localSettings.matchType }}) <img
-            src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg"
-            class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close" />
+          src="../../../../assets/images/shared/theme/searchFilter_clossButton_white.svg"
+          class="selected-filter-bar__remove-x" (click)="clearMatchType()" alt="close"/>
         </div>
         <button class="selected-filter-bar__clear-btn" (click)="clearFilters('all')">Clear Selection</button>
         <div class="selected-filter-bar__expand-icon" [ngClass]="{ 'expand': isFilterBarExpanded }"
-          (click)="toggleFilterBarCollapse()">
-          <img src="../../../../assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" />
+             (click)="toggleFilterBarCollapse()">
+          <img src="../../../../assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon"/>
         </div>
       </div>
     </div>
@@ -65,10 +65,11 @@
             <ng-container *ngIf="getVisibleTags().length > 0">
               <div class="selected-filter-bar__filter-tag" *ngFor="let tag of getVisibleTags()">
                 {{ tag }}<img src="assets/images/shared/theme/searchFilter_clossButton_white.svg"
-                  class="selected-filter-bar__remove-x" (click)="removeEntityTypeFilterTag(tag)" alt="search" />
+                              class="selected-filter-bar__remove-x" (click)="removeEntityTypeFilterTag(tag)"
+                              alt="search"/>
               </div>
               <div class="selected-filter-bar__filter-tag selected-filter-bar__more-tag"
-                *ngIf="getHiddenTagCount() > 0">
+                   *ngIf="getHiddenTagCount() > 0">
                 +{{ getHiddenTagCount() }}
               </div>
             </ng-container>

@@ -130,7 +130,7 @@
       class="dashboard__search-card">
       <div [id]="'item-' + item.m_hash" class="dashboard__search-main-div">
 
-        <div class="dashboard__search-tags" *ngIf="appService.isMobileMode()">
+        <div class="dashboard__search-tags">
           <ng-container *ngIf="item.m_ioc_type?.length; else unknownTag">
             <span *ngFor="let tag of item.m_ioc_type" class="dashboard__tag">{{ tag }}</span>
           </ng-container>
@@ -138,7 +138,7 @@
             <span class="dashboard__tag">unknown</span>
           </ng-template>
 
-          <div class="dashboard__buttons">
+          <div class="dashboard__buttons" *ngIf="!isMobileMode()">
             <div (click)="scrollService.openCTI($event, item.m_hash || '')" appTooltip="Open CTI Graph"
               class="dashboard__search-button">
               <div class="dashboard__search-button-inner">

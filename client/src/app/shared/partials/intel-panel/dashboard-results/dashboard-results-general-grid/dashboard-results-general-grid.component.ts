@@ -1,12 +1,12 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, NgForOf, NgIf } from '@angular/common';
-import { SafeHtml } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HelperService } from '../../../../services/helper.service';
-import { GeneralResultItem } from '../../../../model/results/general/general.callback.model';
-import { LeakResultItem } from '../../../../model/results/leak/leak.callback.model';
-import { ScrollService } from '../../../../services/scroll.service';
-import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {CommonModule, DatePipe, NgForOf, NgIf} from '@angular/common';
+import {SafeHtml} from '@angular/platform-browser';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {HelperService} from '../../../../services/helper.service';
+import {GeneralResultItem} from '../../../../model/results/general/general.callback.model';
+import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
+import {ScrollService} from '../../../../services/scroll.service';
+import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-dashboard-results-general-grid',
@@ -27,7 +27,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
   isCollapsed = true;
   isFreeStrategic = false;
 
-  constructor(private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngAfterViewInit() {
@@ -65,9 +65,14 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
     const hasStrategic = url.includes('strategic');
     this.isFreeStrategic = isFree && hasStrategic;
   }
+
   openURL(item: any) {
     if (!item?.m_url) return;
     window.location.href = item.m_url;
+  }
+
+  isMobileMode(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
   }
 
 }

@@ -133,7 +133,10 @@ export class DashboardService {
         return {
           success: true,
           isEmpty: !hasAnyResults,
-          data: hasAnyResults ? new RankedCallbackModel({result: response.Result, pageCount: response.Page_Count}) : null
+          data: hasAnyResults ? new RankedCallbackModel({
+            result: response.Result,
+            pageCount: response.Page_Count
+          }) : null
         };
       }),
       catchError(() => of({success: false, isEmpty: false, data: null}))
@@ -227,13 +230,22 @@ export class DashboardService {
   }
 
   private initializeSideFilters() {
-    let excludedKeys = Object.keys(new ConsolidatedParamModel());
+    const allowedKeys = [
+      "source",
+      "daterange",
+      "status",
+      "network",
+      "index",
+      "content_type",
+      "safe",
+      "content",
+      "mitre"
+    ];
     const params = new URLSearchParams(window.location.search);
     const selected: Record<string, string | null> = {};
-    excludedKeys.push("ci")
 
     params.forEach((value, key) => {
-      if (!excludedKeys.includes(key)) {
+      if (allowedKeys.includes(key)) {
         selected[key] = value === 'all' || value === '' ? null : value;
       }
     });
@@ -248,7 +260,6 @@ export class DashboardService {
   }
 
   private cancelOngoingRequest() {
-//     this.cancelRequest$.next();
   }
 
   clearCallback(): void {

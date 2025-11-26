@@ -118,8 +118,4 @@ export class AppService {
     this.configData.set(new ConfigSettings());
   }
 
-  isMobileMode(): boolean {
-    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
-  }
-
 }

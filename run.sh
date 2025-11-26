@@ -47,12 +47,10 @@ use_compose_file() {
 }
 
 wait_for_server() {
-  pass
-#    local url="http://localhost"
-#    until curl -s -o /dev/null "$url"; do
-#        sleep 2
-#    done
-#    sudo systemctl restart tor@default
+    until ss -tulpn | grep ':443 ' > /dev/null; do
+        sleep 2
+    done
+    sudo systemctl restart tor@default
 }
 
 stop_docker
@@ -109,4 +107,7 @@ fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
 docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
-wait_for_server
+
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
+    wait_for_server
+fi

@@ -25,7 +25,7 @@ export class DashboardResultGeneralListComponent implements OnInit, AfterViewIni
   queryParams: { ci: string; } | undefined;
   isCollapsed = true;
 
-  constructor(public appService:AppService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(private activatedRoute: ActivatedRoute, public appService:AppService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngOnInit() {
@@ -84,4 +84,9 @@ export class DashboardResultGeneralListComponent implements OnInit, AfterViewIni
     }
     return 'sort-default';
   }
+
+  isMobileMode(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+  }
+
 }

@@ -41,7 +41,6 @@ export class AppStorageService {
   getStaticConfig(baseAppSettings: AppSettingsModel): ConfigSettings {
     const localSettings = this.getLocalSettings();
     const app: Partial<AppSettingsModel> = {
-      api_allowed: baseAppSettings.api_allowed,
       telegram_allowed: baseAppSettings.telegram_allowed,
       version: baseAppSettings.version,
       language_allowed: baseAppSettings.language_allowed,
