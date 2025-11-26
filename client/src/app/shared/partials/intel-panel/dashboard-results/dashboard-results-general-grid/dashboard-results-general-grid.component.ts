@@ -68,7 +68,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
 
   openURL(item: any) {
     if (!item?.m_url) return;
-    window.location.href = item.m_url;
+    window.open(item.m_url, '_blank');
   }
 
   isMobileMode(): boolean {

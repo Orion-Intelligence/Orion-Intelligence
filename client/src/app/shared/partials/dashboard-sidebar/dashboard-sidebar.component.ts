@@ -159,4 +159,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status
   }
+
+  isFreeMobileMode(): boolean {
+    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+  }
+
 }
