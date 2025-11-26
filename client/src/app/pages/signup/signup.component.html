@@ -18,25 +18,6 @@
               <img src="/assets/images/shared/theme/info.svg" class="info-icon" />
               <span>Want to explore first? <strong>Try demo</strong></span>
             </div>
-            <div class="demo-credentials">
-              <div class="password-container">
-                <div class="copy-tooltip" *ngIf="userCopied">Copied!</div>
-
-                <div class="password-line" (click)="copy('user')">
-                  <strong>User:</strong>
-                  <span class="password-text">{{ demoUser }}</span>
-                </div>
-              </div>
-              <div class="password-container">
-                <div class="copy-tooltip" *ngIf="passwordCopied">Copied!</div>
-
-                <div class="password-line" (click)="copy('password')">
-                  <strong>Password:</strong>
-                  <span class="password-text">{{ demoPassword | slice:0:10 }}...</span>
-                </div>
-              </div>
-
-            </div>
           </div>
         </ng-container>
 

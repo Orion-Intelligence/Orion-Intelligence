@@ -97,19 +97,4 @@ export class SignupComponent implements OnInit {
   goToLogin() {
     this.router.navigate(['/login']).then();
   }
-
-  copy(type: string) {
-    if (type === 'user') {
-      navigator.clipboard.writeText(this.demoUser).then(() => {
-        this.userCopied = true;
-        setTimeout(() => this.userCopied = false, 1500);
-      });
-    }
-    else if (type === 'password') {
-      navigator.clipboard.writeText(this.demoPassword).then(() => {
-        this.passwordCopied = true;
-        setTimeout(() => this.passwordCopied = false, 1500);
-      });
-    }
-  }
 }
