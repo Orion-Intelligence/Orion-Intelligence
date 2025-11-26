@@ -25,7 +25,10 @@ export class HomeAccessGuard implements CanActivate {
             take(1),
             switchMap((role) => {
                 if (role === 'demo' && mode === 'free') {
-                    return of(this.router.createUrlTree(['dashboard/strategic/all']));
+                    return of(this.router.createUrlTree(
+                        ['dashboard/strategic/all'],
+                        { queryParams: Object.fromEntries(urlParams) }
+                    ));
                 }
                 if (role === 'admin' || role === 'demo') {
                     return of(true);
