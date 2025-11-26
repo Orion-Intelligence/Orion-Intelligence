@@ -59,10 +59,10 @@ export class LicenseService {
                 }
             }
 
-            combined.cti_graph = rule.cti_graph;
-            combined.mapping = rule.mapping;
-            combined.scanning = rule.scanning;
-            combined.maintainer = rule.maintainer;
+            combined.cti_graph ||= rule.cti_graph;
+            combined.mapping ||= rule.mapping;
+            combined.scanning ||= rule.scanning;
+            combined.maintainer ||= rule.maintainer;
         }
 
         return combined;
