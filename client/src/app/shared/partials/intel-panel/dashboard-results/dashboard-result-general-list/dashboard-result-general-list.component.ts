@@ -5,6 +5,7 @@ import { ScrollService } from '../../../../services/scroll.service';
 import { DefacementResultItem } from '../../../../model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
+import {AppService} from '../../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-dashboard-result-general-list',
@@ -24,7 +25,7 @@ export class DashboardResultGeneralListComponent implements OnInit, AfterViewIni
   queryParams: { ci: string; } | undefined;
   isCollapsed = true;
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(public appService:AppService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngOnInit() {
