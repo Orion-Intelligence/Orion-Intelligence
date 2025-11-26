@@ -671,11 +671,6 @@ table a:visited {
 }
 
 @media only screen and (width <=1000px) {
-  .default-input-container-mobile {
-    width: calc(100vw - 30px) !important;
-
-  }
-
   .default-notification-banner {
     margin-bottom: 10px;
     margin-left: 15px;
@@ -690,6 +685,10 @@ table a:visited {
 
 @media only screen and (width <=550px) {
   .side-menu-container {
+    display: none !important;
+  }
+
+  .homebar-advance > * {
     display: none !important;
   }
 
@@ -712,7 +711,6 @@ table a:visited {
   }
 
   .default-input-sub-container.mobile-overlay-inactive {
-    width: calc(100% - 65px) !important;
     margin-right: 100px;
     position: relative;
     padding: 0;
