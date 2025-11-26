@@ -59,6 +59,6 @@
         "scanning": true,
         "cti_graph": true,
         "mapping": true,
-        "maintainer": true
+        "maintainer": false
     }
 }

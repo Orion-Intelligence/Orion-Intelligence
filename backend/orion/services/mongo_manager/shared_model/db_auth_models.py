@@ -124,8 +124,12 @@ class db_user_account(Model):
             if LicenseName.ONSIT_BASIC in licenses and LicenseName.ONSIT_ADVANCED in licenses:
                 raise FormValidationError({"licenses": "osint_basic and osint_advanced cannot both be assigned"})
 
-            if LicenseName.ENTERPRISE in licenses and len(licenses) > 1:
-                raise FormValidationError({"licenses": "Enterprise license must be the only license"})
+            if LicenseName.ENTERPRISE in licenses:
+                allowed_combo = {LicenseName.ENTERPRISE, LicenseName.MAINTAINER}
+                if not set(licenses).issubset(allowed_combo):
+                    raise FormValidationError({
+                        "licenses": "Enterprise license can only be combined with Maintainer"
+                    })
 
             if any(l == LicenseName.MAINTAINER for l in licenses) and role != user_role.PROFILE:
                 raise FormValidationError({"licenses": "Only profile users can have maintainer license"})
