@@ -85,7 +85,7 @@
     </ng-container>
     <ng-container *ngIf="licenseService.canUseScanning()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" *ngIf="appService.getConfig().appSettings.api_allowed"
+        (sectionSelected)="onSectionSelected($event)"
         [category]="category.API" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories"
         [routePrefix]="'api'" [title]="'Live APIs'"></app-dashboard-sidebar-items>
     </ng-container>
@@ -226,7 +226,7 @@
       </app-dashboard-sidebar-collapsed>
     </ng-container>
 
-    <ng-container *ngIf="licenseService.canUseScanning() && appService.getConfig().appSettings.api_allowed">
+    <ng-container *ngIf="licenseService.canUseScanning()">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.API"
         [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
