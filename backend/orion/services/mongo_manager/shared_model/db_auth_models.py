@@ -67,8 +67,8 @@ class db_user_account(Model):
     @classmethod
     def validate_username(cls, value: str) -> str:
         value = value.strip()
-        if not value.isalnum():
-            raise ValueError("Username must be alphanumeric and cannot contain spaces or special characters")
+        if not re.match(r"^[A-Za-z0-9._-]+$", value):
+            raise ValueError("Username contains invalid characters")
         if any(op in value for op in ["$", "{", "}"]):
             raise ValueError("Invalid characters in username")
         return value
