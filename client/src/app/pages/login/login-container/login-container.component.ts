@@ -31,10 +31,6 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
   isMobile = false;
-  demoUser = 'demo';
-  demoPassword = 'TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw!';
-  userCopied = false;
-  passwordCopied = false;
 
   constructor(
     public authService: AuthService,

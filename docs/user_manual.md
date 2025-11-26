@@ -878,7 +878,7 @@ use it for demonstration purposes.
 
 1. DEMO_USERNAME=demo
 2. DEMO_PASSWORD=
-('TYdycoDuU9U6N6f2B7N8GsxpG3AkkSaOrlX8WBOwJgke3UNYCjgd3owwObGdPrsw')
+('contact out agent')
 
 **Description:** Demo keys are used to provide users with a demo version of the service. By using these keys, users can
 access a limited, demo server environment to explore features.
