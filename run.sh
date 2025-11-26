@@ -26,6 +26,7 @@ create_parser_zip() {
 client_build() {
     cd client || exit
     npm install
+    npm audit fix
     if [ "$1" = "-p" ]; then
         ng build --configuration production
     else
