@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { ChatResultItem } from '../../../../model/results/chat/chat.callback.model';
 import { DatePipe, NgForOf, NgIf, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../services/scroll.service';
@@ -13,7 +13,7 @@ import {NormalizeUnicodePipe} from '../../../../pipes/normalize-unicode.pipe';
     DatePipe,
     NgIf,
     SlicePipe,
-    TooltipDirective, CommonModule, NormalizeUnicodePipe
+    TooltipDirective, CommonModule, NormalizeUnicodePipe, RouterLink
   ],
   templateUrl: './dashboard-result-chat.component.html'
 })
