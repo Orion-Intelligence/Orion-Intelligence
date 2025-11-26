@@ -47,11 +47,12 @@ use_compose_file() {
 }
 
 wait_for_server() {
-    local url="http://localhost"
-    until curl -s -o /dev/null "$url"; do
-        sleep 2
-    done
-    sudo systemctl restart tor@default
+  pass
+#    local url="http://localhost"
+#    until curl -s -o /dev/null "$url"; do
+#        sleep 2
+#    done
+#    sudo systemctl restart tor@default
 }
 
 stop_docker
