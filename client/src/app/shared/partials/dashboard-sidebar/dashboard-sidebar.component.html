@@ -36,43 +36,43 @@
         [icon]="'assets/images/sidebar/strategic.svg'" [items]="generalCategories" [routePrefix]="'strategic'"
         [title]="'General Intelligence'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('breach') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('breach')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.BREACH"
         [icon]="'assets/images/sidebar/data_breach.svg'" [items]="leakCategories" [routePrefix]="'breach'"
         [title]="'Data Breach'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('discussion') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('discussion')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DISCUSSION"
         [icon]="'assets/images/sidebar/data_breach.svg'" [items]="discussionCategories" [routePrefix]="'discussion'"
         [title]="'Discussion'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('defacement') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('defacement')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DEFACEMENT"
         [icon]="'assets/images/sidebar/defacement.svg'" [items]="defacementCategories" [routePrefix]="'defacement'"
         [title]="'Defacement'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('social') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('social')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.SOCIAL"
         [icon]="'assets/images/sidebar/social.svg'" [items]="socialCategories" [routePrefix]="'social'"
         [title]="'Social'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('exploit') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('exploit')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.EXPLOIT"
         [icon]="'assets/images/sidebar/exploits.svg'" [items]="exploitCategories" [routePrefix]="'exploit'"
         [title]="'Exploit'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('feed') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('feed')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.FEED"
         [icon]="'assets/images/sidebar/news.svg'" [items]="newsCategories" [routePrefix]="'feed'"
         [title]="'Feed'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('stealer_logs') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('stealer_logs')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.STEALERLOGS"
         [icon]="'assets/images/sidebar/stealerlog.svg'" [items]="stealerlogsCategories" [routePrefix]="'stealerlogs'"
@@ -83,19 +83,19 @@
         [icon]="'assets/images/sidebar/scanner.svg'" [items]="scannerCategories" [routePrefix]="'scanner'"
         [title]="'Web Scans'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseScanning() && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseScanning()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)"
         [category]="category.API" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories"
         [routePrefix]="'api'" [title]="'Live APIs'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="licenseService.canUseModule('dumps') && !isFreeMobileMode()">
+    <ng-container *ngIf="licenseService.canUseModule('dumps')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.DUMP"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="dumpCategories" [routePrefix]="'dump'"
         [title]="'Dump'"></app-dashboard-sidebar-items>
     </ng-container>
-    <ng-container *ngIf="authService.getRole() === 'admin' && !isFreeMobileMode()">
+    <ng-container *ngIf="authService.getRole() === 'admin'">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.TENANT"
         [icon]="'assets/images/sidebar/tenant.svg'" [items]="tenantCategories" [routePrefix]="'tenant'"

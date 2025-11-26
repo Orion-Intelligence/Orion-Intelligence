@@ -4,6 +4,7 @@ import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs';
 import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common';
+import {AppService} from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-dashboard-header',
@@ -14,7 +15,7 @@ import { NgForOf, NgIf, NgOptimizedImage, TitleCasePipe } from '@angular/common'
 export class DashboardHeaderComponent implements OnInit {
   breadcrumb: { path: string; label: string }[] = [];
 
-  constructor(private router: Router) {
+  constructor(public appService:AppService, private router: Router) {
   }
 
   ngOnInit() {

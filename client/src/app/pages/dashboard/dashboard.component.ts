@@ -30,7 +30,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
   animationState: any;
 
-  constructor(private activatedRoute: ActivatedRoute, protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, private appService: AppService) {
+  constructor(private activatedRoute: ActivatedRoute, protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, protected appService: AppService) {
   }
   ngOnInit(): void {
     this.appService.set('isSidebarOpen', this.isMenuOpen);
@@ -57,9 +57,4 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   hideSubscription() {
     this.dashboardService.showSubscription.set(false)
   }
-
-  isMobileMode(): boolean {
-    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
-  }
-
 }
