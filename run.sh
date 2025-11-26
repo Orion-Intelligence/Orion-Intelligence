@@ -47,7 +47,8 @@ use_compose_file() {
 }
 
 wait_for_server() {
-    until ss -tulpn | grep ':443 ' > /dev/null; do
+    local url="https://try.orionintelligence.org"
+    until curl -s -o /dev/null "$url"; do
         sleep 2
     done
     sudo systemctl restart tor@default
