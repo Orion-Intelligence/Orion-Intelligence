@@ -1,6 +1,8 @@
 import asyncio
 from typing import List, Dict, Any
 from datetime import datetime
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
+from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
@@ -24,6 +26,7 @@ ALERT_CATEGORIES = [
     "discussion",
     "stealerlogs",
     "feed",
+    "port_scanning"
 ]
 
 class alert_job:
@@ -40,6 +43,7 @@ class alert_job:
         self._tenant_manager = TenantManager.get_instance()
         self._alert_manager = AlertManager.get_instance()
         self._search_model = search_model.getInstance() 
+        self._crawl_model= crawl_model.getInstance()
 
     def _get_next_category(self) -> str:
         category = ALERT_CATEGORIES[alert_job.__category_index]
@@ -58,6 +62,10 @@ class alert_job:
             "size": 100,
         }
 
+    def _should_run_repo_scan(self, ioc_value: str) -> bool:
+        keywords = ["repo", "git", "github", "gitlab"]
+        return any(k in ioc_value.lower() for k in keywords)
+
     def _map_es_result_to_alert(self, es_result: Dict[str, Any], ioc_type: str, ioc_value: str) -> AlertModel:
         data_hash = es_result.get("m_hash", es_result.get("m_title")) 
         
@@ -72,6 +80,68 @@ class alert_job:
             last_seen=datetime.utcnow(),
         )
 
+    async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
+        """
+        Executes the scan using crawl_model and creates an alert if data is found.
+        """
+        try:
+            payload = DomainScanRequest(domain=ioc_value, scanType=scan_type)
+            response = await self._crawl_model.scan_domain(payload)
+            scan_result = {}
+            if isinstance(response, dict):
+                scan_result = response
+            elif hasattr(response, 'body'): 
+                import json
+                scan_result = json.loads(response.body)
+            
+            result_data = scan_result.get("result")
+            if not result_data:
+                return 
+
+            grade = result_data.get("grade", "N/A")
+            
+            counts = result_data.get("grade_counts", {})
+            high_risk = counts.get("high", 0)
+            med_risk = counts.get("medium", 0)
+            low_risk = counts.get("low", 0)
+            
+            # Get list of threat categories (e.g., "CORS", "Port Scan")
+            threat_categories = list(result_data.get("threats", {}).keys())
+
+            # 5. Construct Alert Data
+            # Unique Hash: SCAN-IOC-DATE-TYPE (Prevents duplicate alerts on the same day)
+            scan_date = datetime.utcnow().strftime('%Y-%m-%d')
+            data_hash = f"{scan_type}-{ioc_value}"
+
+            title = f"{scan_type.upper()} Scan: {ioc_value} (Grade: {grade})"
+            
+            description = (
+                f"Security scan completed for {ioc_value}.\n"
+                f"**Grade:** {grade}\n"
+                f"**Risk Summary:** High: {high_risk} | Medium: {med_risk} | Low: {low_risk}\n"
+                f"**Issues Found:** {', '.join(threat_categories)}"
+            )
+
+            all_ioc_list = [alert_all_ioc(name=ioc_type, values=[ioc_value])]
+
+            await self._alert_manager.upsert_alert(
+                userId=tenant_id,
+                data_hash=data_hash,
+                category=f"{scan_type} scanning",
+                ioc_type=ioc_type,
+                ioc_value=ioc_value,
+                title=title,
+                description=description,
+                url=ioc_value,
+                source=f"Orion Scanner ({scan_type})",
+                content_types=threat_categories, 
+                all_ioc=all_ioc_list
+            )
+            return True 
+
+        except Exception as e:
+            print(f"[{datetime.now()}] -> SCAN ERROR for {ioc_value} ({scan_type}): {e}")
+            return False
 
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
         
@@ -81,7 +151,25 @@ class alert_job:
             if not decrypted_iocs:
                 return
 
-            new_alerts: List[AlertModel] = []
+            if category == "port_scanning":
+                scanning_tasks = []
+                
+                for ioc in decrypted_iocs:
+                    ioc_type_name = ioc.ioc_id
+                    
+                    if ioc_type_name not in ["m_domain", "m_url", "hostname"]: 
+                        print("ioc name that continue: "+ioc_type_name)
+                        continue
+
+                    for ioc_value in ioc.values or []:
+                        scans_to_run = ["advance"]
+                        print("Ioc type: "+ioc_type_name+" Ioc value: "+ioc_value)
+                        # if any(k in ioc_value.lower() for k in [ "git",  "github"]):
+                        #     scans_to_run.append("repo")
+
+                        for scan_type in scans_to_run:await self._handle_scanning_alert(tenant.userId, ioc_value, ioc_type_name, scan_type)
+                return
+
             search_data_category='all'
             if category == "defacement":
                 ParamModel = search_defacement_param_model
@@ -160,11 +248,26 @@ class alert_job:
                         if results:
                             for result in results:
                                 _data_hash = result.get("m_hash", "NO_HASH")
-                                _content_types=result.get("m_content_type") or "-"
-                                _title=result.get("m_title") or "-"
+                                _content_types=result.get("m_content_type") or []
+                                raw = result.get("raw") or ""
+                                m_title = result.get("m_title")
+                                m_description = result.get("m_content") or result.get("m_important_content")
+                                _description=""
+                                _title=""
+                                if m_title:
+                                    _title = m_title
+                                else:
+                                    if ":" in raw:
+                                        parts = raw.split(":", 1)
+                                        _title = parts[0] or "-"
+                                        _description = parts[1] or "-"
+                                    else:
+                                        _title = raw or "-"
+                                        _description = m_description or "-"
+                                # _title=result.get("m_title") or "-"
                                 _url=result.get("m_url") or result.get("m_base_url") or "-"
-                                _description=result.get("m_content") or result.get("m_important_content") or "-"
-                                _source=result.get("m_network") or "-"
+                                # _description=result.get("m_content") or result.get("m_important_content") or "-"
+                                _source=result.get("m_network") or result.get("channel") or "-"
                                 additional_keys_and_values = self.get_additional_result_keys(result)
                                 all_ioc_list = []
                                 triggering_ioc = alert_all_ioc(name=ioc_type_name, values=[ioc_value])

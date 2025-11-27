@@ -255,7 +255,7 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "cracked")
 
-@api_routes.post("/api/urlscan/domain", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO])), Depends(limiter_dependency),Depends(license_required("scanning"))])
+@api_routes.post("/api/urlscan/domain", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])), Depends(limiter_dependency),Depends(license_required("scanning"))])
 async def parse_text(payload: DomainScanRequest):
     return await crawl_model.getInstance().scan_domain(payload)
 
