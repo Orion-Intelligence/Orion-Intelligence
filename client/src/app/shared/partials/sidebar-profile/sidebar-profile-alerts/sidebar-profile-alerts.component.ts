@@ -87,6 +87,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
 
       case 'breach':
       case 'exploit':
+      case 'stealerlogs':
         if (count) this.criticalRisks++;
         return 'Critical';
 

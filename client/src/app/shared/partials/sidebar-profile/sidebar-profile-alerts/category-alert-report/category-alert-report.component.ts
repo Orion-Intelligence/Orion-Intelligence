@@ -14,6 +14,7 @@ import { alert_filters } from '../../../../constants/filters';
 import { FiltersComponent } from "../../../filters/filters.component";
 import { ApiService } from '../../../../services/api.service';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { LicenseService } from '../../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-category-alert-report',
@@ -31,7 +32,8 @@ export class CategoryAlertReportComponent implements OnInit {
   showEditAlertPopup: boolean = false;
   isFilterOpen$: Observable<boolean>;
   selectedAlert!: AlertModel;
-  constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService) {
+  constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService,
+    private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
   ngOnInit(): void {
@@ -99,21 +101,32 @@ export class CategoryAlertReportComponent implements OnInit {
     })
   }
   seeDetails(hash: string) {
-    this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
-    const alerts = this.appService.userProfile().alerts;
-    const _alert = alerts.find(a => a.data_hash === hash);
+    this.licenseService.loadLicenses().subscribe(licenses => {
+      const hasEnterprise = licenses.includes('enterprise');
 
-    if (_alert) {
-      _alert.report_seen = true;
-    }
-    this.apiService.post('alert/seen', [_alert]).subscribe({
-      next: () => {
-      },
-      error: (err) => {
-        console.error(err);
-        alert(err?.error?.detail || 'Update failed');
-      },
+      if (hasEnterprise) {
+        this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
+        const alerts = this.appService.userProfile().alerts;
+        const _alert = alerts.find(a => a.data_hash === hash);
+        if (_alert?.type === "scanning") {
+          this.router.navigate([`/dashboard/scanner/port-scan`]);
+        }
+        if (_alert) {
+          _alert.report_seen = true;
+        }
+        this.apiService.post('alert/seen', [_alert]).subscribe({
+          next: () => {
+          },
+          error: (err) => {
+            console.error(err);
+            alert(err?.error?.detail || 'Update failed');
+          },
+        });
+      } else {
+        this.messageNotificationService.show("Please purchase enterprise license to view reports")
+      }
     });
+
   }
 
   convertAlertsList(alerts: AlertModel[], targetType: string): CategoryAlerts[] {
