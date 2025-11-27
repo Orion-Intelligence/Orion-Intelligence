@@ -15,7 +15,6 @@ import {TenantModel} from '../../../shared/model/tenant/tenant.model';
 export class AppService {
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
-
   public entities = signal<any[]>([]);
 
   private entitiesCache: any[] | null = null;

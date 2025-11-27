@@ -15,6 +15,7 @@ export class AuthService {
   private onboarding = signal<boolean>(false);
   private subscription = signal<boolean>(false);
   private verificationDate = signal<string>('');
+  private mobileDemo = signal<boolean>(false);
   private licenses = signal<string[]>([]);
 
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
@@ -40,6 +41,10 @@ export class AuthService {
   }
 
   login(username: string, password: string, isDemo:boolean=false): Observable<any> {
+    if(this.appService.isMobileMode()){
+      this.mobileDemo.set(true)
+    }
+
     const body = new URLSearchParams();
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
     let route = 'token'
@@ -143,9 +148,10 @@ export class AuthService {
   }
 
   demoLogin(): void {
+
+
     this.login("_", "_", true).subscribe(async (res) => { });
   }
-
 
   signup(username: string, email: string, password: string): Observable<any> {
     return this.apiService.post('signup', { username, email, password });
@@ -181,6 +187,10 @@ export class AuthService {
 
   getLicenses(): string[] {
     return this.licenses();
+  }
+
+  getIsMobileDemo(): boolean {
+    return this.mobileDemo();
   }
 
   isAuthenticated(): boolean {

@@ -9,6 +9,7 @@ import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationComponent } from "../../shared/partials/message-notification/message-notification.component";
+import {AuthService} from '../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,7 +31,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
   animationState: any;
 
-  constructor(private activatedRoute: ActivatedRoute, protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, protected appService: AppService) {
+  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService:AuthService, protected appService: AppService) {
   }
   ngOnInit(): void {
     this.appService.set('isSidebarOpen', this.isMenuOpen);

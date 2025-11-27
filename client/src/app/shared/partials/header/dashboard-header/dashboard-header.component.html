@@ -17,7 +17,7 @@
     </span>
   </div>
 
-  <div class="header-bar_profile" *ngIf="!appService.isMobileMode()">
+  <div class="header-bar_profile" *ngIf="!authService.getIsMobileDemo()">
     <app-profile></app-profile>
   </div>
 </div>
