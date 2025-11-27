@@ -49,6 +49,7 @@ export class AlertNotificationComponent implements OnInit {
     const normalized = type.toLowerCase();
     switch (normalized) {
       case 'general':
+      case 'seo scanning':
         return 'Low';
 
       case 'breach':
@@ -56,6 +57,8 @@ export class AlertNotificationComponent implements OnInit {
         return 'Critical';
 
       case 'defacement':
+      case 'advanced scanning':
+      case 'repo scanning':
         return 'High';
 
       case 'social':

@@ -105,11 +105,44 @@ export class CategoryAlertReportComponent implements OnInit {
       const hasEnterprise = licenses.includes('enterprise');
 
       if (hasEnterprise) {
-        this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
+
         const alerts = this.appService.userProfile().alerts;
         const _alert = alerts.find(a => a.data_hash === hash);
-        if (_alert?.type === "scanning") {
-          this.router.navigate([`/dashboard/scanner/port-scan`]);
+        if (_alert?.type) {
+          const _domain = _alert.ioc_value || '-';
+          let scanType: string;
+          let route: string = '/dashboard/scanner/basic-scan';
+
+          switch (_alert.type.toLowerCase()) {
+            case "advance scanning":
+              scanType = "advance";
+              route = "/dashboard/scanner/port-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(_domain), canType: scanType }
+              });
+              break;
+
+            case "seo scanning":
+              scanType = "seo";
+              route = "/dashboard/scanner/seo-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(_domain), canType: scanType }
+              });
+              break;
+
+            case "repo scanning":
+              scanType = "repo";
+              route = "/dashboard/scanner/repository-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(_domain), canType: scanType }
+              });
+              break;
+            default:
+              this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
+              break;
+          }
+
+
         }
         if (_alert) {
           _alert.report_seen = true;
@@ -160,13 +193,17 @@ export class CategoryAlertReportComponent implements OnInit {
     const normalized = type.toLowerCase();
     switch (normalized) {
       case 'general':
+      case 'seo scanning':
         return 'Low';
 
       case 'breach':
       case 'exploit':
+      case 'feed':
         return 'Critical';
 
       case 'defacement':
+      case 'advanced scanning':
+      case 'repo scanning':
         return 'High';
 
       case 'social':

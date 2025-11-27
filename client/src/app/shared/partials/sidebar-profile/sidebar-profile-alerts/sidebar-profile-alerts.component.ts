@@ -78,25 +78,24 @@ export class SidebarProfileAlertsComponent implements OnInit {
   }
 
 
-  getRiskLevel(type: string, count: boolean = false): string {
+  getRiskLevel(type: string): string {
     const normalized = type.toLowerCase();
     switch (normalized) {
       case 'general':
-        if (count) this.lowRisks++;
+      case 'seo scanning':
         return 'Low';
 
       case 'breach':
       case 'exploit':
-      case 'stealerlogs':
-        if (count) this.criticalRisks++;
+      case 'feed':
         return 'Critical';
 
       case 'defacement':
-        if (count) this.highRisks++;
+      case 'advanced scanning':
+      case 'repo scanning':
         return 'High';
 
       case 'social':
-        if (count) this.mediumRisks++;
         return 'Medium';
 
       default:

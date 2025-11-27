@@ -106,6 +106,6 @@ def setup_admin(engine: AIOEngine) -> Admin:
     admin.add_view(ModelView(db_system_model, icon="fa fa-cog", label="System Settings", name="system_settings"))
     admin.add_view(ModelView(db_url_data_model, icon="fa fa-link", label="URL Data", name="url_data"))
     # admin.add_view(ModelView(db_tenant_model, icon="fa fa-users", label="Onboarding Data", name="onboarding_data"))
-    # admin.add_view(ModelView(db_alert_model,icon="fa fa-users", label="Alerts Data", name="onboarding_data"))
+    # admin.add_view(ModelView(db_alert_model,icon="fa fa-users", label="Alerts Data", name="alert_data"))
 
     return admin

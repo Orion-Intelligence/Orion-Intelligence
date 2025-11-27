@@ -26,7 +26,7 @@ ALERT_CATEGORIES = [
     "discussion",
     "stealerlogs",
     "feed",
-    "port_scanning"
+    "scanning"
 ]
 
 class alert_job:
@@ -81,11 +81,13 @@ class alert_job:
         )
 
     async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
-        """
-        Executes the scan using crawl_model and creates an alert if data is found.
-        """
         try:
-            payload = DomainScanRequest(domain=ioc_value, scanType=scan_type)
+            clean_domain = ioc_value.strip()
+            if not clean_domain.startswith(("http://", "https://")):
+                clean_domain = "https://" + clean_domain
+            if not clean_domain.endswith("/"):
+                clean_domain += "/"
+            payload = DomainScanRequest(domain=clean_domain, scanType=scan_type)
             response = await self._crawl_model.scan_domain(payload)
             scan_result = {}
             if isinstance(response, dict):
@@ -97,21 +99,17 @@ class alert_job:
             result_data = scan_result.get("result")
             if not result_data:
                 return 
-
             grade = result_data.get("grade", "N/A")
-            
+            if(grade=="N/A"):
+                return
             counts = result_data.get("grade_counts", {})
             high_risk = counts.get("high", 0)
             med_risk = counts.get("medium", 0)
             low_risk = counts.get("low", 0)
             
-            # Get list of threat categories (e.g., "CORS", "Port Scan")
             threat_categories = list(result_data.get("threats", {}).keys())
-
-            # 5. Construct Alert Data
-            # Unique Hash: SCAN-IOC-DATE-TYPE (Prevents duplicate alerts on the same day)
             scan_date = datetime.utcnow().strftime('%Y-%m-%d')
-            data_hash = f"{scan_type}-{ioc_value}"
+            data_hash = f"{scan_type}_{ioc_value}"
 
             title = f"{scan_type.upper()} Scan: {ioc_value} (Grade: {grade})"
             
@@ -147,27 +145,32 @@ class alert_job:
         
         try:
             decrypted_iocs = await self._tenant_manager.decrypt_iocs_for_tenant(tenant)
-            
+        
             if not decrypted_iocs:
                 return
 
-            if category == "port_scanning":
-                scanning_tasks = []
-                
+            if category == "scanning":
                 for ioc in decrypted_iocs:
                     ioc_type_name = ioc.ioc_id
-                    
-                    if ioc_type_name not in ["m_domain", "m_url", "hostname"]: 
-                        print("ioc name that continue: "+ioc_type_name)
+                    if ioc_type_name not in ["m_domain", "m_url"]: 
+                        print(f"Skipping IOC type: {ioc_type_name}")
                         continue
 
                     for ioc_value in ioc.values or []:
-                        scans_to_run = ["advance"]
-                        print("Ioc type: "+ioc_type_name+" Ioc value: "+ioc_value)
-                        # if any(k in ioc_value.lower() for k in [ "git",  "github"]):
-                        #     scans_to_run.append("repo")
-
-                        for scan_type in scans_to_run:await self._handle_scanning_alert(tenant.userId, ioc_value, ioc_type_name, scan_type)
+                        scans_to_run = []
+                        if ioc_type_name == "m_domain":
+                            scans_to_run = ["advanced", "seo"]
+                        elif ioc_type_name == "m_url":
+                            if "github" in ioc_value.lower():
+                                scans_to_run = ["repo"]
+                        for scan_type in scans_to_run:
+                            print(f"Processing {ioc_type_name} | Value: {ioc_value} | Scan: {scan_type}")
+                            await self._handle_scanning_alert(
+                                tenant.userId, 
+                                ioc_value, 
+                                ioc_type_name, 
+                                scan_type
+                            )
                 return
 
             search_data_category='all'
@@ -189,7 +192,7 @@ class alert_job:
                 ParamModel=search_consolidated_param_model
                 search_func=self._search_model.search_consolidated_ranked_result
             elif category=="exploit":
-                ParamModel=search_exploit_param_model
+                ParamModel=search_leak_param_model
                 search_func=self._search_model.search_exploit_result
             elif category=="general":
                 ParamModel=search_general_param_model
@@ -264,9 +267,7 @@ class alert_job:
                                     else:
                                         _title = raw or "-"
                                         _description = m_description or "-"
-                                # _title=result.get("m_title") or "-"
                                 _url=result.get("m_url") or result.get("m_base_url") or "-"
-                                # _description=result.get("m_content") or result.get("m_important_content") or "-"
                                 _source=result.get("m_network") or result.get("channel") or "-"
                                 additional_keys_and_values = self.get_additional_result_keys(result)
                                 all_ioc_list = []
