@@ -472,7 +472,7 @@ button:focus {
   background-color: #f0f0f0;
 }
 
-@media only screen and (width <=460px) {
+@media only screen and (width <=550px) {
   .filter-panel {
     position: fixed;
     top: 125px;
@@ -480,7 +480,9 @@ button:focus {
     width: calc(100% - 20px) !important;
     margin: 0 10px;
   }
+}
 
+@media only screen and (width <=460px) {
   .filter-panel__top-row {
     display: block;
     justify-content: space-between;
