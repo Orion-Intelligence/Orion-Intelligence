@@ -101,7 +101,7 @@ class alert_job:
                 ParamModel=search_consolidated_param_model
                 search_func=self._search_model.search_consolidated_ranked_result
             elif category=="exploit":
-                ParamModel=search_exploit_param_model
+                ParamModel=search_leak_param_model
                 search_func=self._search_model.search_exploit_result
             elif category=="general":
                 ParamModel=search_general_param_model
