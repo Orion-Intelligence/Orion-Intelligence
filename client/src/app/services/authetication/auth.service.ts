@@ -15,7 +15,6 @@ export class AuthService {
   private onboarding = signal<boolean>(false);
   private subscription = signal<boolean>(false);
   private verificationDate = signal<string>('');
-  private mobileDemo = signal<boolean>(false);
   private licenses = signal<string[]>([]);
 
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
@@ -42,7 +41,7 @@ export class AuthService {
 
   login(username: string, password: string, isDemo:boolean=false): Observable<any> {
     if(this.appService.isMobileMode()){
-      this.mobileDemo.set(true)
+      localStorage.setItem('mobileDemo', 'true');
     }
 
     const body = new URLSearchParams();
@@ -148,8 +147,6 @@ export class AuthService {
   }
 
   demoLogin(): void {
-
-
     this.login("_", "_", true).subscribe(async (res) => { });
   }
 
@@ -190,7 +187,7 @@ export class AuthService {
   }
 
   getIsMobileDemo(): boolean {
-    return this.mobileDemo();
+    return localStorage.getItem('mobileDemo') === 'true';
   }
 
   isAuthenticated(): boolean {
