@@ -110,13 +110,13 @@ async def search_consolidated(param: search_credential_param_model = Body(...)):
     return await search_model.getInstance().search_stealerlogs_result(param)
 
 
-@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])),Depends(license_required("maintainer"))],
+@api_routes.post("/api/search/consolidated", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])),Depends(license_required("maintainer",[user_role.ADMIN]))],
                  description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     return await search_model.getInstance().search_consolidated_result(param)
 
 
-@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])),Depends(license_required("maintainer"))],
+@api_routes.post("/api/search/consolidated/ranked", dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE])),Depends(license_required("maintainer",[user_role.ADMIN]))],
                  description="Search breach (leak) intelligence reports using parameters such as company, country, or hash.")
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
     base_index = [
