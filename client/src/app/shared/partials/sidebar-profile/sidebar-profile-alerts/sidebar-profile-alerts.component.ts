@@ -21,6 +21,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
   highRisks: number = 0;
   mediumRisks: number = 0;
   lowRisks: number = 0;
+  isLoading: boolean = false;
   constructor(public appService: AppService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService) {
   }
 
@@ -162,6 +163,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
     this.router.navigate([`/dashboard/profile/alerts/${type}`]);
   }
   scanIOCs() {
+    this.isLoading = true;
     this.apiService.post<any>('profile/alert/scan', null).subscribe({
       next: (response) => {
         console.log('Alert Scan Job Completed:', response);
@@ -177,12 +179,13 @@ export class SidebarProfileAlertsComponent implements OnInit {
         if (status === 'completed_with_errors') {
           successMessage += ' Some scans completed with errors.';
         }
-
+        this.isLoading = false;
         alert(successMessage);
       },
       error: (err) => {
         console.error('Scan failed with an error:', err);
         alert(err?.error?.detail || 'IOC Scan failed to start or complete.');
+        this.isLoading = false;
       },
     });
   }

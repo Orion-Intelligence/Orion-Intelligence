@@ -159,6 +159,23 @@ export class CategoryAlertReportComponent implements OnInit {
                 queryParams: { username: value }
               });
               break;
+            case "stealerlogs":
+              route = "/dashboard/stealerlogs/credential";
+              const queryParams: any = {
+                q: "",
+                page: 1,
+                category: "credential",
+                fullsearch: true,
+                matchtype: "or",
+                must: false
+              };
+              if (this.isDomain(value)) {
+                queryParams.domain = value;
+              } else {
+                queryParams.user = value;
+              }
+              this.router.navigate([route], { queryParams });
+              break;
             default:
               this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
               break;
@@ -365,5 +382,14 @@ export class CategoryAlertReportComponent implements OnInit {
       const lastSeenDate = new Date(alert.detectedOn);
       return lastSeenDate >= start && lastSeenDate <= inclusiveEnd;
     });
+  }
+  isDomain(value: string): boolean {
+    if (!value) return false;
+
+    value = value.replace(/https?:\/\//, "").replace(/^www\./, "");
+
+    const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
+
+    return domainRegex.test(value);
   }
 }
