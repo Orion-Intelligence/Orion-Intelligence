@@ -206,14 +206,12 @@ table {
   margin-bottom: 0;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  overflow: hidden;
   padding: 0;
   line-height: 1 !important;
   width: 100%;
 }
 
 .table td {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

@@ -9,12 +9,12 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 
 @Component({
-  selector: 'app-view-tenant',
+  selector: 'app-view-profile',
   imports: [NgFor, FormsModule, CommonModule],
   animations: [fadeInDashboardItem],
-  templateUrl: './view-tenant.component.html'
+  templateUrl: './view-profile.component.html'
 })
-export class ViewTenantComponent implements OnInit {
+export class ViewProfileComponent implements OnInit {
   users: User[] = [];
   licenseList = Object.values(LicenseName);
   isLoading = true;

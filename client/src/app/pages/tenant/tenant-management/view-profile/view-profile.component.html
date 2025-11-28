@@ -25,9 +25,10 @@
                 <th class="list__column-id-min">Action</th>
               </tr>
               </thead>
+
               <tbody *ngIf="(users?.length || 0) > 0" @fadeInDashboardItem>
               <ng-container *ngFor="let user of users; let i = index">
-                <tr *ngIf="user.role === 'profile'">
+                <tr>
                   <td data-label="Sr #">{{ i + 1 }}</td>
                   <td data-label="User Name">
                     <a class="list__table-url text-decoration-none text-reset">{{ user.username }}</a>
@@ -35,7 +36,7 @@
                   <td data-label="Email">{{ user.email || '-' }}</td>
                   <td data-label="Role">{{ getRoleLabel(user.role) }}</td>
                   <td data-label="Status">
-                    <div class="dropdown mt-2 view-tenant_dropdown-wrapper">
+                    <div class="dropdown view-tenant_dropdown-wrapper">
                         <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuStatus{{i}}"
                               data-bs-toggle="dropdown" aria-expanded="false" [ngClass]="{
                                 'status-active': user.status === 'active',
@@ -51,23 +52,17 @@
                         </span>
                       <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuStatus' + i">
                         <li><a class="dropdown-item disabled" tabindex="-1">Verification Pending</a></li>
-                        <li>
-                          <hr class="dropdown-divider mx-3">
-                        </li>
+                        <li><hr class="dropdown-divider mx-3"></li>
                         <li><a class="dropdown-item disabled" tabindex="-1">Onboarding</a></li>
-                        <li>
-                          <hr class="dropdown-divider mx-3">
-                        </li>
+                        <li><hr class="dropdown-divider mx-3"></li>
                         <li><a class="dropdown-item" (click)="user.status='active'">Active</a></li>
-                        <li>
-                          <hr class="dropdown-divider mx-3">
-                        </li>
+                        <li><hr class="dropdown-divider mx-3"></li>
                         <li><a class="dropdown-item" (click)="user.status='disable'">Disable</a></li>
                       </ul>
                     </div>
                   </td>
                   <td data-label="Subscription">
-                    <div class="dropdown mt-2 view-tenant_dropdown-wrapper">
+                    <div class="dropdown view-tenant_dropdown-wrapper">
                         <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuSub{{i}}"
                               data-bs-toggle="dropdown" aria-expanded="false">
                           <span class="list__status-default-pointer"></span>{{ user.subscription ? 'Paid' : 'Free' }}
@@ -76,15 +71,13 @@
                         </span>
                       <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuSub' + i">
                         <li><a class="dropdown-item" (click)="user.subscription=true">Paid</a></li>
-                        <li>
-                          <hr class="dropdown-divider mx-3">
-                        </li>
+                        <li><hr class="dropdown-divider mx-3"></li>
                         <li><a class="dropdown-item" (click)="user.subscription=false">Free</a></li>
                       </ul>
                     </div>
                   </td>
                   <td data-label="License">
-                    <div class="dropdown mt-2 view-tenant_dropdown-wrapper" data-bs-auto-close="outside">
+                    <div class="dropdown view-tenant_dropdown-wrapper" data-bs-auto-close="outside">
                         <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuLicense{{i}}"
                               data-bs-toggle="dropdown" aria-expanded="false">
                           <span class="list__status-default-pointer"></span>
@@ -106,7 +99,6 @@
                       </ul>
                     </div>
                   </td>
-
                   <td data-label="Action">
                     <div
                       class="dropdown view-tenant_dropdown-wrapper view-tenant_dropdown-wrapper-min d-flex justify-content-center align-items-center"
@@ -121,6 +113,20 @@
                 </tr>
               </ng-container>
               </tbody>
+
+              <tbody *ngIf="(users?.length || 0) === 0">
+              <tr>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+              </tbody>
+
             </table>
           </ng-container>
 
@@ -140,50 +146,22 @@
               </thead>
               <tbody @fadeInDashboardItem>
               <tr>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-75"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-100"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-75"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-50"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-50"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-50"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-25"></div>
-                </td>
+                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
               </tr>
               <tr>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-75"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-100"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-75"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-50"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-50"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-50"></div>
-                </td>
-                <td>
-                  <div class="skeleton_shimmer shimmer-line w-25"></div>
-                </td>
+                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
               </tr>
               </tbody>
             </table>

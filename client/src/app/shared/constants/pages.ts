@@ -110,7 +110,8 @@ export enum StealerlogsSubCategory {
   LOGS = 'Logs',
 }
 export enum TenantSubCategory {
-  VIEW = 'View',
+  VIEW_PROFILE = 'View-Profiles',
+  VIEW_TENANT = 'View-Tenants',
   AUDITLOG = 'Auditlog',
 }
 export enum ProfileSubCategory {

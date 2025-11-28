@@ -29,7 +29,6 @@ import { ForgotPasswordComponent } from './shared/partials/forgot-password/forgo
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
 import { SidebarProfileHomepageComponent } from './shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
 import { SidebarProfileIocComponent } from './shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component';
-import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import { AuditlogComponent } from './pages/admin/auditlog/auditlog.component';
 import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
 import { PaymentGatewayComponent } from './shared/partials/payment-gateway/payment-gateway.component';
@@ -44,6 +43,7 @@ import { SidebarProfileAlertsComponent } from './shared/partials/sidebar-profile
 import { CategoryAlertReportComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component';
 import { AddCustomAlertComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component';
 import { HomeAccessGuard } from './shared/guards/home-access.guard';
+import {ViewProfileComponent} from './pages/tenant/tenant-management/view-profile/view-profile.component';
 
 const consolidatedChildren = [
   {
@@ -568,8 +568,13 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
-            path: 'view',
-            component: ViewTenantComponent,
+            path: 'view-profiles',
+            component: ViewProfileComponent,
+            data: {type: 'view', animation: 'CategoryPage'}
+          },
+          {
+            path: 'view-tenants',
+            component: ViewProfileComponent,
             data: { type: 'view', animation: 'CategoryPage' }
           },
           {

@@ -25,6 +25,7 @@ class db_tenant_model(Model):
     country: str = ""
     city: str = ""
     postal_code: str = ""
+    verified:bool = False
     user_quota: int = 0
     status: TenantStatus = TenantStatus.DISABLE
     licenses: List[str] = []

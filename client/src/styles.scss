@@ -17,7 +17,6 @@
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';
-@use 'app/pages/tenant/tenant-management/view-tenant/view-tenant.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
 @use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
@@ -338,4 +337,12 @@ img[data-ph]:not([width], [height]) {
 .dropdown-item.text-muted {
   opacity: 0.60;
   pointer-events: none;
+}
+
+table tr td,
+table tr th {
+  vertical-align: middle !important;
+}
+.directory-list__table tbody tr {
+  overflow: visible !important;
 }

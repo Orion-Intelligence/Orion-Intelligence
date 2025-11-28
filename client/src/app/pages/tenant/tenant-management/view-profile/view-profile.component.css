@@ -16,7 +16,7 @@
   position: relative;
   display: inline-block;
   width: auto;
-  margin-bottom: 7px;
+  margin: 7px;
 }
 
 .view-tenant-container .dropdown-menu {
