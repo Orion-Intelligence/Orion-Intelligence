@@ -94,6 +94,9 @@ async def logout(ptoken: str = Depends(oauth2_scheme), _: Response = None):
 async def signup(data: SignupRequest):
     return await SignupManager.signup_user(data)
 
+@auth_router.post("/api/signup/verificaion")
+async def signup(data: SignupRequest):
+    return await SignupManager.resend_verification_email(data)
 
 @auth_router.post("/api/verify/{token}")
 async def verifyUser(token: str):

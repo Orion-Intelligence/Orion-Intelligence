@@ -24,8 +24,6 @@ export class SignupComponent implements OnInit {
   };
   currentUnmetCheck: string | null = null;
   isMobile = false;
-  userCopied = false;
-  passwordCopied = false;
   constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute) { }
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {

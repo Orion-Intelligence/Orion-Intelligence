@@ -271,7 +271,7 @@ async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
 
-@api_routes.post("/api/create/tenant", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE])), Depends(status_required([UserStatus.ONBOARDING]))], )
+@api_routes.post("/api/create/tenant", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))], )
 async def create_tenant(data: TenantRequest, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().create_tenant(data, current_user)
 

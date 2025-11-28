@@ -58,18 +58,18 @@ export class AuthService {
       tap({
         next: (response) => {
           if (response.twofa_required) {
-            this.authState.next({ token: null, username, role: null, isAuthenticated: false, onboarding: null, error: '2FA required' });
+            this.authState.next({ token: null, username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: '2FA required' });
             return response.provisioning_uri || null;
           }
 
           if (!response?.access_token) {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!' });
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Access denied!' });
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!' });
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Access denied!' });
             return;
           }
 
@@ -84,8 +84,12 @@ export class AuthService {
           this.startTokenRefresh();
           this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
         },
-        error: () => {
-          this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, error: 'Access denied!', onboarding: null });
+        error: (error) => {
+          if(error?.error?.detail === "Verification pending."){
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false,isValidated: false, error: 'Access denied!', onboarding: null });
+          }else {
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false,isValidated: true, error: 'Access denied!', onboarding: null });
+          }
         }
       })
     );
@@ -102,13 +106,13 @@ export class AuthService {
       tap({
         next: (response) => {
           if (!response?.access_token) {
-            this.authState.next({ token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code' });
+            this.authState.next({ token: null, username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Invalid 2FA code' });
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: 'Access denied!' });
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Access denied!' });
             return;
           }
 
@@ -122,8 +126,8 @@ export class AuthService {
           this.setToken(response.access_token);
           this.startTokenRefresh();
         },
-        error: () => {
-          this.authState.next({ token: null, username, role: null, isAuthenticated: false, onboarding: null, error: 'Invalid 2FA code' });
+        error: (error) => {
+          this.authState.next({ token: null, username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Invalid 2FA code' });
         }
       })
     );
@@ -139,7 +143,7 @@ export class AuthService {
     this.subscription.set(false);
     this.verificationDate.set('');
     this.licenses.set([]);
-    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, onboarding: null, error: null, licenses: [] });
+    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: null, licenses: [] });
     this.tokenRefreshService.stopTokenRefresh();
     this.router.navigate(['/login']).then();
     this.appStorageService.clearStorage()
@@ -147,11 +151,15 @@ export class AuthService {
   }
 
   demoLogin(): void {
-    this.login("_", "_", true).subscribe(async (res) => { });
+    this.login("_", "_", true).subscribe(async (_) => { });
   }
 
   signup(username: string, email: string, password: string): Observable<any> {
     return this.apiService.post('signup', { username, email, password });
+  }
+
+  signup_verification(username: string, password: string): Observable<any> {
+    return this.apiService.post('signup/verificaion', { username, password });
   }
 
   forgotPassword(email: string): Observable<any> {
@@ -207,7 +215,7 @@ export class AuthService {
 
   private setToken(token: string): void {
     localStorage.setItem('token', token);
-    this.authState.next({ token, username: this.username(), role: this.role(), isAuthenticated: true, onboarding: String(this.onboarding()), error: null, licenses: this.licenses(), });
+    this.authState.next({ token, username: this.username(), role: this.role(), isAuthenticated: true, isValidated: true, onboarding: String(this.onboarding()), error: null, licenses: this.licenses(), });
   }
 
   private getStoredToken(): string | null {
@@ -216,7 +224,7 @@ export class AuthService {
 
   private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
-    return { token, username: this.username(), role: this.role(), isAuthenticated: !!token, onboarding: String(this.onboarding()), error: null, licenses: this.licenses() };
+    return { token, username: this.username(), role: this.role(), isValidated: true, isAuthenticated: !!token, onboarding: String(this.onboarding()), error: null, licenses: this.licenses() };
   }
 
   private startTokenRefresh(): void {

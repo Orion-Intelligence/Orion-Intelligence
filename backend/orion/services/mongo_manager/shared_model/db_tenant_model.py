@@ -1,5 +1,7 @@
-from odmantic import Model,EmbeddedModel
+from enum import Enum
 from typing import List
+from odmantic import Model, EmbeddedModel
+
 
 class IocCategory(EmbeddedModel):
     ioc_id: str
@@ -9,15 +11,24 @@ class IocCategory(EmbeddedModel):
     def __str__(self):
         return f"{self.name} ({len(self.values)} values)"
 
+
+class TenantStatus(str, Enum):
+    ONBOARDING = "onboarding"
+    ACTIVE = "active"
+    DISABLE = "disable"
+
+
 class db_tenant_model(Model):
-    userId:str=""
     iocs: List[IocCategory]
     companyName: str
-    phone:str=""
-    country:str=""
-    city:str=""
-    postal_code:str=""
-    tax_id:str=""
+    phone: str = ""
+    country: str = ""
+    city: str = ""
+    postal_code: str = ""
+    user_quota: int = 0
+    status: TenantStatus = TenantStatus.DISABLE
+    licenses: List[str] = []
+
 
 class TenantRequest(Model):
     companyName: str

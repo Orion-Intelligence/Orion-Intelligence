@@ -55,7 +55,7 @@ class ProfileManager:
             country=safe_decrypt(profile.country),
             city=safe_decrypt(profile.city),
             postalCode=safe_decrypt(profile.postal_code),
-            taxId=safe_decrypt(profile.tax_id),
+            taxId=safe_decrypt(profile.id),
             preferences=deepcopy(user.preferences) or {},
             alerts=alerts_list
         )
@@ -91,7 +91,6 @@ class ProfileManager:
         profile.city=encrypted_city
         profile.phone=encrypted_phone
         profile.postal_code=encrypted_postalCode
-        profile.tax_id=encrypted_taxId
         current_user.preferences=data.preferences
         await self._engine.save(profile)
         await self._engine.save(current_user)

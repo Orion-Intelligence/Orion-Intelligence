@@ -4,7 +4,6 @@ import {FormsModule, NgForm} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuthService} from '../../../services/authetication/auth.service';
 import {Subscription} from 'rxjs';
-import {HeaderComponent} from '../../../shared/partials/header/login-header/header.component';
 import {AppService} from '../../../services/core/app/app.service';
 
 import QRCode from 'qrcode';
@@ -12,7 +11,7 @@ import QRCode from 'qrcode';
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, NgIf, NgClass, CommonModule],
+  imports: [FormsModule, NgIf, CommonModule],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
@@ -20,6 +19,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   authenticated = true;
   copied = false;
+  validated_error = false;
   private authSubscription!: Subscription;
 
   twofaRequired = false;
@@ -50,6 +50,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       if (authState.error != '2FA required') {
         this.errorMessage = authState.error ?? null;
       }
+      if(!authState.isValidated){
+        this.validated_error = true
+        this.errorMessage = "Account not Validated";
+      }
     });
     this.route.queryParams.subscribe(params => {
       const isScreenMobile = window.innerWidth <= 480;
@@ -72,6 +76,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit(form: NgForm) {
+    this.validated_error = false
     if (!form.valid) return;
     this.authService.login(this.user.username, this.user.password).subscribe(async res => {
       if (res?.twofa_required) {
@@ -113,5 +118,14 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
 
   demoLogin() {
     this.authService.demoLogin();
+  }
+
+  resendMail() {
+    this.authService.signup_verification(this.user.username, this.user.password).subscribe({
+      next: () => this.router.navigate(['/welcome']),
+      error: (err) => {
+        this.errorMessage = err?.error?.detail || 'Signup failed';
+      }
+    });
   }
 }

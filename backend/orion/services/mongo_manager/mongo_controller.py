@@ -9,6 +9,8 @@ from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_reco
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_views.tenant_admin_view import TenantAdminView
+from orion.services.mongo_manager.shared_views.user_admin_view import UserAdminView
 from orion.services.session_manager.session_enums import admin_mock, crawler_mock
 
 
@@ -44,13 +46,23 @@ class mongo_controller:
 
     async def ensure_indexes(self):
         user_collection = self.__engine.get_collection(db_user_account)
+
         await user_collection.create_index([("username", 1)], unique=True)
+
         await user_collection.create_index(
             [("role", 1)],
             unique=True,
             partialFilterExpression={"role": user_role.ADMIN.value},
             name="unique_admin_role",
         )
+
+        await user_collection.create_index(
+            [("company_uuid", 1)],
+            unique=True,
+            partialFilterExpression={"licenses": ["maintainer"]},
+            name="unique_maintainer_per_company",
+        )
+
         await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
 
     def get_engine(self) -> AIOEngine:
@@ -79,9 +91,11 @@ class mongo_controller:
     def get_admin(self):
         from starlette_admin.contrib.odmantic import Admin, ModelView
         admin = Admin(self.__engine, title="Admin Panel")
-        admin.add_view(ModelView(db_user_account, icon="fa fa-user-circle"))
+
+        admin.add_view(UserAdminView(db_user_account, engine=self.__engine, icon="fa fa-user-circle"))
+        admin.add_view(TenantAdminView(db_tenant_model, engine=self.__engine, icon="fa fa-link"))
         admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
         admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
-        admin.add_view(ModelView(db_tenant_model, icon="fa fa-link"))
         return admin
+

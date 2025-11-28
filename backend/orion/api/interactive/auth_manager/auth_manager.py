@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.helper_manager.env_handler import env_handler
@@ -67,12 +68,29 @@ class auth_manager:
         if isinstance(acct_at, datetime):
             acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
 
+        if role_name == "profile":
+            if not getattr(user, "company_uuid", None):
+                raise HTTPException(status_code=401, detail="Invalid tenant.")
+            engine = mongo_controller.get_instance().get_engine()
+            tenant = await engine.find_one(
+                db_tenant_model,
+                db_tenant_model.id == ObjectId(user.company_uuid)
+            )
+            if not tenant or tenant.status not in (TenantStatus.ACTIVE, TenantStatus.ONBOARDING):
+                raise HTTPException(status_code=401, detail="Invalid tenant.")
+
         if (role_name == "profile"
             and not bool(getattr(user, "subscription", False))
             and acct_at is not None
             and (datetime.now(timezone.utc) - acct_at).days >= 30):
 
             raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
+
+        if role_name == "profile" and user.status == UserStatus.PENDING:
+            raise HTTPException(status_code=401, detail="Verification pending.")
+
+        if role_name == "profile" and user.status == UserStatus.DISABLE:
+            raise HTTPException(status_code=401, detail="Account Blocked.")
 
         if user.role == user_role.CRAWLER:
             access_token_expires = timedelta(weeks=92)
@@ -82,7 +100,7 @@ class auth_manager:
         access_token, role = await session_manager.get_instance().create_access_token(
             data={"sub": user.username}, expires_delta=access_token_expires
         )
-        onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.id))
+        onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.company_uuid))
         subscription = user.subscription
         verificationDate = user.account_verify_at
 
@@ -111,7 +129,7 @@ class auth_manager:
         if not user.verification_expiry or datetime.now(timezone.utc) > user.verification_expiry.replace(tzinfo=timezone.utc):
             raise HTTPException(status_code=400, detail="Verification link expired")
 
-        user.status = UserStatus.ONBOARDING
+        user.status = UserStatus.ACTIVE
         user.account_verify_at = datetime.now(timezone.utc)
         user.verification_token = None
         user.verification_expiry = None

@@ -1,10 +1,10 @@
 import re
-
 import pyotp
 
 from datetime import datetime, UTC
 from enum import Enum
 from typing import List, Optional, Dict, Any
+
 from odmantic import Model, Field
 from passlib.context import CryptContext
 from pydantic import field_validator, model_validator
@@ -22,7 +22,6 @@ class user_role(str, Enum):
 
 class UserStatus(str, Enum):
     PENDING = "verification_pending"
-    ONBOARDING = "onboarding"
     ACTIVE = "active"
     DISABLE = "disable"
 
@@ -47,6 +46,7 @@ class db_user_account(Model):
     role: user_role = Field(default=user_role.DEMO)
     status: Optional[UserStatus] = Field(default=None)
 
+    company_uuid: str = Field(default="")
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
 

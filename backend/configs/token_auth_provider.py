@@ -1,5 +1,4 @@
 from datetime import timedelta
-
 from fastapi import HTTPException, status, Form
 from odmantic import AIOEngine
 from starlette.requests import Request
@@ -7,14 +6,14 @@ from starlette.responses import Response, RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 from starlette_admin.auth import AdminConfig, AdminUser, AuthProvider
 from starlette_admin.contrib.odmantic import Admin, ModelView
-
 from orion.helper_manager.env_handler import env_handler
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
-from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
+from orion.services.mongo_manager.shared_views.tenant_admin_view import TenantAdminView
+from orion.services.mongo_manager.shared_views.user_admin_view import UserAdminView
 from orion.services.session_manager.session_manager import session_manager
 
 
@@ -102,10 +101,10 @@ def setup_admin(engine: AIOEngine) -> Admin:
         base_url="/admin/"
     )
 
-    admin.add_view(ModelView(db_user_account, icon="fa fa-users", label="User Accounts", name="user_account"))
+    admin.add_view(UserAdminView(db_user_account, engine=engine, icon="fa fa-user-circle"))
+    admin.add_view(TenantAdminView(db_tenant_model, engine=engine, icon="fa fa-link"))
     admin.add_view(ModelView(db_system_model, icon="fa fa-cog", label="System Settings", name="system_settings"))
     admin.add_view(ModelView(db_url_data_model, icon="fa fa-link", label="URL Data", name="url_data"))
-    # admin.add_view(ModelView(db_tenant_model, icon="fa fa-users", label="Onboarding Data", name="onboarding_data"))
     # admin.add_view(ModelView(db_alert_model,icon="fa fa-users", label="Alerts Data", name="onboarding_data"))
 
     return admin

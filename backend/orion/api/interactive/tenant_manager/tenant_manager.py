@@ -2,13 +2,15 @@ from datetime import datetime
 import threading
 from typing import List
 from fastapi import HTTPException
+from odmantic import ObjectId
 from starlette import status
 from cryptography.fernet import Fernet
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest
+from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, \
+    TenantStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, user_role
 from orion.api.interactive.tenant_manager.models.user_param_model import user_param_model
 from orion.services.encryption_manager.tenant_key_manager import TenantKeyManager
@@ -37,8 +39,16 @@ class TenantManager:
 
     async def create_tenant(self, data: TenantRequest, current_user):
         dek = await self._dek(str(current_user.id))
-        
         enc = Fernet(dek)
+
+        tenant = await self._engine.find_one(
+            db_tenant_model,
+            db_tenant_model.id == ObjectId(current_user.company_uuid)
+        )
+
+        if not tenant or tenant.status != TenantStatus.ONBOARDING:
+            raise HTTPException(status_code=401, detail="Invalid tenant state")
+
         encrypted_company = enc.encrypt(data.companyName.encode()).decode()
         encrypted_iocs = [
             IocCategory(
@@ -48,16 +58,18 @@ class TenantManager:
             )
             for ioc in data.iocs
         ]
-        new_onboarding = db_tenant_model(
-            userId=str(current_user.id),
-            companyName=encrypted_company,
-            iocs=encrypted_iocs
-        )
-        await self._engine.save(new_onboarding)
+
+        tenant.companyName = encrypted_company
+        tenant.iocs = encrypted_iocs
+        tenant.status = TenantStatus.ACTIVE
+        await self._engine.save(tenant)
+
         current_user.status = UserStatus.ACTIVE
         await self._engine.save(current_user)
+
         await AuditLogManager.get_instance().register(str(current_user.id), "signup")
         await AuditLogManager.get_instance().register(str(current_user.id), "register")
+
         return {"message": "Onboarding created", "user": current_user.username, "company": encrypted_company}
 
     async def get_tenant(self, current_user) -> TenantRequest:
@@ -82,7 +94,7 @@ class TenantManager:
         return tenant_request
 
     async def update_tenant(self, data: TenantRequest, current_user):
-        onboarding = await self._engine.find_one(db_tenant_model, db_tenant_model.userId == str(current_user.id))
+        onboarding = await self._engine.find_one(db_tenant_model, db_tenant_model.id == str(current_user.company_uuid))
         if not onboarding:
             await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant_failed")
             raise HTTPException(status_code=404, detail="Onboarding record not found for this user.")

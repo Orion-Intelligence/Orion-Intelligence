@@ -1,11 +1,13 @@
 import re
 from fastapi import HTTPException
 from datetime import datetime, timedelta, timezone
-
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus,LicenseName
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
@@ -69,6 +71,19 @@ class SignupManager:
             _verification_token = session_manager.get_instance().generate_verification_token()
             _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
 
+            tenant = db_tenant_model(
+                iocs=[],
+                companyName="",
+                phone="",
+                country="",
+                city="",
+                postal_code="",
+                user_quota=2,
+                licenses=["maintainer", "free"],
+                status=TenantStatus.ONBOARDING
+            )
+            tenant = await engine.save(tenant)
+
             user = db_user_account(
                 username=username,
                 email=email,
@@ -77,7 +92,8 @@ class SignupManager:
                 status=UserStatus.PENDING,
                 verification_token=_verification_token,
                 verification_expiry=_verification_token_expire,
-                licenses = [LicenseName.MAINTAINER]
+                licenses=[LicenseName.MAINTAINER],
+                company_uuid=str(tenant.id)
             )
             await engine.save(user)
 
@@ -106,3 +122,64 @@ class SignupManager:
             raise e
         except Exception:
             raise HTTPException(status_code=422, detail="Invalid signup data")
+
+    @staticmethod
+    async def resend_verification_email(data: SignupRequest):
+        try:
+            engine = mongo_controller.get_instance().get_engine()
+
+            user = await engine.find_one(
+                db_user_account,
+                db_user_account.username == data.username
+            )
+            if not user or user.status != UserStatus.PENDING:
+                raise HTTPException(status_code=404, detail="User not found or not pending")
+
+            try:
+                if not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(data.password, user.password):
+                    raise HTTPException(status_code=401, detail="Invalid credentials")
+            except HTTPException:
+                raise
+            except Exception:
+                raise HTTPException(status_code=422, detail="Invalid password")
+
+            redis_inst = redis_controller.getInstance()
+            rate_key = f"resend_verification:{user.id}"
+            current = await redis_inst.invoke_trigger(
+                REDIS_COMMANDS.S_GET_INT,
+                [rate_key, 0, 60]
+            )
+            if int(current) >= 1:
+                raise HTTPException(status_code=429, detail="Too many emails requested. Try again later.")
+            await redis_inst.invoke_trigger(
+                REDIS_COMMANDS.S_SET_INT,
+                [rate_key, 1, 60]
+            )
+
+            token = session_manager.get_instance().generate_verification_token()
+            user.verification_token = token
+            user.verification_expiry = datetime.now(timezone.utc) + timedelta(days=1)
+
+            await engine.save(user)
+
+            APP_URL = env_handler.get_instance().env("APP_URL")
+            verify_url = f"{APP_URL}/welcome/{token}"
+            html_content = constant.mail_template.render(
+                username=user.username,
+                email=user.email,
+                subject=MailSubject.VERIFICATION.value,
+                lurlHeading=MailUrlHeading.VERIFICATION.value,
+                url=verify_url
+            )
+            await mail_manager.get_instance().send_verification_mail(
+                to=user.email,
+                subject=MailSubject.VERIFICATION.value,
+                body=html_content
+            )
+
+            return {"message": "Verification email resent.", "email": user.email}
+
+        except HTTPException as e:
+            raise e
+        except Exception:
+            raise HTTPException(status_code=422, detail="Invalid data")

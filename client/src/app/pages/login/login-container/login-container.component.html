@@ -38,8 +38,14 @@
 
 
             <a (click)="goToForgot()" class="reset-password">Reset password?</a>
-            <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
-              {{ errorMessage }} </p>
+            <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center justify-content-between gap-3 mt-2 py-2 px-3 rounded-3 shadow-sm" role="alert">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+                <span class="fw-semibold">{{ errorMessage }}</span>
+              </div>
+
+              <div *ngIf="validated_error" class="btn btn-light btn-sm rounded-pill px-3 fw-semibold shadow-sm" (click)="resendMail()">Resend Email</div>
+            </div>
             <div>
               <input [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid"
                 type="submit" value="Sign In" />

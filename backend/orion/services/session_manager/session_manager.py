@@ -5,6 +5,7 @@ import secrets
 
 import jwt
 import pyotp
+from bson import ObjectId
 from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 
@@ -135,7 +136,7 @@ class session_manager:
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
-            onboarding_exists = await self.get_instance().has_onboarding(str(user.id))
+            onboarding_exists = await self.get_instance().has_onboarding(str(user.company_uuid))
             session = {
                 "username": user.username,
                 "role": user.role.value if hasattr(user.role, "value") else str(user.role),
@@ -180,7 +181,7 @@ class session_manager:
             ):
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
-            onboarding_exists = await self.has_onboarding(str(user.id))
+            onboarding_exists = await self.has_onboarding(str(user.company_uuid))
 
             new_token_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
             new_token_payload = {"sub": username, "exp": new_token_expiry}
@@ -203,9 +204,11 @@ class session_manager:
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-    async def has_onboarding(self, user_id: str) -> bool:
+    async def has_onboarding(self, company_id: str) -> bool:
         engine = self._engine
-        onboarding = await engine.find_one(db_tenant_model, db_tenant_model.userId == user_id)
+        if company_id == "":
+            return False
+        onboarding = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(company_id))
         return onboarding is not None
 
     @staticmethod
