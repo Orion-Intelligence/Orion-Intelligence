@@ -55,19 +55,27 @@ def status_required(status_required: list[UserStatus], bypass_roles: Optional[li
 
     return verify_status
 
-def license_required(feature: str):
-    async def checker(user = Depends(get_current_user)):
+def license_required(feature: str, bypass_roles: Optional[list[user_role]] = None):
+    async def checker(
+        user = Depends(get_current_user),
+        role: user_role = Depends(get_current_role)
+    ):
+        if bypass_roles and role in bypass_roles:
+            return True
         permissions = get_user_permissions(user)
-        
         if feature.startswith("module:"):
             module_name = feature.split(":", 1)[1]
             if permissions["modules"] == "all" or module_name in permissions["modules"]:
                 return True
-            raise HTTPException(403, f"No license for module: {module_name}")
-
+            raise HTTPException(
+                403,
+                f"No license for module: {module_name}"
+            )
         if not permissions.get(feature, False):
-            raise HTTPException(403, f"License required: {feature}")
-
+            raise HTTPException(
+                403,
+                f"License required: {feature}"
+            )
         return True
     return checker
 
