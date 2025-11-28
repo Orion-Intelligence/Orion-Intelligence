@@ -126,8 +126,13 @@
     gap: 10px;
 }
 
-.ioc-container_cards :hover {
+.ioc-container_cards-card:hover {
     background: var(--color-blue-810);
+}
+
+.ioc-container_cards-card.disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
 }
 
 .ioc-container_cards-card-header {
@@ -204,4 +209,8 @@
     font-size: 12px;
     font-weight: 400;
     padding: 4px 10px;
+}
+
+.ioc-container_scan-ioc {
+    margin: 24px 30px 0px 0px !important;
 }

@@ -1,4 +1,14 @@
-<app-home-search [isRoleAdmin]="false"></app-home-search>
+<div class="category_report_searchbar">
+    <app-home-search [isRoleAdmin]="false"></app-home-search>
+
+    <div class="side-menu-container d-flex align-items-start justify-content-start gap-3 ioc-container_scan-ioc"
+        (click)="scanIOCs()">
+        <label appTooltip="Scan all ioc and generate lerts" class="filters-button d-flex align-items-center">
+            <!-- <img alt="Filter Icon" height="24" src="/assets/images/shared/theme/filter_icon.svg" priority width="24"> -->
+            <span class="ms-2">Scan IOCs</span>
+        </label>
+    </div>
+</div>
 
 <div class="ioc-container">
 
@@ -40,7 +50,8 @@
     <div class="ioc-container_cards">
 
         <ng-container *ngFor="let category of alertCategories">
-            <div class="ioc-container_cards-card" (click)="openAlerts(category.categoryName)">
+            <div class="ioc-container_cards-card" (click)="openAlerts(category.categoryName)"
+                [class.disabled]="category.iocCount === 0">
 
                 <div class="ioc-container_cards-card-header">
                     <div class="ioc-container_cards-card-header-title">

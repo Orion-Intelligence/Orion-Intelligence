@@ -109,7 +109,7 @@ export class CategoryAlertReportComponent implements OnInit {
         const alerts = this.appService.userProfile().alerts;
         const _alert = alerts.find(a => a.data_hash === hash);
         if (_alert?.type) {
-          const _domain = _alert.ioc_value || '-';
+          const value = _alert.ioc_value || '-';
           let scanType: string;
           let route: string = '/dashboard/scanner/basic-scan';
 
@@ -118,7 +118,7 @@ export class CategoryAlertReportComponent implements OnInit {
               scanType = "advance";
               route = "/dashboard/scanner/port-scan";
               this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(_domain), canType: scanType }
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
               });
               break;
 
@@ -126,7 +126,7 @@ export class CategoryAlertReportComponent implements OnInit {
               scanType = "seo";
               route = "/dashboard/scanner/seo-scan";
               this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(_domain), canType: scanType }
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
               });
               break;
 
@@ -134,7 +134,29 @@ export class CategoryAlertReportComponent implements OnInit {
               scanType = "repo";
               route = "/dashboard/scanner/repository-scan";
               this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(_domain), canType: scanType }
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+              });
+              break;
+            case "email-breach":
+              const _username = value.split('@')[0];
+              scanType = "repo";
+              route = "/dashboard/api/email-breach";
+              this.router.navigate([route], {
+                queryParams: { username: _username, email: value }
+              });
+              break;
+            case "playstore-scanning":
+              scanType = "repo";
+              route = "/dashboard/api/playstore-scanner";
+              this.router.navigate([route], {
+                queryParams: { playstore: value }
+              });
+              break;
+            case "social-scanner":
+              scanType = "repo";
+              route = "/dashboard/api/social-scanner";
+              this.router.navigate([route], {
+                queryParams: { username: value }
               });
               break;
             default:
@@ -199,6 +221,10 @@ export class CategoryAlertReportComponent implements OnInit {
       case 'breach':
       case 'exploit':
       case 'feed':
+      case 'playstore-scanning':
+      case 'social-scanner':
+      case 'email-breach':
+      case 'stealerlogs':
         return 'Critical';
 
       case 'defacement':
@@ -207,6 +233,7 @@ export class CategoryAlertReportComponent implements OnInit {
         return 'High';
 
       case 'social':
+      case 'discussion':
         return 'Medium';
 
       default:

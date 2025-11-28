@@ -37,6 +37,7 @@ from orion.api.interactive.profile_manager.model.profile_parma_model import Prof
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
+from orion.management.jobs.alert_job import alert_job
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 public_routes = APIRouter()
@@ -339,3 +340,8 @@ async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_us
 @api_routes.get("/api/profile/alerts", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE]))])
 async def get_user_alerts(current_user = Depends(get_current_user)):
     return await AlertManager.get_instance().getAllAlerts(current_user)
+
+@api_routes.post("/api/profile/alert/scan", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer"))])
+async def run_user_ioc_alerts(current_user = Depends(get_current_user)):
+    return await alert_job.get_instance().run_all_categories_for_api(current_user)
+    # return await AlertManager.get_instance().run_user_ioc_alert(current_user)
