@@ -592,7 +592,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'dashboard',
+            redirectTo: 'homepage',
             pathMatch: 'full'
           },
           {
@@ -612,9 +612,9 @@ export const routes: Routes = [
             data: { type: 'alert', animation: 'AlertPage' },
           },
           {
-            path: 'dashboard',
+            path: 'homepage',
             component: SidebarProfileAlertsComponent,
-            data: { type: 'dashboard', animation: 'DashboardPage' },
+            data: { type: 'homepage', animation: 'HomepagePage' },
           },
           {
             path: 'statistics',
@@ -639,9 +639,14 @@ export const routes: Routes = [
             data: { type: 'auditlog', animation: 'CategoryPage' }
           },
           {
-            path: 'settings',
+            path: 'users',
+            component: ViewProfileComponent,
+            data: { type: 'profile', animation: 'CategoryPage' }
+          },
+          {
+            path: 'account',
             component: SidebarProfileSettingsComponent,
-            data: { type: 'settings', animation: 'CategoryPage' }
+            data: { type: 'account', animation: 'CategoryPage' }
           }
         ]
       }

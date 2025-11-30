@@ -48,7 +48,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
 
     const ci = this.type === 'leak' ? 'leak' : this.type === 'tracking' ? 'tracking' : this.type === 'news' ? 'news' : 'general';
 
-    if (this.currentUrl.includes('/consolidated/all') || this.currentUrl.includes('/profile/dashboard/all')) {
+    if (this.currentUrl.includes('/consolidated/all') || this.currentUrl.includes('/profile/homepage/all')) {
       this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);
     }
 

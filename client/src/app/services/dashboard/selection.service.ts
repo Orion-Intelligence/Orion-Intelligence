@@ -68,6 +68,10 @@ export class SelectionStoreService {
       const capitalizedSection = section.charAt(0).toUpperCase() + section.slice(1);
       this.setSelectedSection(capitalizedSection);
 
+      if(this.router.url.includes('profile') && option=="homepage"){
+        option="Homepage"
+      }
+
       if (option) {
         const capitalizedOption = option.charAt(0).toUpperCase() + option.slice(1);
         this.setSelectedOption(capitalizedOption);

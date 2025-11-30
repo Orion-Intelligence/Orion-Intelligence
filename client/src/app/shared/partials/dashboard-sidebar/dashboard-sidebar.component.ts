@@ -51,20 +51,20 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   stealerlogsCategories = Object.values(StealerlogsSubCategory);
   scannerCategories = Object.values(ScannerSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
-  prfileCategories = Object.values(ProfileSubCategory)
+  profileCategories = Object.values(ProfileSubCategory)
   category = Category;
 
   constructor(private activatedRoute: ActivatedRoute, protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
 
   ngOnInit() {
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-
-
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd))
     window.addEventListener('resize', this.checkScreenWidth.bind(this));
-
     this.checkScreenWidth();
+    if(this.router.url === '/dashboard/profile/homepage'){
+        this.selectionStore.setSelectedSection('Profile');
+        this.selectionStore.setSelectedOption('Homepage');
+    }
   }
 
   ngOnDestroy() {
@@ -126,6 +126,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           break;
         case Category.DISCUSSION:
           firstSubcategory = this.scannerCategories[0];
+          break;
+        case Category.PROFILE:
+          firstSubcategory = this.profileCategories[0];
           break;
       }
 

@@ -13,7 +13,7 @@ export class IocResolver implements Resolve<TenantModel> {
     constructor(private apiService: ApiService, private appService: AppService) { }
     resolve(): Observable<TenantModel> {
         if (!this.cache$) {
-            this.cache$ = this.apiService.post<TenantModel>('get/tenant', {}).pipe(
+            this.cache$ = this.apiService.post<TenantModel>('tenants/get', {}).pipe(
                 tap(_tenantData => {
                     this.appService.tenantData.set(_tenantData);
                 }),

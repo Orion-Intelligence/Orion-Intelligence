@@ -26,7 +26,7 @@ export class SidebarProfileIocComponent implements OnInit {
     const search_filter_keys = Object.keys(search_filter_labels);
     const backendData = this.appService.tenantData();
 
-    if (backendData) {
+    if (backendData && backendData.iocs) {
       this.onboardingData = {
         companyName: backendData.companyName,
         iocs: Array.from(search_filter_keys).map(key => {

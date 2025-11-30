@@ -42,7 +42,7 @@ export class DashboardHeaderComponent implements OnInit {
     const queryParams = currentUrlTree.queryParams;
 
     if (this.router.url.includes('/profile/consolidated') || this.router.url.includes('/profile/alerts')) {
-      this.router.navigate(['/dashboard/profile/dashboard'], { queryParams }).then();
+      this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
       return;
     }
     if (this.router.url.includes('/consolidated')) {

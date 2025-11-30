@@ -135,7 +135,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/dashboard/profile/ioc']);
   }
   openAccountSettings() {
-    this.router.navigate(['/dashboard/profile/settings']);
+    this.router.navigate(['/dashboard/profile/account']);
   }
 
   logout() {

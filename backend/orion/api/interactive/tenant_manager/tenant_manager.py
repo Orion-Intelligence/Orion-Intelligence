@@ -139,8 +139,17 @@ class TenantManager:
 
         return {"message": "Tenant updated", "user": current_user.username, "company": tenant.companyName}
 
-    async def get_all_users(self) -> List[user_param_model]:
-        users = await self._engine.find(db_user_account)
+    async def get_all_users(self, current_user) -> List[user_param_model]:
+        if current_user.role in ["admin"]:
+            users = await self._engine.find(db_user_account)
+            return [user_param_model(**u.dict()) for u in users]
+        else:
+            company_uuid = current_user.company_uuid
+
+        users = await self._engine.find(
+            db_user_account,
+            db_user_account.company_uuid == company_uuid
+        )
         return [user_param_model(**u.dict()) for u in users]
 
     async def update_user(self, request: tenant_param_model):

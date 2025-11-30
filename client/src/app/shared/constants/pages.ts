@@ -115,9 +115,10 @@ export enum TenantSubCategory {
   AUDITLOG = 'Auditlog',
 }
 export enum ProfileSubCategory {
-  DASHBOARD = 'Dashboard',
-  STATISTICS = 'Statistics',
+  HOMEPAGE = 'Homepage',
   IOC = 'IOC',
+  ACCOUNT = 'Account',
+  USERS = 'Users',
+  STATISTICS = 'Statistics',
   AUDITLOG = 'Auditlog',
-  SETTINGS = 'Settings'
 }

@@ -1,5 +1,5 @@
 <div *ngIf="this.username$|async" class="profile">
-  <ng-container *ngIf="licenseService.isMaintainer()&&authService.getOnboardingStatus()">
+  <ng-container *ngIf="licenseService.isMaintainer()">
     <a *ngIf="isProfile()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
       <div class="profile_category profile_logout_icon">
         <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24">
@@ -54,19 +54,19 @@
         </div>
       </li>
 
-      <li *ngIf="licenseService.isMaintainer()&&authService.getOnboardingStatus()" class="profile-item"
+      <li *ngIf="licenseService.isMaintainer()" class="profile-item"
         (click)="auditlog()">
         <img src="assets/images/shared/profile.svg" alt="Auditlog" />
         <span>Auditlog</span>
       </li>
 
-      <li *ngIf="licenseService.isMaintainer()&&authService.getOnboardingStatus()" class="profile-item"
+      <li *ngIf="licenseService.isMaintainer()" class="profile-item"
         (click)="manageIocs()">
         <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" />
         <span>Manage IOC’s</span>
       </li>
 
-      <li *ngIf="licenseService.isMaintainer()&&authService.getOnboardingStatus()" class="profile-item"
+      <li *ngIf="licenseService.isMaintainer()" class="profile-item"
         (click)="openAccountSettings()">
         <img src="assets/images/shared/settings.svg" alt="Account settings" />
         <span>Account settings</span>

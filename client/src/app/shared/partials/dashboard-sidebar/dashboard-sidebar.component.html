@@ -10,9 +10,9 @@
   <ul class="sidebar__items">
     <ng-container *ngIf="authService.getRole() === 'profile' && licenseService.isMaintainer()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
-        [icon]="'assets/images/sidebar/dump.svg'" [items]="prfileCategories" [routePrefix]="'profile'"
-        [title]="authService.getUsername()">
+                                   (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+                                   [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
+                                   [title]="authService.getUsername()">
       </app-dashboard-sidebar-items>
     </ng-container>
 
@@ -152,9 +152,9 @@
   <ul class="sidebar__items">
     <ng-container *ngIf="authService.getRole() === 'profile'; else homeTemplate">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
-        [icon]="'assets/images/sidebar/dump.svg'" [items]="prfileCategories" [routePrefix]="'profile'"
-        [selectionStore]="selectionStore" [title]="authService.getUsername()"></app-dashboard-sidebar-collapsed>
+                                       (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+                                       [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
+                                       [selectionStore]="selectionStore" [title]="authService.getUsername()"></app-dashboard-sidebar-collapsed>
     </ng-container>
 
     <ng-template #homeTemplate>

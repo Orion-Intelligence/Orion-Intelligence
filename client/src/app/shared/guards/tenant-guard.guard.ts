@@ -9,7 +9,7 @@ export class TenantGuard implements CanActivate {
     canActivate(): boolean {
 
         if (!this.authService.getOnboardingStatus()) {
-            this.router.navigate(['/dashboard'], { replaceUrl: true });
+            this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
             return false;
         }
         return true;
