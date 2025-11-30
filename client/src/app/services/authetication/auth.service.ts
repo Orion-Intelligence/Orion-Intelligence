@@ -75,7 +75,7 @@ export class AuthService {
 
           this.username.set(sessionData?.username ?? username ?? '');
           this.role.set(sessionData?.role ?? null);
-          this.onboarding.set(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
+          this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
           this.subscription.set(this.toBool(sessionData?.subscription));
           this.verificationDate.set(sessionData?.verificationDate ?? '');
           this.licenses.set(sessionData?.licenses ?? []);
@@ -118,7 +118,7 @@ export class AuthService {
 
           this.username.set(sessionData?.username ?? username ?? '');
           this.role.set(sessionData?.role ?? null);
-          this.onboarding.set(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
+          this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
           this.subscription.set(this.toBool(sessionData?.subscription));
           this.verificationDate.set(sessionData?.verificationDate ?? '');
           this.licenses.set(sessionData?.licenses ?? []);
@@ -134,16 +134,16 @@ export class AuthService {
   }
 
   logout(): void {
+    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: null, licenses: [] });
     this.apiService.post('logout', {}).subscribe();
     localStorage.clear();
     sessionStorage.clear();
     this.username.set('');
     this.role.set(null);
-    this.onboarding.set(false);
+    this.setOnboarding(false);
     this.subscription.set(false);
     this.verificationDate.set('');
     this.licenses.set([]);
-    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: null, licenses: [] });
     this.tokenRefreshService.stopTokenRefresh();
     this.router.navigate(['/login']).then();
     this.appStorageService.clearStorage()
@@ -248,7 +248,7 @@ export class AuthService {
           const sessionData = response.session;
           this.username.set(sessionData?.username ?? this.username());
           this.role.set(sessionData?.role ?? this.role());
-          this.onboarding.set(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding ?? this.onboarding()));
+          this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding ?? this.onboarding()));
           this.subscription.set(this.toBool(sessionData?.subscription ?? this.subscription()));
           this.verificationDate.set(sessionData?.verificationDate ?? this.verificationDate());
           this.licenses.set(sessionData?.licenses ?? []);

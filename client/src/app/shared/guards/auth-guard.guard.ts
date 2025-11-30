@@ -15,7 +15,7 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    if (!this.authService.getOnboardingStatus() && state.url !== '/onboarding' && this.authService.getRole() === 'profile') {
+    if (this.authService.getOnboardingStatus() && state.url !== '/onboarding' && this.authService.getRole() === 'profile') {
       this.router.navigate(['/onboarding'], { queryParams: { redirect: state.url } }).then();
       return false;
     }

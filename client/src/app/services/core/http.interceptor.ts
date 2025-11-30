@@ -1,10 +1,11 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, throwError, TimeoutError, Subject } from 'rxjs';
 import { catchError, finalize, timeout, takeUntil } from 'rxjs/operators';
 import { LoadingService } from '../../shared/services/loading.service';
 import { MessageNotificationService } from '../message_notification/message-notification.service';
+import { AuthService } from '../authetication/auth.service';
 
 let activeRequests = 0;
 let hideTimeout: any = null;
@@ -34,6 +35,7 @@ export const httpInterceptor: HttpInterceptorFn = (
   const router = inject(Router);
   const loadingService = inject(LoadingService);
   const msg = inject(MessageNotificationService);
+  const injector = inject(Injector);
 
   const token = localStorage.getItem('token');
 
@@ -75,15 +77,23 @@ export const httpInterceptor: HttpInterceptorFn = (
       }
     }),
     catchError((error: any) => {
-      let message = STATUS_MEANINGS[error.status] || 'Error';
-      if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
-        const keys = Object.keys(error.error);
-        if (keys.length === 1) {
-          message += `: ${error.error[keys[0]]}`;
+      const authService = injector.get(AuthService, null);
+
+      if (authService?.isAuthenticated()) {
+        let message = STATUS_MEANINGS[error.status] || 'Error';
+        if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
+          const keys = Object.keys(error.error);
+          if (keys.length === 1) {
+            message += `: ${error.error[keys[0]]}`;
+          }
         }
+        localStorage.clear();
+        sessionStorage.clear();
+        msg.show(message);
       }
 
-      msg.show(message);
+      router.navigate(['/login']).then(() => {
+      });
 
       if (error instanceof TimeoutError) {
         return throwError(() => new HttpErrorResponse({
@@ -92,26 +102,6 @@ export const httpInterceptor: HttpInterceptorFn = (
           statusText: 'Request Timeout',
           url: req.url
         }));
-      }
-
-      if (error instanceof HttpErrorResponse && error.status === 402) {
-        localStorage.clear();
-        sessionStorage.clear();
-        if (router.url !== '/payment') {
-          router.navigate(['/payment'], { replaceUrl: true, state: { fromInterceptor: true } }).then();
-        }
-      }
-
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        const currentUrl = router.url;
-        if (localStorage.getItem('token')) {
-          localStorage.clear();
-          sessionStorage.clear();
-          if (currentUrl !== '/login') {
-            router.navigate(['/login'], { queryParams: { sessionExpired: 'true' } }).then();
-            alert('Session timeout');
-          }
-        }
       }
 
       return throwError(() => error);

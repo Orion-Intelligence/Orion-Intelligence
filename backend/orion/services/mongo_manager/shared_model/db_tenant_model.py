@@ -33,14 +33,14 @@ class db_tenant_model(Model):
 
 
 class TenantRequest(BaseModel):
-    id: str
+    id: str = "-1"
     iocs: List[IocCategory] = []
     companyName: str
     phone: str = ""
     country: str = ""
     city: str = ""
     postal_code: str = ""
-    verified:bool = False
+    verified:bool = None
     user_quota: int = 0
     status: TenantStatus = TenantStatus.DISABLE
     licenses: List[str] = []

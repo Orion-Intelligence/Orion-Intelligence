@@ -1,12 +1,14 @@
 # orion/services/encryption_manager/tenant_key_manager.py
 from datetime import datetime, timezone
 from cryptography.fernet import Fernet
-from odmantic import AIOEngine
+from odmantic import AIOEngine, ObjectId
 
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_tenant_key import db_tenant_key
 from orion.services.encryption_manager.encryption_manager import encryption_manager
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+
 
 class TenantKeyManager:
     _instance = None
@@ -36,14 +38,17 @@ class TenantKeyManager:
         rec = await self._engine.find_one(db_tenant_key, db_tenant_key.tenant_id == tenant_id)
         if rec:
             return self._unwrap(rec.wrapped_key)
+
+        existing = await self._engine.find_one(
+            db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)
+        )
+        if not existing:
+            raise Exception("Tenant does not exist.")
+
         dek = self._new_dek()
         wrapped = self._wrap(dek)
         now = datetime.now(timezone.utc)
-        print("2::::::::::::::::::::::::::::::", flush=True)
-        print("2::::::::::::::::::::::::::::::", flush=True)
-        print(tenant_id, flush=True)
-        print("2::::::::::::::::::::::::::::::", flush=True)
-        print("2::::::::::::::::::::::::::::::", flush=True)
+
         await self._engine.save(db_tenant_key(tenant_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
         return dek
 

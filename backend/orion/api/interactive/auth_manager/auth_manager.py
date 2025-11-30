@@ -76,8 +76,11 @@ class auth_manager:
                 db_tenant_model,
                 db_tenant_model.id == ObjectId(user.company_uuid)
             )
-            if not tenant or tenant.status not in (TenantStatus.ACTIVE, TenantStatus.ONBOARDING):
-                raise HTTPException(status_code=401, detail="Invalid tenant.")
+            if tenant and not tenant.verified:
+                raise HTTPException(status_code=401, detail="Tenant not verified yet.")
+
+            if tenant and tenant.status in [TenantStatus.ONBOARDING, TenantStatus.ACTIVE] and "maintainer" not in user.licenses:
+                raise HTTPException(status_code=401, detail="Tenant not activated yet.")
 
         if (role_name == "profile"
             and not bool(getattr(user, "subscription", False))
@@ -101,6 +104,8 @@ class auth_manager:
             data={"sub": user.username}, expires_delta=access_token_expires
         )
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.company_uuid))
+
+
         subscription = user.subscription
         verificationDate = user.account_verify_at
 

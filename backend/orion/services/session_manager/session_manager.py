@@ -12,7 +12,7 @@ from starlette.responses import JSONResponse
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account, UserStatus
-from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 
 
 class session_manager:
@@ -209,7 +209,10 @@ class session_manager:
         if company_id == "":
             return False
         onboarding = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(company_id))
-        return onboarding is not None
+        if onboarding and onboarding.status == TenantStatus.ONBOARDING:
+            return True
+        else:
+            return False
 
     @staticmethod
     def generate_verification_token():

@@ -60,7 +60,7 @@ class TenantManager:
                 for ioc in (data.iocs or [])
             ]
 
-            data.status = TenantStatus.ACTIVE
+            data.status = TenantStatus.ONBOARDING
             await self._engine.save(data)
         except Exception:
             await self._engine.remove(db_user_account, db_user_account.company_uuid == str(data.id))
@@ -69,7 +69,7 @@ class TenantManager:
             raise
 
     async def get_tenant(self, current_user) -> TenantRequest:
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.userId == str(current_user.id))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == str(current_user.company_uuid))
         if not tenant:
             await AuditLogManager.get_instance().register(str(current_user.id), "get_tenant_failed")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
@@ -114,9 +114,15 @@ class TenantManager:
         tenant.country = enc.encrypt((data.country or "").encode()).decode()
         tenant.city = enc.encrypt((data.city or "").encode()).decode()
         tenant.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
-        tenant.verified = data.verified
+
+        if data.verified is not None:
+            tenant.verified = data.verified
+
         tenant.user_quota = data.user_quota
-        tenant.status = data.status
+
+        if data.status is not None:
+            tenant.status = data.status
+
         tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
         tenant.iocs = [

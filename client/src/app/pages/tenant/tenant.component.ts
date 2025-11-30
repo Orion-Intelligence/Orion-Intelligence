@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIf, NgFor, NgSwitch, NgSwitchCase, CommonModule } from '@angular/common';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
-import { TenantModel } from '../../shared/model/tenant/tenant.model';
+import {TenantModel, TenantStatus, TenantStatusValues} from '../../shared/model/tenant/tenant.model';
 import { search_filter_labels } from '../../shared/constants/shared-enums';
 import { AuthService } from '../../services/authetication/auth.service';
 import { Router } from '@angular/router';
@@ -92,6 +92,7 @@ export class TenantComponent implements OnInit {
   confirm() {
     const filteredOnboardingData: TenantModel = {
       companyName: this.onboardingData.companyName,
+      status:TenantStatusValues.ACTIVE,
       iocs: this.onboardingData.iocs.filter(ioc => ioc.values && ioc.values.length > 0)
     };
     this.categories = {};
@@ -100,9 +101,9 @@ export class TenantComponent implements OnInit {
     });
     this.appService.set('entityfilterCategories', this.categories);
 
-    this.apiService.post('create/tenant', filteredOnboardingData).subscribe({
+    this.apiService.post('tenants/update', filteredOnboardingData).subscribe({
       next: () => {
-        this.auth_service.setOnboarding(true);
+        this.auth_service.setOnboarding(false);
         this.router.navigate(['/dashboard']).then();
       },
       error: (err) => {

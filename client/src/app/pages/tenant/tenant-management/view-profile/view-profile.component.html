@@ -67,7 +67,7 @@
                           (click)="toggleExpandedUser(i)">
                           <i class="bi bi-pencil me-1"></i>
                           <span class="d-inline-block">
-                            {{ user.role === 'admin' || user.role === 'crawler' || user.role === 'demo' ? 'View' : 'Edit' }}
+                            {{ user.role === 'admin' ? 'View' : 'Edit' }}
                           </span>
                         </button>
                       </td>
@@ -125,7 +125,7 @@
                             </div>
                           </div>
 
-                          <div class="tenant-edit-section mt-4 mb-4" *ngIf="user.role !== 'admin' && user.role !== 'crawler' && user.role !== 'demo'">
+                          <div class="tenant-edit-section mt-4 mb-4" *ngIf="user.role !== 'admin'">
                             <div class="section-heading">Edit user</div>
                             <div class="section-desc">Update User Data.</div>
 
