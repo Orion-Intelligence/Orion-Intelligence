@@ -54,7 +54,7 @@
   display: none;
 }
 
-@media only screen and (width <=1300px) {
+@media only screen and (width <= 1300px) {
   .list__content-category {
     padding-bottom: 0;
     padding-left: 15px;
@@ -68,13 +68,8 @@
     margin-right: 15px;
   }
 
-  .list__container {
-    padding: 0;
-    margin: 50px 0 0 !important;
-  }
-
   .list__table-url {
-    text-align: right;
+    text-align: left;
     color: #fff;
     font-size: 12px;
     font-weight: 400;

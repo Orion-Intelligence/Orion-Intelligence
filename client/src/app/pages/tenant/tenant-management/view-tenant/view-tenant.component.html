@@ -1,0 +1,308 @@
+<ng-container>
+  <span id="top"></span>
+  <div class="dropdown-short directory-listing view-tenant-container">
+    <div class="directory-listing_container">
+      <div class="directory-listing_main-container">
+        <div class="directory-listing_upper-heading">
+          <div class="directory-listing_pagination-heading">
+            <p class="directory-listing_header">Tenants</p>
+          </div>
+          <div class="directory-listing_pagination col-7"></div>
+        </div>
+
+        <div class="list__container">
+          <ng-container *ngIf="!isLoading; else loadingTpl">
+            <div class="table-responsive">
+              <table class="table table-striped directory-list__table clear-paddings">
+                <thead>
+                  <tr>
+                    <th class="col-sr">Sr #</th>
+                    <th class="col-company">Company Name</th>
+                    <th class="col-country">Country</th>
+                    <th class="col-verified">Verified</th>
+                    <th class="col-quota">User Quota</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-licenses">Licenses</th>
+                    <th class="col-action text-center">Action</th>
+                  </tr>
+                </thead>
+
+                <tbody *ngIf="(tenants?.length || 0) > 0" @fadeInDashboardItem>
+                  <ng-container *ngFor="let tenant of tenants; let i = index">
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+
+                      <td>
+                        <a class="list__table-url text-decoration-none">
+                          {{ tenant.companyName || tenant.company || '-' }}
+                        </a>
+                      </td>
+
+                      <td>{{ tenant.country || '-' }}</td>
+
+                      <td>
+                        <span
+                          class="badge-pill"
+                          [ngClass]="tenant.verified ? 'badge-true' : 'badge-false'">
+                          {{ tenant.verified ? 'Verified' : 'Not Verified' }}
+                        </span>
+                      </td>
+
+                      <td>{{ tenant.user_quota || 0 }}</td>
+
+                      <td>
+                        <span class="badge-status" [ngClass]="getStatusClass(tenant.status)">
+                          {{ getStatusLabel(tenant.status) }}
+                        </span>
+                      </td>
+
+                      <td class="col-licenses">
+                        <span class="text-truncate d-inline-block license-truncate">
+                          {{ getTenantLicensesLabel(tenant) }}
+                        </span>
+                      </td>
+
+                      <td class="text-center col-action">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn"
+                          (click)="tenant._expanded = !tenant._expanded">
+                          <span class="flex-grow-1 text-center">Edit</span>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr *ngIf="tenant._expanded" class="table-active no-hover-row">
+                      <td colspan="8"><br>
+
+                        <div class="vstack gap-4 tenant-panel">
+
+                          <div class="tenant-edit-section">
+                            <div class="section-heading">Tenant information</div>
+                            <div class="section-desc">Read-only company details.</div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Company Name</div>
+                              <div class="tenant-value">
+                                {{ tenant.companyName || tenant.company || '-' }}
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Phone</div>
+                              <div class="tenant-value">{{ tenant.phone || '-' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Country</div>
+                              <div class="tenant-value">{{ tenant.country || '-' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">City</div>
+                              <div class="tenant-value">{{ tenant.city || '-' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Postal Code</div>
+                              <div class="tenant-value">{{ tenant.postal_code || '-' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Verified</div>
+                              <div class="tenant-value">
+                                {{ tenant.verified ? 'Yes' : 'No' }}
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">User Quota</div>
+                              <div class="tenant-value">{{ tenant.user_quota || 0 }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Status</div>
+                              <div class="tenant-value">
+                                {{ getStatusLabel(tenant.status) }}
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Licenses</div>
+
+                              <div *ngIf="tenant.licenses?.length; else noLicenses">
+                                <ng-container *ngFor="let license of tenant.licenses">
+                                  <span *ngIf="getLicenseLabel(license) !== 'Maintainer'" class="badge-license">
+                                    {{ getLicenseLabel(license) }}
+                                  </span>
+                                </ng-container>
+                              </div>
+
+                              <ng-template #noLicenses>
+                                <div class="no-licenses">No licenses assigned.</div>
+                              </ng-template>
+                            </div>
+                          </div>
+
+                          <div class="tenant-edit-section mt-4 mb-4">
+                            <div class="section-heading">Edit tenant</div>
+                            <div class="section-desc">Update tenant data.</div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Verified</div>
+
+                              <div class="tenant-edit-control">
+                                <button
+                                  type="button"
+                                  class="pill-toggle"
+                                  [class.pill-on]="tenant.verified"
+                                  (click)="tenant.verified = !tenant.verified">
+                                  <span class="pill-dot"></span>
+                                  <span class="pill-text">
+                                    {{ tenant.verified ? 'Verified' : 'Not Verified' }}
+                                  </span>
+                                </button>
+                              </div>
+
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">User Quota</div>
+                              <div class="tenant-edit-control field-equal">
+                                <input
+                                  type="number"
+                                  class="form-control form-control-sm tenant-input"
+                                  [(ngModel)]="tenant.user_quota"
+                                  [min]="1"
+                                  [max]="8">
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Status</div>
+                              <div class="tenant-edit-control field-equal">
+                                <select
+                                  class="form-select form-select-sm tenant-input"
+                                  [(ngModel)]="tenant.status">
+                                  <option [ngValue]="TenantStatus.ACTIVE">Active</option>
+                                  <option [ngValue]="TenantStatus.DISABLE">Disable</option>
+                                  <option [ngValue]="TenantStatus.ONBOARDING">Onboarding</option>
+                                </select>
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Licenses</div>
+
+                              <div class="license-grid">
+                                <ng-container *ngFor="let license of licenseList">
+                                  <div
+                                    class="license-card"
+                                    *ngIf="getLicenseLabel(license) !== 'maintainer'"
+                                    [class.license-selected]="tenant.licenses?.includes(license)"
+                                    (click)="toggleTenantLicense(tenant, license)">
+
+                                    <input
+                                      type="checkbox"
+                                      class="license-checkbox"
+                                      [checked]="tenant.licenses?.includes(license)" />
+
+                                    <span class="license-label">
+                                      {{ getLicenseLabel(license) }}
+                                    </span>
+
+                                  </div>
+                                </ng-container>
+                              </div>
+
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-3">
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-primary expand-btn"
+                                (click)="updateTenant(tenant)">
+                                Save changes
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+
+                <tbody *ngIf="(tenants?.length || 0) === 0">
+                  <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
+
+          <ng-template #loadingTpl>
+            <div class="table-responsive">
+              <table class="table table-striped directory-list__table clear-paddings">
+                <thead>
+                  <tr>
+                    <th class="col-sr">Sr #</th>
+                    <th class="col-company">Company Name</th>
+                    <th class="col-country">Country</th>
+                    <th class="col-verified">Verified</th>
+                    <th class="col-quota">User Quota</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-licenses">Licenses</th>
+                    <th class="col-action">Action</th>
+                  </tr>
+                </thead>
+                <tbody @fadeInDashboardItem>
+                  <tr>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                  </tr>
+                  <tr>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span id="bottom"></span>
+</ng-container>

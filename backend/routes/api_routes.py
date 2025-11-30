@@ -270,18 +270,12 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
 async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
-
-@api_routes.post("/api/create/tenant", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))], )
-async def create_tenant(data: TenantRequest, current_user=Depends(get_current_user)):
-    return await TenantManager.get_instance().create_tenant(data, current_user)
-
-
 @api_routes.post("/api/get/tenant", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))], )
 async def get_tenant(current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_tenant(current_user)
 
 
-@api_routes.post("/api/update/tenant", dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer"))], )
+@api_routes.post("/api/tenants/update", dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer", [user_role.ADMIN]), )], )
 async def update_tenant(data: TenantRequest, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().update_tenant(data, current_user)
 
@@ -290,6 +284,10 @@ async def update_tenant(data: TenantRequest, current_user=Depends(get_current_us
 async def get_all_users():
     return await TenantManager.get_instance().get_all_users()
 
+
+@api_routes.post("/api/tenants/get", dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN]))])
+async def get_all_users():
+    return await TenantManager.get_instance().get_all_tenant()
 
 @api_routes.post("/api/update/user", dependencies=[Depends(role_required([user_role.ADMIN]))])
 async def update_user(user: tenant_param_model):

@@ -11,15 +11,16 @@
 }
 
 .notification-card {
-    background: #172235;
+    background: #b71c1c;
     padding: 12px 24px;
     color: #fff;
     border-radius: 8px;
-    border: 1px solid #ffffff22;
+    border: 1px solid #ffcccc55;
     font-weight: 500;
     opacity: 0;
     transform: translateY(-10px);
     animation: fadeInOut 3s forwards ease-in-out;
+    box-shadow: 0 4px 12px rgba(183, 28, 28, 0.4);
 }
 
 @keyframes fadeInOut {

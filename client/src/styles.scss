@@ -11,6 +11,8 @@
 @use 'app/pages/homepage/search-filters/search-filters.component.css';
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/pages/tenant/tenant.component.css';
+@use 'app/pages/tenant/tenant-management/view-tenant.component-shared.css';
+@use 'app/pages/tenant/tenant-management/view-profile/view-profile.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component.css';
@@ -346,3 +348,51 @@ table tr th {
 .directory-list__table tbody tr {
   overflow: visible !important;
 }
+
+.dropdown-short a{
+  padding-top:10px;
+  padding-bottom:10px;
+}
+
+.dropdown-short .dropdown-divider{
+  margin-top: 1px;
+  margin-bottom: 1px;
+}
+
+.view-tenant_dropdown-wrapper-min{
+  height: 40px;
+  margin-left: -60px;
+}
+
+.dropdown-item:hover{
+  background: #cccccc60;
+}
+
+.dropdown-menu {
+  opacity: 0;
+  transform: translateY(-2px);
+  visibility: hidden;
+  display: block !important;
+  transition: opacity .22s ease-in-out, transform .12s ease-out;
+}
+
+.show > .dropdown-menu,
+.dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.dropdown-item:hover {
+  background: #cccccc60;
+}
+
+.table{
+  overflow: hidden;
+}
+
+table tr:last-child td {
+  border-bottom: none !important;
+}
+
+

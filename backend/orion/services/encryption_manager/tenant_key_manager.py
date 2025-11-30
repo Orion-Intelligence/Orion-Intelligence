@@ -32,18 +32,23 @@ class TenantKeyManager:
     def _unwrap(self, wrapped: str) -> bytes:
         return self._master.decrypt(wrapped).encode()
 
-    async def get_or_create_dek(self, user_id: str) -> bytes:
-        rec = await self._engine.find_one(db_tenant_key, db_tenant_key.userId == user_id)
+    async def get_or_create_dek(self, tenant_id: str) -> bytes:
+        rec = await self._engine.find_one(db_tenant_key, db_tenant_key.tenant_id == tenant_id)
         if rec:
             return self._unwrap(rec.wrapped_key)
         dek = self._new_dek()
         wrapped = self._wrap(dek)
         now = datetime.now(timezone.utc)
-        await self._engine.save(db_tenant_key(userId=user_id, wrapped_key=wrapped, created_at=now, updated_at=now))
+        print("2::::::::::::::::::::::::::::::", flush=True)
+        print("2::::::::::::::::::::::::::::::", flush=True)
+        print(tenant_id, flush=True)
+        print("2::::::::::::::::::::::::::::::", flush=True)
+        print("2::::::::::::::::::::::::::::::", flush=True)
+        await self._engine.save(db_tenant_key(tenant_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
         return dek
 
-    async def get_dek(self, user_id: str) -> bytes:
-        rec = await self._engine.find_one(db_tenant_key, db_tenant_key.userId == user_id)
+    async def get_dek(self, tenant_id: str) -> bytes:
+        rec = await self._engine.find_one(db_tenant_key, db_tenant_key.tenant_id == tenant_id)
         if not rec:
             raise RuntimeError("Tenant key not found")
         return self._unwrap(rec.wrapped_key)

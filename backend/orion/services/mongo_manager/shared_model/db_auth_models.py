@@ -18,6 +18,7 @@ class user_role(str, Enum):
     CRAWLER = "crawler"
     DEMO = "demo"
     PROFILE = "profile"
+    ANALYST = "analyst"
 
 
 class UserStatus(str, Enum):
@@ -165,9 +166,7 @@ class db_user_account(Model):
     @model_validator(mode="after")
     def finalize(self):
         if self.role != user_role.PROFILE:
-            object.__setattr__(self, "status", UserStatus.ACTIVE)
-            if self.account_verify_at is None:
-                object.__setattr__(self, "account_verify_at", datetime.now(UTC))
+            pass
         else:
             if self.status is None:
                 raise FormValidationError({"status": "Status is required for profile users"})

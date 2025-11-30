@@ -3,7 +3,7 @@ from datetime import datetime
 from odmantic import Model, Field
 
 class db_tenant_key(Model):
-    userId: str = Field(index=True)
+    tenant_id: str = Field(index=True)
     wrapped_key: str
     created_at: datetime
     updated_at: datetime

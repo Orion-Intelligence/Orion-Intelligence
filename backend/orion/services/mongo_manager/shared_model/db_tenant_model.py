@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List
 from odmantic import Model, EmbeddedModel
+from pydantic import BaseModel
 
 
 class IocCategory(EmbeddedModel):
@@ -19,7 +20,7 @@ class TenantStatus(str, Enum):
 
 
 class db_tenant_model(Model):
-    iocs: List[IocCategory]
+    iocs: List[IocCategory] = []
     companyName: str
     phone: str = ""
     country: str = ""
@@ -31,6 +32,15 @@ class db_tenant_model(Model):
     licenses: List[str] = []
 
 
-class TenantRequest(Model):
+class TenantRequest(BaseModel):
+    id: str
+    iocs: List[IocCategory] = []
     companyName: str
-    iocs: List[IocCategory]
+    phone: str = ""
+    country: str = ""
+    city: str = ""
+    postal_code: str = ""
+    verified:bool = False
+    user_quota: int = 0
+    status: TenantStatus = TenantStatus.DISABLE
+    licenses: List[str] = []

@@ -89,7 +89,7 @@ class auth_manager:
         if role_name == "profile" and user.status == UserStatus.PENDING:
             raise HTTPException(status_code=401, detail="Verification pending.")
 
-        if role_name == "profile" and user.status == UserStatus.DISABLE:
+        if user.status == UserStatus.DISABLE:
             raise HTTPException(status_code=401, detail="Account Blocked.")
 
         if user.role == user_role.CRAWLER:

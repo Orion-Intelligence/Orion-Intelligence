@@ -19,6 +19,7 @@ export class ViewProfileComponent implements OnInit {
   licenseList = Object.values(LicenseName);
   isLoading = true;
   selectedUserId: string | null = null;
+  expandedUserIndex: number | null = null;
 
   constructor(public apiService: ApiService,) {
   }
@@ -35,6 +36,10 @@ export class ViewProfileComponent implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+
+  toggleExpandedUser(index: number): void {
+    this.expandedUserIndex = this.expandedUserIndex === index ? null : index;
   }
 
   getRoleLabel(role: User['role']): string {
@@ -70,8 +75,8 @@ export class ViewProfileComponent implements OnInit {
     }
   }
 
-  getLicenseLabel(license: LicenseName) {
-    switch (license) {
+  getLicenseLabel(license: LicenseName | string) {
+    switch (license as LicenseName) {
       case LicenseName.FREE: return 'Free';
       case LicenseName.OSINT_BASIC: return 'OSINT Basic';
       case LicenseName.OSINT_ADVANCED: return 'OSINT Advanced';

@@ -44,6 +44,7 @@ import { CategoryAlertReportComponent } from './shared/partials/sidebar-profile/
 import { AddCustomAlertComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component';
 import { HomeAccessGuard } from './shared/guards/home-access.guard';
 import {ViewProfileComponent} from './pages/tenant/tenant-management/view-profile/view-profile.component';
+import {ViewTenantComponent} from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 
 const consolidatedChildren = [
   {
@@ -564,7 +565,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'view',
+            redirectTo: 'view-profiles',
             pathMatch: 'full'
           },
           {
@@ -574,7 +575,7 @@ export const routes: Routes = [
           },
           {
             path: 'view-tenants',
-            component: ViewProfileComponent,
+            component: ViewTenantComponent,
             data: { type: 'view', animation: 'CategoryPage' }
           },
           {

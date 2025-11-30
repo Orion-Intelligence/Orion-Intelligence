@@ -1,6 +1,8 @@
 import re
 from fastapi import HTTPException
 from datetime import datetime, timedelta, timezone
+
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
@@ -71,9 +73,14 @@ class SignupManager:
             _verification_token = session_manager.get_instance().generate_verification_token()
             _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
 
+            company = email.split("@")[1].split(".")[0]
+            if not company:
+                raise HTTPException(status_code=422, detail="Invalid email")
+
+
             tenant = db_tenant_model(
                 iocs=[],
-                companyName="",
+                companyName=company,
                 phone="",
                 country="",
                 city="",
@@ -82,7 +89,7 @@ class SignupManager:
                 licenses=["maintainer", "free"],
                 status=TenantStatus.ONBOARDING
             )
-            tenant = await engine.save(tenant)
+            await TenantManager.get_instance().create_tenant(tenant)
 
             user = db_user_account(
                 username=username,
@@ -118,9 +125,7 @@ class SignupManager:
                 "email": email
             }
 
-        except HTTPException as e:
-            raise e
-        except Exception:
+        except Exception as _:
             raise HTTPException(status_code=422, detail="Invalid signup data")
 
     @staticmethod

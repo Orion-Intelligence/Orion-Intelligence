@@ -1,5 +1,5 @@
-<div class="notification-wrapper" *ngIf="(message$ | async) as message">
-    <div class="notification-card">
-        {{ message }}
-    </div>
+<div class="notification-wrapper" *ngIf="notificationService.message() as message">
+  <div class="notification-card">
+    {{ message }}
+  </div>
 </div>

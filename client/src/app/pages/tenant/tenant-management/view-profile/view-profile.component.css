@@ -4,8 +4,8 @@
 }
 
 .view-tenant-container .label-text-dropdown {
-  font-size: 14px;
-  font-weight: normal;
+  font-size: 14px !important;
+  font-weight: normal !important;
   padding: 8px 13px 8px 15px;
   border: none;
   border-radius: 25px;

@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { NgClass, NgIf } from '@angular/common';
-import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
+import {Router, RouterOutlet} from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
 import { DashboardSidebarComponent } from '../../shared/partials/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
@@ -8,7 +8,6 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription/pro-subscription.component';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
-import { MessageNotificationComponent } from "../../shared/partials/message-notification/message-notification.component";
 import {AuthService} from '../../services/authetication/auth.service';
 
 @Component({
@@ -22,7 +21,6 @@ import {AuthService} from '../../services/authetication/auth.service';
     ScrollingModule,
     NgIf,
     ProSubscriptionComponent,
-    MessageNotificationComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]

@@ -9,9 +9,5 @@ import { MessageNotificationService } from '../../../services/message_notificati
   templateUrl: './message-notification.component.html'
 })
 export class MessageNotificationComponent {
-  message$;
-
-  constructor(private notificationService: MessageNotificationService) {
-    this.message$ = this.notificationService.message$;
-  }
+  constructor(protected notificationService: MessageNotificationService) {}
 }

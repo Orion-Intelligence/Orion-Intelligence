@@ -164,6 +164,9 @@
 .home-insight-card-value {
   font-family: Roboto, sans-serif;
   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: 700;
   color: var(--color-text1);
 }

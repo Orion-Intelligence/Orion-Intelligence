@@ -1,6 +1,6 @@
 <ng-container>
   <span id="top"></span>
-  <div class="directory-listing view-tenant-container">
+  <div class="dropdown-short directory-listing view-tenant-container">
     <div class="directory-listing_container">
       <div class="directory-listing_main-container">
         <div class="directory-listing_upper-heading">
@@ -12,159 +12,222 @@
 
         <div class="list__container">
           <ng-container *ngIf="!isLoading; else loadingTpl">
-            <table class="table table-striped directory-list__table clear-paddings">
-              <thead *ngIf="(users?.length || 0) > 0">
-              <tr>
-                <th class="list__column-id-min" scope="col">Sr #</th>
-                <th class="list__column-service-url" scope="col">User Name</th>
-                <th class="list__column-category" scope="col">Email</th>
-                <th class="list__column-url-status" scope="col">Role</th>
-                <th class="list__column-leak-status" scope="col">Status</th>
-                <th class="list__column-network-type" scope="col">Subscription</th>
-                <th class="list__column-license" scope="col">Licenses</th>
-                <th class="list__column-id-min">Action</th>
-              </tr>
-              </thead>
+            <div class="table-responsive">
+              <table class="table table-striped directory-list__table clear-paddings">
+                <thead *ngIf="(users?.length || 0) > 0">
+                  <tr>
+                    <th class="list__column-id-min col-sr">Sr #</th>
+                    <th class="list__column-service-url col-company">User Name</th>
+                    <th class="list__column-category col-country">Email</th>
+                    <th class="list__column-url-status col-verified">Role</th>
+                    <th class="list__column-leak-status col-status">Status</th>
+                    <th class="list__column-network-type col-quota">Subscription</th>
+                    <th class="list__column-license col-licenses">Licenses</th>
+                    <th class="list__column-id-min col-action text-center">Action</th>
+                  </tr>
+                </thead>
 
-              <tbody *ngIf="(users?.length || 0) > 0" @fadeInDashboardItem>
-              <ng-container *ngFor="let user of users; let i = index">
-                <tr>
-                  <td data-label="Sr #">{{ i + 1 }}</td>
-                  <td data-label="User Name">
-                    <a class="list__table-url text-decoration-none text-reset">{{ user.username }}</a>
-                  </td>
-                  <td data-label="Email">{{ user.email || '-' }}</td>
-                  <td data-label="Role">{{ getRoleLabel(user.role) }}</td>
-                  <td data-label="Status">
-                    <div class="dropdown view-tenant_dropdown-wrapper">
-                        <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuStatus{{i}}"
-                              data-bs-toggle="dropdown" aria-expanded="false" [ngClass]="{
-                                'status-active': user.status === 'active',
-                                'status-disabled': user.status === 'disable',
-                                'status-other': user.status !== 'active' && user.status !== 'disable'
-                              }">
-                          <span class="list__status-default-pointer"></span>{{
-                            user.status === 'verification_pending' ?
-                              'verification' : user.status
-                          }}
-                          <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron"
-                               width="16" height="16">
+                <tbody *ngIf="(users?.length || 0) > 0" @fadeInDashboardItem>
+                  <ng-container *ngFor="let user of users; let i = index">
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+
+                      <td>
+                        <a class="list__table-url text-decoration-none text-reset">
+                          {{ user.username }}
+                        </a>
+                      </td>
+
+                      <td>{{ user.email || '-' }}</td>
+
+                      <td>{{ getRoleLabel(user.role) }}</td>
+
+                      <td>
+                        <span class="label-text-dropdown no-chevron">
+                          {{ user.status === 'verification_pending' ? 'verification' : user.status }}
                         </span>
-                      <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuStatus' + i">
-                        <li><a class="dropdown-item disabled" tabindex="-1">Verification Pending</a></li>
-                        <li><hr class="dropdown-divider mx-3"></li>
-                        <li><a class="dropdown-item disabled" tabindex="-1">Onboarding</a></li>
-                        <li><hr class="dropdown-divider mx-3"></li>
-                        <li><a class="dropdown-item" (click)="user.status='active'">Active</a></li>
-                        <li><hr class="dropdown-divider mx-3"></li>
-                        <li><a class="dropdown-item" (click)="user.status='disable'">Disable</a></li>
-                      </ul>
-                    </div>
-                  </td>
-                  <td data-label="Subscription">
-                    <div class="dropdown view-tenant_dropdown-wrapper">
-                        <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuSub{{i}}"
-                              data-bs-toggle="dropdown" aria-expanded="false">
-                          <span class="list__status-default-pointer"></span>{{ user.subscription ? 'Paid' : 'Free' }}
-                          <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron"
-                               width="16" height="16">
+                      </td>
+
+                      <td>
+                        <span class="label-text-dropdown no-chevron">
+                          {{ user.subscription ? 'Paid' : 'Free' }}
                         </span>
-                      <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuSub' + i">
-                        <li><a class="dropdown-item" (click)="user.subscription=true">Paid</a></li>
-                        <li><hr class="dropdown-divider mx-3"></li>
-                        <li><a class="dropdown-item" (click)="user.subscription=false">Free</a></li>
-                      </ul>
-                    </div>
-                  </td>
-                  <td data-label="License">
-                    <div class="dropdown view-tenant_dropdown-wrapper" data-bs-auto-close="outside">
-                        <span class="label-text-dropdown no-chevron" role="button" id="dropdownMenuLicense{{i}}"
-                              data-bs-toggle="dropdown" aria-expanded="false">
-                          <span class="list__status-default-pointer"></span>
+                      </td>
+
+                      <td>
+                        <span class="label-text-dropdown no-chevron">
                           {{ getUserLicensesLabel(user) }}
-                          <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron"
-                               width="16" height="16">
                         </span>
-                      <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuLicense' + i">
-                        <li *ngFor="let license of licenseList">
-                          <a class="dropdown-item" href="#"
-                             [ngClass]="{ 'text-muted': isLicenseDisabled(user, license) }"
-                             (click)="toggleUserLicense(user, license); $event.stopPropagation(); $event.preventDefault();">
-                            <input [checked]="user.licenses?.includes(license)"
-                                   [disabled]="isLicenseDisabled(user, license)"
-                                   type="checkbox"/>
-                            {{ getLicenseLabel(license) }}
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                  <td data-label="Action">
-                    <div
-                      class="dropdown view-tenant_dropdown-wrapper view-tenant_dropdown-wrapper-min d-flex justify-content-center align-items-center"
-                      role="button" id="dropdownMenuAction{{i}}" data-bs-toggle="dropdown" aria-expanded="false">
-                      <img src="/assets/images/shared/tenant-management-action-icon.svg" alt="menu"
-                           class="action-icon">
-                      <ul class="dropdown-menu mt-3" [attr.aria-labelledby]="'dropdownMenuAction' + i">
-                        <li><a class="dropdown-item" (click)="updateUser(user)">Update</a></li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-              </ng-container>
-              </tbody>
+                      </td>
 
-              <tbody *ngIf="(users?.length || 0) === 0">
-              <tr>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-              </tbody>
+                      <td class="text-center col-action">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn w-100 justify-content-center"
+                          (click)="toggleExpandedUser(i)">
+                          <i class="bi bi-pencil me-1"></i>
+                          <span class="d-inline-block">
+                            {{ user.role === 'admin' || user.role === 'crawler' || user.role === 'demo' ? 'View' : 'Edit' }}
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
 
-            </table>
+                    <tr *ngIf="expandedUserIndex === i" class="table-active no-hover-row">
+                      <td colspan="8"><br>
+
+                        <div class="vstack gap-4 tenant-panel">
+
+                          <div class="tenant-edit-section mb-3">
+                            <div class="section-heading">User information</div>
+                            <div class="section-desc">Read-only user details.</div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">User Name</div>
+                              <div class="tenant-value">{{ user.username || '-' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Email</div>
+                              <div class="tenant-value">{{ user.email || '-' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Role</div>
+                              <div class="tenant-value">{{ getRoleLabel(user.role) }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Status</div>
+                              <div class="tenant-value">{{ user.status }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Subscription</div>
+                              <div class="tenant-value">{{ user.subscription ? 'Paid' : 'Free' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Licenses</div>
+                              <div *ngIf="user.licenses?.length; else noUserLicenses">
+                                <ng-container *ngFor="let license of user.licenses">
+                                  <span class="badge-license">{{ getLicenseLabel(license) }}</span>
+                                </ng-container>
+                              </div>
+                              <ng-template #noUserLicenses>
+                                <div class="no-licenses">No licenses assigned.</div>
+                              </ng-template>
+                            </div>
+                          </div>
+
+                          <div class="tenant-edit-section mt-4 mb-4" *ngIf="user.role !== 'admin' && user.role !== 'crawler' && user.role !== 'demo'">
+                            <div class="section-heading">Edit user</div>
+                            <div class="section-desc">Update User Data.</div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Status</div>
+                              <div class="tenant-edit-control field-equal">
+                                <select class="form-select form-select-sm tenant-input" [(ngModel)]="user.status">
+                                  <option [ngValue]="'active'">Active</option>
+                                  <option [ngValue]="'disable'">Disable</option>
+                                  <option [ngValue]="'verification_pending'">Verification</option>
+                                </select>
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Subscription</div>
+                              <div class="tenant-edit-control">
+                                <button type="button" class="pill-toggle" [class.pill-on]="user.subscription" (click)="user.subscription = !user.subscription">
+                                  <span class="pill-dot"></span>
+                                  <span class="pill-text">{{ user.subscription ? 'Paid' : 'Free' }}</span>
+                                </button>
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Licenses</div>
+                              <div class="license-grid">
+                                <ng-container *ngFor="let license of licenseList">
+                                  <div class="license-card" [class.license-selected]="user.licenses?.includes(license)" (click)="toggleUserLicense(user, license)">
+                                    <input type="checkbox" class="license-checkbox" [checked]="user.licenses?.includes(license)" />
+                                    <span class="license-label">{{ getLicenseLabel(license) }}</span>
+                                  </div>
+                                </ng-container>
+                              </div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-3">
+                              <button type="button" class="btn btn-sm btn-primary expand-btn" (click)="updateUser(user)">
+                                Save changes
+                              </button>
+                            </div>
+                          </div>
+
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+
+                <tbody *ngIf="(users?.length || 0) === 0">
+                  <tr>
+                    <td>-</td><td>-</td><td>-</td><td>-</td>
+                    <td>-</td><td>-</td><td>-</td><td>-</td>
+                  </tr>
+                </tbody>
+
+              </table>
+            </div>
           </ng-container>
 
           <ng-template #loadingTpl>
-            <table class="table table-striped directory-list__table clear-paddings">
-              <thead>
-              <tr>
-                <th class="list__column-id-min" scope="col">Sr #</th>
-                <th class="list__column-service-url" scope="col">User Name</th>
-                <th class="list__column-category" scope="col">Email</th>
-                <th class="list__column-url-status" scope="col">Role</th>
-                <th class="list__column-leak-status" scope="col">Status</th>
-                <th class="list__column-network-type" scope="col">Subscription</th>
-                <th class="list__column-network-type" scope="col">Licenses</th>
-                <th class="list__column-id-min">Action</th>
-              </tr>
-              </thead>
-              <tbody @fadeInDashboardItem>
-              <tr>
-                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
-              </tr>
-              <tr>
-                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
-              </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-striped directory-list__table clear-paddings">
+                <thead>
+                  <tr>
+                    <th class="col-sr">Sr #</th>
+                    <th class="col-company">User Name</th>
+                    <th class="col-country">Email</th>
+                    <th class="col-verified">Role</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-quota">Subscription</th>
+                    <th class="col-licenses">Licenses</th>
+                    <th class="col-action">Action</th>
+                  </tr>
+                </thead>
+                <tbody @fadeInDashboardItem>
+                  <tr>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                  </tr>
+                  <tr>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
+                    <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </ng-template>
         </div>
       </div>
