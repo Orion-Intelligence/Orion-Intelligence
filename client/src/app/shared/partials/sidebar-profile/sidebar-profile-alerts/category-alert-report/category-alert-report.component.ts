@@ -105,11 +105,83 @@ export class CategoryAlertReportComponent implements OnInit {
       const hasEnterprise = licenses.includes('enterprise');
 
       if (hasEnterprise) {
-        this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
+
         const alerts = this.appService.userProfile().alerts;
         const _alert = alerts.find(a => a.data_hash === hash);
-        if (_alert?.type === "scanning") {
-          this.router.navigate([`/dashboard/scanner/port-scan`]);
+        if (_alert?.type) {
+          const value = _alert.ioc_value || '-';
+          let scanType: string;
+          let route: string = '/dashboard/scanner/basic-scan';
+
+          switch (_alert.type.toLowerCase()) {
+            case "advance scanning":
+              scanType = "advance";
+              route = "/dashboard/scanner/port-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+              });
+              break;
+
+            case "seo scanning":
+              scanType = "seo";
+              route = "/dashboard/scanner/seo-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+              });
+              break;
+
+            case "repo scanning":
+              scanType = "repo";
+              route = "/dashboard/scanner/repository-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+              });
+              break;
+            case "email-breach":
+              const _username = value.split('@')[0];
+              scanType = "repo";
+              route = "/dashboard/api/email-breach";
+              this.router.navigate([route], {
+                queryParams: { username: _username, email: value }
+              });
+              break;
+            case "playstore-scanning":
+              scanType = "repo";
+              route = "/dashboard/api/playstore-scanner";
+              this.router.navigate([route], {
+                queryParams: { playstore: value }
+              });
+              break;
+            case "social-scanner":
+              scanType = "repo";
+              route = "/dashboard/api/social-scanner";
+              this.router.navigate([route], {
+                queryParams: { username: value }
+              });
+              break;
+            case "stealerlogs":
+              route = "/dashboard/stealerlogs/credential";
+              const queryParams: any = {
+                q: "",
+                page: 1,
+                category: "credential",
+                fullsearch: true,
+                matchtype: "or",
+                must: false
+              };
+              if (this.isDomain(value)) {
+                queryParams.domain = value;
+              } else {
+                queryParams.user = value;
+              }
+              this.router.navigate([route], { queryParams });
+              break;
+            default:
+              this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
+              break;
+          }
+
+
         }
         if (_alert) {
           _alert.report_seen = true;
@@ -160,16 +232,25 @@ export class CategoryAlertReportComponent implements OnInit {
     const normalized = type.toLowerCase();
     switch (normalized) {
       case 'general':
+      case 'seo scanning':
         return 'Low';
 
       case 'breach':
       case 'exploit':
+      case 'feed':
+      case 'playstore-scanning':
+      case 'social-scanner':
+      case 'email-breach':
+      case 'stealerlogs':
         return 'Critical';
 
       case 'defacement':
+      case 'advanced scanning':
+      case 'repo scanning':
         return 'High';
 
       case 'social':
+      case 'discussion':
         return 'Medium';
 
       default:
@@ -301,5 +382,14 @@ export class CategoryAlertReportComponent implements OnInit {
       const lastSeenDate = new Date(alert.detectedOn);
       return lastSeenDate >= start && lastSeenDate <= inclusiveEnd;
     });
+  }
+  isDomain(value: string): boolean {
+    if (!value) return false;
+
+    value = value.replace(/https?:\/\//, "").replace(/^www\./, "");
+
+    const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
+
+    return domainRegex.test(value);
   }
 }

@@ -114,11 +114,11 @@
   font-weight: bold;
 }
 
-.scan_report-section-danger .scan_meta-value{
+.scan_report-section-danger .scan_meta-value {
   color: var(--color-text7);
 }
 
-.scan_report-section-warning .scan_meta-value{
+.scan_report-section-warning .scan_meta-value {
   color: var(--color-text1);
 }
 
@@ -344,7 +344,7 @@
   border: 1px solid var(--color-border);
 }
 
-.scan_explore-icon{
+.scan_explore-icon {
   margin-top: -5px;
 }
 
@@ -530,14 +530,14 @@
 .scan_empty {
   text-align: center;
   padding: 24px 12px;
-  background: #0b1326;
-  border: 1px solid #ffffff10;
+  background: var(--color-blue-830);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
 .scan_empty-title {
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--color-text1);
   margin-bottom: 6px;
 }
 
@@ -547,9 +547,9 @@
 }
 
 .scan_btn {
-  background: transparent;
-  border: 1px solid #334155;
-  color: #e2e8f0;
+  background: var(--color-scan-light-200);
+  border: 1px solid var(--color-border);
+  color: var(--color-text1);
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -654,8 +654,8 @@
   position: absolute;
   inset: 0;
   background-image: repeating-linear-gradient(45deg,
-  rgb(255 255 255 / 35%) 0 10px,
-  rgb(255 255 255 / 15%) 10px 20px);
+      rgb(255 255 255 / 35%) 0 10px,
+      rgb(255 255 255 / 15%) 10px 20px);
   animation: scan-progress-stripes 1s linear infinite;
   pointer-events: none;
 }
@@ -681,8 +681,8 @@
 
   .scan_progress-fill::after {
     background-image: repeating-linear-gradient(45deg,
-    rgb(255 255 255 / 25%) 0 10px,
-    rgb(255 255 255 / 10%) 10px 20px);
+        rgb(255 255 255 / 25%) 0 10px,
+        rgb(255 255 255 / 10%) 10px 20px);
   }
 }
 

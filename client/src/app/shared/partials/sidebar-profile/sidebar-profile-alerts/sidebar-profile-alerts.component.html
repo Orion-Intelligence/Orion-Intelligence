@@ -1,77 +1,94 @@
-<app-home-search [isRoleAdmin]="false"></app-home-search>
+<div class="category_report_searchbar">
+    <app-home-search [isRoleAdmin]="false"></app-home-search>
 
-<div class="ioc-container">
-
-    <div class="ioc-container_header">
-        <div class="ioc-container_header-title">IOC’s</div>
-
-        <div class="ioc-container_header-actions">
-            <button class="ioc-container_header-actions-entity-btn">Entity ({{entityFiltersCount()}})</button>
-
-            <button class="ioc-container_header-actions-edit-btn" (click)="editIocs()">
-                <img alt="edit-icon" src="../../../../../../assets/images/shared/theme/edit.svg">
-                <i class="fa fa-edit"></i> Edit
-            </button>
-        </div>
+    <div class="side-menu-container d-flex align-items-start justify-content-start gap-3 ioc-container_scan-ioc"
+        (click)="scanIOCs()">
+        <label appTooltip="Scan all ioc and generate lerts" class="filters-button d-flex align-items-center">
+            <!-- <img alt="Filter Icon" height="24" src="/assets/images/shared/theme/filter_icon.svg" priority width="24"> -->
+            <span class="ms-2">Scan IOCs</span>
+        </label>
     </div>
-
-    <div class="ioc-container_alerts">
-        <div class="ioc-container_alerts-card critical">
-            <div class="ioc-container_alerts-card-count">{{criticalRisks}}</div>
-            <div class="ioc-container_alerts-card-label">Critical Alerts</div>
-        </div>
-
-        <div class="ioc-container_alerts-card high">
-            <div class="ioc-container_alerts-card-count">{{highRisks}}</div>
-            <div class="ioc-container_alerts-card-label">High Risk Alerts</div>
-        </div>
-
-        <div class="ioc-container_alerts-card medium">
-            <div class="ioc-container_alerts-card-count">{{mediumRisks}}</div>
-            <div class="ioc-container_alerts-card-label">Medium Risk</div>
-        </div>
-
-        <div class="ioc-container_alerts-card low">
-            <div class="ioc-container_alerts-card-count">{{lowRisks}}</div>
-            <div class="ioc-container_alerts-card-label">Low Risk</div>
-        </div>
-    </div>
-
-    <div class="ioc-container_cards">
-
-        <ng-container *ngFor="let category of alertCategories">
-            <div class="ioc-container_cards-card" (click)="openAlerts(category.categoryName)">
-
-                <div class="ioc-container_cards-card-header">
-                    <div class="ioc-container_cards-card-header-title">
-                        <img alt="icon" src="../../../../../../assets/images/shared/theme/alert-categories-icon.svg">
-                        {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
-                    </div>
-
-                    <div class="ioc-container_cards-card-header-badge" [ngClass]="category.risk.toLowerCase()">
-                        {{ category.risk }} Risk
-                    </div>
-                </div>
-
-                <div class="ioc-container_cards-card-row">
-                    <span>IOC’s found</span>
-                    <span class="value">{{ category.iocCount }}</span>
-                </div>
-
-                <div class="ioc-container_cards-card-row">
-                    <span>Detected on</span>
-                    <span class="value">
-                        {{ category.detectedDate ? (category.detectedDate | date:'dd/MM/yyyy') : '-' }}
-                    </span>
-                </div>
-
-                <div class="ioc-container_cards-card-tags">
-                    <span *ngFor="let tag of category.tags">{{ tag }}</span>
-                </div>
-
-            </div>
-        </ng-container>
-
-    </div>
-
 </div>
+<div class="loading-wrapper" *ngIf="isLoading; else showContent">
+    <div class="loader"></div>
+    <p>Loading...</p>
+</div>
+<ng-template #showContent>
+    <div class="ioc-container">
+
+        <div class="ioc-container_header">
+            <div class="ioc-container_header-title">IOC’s</div>
+
+            <div class="ioc-container_header-actions">
+                <button class="ioc-container_header-actions-entity-btn">Entity ({{entityFiltersCount()}})</button>
+
+                <button class="ioc-container_header-actions-edit-btn" (click)="editIocs()">
+                    <img alt="edit-icon" src="../../../../../../assets/images/shared/theme/edit.svg">
+                    <i class="fa fa-edit"></i> Edit
+                </button>
+            </div>
+        </div>
+
+        <div class="ioc-container_alerts">
+            <div class="ioc-container_alerts-card critical">
+                <div class="ioc-container_alerts-card-count">{{criticalRisks}}</div>
+                <div class="ioc-container_alerts-card-label">Critical Alerts</div>
+            </div>
+
+            <div class="ioc-container_alerts-card high">
+                <div class="ioc-container_alerts-card-count">{{highRisks}}</div>
+                <div class="ioc-container_alerts-card-label">High Risk Alerts</div>
+            </div>
+
+            <div class="ioc-container_alerts-card medium">
+                <div class="ioc-container_alerts-card-count">{{mediumRisks}}</div>
+                <div class="ioc-container_alerts-card-label">Medium Risk</div>
+            </div>
+
+            <div class="ioc-container_alerts-card low">
+                <div class="ioc-container_alerts-card-count">{{lowRisks}}</div>
+                <div class="ioc-container_alerts-card-label">Low Risk</div>
+            </div>
+        </div>
+
+        <div class="ioc-container_cards">
+
+            <ng-container *ngFor="let category of alertCategories">
+                <div class="ioc-container_cards-card" (click)="openAlerts(category.categoryName)"
+                    [class.disabled]="category.iocCount === 0">
+
+                    <div class="ioc-container_cards-card-header">
+                        <div class="ioc-container_cards-card-header-title">
+                            <img alt="icon"
+                                src="../../../../../../assets/images/shared/theme/alert-categories-icon.svg">
+                            {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
+                        </div>
+
+                        <div class="ioc-container_cards-card-header-badge" [ngClass]="category.risk.toLowerCase()">
+                            {{ category.risk }} Risk
+                        </div>
+                    </div>
+
+                    <div class="ioc-container_cards-card-row">
+                        <span>IOC’s found</span>
+                        <span class="value">{{ category.iocCount }}</span>
+                    </div>
+
+                    <div class="ioc-container_cards-card-row">
+                        <span>Detected on</span>
+                        <span class="value">
+                            {{ category.detectedDate ? (category.detectedDate | date:'dd/MM/yyyy') : '-' }}
+                        </span>
+                    </div>
+
+                    <div class="ioc-container_cards-card-tags">
+                        <span *ngFor="let tag of category.tags">{{ tag }}</span>
+                    </div>
+
+                </div>
+            </ng-container>
+
+        </div>
+
+    </div>
+</ng-template>

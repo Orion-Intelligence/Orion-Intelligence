@@ -7,6 +7,7 @@ import { AlertNotification } from '../../model/alert-notification/alert.notifica
 import { AlertModel } from '../../model/company-profile/company.profile.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
 
 
 @Component({
@@ -21,7 +22,9 @@ export class AlertNotificationComponent implements OnInit {
   @Output() closeNotification = new EventEmitter<void>();
   alertNotifications: AlertNotification[] = [];
 
-  constructor(public appService: AppService, public router: Router, public apiService: ApiService, private messageNotificationService: MessageNotificationService) {
+  constructor(public appService: AppService, public router: Router, public apiService: ApiService, private messageNotificationService: MessageNotificationService,
+    protected licenseService: LicenseService
+  ) {
   }
 
   ngOnInit(): void {
@@ -49,16 +52,25 @@ export class AlertNotificationComponent implements OnInit {
     const normalized = type.toLowerCase();
     switch (normalized) {
       case 'general':
+      case 'seo scanning':
         return 'Low';
 
       case 'breach':
       case 'exploit':
+      case 'feed':
+      case 'playstore-scanning':
+      case 'social-scanner':
+      case 'email-breach':
+      case 'stealerlogs':
         return 'Critical';
 
       case 'defacement':
+      case 'advanced scanning':
+      case 'repo scanning':
         return 'High';
 
       case 'social':
+      case 'discussion':
         return 'Medium';
 
       default:
@@ -86,13 +98,100 @@ export class AlertNotificationComponent implements OnInit {
 
   seeDetails(category: string, hash: string) {
     this.close();
-    this.router.navigate([`/dashboard/${category}/all/${hash}`]);
-    const alerts = this.appService.userProfile().alerts;
-    const alert = alerts.find(a => a.data_hash === hash);
+    this.licenseService.loadLicenses().subscribe(licenses => {
+      const hasEnterprise = licenses.includes('enterprise');
 
-    if (alert) {
-      alert.report_seen = true;
-    }
+      if (hasEnterprise) {
+        const alerts = this.appService.userProfile().alerts;
+        const _alert = alerts.find(a => a.data_hash === hash);
+        if (_alert?.type) {
+          const value = _alert.ioc_value || '-';
+          let scanType: string;
+          let route: string = '/dashboard/scanner/basic-scan';
+
+          switch (_alert.type.toLowerCase()) {
+            case "advance scanning":
+              scanType = "advance";
+              route = "/dashboard/scanner/port-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+              });
+              break;
+
+            case "seo scanning":
+              scanType = "seo";
+              route = "/dashboard/scanner/seo-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+              });
+              break;
+
+            case "repo scanning":
+              scanType = "repo";
+              route = "/dashboard/scanner/repository-scan";
+              this.router.navigate([route], {
+                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+              });
+              break;
+            case "email-breach":
+              const _username = value.split('@')[0];
+              scanType = "repo";
+              route = "/dashboard/api/email-breach";
+              this.router.navigate([route], {
+                queryParams: { username: _username, email: value }
+              });
+              break;
+            case "playstore-scanning":
+              scanType = "repo";
+              route = "/dashboard/api/playstore-scanner";
+              this.router.navigate([route], {
+                queryParams: { playstore: value }
+              });
+              break;
+            case "social-scanner":
+              scanType = "repo";
+              route = "/dashboard/api/social-scanner";
+              this.router.navigate([route], {
+                queryParams: { username: value }
+              });
+              break;
+            case "stealerlogs":
+              route = "/dashboard/stealerlogs/credential";
+              const queryParams: any = {
+                q: "",
+                page: 1,
+                category: "credential",
+                fullsearch: true,
+                matchtype: "or",
+                must: false
+              };
+              if (this.isDomain(value)) {
+                queryParams.domain = value;
+              } else {
+                queryParams.user = value;
+              }
+              this.router.navigate([route], { queryParams });
+              break;
+            default:
+              this.router.navigate([`/dashboard/${category}/all/${hash}`]);
+              break;
+          }
+        }
+        if (_alert) {
+          _alert.report_seen = true;
+        }
+        this.apiService.post('alert/seen', [_alert]).subscribe({
+          next: () => {
+          },
+          error: (err) => {
+            console.error(err);
+            alert(err?.error?.detail || 'Update failed');
+          },
+        });
+      } else {
+        this.messageNotificationService.show("Please purchase enterprise license to view reports")
+      }
+    });
   }
 
   close() {
@@ -129,5 +228,13 @@ export class AlertNotificationComponent implements OnInit {
         this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
       }
     })
+  }
+  isDomain(value: string): boolean {
+    if (!value) return false;
+    value = value.replace(/https?:\/\//, "").replace(/^www\./, "");
+
+    const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
+
+    return domainRegex.test(value);
   }
 }

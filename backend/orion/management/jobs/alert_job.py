@@ -1,6 +1,9 @@
 import asyncio
+import json
+import re
 from typing import List, Dict, Any
 from datetime import datetime
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
@@ -16,6 +19,7 @@ from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, IocCategory
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
+from orion.services.mongo_manager.mongo_controller import mongo_controller
 
 ALERT_CATEGORIES = [
     "general",
@@ -26,7 +30,7 @@ ALERT_CATEGORIES = [
     "discussion",
     "stealerlogs",
     "feed",
-    "port_scanning"
+    "scanning"
 ]
 
 class alert_job:
@@ -40,52 +44,20 @@ class alert_job:
         return alert_job.__instance
 
     def __init__(self):
+        self._engine = mongo_controller.get_instance().get_engine()
         self._tenant_manager = TenantManager.get_instance()
         self._alert_manager = AlertManager.get_instance()
         self._search_model = search_model.getInstance() 
         self._crawl_model= crawl_model.getInstance()
 
-    def _get_next_category(self) -> str:
-        category = ALERT_CATEGORIES[alert_job.__category_index]
-        alert_job.__category_index = (alert_job.__category_index + 1) % len(ALERT_CATEGORIES)
-        return category
-
-    def _create_search_data(self, iocs: List[IocCategory], category: str) -> Dict[str, Any]:
-        entity_filter = {}
-        for ioc in iocs:
-            entity_filter[ioc.ioc_id] = ioc.values
-    
-        return {
-            "entity_filter": entity_filter,
-            "category": category, 
-            "page": 1, 
-            "size": 100,
-        }
-
-    def _should_run_repo_scan(self, ioc_value: str) -> bool:
-        keywords = ["repo", "git", "github", "gitlab"]
-        return any(k in ioc_value.lower() for k in keywords)
-
-    def _map_es_result_to_alert(self, es_result: Dict[str, Any], ioc_type: str, ioc_value: str) -> AlertModel:
-        data_hash = es_result.get("m_hash", es_result.get("m_title")) 
-        
-        return AlertModel(
-            alert_id=f"ALERT-{data_hash}-{datetime.utcnow().timestamp()}", 
-            type=es_result.get("rank_index", "general"),
-            ioc_type=ioc_type, 
-            ioc_value=ioc_value, 
-            data_hash=data_hash, 
-            status=alert_status.ACTIVE, 
-            first_seen=datetime.utcnow(),
-            last_seen=datetime.utcnow(),
-        )
-
     async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
-        """
-        Executes the scan using crawl_model and creates an alert if data is found.
-        """
         try:
-            payload = DomainScanRequest(domain=ioc_value, scanType=scan_type)
+            clean_domain = ioc_value.strip()
+            if not clean_domain.startswith(("http://", "https://")):
+                clean_domain = "https://" + clean_domain
+            if not clean_domain.endswith("/"):
+                clean_domain += "/"
+            payload = DomainScanRequest(domain=clean_domain, scanType=scan_type)
             response = await self._crawl_model.scan_domain(payload)
             scan_result = {}
             if isinstance(response, dict):
@@ -97,21 +69,17 @@ class alert_job:
             result_data = scan_result.get("result")
             if not result_data:
                 return 
-
             grade = result_data.get("grade", "N/A")
-            
+            if(grade=="N/A"):
+                return
             counts = result_data.get("grade_counts", {})
             high_risk = counts.get("high", 0)
             med_risk = counts.get("medium", 0)
             low_risk = counts.get("low", 0)
             
-            # Get list of threat categories (e.g., "CORS", "Port Scan")
             threat_categories = list(result_data.get("threats", {}).keys())
-
-            # 5. Construct Alert Data
-            # Unique Hash: SCAN-IOC-DATE-TYPE (Prevents duplicate alerts on the same day)
             scan_date = datetime.utcnow().strftime('%Y-%m-%d')
-            data_hash = f"{scan_type}-{ioc_value}"
+            data_hash = f"{scan_type}_{ioc_value}"
 
             title = f"{scan_type.upper()} Scan: {ioc_value} (Grade: {grade})"
             
@@ -143,33 +111,141 @@ class alert_job:
             print(f"[{datetime.now()}] -> SCAN ERROR for {ioc_value} ({scan_type}): {e}")
             return False
 
+    async def _handle_dynamic_scanning_alert(self, tenant_id: str, ioc_type: str, ioc_value: str, scan_type: str, result_list: List[Dict[str, Any]]):
+        """
+        Processes the results from dynamic_search and upserts alerts.
+        """
+        try:
+            if not result_list:
+                return False
+            for result in result_list:
+                if scan_type in ["email-breach", "social-scanner"]:
+                    _title = result.get("m_title", "Records for provided queries")
+                    _description = result.get("m_important_content") or result.get("m_content", "A match was found.")
+                    _url = result.get("m_url") or result.get("m_base_url") or "-"
+                    _source = result.get("m_network", "-")
+                    _content_types = result.get("m_content_type") or []
+                    _data_hash = f"{scan_type}_{ioc_value}_{result.get('m_base_url') or result.get('m_url')}" 
+                    
+                elif scan_type == "playstore-scanning":
+                    _title = result.get("m_app_name", "Playstore App Found")
+                    _description = (
+                        f"Package ID: {result.get('m_package_id', 'N/A')}\n"
+                        f"Mod Features: {result.get('m_mod_features', 'None')}\n"
+                        f"Version: {result.get('m_version', 'N/A')}"
+                    )
+                    _url = result.get("m_app_url", "-")
+                    _source = result.get("m_network", "-")
+                    _content_types = result.get("m_content_type") or []
+                    _data_hash = f"{scan_type}_{result.get('m_package_id')}_{result.get('m_version')}" # Unique hash
+                else:
+                    continue
+
+                all_ioc_list = []
+                triggering_ioc = alert_all_ioc(name=ioc_type, values=[ioc_value])
+                all_ioc_list.append(triggering_ioc)
+
+                await self._alert_manager.upsert_alert(
+                    userId=tenant_id,
+                    data_hash=_data_hash,
+                    category=scan_type,
+                    ioc_type=ioc_type,
+                    ioc_value=ioc_value,
+                    title=_title,
+                    description=_description,
+                    url=_url,
+                    source=f"Orion Dynamic Scanner ({scan_type})",
+                    content_types=_content_types, 
+                    all_ioc=all_ioc_list
+                )
+            return True 
+
+        except Exception as e:
+            print(f"[{datetime.now()}] -> DYNAMIC SCAN ERROR for {ioc_value} ({scan_type}): {e}")
+            return False
+
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
         
         try:
             decrypted_iocs = await self._tenant_manager.decrypt_iocs_for_tenant(tenant)
-            
+        
             if not decrypted_iocs:
                 return
-
-            if category == "port_scanning":
-                scanning_tasks = []
-                
+            if category == "scanning":
                 for ioc in decrypted_iocs:
                     ioc_type_name = ioc.ioc_id
+                    if ioc_type_name in ["m_domain", "m_url"]: 
+                        for ioc_value in ioc.values or []:
+                            scans_to_run = []
+                            if ioc_type_name == "m_domain":
+                                scans_to_run = ["advanced", "seo"]
+                            elif ioc_type_name == "m_url":
+                                if "github" in ioc_value.lower():
+                                    scans_to_run = ["repo"]
+                            for scan_type in scans_to_run:
+                                print(f"Processing {ioc_type_name} | Value: {ioc_value} | Scan: {scan_type}")
+                                await self._handle_scanning_alert(
+                                    tenant.userId, 
+                                    ioc_value, 
+                                    ioc_type_name, 
+                                    scan_type
+                                )
+                    dynamic_scans_to_run = []
                     
-                    if ioc_type_name not in ["m_domain", "m_url", "hostname"]: 
-                        print("ioc name that continue: "+ioc_type_name)
-                        continue
-
                     for ioc_value in ioc.values or []:
-                        scans_to_run = ["advance"]
-                        print("Ioc type: "+ioc_type_name+" Ioc value: "+ioc_value)
-                        # if any(k in ioc_value.lower() for k in [ "git",  "github"]):
-                        #     scans_to_run.append("repo")
+                        search_payload = {}
+                        scan_type = None
 
-                        for scan_type in scans_to_run:await self._handle_scanning_alert(tenant.userId, ioc_value, ioc_type_name, scan_type)
+                        if ioc_type_name == "m_email":
+                            if "@" in ioc_value:
+                                username = ioc_value.split("@")[0]
+                                search_payload = {"username": username, "email": ioc_value}
+                                scan_type = "email-breach"
+                                
+                        elif ioc_type_name == "m_url" and re.search(r"play\.google\.com\/store\/apps\/details", ioc_value, re.IGNORECASE):
+                            search_payload = {"playstore": ioc_value}
+                            scan_type = "playstore-scanning"
+
+                        elif ioc_type_name in ["m_mention", "m_social_media_profiles", "m_person", "m_company_name", "m_org"]:
+                            search_payload = {"username": ioc_value}
+                            scan_type = "social-scanner"
+                        
+                        if scan_type and search_payload:
+                            print(f"Processing Dynamic Scan | Type: {ioc_type_name} | Value: {ioc_value} | Scan: {scan_type}")
+                            param_model = search_dynamic_param_model(text=search_payload)
+                            dynamic_search_category = ""
+                            if scan_type == "email-breach":
+                                dynamic_search_category = "user"
+                            elif scan_type == "social-scanner":
+                                dynamic_search_category = "social"
+                            elif scan_type == "playstore-scanning":
+                                dynamic_search_category = "cracked"
+
+                            try:
+                                response = await self._search_model.dynamic_search(param_model, dynamic_search_category)
+                                scan_result = {}
+                                if isinstance(response, dict):
+                                    scan_result = response
+                                elif hasattr(response, 'body'): 
+                                    scan_result = json.loads(response.body)
+                                elif hasattr(response, 'model_dump'):
+                                     scan_result = response.model_dump()
+                                
+                                result_list = scan_result.get("result", [])
+                                if result_list:
+                                    await self._handle_dynamic_scanning_alert(
+                                        tenant.userId, 
+                                        ioc_type_name, 
+                                        ioc_value, 
+                                        scan_type,
+                                        result_list
+                                    )
+                                    
+                            except Exception as dynamic_e:
+                                print(f"[{datetime.now().strftime('%H:%M:%S')}] -> DYNAMIC SEARCH CALL ERROR for {scan_type}:{ioc_type_name}:{ioc_value}. Error: {dynamic_e}")
+
                 return
-
+   
             search_data_category='all'
             if category == "defacement":
                 ParamModel = search_defacement_param_model
@@ -264,9 +340,7 @@ class alert_job:
                                     else:
                                         _title = raw or "-"
                                         _description = m_description or "-"
-                                # _title=result.get("m_title") or "-"
                                 _url=result.get("m_url") or result.get("m_base_url") or "-"
-                                # _description=result.get("m_content") or result.get("m_important_content") or "-"
                                 _source=result.get("m_network") or result.get("channel") or "-"
                                 additional_keys_and_values = self.get_additional_result_keys(result)
                                 all_ioc_list = []
@@ -317,22 +391,6 @@ class alert_job:
             await asyncio.gather(*tasks)
             print(f"[INFO] Completed category: {category}")
 
-    async def run_daily_check(self):
-        
-        current_category = self._get_next_category()
-
-        all_tenants = await self._tenant_manager.get_all_tenant()
-        
-        if not all_tenants:
-            return
-
-        tasks = [
-            self._process_tenant_alerts(tenant, current_category)
-            for tenant in all_tenants
-        ]
-        
-        await asyncio.gather(*tasks)
-
     def get_additional_result_keys(self, result: any) -> list[tuple[str, any]]:
         EXCLUDED_KEYS = {
             "m_hash", "m_content_type", "m_title", "m_url", "m_content", "m_network",
@@ -354,3 +412,65 @@ class alert_job:
                 
             additional_data.append((key, val))
         return additional_data
+
+    async def run_all_categories_for_api(self, current_user) -> dict:
+        """
+        Run alerts for all categories for the single current user/tenant.
+        """
+        current_tenant = await self._engine.find_one(
+            db_tenant_model,
+            db_tenant_model.userId == str(current_user.id)
+        )
+        start_time = datetime.utcnow()
+        
+        if not current_tenant or not hasattr(current_tenant, 'userId'):
+            return {
+                "status": "error",
+                "message": "Invalid tenant/user object provided.",
+                "duration_seconds": (datetime.utcnow() - start_time).total_seconds(),
+                "results": []
+            }
+
+        tenant_id = current_tenant.userId
+        
+        category_statuses = []
+        overall_success = True
+
+        for category in ALERT_CATEGORIES:
+            category_start_time = datetime.utcnow()
+            print(f"[INFO] Processing category: {category} for Tenant: {tenant_id}")
+            try:
+                await self._process_tenant_alerts(current_tenant, category)
+                
+                category_status = {
+                    "category": category,
+                    "status": "completed_successfully",
+                    "tenant_count": 1,
+                    "duration_seconds": (datetime.utcnow() - category_start_time).total_seconds(),
+                    "error_count": 0
+                }
+                
+            except Exception as e:
+                overall_success = False
+                print(f"[ERROR] Category {category} failed for tenant {tenant_id}: {e}")
+                category_status = {
+                    "category": category,
+                    "status": "completed_with_errors",
+                    "tenant_count": 1,
+                    "duration_seconds": (datetime.utcnow() - category_start_time).total_seconds(),
+                    "error_count": 1
+                }
+            
+            category_statuses.append(category_status)
+            print(f"[INFO] Completed category: {category} for Tenant: {tenant_id}")
+                
+        end_time = datetime.utcnow()
+        
+        return {
+            "status": "success" if overall_success else "completed_with_errors",
+            "message": f"Alert generation job finished for tenant {tenant_id}.",
+            "start_time": start_time.isoformat(),
+            "end_time": end_time.isoformat(),
+            "total_duration_seconds": (end_time - start_time).total_seconds(),
+            "results": category_statuses
+        }
