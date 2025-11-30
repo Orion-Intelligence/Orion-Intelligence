@@ -72,6 +72,7 @@
 .bar-chart_bars {
   display: flex;
   padding-left: 20px;
+  overflow: clip;
   align-items: flex-end;
   height: 100%;
   gap: 30px;
