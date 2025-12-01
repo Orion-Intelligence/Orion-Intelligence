@@ -76,4 +76,5 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
     return this.authService.getIsMobileDemo();
   }
 
+  protected readonly window = window;
 }
