@@ -7,6 +7,7 @@ import {GeneralResultItem} from '../../../../model/results/general/general.callb
 import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model';
 import {ScrollService} from '../../../../services/scroll.service';
 import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
+import {AuthService} from '../../../../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-dashboard-results-general-grid',
@@ -27,7 +28,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
   isCollapsed = true;
   isFreeStrategic = false;
 
-  constructor(private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(private authService: AuthService, private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngAfterViewInit() {
@@ -72,7 +73,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
   }
 
   isMobileMode(): boolean {
-    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+    return this.authService.getIsMobileDemo();
   }
 
 }
