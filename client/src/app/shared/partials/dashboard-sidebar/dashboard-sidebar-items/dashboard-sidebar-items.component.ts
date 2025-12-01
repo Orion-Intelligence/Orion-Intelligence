@@ -5,6 +5,7 @@ import { TooltipDirective } from '../../../directive/tooltip-directive.directive
 import { LowerPipe } from '../../../pipes/lower.pipe';
 import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
 import {LicenseService} from '../../../../services/licenses/licenses.service';
+import {SubscriptionService} from '../../../../services/dashboard/subscription.service';
 
 @Component({
   selector: 'app-dashboard-sidebar-items',
@@ -23,7 +24,7 @@ export class DashboardSidebarItemsComponent {
   @Output() sectionSelected = new EventEmitter<any>();
   @Output() optionSelected = new EventEmitter<string>();
 
-  constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService) {
+  constructor(protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected subscriptionService:SubscriptionService) {
   }
 
   selectSection() {

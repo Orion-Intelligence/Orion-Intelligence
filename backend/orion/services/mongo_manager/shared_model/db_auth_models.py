@@ -57,7 +57,7 @@ class db_user_account(Model):
     account_verify_at: Optional[datetime] = Field(default=None)
     subscription: bool = Field(default=False)
     preferences: Optional[Dict[str, Any]] = {}
-
+    current_session_id: Optional[str] = Field(default=None)
     licenses: List[LicenseName] = Field(default=[LicenseName.FREE])
 
     @staticmethod
