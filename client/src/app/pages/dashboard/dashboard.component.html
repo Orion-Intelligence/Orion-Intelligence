@@ -10,7 +10,7 @@
 
     <div class="dashboard_container">
       <div class="dashboard_sub-container dashboard_content-scroll" id="dashboard-container">
-        <app-dashboard-header *ngIf="!authService.getIsMobileDemo()"></app-dashboard-header>
+        <app-dashboard-header></app-dashboard-header>
         <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" class="dashboard_body">
           <router-outlet #routerOutlet="outlet"></router-outlet>
         </span>

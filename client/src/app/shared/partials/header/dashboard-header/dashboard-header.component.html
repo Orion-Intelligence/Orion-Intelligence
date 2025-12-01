@@ -1,21 +1,30 @@
 <div class="header-bar">
-  <div class="header-bar_title-container">
-    <img (click)="goBack()" [class.inactive]="breadcrumb.length <= 2" alt="Back" class="header-bar_left-arrow"
-      height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
+  <ng-container *ngIf="!authService.getIsMobileDemo()">
+    <div class="header-bar_title-container">
+      <img (click)="goBack()" [class.inactive]="breadcrumb.length <= 2" alt="Back" class="header-bar_left-arrow"
+        height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
 
-    <span *ngFor="let crumb of breadcrumb; let i = index; let last = last">
-      <span *ngIf="!last" (click)="navigateToCrumb(i)" [class.inactive]="breadcrumb.length <= 2"
-        class="breadcrumb-item">
-        {{ crumb.label.replace('-', ' ') | titlecase }}
-        <img alt="breadcrumb" class="header-bar__breadcrum" height="20" ngSrc="assets/images/shared/theme/nav-next.svg"
-          priority width="20" />
-      </span>
+      <span *ngFor="let crumb of breadcrumb; let i = index; let last = last">
+        <span *ngIf="!last" (click)="navigateToCrumb(i)" [class.inactive]="breadcrumb.length <= 2"
+          class="breadcrumb-item">
+          {{ crumb.label.replace('-', ' ') | titlecase }}
+          <img alt="breadcrumb" class="header-bar__breadcrum" height="20" ngSrc="assets/images/shared/theme/nav-next.svg"
+            priority width="20" />
+        </span>
 
-      <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
-        {{ crumb.label.replace('-', ' ') | titlecase }}
+        <span *ngIf="last" class="breadcrumb-item breadcrumb-active">
+          {{ crumb.label.replace('-', ' ') | titlecase }}
+        </span>
       </span>
-    </span>
-  </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="authService.getIsMobileDemo()">
+    <div class="header-bar_title-container">
+        <span class="breadcrumb-item breadcrumb-active ml-3">
+          Homepage
+        </span>
+    </div>
+  </ng-container>
 
   <div class="header-bar_profile" *ngIf="!authService.getIsMobileDemo()">
     <app-profile></app-profile>
