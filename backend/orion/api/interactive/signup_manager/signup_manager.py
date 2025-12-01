@@ -7,7 +7,7 @@ from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
-from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
+from orion.api.interactive.signup_manager.model.signup_request_model import AdminCreateTenantUserRequest, SignupRequest
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
@@ -188,3 +188,103 @@ class SignupManager:
             raise e
         except Exception:
             raise HTTPException(status_code=422, detail="Invalid data")
+        
+    @staticmethod
+    async def create_tenant_user_by_admin(data: AdminCreateTenantUserRequest):
+        try:
+            engine = mongo_controller.get_instance().get_engine()
+
+            username = data.username.strip()
+            email = data.email.strip().lower()
+            password = data.password.strip()
+
+            # Basic email pattern
+            email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+            if not re.match(email_pattern, email):
+                raise HTTPException(status_code=422, detail="Invalid email format")
+
+            # Check if user already exists
+            existing_user = await engine.find_one(
+                db_user_account,
+                (db_user_account.username == username) | (db_user_account.email == email)
+            )
+            if existing_user:
+                raise HTTPException(status_code=400, detail="User with this email/username already exists")
+
+            # Auto extract company name from email if not provided
+            company = data.company_name or email.split("@")[1].split(".")[0]
+
+            # Create Tenant
+            tenant = db_tenant_model(
+                iocs=[],
+                companyName=company,
+                phone=data.phone or "",
+                country=data.country or "",
+                city=data.city or "",
+                postal_code=data.postal_code or "",
+                user_quota=2,
+                licenses=[lic.value for lic in data.licenses] if data.licenses else ["free"],
+                status=TenantStatus.ONBOARDING if data.status == UserStatus.PENDING else TenantStatus.ACTIVE
+            )
+            await TenantManager.get_instance().create_tenant(tenant)
+
+            # Hash Password
+            if password.startswith("$2b$") and len(password) >= 60:
+                hashed_password = password
+            else:
+                if len(password) > 256:
+                    raise HTTPException(status_code=422, detail="Password too long")
+                hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+
+            # Optional verification token
+            verification_token = None
+            verification_expiry = None
+            if data.send_verification:
+                verification_token = session_manager.get_instance().generate_verification_token()
+                verification_expiry = datetime.now(timezone.utc) + timedelta(days=1)
+
+            # Create User
+            user = db_user_account(
+                username=username,
+                email=email,
+                password=hashed_password,
+                role=data.role,                       # Comes from admin
+                status=data.status,                   # Active, onboarding, disabled etc.
+                subscription=data.subscription,
+                licenses=data.licenses or [LicenseName.FREE],
+                verification_token=verification_token,
+                verification_expiry=verification_expiry,
+                company_uuid=str(tenant.id)
+            )
+            await engine.save(user)
+
+            # Send email only if requested by admin
+            if data.send_verification:
+                APP_URL = env_handler.get_instance().env("APP_URL")
+                verify_url = f"{APP_URL}/welcome/{verification_token}"
+                html_content = constant.mail_template.render(
+                    username=user.username,
+                    email=user.email,
+                    subject=MailSubject.VERIFICATION.value,
+                    lurlHeading=MailUrlHeading.VERIFICATION.value,
+                    url=verify_url
+                )
+                await mail_manager.get_instance().send_verification_mail(
+                    to=user.email,
+                    subject=MailSubject.VERIFICATION.value,
+                    body=html_content
+                )
+
+            return {
+                "message": "Tenant + User created successfully.",
+                "tenant_id": str(tenant.id),
+                "user_id": str(user.id),
+                "email": user.email,
+                "status": user.status
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to create tenant user: {str(e)}")
+

@@ -1,0 +1,113 @@
+/* Background overlay */
+.modal-wrapper {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Main popup */
+.modal-container {
+    background: var(--color-blue-830);
+    width: 100%;
+    max-width: 1000px;
+    max-height: 800px;
+    border-radius: 14px;
+    padding: 35px;
+    position: relative;
+    overflow-y: auto;
+    color: var(--color-text1);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.modal-header .heading {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.modal-header p {
+    margin: 4px 0 20px;
+    color: #A5B4C3;
+}
+
+.close-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    color: #ccc;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Form */
+.label {
+    display: block;
+    margin-bottom: 6px;
+    margin-top: 18px;
+    color: var(--color-text2);
+}
+
+.input,
+.select {
+    width: 100%;
+    background: white;
+    border: 1px solid #2C3A4A;
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #172235;
+    font-size: 14px;
+    outline: none;
+}
+
+.input::placeholder {
+    color: #57718D;
+}
+
+/* Two column layout */
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Footer buttons */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.btn-outline {
+    padding: 10px 24px;
+    /* background: transparent; */
+    /* border: 1px solid #3C4A5B; */
+    border-radius: 8px;
+    /* color: #D2D7DD; */
+    cursor: pointer;
+    font-size: 14px;
+    background: transparent;
+    border: 1px solid #A0B8D1;
+    color: var(--color-text1);
+}
+
+.btn-primary {
+    padding: 10px 24px;
+    /* background: #60A5FA; */
+    /* border: none; */
+    border-radius: 8px;
+    /* color: #000; */
+    cursor: pointer;
+    font-size: 14px;
+    /* font-weight: 600; */
+    background: #57A5EB;
+    color: #373637;
+    border: none;
+}
