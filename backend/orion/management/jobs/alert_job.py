@@ -3,6 +3,7 @@ import json
 import re
 from typing import List, Dict, Any
 from datetime import datetime
+from bson import ObjectId
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -417,13 +418,15 @@ class alert_job:
         """
         Run alerts for all categories for the single current user/tenant.
         """
-        current_tenant = await self._engine.find_one(
-            db_tenant_model,
-            db_tenant_model.userId == str(current_user.id)
-        )
+        # current_tenant = await self._engine.find_one(
+        #     db_tenant_model,
+        #     db_tenant_model.userId == str(current_user.id)
+        # )
+        tenant_id = current_user.company_uuid
+        current_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         start_time = datetime.utcnow()
         
-        if not current_tenant or not hasattr(current_tenant, 'userId'):
+        if not current_tenant:
             return {
                 "status": "error",
                 "message": "Invalid tenant/user object provided.",
@@ -431,7 +434,7 @@ class alert_job:
                 "results": []
             }
 
-        tenant_id = current_tenant.userId
+        # tenant_id = current_tenant.userId
         
         category_statuses = []
         overall_success = True

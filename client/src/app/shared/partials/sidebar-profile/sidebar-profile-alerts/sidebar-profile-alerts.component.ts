@@ -180,7 +180,6 @@ export class SidebarProfileAlertsComponent implements OnInit {
           successMessage += ' Some scans completed with errors.';
         }
         this.isLoading = false;
-        alert(successMessage);
       },
       error: (err) => {
         console.error('Scan failed with an error:', err);
