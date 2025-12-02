@@ -109,7 +109,7 @@
 .home_insight__container {
   display: grid;
   gap: 20px;
-  margin: 30px 20px 0 0;
+  /*margin: 30px 20px 0 0;*/
   grid-template-columns: repeat(2, minmax(340px, 1fr));
 }
 

@@ -680,7 +680,7 @@ table a:visited {
 
 .default-input-container-mobile {
   width: 100% !important;
-  max-width: 1000px;
+  /*max-width: 1000px;*/
 }
 
 @media only screen and (width <=1000px) {
