@@ -53,7 +53,7 @@ class SignupManager:
 
             PRODUCTION = int(env_handler.get_instance().env("PRODUCTION", 0))
             if PRODUCTION == 1:
-                non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"]
+                non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me", "mail.ru"]
                 if domain in non_company_domains:
                     raise HTTPException(
                         status_code=400,

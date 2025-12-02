@@ -1,3 +1,7 @@
+.directory-list__table td{
+  overflow: hidden;
+}
+
 .list__status-default-pointer {
   display: inline-block;
   width: 6px;
