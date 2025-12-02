@@ -144,23 +144,25 @@ class TenantManager:
 
     async def get_all_users(self, current_user) -> List[user_param_model]:
         if current_user.role in ["admin"]:
+            collection = self._engine.get_collection(db_user_account)
+            await collection.update_many(
+                {"status": {"$nin": ["active", "disable"]}},
+                {"$set": {"status": "disable"}},
+            )
             users = await self._engine.find(db_user_account)
-            for u in users:
-                if u.status not in ["verification_pending", "active", "disable"]:
-                    u.status = "disable"
-                    await self._engine.save(u)
             return [user_param_model(**u.dict()) for u in users]
         else:
             company_uuid = current_user.company_uuid
 
+        collection = self._engine.get_collection(db_user_account)
+        await collection.update_many(
+            {"company_uuid": company_uuid, "status": {"$nin": ["active", "disable"]}},
+            {"$set": {"status": "disable"}},
+        )
         users = await self._engine.find(
             db_user_account,
             db_user_account.company_uuid == company_uuid
         )
-        for u in users:
-            if u.status not in ["verification_pending", "active", "disable"]:
-                u.status = "disable"
-                await self._engine.save(u)
         return [user_param_model(**u.dict()) for u in users]
 
     async def update_user(self, request: tenant_param_model):
