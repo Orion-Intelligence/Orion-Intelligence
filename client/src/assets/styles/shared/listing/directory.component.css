@@ -3,7 +3,7 @@
   max-height: 100vh;
 }
 
-.directory-listing-search .dashboard__api-search-input-div{
+.directory-listing-search .dashboard__api-search-input-div {
   padding: 8px 58px 0 0;
 }
 
@@ -16,7 +16,7 @@
   font-family: Inter, sans-serif;
   font-weight: 500;
   background: none;
-  color: var(--color-text4) ;
+  color: var(--color-text4);
   font-size: 18px;
   margin-bottom: 0;
   width: 200px;
@@ -30,23 +30,23 @@
 }
 
 .directory-listing_pagination-heading {
-  width: 50%;
+  width: 100%;
   display: flex;
-  justify-content: start;
+  justify-content: space-between;
   align-items: center;
   padding: 0;
 }
 
 .directory-listing_main-container {
   border-radius: 8px;
-  border: 1px solid var(--color-border) ;
+  border: 1px solid var(--color-border);
 }
 
 .directory-listing_pagination {
   margin-top: -10px;
 }
 
-@media only screen and (width <= 943px) {
+@media only screen and (width <=943px) {
   .directory-listing_container {
     min-height: 100vh;
     padding: 40px 10px 100px;
@@ -69,4 +69,3 @@
 .sidebar_container-disable {
   right: -300px;
 }
-

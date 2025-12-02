@@ -7,7 +7,7 @@ from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
-from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
+from orion.api.interactive.signup_manager.model.signup_request_model import AdminCreateTenantUserRequest, SignupRequest
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
@@ -188,3 +188,4 @@ class SignupManager:
             raise e
         except Exception:
             raise HTTPException(status_code=422, detail="Invalid data")
+        

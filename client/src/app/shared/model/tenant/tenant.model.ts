@@ -33,9 +33,19 @@ export interface TenantRequest {
 export interface User {
   username: string;
   email: string;
-  role: 'admin' | 'crawler' | 'demo' | 'profile' | 'analyst' ;
+  role: 'admin' | 'crawler' | 'demo' | 'profile' | 'analyst';
   status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
   subscription: boolean;
   verificationDate: string;
+  licenses?: string[] | null;
+}
+
+export interface TenantTeamModel {
+  username: string;
+  email: string;
+  password: string;
+  role: 'profile' | 'analyst';
+  status: 'verification_pending' | 'active' | 'disable';
+  subscription: boolean;
   licenses?: string[] | null;
 }

@@ -1,7 +1,9 @@
+import re
 import threading
 
 from typing import List
 
+from orion.api.interactive.tenant_manager.models.tenant_team_model import tenant_team_model
 from bson import ObjectId
 from fastapi import HTTPException
 from starlette import status
@@ -14,6 +16,7 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategor
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
 from orion.api.interactive.tenant_manager.models.user_param_model import user_param_model
 from orion.services.encryption_manager.tenant_key_manager import TenantKeyManager
+from orion.constants.constant import CONSTANTS
 
 
 class TenantManager:
@@ -211,3 +214,117 @@ class TenantManager:
                 values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]
             ))
         return decrypted_iocs
+
+    async def create_company_user(self,data: tenant_team_model, current_user):
+        try:
+            engine = mongo_controller.get_instance().get_engine()
+
+            username = (data.username or "").strip()
+            email = (data.email or "").strip().lower()
+            password = (data.password or "").strip()
+
+            if not username or not username.isalnum():
+                raise HTTPException(status_code=422, detail="Username must be alphanumeric and non-empty")
+
+            email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+            if not re.match(email_pattern, email):
+                raise HTTPException(status_code=422, detail="Invalid email format")
+
+            existing_user = await engine.find_one(
+                db_user_account,
+                (db_user_account.username == username) | (db_user_account.email == email)
+            )
+            if existing_user:
+                raise HTTPException(status_code=400, detail="Username or email already exists")
+
+            if password.startswith("$2b$") and len(password) >= 60:
+                hashed_password = password
+            else:
+                if len(password) > 256:
+                    raise HTTPException(status_code=422, detail="Password too long")
+
+                try:
+                    hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+                except Exception:
+                    raise HTTPException(status_code=422, detail="Invalid password")
+
+            company_uuid = getattr(current_user, "company_uuid", None)
+            if not company_uuid:
+                raise HTTPException(status_code=400, detail="Invalid company association")
+
+            user = db_user_account(
+                username=username,
+                email=email,
+                password=hashed_password,
+                role=data.role,
+                status=data.status,
+                subscription=data.subscription,
+                licenses=data.licenses,
+                company_uuid=company_uuid,
+            )
+
+            await engine.save(user)
+
+            return {
+                "message": "User created successfully",
+                "username": username,
+                "email": email,
+                "company_uuid": company_uuid
+            }
+
+        except Exception as e:
+            raise HTTPException(status_code=422, detail=str(e) or "Error creating user")
+        
+    async def create_demo_user(self,data: tenant_team_model):
+        try:
+            engine = mongo_controller.get_instance().get_engine()
+
+            username = (data.username or "").strip()
+            email = (data.email or "").strip().lower()
+            password = (data.password or "").strip()
+
+            if not username or not username.isalnum():
+                raise HTTPException(status_code=422, detail="Username must be alphanumeric and non-empty")
+
+            email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+            if not re.match(email_pattern, email):
+                raise HTTPException(status_code=422, detail="Invalid email format")
+
+            existing_user = await engine.find_one(
+                db_user_account,
+                (db_user_account.username == username) | (db_user_account.email == email)
+            )
+            if existing_user:
+                raise HTTPException(status_code=400, detail="Username or email already exists")
+
+            if password.startswith("$2b$") and len(password) >= 60:
+                hashed_password = password
+            else:
+                if len(password) > 256:
+                    raise HTTPException(status_code=422, detail="Password too long")
+
+                try:
+                    hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+                except Exception:
+                    raise HTTPException(status_code=422, detail="Invalid password")
+
+            user = db_user_account(
+                username=username,
+                email=email,
+                password=hashed_password,
+                role=data.role,
+                status=data.status,
+                subscription=data.subscription,
+                licenses=data.licenses,
+            )
+
+            await engine.save(user)
+
+            return {
+                "message": "User created successfully",
+                "username": username,
+                "email": email
+            }
+
+        except Exception as e:
+            raise HTTPException(status_code=422, detail=str(e) or "Error creating user")

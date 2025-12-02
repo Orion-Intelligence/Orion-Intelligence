@@ -6,6 +6,7 @@
         <div class="directory-listing_upper-heading">
           <div class="directory-listing_pagination-heading">
             <p class="directory-listing_header">Tenants</p>
+
           </div>
           <div class="directory-listing_pagination col-7"></div>
         </div>
@@ -41,9 +42,7 @@
                       <td>{{ tenant.country || '-' }}</td>
 
                       <td>
-                        <span
-                          class="badge-pill"
-                          [ngClass]="tenant.verified ? 'badge-true' : 'badge-false'">
+                        <span class="badge-pill" [ngClass]="tenant.verified ? 'badge-true' : 'badge-false'">
                           {{ tenant.verified ? 'Verified' : 'Not Verified' }}
                         </span>
                       </td>
@@ -63,8 +62,7 @@
                       </td>
 
                       <td class="text-center col-action">
-                        <button
-                          type="button"
+                        <button type="button"
                           class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn"
                           (click)="tenant._expanded = !tenant._expanded">
                           <span class="flex-grow-1 text-center">Edit</span>
@@ -160,10 +158,7 @@
                               <div class="tenant-title">Verified</div>
 
                               <div class="tenant-edit-control">
-                                <button
-                                  type="button"
-                                  class="pill-toggle"
-                                  [class.pill-on]="tenant.verified"
+                                <button type="button" class="pill-toggle" [class.pill-on]="tenant.verified"
                                   (click)="tenant.verified = !tenant.verified">
                                   <span class="pill-dot"></span>
                                   <span class="pill-text">
@@ -178,12 +173,8 @@
                             <div class="tenant-block">
                               <div class="tenant-title">User Quota</div>
                               <div class="tenant-edit-control field-equal">
-                                <input
-                                  type="number"
-                                  class="form-control form-control-sm tenant-input"
-                                  [(ngModel)]="tenant.user_quota"
-                                  [min]="1"
-                                  [max]="8">
+                                <input type="number" class="form-control form-control-sm tenant-input"
+                                  [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                               </div>
                               <hr class="tenant-divider">
                             </div>
@@ -191,9 +182,7 @@
                             <div class="tenant-block">
                               <div class="tenant-title">Status</div>
                               <div class="tenant-edit-control field-equal">
-                                <select
-                                  class="form-select form-select-sm tenant-input"
-                                  [(ngModel)]="tenant.status">
+                                <select class="form-select form-select-sm tenant-input" [(ngModel)]="tenant.status">
                                   <option [ngValue]="TenantStatus.ACTIVE">Active</option>
                                   <option [ngValue]="TenantStatus.DISABLE">Disable</option>
                                   <option [ngValue]="TenantStatus.ONBOARDING">Onboarding</option>
@@ -207,15 +196,11 @@
 
                               <div class="license-grid">
                                 <ng-container *ngFor="let license of licenseList">
-                                  <div
-                                    class="license-card"
-                                    *ngIf="getLicenseLabel(license) !== 'maintainer'"
+                                  <div class="license-card" *ngIf="getLicenseLabel(license) !== 'maintainer'"
                                     [class.license-selected]="tenant.licenses?.includes(license)"
                                     (click)="toggleTenantLicense(tenant, license)">
 
-                                    <input
-                                      type="checkbox"
-                                      class="license-checkbox"
+                                    <input type="checkbox" class="license-checkbox"
                                       [checked]="tenant.licenses?.includes(license)" />
 
                                     <span class="license-label">
@@ -230,9 +215,7 @@
                             </div>
 
                             <div class="d-flex justify-content-end mt-3">
-                              <button
-                                type="button"
-                                class="btn btn-sm btn-primary expand-btn"
+                              <button type="button" class="btn btn-sm btn-primary expand-btn"
                                 (click)="updateTenant(tenant)">
                                 Save changes
                               </button>
@@ -277,24 +260,56 @@
                 </thead>
                 <tbody @fadeInDashboardItem>
                   <tr>
-                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-75"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-100"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-75"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-75"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-50"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-50"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-50"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-25"></div>
+                    </td>
                   </tr>
                   <tr>
-                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-100"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-75"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-50"></div></td>
-                    <td><div class="skeleton_shimmer shimmer-line w-25"></div></td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-75"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-100"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-75"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-75"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-50"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-50"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-50"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton_shimmer shimmer-line w-25"></div>
+                    </td>
                   </tr>
                 </tbody>
               </table>

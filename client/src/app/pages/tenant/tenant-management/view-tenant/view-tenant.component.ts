@@ -1,18 +1,19 @@
-import {Component, HostListener, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {HttpHeaders} from '@angular/common/http';
-import {FormsModule} from '@angular/forms';
-import {NgFor} from '@angular/common';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpHeaders } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { NgFor } from '@angular/common';
 
-import {ApiService} from '../../../../shared/services/api.service';
-import {LicenseName} from '../../../../shared/model/licenses/license.rules';
-import {fadeInDashboardItem} from '../../../../shared/animations/dashboard.item.animation';
-import {TenantStatus, TenantStatusValues} from '../../../../shared/model/tenant/tenant.model';
+import { ApiService } from '../../../../shared/services/api.service';
+import { LicenseName } from '../../../../shared/model/licenses/license.rules';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
+import { AddTenantComponent } from "../add-tenant/add-tenant.component";
 
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [NgFor, FormsModule, CommonModule],
+  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })
@@ -36,8 +37,8 @@ export class ViewTenantComponent implements OnInit {
           user_quota: tenant.user_quota ?? 0,
           status:
             tenant.status === TenantStatusValues.ONBOARDING ||
-            tenant.status === TenantStatusValues.ACTIVE ||
-            tenant.status === TenantStatusValues.DISABLE
+              tenant.status === TenantStatusValues.ACTIVE ||
+              tenant.status === TenantStatusValues.DISABLE
               ? tenant.status
               : TenantStatusValues.ACTIVE,
           licenses:
@@ -144,4 +145,5 @@ export class ViewTenantComponent implements OnInit {
 
     return names.length <= 15 ? names : names.slice(0, 15) + '...';
   }
+
 }

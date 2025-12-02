@@ -54,22 +54,23 @@
         </div>
       </li>
 
-      <li *ngIf="licenseService.isMaintainer()" class="profile-item"
-        (click)="auditlog()">
+      <li *ngIf="licenseService.isMaintainer()" class="profile-item" (click)="auditlog()">
         <img src="assets/images/shared/profile.svg" alt="Auditlog" />
         <span>Auditlog</span>
       </li>
 
-      <li *ngIf="licenseService.isMaintainer()" class="profile-item"
-        (click)="manageIocs()">
+      <li *ngIf="licenseService.isMaintainer()" class="profile-item" (click)="manageIocs()">
         <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" />
         <span>Manage IOC’s</span>
       </li>
 
-      <li *ngIf="licenseService.isMaintainer()" class="profile-item"
-        (click)="openAccountSettings()">
+      <li *ngIf="licenseService.isMaintainer()" class="profile-item" (click)="openAccountSettings()">
         <img src="assets/images/shared/settings.svg" alt="Account settings" />
         <span>Account settings</span>
+      </li>
+      <li *ngIf="!licenseService.isMaintainer() && isProfile()" class="profile-item" (click)="changePassword()">
+        <img src="assets/images/shared/settings.svg" alt="Change Password" />
+        <span>Change Password</span>
       </li>
 
       <li *ngIf="authService.getOnboardingStatus()" (click)="toggleThemeByClick()">
