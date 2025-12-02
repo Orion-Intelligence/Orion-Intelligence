@@ -13,6 +13,8 @@ from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 
 class session_manager:
@@ -32,6 +34,8 @@ class session_manager:
             raise Exception("This class is a singleton!")
         session_manager.__instance = self
         self._engine = mongo_controller.get_instance().get_engine()
+        self._redis = redis_controller.getInstance()
+        self._session_ttl = 30 * 60
 
     async def get_current_user(self, token: str):
         if not token:
@@ -55,6 +59,24 @@ class session_manager:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
+
+            session_id = payload.get("sid")
+            if user.role == user_role.DEMO:
+                return user
+            if not session_id:
+                raise HTTPException(status_code=401, detail="Missing or invalid token")
+
+            redis_key = f"session:{str(user.id)}"
+            redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+
+            if redis_sid is None:
+                if user.current_session_id != session_id:
+                    raise HTTPException(status_code=401, detail="Missing or invalid token")
+                await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
+            else:
+                if redis_sid != user.current_session_id or redis_sid != session_id:
+                    raise HTTPException(status_code=401, detail="Missing or invalid token")
+                await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._session_ttl])
 
             return user
 
@@ -89,8 +111,33 @@ class session_manager:
 
     async def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
+        username = to_encode.get("sub")
+
+        if expires_delta is None:
+            expires_delta = timedelta(minutes=3)
+
+        user = None
+        if username:
+            user = await self._engine.find_one(db_user_account, db_user_account.username == username)
+
+        if user and user.role != user_role.DEMO and expires_delta > timedelta(minutes=3):
+            expires_delta = timedelta(minutes=3)
+
         expire = datetime.now(timezone.utc) + expires_delta
-        to_encode.update({"exp": expire.timestamp()})
+
+        session_id = None
+        if user and user.role != user_role.DEMO:
+            session_id = secrets.token_urlsafe(32)
+            user.current_session_id = session_id
+            await self._engine.save(user)
+            redis_key = f"session:{str(user.id)}"
+            await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
+
+        if session_id:
+            to_encode.update({"exp": expire.timestamp(), "sid": session_id})
+        else:
+            to_encode.update({"exp": expire.timestamp()})
+
         token = jwt.encode(to_encode, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
         role = await self.get_current_role(token)
         return token, role
@@ -135,6 +182,9 @@ class session_manager:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
+            if user.role != user_role.DEMO and access_ttl > timedelta(minutes=3):
+                access_ttl = timedelta(minutes=3)
+
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
             onboarding_exists = await self.get_instance().has_onboarding(str(user.company_uuid))
             session = {
@@ -169,22 +219,41 @@ class session_manager:
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
 
+            session_id = payload.get("sid")
+            if user.role != user_role.DEMO:
+                if not session_id:
+                    raise HTTPException(status_code=401, detail="Invalid token")
+
+                redis_key = f"session:{str(user.id)}"
+                redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+
+                if redis_sid is None:
+                    if user.current_session_id != session_id:
+                        raise HTTPException(status_code=401, detail="Invalid token")
+                    await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
+                else:
+                    if redis_sid != user.current_session_id or redis_sid != session_id:
+                        raise HTTPException(status_code=401, detail="Invalid token")
+                    await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._session_ttl])
+
             role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
             acct_at = user.account_verify_at
             if isinstance(acct_at, datetime):
                 acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
-            if (
-                    role_name == "profile"
-                    and not bool(getattr(user, "subscription", False))
-                    and acct_at is not None
-                    and (datetime.now(timezone.utc) - acct_at).days >= 30
-            ):
+            if role_name == "profile" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (datetime.now(timezone.utc) - acct_at).days >= 30:
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
             onboarding_exists = await self.has_onboarding(str(user.company_uuid))
 
-            new_token_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
-            new_token_payload = {"sub": username, "exp": new_token_expiry}
+            base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
+            if user.role != user_role.DEMO:
+                base_expiry = time.time() + 3 * 60
+
+            if user.role == user_role.DEMO:
+                new_token_payload = {"sub": username, "exp": base_expiry}
+            else:
+                new_token_payload = {"sub": username, "exp": base_expiry, "sid": session_id}
+
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
             session = {

@@ -23,15 +23,6 @@ export class ScrollService {
   }
 
   saveSession(itemId: string): void {
-    // if (itemId) {
-    //   sessionStorage.setItem('selectedItem', itemId);
-    //   let scrollableContainer: HTMLElement | null = document.getElementById('item-' + itemId);
-    //   while (scrollableContainer && !this.isScrollable(scrollableContainer)) {
-    //     scrollableContainer = scrollableContainer.parentElement;
-    //   }
-    //   const scrollPosition = scrollableContainer ? scrollableContainer.scrollTop : window.scrollY;
-    //   sessionStorage.setItem('scrollPosition', scrollPosition.toString());
-    // }
   }
 
   openCTI(event: MouseEvent, itemId: string): void {

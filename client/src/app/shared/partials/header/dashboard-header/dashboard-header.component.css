@@ -33,6 +33,10 @@
   cursor: pointer;
 }
 
+.breadcrumb-item-large {
+  font-size: 19px !important;
+}
+
 .breadcrumb-item:hover {
   color: #fcfcfc;
 }

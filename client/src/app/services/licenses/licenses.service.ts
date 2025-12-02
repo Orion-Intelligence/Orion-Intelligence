@@ -69,20 +69,21 @@ export class LicenseService {
     }
 
     demoSubscription(moduleName: string) {
-        if (moduleName == "Stealerlogs") {
-            moduleName = "stealer_logs"
-        }
-        if (moduleName == "Strategic") {
-            moduleName = "general"
-        }
+      if (!this.canAccess(moduleName)) {
+        this.dashboardService.showSubscription.set(true);
+        this.router.navigate(['/']).then();
+      }
+    }
 
-        const rule = this.getCombinedRule();
-        let key = moduleName.toLowerCase()
-        let access = (rule.modules === 'all' || rule.modules.has(key))
-        if (this.subscriptionService.isDemo() && !access) {
-            this.dashboardService.showSubscription.set(true);
-            this.router.navigate(['/']).then();
-        }
+    canAccess(moduleName: string): boolean {
+      if (moduleName === 'Stealerlogs') moduleName = 'stealer_logs';
+      if (moduleName === 'Strategic') moduleName = 'general';
+
+      const rule = this.getCombinedRule();
+      const key = moduleName.toLowerCase();
+      const access = rule.modules === 'all' || rule.modules.has(key);
+
+      return !(this.subscriptionService.isDemo() && !access);
     }
 
     canUseModule(moduleName: string): boolean {
