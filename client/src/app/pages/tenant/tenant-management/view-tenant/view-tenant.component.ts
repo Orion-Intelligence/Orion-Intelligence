@@ -8,12 +8,11 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
-import { AddTenantComponent } from "../add-tenant/add-tenant.component";
 
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent],
+  imports: [NgFor, FormsModule, CommonModule],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })
