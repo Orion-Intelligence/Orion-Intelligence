@@ -1,5 +1,5 @@
-<div class="add-tenant_wrapper">
-    <div class="add-tenant_container">
+<div class="add-tenant_wrapper" @overlayAnimation (click)="onClose()">
+    <div class="add-tenant_container" @popupAnimation (click)="$event.stopPropagation()">
         <div class="add-tenant_header">
             <div class="add-tenant_heading">Add Tenant</div>
             <button class="add-tenant_close-btn" (click)="onClose()">×</button>

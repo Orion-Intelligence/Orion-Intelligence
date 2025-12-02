@@ -64,13 +64,14 @@
         <span>Manage IOC’s</span>
       </li>
 
+      <li *ngIf="isProfile()" class="profile-item" (click)="changePassword()">
+        <img src="assets/images/shared/forgot.svg" alt="Change Password" />
+        <span>Change Password</span>
+      </li>
+
       <li *ngIf="licenseService.isMaintainer()" class="profile-item" (click)="openAccountSettings()">
         <img src="assets/images/shared/settings.svg" alt="Account settings" />
         <span>Account settings</span>
-      </li>
-      <li *ngIf="!licenseService.isMaintainer() && isProfile()" class="profile-item" (click)="changePassword()">
-        <img src="assets/images/shared/settings.svg" alt="Change Password" />
-        <span>Change Password</span>
       </li>
 
       <li *ngIf="authService.getOnboardingStatus()" (click)="toggleThemeByClick()">

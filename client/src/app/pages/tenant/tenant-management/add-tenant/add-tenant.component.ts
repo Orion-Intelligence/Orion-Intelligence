@@ -6,12 +6,14 @@ import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 
 @Component({
   selector: 'app-add-tenant',
   imports: [FormsModule, NgFor, NgIf],
   templateUrl: './add-tenant.component.html',
-  styleUrl: './add-tenant.component.css'
+  styleUrl: './add-tenant.component.css',
+  animations: [popupAnimation, overlayAnimation]
 })
 
 export class AddTenantComponent implements OnInit {
