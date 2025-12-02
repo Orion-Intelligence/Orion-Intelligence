@@ -7,10 +7,11 @@ import { FormsModule } from '@angular/forms';
 import { User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
+import { AddTenantComponent } from "../add-tenant/add-tenant.component";
 
 @Component({
   selector: 'app-view-profile',
-  imports: [NgFor, FormsModule, CommonModule],
+  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './view-profile.component.html'
 })
@@ -20,6 +21,7 @@ export class ViewProfileComponent implements OnInit {
   isLoading = true;
   selectedUserId: string | null = null;
   expandedUserIndex: number | null = null;
+  showAddTenantPopup: boolean = false;
 
   constructor(public apiService: ApiService,) {
   }
@@ -139,5 +141,10 @@ export class ViewProfileComponent implements OnInit {
     const names = user.licenses.map((l: LicenseName) => this.getLicenseLabel(l)).join(', ');
     return (names.length <= 15) ? names : names.slice(0, 15) + ('...');
   }
-
+  addtenant() {
+    this.showAddTenantPopup = true;
+  }
+  clossAddTenant() {
+    this.showAddTenantPopup = false;
+  }
 }

@@ -38,6 +38,7 @@ from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert_job import alert_job
+from orion.api.interactive.tenant_manager.models.tenant_team_model import tenant_team_model
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 public_routes = APIRouter()
@@ -294,6 +295,13 @@ async def get_all_users():
 async def update_user(user: tenant_param_model):
     return await TenantManager.get_instance().update_user(user)
 
+@api_routes.post("/api/tenant/create/user", dependencies=[Depends(role_required([user_role.PROFILE])),Depends(license_required("maintainer"))])
+async def create_user(data: tenant_team_model, current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().create_company_user(data,current_user)
+
+@api_routes.post("/api/admin/create/user", dependencies=[Depends(role_required([user_role.ADMIN]))])
+async def create_user(data: tenant_team_model):
+    return await TenantManager.get_instance().create_demo_user(data)
 
 @api_routes.post("/api/audit/logs", dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))])
 async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=Depends(get_current_user)):

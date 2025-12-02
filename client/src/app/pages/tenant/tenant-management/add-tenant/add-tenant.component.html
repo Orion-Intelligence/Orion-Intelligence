@@ -1,50 +1,54 @@
-<div class="modal-wrapper">
-    <div class="modal-container">
-        <div class="modal-header">
-            <div class="heading">Add Tenant</div>
-            <button class="close-btn" (click)="onClose()">×</button>
+<div class="add-tenant_wrapper">
+    <div class="add-tenant_container">
+        <div class="add-tenant_header">
+            <div class="add-tenant_heading">Add Tenant</div>
+            <button class="add-tenant_close-btn" (click)="onClose()">×</button>
         </div>
 
-        <form class="form">
+        <form class="add-tenant_form">
 
-            <label class="label">Username</label>
-            <input type="text" class="input" placeholder="Enter username" [(ngModel)]="model.username"
+            <label class="add-tenant_label">Username</label>
+            <input type="text" class="add-tenant_input" placeholder="Enter username" [(ngModel)]="model.username"
                 name="username" />
 
-            <label class="label">Email</label>
-            <input type="email" class="input" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
+            <label class="add-tenant_label">Email</label>
+            <input type="email" class="add-tenant_input" placeholder="Enter email" [(ngModel)]="model.email"
+                name="email" />
 
-            <label class="label">Password</label>
-            <input type="password" class="input" placeholder="Enter password" [(ngModel)]="password" name="password" />
+            <label class="add-tenant_label">Password</label>
+            <input type="password" class="add-tenant_input" placeholder="Enter password" [(ngModel)]="model.password"
+                name="password" />
 
-            <div class="two-column">
+            <div class="add-tenant_two-column">
                 <div>
-                    <label class="label">Role</label>
-                    <select class="select" [(ngModel)]="model.role" name="role">
-                        <option [ngValue]="'demo'">Demo</option>
-                        <option [ngValue]="'analyst'">Analyst</option>
+                    <label class="add-tenant_label">Role</label>
+                    <select class="add-tenant_select" [(ngModel)]="model.role" name="role">
+                        <option [ngValue]="isAdmin ? 'demo' : 'profile'">
+                            {{ isAdmin ? 'Demo' : 'Profile' }}
+                        </option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="label">Status</label>
-                    <select class="select" [(ngModel)]="model.status" name="status">
+                    <label class="add-tenant_label">Status</label>
+                    <select class="add-tenant_select" [(ngModel)]="model.status" name="status">
                         <option [ngValue]="'active'">Active</option>
                         <option [ngValue]="'disable'">Disable</option>
-                        <option [ngValue]="'verification_pending'">Pending Verification</option>
                     </select>
                 </div>
             </div>
-            <div class="two-column">
+
+            <div class="add-tenant_two-column">
                 <div>
-                    <label class="label">Subscription</label>
-                    <select class="select" [(ngModel)]="model.subscription" name="subscription">
+                    <label class="add-tenant_label">Subscription</label>
+                    <select class="add-tenant_select" [(ngModel)]="model.subscription" name="subscription">
                         <option [value]="true">Paid</option>
                         <option [value]="false">Free</option>
                     </select>
                 </div>
             </div>
-            <div class="label">Licenses</div>
+
+            <div class="add-tenant_label">Licenses</div>
 
             <div class="license-grid">
                 <ng-container *ngFor="let license of licenseList">
@@ -63,14 +67,12 @@
             </div>
 
             <hr class="tenant-divider">
-            <!-- </div> -->
 
         </form>
 
-
-        <div class="footer">
-            <button class="btn-outline" (click)="onClose()">Cancel</button>
-            <button class="btn-primary" (click)="onSubmit()">Add Tenant</button>
+        <div class="add-tenant_footer">
+            <button class="add-tenant_btn-outline" (click)="onClose()">Cancel</button>
+            <button class="add-tenant_btn-primary" (click)="onSubmit()">Add Tenant</button>
         </div>
 
     </div>

@@ -23,7 +23,6 @@ export class ViewTenantComponent implements OnInit {
   isLoading = true;
   selectedTenantId: string | null = null;
   TenantStatus = TenantStatusValues;
-  showAddTenantPopup: boolean = false;
 
   constructor(public apiService: ApiService) {
   }
@@ -146,10 +145,5 @@ export class ViewTenantComponent implements OnInit {
 
     return names.length <= 15 ? names : names.slice(0, 15) + '...';
   }
-  addtenant() {
-    this.showAddTenantPopup = true;
-  }
-  clossAddTenant() {
-    this.showAddTenantPopup = false;
-  }
+
 }

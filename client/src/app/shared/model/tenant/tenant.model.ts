@@ -39,3 +39,13 @@ export interface User {
   verificationDate: string;
   licenses?: string[] | null;
 }
+
+export interface TenantTeamModel {
+  username: string;
+  email: string;
+  password: string;
+  role: 'profile' | 'analyst';
+  status: 'verification_pending' | 'active' | 'disable';
+  subscription: boolean;
+  licenses?: string[] | null;
+}

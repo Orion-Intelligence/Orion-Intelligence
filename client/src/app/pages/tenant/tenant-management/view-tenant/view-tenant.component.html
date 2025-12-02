@@ -6,10 +6,7 @@
         <div class="directory-listing_upper-heading">
           <div class="directory-listing_pagination-heading">
             <p class="directory-listing_header">Tenants</p>
-            <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn"
-              (click)="addtenant()">
-              <span class="flex-grow-1 text-center">Add Tenant</span>
-            </button>
+
           </div>
           <div class="directory-listing_pagination col-7"></div>
         </div>
@@ -323,8 +320,4 @@
     </div>
   </div>
   <span id="bottom"></span>
-</ng-container>
-
-<ng-container *ngIf="showAddTenantPopup">
-  <app-add-tenant (closs)="clossAddTenant()"></app-add-tenant>
 </ng-container>

@@ -1,9 +1,11 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
-import { User } from '../../../../shared/model/tenant/tenant.model';
+import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
+import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-add-tenant',
@@ -12,30 +14,54 @@ import { ApiService } from '../../../../shared/services/api.service';
   styleUrl: './add-tenant.component.css'
 })
 
-export class AddTenantComponent {
+export class AddTenantComponent implements OnInit {
 
   @Output() closs = new EventEmitter<void>();
+  @Output() accountAdded = new EventEmitter<void>();
 
   licenseList = Object.values(LicenseName);
   licenses = ["free", "osint_basic", "osint_advanced", "pentester", "maintainer", "enterprise"];
+  isAdmin: boolean = false;
 
-  model: User = {
+  model: TenantTeamModel = {
     username: "",
     email: "",
-    // password: "",
-    role: "demo",
-    status: "verification_pending",
+    password: "",
+    role: "profile",
+    status: "active",
     subscription: false,
     licenses: [],
-    verificationDate: ""
   };
-  password = ''
 
-  constructor(public apiService: ApiService) {
+  constructor(public apiService: ApiService, private messageNotificationService: MessageNotificationService, private authService: AuthService) {
+  }
+  ngOnInit(): void {
+    this.isAdmin = this.authService.getRole() === "admin"
   }
 
   onSubmit() {
-    console.log(this.model);
+    if (this.isAdmin) {
+      this.apiService.post('admin/create/user', this.model).subscribe({
+        next: () => {
+          this.accountAdded.emit()
+          this.onClose();
+        },
+        error: (err) => {
+          this.messageNotificationService.show(err?.error?.detail || 'failed to create user');
+        },
+      });
+    }
+    else {
+      this.apiService.post('tenant/create/user', this.model).subscribe({
+        next: () => {
+          this.accountAdded.emit()
+          this.onClose();
+        },
+        error: (err) => {
+          this.messageNotificationService.show(err?.error?.detail || 'failed to create user');
+        },
+      });
+    }
   }
 
   onClose() {
