@@ -12,7 +12,6 @@ import { popupAnimation, overlayAnimation } from '../../../../shared/animations/
   selector: 'app-add-tenant',
   imports: [FormsModule, NgFor, NgIf],
   templateUrl: './add-tenant.component.html',
-  styleUrl: './add-tenant.component.css',
   animations: [popupAnimation, overlayAnimation]
 })
 

@@ -12,6 +12,7 @@
     background: var(--color-blue-830);
     width: 100%;
     max-width: 1000px;
+    border: 1px solid var(--color-border);;
     max-height: 800px;
     border-radius: 14px;
     padding: 35px;
