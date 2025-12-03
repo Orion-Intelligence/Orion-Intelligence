@@ -1,4 +1,4 @@
-<div class="list__container">
+<div class="list__container" (scroll)="onScroll($event)">
   <ng-container *ngIf="(directoryData$ | async) as data; else loadingTpl">
     <table class="table table-striped directory-list__table clear-paddings">
       <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
@@ -13,7 +13,7 @@
         </tr>
       </thead>
       <tbody *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0" @fadeInDashboardItem>
-        <ng-container *ngFor="let item of data.mDirectoryCallbackLinks; let i = index">
+        <ng-container *ngFor="let item of data.mDirectoryCallbackLinks | slice:0:visibleCount; let i = index">
           <tr *ngIf="item.url?.trim()">
             <td data-label="ID">
               {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}

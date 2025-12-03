@@ -84,7 +84,7 @@ export const httpInterceptor: HttpInterceptorFn = (
         if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
           const keys = Object.keys(error.error);
           if (keys.length === 1) {
-            message += `: ${error.error[keys[0]]}`;
+            message = `${error.error[keys[0]]}`;
           }
         }
         localStorage.clear();
