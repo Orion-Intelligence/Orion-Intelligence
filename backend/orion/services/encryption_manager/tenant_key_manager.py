@@ -48,7 +48,6 @@ class TenantKeyManager:
         dek = self._new_dek()
         wrapped = self._wrap(dek)
         now = datetime.now(timezone.utc)
-
         await self._engine.save(db_tenant_key(tenant_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
         return dek
 
@@ -56,4 +55,5 @@ class TenantKeyManager:
         rec = await self._engine.find_one(db_tenant_key, db_tenant_key.tenant_id == tenant_id)
         if not rec:
             raise RuntimeError("Tenant key not found")
+        print("now returning dek_____________________")
         return self._unwrap(rec.wrapped_key)

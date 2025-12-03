@@ -168,10 +168,13 @@ class alert_job:
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
         
         try:
+            print("____________1____________"+str(tenant.id)+" "+category)
             decrypted_iocs = await self._tenant_manager.decrypt_iocs_for_tenant(tenant)
-        
+            print("____________2____________"+str(tenant.id)+" "+category)
             if not decrypted_iocs:
+                print("___________no decrypted ioc__________")
                 return
+            print("now checking the categories________________________")
             if category == "scanning":
                 for ioc in decrypted_iocs:
                     ioc_type_name = ioc.ioc_id
@@ -186,7 +189,7 @@ class alert_job:
                             for scan_type in scans_to_run:
                                 print(f"Processing {ioc_type_name} | Value: {ioc_value} | Scan: {scan_type}")
                                 await self._handle_scanning_alert(
-                                    tenant.userId, 
+                                    str(tenant.id), 
                                     ioc_value, 
                                     ioc_type_name, 
                                     scan_type
@@ -235,7 +238,7 @@ class alert_job:
                                 result_list = scan_result.get("result", [])
                                 if result_list:
                                     await self._handle_dynamic_scanning_alert(
-                                        tenant.userId, 
+                                        str(tenant.id), 
                                         ioc_type_name, 
                                         ioc_value, 
                                         scan_type,
@@ -360,7 +363,7 @@ class alert_job:
                                     all_ioc_list.append(new_ioc)
 
                                 status = await self._alert_manager.upsert_alert(
-                                    userId=tenant.userId,
+                                    userId=str(tenant.id),
                                     data_hash=_data_hash,
                                     category=category,
                                     ioc_type=ioc_type_name,
@@ -376,7 +379,7 @@ class alert_job:
                     except Exception as sub_e:
                         print(f"[{datetime.now().strftime('%H:%M:%S')}] -> CRITICAL SEARCH ERROR for {category}:{ioc_type_name}:{ioc_value}. Error: {sub_e}")
         except Exception as e:
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] -> CRONJOB FATAL ERROR for tenant {tenant.userId} in category {category}. Error: {e}")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] -> CRONJOB FATAL ERROR for tenant {tenant.id} in category {category}. Error: {e}")
 
 
     async def run_all_categories(self):
