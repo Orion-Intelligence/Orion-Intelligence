@@ -46,7 +46,6 @@ class TenantManager:
         try:
             dek = await self._dek(str(data.id))
             enc = Fernet(dek)
-
             data.companyName = enc.encrypt((data.companyName or "").encode()).decode()
             data.phone = enc.encrypt((data.phone or "").encode()).decode()
             data.country = enc.encrypt((data.country or "").encode()).decode()
@@ -214,16 +213,28 @@ class TenantManager:
         return result
 
     async def decrypt_iocs_for_tenant(self, tenant: db_tenant_model) -> List[IocCategory]:
+        print("++++++++++++++++++++++++++++++=1")
         dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
+        print("++++++++++++++++++++++++++++++=2")
         enc = Fernet(dek)
+        print("++++++++++++++++++++++++++++++=3")
         decrypted_iocs = []
+        print("++++++++++++++++++++++++++++++=4")
+        
         for ioc in tenant.iocs or []:
-            decrypted_iocs.append(IocCategory(
-                ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
-                name=enc.decrypt(ioc.name.encode()).decode(),
-                values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]
-            ))
+            print("++++++++++++++++++++++++++++++ Ioc id:", ioc.ioc_id, "name:", ioc.name)
+            try:
+                ioc_id = enc.decrypt(ioc.ioc_id.encode()).decode() if ioc.ioc_id else ""
+                name = enc.decrypt(ioc.name.encode()).decode() if ioc.name else ""
+                values = [enc.decrypt(v.encode()).decode() for v in (ioc.values or []) if v]
+                decrypted_iocs.append(IocCategory(ioc_id=ioc_id, name=name, values=values))
+                print("Decrypted IOC:", ioc_id, name, values)
+            except Exception as e:
+                print(f"Failed to decrypt IOC {ioc}: {e}")
+        
+        print("++++++++++++++++++++++++++++++= Count:", len(decrypted_iocs))
         return decrypted_iocs
+
 
     async def create_company_user(self,data: tenant_team_model, current_user):
         try:
