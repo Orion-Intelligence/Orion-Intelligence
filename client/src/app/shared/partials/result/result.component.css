@@ -249,3 +249,21 @@
 .result__match-row input:checked+.result__slider::before {
   transform: translateX(10px);
 }
+
+.search-filter-row {
+  width: 100%;
+  gap: 10px;
+}
+
+.search-bar-wrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.search-bar-wrapper .default-input-container-mobile {
+  width: 100%;
+}
+
+.filter-button-wrapper {
+  flex: 0 0 auto;
+}
