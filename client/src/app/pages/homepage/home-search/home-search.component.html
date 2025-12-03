@@ -3,7 +3,7 @@
 
     <div class="col-md-12 col-sm-12 col-xs-12 default-input-container-mobile">
       <div class="mobile-backdrop" *ngIf="showFiltersOverlay"></div>
-      <ng-container *ngIf="authService.getRole() === 'admin' || licenseService.isMaintainer()">
+      <ng-container *ngIf="authService.getRole() === 'admin' || licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')">
         <div class="input-group default-input-sub-container"
           [ngClass]="{'mobile-overlay-active': showFiltersOverlay,'mobile-overlay-inactive': !showFiltersOverlay }">
           <button class="btn btn-primary default-input-button" (click)="onSearchSubmit()" type="submit">

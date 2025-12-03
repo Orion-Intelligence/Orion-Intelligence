@@ -23,7 +23,7 @@ export class LicenseService {
 
     constructor(protected dashboardService: DashboardService, private auth: AuthService, private subscriptionService: SubscriptionService, private router: Router) { }
 
-    private getLicenses(): string[] {
+    getLicenses(): string[] {
         return this.auth.getLicenses() ?? [];
     }
 
