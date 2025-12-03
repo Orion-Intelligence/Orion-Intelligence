@@ -5,7 +5,7 @@ import { interval, Observable, switchMap, tap, timer } from 'rxjs';
 export class TokenRefreshService {
   private refreshTokenSubscription: any;
   private readonly FIRST_REFRESH_DELAY = 5000;
-  private readonly REFRESH_INTERVAL = 500000;
+  private readonly REFRESH_INTERVAL = 120000;
 
   startTokenRefresh(refreshAction: () => Observable<string | null>): void {
     if (!this.refreshTokenSubscription || this.refreshTokenSubscription.closed) {

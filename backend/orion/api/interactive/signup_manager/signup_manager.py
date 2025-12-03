@@ -41,18 +41,8 @@ class SignupManager:
                 raise HTTPException(status_code=400, detail="Username or email already exists")
 
             domain = email.split("@")[-1].lower()
-            existing_domain_user = await engine.find_one(
-                db_user_account,
-                {"email": {"$regex": f"@{domain}$", "$options": "i"}}
-            )
-            if existing_domain_user:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Accounts with domain '{domain}' are not allowed since one already exists."
-                )
-
-            PRODUCTION = int(env_handler.get_instance().env("PRODUCTION", 0))
-            if PRODUCTION == 1:
+            PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
+            if PRODUCTION == "1":
                 non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me", "mail.ru"]
                 if domain in non_company_domains:
                     raise HTTPException(
@@ -126,6 +116,9 @@ class SignupManager:
             }
 
         except Exception as _:
+            print("::::::::::::::::::::::::::::", flush=True)
+            print(_, flush=True)
+            print("::::::::::::::::::::::::::::", flush=True)
             raise HTTPException(status_code=422, detail="Invalid signup data")
 
     @staticmethod
