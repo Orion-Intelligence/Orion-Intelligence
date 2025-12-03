@@ -5,3 +5,4 @@
 {"file": "_zone_xsec", "url": "https://zone-xsec.com"}
 {"file": "_usom", "url": "https://www.usom.gov.tr"}
 {"file": "_ownzyou", "url": "https://ownzyou.com"}
+{"file": "_defacer", "url": "https://defacer.net"}

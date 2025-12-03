@@ -6,3 +6,4 @@
 {"file": "_4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd", "url": "http://4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd.onion"}
 {"file": "_hacksnation", "url": "https://hacksnation.com"}
 {"file": "_re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd", "url": "http://re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd.onion"}
+{"file": "_csrin", "url": "https://cs.rin.ru"}
