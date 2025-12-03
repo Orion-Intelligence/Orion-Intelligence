@@ -114,14 +114,14 @@ class session_manager:
         username = to_encode.get("sub")
 
         if expires_delta is None:
-            expires_delta = timedelta(minutes=3)
+            expires_delta = timedelta(minutes=30)
 
         user = None
         if username:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
 
-        if user and user.role not in (user_role.DEMO, user_role.CRAWLER) and expires_delta > timedelta(minutes=3):
-            expires_delta = timedelta(minutes=3)
+        if user and user.role not in (user_role.DEMO, user_role.CRAWLER) and expires_delta > timedelta(minutes=30):
+            expires_delta = timedelta(minutes=30)
 
         expire = datetime.now(timezone.utc) + expires_delta
 
@@ -182,8 +182,8 @@ class session_manager:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
-            if user.role not in (user_role.DEMO, user_role.CRAWLER) and access_ttl > timedelta(minutes=3):
-                access_ttl = timedelta(minutes=3)
+            if user.role not in (user_role.DEMO, user_role.CRAWLER) and access_ttl > timedelta(minutes=30):
+                access_ttl = timedelta(minutes=30)
 
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
             onboarding_exists = await self.get_instance().has_onboarding(str(user.company_uuid))
