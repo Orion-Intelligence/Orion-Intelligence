@@ -8,6 +8,7 @@ from starlette.requests import Request
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, LicenseName
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
+
 class UserAdminView(ModelView):
     def __init__(self, model, engine, **kwargs):
         super().__init__(model, **kwargs)
@@ -18,6 +19,8 @@ class UserAdminView(ModelView):
         objs = await self.find_by_pks(request, pks)
 
         for obj in objs:
+            if isinstance(obj, db_user_account) and getattr(obj, "role", None) == "admin":
+                raise ActionFailed("Cannot delete admin user.")
             if isinstance(obj, db_user_account) and LicenseName.MAINTAINER in obj.licenses:
                 tenant = await self._engine.find_one(
                     db_tenant_model,

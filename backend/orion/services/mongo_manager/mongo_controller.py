@@ -4,7 +4,7 @@ from odmantic.exceptions import DuplicateKeyError
 
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_key import db_tenant_key
@@ -79,12 +79,16 @@ class mongo_controller:
                     username=admin_mock["username"],
                     password=admin_mock["password"],
                     role=user_role.ADMIN,
+                    status= UserStatus.ACTIVE,
+                    licenses = LicenseName.FREE
                 )
                 await self.__engine.save(admin_user)
                 crawler_user = db_user_account(
                     username=crawler_mock["username"],
                     password=crawler_mock["password"],
                     role=user_role.CRAWLER,
+                    status= UserStatus.ACTIVE,
+                    licenses = LicenseName.ENTERPRISE
                 )
                 await self.__engine.save(crawler_user)
             except DuplicateKeyError:

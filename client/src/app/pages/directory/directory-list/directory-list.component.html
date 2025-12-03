@@ -1,4 +1,4 @@
-<div class="list__container" (scroll)="onScroll($event)">
+<div class="list__container">
   <ng-container *ngIf="(directoryData$ | async) as data; else loadingTpl">
     <table class="table table-striped directory-list__table clear-paddings">
       <thead *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) > 0">
@@ -54,6 +54,14 @@
             </td>
           </tr>
         </ng-container>
+
+        <tr *ngIf="loadingMore">
+          <td colspan="7" class="text-center py-3">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden"></span>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
     <div *ngIf="(data?.mDirectoryCallbackLinks?.length || 0) === 0" class="list__empty-padding">
@@ -98,4 +106,6 @@
       </tbody>
     </table>
   </ng-template>
+
+  <div #infiniteAnchor></div>
 </div>
