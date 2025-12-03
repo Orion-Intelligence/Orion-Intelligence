@@ -79,7 +79,7 @@ class auth_manager:
             if tenant and not tenant.verified:
                 raise HTTPException(status_code=401, detail="Tenant not verified yet.")
 
-            if tenant and tenant.status in [TenantStatus.ONBOARDING, TenantStatus.ACTIVE] and "maintainer" not in tenant.licenses:
+            if tenant and tenant.status in [TenantStatus.ONBOARDING, TenantStatus.ACTIVE]:
                 raise HTTPException(status_code=401, detail="Tenant not activated yet.")
 
         if (role_name == "profile"
