@@ -313,7 +313,7 @@ class TenantManager:
 
             existing_user = await engine.find_one(
                 db_user_account,
-                (db_user_account.username == username) | (db_user_account.email == email)
+                (db_user_account.username == username)
             )
             if existing_user:
                 raise HTTPException(status_code=400, detail="Username or email already exists")
