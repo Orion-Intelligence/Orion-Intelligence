@@ -179,7 +179,8 @@ export class SidebarProfileAlertsComponent implements OnInit {
         if (status === 'completed_with_errors') {
           successMessage += ' Some scans completed with errors.';
         }
-        this.isLoading = false;
+        this.getLatestAlerts()
+        // this.isLoading = false;
       },
       error: (err) => {
         console.error('Scan failed with an error:', err);
@@ -187,5 +188,14 @@ export class SidebarProfileAlertsComponent implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+  getLatestAlerts() {
+    this.apiService.get<any>('profile/alerts').subscribe({
+      next: response => {
+        this.appService.userProfile().alerts = response
+        this.ngOnInit();
+        this.isLoading = false;
+      }
+    })
   }
 }
