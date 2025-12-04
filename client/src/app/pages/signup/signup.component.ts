@@ -33,10 +33,10 @@ export class SignupComponent implements OnInit {
   }
 
   validateFields() {
-    const usernamePattern = /^[a-zA-Z0-9]+$/;
+    const usernamePattern = /^[a-zA-Z0-9_-]{4,20}$/;
     const emailPattern = /^[\w\.-]+@[\w\.-]+\.\w+$/;
     if (!usernamePattern.test(this.user.username)) {
-      this.errorMessage = 'Username must be alphanumeric';
+      this.errorMessage = 'Username already exist';
       return false;
     }
     if (!emailPattern.test(this.user.mail)) {

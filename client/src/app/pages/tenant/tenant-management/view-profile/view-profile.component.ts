@@ -50,6 +50,7 @@ export class ViewProfileComponent implements OnInit {
       case 'crawler': return 'Crawler';
       case 'demo': return 'Demo';
       case 'profile': return 'Profile';
+      case 'analyst': return 'Analyst';
       default: return '';
     }
   }

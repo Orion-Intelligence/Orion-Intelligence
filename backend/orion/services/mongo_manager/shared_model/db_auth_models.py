@@ -7,6 +7,7 @@ from typing import List, Optional, Dict, Any
 
 from odmantic import Model, Field
 from passlib.context import CryptContext
+from fastapi import HTTPException
 from pydantic import field_validator, model_validator
 from starlette_admin.exceptions import FormValidationError
 
@@ -68,11 +69,14 @@ class db_user_account(Model):
     @classmethod
     def validate_username(cls, value: str) -> str:
         value = value.strip()
-        if not re.match(r"^[A-Za-z0-9._-]+$", value):
-            raise ValueError("Username contains invalid characters")
+        username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
+        if not re.match(username_pattern, value):
+            raise ValueError("Username already exist")
         if any(op in value for op in ["$", "{", "}"]):
             raise ValueError("Invalid characters in username")
+
         return value
+
 
     @field_validator("password", mode="before")
     @classmethod
@@ -104,10 +108,10 @@ class db_user_account(Model):
         email = values.get("email", "")
         if role == user_role.PROFILE:
             if not email or "@" not in email or "." not in email.split("@")[-1]:
-                raise FormValidationError({"email": "Invalid or missing email address for profile users"})
+                raise HTTPException(status_code=400, detail="Invalid or missing email address for profile users")
         elif email:
             if "@" not in email or "." not in email.split("@")[-1]:
-                raise FormValidationError({"email": "Invalid email format"})
+                raise HTTPException(status_code=400, detail="Invalid email format")
         return values
 
     @model_validator(mode="before")
@@ -117,20 +121,18 @@ class db_user_account(Model):
 
         if licenses is not None:
             if not licenses:
-                raise FormValidationError({"licenses": "At least one license is required"})
+                raise HTTPException(status_code=400, detail="At least one license is required")
 
             if LicenseName.FREE in licenses and len(licenses) > 1:
-                raise FormValidationError({"licenses": "Free license cannot be combined with other licenses"})
+                raise HTTPException(status_code=400, detail="Free license cannot be combined with other licenses")
 
             if LicenseName.ONSIT_BASIC in licenses and LicenseName.ONSIT_ADVANCED in licenses:
-                raise FormValidationError({"licenses": "osint_basic and osint_advanced cannot both be assigned"})
+                raise HTTPException(status_code=400, detail="osint_basic and osint_advanced cannot both be assigned")
 
             if LicenseName.ENTERPRISE in licenses:
                 allowed_combo = {LicenseName.ENTERPRISE, LicenseName.MAINTAINER}
                 if not set(licenses).issubset(allowed_combo):
-                    raise FormValidationError({
-                        "licenses": "Enterprise license can only be combined with Maintainer"
-                    })
+                    raise HTTPException(status_code=400, detail="Enterprise license can only be combined with Maintainer")
 
             # if any(l == LicenseName.MAINTAINER for l in licenses) and role != user_role.PROFILE:
             #     raise FormValidationError({"licenses": "Only profile users can have maintainer license"})
@@ -169,5 +171,5 @@ class db_user_account(Model):
             pass
         else:
             if self.status is None:
-                raise FormValidationError({"status": "Status is required for profile users"})
+                raise HTTPException(status_code=400, detail="Status is required for profile users")
         return self

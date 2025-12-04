@@ -38,6 +38,7 @@ export class AddTenantComponent implements OnInit {
   }
   ngOnInit(): void {
     this.isAdmin = this.authService.getRole() === "admin"
+    this.isAdmin ? this.model.role = 'demo' : this.model.role = 'profile';
   }
 
   onSubmit() {

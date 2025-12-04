@@ -26,6 +26,9 @@ class SignupManager:
             email = (data.email or "").strip().lower()
             password = (data.password or "").strip()
 
+            username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
+            if not re.match(username_pattern, username):
+                raise HTTPException(status_code=422, detail="Username already exist")
             if not username or not username.isalnum():
                 raise HTTPException(status_code=422, detail="Username must be alphanumeric and non-empty")
 
@@ -132,7 +135,7 @@ class SignupManager:
 
             user = await engine.find_one(
                 db_user_account,
-                db_user_account.username == data.username
+                db_user_account.email == data.email
             )
             if not user or user.status != UserStatus.PENDING:
                 raise HTTPException(status_code=404, detail="User not found or not pending")

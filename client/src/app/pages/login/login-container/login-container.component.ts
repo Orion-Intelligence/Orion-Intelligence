@@ -1,10 +1,10 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {CommonModule, NgClass, NgIf} from '@angular/common';
-import {FormsModule, NgForm} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AuthService} from '../../../services/authetication/auth.service';
-import {Subscription} from 'rxjs';
-import {AppService} from '../../../services/core/app/app.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule, NgClass, NgIf } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../../services/authetication/auth.service';
+import { Subscription } from 'rxjs';
+import { AppService } from '../../../services/core/app/app.service';
 
 import QRCode from 'qrcode';
 
@@ -15,7 +15,7 @@ import QRCode from 'qrcode';
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
-  user = {username: '', password: ''};
+  user = { mail: '', password: '' };
   errorMessage: string | null = null;
   authenticated = true;
   copied = false;
@@ -43,14 +43,14 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.router.navigate(['dashboard'], {replaceUrl: true}).then();
+        this.router.navigate(['dashboard'], { replaceUrl: true }).then();
       } else {
         this.authenticated = false;
       }
       if (authState.error != '2FA required') {
         this.errorMessage = authState.error ?? null;
       }
-      if(!authState.isValidated){
+      if (!authState.isValidated) {
         this.validated_error = true
         this.errorMessage = "Account not Validated";
       }
@@ -78,10 +78,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   async onSubmit(form: NgForm) {
     this.validated_error = false
     if (!form.valid) return;
-    this.authService.login(this.user.username, this.user.password).subscribe(async res => {
+    this.authService.login(this.user.mail, this.user.password).subscribe(async res => {
       if (res?.twofa_required) {
         this.twofaRequired = true;
-        this.pendingUsername = this.user.username;
+        this.pendingUsername = res.username;
         this.tempToken = res.temp_token || null;
         this.otpUri = res.provisioning_uri || null;
         this.otpSecret = res.twofa_secret || null;
@@ -121,7 +121,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   resendMail() {
-    this.authService.signup_verification(this.user.username, this.user.password).subscribe({
+    this.authService.signup_verification(this.user.mail, this.user.password).subscribe({
       next: () => this.router.navigate(['/welcome']),
       error: (err) => {
         this.errorMessage = err?.error?.detail || 'Signup failed';

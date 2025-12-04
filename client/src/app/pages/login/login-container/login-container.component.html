@@ -25,7 +25,7 @@
             <label for="username" class="input-label">Email</label>
             <div class="input-with-icon">
               <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="input-icon" />
-              <input [(ngModel)]="user.username" placeholder="Enter email" class="login-input" name="username" required
+              <input [(ngModel)]="user.mail" placeholder="Enter email" class="login-input" name="username" required
                 type="text" />
             </div>
 
@@ -38,12 +38,12 @@
 
 
             <a (click)="goToForgot()" class="reset-password">Reset password?</a>
-              <div *ngIf="errorMessage"
-                   class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
+            <div *ngIf="errorMessage"
+              class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
 
-                <i class="bi bi-exclamation-diamond-fill me-2"></i>
-                {{ errorMessage }}
-              </div>
+              <i class="bi bi-exclamation-diamond-fill me-2"></i>
+              {{ errorMessage }}
+            </div>
 
             <div>
               <input [class.login-button]="loginForm.valid" [class.login-button-disable]="!loginForm.valid"

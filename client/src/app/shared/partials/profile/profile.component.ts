@@ -122,6 +122,10 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     const currentRole = this.authService.getRole();
     return currentRole === 'profile';
   }
+  isAnalyst(): boolean {
+    const currentRole = this.authService.getRole();
+    return currentRole === 'analyst';
+  }
 
   toggleDropdown(event: Event) {
     event.stopPropagation();

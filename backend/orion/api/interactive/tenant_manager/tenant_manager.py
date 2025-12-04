@@ -106,7 +106,7 @@ class TenantManager:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         if not tenant and not current_user.role in ["admin"]:
             await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant_failed")
-            raise HTTPException(status_code=404, detail="Onboarding record not found for this user.")
+            raise HTTPException(status_code=400, detail="Onboarding record not found for this user.")
 
         dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
         enc = Fernet(dek)
@@ -168,10 +168,10 @@ class TenantManager:
         user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
         if not user:
             await AuditLogManager.get_instance().register("system", f"update_user_failed:{request.username}")
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=400, detail="User not found")
         if user.role in ["admin", "crawl"]:
             await AuditLogManager.get_instance().register(str(user.id), f"update_user_denied:{request.username}")
-            raise HTTPException(status_code=403, detail="This user type cannot be updated")
+            raise HTTPException(status_code=400, detail="This user type cannot be updated")
 
         if request.status.value == "disable":
             user.status = UserStatus.DISABLE.value
@@ -244,30 +244,35 @@ class TenantManager:
             email = (data.email or "").strip().lower()
             password = (data.password or "").strip()
 
-            if not username or not username.isalnum():
-                raise HTTPException(status_code=422, detail="Username must be alphanumeric and non-empty")
+            username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
+            if not re.match(username_pattern, username):
+                raise HTTPException(status_code=400, detail="Username already exist")
 
             email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
             if not re.match(email_pattern, email):
-                raise HTTPException(status_code=422, detail="Invalid email format")
+                raise HTTPException(status_code=400, detail="Invalid email format")
 
             existing_user = await engine.find_one(
                 db_user_account,
                 (db_user_account.username == username) | (db_user_account.email == email)
             )
-            if existing_user:
+            existing_mail = await engine.find_one(
+                db_user_account,
+                (db_user_account.email == email)
+            )
+            if existing_user or existing_mail:
                 raise HTTPException(status_code=400, detail="Username or email already exists")
 
             if password.startswith("$2b$") and len(password) >= 60:
                 hashed_password = password
             else:
                 if len(password) > 256:
-                    raise HTTPException(status_code=422, detail="Password too long")
+                    raise HTTPException(status_code=400, detail="Password too long")
 
                 try:
                     hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
                 except Exception:
-                    raise HTTPException(status_code=422, detail="Invalid password")
+                    raise HTTPException(status_code=400, detail="Invalid password")
 
             company_uuid = getattr(current_user, "company_uuid", None)
             if not company_uuid:
@@ -294,7 +299,7 @@ class TenantManager:
             }
 
         except Exception as e:
-            raise HTTPException(status_code=422, detail=str(e) or "Error creating user")
+            raise HTTPException(status_code=400, detail=str(e) or "Error creating user")
         
     async def create_demo_user(self,data: tenant_team_model):
         try:
@@ -304,30 +309,35 @@ class TenantManager:
             email = (data.email or "").strip().lower()
             password = (data.password or "").strip()
 
-            if not username or not username.isalnum():
-                raise HTTPException(status_code=422, detail="Username must be alphanumeric and non-empty")
+            username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
+            if not re.match(username_pattern, username):
+                raise HTTPException(status_code=400, detail="Username already exist")
 
             email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
             if not re.match(email_pattern, email):
-                raise HTTPException(status_code=422, detail="Invalid email format")
+                raise HTTPException(status_code=400, detail="Invalid email format")
 
             existing_user = await engine.find_one(
                 db_user_account,
                 (db_user_account.username == username)
             )
-            if existing_user:
+            existing_mail = await engine.find_one(
+                db_user_account,
+                (db_user_account.email == email)
+            )
+            if existing_user or existing_mail:
                 raise HTTPException(status_code=400, detail="Username or email already exists")
 
             if password.startswith("$2b$") and len(password) >= 60:
                 hashed_password = password
             else:
                 if len(password) > 256:
-                    raise HTTPException(status_code=422, detail="Password too long")
+                    raise HTTPException(status_code=400, detail="Password too long")
 
                 try:
                     hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
                 except Exception:
-                    raise HTTPException(status_code=422, detail="Invalid password")
+                    raise HTTPException(status_code=400, detail="Invalid password")
 
             user = db_user_account(
                 username=username,
@@ -348,4 +358,4 @@ class TenantManager:
             }
 
         except Exception as e:
-            raise HTTPException(status_code=422, detail=str(e) or "Error creating user")
+            raise HTTPException(status_code=400, detail=str(e) or "Error creating user")

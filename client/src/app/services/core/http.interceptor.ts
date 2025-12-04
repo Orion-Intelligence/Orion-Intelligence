@@ -78,7 +78,6 @@ export const httpInterceptor: HttpInterceptorFn = (
     }),
     catchError((error: any) => {
       const authService = injector.get(AuthService, null);
-
       if (authService?.isAuthenticated()) {
         let message = STATUS_MEANINGS[error.status] || 'Error';
         if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
@@ -87,14 +86,13 @@ export const httpInterceptor: HttpInterceptorFn = (
             message = `${error.error[keys[0]]}`;
           }
         }
-        localStorage.clear();
-        sessionStorage.clear();
+        if (error.status !== 400) {
+          localStorage.clear();
+          sessionStorage.clear();
+          router.navigate(['/login']);
+        }
         msg.show(message);
       }
-
-      router.navigate(['/login']).then(() => {
-      });
-
       if (error instanceof TimeoutError) {
         return throwError(() => new HttpErrorResponse({
           error: 'Request timed out',
@@ -103,8 +101,8 @@ export const httpInterceptor: HttpInterceptorFn = (
           url: req.url
         }));
       }
-
       return throwError(() => error);
     })
+
   );
 };

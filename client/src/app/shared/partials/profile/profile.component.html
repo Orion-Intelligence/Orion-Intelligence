@@ -15,9 +15,9 @@
     </div>
   </a>
   <ul [class.show]="dropdownOpen()" class="profile-dropdown"
-    [ngClass]="{'profile-dropdown-width': !isAdmin() && !isDemo()}">
+    [ngClass]="{'profile-dropdown-width': !isAdmin() && !isDemo() && !isAnalyst()}">
     <div class="profile-dropdown-arrow"></div>
-    <ng-container *ngIf="isAdmin() || isDemo(); else profile">
+    <ng-container *ngIf="isAdmin() || isDemo() || isAnalyst(); else profile">
       <li><a class="dropdown-item disabled"> <img alt="Settings" height="15" class="ml-0"
             ngSrc="assets/images/shared/profile.svg" priority width="15" />&nbsp;{{ username$ | async }}</a></li>
       <li class="dropdown-item d-flex align-items-center disabled">
@@ -25,6 +25,10 @@
       </li>
       <li>
         <hr class="dropdown-divider mx-3">
+      </li>
+      <li *ngIf="isAnalyst()"><a (click)="changePassword()" class="dropdown-item" id="change-password"> <img
+            alt="Change Password" height="15" class="ml-0" ngSrc="assets/images/shared/forgot.svg" priority width="15">
+          &nbsp; Change Passw..</a>
       </li>
       <li (click)="toggleThemeByClick()">
         <div class="dropdown-item profile_theme-toggle">

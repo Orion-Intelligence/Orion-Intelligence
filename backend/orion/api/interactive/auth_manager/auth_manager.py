@@ -35,18 +35,19 @@ class auth_manager:
         auth_manager.__instance = self
         self._engine = mongo_controller.get_instance().get_engine()
 
-    async def authenticate_user(self, username: str, password: str):
-        user = await self._engine.find_one(db_user_account, db_user_account.username == username)
+    async def authenticate_user(self, mail: str, password: str):
+        user = await self._engine.find_one(db_user_account, db_user_account.email == mail)
+        if not user:
+            user = await self._engine.find_one(db_user_account, db_user_account.username == mail)
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
             return None
         return user
 
     @staticmethod
-    async def login(username: str, password: str):
-        user = await auth_manager.get_instance().authenticate_user(username, password)
+    async def login(mail: str, password: str):
+        user = await auth_manager.get_instance().authenticate_user(mail, password)
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid username or password")
-
+            raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.twofa_enabled:
             if user.twofa_secret:
                 user.twofa_secret = ""
@@ -60,7 +61,8 @@ class auth_manager:
                     "twofa_required": True,
                     "temp_token": temp_token,
                     "provisioning_uri": provisioning_uri,
-                    "twofa_secret": secret
+                    "twofa_secret": secret,
+                    "username":user.username
                 }
 
         role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
@@ -111,6 +113,7 @@ class auth_manager:
 
         session_data = {
             "role": role,
+            "username":user.username,
             "status": user.status,
             "hasOnboarding": onboarding_exists,
             "subscription": subscription,

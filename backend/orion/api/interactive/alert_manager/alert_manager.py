@@ -102,7 +102,7 @@ class AlertManager:
 
  
         if not doc_result:
-            raise HTTPException(status_code=404, detail="No document found for this hash. Not a valid hash or not found.")
+            raise HTTPException(status_code=400, detail="No document found for this hash. Not a valid hash or not found.")
 
         if hasattr(doc_result, "dict"):
             doc_dict = doc_result.dict()

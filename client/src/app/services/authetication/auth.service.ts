@@ -39,18 +39,18 @@ export class AuthService {
     return this.authState$.pipe(map((state) => state.role));
   }
 
-  login(username: string, password: string, isDemo:boolean=false): Observable<any> {
-    if(this.appService.isMobileMode()){
+  login(mail: string, password: string, isDemo: boolean = false): Observable<any> {
+    if (this.appService.isMobileMode()) {
       localStorage.setItem('mobileDemo', 'true');
     }
 
     const body = new URLSearchParams();
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
     let route = 'token'
-    if(isDemo){
+    if (isDemo) {
       route = 'token/demo'
-    }else {
-      body.set('username', username);
+    } else {
+      body.set('username', mail);
       body.set('password', password);
     }
 
@@ -58,7 +58,7 @@ export class AuthService {
       tap({
         next: (response) => {
           if (response.twofa_required) {
-            this.authState.next({ token: null, username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: '2FA required' });
+            this.authState.next({ token: null, username: response.username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: '2FA required' });
             return response.provisioning_uri || null;
           }
 
@@ -73,7 +73,7 @@ export class AuthService {
             return;
           }
 
-          this.username.set(sessionData?.username ?? username ?? '');
+          this.username.set(sessionData?.username ?? '');
           this.role.set(sessionData?.role ?? null);
           this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding));
           this.subscription.set(this.toBool(sessionData?.subscription));
@@ -85,10 +85,10 @@ export class AuthService {
           this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
         },
         error: (error) => {
-          if(error?.error?.detail === "Verification pending."){
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false,isValidated: false, error: 'Access denied!', onboarding: null });
-          }else {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false,isValidated: true, error: 'Access denied!', onboarding: null });
+          if (error?.error?.detail === "Verification pending.") {
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: false, error: 'Access denied!', onboarding: null });
+          } else {
+            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, error: 'Access denied!', onboarding: null });
           }
         }
       })
@@ -158,8 +158,8 @@ export class AuthService {
     return this.apiService.post('signup', { username, email, password });
   }
 
-  signup_verification(username: string, password: string): Observable<any> {
-    return this.apiService.post('signup/verificaion', { username, password });
+  signup_verification(mail: string, password: string): Observable<any> {
+    return this.apiService.post('signup/verificaion', { mail, password });
   }
 
   forgotPassword(email: string): Observable<any> {
