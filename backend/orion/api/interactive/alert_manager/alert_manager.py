@@ -28,14 +28,18 @@ class AlertManager:
         AlertManager.__instance = self
 
     async def get_user_alerts(self, user_id: str) -> db_alert_model | None:
-        return await self._engine.find_one(db_alert_model, db_alert_model.userId == user_id)
+        return await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == user_id)
     
 
-    async def upsert_alert(self, userId: str, data_hash: str, category: str, ioc_type: str, ioc_value: str,
+    async def upsert_alert(self, tenantId: str, data_hash: str, category: str, ioc_type: str, ioc_value: str,
                            title:str,url:str,description:str,source:str,all_ioc:List[alert_all_ioc]=[], content_types: List[str] = []):
-        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.userId == userId)
+        print(f"_______________________ {data_hash}: {category}: {tenantId}")
+        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenantId)
+        if existing_doc:
+            print("not null existing_doc:::::::::::::::::::::::::::::::::")
         alert_updated = False
         if existing_doc and existing_doc.alerts:
+            print("not null alerts::::::::::----------------------")
             for alert in existing_doc.alerts:
                 if (alert.data_hash == data_hash and 
                     alert.ioc_value == ioc_value and 
@@ -68,7 +72,7 @@ class AlertManager:
                 doc_to_save = existing_doc
             else:
                 doc_to_save = db_alert_model(
-                    userId=userId,
+                    tenant_id=tenantId,
                     alerts=[new_alert]
                 )
 
@@ -82,7 +86,7 @@ class AlertManager:
     
 
     async def add_custom_alert(self, data: AlertModel, current_user):
-        userId = str(current_user.id)
+        company_uuid = str(current_user.company_uuid)
         doc_id = data.data_hash  
 
 
@@ -135,7 +139,7 @@ class AlertManager:
             last_seen=datetime.utcnow(),
         )
 
-        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.userId == userId)
+        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == company_uuid)
         if existing_doc and existing_doc.alerts:
             for alert in existing_doc.alerts:
                 if (
@@ -151,7 +155,7 @@ class AlertManager:
             save_doc = existing_doc
         else:
             save_doc = db_alert_model(
-                userId=userId,
+                tenant_id=company_uuid,
                 alerts=[new_alert]
             )
 
@@ -160,10 +164,10 @@ class AlertManager:
     
 
     async def update_alert(self, alert_to_update: AlertModel, current_user):
-        userId = str(current_user.id)
+        company_uuid = str(current_user.company_uuid)
         existing_doc = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.userId == userId)
+            db_alert_model.tenant_id == company_uuid)
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=404, detail="No alerts found for this user")
         hash_to_find = alert_to_update.data_hash
@@ -190,10 +194,10 @@ class AlertManager:
 
 
     async def set_alert_seen(self, alerts_to_update: list[AlertModel], current_user):
-        userId = str(current_user.id)
+        company_uuid = str(current_user.company_uuid)
         existing_doc = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.userId == userId
+            db_alert_model.tenant_id == company_uuid
         )
 
         if not existing_doc or not existing_doc.alerts:
@@ -223,11 +227,11 @@ class AlertManager:
         }
     
     async def delete_alert(self, hash: str, current_user):
-        userId = str(current_user.id)
+        company_uuid = str(current_user.company_uuid)
 
         existing_doc = await self._engine.find_one(
             db_alert_model, 
-            db_alert_model.userId == userId
+            db_alert_model.tenant_id == company_uuid
         )
 
         if not existing_doc or not existing_doc.alerts:
@@ -247,7 +251,7 @@ class AlertManager:
     async def getAllAlerts(self, current_user):
         alerts_data = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.userId == str(current_user.id)
+            db_alert_model.tenant_id == str(current_user.id)
         )
         
         if not alerts_data:

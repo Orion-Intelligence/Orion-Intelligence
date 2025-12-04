@@ -71,10 +71,10 @@ class TenantManager:
             raise
 
     async def get_tenant(self, current_user) -> TenantRequest:
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == str(current_user.company_uuid))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.company_uuid))
         if not tenant:
             await AuditLogManager.get_instance().register(str(current_user.id), "get_tenant_failed")
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found in get tenant")
 
         dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
         enc = Fernet(dek)
@@ -89,7 +89,7 @@ class TenantManager:
         ]
 
         tenant_request = TenantRequest(
-            id=tenant.id,
+            id=str(current_user.company_uuid),
             companyName=enc.decrypt(tenant.companyName.encode()).decode(),
             iocs=ioc_models
         )
@@ -211,29 +211,6 @@ class TenantManager:
             result.append(tenant)
 
         return result
-
-    async def decrypt_iocs_for_tenant(self, tenant: db_tenant_model) -> List[IocCategory]:
-        print("++++++++++++++++++++++++++++++=1")
-        dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
-        print("++++++++++++++++++++++++++++++=2")
-        enc = Fernet(dek)
-        print("++++++++++++++++++++++++++++++=3")
-        decrypted_iocs = []
-        print("++++++++++++++++++++++++++++++=4")
-        
-        for ioc in tenant.iocs or []:
-            print("++++++++++++++++++++++++++++++ Ioc id:", ioc.ioc_id, "name:", ioc.name)
-            try:
-                ioc_id = enc.decrypt(ioc.ioc_id.encode()).decode() if ioc.ioc_id else ""
-                name = enc.decrypt(ioc.name.encode()).decode() if ioc.name else ""
-                values = [enc.decrypt(v.encode()).decode() for v in (ioc.values or []) if v]
-                decrypted_iocs.append(IocCategory(ioc_id=ioc_id, name=name, values=values))
-                print("Decrypted IOC:", ioc_id, name, values)
-            except Exception as e:
-                print(f"Failed to decrypt IOC {ioc}: {e}")
-        
-        print("++++++++++++++++++++++++++++++= Count:", len(decrypted_iocs))
-        return decrypted_iocs
 
 
     async def create_company_user(self,data: tenant_team_model, current_user):

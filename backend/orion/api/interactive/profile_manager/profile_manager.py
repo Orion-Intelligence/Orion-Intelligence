@@ -38,7 +38,7 @@ class ProfileManager:
 
     async def getCompanyProfileData(self,current_user)  -> ProfileParmaModel:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.company_uuid))
-        _alerts=await self._engine.find_one(db_alert_model,db_alert_model.id == str(current_user.company_uuid))
+        _alerts=await self._engine.find_one(db_alert_model,db_alert_model.tenant_id == str(current_user.company_uuid))
         user=current_user
         dek = await self._dek(str(tenant.id))
         enc = Fernet(dek)
