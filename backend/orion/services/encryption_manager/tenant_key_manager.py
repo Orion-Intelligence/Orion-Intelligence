@@ -36,6 +36,7 @@ class TenantKeyManager:
 
     async def get_or_create_dek(self, tenant_id: str) -> bytes:
         rec = await self._engine.find_one(db_tenant_key, db_tenant_key.tenant_id == tenant_id)
+        print("get or create dek. "+tenant_id)
         if rec:
             return self._unwrap(rec.wrapped_key)
 

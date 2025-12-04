@@ -48,7 +48,7 @@ class cronjob_manager:
                 print(f"[{datetime.utcnow()}] ALERT JOB ERROR: {e}")
 
             # Sleep for 10 seconds
-            await asyncio.sleep(300)
+            await asyncio.sleep(60)
 
         tz = ZoneInfo("Australia/Sydney")
         while True:

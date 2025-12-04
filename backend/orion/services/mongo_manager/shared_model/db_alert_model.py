@@ -42,5 +42,5 @@ class AlertModel(EmbeddedModel):
         return v
 
 class db_alert_model(Model):
-    userId: str = ''
+    tenant_id:str=''
     alerts: List[AlertModel] = Field(default_factory=list)

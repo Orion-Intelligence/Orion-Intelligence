@@ -94,7 +94,7 @@ class alert_job:
             all_ioc_list = [alert_all_ioc(name=ioc_type, values=[ioc_value])]
 
             await self._alert_manager.upsert_alert(
-                userId=tenant_id,
+                tenantId=tenant_id,
                 data_hash=data_hash,
                 category=f"{scan_type} scanning",
                 ioc_type=ioc_type,
@@ -147,7 +147,7 @@ class alert_job:
                 all_ioc_list.append(triggering_ioc)
 
                 await self._alert_manager.upsert_alert(
-                    userId=tenant_id,
+                    tenantId=tenant_id,
                     data_hash=_data_hash,
                     category=scan_type,
                     ioc_type=ioc_type,
@@ -168,15 +168,11 @@ class alert_job:
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
         
         try:
-            print("____________1____________"+str(tenant.id)+" "+category)
-            decrypted_iocs = await self._tenant_manager.decrypt_iocs_for_tenant(tenant)
-            print("____________2____________"+str(tenant.id)+" "+category)
-            if not decrypted_iocs:
-                print("___________no decrypted ioc__________")
+            iocs = await self.get_iocs_of_tenant(tenant)
+            if not iocs:
                 return
-            print("now checking the categories________________________")
             if category == "scanning":
-                for ioc in decrypted_iocs:
+                for ioc in iocs:
                     ioc_type_name = ioc.ioc_id
                     if ioc_type_name in ["m_domain", "m_url"]: 
                         for ioc_value in ioc.values or []:
@@ -289,7 +285,7 @@ class alert_job:
                 return
 
             total_alerts_processed = 0
-            for ioc in decrypted_iocs:
+            for ioc in iocs:
                 ioc_type_name = ioc.ioc_id
                 
                 for ioc_value in ioc.values or []:
@@ -302,6 +298,7 @@ class alert_job:
                         "size": 100, 
                         "matchtype": 'or',
                         "fullsearch": True,
+                        "must":True,
                     }
                     
                     try:
@@ -363,7 +360,7 @@ class alert_job:
                                     all_ioc_list.append(new_ioc)
 
                                 status = await self._alert_manager.upsert_alert(
-                                    userId=str(tenant.id),
+                                    tenantId=str(tenant.id),
                                     data_hash=_data_hash,
                                     category=category,
                                     ioc_type=ioc_type_name,
@@ -416,6 +413,17 @@ class alert_job:
                 
             additional_data.append((key, val))
         return additional_data
+
+    async def get_iocs_of_tenant(self, tenant: db_tenant_model) -> List[IocCategory]:
+        iocs = []
+        for ioc in tenant.iocs or []:
+
+            iocs.append(IocCategory(
+                ioc_id=ioc.ioc_id,
+                name=ioc.name,
+                values=ioc.values or []
+            ))
+        return iocs
 
     async def run_all_categories_for_api(self, current_user) -> dict:
         """
