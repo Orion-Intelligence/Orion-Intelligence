@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { NgIf, NgFor, CommonModule } from '@angular/common';
 import { filterAnimation } from '../../animations/filter.animation';
 import { AppService } from '../../../services/core/app/app.service';
@@ -8,6 +8,7 @@ import { AlertModel } from '../../model/company-profile/company.profile.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -16,7 +17,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   templateUrl: './alert-notification.component.html',
   animations: [filterAnimation],
 })
-export class AlertNotificationComponent implements OnInit {
+export class AlertNotificationComponent implements OnChanges {
   @Input() isNotificationOpen!: boolean | null;
 
   @Output() closeNotification = new EventEmitter<void>();
@@ -26,9 +27,13 @@ export class AlertNotificationComponent implements OnInit {
     protected licenseService: LicenseService
   ) {
   }
-
-  ngOnInit(): void {
-    this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isNotificationOpen']) {
+      const value = changes['isNotificationOpen'].currentValue;
+      if (value === true) {
+        this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
+      }
+    }
   }
 
   convertToAlertNotifications(alerts: AlertModel[]): AlertNotification[] {

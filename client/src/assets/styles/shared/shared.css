@@ -66,7 +66,7 @@
   display: flex;
   flex-wrap: inherit;
   margin-bottom: 8px;
-  width: calc(100vw - 365px);
+  width: calc(100vw - 840px);
   height: 42px;
 }
 
@@ -577,11 +577,13 @@ table a:visited {
     display: grid;
     margin-left: 10px !important;
   }
+
   .list__container {
     padding: 0;
     margin: 0 !important;
   }
-  .directory-listing_upper-heading{
+
+  .directory-listing_upper-heading {
     height: 80px !important;
   }
 }
@@ -701,7 +703,7 @@ table a:visited {
     display: none !important;
   }
 
-  .homebar-advance > * {
+  .homebar-advance>* {
     display: none !important;
   }
 

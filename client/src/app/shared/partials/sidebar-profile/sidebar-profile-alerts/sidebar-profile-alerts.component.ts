@@ -9,10 +9,15 @@ import { AlertCategorySummary } from '../../../model/alert-notification/alert.no
 import { AlertModel } from '../../../model/company-profile/company.profile.model';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { ApiService } from '../../../services/api.service';
+import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { ConfirmationPopupComponent } from "./confirmation-popup/confirmation-popup.component";
+import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
+import { AlertService } from '../../../../services/alerts/alerts.service';
 
 @Component({
   selector: 'app-sidebar-profile-alerts',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent],
   templateUrl: './sidebar-profile-alerts.component.html',
 })
 export class SidebarProfileAlertsComponent implements OnInit {
@@ -22,14 +27,34 @@ export class SidebarProfileAlertsComponent implements OnInit {
   mediumRisks: number = 0;
   lowRisks: number = 0;
   isLoading: boolean = false;
-  constructor(public appService: AppService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService) {
+  isConfirmationOpen$ = new BehaviorSubject<boolean>(false);
+  constructor(public appService: AppService, private alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService) {
   }
 
   ngOnInit(): void {
-    this.alertCategories = this.convertAlertsToCategories(this.appService.userProfile().alerts);
-    this.countRisk(this.appService.userProfile().alerts);
+    this.checkScanProgress();
+    this.alertService.isAlertScanLoading$.subscribe(v => this.isLoading = v);
+    this.initializData()
+    this.alertService.isAlertScanLoading$
+      .subscribe(isLoading => {
+        if (!isLoading) {
+          this.initializData();
+        }
+      });
   }
-
+  initializData() {
+    this.alertCategories = this.convertAlertsToCategories(this.appService.userProfile().alerts);
+    this.countRiskCount(this.appService.userProfile().alerts);
+  }
+  checkScanProgress() {
+    const stream = this.alertService.autoCheckScanStatus();
+    if (!stream) {
+      return;
+    }
+    stream.subscribe(res => {
+      this.alertService.isAlertScanLoading$.next(res.scan_running);
+    });
+  }
   convertAlertsToCategories(alerts: AlertModel[]): AlertCategorySummary[] {
     const activeAlerts = alerts.filter(a => a.status !== 'ignore');
     const grouped: Record<string, AlertModel[]> = {};
@@ -87,7 +112,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
 
     return summaries;
   }
-  countRisk(alerts: AlertModel[]) {
+  countRiskCount(alerts: AlertModel[]) {
 
     this.criticalRisks = 0;
     this.highRisks = 0;
@@ -163,31 +188,28 @@ export class SidebarProfileAlertsComponent implements OnInit {
     this.router.navigate([`/dashboard/profile/alerts/${type}`]);
   }
   scanIOCs() {
-    this.isLoading = true;
-    this.apiService.post<any>('profile/alert/scan', null).subscribe({
-      next: (response) => {
-        console.log('Alert Scan Job Completed:', response);
-        const status = response?.status || 'unknown';
-        const totalDuration = response?.total_duration_seconds;
-
-        let successMessage = `IOC Scan completed.`;
-
-        if (typeof totalDuration === 'number') {
-          successMessage = `IOC Scan completed in ${totalDuration.toFixed(2)} seconds.`;
-        }
-
-        if (status === 'completed_with_errors') {
-          successMessage += ' Some scans completed with errors.';
-        }
-        this.getLatestAlerts()
-        // this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Scan failed with an error:', err);
-        alert(err?.error?.detail || 'IOC Scan failed to start or complete.');
-        this.isLoading = false;
-      },
-    });
+    this.alertService.scanIOCs();
+  }
+  flushAll() {
+    this.isConfirmationOpen$.next(true);
+  }
+  flushAllConfirmation(value: boolean) {
+    this.isConfirmationOpen$.next(false);
+    if (value === true) {
+      this.isLoading = true;
+      this.apiService.post('profile/alerts/delete/all', null).subscribe({
+        next: () => {
+          const alerts: AlertModel[] = [];
+          this.appService.userProfile().alerts = alerts;
+          this.ngOnInit();
+          this.isLoading = false;
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete')
+        },
+      });
+    }
   }
   getLatestAlerts() {
     this.apiService.get<any>('profile/alerts').subscribe({

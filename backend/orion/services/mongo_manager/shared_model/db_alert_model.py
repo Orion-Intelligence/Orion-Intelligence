@@ -43,4 +43,5 @@ class AlertModel(EmbeddedModel):
 
 class db_alert_model(Model):
     tenant_id:str=''
+    scan_running:bool=False
     alerts: List[AlertModel] = Field(default_factory=list)
