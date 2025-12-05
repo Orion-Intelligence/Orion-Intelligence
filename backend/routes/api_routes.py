@@ -350,4 +350,12 @@ async def get_user_alerts(current_user = Depends(get_current_user)):
 @api_routes.post("/api/profile/alert/scan", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer"))])
 async def run_user_ioc_alerts(current_user = Depends(get_current_user)):
     return await alert_job.get_instance().run_all_categories_for_api(current_user)
-    # return await AlertManager.get_instance().run_user_ioc_alert(current_user)
+
+
+@api_routes.post("/api/profile/alerts/delete/all", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer"))])
+async def delete_all_alerts(current_user = Depends(get_current_user)):
+    return await AlertManager.get_instance().delete_all_alerts(current_user)
+
+@api_routes.post("/api/profile/alert/scan/status", dependencies=[Depends(role_required([user_role.PROFILE])), Depends(status_required([UserStatus.ACTIVE])),Depends(license_required("maintainer"))])
+async def delete_all_alerts(current_user = Depends(get_current_user)):
+    return await AlertManager.get_instance().get_scan_status(current_user)

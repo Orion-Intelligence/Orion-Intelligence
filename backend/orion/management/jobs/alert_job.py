@@ -429,13 +429,11 @@ class alert_job:
         """
         Run alerts for all categories for the single current user/tenant.
         """
-        # current_tenant = await self._engine.find_one(
-        #     db_tenant_model,
-        #     db_tenant_model.userId == str(current_user.id)
-        # )
+        
         tenant_id = current_user.company_uuid
         current_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         start_time = datetime.utcnow()
+        await self._alert_manager.get_instance().set_scan_running(tenant_id,True)
         
         if not current_tenant:
             return {
@@ -444,8 +442,6 @@ class alert_job:
                 "duration_seconds": (datetime.utcnow() - start_time).total_seconds(),
                 "results": []
             }
-
-        # tenant_id = current_tenant.userId
         
         category_statuses = []
         overall_success = True
@@ -479,7 +475,7 @@ class alert_job:
             print(f"[INFO] Completed category: {category} for Tenant: {tenant_id}")
                 
         end_time = datetime.utcnow()
-        
+        await self._alert_manager.get_instance().set_scan_running(tenant_id,False)
         return {
             "status": "success" if overall_success else "completed_with_errors",
             "message": f"Alert generation job finished for tenant {tenant_id}.",

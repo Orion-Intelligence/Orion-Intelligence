@@ -1,19 +1,26 @@
-<div class="category_report_searchbar">
-    <app-home-search [isRoleAdmin]="false"></app-home-search>
-
-    <div class="side-menu-container d-flex align-items-start justify-content-start gap-3 ioc-container_scan-ioc"
-        (click)="scanIOCs()">
-        <label appTooltip="Scan all ioc and generate lerts" class="filters-button d-flex align-items-center">
-            <!-- <img alt="Filter Icon" height="24" src="/assets/images/shared/theme/filter_icon.svg" priority width="24"> -->
-            <span class="ms-2">Scan IOCs</span>
-        </label>
-    </div>
-</div>
-<div class="loading-wrapper" *ngIf="isLoading; else showContent">
-    <div class="loader"></div>
-    <p>Loading...</p>
+<div class="alert-loading" *ngIf="isLoading; else showContent">
+    <app-alert-scan-loading></app-alert-scan-loading>
 </div>
 <ng-template #showContent>
+    <div class="category_report_searchbar">
+        <app-home-search [isRoleAdmin]="false"></app-home-search>
+
+        <div class="category_report_flex">
+            <div class="side-menu-container d-flex align-items-start justify-content-start gap-3 ioc-container_scan-ioc"
+                (click)="flushAll()">
+                <label appTooltip="Delete all lerts" class="filters-button d-flex align-items-center">
+                    <span class="ms-2">Flush All</span>
+                </label>
+            </div>
+            <div class="side-menu-container d-flex align-items-start justify-content-start gap-3 ioc-container_scan-ioc"
+                (click)="scanIOCs()">
+                <label appTooltip="Scan all ioc and generate lerts" class="filters-button d-flex align-items-center">
+                    <span class="ms-2">Scan IOCs</span>
+                </label>
+            </div>
+
+        </div>
+    </div>
     <div class="ioc-container">
 
         <div class="ioc-container_header">
@@ -92,3 +99,6 @@
 
     </div>
 </ng-template>
+<ng-container *ngIf="isConfirmationOpen$ | async">
+    <app-confirmation-popup (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
+</ng-container>

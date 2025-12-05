@@ -215,16 +215,17 @@
     margin: 24px 30px 0px 0px !important;
 }
 
+.alert-loading {
+    position: relative;
+}
 
-.loading-wrapper {
+/* .loading-wrapper {
     position: fixed;
     inset: 0;
-    /* background: #0f172a; */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* z-index: 9999; */
     color: white;
     font-size: 18px;
     font-weight: 500;
@@ -238,7 +239,7 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
-}
+} */
 
 @keyframes spin {
     to {

@@ -33,13 +33,9 @@ class AlertManager:
 
     async def upsert_alert(self, tenantId: str, data_hash: str, category: str, ioc_type: str, ioc_value: str,
                            title:str,url:str,description:str,source:str,all_ioc:List[alert_all_ioc]=[], content_types: List[str] = []):
-        print(f"_______________________ {data_hash}: {category}: {tenantId}")
         existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenantId)
-        if existing_doc:
-            print("not null existing_doc:::::::::::::::::::::::::::::::::")
         alert_updated = False
         if existing_doc and existing_doc.alerts:
-            print("not null alerts::::::::::----------------------")
             for alert in existing_doc.alerts:
                 if (alert.data_hash == data_hash and 
                     alert.ioc_value == ioc_value and 
@@ -251,7 +247,7 @@ class AlertManager:
     async def getAllAlerts(self, current_user):
         alerts_data = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.tenant_id == str(current_user.id)
+            db_alert_model.tenant_id == str(current_user.company_uuid)
         )
         
         if not alerts_data:
@@ -259,3 +255,42 @@ class AlertManager:
 
         return alerts_data.alerts
 
+    async def delete_all_alerts(self, current_user):
+        company_uuid = str(current_user.company_uuid)
+
+        existing_doc = await self._engine.find_one(
+            db_alert_model,
+            db_alert_model.tenant_id == company_uuid
+        )
+
+        if not existing_doc:
+            raise HTTPException(status_code=400, detail="No alerts to delete")
+
+        if not existing_doc.alerts or len(existing_doc.alerts) == 0:
+            raise HTTPException(status_code=400, detail="No alerts to delete")
+
+        existing_doc.alerts = []
+        await self._engine.save(existing_doc)
+
+        return {"message": "All alerts deleted successfully"}
+    
+    async def set_scan_running(self,tenant_id: str, value: bool) -> dict:
+        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
+
+        if alert_doc:
+            alert_doc.scan_running = value
+            await self._engine.save(alert_doc)
+
+        return {"tenant_id": tenant_id, "scan_running": value}
+    
+    async def get_scan_status(self, current_user):
+        company_uuid = str(current_user.company_uuid)
+        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == company_uuid)
+
+        if alert_doc:
+            return {
+                "scan_running": alert_doc.scan_running
+            }
+        return {
+            "scan_running": False
+        }
