@@ -26,11 +26,9 @@ class SignupManager:
             email = (data.email or "").strip().lower()
             password = (data.password or "").strip()
 
-            username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
+            username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
             if not re.match(username_pattern, username):
                 raise HTTPException(status_code=422, detail="Username already exist")
-            if not username or not username.isalnum():
-                raise HTTPException(status_code=422, detail="Username must be alphanumeric and non-empty")
 
             email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
             if not re.match(email_pattern, email):

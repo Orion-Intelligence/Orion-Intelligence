@@ -1,7 +1,7 @@
 import re
 import pyotp
 
-from datetime import datetime, UTC
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Dict, Any
 
@@ -9,7 +9,7 @@ from odmantic import Model, Field
 from passlib.context import CryptContext
 from fastapi import HTTPException
 from pydantic import field_validator, model_validator
-from starlette_admin.exceptions import FormValidationError
+from pydantic_core.core_schema import FieldValidationInfo
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -67,16 +67,16 @@ class db_user_account(Model):
 
     @field_validator("username")
     @classmethod
-    def validate_username(cls, value: str) -> str:
+    def validate_username(cls, value: str, info: FieldValidationInfo) -> str:
         value = value.strip()
-        username_pattern = r"^[A-Za-z0-9_-]{4,20}$"
-        if not re.match(username_pattern, value):
-            raise ValueError("Username already exist")
-        if any(op in value for op in ["$", "{", "}"]):
-            raise ValueError("Invalid characters in username")
-
+        role = info.data.get("role")
+        if role == user_role.PROFILE:
+            username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
+            if not re.match(username_pattern, value):
+                raise ValueError("Username already exist")
+            if any(op in value for op in ["$", "{", "}"]):
+                raise ValueError("Invalid characters in username")
         return value
-
 
     @field_validator("password", mode="before")
     @classmethod
