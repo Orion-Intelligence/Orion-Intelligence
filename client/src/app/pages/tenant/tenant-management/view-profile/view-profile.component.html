@@ -8,7 +8,7 @@
             <p class="directory-listing_header">Tenant Users</p>
             <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn"
               (click)="addtenant()">
-              <span class="flex-grow-1 text-center">Add Tenant</span>
+              <span class="flex-grow-1 text-center">Add User</span>
             </button>
           </div>
         </div>
@@ -131,15 +131,48 @@
                             <div class="section-heading">Edit user</div>
                             <div class="section-desc">Update User Data.</div>
 
-                            <div class="tenant-block">
-                              <div class="tenant-title">Status</div>
-                              <div class="tenant-edit-control field-equal">
-                                <select class="form-select form-select-sm tenant-input" [(ngModel)]="user.status">
-                                  <option [ngValue]="'active'">Active</option>
-                                  <option [ngValue]="'disable'">Disable</option>
-                                  <option [ngValue]="'verification_pending'">Verification</option>
-                                </select>
-                              </div>
+                            <label class="sidebar_label mt-1">Status</label>
+                            <div class="dropdown mb-3">
+                              <button
+                                aria-expanded="false"
+                                class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
+                                data-bs-toggle="dropdown"
+                                id="dropdownStatus"
+                                type="button">
+                                {{ user.status | titlecase }}
+                              </button>
+
+                              <ul
+                                aria-labelledby="dropdownStatus"
+                                class="dropdown-menu w-100 p-1 mt-2 border-0 shadow rounded-3">
+
+                                <li class="p-0">
+                                  <a
+                                    class="dropdown-item py-0 align-items-center"
+                                    (click)="user.status = 'active'">
+                                    Active
+                                  </a>
+                                </li>
+                                <li class="dropdown-divider m-0 mx-3"></li>
+
+                                <li class="p-0">
+                                  <a
+                                    class="dropdown-item py-0 align-items-center"
+                                    (click)="user.status = 'disable'">
+                                    Disable
+                                  </a>
+                                </li>
+                                <li class="dropdown-divider m-0 mx-3"></li>
+
+                                <li class="p-0">
+                                  <a
+                                    class="dropdown-item py-0 align-items-center"
+                                    (click)="user.status = 'verification_pending'">
+                                    Verification
+                                  </a>
+                                </li>
+                              </ul>
+
                               <hr class="tenant-divider">
                             </div>
 

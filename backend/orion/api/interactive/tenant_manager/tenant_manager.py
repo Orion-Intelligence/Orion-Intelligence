@@ -148,7 +148,13 @@ class TenantManager:
                 {"status": {"$nin": ["active", "disable"]}},
                 {"$set": {"status": "disable"}},
             )
-            users = await self._engine.find(db_user_account)
+            users = await self._engine.find(
+                db_user_account,
+                (db_user_account.role != "profile") | (
+                        (db_user_account.role == "profile") &
+                        (db_user_account.licenses == ["maintainer"])
+                )
+            )
             return [user_param_model(**u.dict()) for u in users]
         else:
             company_uuid = current_user.company_uuid

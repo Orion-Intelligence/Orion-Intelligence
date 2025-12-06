@@ -1,12 +1,12 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { NgFor, NgIf } from '@angular/common';
-import { LicenseName } from '../../../../shared/model/licenses/license.rules';
-import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
-import { ApiService } from '../../../../shared/services/api.service';
-import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
-import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {NgFor, NgIf} from '@angular/common';
+import {LicenseName} from '../../../../shared/model/licenses/license.rules';
+import {TenantTeamModel} from '../../../../shared/model/tenant/tenant.model';
+import {ApiService} from '../../../../shared/services/api.service';
+import {MessageNotificationService} from '../../../../services/message_notification/message-notification.service';
+import {AuthService} from '../../../../services/authetication/auth.service';
+import {popupAnimation, overlayAnimation} from '../../../../shared/animations/popup.animations';
 
 @Component({
   selector: 'app-add-tenant',
@@ -14,56 +14,100 @@ import { popupAnimation, overlayAnimation } from '../../../../shared/animations/
   templateUrl: './add-tenant.component.html',
   animations: [popupAnimation, overlayAnimation]
 })
-
 export class AddTenantComponent implements OnInit {
-
   @Output() closs = new EventEmitter<void>();
   @Output() accountAdded = new EventEmitter<void>();
 
   licenseList = Object.values(LicenseName);
-  licenses = ["free", "osint_basic", "osint_advanced", "pentester", "maintainer", "enterprise"];
+  licenses = ['free', 'osint_basic', 'osint_advanced', 'pentester', 'maintainer', 'enterprise'];
   isAdmin: boolean = false;
 
   model: TenantTeamModel = {
-    username: "",
-    email: "",
-    password: "",
-    role: "profile",
-    status: "active",
+    username: '',
+    email: '',
+    password: '',
+    role: 'profile',
+    status: 'active',
     subscription: false,
-    licenses: [],
+    licenses: []
   };
+  errorText: string = "";
+  usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
+  usernameSuggestion: string = "";
 
-  constructor(public apiService: ApiService, private messageNotificationService: MessageNotificationService, private authService: AuthService) {
+  constructor(
+    public apiService: ApiService,
+    private messageNotificationService: MessageNotificationService,
+    private authService: AuthService
+  ) {
   }
+
   ngOnInit(): void {
-    this.isAdmin = this.authService.getRole() === "admin"
-    this.isAdmin ? this.model.role = 'demo' : this.model.role = 'profile';
+    this.isAdmin = this.authService.getRole() === 'admin';
+    this.isAdmin ? (this.model.role = 'demo') : (this.model.role = 'profile');
   }
 
   onSubmit() {
-    if (this.isAdmin) {
-      this.apiService.post('admin/create/user', this.model).subscribe({
-        next: () => {
-          this.accountAdded.emit()
-          this.onClose();
-        },
-        error: (err) => {
-          this.messageNotificationService.show(err?.error?.detail || 'failed to create user');
-        },
-      });
+    this.errorText = '';
+    this.usernameSuggestion = '';
+    if (!this.model.username) {
+      this.errorText = 'Username is required';
+      return;
     }
-    else {
-      this.apiService.post('tenant/create/user', this.model).subscribe({
-        next: () => {
-          this.accountAdded.emit()
-          this.onClose();
-        },
-        error: (err) => {
-          this.messageNotificationService.show(err?.error?.detail || 'failed to create user');
-        },
-      });
+    if (!this.validateUsername()) {
+      return;
     }
+    if (!this.model.email) {
+      this.errorText = 'Email is required';
+      return;
+    }
+    if (!this.model.password) {
+      this.errorText = 'Password is required';
+      return;
+    }
+    const endpoint = this.isAdmin ? 'admin/create/user' : 'tenant/create/user';
+    this.apiService.post(endpoint, this.model).subscribe({
+      next: () => {
+        this.accountAdded.emit();
+        this.onClose();
+      },
+      error: err => {
+        this.errorText = err?.error?.detail || 'Failed to create user';
+      }
+    });
+  }
+
+  validateUsername(): boolean {
+    if (this.usernamePattern.test(this.model.username)) {
+      return true;
+    }
+    const suggestions: string[] = [];
+    const base = this.model.username || '';
+    let counter = 1;
+    while (suggestions.length < 4 && counter < 50) {
+      const suffix = counter.toString();
+      let s = base.toLowerCase();
+      if (!/^[A-Za-z]/.test(s)) {
+        s = 'u' + s;
+      }
+      s = s.replace(/[^A-Za-z0-9_-]/g, '');
+      if (s.length > 20 - suffix.length) {
+        s = s.slice(0, 20 - suffix.length);
+      }
+      if (s.length < 8 - suffix.length) {
+        s = s.padEnd(8 - suffix.length, '0');
+      }
+      const suggestion = s + suffix;
+      if (this.usernamePattern.test(suggestion) && !suggestions.includes(suggestion)) {
+        suggestions.push(suggestion);
+      }
+      counter++;
+    }
+    this.usernameSuggestion = suggestions.length
+      ? 'Username already taken. Suggested usernames: ' + suggestions.join(', ')
+      : 'Username already taken.';
+    this.errorText = 'Invalid username';
+    return false;
   }
 
   onClose() {
@@ -86,6 +130,7 @@ export class AddTenantComponent implements OnInit {
         return license;
     }
   }
+
   toggleTenantLicense(tenant: any, license: LicenseName): void {
     if (!tenant.licenses) {
       tenant.licenses = [];

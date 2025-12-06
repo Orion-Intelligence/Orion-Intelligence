@@ -94,3 +94,23 @@
     color: #373637;
     border: none;
 }
+
+.username-suggestion {
+  background: #fff4e5;
+  border: 1px solid #ffcc80;
+  color: #a66300;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.username-suggestion .suggestion-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.username-suggestion .suggestion-list {
+  font-size: 12px;
+  opacity: 0.9;
+}

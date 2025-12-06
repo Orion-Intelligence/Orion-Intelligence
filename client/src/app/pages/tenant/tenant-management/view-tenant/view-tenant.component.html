@@ -173,7 +173,7 @@
                             <div class="tenant-block">
                               <div class="tenant-title">User Quota</div>
                               <div class="tenant-edit-control field-equal">
-                                <input type="number" class="form-control form-control-sm tenant-input"
+                                <input type="number" class="sidebar_input form-control form-control-sm tenant-input "
                                   [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                               </div>
                               <hr class="tenant-divider">
@@ -181,13 +181,35 @@
 
                             <div class="tenant-block">
                               <div class="tenant-title">Status</div>
+
                               <div class="tenant-edit-control field-equal">
-                                <select class="form-select form-select-sm tenant-input" [(ngModel)]="tenant.status">
-                                  <option [ngValue]="TenantStatus.ACTIVE">Active</option>
-                                  <option [ngValue]="TenantStatus.DISABLE">Disable</option>
-                                  <option [ngValue]="TenantStatus.ONBOARDING">Onboarding</option>
-                                </select>
+                                <div class="dropdown w-100">
+                                  <button
+                                    aria-expanded="false"
+                                    class="btn dropdown-toggle sidebar_input form-select form-select-sm tenant-input w-100 text-start d-flex justify-content-between align-items-center"
+                                    data-bs-toggle="dropdown"
+                                    type="button">
+                                    {{ getStatusLabel(tenant.status) }}
+                                  </button>
+
+                                  <ul class="dropdown-menu w-100 p-1 mt-2 border-0 shadow rounded-3">
+                                    <li>
+                                      <a class="dropdown-item py-0 align-items-center" (click)="tenant.status = TenantStatus.ACTIVE">Active</a>
+                                    </li>
+                                    <li class="dropdown-divider m-0 mx-3"></li>
+
+                                    <li>
+                                      <a class="dropdown-item py-0 align-items-center" (click)="tenant.status = TenantStatus.DISABLE">Disable</a>
+                                    </li>
+                                    <li class="dropdown-divider m-0 mx-3"></li>
+
+                                    <li>
+                                      <a class="dropdown-item py-0 align-items-center" (click)="tenant.status = TenantStatus.ONBOARDING">Onboarding</a>
+                                    </li>
+                                  </ul>
+                                </div>
                               </div>
+
                               <hr class="tenant-divider">
                             </div>
 

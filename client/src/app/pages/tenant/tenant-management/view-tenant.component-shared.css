@@ -194,3 +194,20 @@
   padding: 0;
 }
 
+.dropdown-short .dropdown-item{
+  height: 40px;
+  font-size: 15px;
+  vertical-align: center;
+}
+
+.dropdown-short .dropdown-item {
+  height: 40px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-short .sidebar_input{
+  background: var(--color-gray-910) !important;
+}
+

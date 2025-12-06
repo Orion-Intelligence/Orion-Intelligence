@@ -19,10 +19,6 @@
   margin: 7px;
 }
 
-.view-tenant-container .dropdown-menu {
-  margin-top: 0 !important;
-}
-
 .view-tenant-container .dropdown-item.disabled {
   pointer-events: none;
   opacity: 0.4;

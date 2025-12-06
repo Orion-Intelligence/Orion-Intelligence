@@ -1,7 +1,7 @@
 <div class="add-tenant_wrapper" @overlayAnimation (click)="onClose()">
     <div class="add-tenant_container" @popupAnimation (click)="$event.stopPropagation()">
         <div class="add-tenant_header">
-            <div class="add-tenant_heading">Add Tenant</div>
+            <div class="add-tenant_heading">Add User</div>
             <button class="add-tenant_close-btn" (click)="onClose()">×</button>
         </div>
 
@@ -10,6 +10,10 @@
             <label class="add-tenant_label">Username</label>
             <input type="text" class="add-tenant_input" placeholder="Enter username" [(ngModel)]="model.username"
                 name="username" />
+            <div class="username-suggestion" *ngIf="usernameSuggestion">
+              <div class="suggestion-title">Username already taken, suggested usernames below</div>
+              <div class="suggestion-list">{{ usernameSuggestion.replace('Username already taken. Suggested usernames: ', '') }}</div>
+            </div>
 
             <label class="add-tenant_label">Email</label>
             <input type="email" class="add-tenant_input" placeholder="Enter email" [(ngModel)]="model.email"
@@ -71,6 +75,13 @@
             </div>
 
             <hr class="tenant-divider">
+
+            <div *ngIf="errorText"
+                 class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm d-block">
+
+              <i class="bi bi-exclamation-diamond-fill me-2"></i>
+              {{ errorText }}
+            </div>
 
         </form>
 

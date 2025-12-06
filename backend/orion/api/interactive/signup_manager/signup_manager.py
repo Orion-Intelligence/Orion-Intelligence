@@ -121,9 +121,6 @@ class SignupManager:
             }
 
         except Exception as _:
-            print("::::::::::::::::::::::::::::", flush=True)
-            print(_, flush=True)
-            print("::::::::::::::::::::::::::::", flush=True)
             raise HTTPException(status_code=422, detail="Invalid signup data")
 
     @staticmethod
