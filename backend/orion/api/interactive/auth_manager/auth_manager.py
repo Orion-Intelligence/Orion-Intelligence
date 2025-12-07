@@ -172,7 +172,7 @@ class auth_manager:
         user.verification_token = forgotToken
         await engine.save(user)
         APP_URL = env_handler.get_instance().env("APP_URL")
-        forgot_url = f"{APP_URL}/forgot/{forgotToken}"
+        forgot_url = f"{APP_URL}/reset/{forgotToken}"
         html_content = constant.mail_template.render(
             username=user.username,
             email=user.email,

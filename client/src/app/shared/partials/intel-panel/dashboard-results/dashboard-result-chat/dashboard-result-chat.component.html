@@ -14,7 +14,7 @@
         </div>
 
         <div class="dashboard__buttons">
-          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph"
+          <div *ngIf="!this.licenseService.isMaintainer()" (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph"
             class="dashboard__search-button">
             <div class="dashboard__search-button-inner">
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />

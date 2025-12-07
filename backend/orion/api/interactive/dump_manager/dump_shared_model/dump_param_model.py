@@ -1,12 +1,16 @@
-from typing import Optional
-
-from pydantic import BaseModel
+from typing import Literal
+from pydantic import BaseModel, Field
 
 
 class dump_param_model(BaseModel):
-    page: int = 1
-    source: Optional[str] = "all"
-    group: Optional[str] = "all"
-    status: Optional[str] = "all"
-    daterange: Optional[str] = ""
-    q: Optional[str] = "*"
+    page: int = Field(1, ge=1)
+
+    source: Literal["all", "telegram", "websites"] = "all"
+
+    group: str = "all"
+
+    status: Literal["all", "parsed", "unparsed"] = "all"
+
+    daterange: str = ""
+
+    q: str = "*"

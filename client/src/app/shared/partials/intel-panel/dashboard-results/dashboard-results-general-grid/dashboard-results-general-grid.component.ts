@@ -8,6 +8,7 @@ import {LeakResultItem} from '../../../../model/results/leak/leak.callback.model
 import {ScrollService} from '../../../../services/scroll.service';
 import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
 import {AuthService} from '../../../../../services/authetication/auth.service';
+import {LicenseService} from '../../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-dashboard-results-general-grid',
@@ -28,7 +29,7 @@ export class DashboardResultsGeneralGridComponent implements AfterViewInit, OnIn
   isCollapsed = true;
   isFreeStrategic = false;
 
-  constructor(private authService: AuthService, private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(private authService: AuthService, private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {

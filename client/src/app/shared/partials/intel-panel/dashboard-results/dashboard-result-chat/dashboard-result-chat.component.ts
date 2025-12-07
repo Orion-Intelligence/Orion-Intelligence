@@ -5,6 +5,7 @@ import { DatePipe, NgForOf, NgIf, SlicePipe, CommonModule } from '@angular/commo
 import { ScrollService } from '../../../../services/scroll.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
 import {NormalizeUnicodePipe} from '../../../../pipes/normalize-unicode.pipe';
+import {LicenseService} from '../../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-dashboard-result-chat',
@@ -24,7 +25,7 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   queryParams: any = {};
   isCollapsed = true;
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {

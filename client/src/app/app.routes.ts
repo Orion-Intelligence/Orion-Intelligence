@@ -25,7 +25,7 @@ import { SecurityScanResultsComponent } from './shared/partials/security-scan-re
 import { SignupComponent } from './pages/signup/signup.component';
 import { TenantComponent } from './pages/tenant/tenant.component';
 import { WelcomeComponent } from './pages/welcome/welcome.component';
-import { ForgotPasswordComponent } from './shared/partials/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './shared/partials/forgot-password/reset-password.component';
 import { TenantGuard } from './shared/guards/tenant-guard.guard';
 import { SidebarProfileHomepageComponent } from './shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component';
 import { SidebarProfileIocComponent } from './shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component';
@@ -136,8 +136,8 @@ export const routes: Routes = [
     data: { animation: 'TrailNotificationPage' }
   },
   {
-    path: 'forgot',
-    component: ForgotPasswordComponent,
+    path: 'reset',
+    component: ResetPasswordComponent,
     data: { animation: 'ForgotPasswordComponent' }
   },
   {
@@ -151,8 +151,8 @@ export const routes: Routes = [
     data: { animation: 'PaymentGatewayComponent' }
   },
   {
-    path: 'forgot/:token',
-    component: ForgotPasswordComponent,
+    path: 'reset/:token',
+    component: ResetPasswordComponent,
     data: { animation: 'ForgotPasswordComponent' }
   },
   {

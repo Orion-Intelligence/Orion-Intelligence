@@ -12,7 +12,7 @@ import {
   ProfileSubCategory, DiscussionSubCategory
 
 } from '../../constants/pages';
-import {ActivatedRoute, NavigationEnd, Router, RouterLink} from '@angular/router';
+import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { filter, take } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
@@ -54,17 +54,21 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   profileCategories = Object.values(ProfileSubCategory)
   category = Category;
 
-  constructor(private activatedRoute: ActivatedRoute, protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
 
   ngOnInit() {
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd))
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => {
+        if (e.urlAfterRedirects.startsWith('/dashboard/profile/consolidated/')) {
+          this.selectionStore.setSelectedSection('Profile');
+          this.selectionStore.setSelectedOption('Homepage');
+        }
+      });
+
     window.addEventListener('resize', this.checkScreenWidth.bind(this));
     this.checkScreenWidth();
-    if(this.router.url === '/dashboard/profile/homepage'){
-        this.selectionStore.setSelectedSection('Profile');
-        this.selectionStore.setSelectedOption('Homepage');
-    }
   }
 
   ngOnDestroy() {
@@ -131,7 +135,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           firstSubcategory = this.profileCategories[0];
           break;
       }
-
       if (firstSubcategory) {
         this.selectionStore.setSelectedOption(firstSubcategory);
         if (this.min_detected && this.sidebar_default && !this.mobile_menu_status) {

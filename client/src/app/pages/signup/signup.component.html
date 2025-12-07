@@ -2,9 +2,9 @@
   <div class="login-form-side">
     <div class="header-links">
       <a href="https://drive.google.com/file/d/16NQysXxTdEg5Jx6KNok-rqHvdeM-YOJO/view?usp=sharing" target="_blank"
-        class="header-link">Privacy Policy</a> <a href="https://orionintelligence.org/service/" target="_blank"
-        class="header-link">Our Services</a> <a href="https://orionintelligence.org" target="_blank"
-        class="header-link">About Us</a>
+        class="header-link">Privacy Policy</a>
+      <a href="https://orionintelligence.org/service/" target="_blank" class="header-link">Our Services</a>
+      <a href="https://orionintelligence.org" target="_blank" class="header-link">About Us</a>
     </div>
 
     <div class="center-content-wrapper">
@@ -12,22 +12,19 @@
         <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo" />
         <div class="login-heading">Sign Up to get started!</div>
 
-        <ng-container>
-          <div class="demo-note">
-            <div class="demo-header">
-              <img src="/assets/images/shared/theme/info.svg" class="info-icon" />
-              <span>Want to explore first? <strong>Try demo</strong></span>
-            </div>
-          </div>
-        </ng-container>
-
-
         <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="login-form">
           <label class="input-label">Username</label>
           <div class="input-with-icon">
             <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" class="input-icon" />
             <input [(ngModel)]="user.username" placeholder="Enter your username" class="login-input" name="username"
               required type="text" />
+          </div>
+
+          <div class="username-suggestion" *ngIf="usernameSuggestion">
+            <div class="suggestion-title">Username already taken, suggested usernames below</div>
+            <div class="suggestion-list">
+              {{ usernameSuggestion.replace('Username already taken. Suggested usernames: ', '') }}
+            </div>
           </div>
 
           <label class="input-label mt-2">Company Mail</label>
@@ -40,8 +37,8 @@
           <label class="input-label mt-2 ">Password</label>
           <div class="input-with-icon mb-4">
             <img src="/assets/images/shared/lock.svg" alt="profile icon" class="input-icon" />
-            <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password" type="password"
-              placeholder="Enter your password" class="login-input" name="password" required />
+            <input [(ngModel)]="user.password" (input)="onPasswordInput(user.password)" id="id_password"
+              type="password" placeholder="Enter your password" class="login-input" name="password" required />
           </div>
 
           <div *ngIf="showPasswordMeter">
@@ -57,8 +54,11 @@
             </ul>
           </div>
 
-          <p *ngIf="errorMessage" [ngClass]="{'login-error-message': errorMessage}">
-            {{ errorMessage }} </p>
+          <div *ngIf="errorMessage"
+            class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
+            <i class="bi bi-exclamation-diamond-fill me-2"></i>
+            {{ errorMessage }}
+          </div>
 
           <div>
             <input [disabled]="!signUpForm.valid || !allPasswordRequirementsMet"

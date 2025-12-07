@@ -1,5 +1,5 @@
 import { NgIf, CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { NgForm, FormsModule } from '@angular/forms';
@@ -7,17 +7,17 @@ import { HeaderComponent } from "../header/login-header/header.component";
 
 @Component({
   selector: 'app-forgot-password',
-  templateUrl: './forgot-password.component.html',
+  templateUrl: './reset-password.component.html',
   imports: [FormsModule, NgIf, HeaderComponent, CommonModule]
 })
-export class ForgotPasswordComponent {
+export class ResetPasswordComponent implements OnInit{
   email = '';
   password = '';
   errorMessage: string | null = null;
   responseError = false;
-  hasToken: boolean = false;
+  hasToken: boolean = true;
   token: string = '';
-  confirmPassword: string = '';
+  confirmPassword: string = 'asdsadasd';
 
   passwordStrength: 'weak' | 'medium' | 'strong' | null = null;
   showPasswordMeter = false;

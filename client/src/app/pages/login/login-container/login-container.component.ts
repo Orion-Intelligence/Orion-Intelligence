@@ -109,7 +109,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   goToForgot() {
-    this.router.navigate(['/forgot']).then();
+    this.router.navigate(['/reset']).then();
   }
 
   ngOnDestroy() {

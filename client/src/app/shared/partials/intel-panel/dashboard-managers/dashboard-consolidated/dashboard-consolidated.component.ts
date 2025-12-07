@@ -69,8 +69,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   @ViewChild('liveApiSearch') liveApiSearchComponent!: ConsolidatedApisComponent;
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
 
-
-
   constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, private apiService: ApiService, private helperService: HelperService, protected licenseService: LicenseService) {
     this.pageCounts = {};
   }
@@ -102,18 +100,16 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
         this.fetchSearchResults();
       }
-      // this.isLoading.set(false);
-
       this.firstTrigger = false;
     });
   }
 
   fetchSearchResults(_ = false): void {
-    if (this.checkProfile() && !this.hasIOCs()) {
-      return
+    if(this.licenseService.canUseScanning()){
+      this.liveApiSearchComponent.runSearch(this.dashboardService.consolidatedParamModel.q)
+      this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
     }
-    this.liveApiSearchComponent.runSearch(this.dashboardService.consolidatedParamModel.q)
-    this.domainScanComponent.runScan(this.dashboardService.consolidatedParamModel.q);
+
     if (!this.isGrouped) {
       this.fetchRanked()
       return
@@ -254,6 +250,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   onSectionSelected(section: Category) {
+
     this.selectionStore.setSelectedSection(section);
     let firstSubcategory: string | undefined;
     let second_category = "all"

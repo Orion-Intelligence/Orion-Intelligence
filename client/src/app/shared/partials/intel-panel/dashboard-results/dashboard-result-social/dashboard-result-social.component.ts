@@ -7,6 +7,7 @@ import {SocialResultItem} from '../../../../model/results/social/social.callback
 import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
 import {RemoveEmojisPipe} from '../../../../pipes/remove-emojis-pipe.pipe';
 import {CodeBlockComponent} from '../../../code-block/code-block.component';
+import {LicenseService} from '../../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-dashboard-result-social',
@@ -32,7 +33,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   queryParams: any = {};
   isCollapsed = true;
 
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {

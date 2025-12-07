@@ -8,6 +8,6 @@ from orion.shared_models.crawl_models.CTITextRequest import CTITextRequest
 micro_routes = APIRouter()
 
 
-@micro_routes.post("/api/cti/fetch", dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
+@micro_routes.post("/api/cti/fetch", include_in_schema=False, dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def fetch_cti_label(payload: CTITextRequest, _=Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))):
     return await crawl_model.fetch_cti_label(payload)
