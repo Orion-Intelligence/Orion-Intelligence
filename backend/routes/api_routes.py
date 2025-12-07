@@ -23,7 +23,7 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
-from routes.docs.docs import SYSTEM_INFO_DOCS
+from routes.docs.docs import SYSTEM_INFO_DOCS, REPORT_DOCS, DYNAMIC_DOCS
 
 api_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))]
@@ -198,6 +198,7 @@ async def search_telegram(param: search_chat_param_model = Body(...)):
     operation_id="searchThreatDiscussionReports",
     response_description="Threat actor discussion search results with metadata for matching discussion reports.",
     status_code=200,
+    include_in_schema=False,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
         Depends(license_required("module:discussion")),
@@ -219,6 +220,7 @@ async def search_leak(param: search_leak_param_model = Body(...)):
     operation_id="searchExploitDiscussionReports",
     response_description="Exploit discussion search results with metadata for matching exploit discussion reports.",
     status_code=200,
+    include_in_schema=False,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
         Depends(license_required("module:exploit")),
@@ -351,12 +353,19 @@ async def search_defacement(param: search_defacement_param_model = Body(...)):
 @api_routes.get(
     "/api/search/defacement/{doc_id}",
     summary="Get defacement report",
-    description="Get a specific defacement intelligence report targeting phishing or hacked websites by its report ID.",
+    description=REPORT_DOCS["defacement"]["description"],
     tags=["Reports"],
     operation_id="getDefacementReport",
-    response_description="Full defacement intelligence report, including details on the targeted website and defacement indicators.",
+    response_description=REPORT_DOCS["defacement"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
 )
 async def get_defacement_document(doc_id: str):
     return await search_model.getInstance().request_defacement_doc(doc_id)
@@ -365,16 +374,27 @@ async def get_defacement_document(doc_id: str):
 @api_routes.get(
     "/api/search/breach/{doc_id}",
     summary="Get breach monitoring report",
-    description="Get a specific breach monitoring report for a tracked website or asset by its report ID and optional language.",
+    description=REPORT_DOCS["breach"]["description"],
     tags=["Reports"],
     operation_id="getBreachReport",
-    response_description="Full breach intelligence report with details about the monitored website and associated breach data.",
+    response_description=REPORT_DOCS["breach"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
 )
 async def get_leak_document(
     doc_id: str,
-    lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content."),
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
 ):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
@@ -382,16 +402,27 @@ async def get_leak_document(
 @api_routes.get(
     "/api/search/news/{doc_id}",
     summary="Get breach-related news report",
-    description="Get a specific breach-related news intelligence report, generated from external news feeds, by its report ID and optional language.",
+    description=REPORT_DOCS["news"]["description"],
     tags=["Reports"],
     operation_id="getNewsReport",
-    response_description="News intelligence report describing breach-related events from external news sources.",
+    response_description=REPORT_DOCS["news"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
 )
 async def get_leak_document(
     doc_id: str,
-    lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content."),
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
 ):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
@@ -399,16 +430,27 @@ async def get_leak_document(
 @api_routes.get(
     "/api/search/exploit/{doc_id}",
     summary="Get exploit intelligence report",
-    description="Get a specific exploit intelligence report (CVE, exploit kit, zero-day activity, etc.) by its report ID and optional language.",
+    description=REPORT_DOCS["exploit"]["description"],
     tags=["Reports"],
     operation_id="getExploitReport",
-    response_description="Exploit intelligence report containing details about vulnerabilities, CVEs, and exploitation activity.",
+    response_description=REPORT_DOCS["exploit"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
 )
 async def get_leak_document(
     doc_id: str,
-    lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content."),
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
 ):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
 
@@ -416,16 +458,27 @@ async def get_leak_document(
 @api_routes.get(
     "/api/search/strategic/{doc_id}",
     summary="Get darkweb strategic report",
-    description="Get a specific strategic intelligence report aggregating crawled content from onion, I2P, and Freenet pages by its report ID and optional language.",
+    description=REPORT_DOCS["strategic"]["description"],
     tags=["Reports"],
     operation_id="getStrategicReport",
-    response_description="Strategic intelligence report built from darkweb and hidden-service crawled content.",
+    response_description=REPORT_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
 )
 async def get_general_document(
     doc_id: str,
-    lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content."),
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
 ):
     return await search_model.getInstance().request_general_doc(doc_id, lang)
 
@@ -433,16 +486,27 @@ async def get_general_document(
 @api_routes.get(
     "/api/search/chat/{doc_id}",
     summary="Get chat intelligence report",
-    description="Get a specific chat intelligence report focused on messaging platforms such as Telegram by its report ID and optional language.",
+    description=REPORT_DOCS["chat"]["description"],
     tags=["Reports"],
     operation_id="getChatReport",
-    response_description="Chat intelligence report summarizing relevant conversations and messages (for example from Telegram).",
+    response_description=REPORT_DOCS["chat"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
 )
 async def get_general_document(
     doc_id: str,
-    lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content."),
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
 ):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
@@ -450,16 +514,27 @@ async def get_general_document(
 @api_routes.get(
     "/api/search/social/{doc_id}",
     summary="Get social media intelligence report",
-    description="Get a specific social media intelligence report (for example posts by ransomware groups on platforms like Facebook or similar) by its report ID and optional language.",
+    description=REPORT_DOCS["social"]["description"],
     tags=["Reports"],
     operation_id="getSocialReport",
-    response_description="Social media intelligence report containing posts and activity from monitored social platforms.",
+    response_description=REPORT_DOCS["social"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
 )
 async def get_social_document(
     doc_id: str,
-    lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content."),
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
 ):
     return await search_model.getInstance().request_social_doc(doc_id, lang)
 
@@ -467,33 +542,39 @@ async def get_social_document(
 @api_routes.get(
     "/api/search/breach/screenshot/{filename}",
     summary="Get breach report screenshot",
-    description="Retrieve the screenshot image associated with a specific breach report, stored in WebP format.",
+    description=REPORT_DOCS["breach_screenshot"]["description"],
     tags=["Reports"],
     operation_id="getBreachReportScreenshot",
-    response_description="WebP screenshot image that visually represents the breached website or resource described in the breach report.",
+    response_description=REPORT_DOCS["breach_screenshot"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
         Depends(license_required("module:breach")),
     ],
 )
 async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
 
-
 @api_routes.post(
     "/api/dynamic/user",
     summary="Dynamic user email exposure search",
-    description=(
-        "Perform a dynamic search for user email addresses discovered in monitored breach and defacement data, "
-        "returning exposed account metadata for further investigation and remediation."
-    ),
+    description=DYNAMIC_DOCS["dynamic_user_email"]["description"],
     tags=["Live Dynamic Scan"],
     operation_id="dynamicUserEmailExposureSearch",
-    response_description="Dynamic search results listing exposed user email addresses and associated intelligence metadata.",
+    response_description=DYNAMIC_DOCS["dynamic_user_email"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
         Depends(license_required("scanning")),
     ],
 )
@@ -504,16 +585,18 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
 @api_routes.post(
     "/api/dynamic/cracked",
     summary="Dynamic cracked credential search",
-    description=(
-        "Perform a dynamic search for cracked credentials identified in breach and defacement datasets, "
-        "highlighting high-risk compromised accounts and password reuse exposure."
-    ),
+    description=DYNAMIC_DOCS["dynamic_cracked"]["description"],
     tags=["Live Dynamic Scan"],
     operation_id="dynamicCrackedCredentialSearch",
-    response_description="Dynamic search results listing cracked credentials with related breach context and metadata.",
+    response_description=DYNAMIC_DOCS["dynamic_cracked"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
         Depends(license_required("scanning")),
     ],
 )
@@ -521,23 +604,22 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "cracked")
 
 
+
 @api_routes.post(
     "/api/urlscan/domain",
     summary="Domain, SEO, and repository scan",
-    description=(
-        "Scan a target domain using the configured scanning engine. Supports scan modes via `scanType`:\n"
-        "- `basic` → infrastructure & HTTP intelligence\n"
-        "- `seo`   → SEO metadata, indexing, ranking signals\n"
-        "- `repo`  → linked repository scan (GitHub/GitLab, exposed files, commit metadata)"
-    ),
+    description=DYNAMIC_DOCS["domain_scan"]["description"],
     tags=["Live Dynamic Scan"],
     operation_id="scanDomainBasicSeoRepo",
-    response_description=(
-        "Scan results for the selected `scanType`, containing domain intelligence, SEO metrics, or repository analysis artifacts."
-    ),
+    response_description=DYNAMIC_DOCS["domain_scan"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
         Depends(limiter_dependency),
         Depends(license_required("scanning")),
     ],
@@ -549,16 +631,18 @@ async def parse_text(payload: DomainScanRequest):
 @api_routes.post(
     "/api/dynamic/social",
     summary="Dynamic social identifier exposure search",
-    description=(
-        "Perform a dynamic search for social media identifiers and related email addresses found in breach and "
-        "defacement data, helping uncover exposed or impersonated social accounts."
-    ),
+    description=DYNAMIC_DOCS["dynamic_social"]["description"],
     tags=["Live Dynamic Scan"],
     operation_id="dynamicSocialIdentifierExposureSearch",
-    response_description="Dynamic search results listing exposed social media identifiers and related contact details.",
+    response_description=DYNAMIC_DOCS["dynamic_social"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
         Depends(license_required("scanning")),
     ],
 )
