@@ -23,7 +23,7 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
-from routes.docs.docs import SYSTEM_INFO_DOCS, REPORT_DOCS, DYNAMIC_DOCS
+from routes.docs.docs import SYSTEM_INFO_DOCS, REPORT_DOCS, DYNAMIC_DOCS, SEARCH_DOCS
 
 api_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))]
@@ -95,10 +95,10 @@ async def get_insight():
 @api_routes.post(
     "/api/search/strategic",
     summary="Search strategic reports",
-    description="Search strategic intelligence reports using filters such as category, title, date, or hash; returns metadata for matching reports that can be opened via the report APIs.",
+    description=SEARCH_DOCS["strategic"]["description"],
     tags=["Search"],
     operation_id="searchStrategicReports",
-    response_description="Strategic intelligence search results containing metadata for each matching report.",
+    response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -118,10 +118,10 @@ async def search_general(param: search_general_param_model = Body(...)):
 @api_routes.post(
     "/api/search/stealerlogs",
     summary="Search stealer log reports",
-    description="Search credential stealer log reports using supplied filters; returns metadata for each matching stealer log report.",
+    description=SEARCH_DOCS["stealerlogs"]["description"],
     tags=["Search"],
     operation_id="searchStealerLogReports",
-    response_description="Stealer log search results with metadata for each matching stealer log report.",
+    response_description=SEARCH_DOCS["stealerlogs"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.DEMO, user_role.ANALYST])),
@@ -135,10 +135,10 @@ async def search_consolidated(param: search_credential_param_model = Body(...)):
 @api_routes.post(
     "/api/search/consolidated",
     summary="Search consolidated reports (grouped)",
-    description="Search across all report types (breach, exploit, chats, social, etc.) and return a consolidated, grouped set of report metadata from each section.",
+    description=SEARCH_DOCS["consolidated"]["description"],
     tags=["Search"],
     operation_id="searchConsolidatedReports",
-    response_description="Consolidated search results with grouped metadata from each report section, suitable for drill-down via report APIs.",
+    response_description=SEARCH_DOCS["consolidated"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -152,10 +152,10 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
 @api_routes.post(
     "/api/search/consolidated/ranked",
     summary="Search consolidated reports (ranked)",
-    description="Search the entire database across all report types and return a single relevance-ranked list of report metadata without per-section grouping.",
+    description=SEARCH_DOCS["consolidated_ranked"]["description"],
     tags=["Search"],
     operation_id="searchConsolidatedReportsRanked",
-    response_description="Globally ranked consolidated search results with report metadata ordered by relevance.",
+    response_description=SEARCH_DOCS["consolidated_ranked"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -176,10 +176,10 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
 @api_routes.post(
     "/api/chat/telegram",
     summary="Search Telegram chat reports",
-    description="Search Telegram-based chat intelligence and return metadata for matching chat reports.",
+    description=SEARCH_DOCS["telegram"]["description"],
     tags=["Search"],
     operation_id="searchTelegramChatReports",
-    response_description="Telegram chat search results containing metadata for matching chat intelligence reports.",
+    response_description=SEARCH_DOCS["telegram"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -241,10 +241,10 @@ async def search_discussion(param: search_general_param_model = Body(...)):
 @api_routes.post(
     "/api/social/all",
     summary="Search all social and chat reports",
-    description="Search across all chat and social indices combined and return metadata for matching social/chat reports.",
+    description=SEARCH_DOCS["social"]["description"],
     tags=["Search"],
     operation_id="searchAllSocialChatReports",
-    response_description="Combined social and chat search results with metadata for matching reports from both sources.",
+    response_description=SEARCH_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -262,10 +262,10 @@ async def search_discussion(param: search_general_param_model = Body(...)):
 @api_routes.post(
     "/api/social",
     summary="Search social media reports",
-    description="Search social media intelligence and return metadata for reports generated from monitored social platforms.",
+    description=SEARCH_DOCS["social"]["description"],
     tags=["Search"],
     operation_id="searchSocialMediaReports",
-    response_description="Social media intelligence search results with metadata for each matching social report.",
+    response_description=SEARCH_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -279,10 +279,10 @@ async def search_twitter(param: search_social_param_model = Body(...)):
 @api_routes.post(
     "/api/search/breach",
     summary="Search breach reports",
-    description="Search breach (leak) intelligence reports using parameters such as company, domain, country, or hash; returns metadata for matching breach reports.",
+    description=SEARCH_DOCS["breach"]["description"],
     tags=["Search"],
     operation_id="searchBreachReports",
-    response_description="Breach intelligence search results containing metadata for each matching breach report.",
+    response_description=SEARCH_DOCS["breach"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -304,10 +304,10 @@ async def search_leak(param: search_leak_param_model = Body(...)):
 @api_routes.post(
     "/api/search/news",
     summary="Search breach news reports",
-    description="Search breach-related news intelligence using parameters such as company, domain, country, or hash; returns metadata for news-based reports.",
+    description=SEARCH_DOCS["news"]["description"],
     tags=["Search"],
     operation_id="searchBreachNewsReports",
-    response_description="Breach-related news search results with metadata for matching news intelligence reports.",
+    response_description=SEARCH_DOCS["news"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
 )
@@ -319,10 +319,10 @@ async def search_news(param: search_leak_param_model = Body(...)):
 @api_routes.post(
     "/api/search/exploit",
     summary="Search exploit reports",
-    description="Search exploit and vulnerability intelligence reports using parameters such as CVE, vendor, product, or keyword.",
+    description=SEARCH_DOCS["exploit"]["description"],
     tags=["Search"],
     operation_id="searchExploitReports",
-    response_description="Exploit intelligence search results containing metadata for each matching exploit report.",
+    response_description=SEARCH_DOCS["exploit"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
@@ -336,10 +336,10 @@ async def search_leak(param: search_leak_param_model = Body(...)):
 @api_routes.post(
     "/api/search/defacement",
     summary="Search defacement reports",
-    description="Search defacement intelligence reports by keyword, threat group, or affected domain; returns metadata for matching defacement reports.",
+    description=SEARCH_DOCS["defacement"]["description"],
     tags=["Search"],
     operation_id="searchDefacementReports",
-    response_description="Defacement intelligence search results with metadata for each matching defacement report.",
+    response_description=SEARCH_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
