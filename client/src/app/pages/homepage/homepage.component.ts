@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HomeSearchComponent } from './home-search/home-search.component';
 import {AuthService} from '../../services/authetication/auth.service';
+import {LicenseService} from '../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-index',
@@ -11,13 +12,13 @@ import {AuthService} from '../../services/authetication/auth.service';
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {
-  constructor(private router: Router, private authService:AuthService) {
+  constructor(private router: Router, private authService:AuthService, private licenseService:LicenseService) {
   }
 
   ngOnInit() {
 
     const role = this.authService.getRole();
-    if (role == "profile")
+    if (role == "profile" && this.licenseService.isMaintainer())
       this.router.navigate(['dashboard/profile/homepage']).then();
     if (this.authService.getIsMobileDemo())
       this.router.navigate(['dashboard/strategic/all']).then();
