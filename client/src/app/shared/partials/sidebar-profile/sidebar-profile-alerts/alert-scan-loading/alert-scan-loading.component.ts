@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-alert-scan-loading',
-  imports: [],
+  imports: [NgFor],
   templateUrl: './alert-scan-loading.component.html',
   styleUrl: './alert-scan-loading.component.css'
 })

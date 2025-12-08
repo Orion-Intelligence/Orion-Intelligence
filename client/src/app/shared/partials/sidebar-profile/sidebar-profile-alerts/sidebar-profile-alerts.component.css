@@ -218,31 +218,3 @@
 .alert-loading {
     position: relative;
 }
-
-/* .loading-wrapper {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 18px;
-    font-weight: 500;
-}
-
-.loader {
-    width: 60px;
-    height: 60px;
-    border: 6px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
-} */
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}

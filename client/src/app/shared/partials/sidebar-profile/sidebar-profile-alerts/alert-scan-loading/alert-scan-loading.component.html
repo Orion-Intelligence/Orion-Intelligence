@@ -1,4 +1,47 @@
-<div class="loader-overlay_backdrop">
-    <div class="spinner"></div>
-    <span>Loading...</span>
+<div class="ioc-loading-container">
+    <div class="ioc-skeleton-search skeleton shimmer"></div>
+    <div class="ioc-skeleton-alerts">
+
+        <div class="ioc-skeleton-alert-card skeleton shimmer">
+            <div class="skeleton skeleton-alert-count shimmer"></div>
+            <div class="ioc-skeleton-alert-label">Critical Alerts</div>
+        </div>
+
+        <div class="ioc-skeleton-alert-card skeleton shimmer">
+            <div class="skeleton skeleton-alert-count shimmer"></div>
+            <div class="ioc-skeleton-alert-label">High Risk Alerts</div>
+        </div>
+
+        <div class="ioc-skeleton-alert-card skeleton shimmer">
+            <div class="skeleton skeleton-alert-count shimmer"></div>
+            <div class="ioc-skeleton-alert-label">Medium Risk</div>
+        </div>
+
+        <div class="ioc-skeleton-alert-card skeleton shimmer">
+            <div class="skeleton skeleton-alert-count shimmer"></div>
+            <div class="ioc-skeleton-alert-label">Low Risk</div>
+        </div>
+
+    </div>
+
+    <div class="ioc-skeleton-cards">
+
+        <div class="ioc-skeleton-card skeleton shimmer" *ngFor="let i of [1,2,3,4]">
+
+            <div class="ioc-skeleton-card-header">
+                <div class="skeleton skeleton-title shimmer"></div>
+            </div>
+            <div class="skeleton skeleton-row shimmer"></div>
+            <div class="skeleton skeleton-row shimmer"></div>
+
+            <div class="ioc-skeleton-tags">
+                <div class="skeleton skeleton-tag shimmer"></div>
+                <div class="skeleton skeleton-tag shimmer"></div>
+                <div class="skeleton skeleton-tag shimmer"></div>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
