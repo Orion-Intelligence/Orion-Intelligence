@@ -8,10 +8,14 @@ import { User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { AddTenantComponent } from "../add-tenant/add-tenant.component";
+import {
+  ConfirmationPopupComponent
+} from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-view-profile',
-  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent],
+  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './view-profile.component.html'
 })
@@ -22,6 +26,8 @@ export class ViewProfileComponent implements OnInit {
   selectedUserId: string | null = null;
   expandedUserIndex: number | null = null;
   showAddTenantPopup: boolean = false;
+  isDeleteConfirmationOpen$ = new BehaviorSubject<boolean>(false);
+  userToDelete: User | null = null;
 
   constructor(public apiService: ApiService,) {
   }
@@ -137,14 +143,50 @@ export class ViewProfileComponent implements OnInit {
     }
   }
 
+  deleteUser(user: User) {
+    this.userToDelete = user;
+    this.isDeleteConfirmationOpen$.next(true);
+  }
+
+  confirmDeleteUser(value: boolean) {
+    this.isDeleteConfirmationOpen$.next(false);
+    if (!value || !this.userToDelete) {
+      this.userToDelete = null;
+      return;
+    }
+    this.isLoading = true;
+    this.apiService.post('delete/user', this.userToDelete).subscribe({
+      next: () => {
+        const headers = new HttpHeaders({});
+        this.apiService.post<User[]>('users', headers).subscribe({
+          next: (data) => {
+            this.users = data;
+            this.isLoading = false;
+            this.userToDelete = null;
+          },
+          error: () => {
+            this.isLoading = false;
+            this.userToDelete = null;
+          }
+        });
+      },
+      error: () => {
+        this.isLoading = false;
+        this.userToDelete = null;
+      },
+    });
+  }
+
   getUserLicensesLabel(user: any): string {
     if (!user.licenses || user.licenses.length === 0) return 'None';
     const names = user.licenses.map((l: LicenseName) => this.getLicenseLabel(l)).join(', ');
     return (names.length <= 15) ? names : names.slice(0, 15) + ('...');
   }
+
   addtenant() {
     this.showAddTenantPopup = true;
   }
+
   clossAddTenant() {
     this.showAddTenantPopup = false;
   }

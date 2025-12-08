@@ -191,6 +191,28 @@ class TenantManager:
 
         return {"message": "User updated successfully"}
 
+    async def delete_user(self, tenant, current_user):
+        user = await self._engine.find_one(db_user_account, db_user_account.username == tenant.username)
+        if not user:
+            raise HTTPException(status_code=400, detail="User not found")
+
+        if user.role in ["admin", "maintainer"]:
+            raise HTTPException(status_code=400, detail="This user type cannot be deleted")
+
+        if current_user.role == "admin":
+            if user.role not in ["demo", "analyst"] or user.licenses == ["maintainer"]:
+                raise HTTPException(status_code=400, detail="Admin can only delete demo or analyst users")
+        elif current_user.licenses == ["maintainer"]:
+            if user.company_uuid != current_user.company_uuid or user.licenses == ["maintainer"]:
+                raise HTTPException(status_code=400, detail="Maintainer can only delete non-maintainer users from the same company")
+        else:
+            raise HTTPException(status_code=400, detail="You are not allowed to delete users")
+
+        await self._engine.delete(user)
+        await AuditLogManager.get_instance().register(str(user.id), "delete_user")
+
+        return {"message": "User deleted successfully"}
+
     async def get_all_tenant(self) -> List[db_tenant_model]:
         tenants = await self._engine.find(db_tenant_model)
         result = []

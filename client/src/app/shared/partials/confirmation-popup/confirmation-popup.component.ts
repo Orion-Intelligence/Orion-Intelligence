@@ -3,8 +3,7 @@ import { Component, EventEmitter, HostListener, Output } from '@angular/core';
 @Component({
   selector: 'app-confirmation-popup',
   imports: [],
-  templateUrl: './confirmation-popup.component.html',
-  styleUrl: './confirmation-popup.component.css'
+  templateUrl: './confirmation-popup.component.html'
 })
 export class ConfirmationPopupComponent {
   @Output() confirmed = new EventEmitter<boolean>();

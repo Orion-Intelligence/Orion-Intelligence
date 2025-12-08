@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -10,8 +10,8 @@ import { AlertModel } from '../../../model/company-profile/company.profile.model
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { ApiService } from '../../../services/api.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { ConfirmationPopupComponent } from "./confirmation-popup/confirmation-popup.component";
+import { BehaviorSubject } from 'rxjs';
+import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
 import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
 import { AlertService } from '../../../../services/alerts/alerts.service';
 

@@ -65,7 +65,15 @@
                         <button type="button"
                           class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn"
                           (click)="tenant._expanded = !tenant._expanded">
-                          <span class="flex-grow-1 text-center">Edit</span>
+
+                          <span class="flex-grow-1 text-center me-1">Edit</span>
+
+                          <img
+                            src="../../../../../assets/images/shared/search_side_dropdown_icon.svg"
+                            width="20"
+                            height="20"
+                            [style.transform]="tenant._expanded ? 'rotate(180deg)' : 'rotate(0deg)'" />
+
                         </button>
                       </td>
                     </tr>

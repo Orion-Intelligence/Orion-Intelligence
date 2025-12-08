@@ -26,7 +26,7 @@
                     <th class="list__column-leak-status col-status">Status</th>
                     <th class="list__column-network-type col-quota">Subscription</th>
                     <th class="list__column-license col-licenses">Licenses</th>
-                    <th class="list__column-id-min col-action text-center">Action</th>
+                    <th class="list__column-license col-action text-center">Action</th>
                   </tr>
                 </thead>
 
@@ -62,15 +62,23 @@
                           {{ getUserLicensesLabel(user) }}
                         </span>
                       </td>
-
                       <td class="text-center col-action">
                         <button type="button"
                           class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn w-100 justify-content-center"
                           (click)="toggleExpandedUser(i)">
+
                           <i class="bi bi-pencil me-1"></i>
-                          <span class="d-inline-block">
-                            {{ user.role === 'admin' ? 'View' : 'Edit' }}
+
+                          <span class="d-inline-block me-1">
+                            {{ (user.role === 'admin' || user.licenses?.includes('maintainer')) ? 'View' : 'Edit' }}
                           </span>
+
+                          &nbsp;<img
+                            src="../../../../../assets/images/shared/search_side_dropdown_icon.svg"
+                            width="20"
+                            height="20"
+                            [style.transform]="expandedUserIndex === i ? 'rotate(180deg)' : 'rotate(0deg)'" />
+
                         </button>
                       </td>
                     </tr>
@@ -127,7 +135,7 @@
                             </div>
                           </div>
 
-                          <div class="tenant-edit-section mt-4 mb-4" *ngIf="user.role !== 'admin'">
+                          <div class="tenant-edit-section mt-4 mb-4" *ngIf="user.role !== 'admin' && !user.licenses?.includes('maintainer')">
                             <div class="section-heading">Edit user</div>
                             <div class="section-desc">Update User Data.</div>
 
@@ -203,8 +211,17 @@
                               <hr class="tenant-divider">
                             </div>
 
-                            <div class="d-flex justify-content-end mt-3">
-                              <button type="button" class="btn btn-sm btn-primary expand-btn"
+                            <div class="d-flex justify-content-end mt-3 gap-2">
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-danger expand-btn mr-2 p-2 pl-2 pr-2"
+                                (click)="deleteUser(user)">
+                                Delete User
+                              </button>
+
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-primary expand-btn p-2"
                                 (click)="updateUser(user)">
                                 Save changes
                               </button>
@@ -314,4 +331,7 @@
 </ng-container>
 <ng-container *ngIf="showAddTenantPopup">
   <app-add-tenant (closs)="clossAddTenant()" (accountAdded)="ngOnInit()"></app-add-tenant>
+</ng-container>
+<ng-container *ngIf="isDeleteConfirmationOpen$ | async">
+  <app-confirmation-popup (confirmed)="confirmDeleteUser($event)"></app-confirmation-popup>
 </ng-container>

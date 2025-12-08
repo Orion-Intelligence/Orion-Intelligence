@@ -16,6 +16,7 @@
 @use 'app/pages/tenant/tenant-management/add-tenant/add-tenant.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component.css';
+@use 'app/shared/partials/confirmation-popup/confirmation-popup.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
@@ -397,4 +398,8 @@ table tr th {
 
 table tr:last-child td {
   border-bottom: none !important;
+}
+
+.btn-danger{
+  background: red !important;
 }

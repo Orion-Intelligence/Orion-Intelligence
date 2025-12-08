@@ -94,10 +94,24 @@ async def get_all_tenants():
     response_description="Updated user information.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
 async def update_user(user: tenant_param_model):
     return await TenantManager.get_instance().update_user(user)
+
+@tenant_routes.post(
+    "/api/delete/user",
+    summary="Update user",
+    description="Update user profile and access details within the tenant.",
+    tags=["Users"],
+    operation_id="updateUser",
+    response_description="Updated user information.",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+)
+async def update_user(user: tenant_param_model, current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().delete_user(user, current_user)
 
 
 @tenant_routes.post(
