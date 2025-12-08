@@ -270,12 +270,45 @@
 
 }
 
+.swagger-ui .dialog-ux .modal-ux-header .close-modal{
+    padding: 0 !important;
+}
+
 .swagger-ui .opblock-tag-section .opblock:last-of-type {
     border-bottom: none !important;
 }
 
-.swagger-ui .opblock-summary {
+.swagger-ui .json-schema-2020-12-accordion{
+    padding: 0 !important;
+}
+
+.swagger-ui button{
     padding: 10px 16px !important;
+}
+
+.swagger-ui .model-box-control:focus, .swagger-ui .models-control:focus, .swagger-ui .opblock-summary-control:focus{
+    border: none !important;
+    outline: none !important;
+}
+
+.swagger-ui .opblock-summary:has(.opblock-summary-control:focus) {
+    background: #61affe15 !important;
+}
+
+.swagger-ui .model-box-control:focus, .swagger-ui .models-control:focus, .swagger-ui .opblock-summary-control{
+    margin-right: 30px;
+}
+
+.swagger-ui .scheme-container .schemes:not(:has(.schemes-server-container)){
+    padding: 0;
+}
+
+.swagger-ui .scheme-container{
+    padding: 10 !important;
+}
+
+.swagger-ui .opblock-summary {
+    padding: 0 !important;
     align-items: center !important;
 }
 
@@ -351,7 +384,7 @@
     max-width: 1420px !important;
     border: 1px solid #00000010;
     margin: 0 auto 16px auto !important;
-    padding: 18px !important;
+    padding: 13px !important;
     border-radius: 12px;
 }
 

@@ -484,67 +484,64 @@ REPORT_DOCS = {
     "defacement": {
         "description": (
             "Get a specific defacement intelligence report targeting phishing or hacked websites by its report ID.\n\n"
-            "The request is a simple HTTP GET that takes a single path parameter:\n"
+            "The request is an HTTP GET that takes a single path parameter:\n"
             "- **doc_id** — string identifier of the defacement report document.\n\n"
             "No request body is required."
         ),
         "response_description": (
-          "Single defacement intelligence report document, returned as a JSON object describing a defaced or "
-          "phishing-style page and its metadata.\n\n"
-          "Core response fields typically include:\n"
-          "- **m_team** — threat actor, group or campaign name responsible for the defacement/phishing (e.g. `mthcht`)\n"
-          "- **m_base_url** — base URL or service where the content or campaign originates (e.g. `https://github.com/`)\n"
-          "- **m_url** — concrete URL of the defaced or phishing page\n"
-          "- **m_ioc_type** — high-level classification of the event or page type (e.g. `phishing`)\n"
-          "- **m_leak_date** — date when the defacement/phishing item was first reported or observed\n"
-          "- **m_network** — network type, usually `clearnet` or `onion`\n"
-          "- **m_scrap_file** — internal scraper identifier or file prefix (e.g. `_github_mthcht_awesome_lists`)\n"
-          "- **m_domain** — list of domains involved in the event (infrastructure and target domains)\n"
-          "- **m_hash** — internal hash for this document, used for deduplication and correlation\n"
-          "- **m_update_date** — last time the document was updated in the system\n"
-          "- **m_creation_date** — first time the document was created/ingested into the system\n\n"
-          "Depending on the source, additional fields may also be present, such as:\n"
-          "- **m_title** — page or banner title of the defaced site\n"
-          "- **m_content** — full textual content extracted from the page\n"
-          "- **m_important_content** — key snippet extracted from the page\n"
-          "- **m_content_type** — classification labels (e.g. `defacement`, `phishing`)\n"
-          "- **m_sub_url** — list of related or child URLs\n"
-          "- **m_validity_score** — internal confidence/validity score\n"
-          "- **m_screenshot** — screenshot identifier pointing to a stored image of the page\n"
-          "- **m_language** — detected language(s) of the content\n"
-          "- **m_currencies** — currencies mentioned in the content\n"
-          "- **m_organization** — extracted organizations or brands related to the event"
-          "\n\nExample response:\n"
-          "```json\n"
-          "{\n"
-          '  "m_team": "mthcht",\n'
-          '  "m_base_url": "https://github.com/",\n'
-          '  "m_url": "http://me-itay-mask_logjjin.godaddysites.com/",\n'
-          '  "m_ioc_type": ["phishing"],\n'
-          '  "m_leak_date": "2025-12-01",\n'
-          '  "m_network": "clearnet",\n'
-          '  "m_scrap_file": "_github_mthcht_awesome_lists",\n'
-          '  "m_domain": [\n'
-          '    "github.com",\n'
-          '    "me-itay-mask_logjjin.godaddysites.com"\n'
-          "  ],\n"
-          '  "m_hash": "e386dad88518aaa3072f8aefda4f1f5fe89b0df31248af77a09270903410c57c",\n'
-          '  "m_update_date": "2025-12-01T01:33:51.873016+00:00",\n'
-          '  "m_creation_date": "2025-12-01T01:33:51.878252+00:00",\n'
-          '  "m_title": "Example phishing landing page",\n'
-          '  "m_content": "Login to your account to resolve a security issue...",\n'
-          '  "m_important_content": "Phishing kit targeting example users.",\n'
-          '  "m_content_type": ["defacement", "phishing"],\n'
-          '  "m_sub_url": [],\n'
-          '  "m_validity_score": 92,\n'
-          '  "m_screenshot": "1234567890abcdef",\n'
-          '  "m_language": ["en"],\n'
-          '  "m_currencies": [],\n'
-          '  "m_organization": ["Example Corp"]\n'
-          "}\n"
-          "```\n"
-      ) + IOC_DOC,
+            "Single defacement intelligence report document, returned as a JSON object describing a defaced, "
+            "phishing, or compromised webpage and its metadata.\n\n"
+            "Core response fields typically include:\n"
+            "- **m_team** — actor, group, or user associated with the report (e.g. a social-media source)\n"
+            "- **m_base_url** — platform or originating service (e.g. `https://tweetfeed.live/`)\n"
+            "- **m_url** — the direct URL of the defaced or phishing page\n"
+            "- **m_ioc_type** — classification (e.g. `phishing`, `databases`)\n"
+            "- **m_leak_date** — first time the event or page was observed\n"
+            "- **m_source_url** — list of source URLs referencing the report (e.g. tweets, posts)\n"
+            "- **m_network** — network type, usually `clearnet` or `onion`\n"
+            "- **m_social_media_profiles** — accounts tied to the incident or reporter\n"
+            "- **m_weblink** — extracted or related external links\n"
+            "- **m_external_scanners** — external threat-intel or sandbox scanner references\n"
+            "- **m_scrap_file** — internal scraper identifier\n"
+            "- **m_domain** — list of domains involved in the event\n"
+            "- **m_hash** — internal hash used for deduplication\n"
+            "- **m_update_date** — last update timestamp\n"
+            "- **m_creation_date** — first ingestion timestamp\n\n"
+            "Additional fields may appear depending on the source, such as content, metadata, tags, and screenshots.\n\n"
+            "Example response:\n"
+            "```json\n"
+            "{\n"
+            "  \"m_team\": \"CarlyGriggs13\",\n"
+            "  \"m_base_url\": \"https://tweetfeed.live/\",\n"
+            "  \"m_url\": \" http://tranhdonghoxinh.com\",\n"
+            "  \"m_ioc_type\": [\"phishing\", \"databases\"],\n"
+            "  \"m_leak_date\": \"2025-12-02\",\n"
+            "  \"m_source_url\": [\n"
+            "    \"https://x.com/CarlyGriggs13/status/1995649652855914520\"\n"
+            "  ],\n"
+            "  \"m_network\": \"clearnet\",\n"
+            "  \"m_social_media_profiles\": [\n"
+            "    \"https://twitter.com/CarlyGriggs13\"\n"
+            "  ],\n"
+            "  \"m_weblink\": [\n"
+            "    \"http://tranhdonghoxinh.com\"\n"
+            "  ],\n"
+            "  \"m_external_scanners\": [\n"
+            "    \"https://www.virustotal.com/gui/search/http%253A%252F%252Ftranhdonghoxinh.com\"\n"
+            "  ],\n"
+            "  \"m_scrap_file\": \"_tweetfeed\",\n"
+            "  \"m_domain\": [\n"
+            "    \"tweetfeed.live\",\n"
+            "    \"tranhdonghoxinh.com\"\n"
+            "  ],\n"
+            "  \"m_hash\": \"91662087cdc0cc93dd3f0916ef5d215164c539715103d8c4a07d4aef39361a56\",\n"
+            "  \"m_update_date\": \"2025-12-02T16:35:31.246539+00:00\",\n"
+            "  \"m_creation_date\": \"2025-12-02T16:35:31.246585+00:00\"\n"
+            "}\n"
+            "```\n"
+        ) + IOC_DOC,
     },
+
     "breach": {
         "description": (
             "Get a specific breach monitoring report for a tracked website or asset by its report ID.\n\n"
@@ -554,61 +551,60 @@ REPORT_DOCS = {
             "No request body is required."
         ),
         "response_description": (
-          "Single breach monitoring report document, returned as a JSON object representing the tracked website "
-          "or asset and associated breach data.\n\n"
-          "A typical response looks like:\n"
-          "```json\n"
-          "{\n"
-          '  "m_title": "Columbus Regional Healthcare System",\n'
-          '  "m_url": "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion/",\n'
-          '  "m_screenshot": "69993154316451142028569605097804",\n'
-          '  "m_base_url": "http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion",\n'
-          '  "m_content": "Columbus Regional Healthcare System has one of the highest volume and most experienced '
-          'robotic surgical programs in Southeastern North Carolina. ...",\n'
-          '  "m_important_content": "Columbus Regional Healthcare System has one of the highest volume and most '
-          'experienced robotic surgical programs in Southeastern North Carolina.",\n'
-          '  "m_network": "onion",\n'
-          '  "m_content_type": ["leaks"],\n'
-          '  "m_weblink": ["https://crhealthcare.org/"],\n'
-          '  "m_dumplink": ["https://crhealthcare.org/"],\n'
-          '  "m_company_name": "Columbus Regional Healthcare System",\n'
-          '  "m_location": ["US"],\n'
-          '  "m_team": "diaxin",\n'
-          '  "m_scrap_file": "_7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd",\n'
-          '  "m_language": ["en"],\n'
-          '  "m_domain": [\n'
-          '    "7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion",\n'
-          '    "crhealthcare.org"\n'
-          "  ],\n"
-          '  "m_hash": "1a17b87ad12262b38a81419c3d1cc8c57868ce62b9e32e042ff1b20a9aefacc0",\n'
-          '  "m_update_date": "2025-12-03T20:46:34.909368+00:00",\n'
-          '  "m_creation_date": "2025-12-03T20:46:34.909391+00:00",\n'
-          '  "content_type": ["ddos", "darkweb"]\n'
-          "}\n"
-          "```\n\n"
-          "Common fields and their meaning:\n"
-          "- **m_title** — human-readable title of the victim or breached asset\n"
-          "- **m_url** — specific leak or post URL on the darkweb/dump source\n"
-          "- **m_screenshot** — screenshot identifier (use `/api/search/breach/screenshot/{m_screenshot}` to fetch it)\n"
-          "- **m_base_url** — base onion/clearnet URL of the leak site or listing\n"
-          "- **m_content** — full textual content of the breach note/announcement\n"
-          "- **m_important_content** — condensed or highlighted summary of the breach content\n"
-          "- **m_network** — network type (e.g. `onion`)\n"
-          "- **m_content_type** — internal category labels, e.g. `leaks`\n"
-          "- **m_weblink** — list of URLs pointing to the victim’s official/clearnet web presence\n"
-          "- **m_dumplink** — list of URLs where the attacker claims to host or reference leaked data\n"
-          "- **m_company_name** — normalized company or organization name of the victim\n"
-          "- **m_location** — list of country/region codes associated with the victim (e.g. `US`)\n"
-          "- **m_team** — threat group, ransomware gang or actor name (e.g. `diaxin`)\n"
-          "- **m_scrap_file** — internal scrape identifier or file prefix\n"
-          "- **m_language** — detected language(s) of the content (e.g. `en`)\n"
-          "- **m_domain** — domains associated with the leak site and the victim (onion + clearnet)\n"
-          "- **m_hash** — internal hash for the document used for deduplication and correlation\n"
-          "- **m_update_date** — last time the document was updated in the system\n"
-          "- **m_creation_date** — first time the document was created/ingested\n"
-          "- **content_type** — high-level classification tags used by other modules (e.g. `ddos`, `darkweb`)\n"
-      ) + IOC_DOC,
+            "Single breach monitoring report document, returned as a JSON object representing the tracked website "
+            "or asset and associated breach data.\n\n"
+            "Example response:\n"
+            "```json\n"
+            "{\n"
+            "  \"m_title\": \"Columbus Regional Healthcare System\",\n"
+            "  \"m_url\": \"http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion/\",\n"
+            "  \"m_screenshot\": \"69993154316451142028569605097804\",\n"
+            "  \"m_base_url\": \"http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion\",\n"
+            "  \"m_content\": \"Columbus Regional Healthcare System has one of the highest volume and most experienced robotic surgical programs in Southeastern North Carolina. http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion http://7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion/\",\n"
+            "  \"m_important_content\": \"Columbus Regional Healthcare System has one of the highest volume and most experienced robotic surgical programs in Southeastern North Carolina.\",\n"
+            "  \"m_network\": \"onion\",\n"
+            "  \"m_content_type\": [\"leaks\"],\n"
+            "  \"m_weblink\": [\"https://crhealthcare.org/\"],\n"
+            "  \"m_dumplink\": [\"https://crhealthcare.org/\"],\n"
+            "  \"m_company_name\": \"Columbus Regional Healthcare System\",\n"
+            "  \"m_location\": [\"US\"],\n"
+            "  \"m_team\": \"diaxin\",\n"
+            "  \"m_scrap_file\": \"_7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd\",\n"
+            "  \"m_language\": [\"en\"],\n"
+            "  \"m_domain\": [\n"
+            "    \"7ukmkdtyxdkdivtjad57klqnd3kdsmq6tp45rrsxqnu76zzv3jvitlqd.onion\",\n"
+            "    \"crhealthcare.org\"\n"
+            "  ],\n"
+            "  \"m_hash\": \"1a17b87ad12262b38a81419c3d1cc8c57868ce62b9e32e042ff1b20a9aefacc0\",\n"
+            "  \"m_update_date\": \"2025-12-03T20:46:34.909368+00:00\",\n"
+            "  \"m_creation_date\": \"2025-12-03T20:46:34.909391+00:00\",\n"
+            "  \"content_type\": [\"ddos\", \"darkweb\"]\n"
+            "}\n"
+            "```\n\n"
+            "Common fields and their meaning:\n"
+            "- **m_title** — human-readable title of the victim or breached asset\n"
+            "- **m_url** — leak or post URL on the darkweb/dump source\n"
+            "- **m_screenshot** — screenshot identifier (use `/api/search/breach/screenshot/{m_screenshot}`)\n"
+            "- **m_base_url** — base onion/clearnet URL of the leak site\n"
+            "- **m_content** — full textual content of the breach announcement\n"
+            "- **m_important_content** — condensed summary of the breach\n"
+            "- **m_network** — network type (e.g. `onion`)\n"
+            "- **m_content_type** — internal category labels (e.g. `leaks`)\n"
+            "- **m_weblink** — URLs pointing to the victim’s clearnet web presence\n"
+            "- **m_dumplink** — URLs referencing claimed leaked data\n"
+            "- **m_company_name** — normalized company/organization name\n"
+            "- **m_location** — list of associated country/region codes\n"
+            "- **m_team** — threat actor or ransomware group name\n"
+            "- **m_scrap_file** — internal scraper identifier\n"
+            "- **m_language** — detected language(s)\n"
+            "- **m_domain** — domains associated with the leak site and victim\n"
+            "- **m_hash** — internal hash used for deduplication and correlation\n"
+            "- **m_update_date** — last update timestamp\n"
+            "- **m_creation_date** — ingestion timestamp\n"
+            "- **content_type** — high-level classification tags (e.g. `ddos`, `darkweb`)\n"
+        ) + IOC_DOC,
     },
+
     "news": {
         "description": (
             "Get a specific breach-related news intelligence report generated from external news feeds by its report ID.\n\n"
@@ -618,51 +614,54 @@ REPORT_DOCS = {
             "No request body is required."
         ),
         "response_description": (
-          "News intelligence report document describing breach- or threat-related events from external news sources, "
-          "returned as a single JSON object.\n\n"
-          "Core response fields typically include:\n"
-          "- **m_title** — article or post title (e.g. `Dangerous websites Warning List`)\n"
-          "- **m_url** — direct URL of the article/post (e.g. a specific blog or advisory page)\n"
-          "- **m_base_url** — base URL of the publishing site (e.g. `https://cert.pl`)\n"
-          "- **m_content** — normalized content body, including title, description, publication info and extracted text\n"
-          "- **m_important_content** — short summary or key snippet (falls back to placeholders like `No description found` when necessary)\n"
-          "- **m_network** — network classification of the resource, typically `clearnet`\n"
-          "- **m_content_type** — internal labels describing the article, such as `news`, `tracking`, etc.\n"
-          "- **m_team** — name of the publishing or responsible team (e.g. `CERT Polska Team`)\n"
-          "- **m_country** — list of associated countries or regions (e.g. `[\"Poland\"]`)\n"
-          "- **m_author** — list of author names for the article (e.g. `[\"CERT Author\"]`)\n"
-          "- **m_scrap_file** — internal scraper identifier or file prefix (e.g. `_cert_pl`)\n"
-          "- **m_language** — detected language(s) of the article content (e.g. `[\"en\"]`)\n"
-          "- **m_domain** — list of domains associated with the news source (e.g. `[\"cert.pl\"]`)\n"
-          "- **m_hash** — internal hash for this document, used for deduplication and correlation\n"
-          "- **m_update_date** — last time the document was updated in the system\n"
-          "- **m_creation_date** — first time the document was created/ingested into the system\n"
-          "- **content_type** — high-level classification tags used by other modules (e.g. `[\"darkweb\"]`)\n"
-          "\nExample response:\n"
-          "```json\n"
-          "{\n"
-          '  "m_title": "Dangerous websites Warning List",\n'
-          '  "m_url": "https://cert.pl/en/posts/2019/02/dangerous-websites-warning-list/",\n'
-          '  "m_base_url": "https://cert.pl",\n'
-          '  "m_content": "Title: Dangerous websites Warning List\\nNo description found\\n\\nPublished on: 2019-02-02\\nResources: []\\nImages: []",\n'
-          '  "m_important_content": "No description found",\n'
-          '  "m_network": "clearnet",\n'
-          '  "m_content_type": ["news", "tracking"],\n'
-          '  "m_team": "CERT Polska Team",\n'
-          '  "m_country": ["Poland"],\n'
-          '  "m_author": ["CERT Author"],\n'
-          '  "m_scrap_file": "_cert_pl",\n'
-          '  "m_language": ["en"],\n'
-          '  "m_domain": ["cert.pl"],\n'
-          '  "m_hash": "d2b1cc17284f0d286d5454b294b8c9c0ab44593f8072fe4f4ad8fc9d5353f993",\n'
-          '  "m_update_date": "2025-10-13T16:10:29.381614+00:00",\n'
-          '  "m_creation_date": "2025-10-13T16:10:29.388117+00:00",\n'
-          '  "content_type": ["darkweb"]\n'
-          "}\n"
-          "```\n"
-      ) + IOC_DOC,
+            "News intelligence report document describing breach- or threat-related events from external news sources, "
+            "returned as a single JSON object.\n\n"
+            "Core response fields typically include:\n"
+            "- **m_title** — title of the article or report\n"
+            "- **m_url** — direct URL of the article\n"
+            "- **m_base_url** — base URL of the source site\n"
+            "- **m_content** — normalized article text, including extracted narrative content\n"
+            "- **m_important_content** — summary or extracted key snippet\n"
+            "- **m_network** — usually `clearnet`\n"
+            "- **m_content_type** — internal classification labels such as `news`\n"
+            "- **m_team** — publishing organization or referenced entity\n"
+            "- **m_weblink** — list of related article URLs\n"
+            "- **m_dumplink** — list of referenced dump or external resources\n"
+            "- **m_organization** — organizations mentioned or discussed in the article\n"
+            "- **m_language** — detected language(s)\n"
+            "- **m_domain** — domains associated with the source\n"
+            "- **m_hash** — internal hash for deduplication\n"
+            "- **m_update_date** — last update timestamp\n"
+            "- **m_creation_date** — ingestion timestamp\n"
+            "- **content_type** — high-level classification tags used by other modules\n\n"
+            "Example response:\n"
+            "```json\n"
+            "{\n"
+            "  \"m_title\": \"Turning Intelligence Into Action with Threat-Informed Defense\",\n"
+            "  \"m_url\": \"https://thehackernews.com/expert-insights/2025/09/turning-intelligence-into-action-with.html\",\n"
+            "  \"m_base_url\": \"https://thehackernews.com/\",\n"
+            "  \"m_content\": \"Jean-Philippe Salles — Head of Product at Filigran Sept 22, 2025  Cybersecurity is undergoing a necessary transformation from reacting to threats as they arise to proactively anticipating and addressing them through Threat-Informed Defense (TID). This shift emphasizes operational discipline over accumulating more tools. It involves using threat intelligence to streamline existing technologies, enhance the quality of security signals, and focus efforts on the threats most relevant to each organization. The goal is to continuously identify and close security gaps by combining insights from external threat data with internal defense capabilities.  How do you put TID into practice? The team at Filigran has broken down the TID framework into a six-stage pipeline to develop actionable chunks for cybersecurity leaders. In this article, we share the details so that your security teams can leverage it too to support TID.  What is Threat-Informed Defense?#  First advocated by MITRE, Threat-Informed Defense (TID) leverages MITRE ATT&CK framework to map how real threat actors operate and align defenses accordingly. It rests on three pillars:  Cyber threat intelligence: First gather, ingest and process all of your threat intelligence to make it contextual and relevant for you. Go beyond IOCs to understand adversary behaviors and intent, which are more durable and more costly for attackers to change. Defensive measures: Translate prioritized threat intelligence into detections, hardening, response playbooks, and configurations; utilize it properly and make it do the work for you. Adapt controls to the threats most likely to target you. Testing and evaluation: Plan adversary emulation and run continuous breach-and-attack simulations to verify coverage and avoid regressions. Gain granular level visibility into the effectiveness of your security programs. Automate and scale for continuous security posture validation and improvement.  Security teams today are facing tighter budgets and limited resources. As a result, many CISOs are shifting their focus from constantly adopting new tools to making the most of the technologies they already have. This change in mindset is driving a more proactive approach to cybersecurity. Instead of waiting for threats to happen, leaders are asking critical questions like 'Who might target us?', 'How do they operate?', 'Are our defenses strong enough?' and 'What's our plan if something fails?'. Implementing a Threat-Informed Defense (TID) strategy requires breaking down silos between teams, encouraging collaboration and information sharing across security operations, threat intelligence, and testing groups.  From Idea to Execution: Threat-Informed Defense Pipeline#  Similar to Continuous Threat Exposure Management (CTEM), TID is a concept, a cybersecurity strategy. Organizations can adopt and implement TID through various approaches, whether using commercial solutions, open-source tools, or hybrid implementations. For example, one approach could involve leveraging Filigran's open-source extended threat management (XTM) suite that combines threat intelligence platform with adversary emulation capabilities. These integrated solutions help security teams operationalize TID through six actionable stages:  Stage 01: Strategic threat landscape assessment#  Goal: Identify which adversaries, malware, and campaigns are most relevant to your business model, stack, and region.  How: Threat assessment in threat-informed defense involves systematically evaluating and prioritizing the specific threat actors, their capabilities, tactics, techniques, and procedures (TTPs) that are most likely to target your organization's critical assets. A threat intelligence platform (TIP) allows you to gather, analyze, refine and share prioritized threat intelligence is a useful component for this step.  Outcome: A prioritized watchlist with clear inclusion criteria and analyst annotations.  Stage 02: Actor and malware tracking#  Goal: Keep pace with evolving TTPs and indicators while filtering noise.  How: Maintain adaptive watchlists; triage incoming reports; tag IOCs and TTPs and distribute them to SIEM/EDR/SOAR. Modern TIPs like open-source based OpenCTI use knowledge graph models to provide powerful visualizations to link campaigns, malware, techniques, and exploited vulnerabilities.  Outcome: Continuously updated views of active threats and automated, stakeholder-ready reporting to show program progress.  Stage 03: TTP and report mapping#  Goal: See where attacker behaviors outpace your defenses.  How: Advanced Persistent Threats (APTs) and opportunistic attackers increasingly target the expanded attack surface created by cloud-native architectures, leveraging misconfigurations in multi-cloud environments, exploiting container escape vulnerabilities, poisoning CI/CD pipelines with malicious code, and conducting identity-based attacks through stolen credentials and API keys. OpenCTI can serve as a critical enabler for this assessment by centralizing and correlating threat intelligence specific to your technology stack, automatically ingesting indicators and TTPs from multiple sources—including cloud provider threat feeds, container security advisories, and identity-focused threat research. The platform maps these threats to the MITRE ATT&CK framework, allowing security teams to visualize adversary groups.  Outcome: A prioritized TTP list ready for adversary emulation and detection engineering.  Stage 04: Breach & attack simulation#  Goal: Prove whether you security controls detect and respond as designed.  How: Testing security controls in TID moves beyond generic vulnerability scanning and compliance checks to validate whether your defenses actually stop the specific adversary behaviors targeting your organization. Adversary Exposure Validation (AEV) tools makes threat intelligence actionable by emulating the exact techniques your most likely threat actors employ. Filigran's open-source OpenBAS provides scalability to design and execute purple team exercises, breach and attack simulations, and atomic red team tests. It also feed outcomes back into OpenCTI to maintain context with the threats that matter.  Outcome: A continuous feedback loop that catches regressions, validates detections, and informs engineering fixes.  Stage 05: Control validation and investment#  Goal: Translate intel and testing into targeted remediation and budget decisions.  How: Use time-series and historical snapshots to show coverage trends and risk reduction. Apply remediation guidance from OpenBAS to tune configs, update rules, and plan upgrades or replacements. The continuous validation using the combination of OpenCTI and OpenBAS creates a feedback loop that informs strategic investments and architectural decisions with unprecedented precision. The quantifiable nature of these insights enables CISOs to justify budget requests with specific risk reduction metrics, prioritize engineering efforts based on actual adversary impact  Outcome: Evidence-based prioritization that improves day-to-day resilience and informs quarterly planning.  Stage 06: Quarterly review#  Goal: Recalibrate strategy and maintain executive alignment.  How: Consolidate threat insights, control coverage, and simulation results into executive-ready reporting. Our recommendation is to make this as a quarterly exercise to share with your key stakeholders. This creates a closed-loop system where threat intelligence directly drives security validation priorities. Revisit tracked threats, business priorities, and risk appetite as part of a broader Continuous Threat Exposure Management (CTEM) rhythm.  Outcome: A living program that stays aligned to business risk and adversary reality.  Ready to make the shift to Threat-Informed Defense?#  Utilize TID to shift the conversation from traditional security life cycle (protection/detection/response) to proactive finding the gaps in your security controls and reducing cyber risks. The empirical approach of TID provides metrics that matter, from 'we blocked 10 million attacks' to 'we can detect and stop 85% of the techniques used by the ransomware groups actively targeting our sector and here is what we are going to do to fill our gaps for the rest 15%'.  If you'd like to learn more about TID, Filigran's open-source product suite, and its alignment with the framework you can download our latest white paper, A Practical Guide to Threat-Informed Defense, or contact us to speak directly with our team.    SHARE      Tweet  Share  Share  Share\",\n"
+            "  \"m_important_content\": \"Jean-Philippe Salles — Head of Product at Filigran Sept 22, 2025  Cybersecurity is undergoing a necessary transformation from reacting to threats as they arise to proactively anticipating and addressing them through Threat-Informed Defense (TID). This shift emphasizes operational discipline over accumulating more tools.\",\n"
+            "  \"m_network\": \"clearnet\",\n"
+            "  \"m_content_type\": [\"news\"],\n"
+            "  \"m_weblink\": [\n"
+            "    \"https://thehackernews.com/expert-insights/2025/09/turning-intelligence-into-action-with.html\"\n"
+            "  ],\n"
+            "  \"m_dumplink\": [\n"
+            "    \"https://thehackernews.com/expert-insights/2025/09/turning-intelligence-into-action-with.html\"\n"
+            "  ],\n"
+            "  \"m_team\": \"hackernews live\",\n"
+            "  \"m_scrap_file\": \"_thehackernews\",\n"
+            "  \"m_organization\": [\"Filigran\", \"MITRE\", \"Cybersecurity\"],\n"
+            "  \"m_language\": [\"en\"],\n"
+            "  \"m_domain\": [\"thehackernews.com\"],\n"
+            "  \"m_hash\": \"7cd89edea323f8127203c984df5df7d7cbb0b564cae4b5ef770f7050f11cba34\",\n"
+            "  \"m_update_date\": \"2025-10-10T08:21:46.160580+00:00\",\n"
+            "  \"m_creation_date\": \"2025-10-10T08:21:46.186711+00:00\"\n"
+            "}\n"
+            "```\n"
+        ) + IOC_DOC,
     },
-
     "exploit": {
         "description": (
             "Get a specific exploit intelligence report (CVE, exploit kit, zero-day activity, etc.) by its report ID.\n\n"
@@ -672,65 +671,59 @@ REPORT_DOCS = {
             "No request body is required."
         ),
         "response_description": (
-          "Exploit intelligence report document containing exploit details, returned as a single JSON object.\n\n"
-          "Core response fields typically include:\n"
-          "- **m_title** — exploit or module title (e.g. `Windows Registry Only Persistence`)\n"
-          "- **m_url** — direct URL for the exploit/module page "
-          "(e.g. a Metasploit module page or technical write-up)\n"
-          "- **m_base_url** — base URL of the publishing site or contact page "
-          "(e.g. `https://www.rapid7.com/contact/`)\n"
-          "- **m_content** — normalized exploit description or short text body\n"
-          "- **m_important_content** — key snippet or short summary emphasizing the exploit name or purpose\n"
-          "- **m_network** — network type of the source, typically `clearnet`\n"
-          "- **m_content_type** — internal labels such as `cve`, `exploit`, `poc`, etc.\n"
-          "- **m_weblink** — list of additional URLs related to the exploit, such as source code repositories or commits "
-          "(for example Metasploit module paths on GitHub)\n"
-          "- **content_type** — high-level classification tags used by other modules "
-          "(e.g. `[\"persistence\"]` for a persistence-focused module)\n"
-          "- **m_name** — author or contributor information, often including names and email addresses\n"
-          "- **m_code_snippet** — list of code or command snippets showing how to use or trigger the exploit "
-          "(for example an `msf > use exploit/windows/persistence/registry` Metasploit usage example)\n"
-          "- **m_platform** — list of affected or supported platforms (e.g. `[\"Windows\"]`)\n"
-          "- **m_scrap_file** — internal scraper identifier or file prefix (e.g. `_rapid7`)\n"
-          "- **m_domain** — list of domains related to the exploit content and references "
-          "(e.g. `github.com`, `rapid7.com`)\n"
-          "- **m_hash** — internal hash for this document, used for deduplication and correlation\n"
-          "- **m_update_date** — last time the document was updated in the system\n"
-          "- **m_creation_date** — first time the document was created/ingested into the system\n\n"
-          "Depending on the source and context, additional enrichment fields may be present, such as CVE identifiers, "
-          "threat actor information or extended narrative text."
-          "\n\nExample response:\n"
-          "```json\n"
-          "{\n"
-          '  "m_title": "Windows Registry Only Persistence",\n'
-          '  "m_url": "https://www.rapid7.com/db/modules/exploit/windows/persistence/registry/",\n'
-          '  "m_base_url": "https://www.rapid7.com/contact/",\n'
-          '  "m_content": "Windows Registry Only Persistence",\n'
-          '  "m_important_content": "Windows Registry Only Persistence",\n'
-          '  "m_network": "clearnet",\n'
-          '  "m_content_type": ["cve"],\n'
-          '  "m_weblink": [\n'
-          '    "https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/windows/persistence/registry.rb",\n'
-          '    "https://github.com/rapid7/metasploit-framework/commits/master/modules/exploits/windows/persistence/registry.rb"\n'
-          "  ],\n"
-          '  "content_type": ["persistence"],\n'
-          '  "m_name": "Donny Maasland donny.maasland@fox-it.com,h00die",\n'
-          '  "m_code_snippet": [\n'
-          '    "msf > use exploit/windows/persistence/registry\\n\\nmsf exploit(registry) > show targets\\n\\n...targets...\\n\\nmsf exploit(registry) > set TARGET < target-id >\\n\\nmsf exploit(registry) > show options\\n\\n...show and set options...\\n\\nmsf exploit(registry) > exploit"\n'
-          "  ],\n"
-          '  "m_platform": ["Windows"],\n'
-          '  "m_scrap_file": "_rapid7",\n'
-          '  "m_domain": [\n'
-          '    "github.com",\n'
-          '    "rapid7.com",\n'
-          '    "rapid7.com/contact"\n'
-          "  ],\n"
-          '  "m_hash": "6c88d95f4d98b5c95f65a79da548fd5c3b33d6ac319790c33630dc2f2d869019",\n'
-          '  "m_update_date": "2025-10-28T18:09:14.512739+00:00",\n'
-          '  "m_creation_date": "2025-10-28T18:09:14.516589+00:00"\n'
-          "}\n"
-          "```\n"
-      ) + IOC_DOC,
+           "Exploit intelligence report document containing exploit details, returned as a single JSON object.\n\n"
+           "Core response fields typically include:\n"
+           "- **m_title** — exploit or module title\n"
+           "- **m_url** — direct URL for the exploit/module page\n"
+           "- **m_base_url** — base URL of the publishing site or contact page\n"
+           "- **m_content** — normalized exploit description or short text body\n"
+           "- **m_important_content** — key snippet or short summary emphasizing the exploit name or purpose\n"
+           "- **m_network** — network type of the source, typically `clearnet`\n"
+           "- **m_content_type** — internal labels such as `cve`, `exploit`, `poc`\n"
+           "- **m_weblink** — list of additional URLs related to the exploit (e.g. source code or commits)\n"
+           "- **content_type** — high-level classification tags used by other modules\n"
+           "- **m_name** — author or contributor information\n"
+           "- **m_code_snippet** — list of code or command snippets showing usage of the exploit\n"
+           "- **m_platform** — list of affected or supported platforms\n"
+           "- **m_scrap_file** — internal scraper identifier or file prefix\n"
+           "- **m_domain** — domains related to the exploit content and references\n"
+           "- **m_hash** — internal hash for this document, used for deduplication and correlation\n"
+           "- **m_update_date** — last time the document was updated in the system\n"
+           "- **m_creation_date** — first time the document was created/ingested into the system\n\n"
+           "Depending on the source and context, additional enrichment fields may be present, such as CVE identifiers, "
+           "threat actor information or extended narrative text.\n\n"
+           "Example response:\n"
+           "```json\n"
+           "{\n"
+           "  \"m_title\": \"Windows Registry Only Persistence\",\n"
+           "  \"m_url\": \"https://www.rapid7.com/db/modules/exploit/windows/persistence/registry/\",\n"
+           "  \"m_base_url\": \"https://www.rapid7.com/contact/\",\n"
+           "  \"m_content\": \"Windows Registry Only Persistence\",\n"
+           "  \"m_important_content\": \"Windows Registry Only Persistence\",\n"
+           "  \"m_network\": \"clearnet\",\n"
+           "  \"m_content_type\": [\"cve\"],\n"
+           "  \"m_weblink\": [\n"
+           "    \"https://github.com/rapid7/metasploit-framework/blob/master//modules/exploits/windows/persistence/registry.rb\",\n"
+           "    \"https://github.com/rapid7/metasploit-framework/commits/master//modules/exploits/windows/persistence/registry.rb\"\n"
+           "  ],\n"
+           "  \"content_type\": [\"persistence\"],\n"
+           "  \"m_name\": \"Donny Maasland donny.maasland@fox-it.com,h00die\",\n"
+           "  \"m_code_snippet\": [\n"
+           "    \"msf > use exploit/windows/persistence/registry\\n\\n    msf exploit(registry) > show targets\\n\\n        ...targets...\\n\\n    msf exploit(registry) > set TARGET < target-id >\\n\\n    msf exploit(registry) > show options\\n\\n        ...show and set options...\\n\\n    msf exploit(registry) > exploit\"\n"
+           "  ],\n"
+           "  \"m_platform\": [\"Windows\"],\n"
+           "  \"m_scrap_file\": \"_rapid7\",\n"
+           "  \"m_domain\": [\n"
+           "    \"github.com\",\n"
+           "    \"rapid7.com\",\n"
+           "    \"rapid7.com/contact\"\n"
+           "  ],\n"
+           "  \"m_hash\": \"6c88d95f4d98b5c95f65a79da548fd5c3b33d6ac319790c33630dc2f2d869019\",\n"
+           "  \"m_update_date\": \"2025-10-28T18:09:14.512739+00:00\",\n"
+           "  \"m_creation_date\": \"2025-10-28T18:09:14.516589+00:00\"\n"
+           "}\n"
+           "```\n"
+        ) + IOC_DOC,
     },
 
     "strategic": {
@@ -743,74 +736,72 @@ REPORT_DOCS = {
             "No request body is required."
         ),
         "response_description": (
-          "Strategic darkweb intelligence document representing a single crawled page (such as a forum thread, "
-          "marketplace listing or generic page), returned as a JSON object.\n\n"
-          "Core response fields typically include:\n"
-          "- **m_base_url** — base URL of the hidden service or site (e.g. the main forum onion address)\n"
-          "- **m_url** — specific page URL, such as a thread URL with pagination\n"
-          "- **m_network** — network type (e.g. `onion`)\n"
-          "- **m_title** — page title as seen in the source (for example a thread title in the forum)\n"
-          "- **m_meta_description** — meta description extracted from the HTML, if available\n"
-          "- **m_content** — normalized text content extracted from the page (including posts, notices and boilerplate)\n"
-          "- **m_important_content** — key snippet or condensed portion of the most relevant text on the page\n"
-          "- **m_images** — list of image URLs extracted from the page (logos, avatars, icons, etc.)\n"
-          "- **m_sub_url** — list of internal navigation or related links (search, login, rules, other threads, sections)\n"
-          "- **m_validity_score** — internal confidence/validity score for the crawled document\n"
-          "- **m_meta_keywords** — keyword string summarizing tags, topics and SEO-style keywords for the page\n"
-          "- **m_content_type** — internal classification labels such as `general`, `forums`, `adult`, etc.\n"
-          "- **m_clearnet_links** — list of clearnet links referenced from the page (e.g. external sites, Telegram, etc.)\n"
-          "- **m_organization** — extracted organizations or platforms mentioned (e.g. `Forum`, `Telegram`)\n"
-          "- **m_language** — detected language(s) of the content (e.g. `[\"en\"]`)\n"
-          "- **m_domain** — list of domains associated with the page and its references (onion plus clearnet domains)\n"
-          "- **m_hash_content** — hash of the normalized page content\n"
-          "- **m_hash_url** — hash of the page URL\n"
-          "- **m_hash** — internal document hash identifier used for deduplication and correlation\n"
-          "- **m_update_date** — last time the document was updated in the system\n"
-          "- **m_creation_date** — first time the document was created/ingested into the system\n\n"
-          "Depending on the source, additional enrichment fields may be present, such as forum-specific metadata or "
-          "structured attributes describing the section, category or thread state."
-          "\n\nExample response:\n"
-          "```json\n"
-          "{\n"
-          '  "m_base_url": "http://darknet3osr75sgyqgaed54w6pjh2tkh67tcozvxmuzn426l4vkvjfad.onion",\n'
-          '  "m_url": "http://darknet3osr75sgyqgaed54w6pjh2tkh67tcozvxmuzn426l4vkvjfad.onion/threads/free-site-for-onlyfans-porn-leaked.38796/page-26",\n'
-          '  "m_network": "onion",\n'
-          '  "m_title": "free site for onlyfans porn leaked page 26 | darknet army - forum ⭐",\n'
-          '  "m_meta_description": ". free site for porn onlyfans streaming accounts leaked",\n'
-          '  "m_content": "can i see it pls\\nso far there\\\'s no one here ...",\n'
-          '  "m_important_content": "some forum functions may not work properly you are using an out of date browser...",\n'
-          '  "m_images": [\n'
-          '    "http://darknet3osr75sgyqgaed54w6pjh2tkh67tcozvxmuzn426l4vkvjfad.onion/data/assets/logo/DNA_banner_logo.png"\n'
-          "  ],\n"
-          '  "m_sub_url": [\n'
-          '    "http://darknet3osr75sgyqgaed54w6pjh2tkh67tcozvxmuzn426l4vkvjfad.onion/search",\n'
-          '    "http://darknet3osr75sgyqgaed54w6pjh2tkh67tcozvxmuzn426l4vkvjfad.onion/login"\n'
-          "  ],\n"
-          '  "m_validity_score": 79,\n'
-          '  "m_meta_keywords": "carding forum hacking hack marketplace ...",\n'
-          '  "m_content_type": ["general", "forums", "adult"],\n'
-          '  "m_clearnet_links": [\n'
-          '    "xenet.info/resources/",\n'
-          '    "t.me/+DKNhCjWNY4A2NmQx",\n'
-          '    "google.com/chrome/"\n'
-          "  ],\n"
-          '  "m_organization": ["Forum", "Telegram"],\n'
-          '  "m_language": ["en"],\n'
-          '  "m_domain": [\n'
-          '    "xenet.info",\n'
-          '    "joyfreak.com",\n'
-          '    "darknet3osr75sgyqgaed54w6pjh2tkh67tcozvxmuzn426l4vkvjfad.onion"\n'
-          "  ],\n"
-          '  "m_hash_content": "b64eaf1521d5...",\n'
-          '  "m_hash_url": "262f3475111c...",\n'
-          '  "m_hash": "c5b8edaf230c...",\n'
-          '  "m_update_date": "2025-11-30T23:59:42.631785+00:00",\n'
-          '  "m_creation_date": "2025-11-30T23:59:42.631828+00:00"\n'
-          "}\n"
-          "```\n"
-      ) + IOC_DOC,
+            "Strategic darkweb intelligence document representing a single crawled page (such as a marketplace listing, "
+            "forum thread or generic page), returned as a JSON object.\n\n"
+            "Core response fields typically include:\n"
+            "- **m_base_url** — base URL of the hidden service or site\n"
+            "- **m_url** — specific page URL\n"
+            "- **m_network** — network type (e.g. `onion`)\n"
+            "- **m_title** — page title as seen in the source\n"
+            "- **m_meta_description** — meta description extracted from the HTML, if available\n"
+            "- **m_content** — normalized text content extracted from the page\n"
+            "- **m_important_content** — key snippet or condensed portion of the most relevant text\n"
+            "- **m_images** — list of image URLs extracted from the page\n"
+            "- **m_sub_url** — list of internal navigation or related links\n"
+            "- **m_validity_score** — internal confidence/validity score for the crawled document\n"
+            "- **m_meta_keywords** — keyword string summarizing tags, topics and SEO-style keywords (when available)\n"
+            "- **m_content_type** — internal classification labels such as `marketplaces`, `general`, `forums`\n"
+            "- **m_country** — list of associated countries inferred from the content or targeting\n"
+            "- **m_location** — list of locations or regions mentioned or targeted\n"
+            "- **m_organization** — extracted organizations or platforms mentioned\n"
+            "- **m_language** — detected language(s) of the content\n"
+            "- **m_currencies** — list of currencies mentioned or used on the page\n"
+            "- **m_domain** — list of domains associated with the page and its references\n"
+            "- **m_hash_content** — hash of the normalized page content\n"
+            "- **m_hash_url** — hash of the page URL\n"
+            "- **m_hash** — internal document hash identifier used for deduplication and correlation\n"
+            "- **m_update_date** — last time the document was updated in the system\n"
+            "- **m_creation_date** — first time the document was created/ingested into the system\n\n"
+            "Depending on the source, additional enrichment fields may be present, such as forum-specific metadata, "
+            "structured attributes describing the section or category, or clearnet reference links.\n\n"
+            "Example response:\n"
+            "```json\n"
+            "{\n"
+            "  \"m_base_url\": \"http://cards3wmb7atxhczo33trz5lhzcmfjftreyap2povmftd7g22u4holyd.onion\",\n"
+            "  \"m_url\": \"http://cards3wmb7atxhczo33trz5lhzcmfjftreyap2povmftd7g22u4holyd.onion/popular/442\",\n"
+            "  \"m_network\": \"onion\",\n"
+            "  \"m_title\": \"giftcardxpress - buy cheap gift cards\",\n"
+            "  \"m_meta_description\": \"save up to 70% on all your favorite gift cards\",\n"
+            "  \"m_content\": \"save up to 70 on all your favorite gift cards\\nsave up to 70% on all your favorite gift cards\\nSave up to 70% on all your favorite gift cards\",\n"
+            "  \"m_important_content\": \"no description found but contains some urls. this website is most probably a search engine or only contain references of other websites giftcardxpress - buy cheap gift cards save up to 70% on all your favorite\",\n"
+            "  \"m_images\": [\n"
+            "    \"http://cards3wmb7atxhczo33trz5lhzcmfjftreyap2povmftd7g22u4holyd.onion/static/assets/amazon.png\",\n"
+            "    \"http://cards3wmb7atxhczo33trz5lhzcmfjftreyap2povmftd7g22u4holyd.onion/static/assets/amazon.png\",\n"
+            "  ],\n"
+            "  \"m_sub_url\": [\n"
+            "    \"http://cards3wmb7atxhczo33trz5lhzcmfjftreyap2povmftd7g22u4holyd.onion/popular/823\",\n"
+            "    \"http://cards3wmb7atxhczo33trz5lhzcmfjftreyap2povmftd7g22u4holyd.onion/new_arraival/823\",\n"
+            "  ],\n"
+            "  \"m_validity_score\": 0,\n"
+            "  \"m_content_type\": [\"marketplaces\"],\n"
+            "  \"m_domain\": [\n"
+            "    \"amazon.de\",\n"
+            "    \"cards3wmb7atxhczo33trz5lhzcmfjftreyap2povmftd7g22u4holyd.onion\"\n"
+            "  ],\n"
+            "  \"m_country\": [\"Spain\", \"Netherlands\", \"Germany\", \"France\"],\n"
+            "  \"m_organization\": [\"Amazon\", \"Fortnite\", \"iTunes\", \"GiftCardXpress\", \"Google\", \"Steam\", \"Netflix\"],\n"
+            "  \"m_location\": [\"Spain\", \"Germany\", \"France\"],\n"
+            "  \"m_language\": [\"en\"],\n"
+            "  \"m_currencies\": [\"USD\", \"EUR\", \"GBP\"],\n"
+            "  \"m_update_date\": \"2025-12-02T13:13:55.970184+00:00\",\n"
+            "  \"m_hash_content\": \"7c2739bc52efab970134f87542ac382daf25a1fa429aa0a15cbacbe30740b896\",\n"
+            "  \"m_hash_url\": \"3fa64feadef7ea1a7765ee0849e6797838a468b3496759042ca7f33c22b9d6f9\",\n"
+            "  \"m_hash\": \"c8790e0132c7fdfbbf6420cc9a73f478fbfc884202a5dab6f6ad3f1195882bbd\",\n"
+            "  \"m_creation_date\": \"2025-12-02T13:13:55.970231+00:00\"\n"
+            "}\n"
+            "```\n"
+        ) + IOC_DOC,
     },
-
     "chat": {
         "description": (
             "Get a specific chat intelligence report focused on messaging platforms such as Telegram by its report ID.\n\n"
@@ -820,89 +811,88 @@ REPORT_DOCS = {
             "No request body is required."
         ),
         "response_description": (
-          "Chat intelligence report consolidating one chat message or a small thread (for example from Telegram), "
-          "returned as a single JSON object.\n\n"
-          "Core response fields typically include:\n"
-          "- **m_content** — normalized text content of the message (main body text)\n"
-          "- **m_caption** — original caption text, often mirroring **m_content** for media posts\n"
-          "- **m_message_date** — message date in `YYYY-MM-DD` format\n"
-          "- **m_message_id** — platform-specific message identifier (e.g. Telegram message id)\n"
-          "- **m_message_sharable_link** — deep link to the message (e.g. `https://t.me/...`)\n"
-          "- **m_channel_id** — internal or platform channel identifier\n"
-          "- **m_views** — number of views or impressions for the message\n"
-          "- **m_sender_name** — human-readable sender name (may include additional text)\n"
-          "- **m_sender_username** — sender username/handle (e.g. Telegram `@` handle)\n"
-          "- **m_message_type** — list of message types (e.g. `[\"photo\"]`, `[\"text\"]`)\n"
-          "- **m_media_url** — URL pointing to the media or message (for example a Telegram web link)\n"
-          "- **m_media_caption** — caption/description related to the attached media\n"
-          "- **m_reply_to_message_id** — message id of the parent message when this is a reply\n"
-          "- **m_message_status** — message processing status in the system (e.g. `success`)\n"
-          "- **m_channel_name** — human-readable channel name (e.g. `Mash`)\n"
-          "- **m_weblink** — list of additional links associated with the channel or message (e.g. invite links)\n"
-          "- **m_users** — list of user identifiers or usernames referenced in the message (e.g. `[\"Tiarkasir\"]`)\n"
-          "- **m_content_type** — high-level internal labels for the content (e.g. `[\"text\"]`)\n"
-          "- **m_sender_id** — numeric sender id on the platform\n"
-          "- **m_sender_is_bot** — boolean indicating whether the sender is a bot\n"
-          "- **m_is_forwarded** — boolean indicating whether the message is a forwarded message\n"
-          "- **m_forwarded_date** — original forward date when **m_is_forwarded** is true\n"
-          "- **m_is_reply** — boolean indicating whether the message is a reply\n"
-          "- **m_pinned** — boolean indicating whether the message is pinned in the channel\n"
-          "- **m_location** — list of location strings extracted from the content (e.g. city or area names)\n"
-          "- **m_social_media_profiles** — list of social profile URLs mentioned in the message content\n"
-          "- **m_domain** — list of domains extracted from links in the message\n"
-          "- **m_platforms** — list of platforms referenced or linked (e.g. `[\"instagram\"]`)\n"
-          "- **m_cluster_id** — internal logical cluster/group identifier for related chat items (e.g. `chat`)\n"
-          "- **m_document_id** — internal document id used by the system for this chat record\n"
-          "- **m_hash** — internal content hash used for deduplication and correlation\n"
-          "- **m_creation_date** — timestamp when the message document was created/ingested\n"
-          "- **m_edit_date** — last edit timestamp for the message (if it was edited)\n"
-          "- **m_organization** — list of organizations or entities mentioned (e.g. `Boeing`)\n"
-          "- **m_language** — detected language(s) of the message content (e.g. `[\"ru\"]`)\n\n"
-          "Depending on the platform and message type, additional enrichment fields may be present, such as media "
-          "metadata, reaction counts or extended thread context."
-          "\n\nExample response:\n"
-          "```json\n"
-          "{\n"
-          '  "m_content": "Причина сигнала бедствия Boeing 777-200 — возгорание одного из двигателей...",\n'
-          '  "m_caption": "Причина сигнала бедствия Boeing 777-200 — возгорание одного из двигателей...",\n'
-          '  "m_message_date": "2025-12-03",\n'
-          '  "m_message_id": "69893",\n'
-          '  "m_message_sharable_link": "https://t.me/mash/69893",\n'
-          '  "m_channel_id": "1117628569",\n'
-          '  "m_views": "401445",\n'
-          '  "m_sender_name": "TIAR None",\n'
-          '  "m_sender_username": "Tiarkasir",\n'
-          '  "m_message_type": ["photo"],\n'
-          '  "m_media_url": "https://t.me/mash/69893",\n'
-          '  "m_media_caption": "9 9 1 0 0 0 2 3 0 0 RUKO SENTRA NIAGA ...",\n'
-          '  "m_reply_to_message_id": "69892",\n'
-          '  "m_message_status": "success",\n'
-          '  "m_channel_name": "Mash",\n'
-          '  "m_weblink": ["https://t.me/+mBgDVq0QTftmY2Ji"],\n'
-          '  "m_users": ["Tiarkasir"],\n'
-          '  "m_content_type": ["text"],\n'
-          '  "m_sender_id": "1117628569",\n'
-          '  "m_sender_is_bot": false,\n'
-          '  "m_is_forwarded": false,\n'
-          '  "m_forwarded_date": "2025-11-05 08:29:26",\n'
-          '  "m_is_reply": true,\n'
-          '  "m_pinned": false,\n'
-          '  "m_location": ["KAYURINGIN"],\n'
-          '  "m_social_media_profiles": ["https://www.instagram.com/new_king_spa_bekasi_"],\n'
-          '  "m_domain": ["instagram.com"],\n'
-          '  "m_platforms": ["instagram"],\n'
-          '  "m_cluster_id": "chat",\n'
-          '  "m_document_id": "e233d6042cec2a3239a701d0eebebe3430f72543c0fd0e20de00f228808cafa5",\n'
-          '  "m_hash": "e233d6042cec2a3239a701d0eebebe3430f72543c0fd0e20de00f228808cafa5",\n'
-          '  "m_creation_date": "2025-12-03T21:36:59.858292+00:00",\n'
-          '  "m_edit_date": "2025-12-03 19:40:44",\n'
-          '  "m_organization": ["Boeing"],\n'
-          '  "m_language": ["ru"]\n'
-          "}\n"
-          "```\n"
-      ) + IOC_DOC,
+            "Chat intelligence report consolidating one chat message or a small thread (for example from Telegram), "
+            "returned as a single JSON object.\n\n"
+            "Core response fields typically include:\n"
+            "- **m_content** — normalized text content of the message (main body text)\n"
+            "- **m_caption** — original caption text, often mirroring **m_content** for media posts\n"
+            "- **m_message_date** — message date in `YYYY-MM-DD` format\n"
+            "- **m_message_id** — platform-specific message identifier (e.g. Telegram message id)\n"
+            "- **m_message_sharable_link** — deep link to the message (e.g. `https://t.me/...`)\n"
+            "- **m_channel_id** — internal or platform channel identifier\n"
+            "- **m_views** — number of views or impressions for the message\n"
+            "- **m_sender_name** — human-readable sender name (may include additional text)\n"
+            "- **m_sender_username** — sender username/handle (e.g. Telegram `@` handle)\n"
+            "- **m_message_type** — list of message types (e.g. `[\"photo\"]`, `[\"text\"]`)\n"
+            "- **m_media_url** — URL pointing to the media or message (for example a Telegram web link)\n"
+            "- **m_media_caption** — caption/description related to the attached media\n"
+            "- **m_reply_to_message_id** — message id of the parent message when this is a reply\n"
+            "- **m_message_status** — message processing status in the system (e.g. `success`)\n"
+            "- **m_channel_name** — human-readable channel name (e.g. `Mash`)\n"
+            "- **m_weblink** — list of additional links associated with the channel or message (e.g. invite links)\n"
+            "- **m_users** — list of user identifiers or usernames referenced in the message (e.g. `[\"Tiarkasir\"]`)\n"
+            "- **m_content_type** — high-level internal labels for the content (e.g. `[\"text\"]`)\n"
+            "- **m_sender_id** — numeric sender id on the platform\n"
+            "- **m_sender_is_bot** — boolean indicating whether the sender is a bot\n"
+            "- **m_is_forwarded** — boolean indicating whether the message is a forwarded message\n"
+            "- **m_forwarded_date** — original forward date when **m_is_forwarded** is true\n"
+            "- **m_is_reply** — boolean indicating whether the message is a reply\n"
+            "- **m_pinned** — boolean indicating whether the message is pinned in the channel\n"
+            "- **m_location** — list of location strings extracted from the content (e.g. city or area names)\n"
+            "- **m_social_media_profiles** — list of social profile URLs mentioned in the message content\n"
+            "- **m_domain** — list of domains extracted from links in the message\n"
+            "- **m_platforms** — list of platforms referenced or linked (e.g. `[\"instagram\"]`)\n"
+            "- **m_cluster_id** — internal logical cluster/group identifier for related chat items (e.g. `chat`)\n"
+            "- **m_document_id** — internal document id used by the system for this chat record\n"
+            "- **m_hash** — internal content hash used for deduplication and correlation\n"
+            "- **m_creation_date** — timestamp when the message document was created/ingested\n"
+            "- **m_edit_date** — last edit timestamp for the message (if it was edited)\n"
+            "- **m_organization** — list of organizations or entities mentioned (e.g. `Boeing`)\n"
+            "- **m_language** — detected language(s) of the message content (e.g. `[\"ru\"]`)\n\n"
+            "Depending on the platform and message type, additional enrichment fields may be present, such as media "
+            "metadata, reaction counts or extended thread context.\n\n"
+            "Example response:\n"
+            "```json\n"
+            "{\n"
+            "  \"m_content\": \"Причина сигнала бедствия Boeing 777-200 — возгорание одного из двигателей. На данный момент пожар потушен. Сейчас самолёт вырабатывает топливо, готовясь к возвращению в Домодедово в 22:40. Экипаж работает штатно, паники на борту нет. UPD. На судне находятся 412 пассажиров и 13 членов бортовой команды. Подписывайся на Mash\",\n"
+            "  \"m_caption\": \"Причина сигнала бедствия Boeing 777-200 — возгорание одного из двигателей. На данный момент пожар потушен. Сейчас самолёт вырабатывает топливо, готовясь к возвращению в Домодедово в 22:40. Экипаж работает штатно, паники на борту нет. UPD. На судне находятся 412 пассажиров и 13 членов бортовой команды. Подписывайся на Mash\",\n"
+            "  \"m_message_date\": \"2025-12-03\",\n"
+            "  \"m_message_id\": \"69893\",\n"
+            "  \"m_message_sharable_link\": \"https://t.me/mash/69893\",\n"
+            "  \"m_channel_id\": \"1117628569\",\n"
+            "  \"m_views\": \"401445\",\n"
+            "  \"m_sender_name\": \"TIAR None\",\n"
+            "  \"m_sender_username\": \"Tiarkasir\",\n"
+            "  \"m_message_type\": [\"photo\"],\n"
+            "  \"m_media_url\": \"https://t.me/mash/69893\",\n"
+            "  \"m_media_caption\": \"9 9 1 0 0 0 2 3 0 0 RUKO SENTRA NIAGA KALIMALANG BLOK B-1 NO.24 JALAN AHMAD YANI, KAYURINGIN BELAKANG MALL BCP •QEYSA •LENKA •MEMEY •SANSAN •KHANZA •ALEXA •ANITA •SENA •ESSA •NAOMI •MPIE •VITTA •CATRIN •MUTIA •FELISHA •ARRA •LALA •KIKI •EVA ID INSTAGRAM https://www.instagram.com/new_king_spa_bekasi_selatan?igsh=Znk4cWY3OG1udzZ3 BOKING DISINI @Tiarkasir LOKASI https://maps.app.goo.gl/sNzBhjnHhk7bgF2WA WA https://wa.me/qr/YGHM5GCX7SBFG1 SAYA TUNGGU KEHADIRANNYA SELALU BOS KU\",\n"
+            "  \"m_reply_to_message_id\": \"69892\",\n"
+            "  \"m_message_status\": \"success\",\n"
+            "  \"m_channel_name\": \"Mash\",\n"
+            "  \"m_weblink\": [\"https://t.me/+mBgDVq0QTftmY2Ji\"],\n"
+            "  \"m_users\": [\"Tiarkasir\"],\n"
+            "  \"m_content_type\": [\"text\"],\n"
+            "  \"m_sender_id\": \"1117628569\",\n"
+            "  \"m_sender_is_bot\": false,\n"
+            "  \"m_is_forwarded\": false,\n"
+            "  \"m_forwarded_date\": \"2025-11-05 08:29:26\",\n"
+            "  \"m_is_reply\": true,\n"
+            "  \"m_pinned\": false,\n"
+            "  \"m_location\": [\"KAYURINGIN\"],\n"
+            "  \"m_social_media_profiles\": [\"https://www.instagram.com/new_king_spa_bekasi_\"],\n"
+            "  \"m_domain\": [\"instagram.com\"],\n"
+            "  \"m_platforms\": [\"instagram\"],\n"
+            "  \"m_cluster_id\": \"chat\",\n"
+            "  \"m_document_id\": \"e233d6042cec2a3239a701d0eebebe3430f72543c0fd0e20de00f228808cafa5\",\n"
+            "  \"m_hash\": \"e233d6042cec2a3239a701d0eebebe3430f72543c0fd0e20de00f228808cafa5\",\n"
+            "  \"m_creation_date\": \"2025-12-03T21:36:59.858292+00:00\",\n"
+            "  \"m_edit_date\": \"2025-12-03 19:40:44\",\n"
+            "  \"m_organization\": [\"Boeing\"],\n"
+            "  \"m_language\": [\"ru\"]\n"
+            "}\n"
+            "```\n"
+        ) + IOC_DOC,
     },
-
     "social": {
         "description": (
             "Get a specific social media intelligence report (for example posts by ransomware groups or other threat "
@@ -913,59 +903,68 @@ REPORT_DOCS = {
             "No request body is required."
         ),
         "response_description": (
-          "Social media intelligence report containing posts and activity from monitored social platforms, returned "
-          "as a single JSON object.\n\n"
-          "Core response fields typically include:\n"
-          "- **m_sender_name** — display name or handle of the account that posted the content (e.g. `@abuse_ch`)\n"
-          "- **m_message_sharable_link** — platform-specific path or link to the post "
-          "(e.g. `/@abuse_ch/115532056771887329`)\n"
-          "- **m_content** — normalized text content of the post, including hashtags, mentions and links\n"
-          "- **m_content_type** — internal labels describing the social collector/source type "
-          "(e.g. `[\"social_collector\"]`)\n"
-          "- **m_message_date** — date the post was created, in `YYYY-MM-DD` format\n"
-          "- **m_channel_url** — URL of the profile, channel or account page "
-          "(e.g. `https://ioc.exchange/@abuse_ch/`)\n"
-          "- **m_message_id** — platform-specific unique identifier for the post\n"
-          "- **m_platform** — social platform name (e.g. `mastodon`)\n"
-          "- **m_network** — network type for the source (typically `clearnet`)\n"
-          "- **content_type** — high-level classification tags used by other modules "
-          "(e.g. `[\"malware\", \"ddos\", \"threat_intel\", \"news\"]`)\n"
-          "- **m_username** — list of usernames or handles associated with the posting account\n"
-          "- **m_scrap_file** — internal scraper identifier or file prefix (e.g. `_mastodon`)\n"
-          "- **m_organization** — list of organizations or projects referenced (e.g. `ThreatFox`)\n"
-          "- **m_language** — detected language(s) of the post content (e.g. `[\"en\"]`)\n"
-          "- **m_hashtag** — list of hashtags extracted from the content (e.g. `[#IOCs]`)\n"
-          "- **m_mention** — list of mentioned accounts/handles in the post (e.g. `@abuse_chover`)\n"
-          "- **m_domain** — list of domains referenced in links within the post (e.g. `ioc.exchange`)\n"
-          "- **m_hash** — internal content hash used for deduplication and correlation\n"
-          "- **m_creation_date** — timestamp when the social post document was created/ingested by the system\n\n"
-          "Depending on the platform and event type, additional enrichment fields may be present, such as reaction "
-          "counts, boost/repost information, attached media details or thread/conversation context."
-          "\n\nExample response:\n"
-          "```json\n"
-          "{\n"
-          '  "m_sender_name": "@abuse_ch",\n'
-          '  "m_message_sharable_link": "/@abuse_ch/115532056771887329",\n'
-          '  "m_content": "Over the past 30 days, our community shared 27,165 new #IOCs on ThreatFox — an 18% increase from the previous month...",\n'
-          '  "m_content_type": ["social_collector"],\n'
-          '  "m_message_date": "2025-11-11",\n'
-          '  "m_channel_url": "https://ioc.exchange/@abuse_ch/",\n'
-          '  "m_message_id": "115532056771887329",\n'
-          '  "m_platform": "mastodon",\n'
-          '  "m_network": "clearnet",\n'
-          '  "content_type": ["malware", "ddos", "threat_intel", "news"],\n'
-          '  "m_username": ["@abuse_ch"],\n'
-          '  "m_scrap_file": "_mastodon",\n'
-          '  "m_organization": ["ThreatFox"],\n'
-          '  "m_language": ["en"],\n'
-          '  "m_hashtag": ["#IOCs"],\n'
-          '  "m_mention": ["@abuse_chover"],\n'
-          '  "m_domain": ["ioc.exchange"],\n'
-          '  "m_hash": "d9a2dc2203d4398efb9fe6a28adb1cb87c18e0f64a4fdff16360df2ca95e4a02",\n'
-          '  "m_creation_date": "2025-12-03T20:42:56.038022+00:00"\n'
-          "}\n"
-          "```\n"
-      ) + IOC_DOC,
+           "Social media intelligence report containing posts and activity from monitored social platforms, returned "
+           "as a single JSON object.\n\n"
+           "Core response fields typically include:\n"
+           "- **m_sender_name** — display name or handle of the account that posted the content (e.g. `@lu3ky13`)\n"
+           "- **m_message_sharable_link** — full platform URL or deep link to the post\n"
+           "- **m_content** — normalized text content of the post, including hashtags, mentions and links\n"
+           "- **m_content_type** — internal labels describing the social collector/source type "
+           "(e.g. `[\"social_collector\"]`)\n"
+           "- **m_message_date** — date the post was created, in `YYYY-MM-DD` format\n"
+           "- **m_channel_url** — URL of the profile, channel or account page\n"
+           "- **m_message_id** — platform-specific unique identifier for the post\n"
+           "- **m_platform** — social platform name (e.g. `twitter`)\n"
+           "- **m_network** — network type for the source (typically `clearnet`)\n"
+           "- **m_views** — approximate view/impression count when available\n"
+           "- **m_comment_count** — number of comments or replies when available\n"
+           "- **m_likes** — number of likes or favorites when available\n"
+           "- **m_retweets** — number of reshares/retweets/boosts when available\n"
+           "- **content_type** — high-level classification tags used by other modules "
+           "(e.g. `[\"ddos\", \"exploit\", \"rce\"]`)\n"
+           "- **m_name** — profile display name (e.g. `lu3ky13`)\n"
+           "- **m_scrap_file** — internal scraper identifier or file prefix (e.g. `_twitter`)\n"
+           "- **m_language** — detected language(s) of the post content (e.g. `[\"en\"]`)\n"
+           "- **m_hashtag** — list of hashtags extracted from the content\n"
+           "- **m_mention** — list of mentioned accounts/handles in the post\n"
+           "- **m_currencies** — list of currencies referenced in the post\n"
+           "- **m_domain** — list of domains referenced in links within the post\n"
+           "- **m_hash** — internal content hash used for deduplication and correlation\n"
+           "- **m_creation_date** — timestamp when the social post document was created/ingested by the system\n\n"
+           "Depending on the platform and event type, additional enrichment fields may be present, such as reaction "
+           "breakdowns, attached media details or thread/conversation context.\n\n"
+           "Example response:\n"
+           "```json\n"
+           "{\n"
+           "  \"m_sender_name\": \"@lu3ky13\",\n"
+           "  \"m_message_sharable_link\": \"https://x.com/lu3ky13/status/1852382887246541180\",\n"
+           "  \"m_content\": \"Remote Code Execution (RCE) thank you \\n@nahamsec\\n \\n\\nYay, I was awarded a $7,800 bounty on \\n@Hacker0x01\\n! \\nhttps://\\nhackerone.com/lu3ky-13 #TogetherWeHitHarder #bugbounty\",\n"
+           "  \"m_content_type\": [\"social_collector\"],\n"
+           "  \"m_message_date\": \"2024-11-01\",\n"
+           "  \"m_channel_url\": \"https://x.com/lu3ky13\",\n"
+           "  \"m_message_id\": \"1852382887246541180\",\n"
+           "  \"m_platform\": \"twitter\",\n"
+           "  \"m_network\": \"clearnet\",\n"
+           "  \"m_views\": \"23000\",\n"
+           "  \"m_comment_count\": \"15\",\n"
+           "  \"m_likes\": \"357\",\n"
+           "  \"m_retweets\": \"13\",\n"
+           "  \"m_name\": \"lu3ky13\",\n"
+           "  \"m_scrap_file\": \"_twitter\",\n"
+           "  \"m_domain\": [\n"
+           "    \"x.com\",\n"
+           "    \"hackerone.com\"\n"
+           "  ],\n"
+           "  \"m_language\": [\"en\"],\n"
+           "  \"m_hashtag\": [\"#bugbounty\", \"#togetherwehitharder\"],\n"
+           "  \"m_currencies\": [\"USD\"],\n"
+           "  \"m_mention\": [\"@hacker0x01\", \"@lu3ky13remote\", \"@nahamsec\"],\n"
+           "  \"m_hash\": \"07b76a8a449633b73d38cc4f7c55ae970e01e942ea525a5dc9f39225de347c2d\",\n"
+           "  \"m_creation_date\": \"2025-12-02T11:24:10.131332+00:00\",\n"
+           "  \"content_type\": [\"ddos\", \"exploit\", \"rce\"]\n"
+           "}\n"
+           "```\n"
+        ) + IOC_DOC,
     },
 
     "breach_screenshot": {
