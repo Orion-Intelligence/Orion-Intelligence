@@ -15,10 +15,10 @@ from orion.middleware.middleware_setup import setup_middlewares
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from routes.admin_routes import admin_routes
 from routes.api_micros import micro_routes
-from routes.api_routes import api_routes, public_routes
+from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
-from routes.private_api_routes import private_api_routes
+from routes.private_api_routes import private_api_routes, public_routes
 from routes.tenant_routes import tenant_routes
 
 BASE_DIR = Path(__file__).resolve().parent

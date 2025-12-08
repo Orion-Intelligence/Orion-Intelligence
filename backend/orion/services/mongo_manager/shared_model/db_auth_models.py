@@ -10,6 +10,7 @@ from passlib.context import CryptContext
 from fastapi import HTTPException
 from pydantic import field_validator, model_validator
 from pydantic_core.core_schema import FieldValidationInfo
+from starlette_admin.exceptions import FormValidationError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -134,8 +135,8 @@ class db_user_account(Model):
                 if not set(licenses).issubset(allowed_combo):
                     raise HTTPException(status_code=400, detail="Enterprise license can only be combined with Maintainer")
 
-            # if any(l == LicenseName.MAINTAINER for l in licenses) and role != user_role.PROFILE:
-            #     raise FormValidationError({"licenses": "Only profile users can have maintainer license"})
+            if any(l == LicenseName.MAINTAINER for l in licenses) and role != user_role.PROFILE:
+                raise FormValidationError({"licenses": "Only profile users can have maintainer license"})
 
         return values
 

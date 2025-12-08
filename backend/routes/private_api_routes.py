@@ -15,8 +15,9 @@ private_api_routes = APIRouter(
 )
 public_routes = APIRouter(tags=["Public"])
 
-@private_api_routes.get(
+@public_routes.get(
     "/api/public",
+    dependencies=[],
     summary="Get public configuration",
     description="Get public configuration values used for frontend initialization.",
     tags=["Public", "Config"],
@@ -24,7 +25,7 @@ public_routes = APIRouter(tags=["Public"])
     response_description="Public configuration values used at frontend startup.",
 )
 async def get_public_config():
-    return await config_controller.getInstance().get_all()
+    return await config_controller.getInstance().get_all_alerts()
 
 @private_api_routes.get(
     "/api/graph",

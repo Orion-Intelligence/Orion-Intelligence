@@ -96,17 +96,48 @@ class TenantManager:
 
         return tenant_request
 
+    async def get_all_users(self, current_user) -> List[user_param_model]:
+        if current_user.role in ["admin"]:
+            collection = self._engine.get_collection(db_user_account)
+            await collection.update_many(
+                {"status": {"$nin": ["active", "disable"]}},
+                {"$set": {"status": "disable"}},
+            )
+            users = await self._engine.find(
+                db_user_account,
+                (db_user_account.role != "profile") | (
+                        (db_user_account.role == "profile") &
+                        (db_user_account.licenses == ["maintainer"])
+                )
+            )
+            return [user_param_model(**u.dict()) for u in users]
+        else:
+            company_uuid = current_user.company_uuid
+
+        collection = self._engine.get_collection(db_user_account)
+        await collection.update_many(
+            {"company_uuid": company_uuid, "status": {"$nin": ["active", "disable"]}},
+            {"$set": {"status": "disable"}},
+        )
+        users = await self._engine.find(
+            db_user_account,
+            db_user_account.company_uuid == company_uuid
+        )
+        return [user_param_model(**u.dict()) for u in users]
+
     async def update_tenant(self, data: TenantRequest, current_user):
 
         if current_user.role in ["admin"]:
+            tenant_id = data.id
+        elif current_user.licenses == ["maintainer"] and current_user.company_uuid == data.id:
             tenant_id = data.id
         else:
             tenant_id = current_user.company_uuid
 
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
-        if not tenant and not current_user.role in ["admin"]:
+        if not tenant:
             await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant_failed")
-            raise HTTPException(status_code=400, detail="Onboarding record not found for this user.")
+            raise HTTPException(status_code=401, detail="Onboarding record not found for this user.")
 
         dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
         enc = Fernet(dek)
@@ -141,43 +172,25 @@ class TenantManager:
 
         return {"message": "Tenant updated", "user": current_user.username, "company": tenant.companyName}
 
-    async def get_all_users(self, current_user) -> List[user_param_model]:
-        if current_user.role in ["admin"]:
-            collection = self._engine.get_collection(db_user_account)
-            await collection.update_many(
-                {"status": {"$nin": ["active", "disable"]}},
-                {"$set": {"status": "disable"}},
-            )
-            users = await self._engine.find(
-                db_user_account,
-                (db_user_account.role != "profile") | (
-                        (db_user_account.role == "profile") &
-                        (db_user_account.licenses == ["maintainer"])
-                )
-            )
-            return [user_param_model(**u.dict()) for u in users]
-        else:
-            company_uuid = current_user.company_uuid
-
-        collection = self._engine.get_collection(db_user_account)
-        await collection.update_many(
-            {"company_uuid": company_uuid, "status": {"$nin": ["active", "disable"]}},
-            {"$set": {"status": "disable"}},
-        )
-        users = await self._engine.find(
-            db_user_account,
-            db_user_account.company_uuid == company_uuid
-        )
-        return [user_param_model(**u.dict()) for u in users]
-
-    async def update_user(self, request: tenant_param_model):
+    async def update_user(self, request: tenant_param_model, current_user):
         user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
         if not user:
             await AuditLogManager.get_instance().register("system", f"update_user_failed:{request.username}")
-            raise HTTPException(status_code=400, detail="User not found")
+            raise HTTPException(status_code=401, detail="User not found")
+
+        if current_user.role in ["admin"]:
+            if user.role not in ["demo", "analyst"]:
+                await AuditLogManager.get_instance().register(str(current_user.id), f"update_user_denied:{request.username}")
+                raise HTTPException(status_code=401, detail="Admin can only update demo and analyst users")
+        elif current_user.licenses == ["maintainer"] and user.company_uuid == current_user.company_uuid:
+            pass
+        else:
+            await AuditLogManager.get_instance().register(str(current_user.id), f"update_user_denied:{request.username}")
+            raise HTTPException(status_code=401, detail="You are not allowed to update this user")
+
         if user.role in ["admin", "crawl"]:
             await AuditLogManager.get_instance().register(str(user.id), f"update_user_denied:{request.username}")
-            raise HTTPException(status_code=400, detail="This user type cannot be updated")
+            raise HTTPException(status_code=401, detail="This user type cannot be updated")
 
         if request.status.value == "disable":
             user.status = UserStatus.DISABLE.value
@@ -194,19 +207,19 @@ class TenantManager:
     async def delete_user(self, tenant, current_user):
         user = await self._engine.find_one(db_user_account, db_user_account.username == tenant.username)
         if not user:
-            raise HTTPException(status_code=400, detail="User not found")
+            raise HTTPException(status_code=401, detail="User not found")
 
         if user.role in ["admin", "maintainer"]:
-            raise HTTPException(status_code=400, detail="This user type cannot be deleted")
+            raise HTTPException(status_code=401, detail="This user type cannot be deleted")
 
         if current_user.role == "admin":
             if user.role not in ["demo", "analyst"] or user.licenses == ["maintainer"]:
-                raise HTTPException(status_code=400, detail="Admin can only delete demo or analyst users")
+                raise HTTPException(status_code=401, detail="Admin can only delete demo or analyst users")
         elif current_user.licenses == ["maintainer"]:
             if user.company_uuid != current_user.company_uuid or user.licenses == ["maintainer"]:
-                raise HTTPException(status_code=400, detail="Maintainer can only delete non-maintainer users from the same company")
+                raise HTTPException(status_code=401, detail="Maintainer can only delete non-maintainer users from the same company")
         else:
-            raise HTTPException(status_code=400, detail="You are not allowed to delete users")
+            raise HTTPException(status_code=401, detail="You are not allowed to delete users")
 
         await self._engine.delete(user)
         await AuditLogManager.get_instance().register(str(user.id), "delete_user")

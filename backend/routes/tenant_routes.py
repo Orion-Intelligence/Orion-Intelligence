@@ -96,8 +96,8 @@ async def get_all_tenants():
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
-async def update_user(user: tenant_param_model):
-    return await TenantManager.get_instance().update_user(user)
+async def update_user(user: tenant_param_model, current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().update_user(user, current_user)
 
 @tenant_routes.post(
     "/api/delete/user",
@@ -110,7 +110,7 @@ async def update_user(user: tenant_param_model):
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
-async def update_user(user: tenant_param_model, current_user=Depends(get_current_user)):
+async def delete_user(user: tenant_param_model, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().delete_user(user, current_user)
 
 

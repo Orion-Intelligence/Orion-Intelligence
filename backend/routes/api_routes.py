@@ -28,7 +28,6 @@ from routes.docs.docs import SYSTEM_INFO_DOCS, REPORT_DOCS, DYNAMIC_DOCS, SEARCH
 api_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))]
 )
-public_routes = APIRouter(tags=["Public"])
 
 @api_routes.get(
     "/api/directory",

@@ -37,7 +37,7 @@ class config_controller:
     async def refresh_config(self):
         await self.load_config()
 
-    async def get_all(self) -> config_data:
+    async def get_all_alerts(self) -> config_data:
         try:
             records = await self._engine.find(db_system_model)
             fresh_config = {record.key.value: record.value for record in records}
