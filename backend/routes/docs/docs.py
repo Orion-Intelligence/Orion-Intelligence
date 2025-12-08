@@ -4,11 +4,11 @@ SYSTEM_INFO_DOCS = {
             "Retrieve the complete list of monitored and crawled sources across Clearnet, Onion, and I2P.\n\n"
             "Supported filters:\n"
             "- **page:** page number of the result\n"
-            "- **content_type:** all, general, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency,\n"
-            "  leaks, adult, tracking, chat, social\n"
+            "- **network:** all, onion, i2p, clearnet\n"
             "- **index:** all, general, leak, defacement, chat, exploit, twitter, reddit\n"
-            "- **network:** all, clearnet, onion, i2p\n"
-            "- **dateRange:** optional date range (e.g., `2025-12-03,2025-12-18` or an equivalent picker range)\n\n"
+            "- **content_type:** all, general, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency, "
+            "leaks, adult, tracking, chat, social\n"
+            "- **daterange:** optional date range (e.g., `2025-12-03,2025-12-18`)\n\n"
             "Results include URL, detected content type(s), index classification, network layer, and last-update metadata."
         ),
         "response_description": (
@@ -39,16 +39,17 @@ SYSTEM_INFO_DOCS = {
             "```\n"
         ),
     },
+
     "dumps": {
         "description": (
             "Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites.\n\n"
             "Supported filters:\n"
             "- **page:** page number of the result set\n"
-            "- **source:** all, telegram, websites\n"
-            "- **group:** leak group or channel name (string)\n"
+            "- **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites)\n"
+            "- **group:** leak group or channel name derived from the source (e.g., Telegram channel name)\n"
             "- **status:** all, parsed, unparsed\n"
             "- **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`)\n"
-            "- **q:** free-text search query (default: `*`)\n\n"
+            "- **q:** free-text search query applied to `leak_url`, `source`, `group`, and other indexed fields (default: `*`)\n\n"
             "Common use-cases include identifying newly leaked dumps, retrieving unparsed dumps for analysis, "
             "or filtering dumps from specific threat groups or Telegram channels."
         ),
@@ -59,7 +60,7 @@ SYSTEM_INFO_DOCS = {
             "- **mDumpCallbackLinks** — list of dump entries, each containing:\n"
             "  - **leak_url** — raw dump reference or asset URL\n"
             "  - **source** — origin of the leak (e.g., telegram, websites)\n"
-            "  - **group** — associated leak group or channel\n"
+            "  - **group** — associated leak group or channel name derived from the source (e.g., Telegram channel name)\n"
             "  - **link** — direct reference link to the dump message or file\n"
             "  - **parsed_status** — whether the dump has been parsed/processed\n"
             "  - **created_at** — first-seen timestamp of the dump"
@@ -87,21 +88,27 @@ SYSTEM_INFO_DOCS = {
             "Retrieve system-wide analytics and high-level intelligence metrics across all monitored data sources.\n\n"
             "This endpoint does not take any parameters and returns pre-aggregated insights computed by Orion.\n\n"
             "Returned analytics include (per data type such as general, leak, defacement):\n"
-            "- Document volume over time (document_count, updated_5_days_ago, updated_9_days_ago)\n"
-            "- Freshness indicators (most_recent, oldest_update)\n"
-            "- Enrichment density (URL/Document, Archive/Document, Email/Document, Phone/Document)\n"
-            "- Common content characteristics (Common Type, Common Server, Top Team)\n\n"
-            "It also returns latest documents discovered across leak, exploit, chat, generic and defacement sources, "
+            "- Document volume and activity over time (`document_count`, `updated_5_days_ago`, `updated_9_days_ago`)\n"
+            "- Freshness indicators (`most_recent`, `oldest_update`)\n"
+            "- Enrichment density (`url_document_count`, `archive_document_count`, `email_document_count`, `phone_document_count`, `clearnet_document_count`)\n"
+            "- Common content characteristics (`common_types`, `top_team`, `common_server`, `unique_base_urls`, `dumps_document_count`, etc.)\n\n"
+            "Each metric is returned as an object containing:\n"
+            "- **key** — human-readable label\n"
+            "- **value** — current metric value\n"
+            "- **change_weekly** — weekly change percentage (string)\n"
+            "- **change_daily** — daily change percentage (string)\n\n"
+            "It also returns latest documents discovered across leak, generic and defacement sources, "
             "as well as graph-style aggregations such as top teams, locations, and hashtags."
         ),
         "response_description": (
             "System-wide insight payload with three main sections:\n\n"
-            "- **insights** — aggregated metrics grouped by data type (e.g. general, leak, defacement), each containing:\n"
-            "  - **document_count** — total documents in that category\n"
-            "  - **most_recent / oldest_update** — recency indicators\n"
-            "  - **updated_5_days_ago / updated_9_days_ago** — activity in recent windows\n"
-            "  - **url_document_count, archive_document_count, email_document_count, phone_document_count** — enrichment counts\n"
-            "  - **clearnet_document_count, common_types, top_team, common_server**, etc., depending on category\n\n"
+            "- **insights** — aggregated metrics grouped by data type (e.g. `general`, `leak`, `defacement`), each containing objects of the form:\n"
+            "  - **document_count** — { key, value, change_weekly, change_daily }\n"
+            "  - **most_recent / oldest_update** — { key, value, change_weekly, change_daily }\n"
+            "  - **updated_5_days_ago / updated_9_days_ago** — { key, value, change_weekly, change_daily }\n"
+            "  - **average_score** — { key, value, change_weekly, change_daily } (where applicable)\n"
+            "  - **url_document_count, archive_document_count, email_document_count, phone_document_count, clearnet_document_count** — enrichment metrics\n"
+            "  - **common_types, dumps_document_count, unique_base_urls, top_team, common_server** — category-specific metrics\n\n"
             "- **latestDocument** — latest crawled documents by model type:\n"
             "  - **leak_model, exploit_model, chat_model, generic_model, defacement_model** — each is a list of documents with:\n"
             "    - **title** — document title or caption\n"
@@ -111,80 +118,324 @@ SYSTEM_INFO_DOCS = {
             "    - **url** — list of associated URLs\n"
             "    - **source** — origin (e.g. onion, XYZ)\n"
             "    - **hash** — internal document hash identifier\n\n"
-            "- **graph_insight** — graph and aggregation-oriented insights represented as:\n"
-            "  - a boolean flag indicating graph availability\n"
-            "  - a list of aggregation objects, each including:\n"
+            "- **graph_insight** — graph and aggregation-oriented insights represented as a 2-element array:\n"
+            "  - index 0 — boolean flag indicating graph availability\n"
+            "  - index 1 — list of aggregation objects, each including:\n"
             "    - **aggregation_name** — e.g. 'Top Teams (Leak)', 'Top Teams (Defacement)', "
             "'Top Locations (Defacement)', 'Top Hashtags (Social)'\n"
-            "    - **index** — underlying model/index (e.g. leak_model, defacement_model, chat_model)\n"
+            "    - **index** — underlying model/index (e.g. `leak_model`, `defacement_model`, `chat_model`)\n"
             "    - **buckets** — list of key/count pairs representing the top entities (teams, locations, hashtags, etc.)"
             "\n\nExample response:\n"
             "```json\n"
             "{\n"
             '  "insights": {\n'
             '    "general": {\n'
-            '      "document_count": 254321,\n'
-            '      "most_recent": "2025-12-07T09:30:00Z",\n'
-            '      "oldest_update": "2025-10-01T00:00:00Z",\n'
-            '      "updated_5_days_ago": 3210,\n'
-            '      "updated_9_days_ago": 5821,\n'
-            '      "url_document_count": 210000,\n'
-            '      "archive_document_count": 12000,\n'
-            '      "email_document_count": 3400,\n'
-            '      "phone_document_count": 950,\n'
-            '      "clearnet_document_count": 180000,\n'
-            '      "common_types": ["news", "forums"],\n'
-            '      "top_team": "example_team",\n'
-            '      "common_server": "nginx"\n'
-            "    },\n"
+            '      "document_count": {\n'
+            '        "key": "Document Count",\n'
+            '        "value": 57,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "most_recent": {\n'
+            '        "key": "Most Recent",\n'
+            '        "value": "26 Nov",\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "oldest_update": {\n'
+            '        "key": "Oldest Update",\n'
+            '        "value": "26 Nov",\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "updated_5_days_ago": {\n'
+            '        "key": "Updated 5 Days ago",\n'
+            '        "value": 0,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "updated_9_days_ago": {\n'
+            '        "key": "Updated 9 Days ago",\n'
+            '        "value": 0,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "average_score": {\n'
+            '        "key": "Average Score",\n'
+            '        "value": 50.75,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "url_document_count": {\n'
+            '        "key": "URL/Document",\n'
+            '        "value": 451,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "archive_document_count": {\n'
+            '        "key": "Archive/Document",\n'
+            '        "value": 5,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "email_document_count": {\n'
+            '        "key": "Email/Document",\n'
+            '        "value": 3,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "phone_document_count": {\n'
+            '        "key": "Phone/Document",\n'
+            '        "value": 0,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "clearnet_document_count": {\n'
+            '        "key": "Clearnet/Document",\n'
+            '        "value": 68,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "common_types": {\n'
+            '        "key": "Common Type",\n'
+            '        "value": "Adult",\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      }\n'
+            '    },\n'
             '    "leak": {\n'
-            '      "document_count": 12450,\n'
-            '      "most_recent": "2025-12-07T08:10:00Z",\n'
-            '      "oldest_update": "2025-09-15T00:00:00Z"\n'
-            "    }\n"
-            "  },\n"
+            '      "document_count": {\n'
+            '        "key": "Document Count",\n'
+            '        "value": 3,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "url_document_count": {\n'
+            '        "key": "URL/Documents",\n'
+            '        "value": 0,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "dumps_document_count": {\n'
+            '        "key": "Dumps/Document",\n'
+            '        "value": 8,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "updated_5_days_ago": {\n'
+            '        "key": "Updated 5 Days ago",\n'
+            '        "value": 3,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "updated_9_days_ago": {\n'
+            '        "key": "Updated 9 Days ago",\n'
+            '        "value": 3,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "most_recent": {\n'
+            '        "key": "Most Recent",\n'
+            '        "value": "03 Dec",\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "oldest_update": {\n'
+            '        "key": "Oldest Update",\n'
+            '        "value": "03 Dec",\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "unique_base_urls": {\n'
+            '        "key": "Unique Base URLs",\n'
+            '        "value": 3,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      }\n'
+            '    },\n'
+            '    "defacement": {\n'
+            '      "document_count": {\n'
+            '        "key": "Document Count",\n'
+            '        "value": 12,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "updated_5_days_ago": {\n'
+            '        "key": "Updated 5 Days ago",\n'
+            '        "value": 6,\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "top_team": {\n'
+            '        "key": "Top Team",\n'
+            '        "value": "Alpha Wolf",\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      },\n'
+            '      "common_server": {\n'
+            '        "key": "Common Server",\n'
+            '        "value": "Litespeed",\n'
+            '        "change_weekly": "0%",\n'
+            '        "change_daily": "0%"\n'
+            '      }\n'
+            '    }\n'
+            '  },\n'
             '  "latestDocument": {\n'
             '    "leak_model": [\n'
-            "      {\n"
-            '        "title": "Example Ransomware Leak #1",\n'
-            '        "date": "2025-12-07 08:10:00",\n'
-            '        "location": "US",\n'
+            '      {\n'
+            '        "title": "Announcement",\n'
+            '        "date": "December 03, 2025",\n'
+            '        "location": "",\n'
             '        "phoneNumber": [],\n'
-            '        "url": ["http://exampleleakabcdef.onion/"],\n'
+            '        "url": [\n'
+            '          "http://brohoodyaifh2ptccph5zfljyajjabwjjo4lg6gfp4xb6ynw5w7ml6id.onion/"\n'
+            '        ],\n'
             '        "source": "onion",\n'
-            '        "hash": "abc123..."\n'
-            "      }\n"
-            "    ],\n"
+            '        "hash": "ca1c7476db86b66c05773f62b85ea5ab0042cd356744ad189f218d16b29db344"\n'
+            '      }\n'
+            '    ],\n'
             '    "exploit_model": [],\n'
             '    "chat_model": [],\n'
-            '    "generic_model": [],\n'
-            '    "defacement_model": []\n'
-            "  },\n"
-            '  "graph_insight": {\n'
-            '    "enabled": true,\n'
-            '    "aggregations": [\n'
-            "      {\n"
+            '    "generic_model": [\n'
+            '      {\n'
+            '        "title": "shop pirated content - best hacked accounts, stolen credit cards and other hacker stuff.",\n'
+            '        "date": "November 26, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "http://2222222dk552uwysu3xjaotjmf7basqqrhxrjundlmnzhp6yauj6puqd.onion/shop/cards/mastercard"\n'
+            '        ],\n'
+            '        "source": "onion",\n'
+            '        "hash": "2e3fbb01cb946b9afc5c67e249ffe5431985a05e3b79c5359f2b420231257a71"\n'
+            '      },\n'
+            '      {\n'
+            '        "title": "coin swap",\n'
+            '        "date": "November 26, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "http://2222222m7dzmk7wffagz7cduawmrciml67s3brw2pmvjihhhuf3hukid.onion/convert/?amount_from=0.01012&from_coin=BTC&to_coin=XMR"\n'
+            '        ],\n'
+            '        "source": "onion",\n'
+            '        "hash": "ed72d568d19e1fc76e6d6102b465fd27f244771e97927766b40bf284d3700ca7"\n'
+            '      },\n'
+            '      {\n'
+            '        "title": "shop pirated content - best hacked accounts, stolen credit cards and other hacker stuff.",\n'
+            '        "date": "November 26, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "http://2222222dk552uwysu3xjaotjmf7basqqrhxrjundlmnzhp6yauj6puqd.onion/shop/cards/visa"\n'
+            '        ],\n'
+            '        "source": "onion",\n'
+            '        "hash": "ed2f9550a258229c7c7f4db6df457a34c98392c8a7178bca41dda9413c721ab9"\n'
+            '      },\n'
+            '      {\n'
+            '        "title": "coin swap",\n'
+            '        "date": "November 26, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "http://2222222m7dzmk7wffagz7cduawmrciml67s3brw2pmvjihhhuf3hukid.onion/convert/?amount_from=0.00164&from_coin=BTC&to_coin=DOGE"\n'
+            '        ],\n'
+            '        "source": "onion",\n'
+            '        "hash": "649845a2c6c8d0bc13a88582ff822caf5e9fc745f47d162c3185ffac1e5b4849"\n'
+            '      }\n'
+            '    ],\n'
+            '    "defacement_model": [\n'
+            '      {\n'
+            '        "title": "http://phaoboi.vn/",\n'
+            '        "date": "December 03, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "http://phaoboi.vn/"\n'
+            '        ],\n'
+            '        "source": "XYZ",\n'
+            '        "hash": "31d109a231bfdaa36fc757a7c749253021f04fad0c54d08455c516007c7feabb"\n'
+            '      },\n'
+            '      {\n'
+            '        "title": "https://www.phdfpakistan.com/index.html",\n'
+            '        "date": "December 03, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "https://www.phdfpakistan.com/index.html"\n'
+            '        ],\n'
+            '        "source": "XYZ",\n'
+            '        "hash": "599e8416b67e070178ccbfd0b727abe01150f17a3c50dc20446c72825bf8c523"\n'
+            '      },\n'
+            '      {\n'
+            '        "title": "https://monsite-wp.net/index.html",\n'
+            '        "date": "December 03, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "https://monsite-wp.net/index.html"\n'
+            '        ],\n'
+            '        "source": "XYZ",\n'
+            '        "hash": "50440bc0e8994252e3fac7299bd110afc3086bb54f171468a55e246778b8c170"\n'
+            '      },\n'
+            '      {\n'
+            '        "title": "https://www.arc9.us/",\n'
+            '        "date": "December 03, 2025",\n'
+            '        "location": "",\n'
+            '        "phoneNumber": [],\n'
+            '        "url": [\n'
+            '          "https://www.arc9.us/"\n'
+            '        ],\n'
+            '        "source": "XYZ",\n'
+            '        "hash": "fbee8ab2e997183dc9bc2580a99f8ac6a70744fc8f51ff5ea69d7d600ca367e9"\n'
+            '      }\n'
+            '    ]\n'
+            '  },\n'
+            '  "graph_insight": [\n'
+            '    true,\n'
+            '    [\n'
+            '      {\n'
             '        "aggregation_name": "Top Teams (Leak)",\n'
             '        "index": "leak_model",\n'
             '        "buckets": [\n'
-            "          { \"key\": \"example_team\", \"count\": 120 },\n"
-            "          { \"key\": \"another_team\", \"count\": 95 }\n"
-            "        ]\n"
-            "      },\n"
-            "      {\n"
+            '          {\n'
+            '            "key": "BROTHERHOOD",\n'
+            '            "count": 3\n'
+            '          }\n'
+            '        ]\n'
+            '      },\n'
+            '      {\n'
+            '        "aggregation_name": "Top Teams (Defacement)",\n'
+            '        "index": "defacement_model",\n'
+            '        "buckets": [\n'
+            '          {\n'
+            '            "key": "Alpha Wolf",\n'
+            '            "count": 6\n'
+            '          },\n'
+            '          {\n'
+            '            "key": "BONDOWOSO BLACK HAT",\n'
+            '            "count": 4\n'
+            '          },\n'
+            '          {\n'
+            '            "key": "Death Networks",\n'
+            '            "count": 1\n'
+            '          }\n'
+            '        ]\n'
+            '      },\n'
+            '      {\n'
+            '        "aggregation_name": "Top Locations (Defacement)",\n'
+            '        "index": "defacement_model",\n'
+            '        "buckets": []\n'
+            '      },\n'
+            '      {\n'
             '        "aggregation_name": "Top Hashtags (Social)",\n'
             '        "index": "chat_model",\n'
-            '        "buckets": [\n'
-            "          { \"key\": \"#ransomware\", \"count\": 430 },\n"
-            "          { \"key\": \"#databreach\", \"count\": 280 }\n"
-            "        ]\n"
-            "      }\n"
-            "    ]\n"
-            "  }\n"
-            "}\n"
+            '        "buckets": []\n'
+            '      }\n'
+            '    ]\n'
+            '  ]\n'
+            '}\n'
             "```\n"
         ),
-    },
+    }
 }
 
 IOC_DOC = (

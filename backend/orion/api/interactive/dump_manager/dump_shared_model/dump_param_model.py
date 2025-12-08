@@ -1,5 +1,5 @@
-from typing import Literal
-from pydantic import BaseModel, Field
+from typing import Literal, Annotated
+from pydantic import BaseModel, Field, StringConstraints
 
 
 class dump_param_model(BaseModel):
@@ -11,6 +11,8 @@ class dump_param_model(BaseModel):
 
     status: Literal["all", "parsed", "unparsed"] = "all"
 
-    daterange: str = ""
+    daterange: Annotated[str,
+        StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
+    ] = ""
 
     q: str = "*"

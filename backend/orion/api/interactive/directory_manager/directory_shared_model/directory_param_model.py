@@ -1,6 +1,6 @@
 from typing import Literal
-from pydantic import BaseModel, Field
-
+from typing_extensions import Annotated
+from pydantic import BaseModel, Field, StringConstraints
 
 class directory_param_model(BaseModel):
     page: int = Field(
@@ -21,4 +21,6 @@ class directory_param_model(BaseModel):
 
     network: Literal["all", "clearnet", "onion", "i2p"] = "all"
 
-    mDateRange: str = ""
+    mDateRange: Annotated[str,
+        StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
+    ] = ""

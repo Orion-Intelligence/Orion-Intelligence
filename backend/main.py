@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
 
 from configs.token_auth_provider import setup_admin
@@ -22,6 +23,7 @@ from routes.tenant_routes import tenant_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
+SWAGGER_STATIC_DIR = BASE_DIR / "static"
 
 @asynccontextmanager
 async def lifespan(p_app: FastAPI):
@@ -32,13 +34,19 @@ async def lifespan(p_app: FastAPI):
     app.include_router(interface)
     yield
 
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 setup_middlewares(app)
 
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
-app.mount("/static", StaticFiles(directory=ANGULAR_BUILD_DIR), name="static")
+app.mount("/static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="static")
+
+@app.get("/docs", include_in_schema=False)
+def custom_swagger_ui():
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title="API Docs",
+        swagger_css_url="/static/swagger-code.css"
+    )
 
 configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
@@ -51,5 +59,4 @@ app.include_router(private_api_routes, include_in_schema=False)
 app.include_router(api_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
-
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
