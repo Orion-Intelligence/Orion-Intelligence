@@ -411,8 +411,8 @@
 }
 
 .swagger-ui .authorization__btn svg {
-    width: 28px !important;
-    height: 28px !important;
+    width: 17px !important;
+    height: 17px !important;
 }
 
 .swagger-ui .authorization__btn svg path,
@@ -592,6 +592,23 @@ html, body {
     font-size: 15px !important;
     font-weight: 600 !important;
     color: #4c1d95 !important;
+}
+
+.swagger-ui .info{
+    margin-left: 120px !important;
+}
+
+.swagger-ui .opblock .opblock-summary-path-description-wrapper{
+    align-items: start;
+    margin-left: 20px;
+}
+
+.swagger-ui .opblock-summary-control {
+  transition: margin-left .3s ease;
+}
+
+.swagger-ui .opblock-summary-control:hover {
+  margin-left: 10px;
 }
 
 .swagger-ui .json-schema-2020-12-expand-deep-button {
