@@ -14,10 +14,15 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ConfirmationPopupComponent } from "./confirmation-popup/confirmation-popup.component";
 import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
 import { AlertService } from '../../../../services/alerts/alerts.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
+import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
+import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
+import { SidebarProfileHomepageComponent } from "../sidebar-profile-homepage/sidebar-profile-homepage.component";
 
 @Component({
   selector: 'app-sidebar-profile-alerts',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, SidebarProfileHomepageComponent],
   templateUrl: './sidebar-profile-alerts.component.html',
 })
 export class SidebarProfileAlertsComponent implements OnInit {
@@ -28,19 +33,22 @@ export class SidebarProfileAlertsComponent implements OnInit {
   lowRisks: number = 0;
   isLoading: boolean = false;
   isConfirmationOpen$ = new BehaviorSubject<boolean>(false);
-  constructor(public appService: AppService, private alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService) {
+  constructor(public appService: AppService, private alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
+    private messageNotificationService: MessageNotificationService, protected authService: AuthService) {
   }
 
   ngOnInit(): void {
-    this.checkScanProgress();
-    this.alertService.isAlertScanLoading$.subscribe(v => this.isLoading = v);
-    this.initializData()
-    this.alertService.isAlertScanLoading$
-      .subscribe(isLoading => {
-        if (!isLoading) {
-          this.initializData();
-        }
-      });
+    if (!this.isAdmin()) {
+      this.checkScanProgress();
+      this.alertService.isAlertScanLoading$.subscribe(v => this.isLoading = v);
+      this.initializData()
+      this.alertService.isAlertScanLoading$
+        .subscribe(isLoading => {
+          if (!isLoading) {
+            this.initializData();
+          }
+        });
+    }
   }
   initializData() {
     this.alertCategories = this.convertAlertsToCategories(this.appService.userProfile().alerts);
@@ -54,6 +62,9 @@ export class SidebarProfileAlertsComponent implements OnInit {
     stream.subscribe(res => {
       this.alertService.isAlertScanLoading$.next(res.scan_running);
     });
+  }
+  isAdmin(): boolean {
+    return this.authService.getRole() === 'admin';
   }
   convertAlertsToCategories(alerts: AlertModel[]): AlertCategorySummary[] {
     const activeAlerts = alerts.filter(a => a.status !== 'ignore');

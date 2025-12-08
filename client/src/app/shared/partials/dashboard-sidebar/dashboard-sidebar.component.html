@@ -8,15 +8,17 @@
 
 
   <ul class="sidebar__items">
-    <ng-container *ngIf="authService.getRole() === 'profile' && licenseService.isMaintainer()">
+    <ng-container
+      *ngIf="authService.getRole() === 'profile' || authService.getRole() === 'admin' && licenseService.isMaintainer()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
-                                   (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
-                                   [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
-                                   [title]="authService.getUsername()">
+        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+        [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
+        [title]="authService.getUsername()">
       </app-dashboard-sidebar-items>
     </ng-container>
 
-    <ng-container *ngIf="authService.getRole() !== 'profile' || !licenseService.isMaintainer()">
+    <ng-container
+      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'profile') || !licenseService.isMaintainer()">
       <li class="sidebar__item">
         <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{
         'active':
@@ -84,9 +86,9 @@
     </ng-container>
     <ng-container *ngIf="licenseService.canUseScanning()">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
-        (sectionSelected)="onSectionSelected($event)"
-        [category]="category.API" [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories"
-        [routePrefix]="'api'" [title]="'Live APIs'"></app-dashboard-sidebar-items>
+        (sectionSelected)="onSectionSelected($event)" [category]="category.API"
+        [icon]="'assets/images/sidebar/live_api.svg'" [items]="apiCategories" [routePrefix]="'api'"
+        [title]="'Live APIs'"></app-dashboard-sidebar-items>
     </ng-container>
     <ng-container *ngIf="licenseService.canUseModule('dumps')">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
@@ -152,9 +154,9 @@
   <ul class="sidebar__items">
     <ng-container *ngIf="authService.getRole() === 'profile'; else homeTemplate">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
-                                       (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
-                                       [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
-                                       [selectionStore]="selectionStore" [title]="authService.getUsername()"></app-dashboard-sidebar-collapsed>
+        (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
+        [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
+        [selectionStore]="selectionStore" [title]="authService.getUsername()"></app-dashboard-sidebar-collapsed>
     </ng-container>
 
     <ng-template #homeTemplate>

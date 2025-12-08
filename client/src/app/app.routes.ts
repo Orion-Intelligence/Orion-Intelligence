@@ -43,8 +43,9 @@ import { SidebarProfileAlertsComponent } from './shared/partials/sidebar-profile
 import { CategoryAlertReportComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component';
 import { AddCustomAlertComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component';
 import { HomeAccessGuard } from './shared/guards/home-access.guard';
-import {ViewProfileComponent} from './pages/tenant/tenant-management/view-profile/view-profile.component';
-import {ViewTenantComponent} from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
+import { ViewProfileComponent } from './pages/tenant/tenant-management/view-profile/view-profile.component';
+import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
+import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-system-settings/sidebar-profile-system-settings.component';
 
 const consolidatedChildren = [
   {
@@ -571,7 +572,7 @@ export const routes: Routes = [
           {
             path: 'view-profiles',
             component: ViewProfileComponent,
-            data: {type: 'view', animation: 'CategoryPage'}
+            data: { type: 'view', animation: 'CategoryPage' }
           },
           {
             path: 'view-tenants',
@@ -614,6 +615,7 @@ export const routes: Routes = [
           {
             path: 'homepage',
             component: SidebarProfileAlertsComponent,
+            resolve: { insights: InsightResolver },
             data: { type: 'homepage', animation: 'HomepagePage' },
           },
           {
@@ -647,6 +649,16 @@ export const routes: Routes = [
             path: 'account',
             component: SidebarProfileSettingsComponent,
             data: { type: 'account', animation: 'CategoryPage' }
+          },
+          {
+            path: 'tenant',
+            component: ViewTenantComponent,
+            data: { type: 'view', animation: 'CategoryPage' }
+          },
+          {
+            path: 'system-settings',
+            component: SidebarProfileSystemSettingsComponent,
+            data: { type: 'srttings', animation: 'CategoryPage' }
           }
         ]
       }

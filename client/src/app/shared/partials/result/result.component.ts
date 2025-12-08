@@ -272,9 +272,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.onFormSubmit();
   }
   checkProfile(): boolean {
-    const url = this.router.url;
-    const parts = url.split('/');
-    return parts.includes('profile');
+    return this.authService.getRole() === 'profile';
   }
   hasIOCs(): boolean {
     const categories = this.app_service.configData().localSettings.entityfilterCategories;

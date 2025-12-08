@@ -121,4 +121,6 @@ export enum ProfileSubCategory {
   USERS = 'Users',
   STATISTICS = 'Statistics',
   AUDITLOG = 'Auditlog',
+  TENANT = 'Tenant',
+  SYSTEM_SETTINGS = 'System-Settings',
 }

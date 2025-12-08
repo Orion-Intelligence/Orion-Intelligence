@@ -1,3 +1,8 @@
-<div class="sidebar-profile-homepage-container">
-    <app-home-insight></app-home-insight>
-</div>
+<ng-container *ngIf="!isAdmin(); else showAdmin">
+    <div class="sidebar-profile-homepage-container">
+        <app-home-insight></app-home-insight>
+    </div>
+</ng-container>
+<ng-template #showAdmin>
+    <app-index></app-index>
+</ng-template>

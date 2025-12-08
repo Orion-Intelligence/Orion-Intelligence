@@ -21,6 +21,7 @@
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/profile-image-picker/profile-image-picker.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-system-settings/sidebar-profile-system-settings.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
 @use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
@@ -349,26 +350,27 @@ table tr td,
 table tr th {
   vertical-align: middle !important;
 }
+
 .directory-list__table tbody tr {
   overflow: visible !important;
 }
 
-.dropdown-short a{
-  padding-top:10px;
-  padding-bottom:10px;
+.dropdown-short a {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-.dropdown-short .dropdown-divider{
+.dropdown-short .dropdown-divider {
   margin-top: 1px;
   margin-bottom: 1px;
 }
 
-.view-tenant_dropdown-wrapper-min{
+.view-tenant_dropdown-wrapper-min {
   height: 40px;
   margin-left: -60px;
 }
 
-.dropdown-item:hover{
+.dropdown-item:hover {
   background: #cccccc60;
 }
 
@@ -380,7 +382,7 @@ table tr th {
   transition: opacity .22s ease-in-out, transform .12s ease-out;
 }
 
-.show > .dropdown-menu,
+.show>.dropdown-menu,
 .dropdown-menu.show {
   opacity: 1;
   transform: translateY(0);
@@ -391,7 +393,7 @@ table tr th {
   background: #cccccc60;
 }
 
-.table{
+.table {
   overflow: hidden;
 }
 
