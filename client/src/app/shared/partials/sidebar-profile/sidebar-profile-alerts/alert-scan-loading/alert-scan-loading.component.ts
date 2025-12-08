@@ -8,5 +8,5 @@ import { NgFor } from '@angular/common';
   styleUrl: './alert-scan-loading.component.css'
 })
 export class AlertScanLoadingComponent {
-
+  skeletonCards = Array.from({ length: 4 });
 }
