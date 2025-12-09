@@ -22,7 +22,7 @@ import { SidebarProfileHomepageComponent } from "../sidebar-profile-homepage/sid
 
 @Component({
   selector: 'app-sidebar-profile-alerts',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, SidebarProfileHomepageComponent],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent],
   templateUrl: './sidebar-profile-alerts.component.html',
 })
 export class SidebarProfileAlertsComponent implements OnInit {
