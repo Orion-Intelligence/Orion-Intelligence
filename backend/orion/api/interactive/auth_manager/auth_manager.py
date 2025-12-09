@@ -40,12 +40,19 @@ class auth_manager:
         user = await self._engine.find_one(db_user_account, db_user_account.email == mail)
         print("::::::::::::::::::::::::::::::::::::3", flush=True)
         if not user:
-            print("::::::::::::::::::::::::::::::::::::4", flush=True)
             user = await self._engine.find_one(db_user_account, db_user_account.username == mail)
+            if not user:
+                print("FUCKKK ::::::::::::::::::::::::::::::::::::4", flush=True)
+
+            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
+            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
+            print(db_user_account.username, flush=True)
+            print(mail, flush=True)
+            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
+            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
+
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
-            print("::::::::::::::::::::::::::::::::::::5", flush=True)
             return None
-        print("::::::::::::::::::::::::::::::::::::6", flush=True)
         return user
 
     @staticmethod
