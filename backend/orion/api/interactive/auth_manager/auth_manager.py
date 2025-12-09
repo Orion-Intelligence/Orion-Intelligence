@@ -39,12 +39,6 @@ class auth_manager:
         user = await self._engine.find_one(db_user_account, db_user_account.email == mail)
         if not user:
             user = await self._engine.find_one(db_user_account, db_user_account.username == mail)
-
-        # status = CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password)
-        # print("::::::::::::::::::::::::::::::::::::2", flush=True)
-        # print(str(password) + " ::: " + str(user.password) + " ::: " + str(status) + " ::: " + str(mail), flush=True)
-        # print("::::::::::::::::::::::::::::::::::::2", flush=True)
-
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
             return None
         return user
@@ -53,7 +47,6 @@ class auth_manager:
     async def login(mail: str, password: str):
         user = await auth_manager.get_instance().authenticate_user(mail, password)
         if not user:
-            print("::::::::::::::::::::::::::::::::::::1", flush=True)
             raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.twofa_enabled:
             if user.twofa_secret:
