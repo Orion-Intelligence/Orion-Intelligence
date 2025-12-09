@@ -158,7 +158,7 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.PROFILE,user_role.ADMIN])),
         Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")),
     ],

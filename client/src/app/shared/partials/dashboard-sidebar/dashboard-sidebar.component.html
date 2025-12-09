@@ -18,7 +18,7 @@
     </ng-container>
 
     <ng-container
-      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'profile') || !licenseService.isMaintainer()">
+      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'admin') || !licenseService.isMaintainer()">
       <li class="sidebar__item">
         <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{
         'active':

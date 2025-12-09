@@ -15,13 +15,13 @@ export class SidebarProfileSystemSettingsComponent {
   systemData = {
     language: '',
     version: '',
-    apiAllowed: '0'
+    api_allowed: '0'
   };
 
   form = {
     language: '',
     version: '',
-    apiAllowed: '0'
+    api_allowed: '0'
   };
 
   languageOptions = [
@@ -37,13 +37,13 @@ export class SidebarProfileSystemSettingsComponent {
   }
 
   loadSettings() {
-    const baseUrl = 'system-settings';
+    const baseUrl = 'get/system/settings';
     this.apiService.get<any>(baseUrl).subscribe(data => {
       this.systemData = data;
 
       this.form.language = data.language;
       this.form.version = data.version;
-      this.form.apiAllowed = data.apiAllowed;
+      this.form.api_allowed = data.api_allowed;
     });
   }
 
@@ -56,16 +56,17 @@ export class SidebarProfileSystemSettingsComponent {
 
   cancelEdit() {
     this.form.language = this.systemData.language;
-    this.form.apiAllowed = this.systemData.apiAllowed;
+    this.form.api_allowed = this.systemData.api_allowed;
     this.isEditing = false;
   }
 
   save() {
-    // this.systemService.updateSystemSettings({
-    //   language_allowed: this.form.language,
-    //   api_allowed: this.form.apiAllowed
-    // }).subscribe(() => {
-    //   this.loadSettings();
-    // });
+    this.apiService.post('update/system/settings', this.form).subscribe({
+      next: () => {
+      },
+      error: (err) => {
+        console.log(err)
+      },
+    });
   }
 }

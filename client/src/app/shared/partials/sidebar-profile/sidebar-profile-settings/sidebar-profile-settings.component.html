@@ -23,8 +23,7 @@
 
                 <div>
                     <ng-container *ngIf="isAdmin(); else companyProfileBlock">
-                        <input type="email" [(ngModel)]="profile.email" class="company-profile_input" disabled
-                            placeholder="Email" />
+
                     </ng-container>
                     <ng-template #companyProfileBlock>
                         <div class="company-profile_company-name">
