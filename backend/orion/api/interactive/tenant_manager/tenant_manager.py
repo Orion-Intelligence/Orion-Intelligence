@@ -188,6 +188,9 @@ class TenantManager:
             await AuditLogManager.get_instance().register(str(current_user.id), f"update_user_denied:{request.username}")
             raise HTTPException(status_code=401, detail="You are not allowed to update this user")
 
+        if user.role in ["admin"]:
+            raise HTTPException(status_code=401, detail="You are not allowed to update this user")
+
         if user.role in ["admin", "crawl"]:
             await AuditLogManager.get_instance().register(str(user.id), f"update_user_denied:{request.username}")
             raise HTTPException(status_code=401, detail="This user type cannot be updated")

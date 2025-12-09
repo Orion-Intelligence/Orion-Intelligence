@@ -16,7 +16,8 @@ from orion.api.interactive.search_manager.search_data_model.defacement.search_de
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
+from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model, \
+    search_news_param_model, search_news_internal_param_model
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
@@ -310,9 +311,9 @@ async def search_leak(param: search_leak_param_model = Body(...)):
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
 )
-async def search_news(param: search_leak_param_model = Body(...)):
-    param.mContentType = "news"
-    return await search_model.getInstance().search_leak_result(param)
+async def search_news(param: search_news_param_model = Body(...)):
+    internal_param = search_news_internal_param_model(**param.model_dump())
+    return await search_model.getInstance().search_leak_result(internal_param)
 
 
 @api_routes.post(

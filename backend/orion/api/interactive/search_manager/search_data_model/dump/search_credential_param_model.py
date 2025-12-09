@@ -1,9 +1,12 @@
-from typing import Optional
-from pydantic import BaseModel
+from typing import Optional, Annotated
+from pydantic import BaseModel, StringConstraints
 
 
 class search_credential_param_model(BaseModel):
-    daterange: Optional[str] = ""
+    daterange: Annotated[str,
+        StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
+    ] = ""
+
     q: Optional[str] = ""
     url: Optional[str] = ""
     user: Optional[str] = ""

@@ -181,6 +181,7 @@ class search_model:
             hits = response["hits"]["hits"]
             for rank, hit in enumerate(hits):
                 source = hit.get("_source", {})
+                source.pop("m_embedding", None)
                 source["rank_index"] = hit.get("_index")
                 source["_score"] = hit.get("_score", 0)
                 source["_rank"] = rank + 1
