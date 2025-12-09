@@ -17,6 +17,7 @@ export interface AlertNotification {
     hash: string;
 }
 export interface CategoryAlerts {
+    id: string;
     custom: boolean;
     seen: boolean;
     risk: string;

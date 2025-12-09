@@ -222,7 +222,7 @@ class AlertManager:
             "updated": updated_count
         }
     
-    async def delete_alert(self, hash: str, current_user):
+    async def delete_alert(self, id: str, current_user):
         company_uuid = str(current_user.company_uuid)
 
         existing_doc = await self._engine.find_one(
@@ -233,7 +233,7 @@ class AlertManager:
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=404, detail="No alerts found for this user")
 
-        updated_alerts = [alert for alert in existing_doc.alerts if alert.data_hash != hash]
+        updated_alerts = [alert for alert in existing_doc.alerts if alert.alert_id != id]
 
         if len(updated_alerts) == len(existing_doc.alerts):
             raise HTTPException(status_code=404, detail="Alert not found")
@@ -242,7 +242,7 @@ class AlertManager:
 
         await self._engine.save(existing_doc)
 
-        return {"message": "Alert deleted successfully", "hash": hash}
+        return {"message": "Alert deleted successfully", "id": id}
     
     async def getAllAlerts(self, current_user):
         alerts_data = await self._engine.find_one(
@@ -273,6 +273,35 @@ class AlertManager:
         await self._engine.save(existing_doc)
 
         return {"message": "All alerts deleted successfully"}
+
+    async def delete_alerts_by_type(self, current_user, alert_type: str):
+        company_uuid = str(current_user.company_uuid)
+
+        existing_doc = await self._engine.find_one(
+            db_alert_model,
+            db_alert_model.tenant_id == company_uuid
+        )
+        if not existing_doc or not existing_doc.alerts:
+            raise HTTPException(status_code=400, detail="No alerts to delete")
+
+        initial_count = len(existing_doc.alerts)
+        existing_doc.alerts = [
+            alert for alert in existing_doc.alerts
+            if alert.type != alert_type
+        ]
+        deleted_count = initial_count - len(existing_doc.alerts)
+
+        if deleted_count == 0:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No alerts found with type '{alert_type}'"
+            )
+
+        await self._engine.save(existing_doc)
+
+        return {
+            "message": f"Deleted {deleted_count} alerts of type '{alert_type}'"
+        }
     
     async def set_scan_running(self,tenant_id: str, value: bool) -> dict:
         alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryAlerts } from '../../../../model/alert-notification/alert.notification.model';
 import { AlertAllIoc, AlertModel } from '../../../../model/company-profile/company.profile.model';
-import { map, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../../constants/shared-enums';
 import { AddCustomAlertComponent } from "../add-custom-alert/add-custom-alert.component";
@@ -15,10 +15,11 @@ import { FiltersComponent } from "../../../filters/filters.component";
 import { ApiService } from '../../../../services/api.service';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
+import { ConfirmationPopupComponent } from "../../../confirmation-popup/confirmation-popup.component";
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent],
+  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent],
   templateUrl: './category-alert-report.component.html'
 })
 export class CategoryAlertReportComponent implements OnInit {
@@ -32,6 +33,9 @@ export class CategoryAlertReportComponent implements OnInit {
   showEditAlertPopup: boolean = false;
   isFilterOpen$: Observable<boolean>;
   selectedAlert!: AlertModel;
+  isFlushAllConfirmationOpen$ = new BehaviorSubject<boolean>(false);
+  isDeleteAlertConfirmationOpen$ = new BehaviorSubject<boolean>(false);
+  selectedDeleteAlertId: string = '';
   constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService,
     private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -51,11 +55,27 @@ export class CategoryAlertReportComponent implements OnInit {
     this.alerts = this.convertAlertsList(this.appService.userProfile().alerts, this.category);
     this.filteredAlerts = this.alerts;
   }
-
-  showAlertPopup(action: string, hash: string) {
+  flushAll() {
+    this.isFlushAllConfirmationOpen$.next(true);
+  }
+  flushAllConfirmation(value: boolean) {
+    this.isFlushAllConfirmationOpen$.next(false);
+    if (value === true) {
+      this.apiService.post(`profile/alerts/delete/${this.category}`, null).subscribe({
+        next: () => {
+          this.getLatestAlerts();
+          this.router.navigate(["/dashboard"], {});
+        },
+        error: (err) => {
+          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete')
+        },
+      });
+    }
+  }
+  showAlertPopup(action: string, id: string) {
     switch (action) {
       case 'edit':
-        const alert = this.appService.userProfile().alerts.find(a => a.data_hash === hash);
+        const alert = this.appService.userProfile().alerts.find(a => a.alert_id === id);
         if (alert) {
           this.selectedAlert = alert;
           this.showEditAlertPopup = true;
@@ -79,17 +99,26 @@ export class CategoryAlertReportComponent implements OnInit {
     this.showCustomAlertPopup = false;
     this.showEditAlertPopup = false;
   }
-  deleteCustomAlert(hash: string) {
-    this.apiService.post('alert/delete', hash).subscribe({
-      next: () => {
-        this.messageNotificationService.show("Alert deleted successfully!")
-        this.getLatestAlerts();
-      },
-      error: (err) => {
-        const mess = err?.error?.detail || 'delete alert failed'
-        this.messageNotificationService.show(mess)
-      },
-    });
+  deleteAlertConfirmation(id: string) {
+    this.selectedDeleteAlertId = id;
+    this.isDeleteAlertConfirmationOpen$.next(true);
+  }
+  deleteCustomAlert(confirmed: boolean, id: string) {
+    if (confirmed) {
+      this.apiService.post('alert/delete', id).subscribe({
+        next: () => {
+          this.messageNotificationService.show("Alert deleted successfully!")
+          this.getLatestAlerts();
+        },
+        error: (err) => {
+          const mess = err?.error?.detail || 'delete alert failed'
+          this.messageNotificationService.show(mess)
+        },
+      });
+    }
+    else {
+      this.selectedDeleteAlertId = '';
+    }
   }
   getLatestAlerts() {
     this.apiService.get<any>('profile/alerts').subscribe({
@@ -213,6 +242,7 @@ export class CategoryAlertReportComponent implements OnInit {
     const entity = alert.ioc_value || 'N/A';
 
     return {
+      id: alert.alert_id || '',
       seen: alert.report_seen || false,
       custom: alert.custom_alert || false,
       risk: this.getRiskLevel(alert.type!),

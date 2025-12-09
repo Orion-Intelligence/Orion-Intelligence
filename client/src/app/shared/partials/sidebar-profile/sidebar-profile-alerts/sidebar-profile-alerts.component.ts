@@ -11,7 +11,7 @@ import { TooltipDirective } from '../../../directive/tooltip-directive.directive
 import { ApiService } from '../../../services/api.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { BehaviorSubject } from 'rxjs';
-import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
+import { ConfirmationPopupComponent } from "../../../../shared/partials/confirmation-popup/confirmation-popup.component";
 import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
 import { AlertService } from '../../../../services/alerts/alerts.service';
 
