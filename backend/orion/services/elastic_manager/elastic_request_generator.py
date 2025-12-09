@@ -723,7 +723,6 @@ class elastic_request_generator:
 
         category = p_query_model.category
 
-        m_safe_search = p_query_model.safe
         m_page_number = p_query_model.page
         m_network = p_query_model.network
         m_search_type = p_query_model.content
@@ -775,8 +774,6 @@ class elastic_request_generator:
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
         if m_search_type and m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
-        if m_safe_search == "True":
-            must_not_clause.append({"term": {"m_content_type": "adult"}})
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
