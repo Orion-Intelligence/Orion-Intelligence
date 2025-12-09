@@ -185,18 +185,6 @@
                             </div>
 
                             <div class="tenant-block">
-                              <div class="tenant-title">Subscription</div>
-                              <div class="tenant-edit-control">
-                                <button type="button" class="pill-toggle" [class.pill-on]="user.subscription"
-                                  (click)="user.subscription = !user.subscription">
-                                  <span class="pill-dot"></span>
-                                  <span class="pill-text">{{ user.subscription ? 'Paid' : 'Free' }}</span>
-                                </button>
-                              </div>
-                              <hr class="tenant-divider">
-                            </div>
-
-                            <div class="tenant-block">
                               <div class="tenant-title">Licenses</div>
                               <div class="license-grid">
                                 <ng-container *ngFor="let license of licenseList">

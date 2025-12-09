@@ -18,6 +18,7 @@ export interface TenantModel {
   phone?: string;
   country?: string;
   city?: string;
+  subscription?: boolean;
   postal_code?: string;
   verified?: boolean;
   user_quota?: number;
@@ -35,7 +36,6 @@ export interface User {
   email: string;
   role: 'admin' | 'crawler' | 'demo' | 'profile' | 'analyst';
   status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
-  subscription: boolean;
   verificationDate: string;
   licenses?: string[] | null;
 }

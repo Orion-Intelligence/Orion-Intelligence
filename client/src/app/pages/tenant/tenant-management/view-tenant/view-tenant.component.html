@@ -20,6 +20,7 @@
                     <th class="col-sr">Sr #</th>
                     <th class="col-company">Company Name</th>
                     <th class="col-country">Country</th>
+                    <th class="col-quota">Subscription</th>
                     <th class="col-verified">Verified</th>
                     <th class="col-quota">User Quota</th>
                     <th class="col-status">Status</th>
@@ -40,6 +41,11 @@
                       </td>
 
                       <td>{{ tenant.country || '-' }}</td>
+                      <td>
+                        <span class="label-text-dropdown no-chevron">
+                          {{ tenant.subscription ? 'Paid' : 'Free' }}
+                        </span>
+                      </td>
 
                       <td>
                         <span class="badge-pill" [ngClass]="tenant.verified ? 'badge-true' : 'badge-false'">
@@ -79,7 +85,7 @@
                     </tr>
 
                     <tr *ngIf="tenant._expanded" class="table-active no-hover-row">
-                      <td colspan="8"><br>
+                      <td colspan="12"><br>
 
                         <div class="vstack gap-4 tenant-panel">
 
@@ -116,6 +122,12 @@
                             <div class="tenant-block">
                               <div class="tenant-title">Postal Code</div>
                               <div class="tenant-value">{{ tenant.postal_code || '-' }}</div>
+                              <hr class="tenant-divider">
+                            </div>
+
+                            <div class="tenant-block">
+                              <div class="tenant-title">Subscription</div>
+                              <div class="tenant-value">{{ tenant.subscription}}</div>
                               <hr class="tenant-divider">
                             </div>
 

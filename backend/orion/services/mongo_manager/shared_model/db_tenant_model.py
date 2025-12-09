@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import List
-from odmantic import Model, EmbeddedModel
+from odmantic import Model, EmbeddedModel, Field
 from pydantic import BaseModel
 
 
@@ -24,6 +24,7 @@ class db_tenant_model(Model):
     companyName: str
     phone: str = ""
     country: str = ""
+    subscription: bool = False
     city: str = ""
     postal_code: str = ""
     verified:bool = False
@@ -38,6 +39,7 @@ class TenantRequest(BaseModel):
     companyName: str
     phone: str = ""
     country: str = ""
+    subscription: bool = False
     city: str = ""
     postal_code: str = ""
     verified:bool = None

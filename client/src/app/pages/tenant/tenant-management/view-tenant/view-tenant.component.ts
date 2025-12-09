@@ -145,4 +145,5 @@ export class ViewTenantComponent implements OnInit {
     return names.length <= 15 ? names : names.slice(0, 15) + '...';
   }
 
+  protected readonly JSON = JSON;
 }

@@ -197,7 +197,6 @@ class TenantManager:
         else:
             user.status = UserStatus.ACTIVE.value
 
-        user.subscription = request.subscription
         user.licenses = request.licenses
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(str(user.id), "update_user")
