@@ -14,7 +14,8 @@ from orion.api.interactive.search_manager.search_data_model.chat.search_chat_par
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import \
+    search_dynamic_param_model, search_dynamic_crack_model, search_dynamic_social_model
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model, search_news_param_model, search_news_internal_param_model
@@ -601,7 +602,7 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
         Depends(license_required("scanning")),
     ],
 )
-async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
+async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "cracked")
 
 
@@ -647,5 +648,5 @@ async def parse_text(payload: DomainScanRequest):
         Depends(license_required("scanning")),
     ],
 )
-async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
+async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "social")
