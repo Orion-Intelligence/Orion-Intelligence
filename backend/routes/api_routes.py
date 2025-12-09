@@ -20,8 +20,6 @@ from orion.api.interactive.search_manager.search_data_model.leak.search_leak_par
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
-from orion.api.interactive.system_settings_manager.system_settings_manager import SystemSettingsManager
-from orion.api.interactive.system_settings_manager.model.system_settings_parma_model import SystemSettingsParmaModel
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
@@ -650,36 +648,3 @@ async def parse_text(payload: DomainScanRequest):
 )
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "social")
-
-@api_routes.get(
-    "/api/get/system/settings",
-    summary="Retrieve the System Settings",
-    description="Retrieve the System Settings",
-    tags=["Get System Settings"],
-    operation_id="getSystemSettings",
-    response_description="System settings information.",
-    status_code=200,
-    dependencies=[
-        Depends(role_required([
-            user_role.ADMIN
-        ])),
-    ],)
-async def get_system_settings():
-    return await SystemSettingsManager.get_instance().get_settings()
-
-@api_routes.post(
-    "/api/update/system/settings",
-    summary="Update System Settings",
-    description="Update System Settings",
-    tags=["Update System Settings"],
-    operation_id="updateSystemSettings",
-    response_description="Update System settings information.",
-    status_code=200,
-    dependencies=[
-        Depends(role_required([
-            user_role.ADMIN
-        ])),
-    ],)
-async def update_system_settings(param:SystemSettingsParmaModel = Body(...)):
-    await SystemSettingsManager.get_instance().update_settings(param)
-    return {"success": True}

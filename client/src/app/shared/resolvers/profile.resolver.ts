@@ -16,7 +16,7 @@ export class ProfileResolver implements Resolve<CompanyProfile> {
     resolve(): Observable<CompanyProfile> {
         const role = this.authService.getRole();
 
-        if (role !== 'profile' && role !== 'admin') {
+        if (role !== 'profile') {
             return of(null as any);
         }
 

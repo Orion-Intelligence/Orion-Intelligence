@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ApiService } from '../../../../services/api.service';
 import { AppService } from '../../../../../services/core/app/app.service';
+import { AuthService } from '../../../../../services/authetication/auth.service';
 
 
 @Component({
@@ -18,9 +19,13 @@ export class ProfileImagePickerComponent implements OnInit {
   previewUrl?: string;
   isUploading = false;
 
-  constructor(private apiService: ApiService, private appService: AppService) { }
+  constructor(private apiService: ApiService, private appService: AppService, protected authService: AuthService) { }
   ngOnInit(): void {
-    this.currentImageUrl = this.appService.profileImageUrl();
+    if (this.isProfile())
+      this.currentImageUrl = this.appService.profileImageUrl();
+    else if (this.isAdmin()) {
+      this.currentImageUrl = this.appService.configData().appSettings.logo_url;
+    }
   }
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -52,16 +57,39 @@ export class ProfileImagePickerComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', this.selectedFile);
 
-    this.apiService.post('upload/image', formData).subscribe({
-      next: (res) => {
-        this.isUploading = false;
-      },
-      error: (err) => {
-        this.isUploading = false;
-        this.previewUrl = '';
-        console.error(err);
-        alert(err?.error?.detail || 'Upload image failed');
-      },
-    });
+    if (this.isProfile()) {
+      this.apiService.post('upload/image', formData).subscribe({
+        next: (res) => {
+          this.isUploading = false;
+        },
+        error: (err) => {
+          this.isUploading = false;
+          this.previewUrl = '';
+          console.error(err);
+          alert(err?.error?.detail || 'Upload image failed');
+        },
+      });
+    }
+    else if (this.isAdmin()) {
+      this.apiService.post('upload/logo', formData).subscribe({
+        next: (res) => {
+          this.appService.loadConfig();
+          this.isUploading = false;
+
+        },
+        error: (err) => {
+          this.isUploading = false;
+          this.previewUrl = '';
+          console.error(err);
+          alert(err?.error?.detail || 'Upload image failed');
+        },
+      });
+    }
+  }
+  isProfile(): boolean {
+    return this.authService.getRole() === 'profile'
+  }
+  isAdmin(): boolean {
+    return this.authService.getRole() === 'admin'
   }
 }

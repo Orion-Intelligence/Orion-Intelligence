@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import Depends,UploadFile
 from configs.app_dependency import license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.server.config_manager.config_controller import config_controller
@@ -8,6 +8,7 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
+from orion.api.server.config_manager.model.config_data import config_data
 
 private_api_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))],
@@ -25,6 +26,38 @@ public_routes = APIRouter(tags=["Public"])
 )
 async def get_public_config():
     return await config_controller.getInstance().get_all()
+
+@private_api_routes.post(
+    "/api/public/update",
+    summary="Update public configuration",
+    description="Update public configuration values used for frontend initialization.",
+    tags=["Public", "Config"],
+    operation_id="updatePublicConfig",
+    response_description="Update configuration values used at frontend startup.",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN
+        ])),
+    ],)
+async def update_public_config(param:config_data):
+    await config_controller.getInstance().update_all(param)
+    return {"success": True}
+
+@private_api_routes.post(
+    "/api/upload/logo",
+    summary="Upload system logo",
+    tags=["System Settings", "Media"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN])),
+        Depends(status_required([UserStatus.ACTIVE])),
+    ],
+)
+async def upload_system_logo(
+    file: UploadFile):
+    return await config_controller.getInstance().upload_logo(file)
+
 
 @private_api_routes.get(
     "/api/graph",

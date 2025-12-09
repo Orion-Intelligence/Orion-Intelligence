@@ -152,7 +152,7 @@
   </div>
 
   <ul class="sidebar__items">
-    <ng-container *ngIf="authService.getRole() === 'profile'; else homeTemplate">
+    <ng-container *ngIf="authService.getRole() === 'profile' || authService.getRole()==='admin'; else homeTemplate">
       <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
