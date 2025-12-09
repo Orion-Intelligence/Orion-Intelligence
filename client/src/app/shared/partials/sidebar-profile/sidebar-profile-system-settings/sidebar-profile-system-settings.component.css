@@ -1,0 +1,21 @@
+.system-settings_card {
+    align-items: center;
+}
+
+.system-settings_box {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.system-settings_field {
+    display: flex;
+    flex-direction: column;
+}
+
+.system-settings_label {
+    color: var(--color-text6);
+    font-size: 12px;
+    margin-bottom: 6px;
+    font-weight: 400;
+}

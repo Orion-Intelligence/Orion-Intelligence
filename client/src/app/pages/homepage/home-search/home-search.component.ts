@@ -54,17 +54,17 @@ export class HomeSearchComponent implements OnInit {
       q: this.searchQuery || null
     };
 
-    if (this.isRoleAdmin) {
-      this.router.navigate(['/dashboard/consolidated/all'], {
-        queryParams,
-        queryParamsHandling: 'merge'
-      }).then();
-    } else {
-      this.router.navigate(['/dashboard/profile/consolidated/all'], {
-        queryParams,
-        queryParamsHandling: 'merge'
-      }).then();
-    }
+    // if (this.isRoleAdmin) {
+    //   this.router.navigate(['/dashboard/consolidated/all'], {
+    //     queryParams,
+    //     queryParamsHandling: 'merge'
+    //   }).then();
+    // } else {
+    this.router.navigate(['/dashboard/profile/consolidated/all'], {
+      queryParams,
+      queryParamsHandling: 'merge'
+    }).then();
+    // }
   }
 
   getMatchType() {

@@ -1,89 +1,91 @@
 <div class="company-profile_section">
     <div class="company-profile_section-header" (click)="toggleSection('profile')">
-        <span class="company-profile_section-title">Company Profile</span>
+        <span class="company-profile_section-title">
+            {{ isAdmin() ? 'Admin Profile' : 'Company Profile' }}
+        </span>
 
         <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isProfileOpen"
-            alt="search side dropdown icon dark" />
+            class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isProfileOpen" />
     </div>
-    <span class="company-profile_section-description">Manage and edit your company details, including phone, address,
-        and profile information.</span>
+
+    <span class="company-profile_section-description">
+        {{ isAdmin()
+        ? 'Manage profile information.'
+        : 'Manage and edit your company details, including phone, address, and profile information.' }}
+    </span>
+
     <div *ngIf="isProfileOpen">
         <div class="company-profile_card">
             <div class="company-profile_info">
-                <div class="company-profile_avatar"><app-profile-image-picker
-                        [userId]="userId"></app-profile-image-picker></div>
+                <div class="company-profile_avatar">
+                    <app-profile-image-picker [userId]="userId"></app-profile-image-picker>
+                </div>
+
                 <div>
-                    <div class="company-profile_company-name">
-                        <input type="text" [(ngModel)]="profile.companyName" class="company-profile_input" disabled
-                            placeholder="Enter company name" />
-                    </div>
-                    <div class="company-profile_company-location">
-                        {{ getLocationDisplay() || 'Location will appear here' }}
-                    </div>
+                    <ng-container *ngIf="isAdmin(); else companyProfileBlock">
+
+                    </ng-container>
+                    <ng-template #companyProfileBlock>
+                        <div class="company-profile_company-name">
+                            <input type="text" [(ngModel)]="profile.companyName" class="company-profile_input" disabled
+                                placeholder="Enter company name" />
+                        </div>
+
+                        <div class="company-profile_company-location">
+                            {{ getLocationDisplay() || 'Location will appear here' }}
+                        </div>
+                    </ng-template>
                 </div>
             </div>
-            <div class="company-profile_action-buttons">
+            <div class="company-profile_action-buttons" *ngIf="!isAdmin()">
                 <button class="company-profile_edit-btn" *ngIf="isEditing" (click)="cancelEdit($event)">
                     Cancel
                 </button>
                 <button class="company-profile_edit-btn" (click)="toggleEdit($event)">
-                    <span>{{ isEditing ? 'Save' : 'Edit' }}</span>
+                    {{ isEditing ? 'Save' : 'Edit' }}
                 </button>
             </div>
         </div>
-
-        <div class="company-profile_box">
+        <div class="company-profile_box" *ngIf="!isAdmin()">
             <div class="company-profile_box-header">Contacts</div>
             <div class="company-profile_box-content">
                 <div class="company-profile_row">
                     <div class="company-profile_info-item">
                         <div class="company-profile_info-label">Email address</div>
-                        <input type="email" [(ngModel)]="profile.email" class="company-profile_info-value" disabled
-                            placeholder="Enter email" />
+                        <input type="email" [(ngModel)]="profile.email" class="company-profile_info-value" disabled />
                     </div>
+
                     <div class="company-profile_info-item">
                         <div class="company-profile_info-label">Phone</div>
                         <input type="text" [(ngModel)]="profile.phone" class="company-profile_info-value"
-                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
+                            [disabled]="!isEditing" [ngClass]="{ 'company-profile_editable': isEditing }"
                             placeholder="Enter phone" />
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="company-profile_box">
+        <div class="company-profile_box" *ngIf="!isAdmin()">
             <div class="company-profile_box-header">Address</div>
             <div class="company-profile_box-content">
                 <div class="company-profile_row">
                     <div class="company-profile_info-item">
                         <div class="company-profile_info-label">Country</div>
                         <input type="text" [(ngModel)]="profile.country" class="company-profile_info-value"
-                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
-                            placeholder="Enter country" />
+                            [disabled]="!isEditing" placeholder="Enter country" />
                     </div>
 
                     <div class="company-profile_info-item">
                         <div class="company-profile_info-label">City/State</div>
                         <input type="text" [(ngModel)]="profile.city" class="company-profile_info-value"
-                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
-                            placeholder="Enter city/state" />
+                            [disabled]="!isEditing" placeholder="Enter city/state" />
                     </div>
                 </div>
-                <div class="company-profile_row">
-                    <div class="company-profile_info-item">
-                        <div class="company-profile_info-label">Postal Code</div>
-                        <input type="text" [(ngModel)]="profile.postalCode" class="company-profile_info-value"
-                            [ngClass]="{ 'company-profile_editable': isEditing }" [disabled]="!isEditing"
-                            placeholder="Enter postal code" />
-                    </div>
-                </div>
-
             </div>
         </div>
 
     </div>
 </div>
+
 
 <div class="company-profile_section">
     <div class="company-profile_section-header" (click)="toggleSection('twoFA')">

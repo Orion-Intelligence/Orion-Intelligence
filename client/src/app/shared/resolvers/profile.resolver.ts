@@ -11,7 +11,7 @@ import { AuthService } from '../../services/authetication/auth.service';
 export class ProfileResolver implements Resolve<CompanyProfile> {
     private cache$?: Observable<CompanyProfile>;
 
-    constructor(private apiService: ApiService, private appService: AppService, private authService: AuthService) {}
+    constructor(private apiService: ApiService, private appService: AppService, private authService: AuthService) { }
 
     resolve(): Observable<CompanyProfile> {
         const role = this.authService.getRole();

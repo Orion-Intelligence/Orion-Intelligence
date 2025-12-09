@@ -4,6 +4,7 @@ export class AppSettingsModel {
   version: string = '1.0.0';
   language_allowed: string = 'en';
   logo_url: string = '';
+  api_allowed: string = '0';
 
   constructor(data?: Partial<Record<keyof AppSettingsModel, string | boolean>>) {
     if (data) {
@@ -12,6 +13,7 @@ export class AppSettingsModel {
       this.version = (data.version as string) || this.version;
       this.language_allowed = (data.language_allowed as string) || this.language_allowed;
       this.logo_url = (data.logo_url as string) || this.logo_url;
+      this.api_allowed = (data.api_allowed as string) || this.api_allowed;
     }
   }
 }

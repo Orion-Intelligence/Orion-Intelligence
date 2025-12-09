@@ -1,0 +1,73 @@
+<div class="company-profile_section">
+
+    <div class="company-profile_section-header">
+        <span class="company-profile_section-title">System Settings</span>
+    </div>
+
+    <span class="company-profile_section-description">
+        Manage platform-level configuration and integrations.
+    </span>
+
+    <div class="company-profile_card">
+
+        <div class="company-profile_info">
+            <div class="company-profile_avatar">
+                <app-profile-image-picker></app-profile-image-picker>
+            </div>
+        </div>
+
+        <div class="company-profile_action-buttons">
+            <button class="company-profile_edit-btn" *ngIf="isEditing" (click)="cancelEdit()">
+                Cancel
+            </button>
+
+            <button class="company-profile_edit-btn" (click)="toggleEdit()">
+                {{ isEditing ? 'Save' : 'Edit' }}
+            </button>
+        </div>
+
+    </div>
+
+    <div class="company-profile_box">
+
+        <div class="company-profile_box-header">
+            Configuration
+        </div>
+
+        <div class="company-profile_box-content">
+
+            <div class="company-profile_row">
+
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">Language</div>
+
+                    <select class="company-profile_info-value" [(ngModel)]="form.language" [disabled]="!isEditing"
+                        [ngClass]="{ 'company-profile_editable': isEditing }">
+
+                        <option *ngFor="let lang of languageOptions" [value]="lang">
+                            {{ lang.toUpperCase() }}
+                        </option>
+                    </select>
+                </div>
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">Version</div>
+
+                    <input type="text" class="company-profile_info-value" [(ngModel)]="form.version"
+                        [disabled]="!isEditing" [ngClass]="{ 'company-profile_editable': isEditing }"
+                        placeholder="Enter version" />
+                </div>
+                <div class="company-profile_info-item">
+                    <div class="company-profile_info-label">API Allowed</div>
+
+                    <select class="company-profile_info-value" [(ngModel)]="form.api_allowed" [disabled]="!isEditing"
+                        [ngClass]="{ 'company-profile_editable': isEditing }">
+                        <option value="1">Enabled</option>
+                        <option value="0">Disabled</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -12,7 +12,7 @@ import {
   ProfileSubCategory, DiscussionSubCategory
 
 } from '../../constants/pages';
-import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, take } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
@@ -165,5 +165,23 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status
   }
+  getProfileCategories(): string[] {
+    const categories = Object.values(ProfileSubCategory);
 
+    if (this.isAdmin()) {
+      return categories.filter(
+        c =>
+          c !== ProfileSubCategory.IOC &&
+          c !== ProfileSubCategory.STATISTICS
+      );
+    }
+
+    return categories.filter(
+      c => c !== ProfileSubCategory.TENANT &&
+        c !== ProfileSubCategory.SYSTEM_SETTINGS
+    );
+  }
+  isAdmin(): boolean {
+    return this.authService.getRole() === 'admin';
+  }
 }

@@ -7,6 +7,7 @@ import { CompanyProfile } from '../../../model/company-profile/company.profile.m
 import { ProfileImagePickerComponent } from "./profile-image-picker/profile-image-picker.component";
 import { AppStorageService } from '../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../services/core/app/app.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
@@ -22,7 +23,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
   twoFactorEnabled = true;
   isDarkMode = true;
   userId: string = '';
-  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService) { this.profile = this.appService.userProfile(); }
+  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService, protected authService: AuthService) { this.profile = this.appService.userProfile(); }
   ngOnInit(): void {
     if (this.profile) {
       this.setItemsFromPreferences();
@@ -43,6 +44,9 @@ export class SidebarProfileSettingsComponent implements OnInit {
       this.twoFactorEnabled = this.profile?.preferences?.["twoFa"] === 'true';
     }
     this.userId = this.profile?.preferences?.["userId"]
+  }
+  isAdmin(): boolean {
+    return this.authService.getRole() === 'admin';
   }
   applyTheme() {
     const body = document.body;

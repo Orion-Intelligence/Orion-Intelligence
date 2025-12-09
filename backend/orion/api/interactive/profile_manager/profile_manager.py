@@ -11,6 +11,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 
 
@@ -36,12 +37,37 @@ class ProfileManager:
     async def _dek(user_id: str) -> bytes:
         return await TenantKeyManager.get_instance().get_or_create_dek(user_id)
 
-    async def getCompanyProfileData(self,current_user)  -> ProfileParmaModel:
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.company_uuid))
-        _alerts=await self._engine.find_one(db_alert_model,db_alert_model.tenant_id == str(current_user.company_uuid))
-        user=current_user
+    async def getCompanyProfileData(self, current_user) -> ProfileParmaModel:
+        user = current_user
+        empty_company = ProfileParmaModel(
+            companyName="",
+            phone="",
+            email=user.email,
+            country="",
+            city="",
+            postalCode="",
+            taxId="",
+            preferences=deepcopy(user.preferences) or {},
+            alerts=[]
+        )
+
+        if user.role != user_role.PROFILE:
+            if "userId" not in empty_company.preferences:
+                empty_company.preferences["userId"] = str(user.id)
+            empty_company.preferences["twoFa"] = str(user.twofa_enabled)
+            return empty_company
+        
+        tenant = await self._engine.find_one(
+            db_tenant_model,
+            db_tenant_model.id == ObjectId(user.company_uuid)
+        )
+        _alerts = await self._engine.find_one(
+            db_alert_model,
+            db_alert_model.tenant_id == str(user.company_uuid)
+        )
         dek = await self._dek(str(tenant.id))
         enc = Fernet(dek)
+
         def safe_decrypt(value: str | None) -> str:
             if not value:
                 return ""
@@ -49,6 +75,7 @@ class ProfileManager:
                 return enc.decrypt(value.encode()).decode()
             except Exception:
                 return ""
+
         alerts_list = _alerts.alerts if _alerts and _alerts.alerts else []
         company = ProfileParmaModel(
             companyName=safe_decrypt(tenant.companyName),
@@ -62,14 +89,19 @@ class ProfileManager:
             alerts=alerts_list
         )
         for key, value in company.preferences.items():
-                if value:
-                    if isinstance(value, str):
-                        company.preferences[key] = enc.decrypt(value.encode()).decode()
+            if value and isinstance(value, str):
+                try:
+                    company.preferences[key] = enc.decrypt(value.encode()).decode()
+                except Exception:
+                    company.preferences[key] = ""
 
         if "userId" not in company.preferences:
             company.preferences["userId"] = str(user.id)
+
         company.preferences["twoFa"] = str(user.twofa_enabled)
+
         return company
+
 
     async def updateCompanyProfile(self,data: ProfileParmaModel, current_user):
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.company_uuid))
