@@ -1,5 +1,5 @@
-from typing import Optional, List, Dict
-from pydantic import BaseModel, root_validator
+from typing import Optional, List, Dict, Annotated
+from pydantic import BaseModel, root_validator, StringConstraints, Field
 import json
 
 
@@ -8,22 +8,25 @@ class search_consolidated_param_model(BaseModel):
     category: Optional[str] = "all"
     page: Optional[int] = 1
     safe: bool = False
-    profile: bool = False
     must: bool = False
     network: str = "all"
-    daterange: Optional[str] = ""
     matchtype: Optional[str] = ""
     content: Optional[str] = "all"
-    entity: Optional[str] = ""
-    mitre: Optional[str] = ""
     attacker: Optional[str] = ""
-    team: Optional[List[str]] = []
+    team: Optional[str] = ""
     platform: Optional[str] = ""
     url: Optional[str] = ""
     user: Optional[str] = ""
     fullsearch: Optional[bool] = False
 
-    entity_filter: Optional[Dict[str, List[str]]] = None
+    daterange: Annotated[str,
+        StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
+    ] = ""
+    entity_filter: Optional[Dict[str, List[str]]] = Field(
+        default=None,
+        examples=[{"m_country": ["pakistan"]}]
+    )
+
 
     class Config:
         populate_by_name = True

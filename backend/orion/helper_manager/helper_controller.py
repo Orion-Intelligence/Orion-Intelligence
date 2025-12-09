@@ -63,7 +63,7 @@ class helper_controller:
                 else:
                     clauses.extend([{"term": {k: val}} for val in vals])
 
-            if p_query_model.must or p_query_model.profile:
+            if p_query_model.must:
                 must_filter_clauses = clauses
             else:
                 should_filter_clauses = {"bool": {"should": clauses}}

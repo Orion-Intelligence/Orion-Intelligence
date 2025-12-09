@@ -8,13 +8,12 @@ class search_defacement_param_model(BaseModel,helper_controller):
     category: Optional[str] = "all"
     page: Optional[int] = 1
     network: str = "all"
-    profile: bool = False
     daterange: Annotated[str,
         StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
     ] = ""
-    attacker: Optional[str] = ""
     must: Optional[bool] = False
     matchtype: Optional[str] = ""
+    attacker: Optional[str] = ""
     team: Optional[str] = ""
     content: Optional[str] = ""
     entity_filter: Optional[Dict[str, List[str]]] = Field(

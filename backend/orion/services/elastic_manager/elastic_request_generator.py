@@ -1,9 +1,5 @@
-import copy
 import hashlib
-import random
 import re
-import string
-
 from datetime import timedelta, timezone
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
@@ -331,12 +327,19 @@ class elastic_request_generator:
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
         m_content_type = p_query_model.content
+        if p_query_model.attacker:
+            must_clauses.append({"terms": {"m_attacker": [p_query_model.attacker]}})
+        if p_query_model.team:
+            must_clauses.append({"terms": {"m_team": [p_query_model.team]}})
+
         if m_content_type == "phishing":
             must_clauses.append({"terms": {"m_ioc_type": ["phishing"]}})
         elif m_content_type == "hacked":
             must_clauses.append({"terms": {"m_ioc_type": ["hacked"]}})
         elif m_content_type == "databases":
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
+        elif m_content_type != "":
+            must_clauses.append({"terms": {"m_ioc_type": ['none']}})
 
         quoted_value_match = re.fullmatch(r'"([^"]+)"', raw_query.strip())
         quoted_value = quoted_value_match.group(1) if quoted_value_match else None
@@ -388,7 +391,8 @@ class elastic_request_generator:
         m_date_range = p_query_model.daterange
         m_network = p_query_model.network
         m_page_number = getattr(p_query_model, "page", 1)
-
+        m_content_type = p_query_model.content
+        m_safe_search = p_query_model.safe
         must_clauses = []
         must_not_clause = []
 
@@ -419,7 +423,7 @@ class elastic_request_generator:
                     })
             except ValueError:
                 pass
-        else:
+        elif m_date_range!="":
             to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
             from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
             must_clauses.append({
@@ -483,6 +487,26 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
+        if m_safe_search and m_safe_search == True:
+            must_not_clause.append({"term": {"m_content_type": "adult"}})
+
+        if hasattr(p_query_model, "platform") and p_query_model.platform:
+            must_clauses.append({"term": {"m_platform": p_query_model.platform}})
+        if hasattr(p_query_model, "attacker") and p_query_model.attacker:
+            must_clauses.append({"terms": {"m_attacker": [p_query_model.attacker]}})
+        if hasattr(p_query_model, "team") and p_query_model.team:
+            must_clauses.append({"terms": {"m_team": [p_query_model.team]}})
+
+        if m_content_type and m_content_type.lower() not in ("", "all"):
+            must_clauses.append({
+                "bool": {
+                    "filter": [
+                        {"exists": {"field": "content_type"}},
+                        {"term": {"content_type": m_content_type.lower()}}
+                    ]
+                }
+            })
+
         phrases = re.findall(r'"([^"]+)"', p_query_model.q or "")
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (p_query_model.q or "").strip().endswith('"')
         exact_phrases = phrases
@@ -516,7 +540,7 @@ class elastic_request_generator:
         )
 
         unified_query["size"] = 15
-        unified_query["from"] = 0
+        unified_query["from"] = max(0, (m_page_number - 1) * 15)
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"]["bool"]
@@ -530,7 +554,8 @@ class elastic_request_generator:
             {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
             {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4},
             {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
-            {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}
+            {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4},
+            {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.4}
         ] if next(iter(b)) in base_index]
 
         return query
@@ -616,7 +641,6 @@ class elastic_request_generator:
         m_search_type = p_query_model.category
         m_date_range = p_query_model.daterange
         m_content_type = p_query_model.content
-        m_entity = p_query_model.entity
 
         must_clauses = []
         must_not_clause = []
@@ -647,23 +671,8 @@ class elastic_request_generator:
                 except ValueError:
                     pass
 
-        if m_entity:
-            entity_list = [
-                e if e.startswith("m_") else f"m_{e}"
-                for e in [
-                    i.strip().lower().replace(" ", "_") for i in m_entity.split(",") if i.strip()
-                ]
-            ]
-            if entity_list:
-                must_clauses.append({
-                    "bool": {
-                        "should": [{"exists": {"field": entity}} for entity in entity_list],
-                        "minimum_should_match": 1
-                    }
-                })
-
         if m_content_type and m_content_type.lower() not in ("", "all"):
-            must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})
+            must_clauses.append({"term": {"content_type": m_content_type.lower()}})
 
         if m_search_type == "databases":
             m_search_type = "leaks"
@@ -759,7 +768,7 @@ class elastic_request_generator:
                     pass
 
         if m_content_type and m_content_type.lower() not in ("", "all"):
-            must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})
+            must_clauses.append({"term": {"content_type": m_content_type.lower()}})
 
         if m_search_type == "databases":
             m_search_type = "leaks"
@@ -841,6 +850,10 @@ class elastic_request_generator:
         if m_platform:
             must_clauses.append({"term": {"m_platform": m_platform}})
 
+        m_content_type = p_query_model.content
+        if m_content_type and m_content_type.lower() not in ("", "all"):
+            must_clauses.append({"term": {"content_type": m_content_type.lower()}})
+
         if m_date_range:
             parts = m_date_range.split(",")
             if len(parts) == 2:
@@ -899,8 +912,7 @@ class elastic_request_generator:
         m_page_number = p_query_model.page
         m_search_type = p_query_model.content
         m_message_date = p_query_model.daterange
-        m_entity = p_query_model.entity
-        m_mitryTtp = p_query_model.mitre
+        m_content_type = p_query_model.content
         m_ctype = p_query_model.category
 
         must_clauses = []
@@ -939,18 +951,8 @@ class elastic_request_generator:
                 except ValueError:
                     pass
 
-        if m_entity:
-            must_clauses.append({
-                "bool": {
-                    "should": [
-                        {"exists": {"field": entity}} for entity in m_entity
-                    ],
-                    "minimum_should_match": 1
-                }
-            })
-
-        if m_mitryTtp and m_mitryTtp.lower() not in ("", "all"):
-            must_clauses.append({"term": {"m_mitre_ttp_type": m_mitryTtp.lower()}})
+        if m_content_type and m_content_type.lower() not in ("", "all"):
+            must_clauses.append({"term": {"content_type": m_content_type.lower()}})
 
         search_fields = [
             "m_content^3",
@@ -1305,7 +1307,6 @@ class elastic_request_generator:
         m_network = p_query_model.network
         m_date_range = p_query_model.daterange
         m_content_type = p_query_model.content
-        m_entity = p_query_model.entity
 
         exact_phrases = re.findall(r'"([^"]+)"', raw_query)
         loose_terms = re.sub(r'"[^"]+"', '', raw_query).strip().split()
@@ -1339,18 +1340,8 @@ class elastic_request_generator:
                 except ValueError:
                     pass
 
-        if m_entity:
-            must_clauses.append({
-                "bool": {
-                    "should": [
-                        {"exists": {"field": entity}} for entity in m_entity
-                    ],
-                    "minimum_should_match": 1
-                }
-            })
-
         if m_content_type and m_content_type.lower() not in ("", "all"):
-            must_clauses.append({"term": {"m_mitre_ttp_type": m_content_type.lower()}})
+            must_clauses.append({"term": {"content_type": m_content_type.lower()}})
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})

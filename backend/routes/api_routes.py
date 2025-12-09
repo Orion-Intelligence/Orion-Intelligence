@@ -15,9 +15,9 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model
+from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model, \
-    search_news_param_model, search_news_internal_param_model
+from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model, search_news_param_model, search_news_internal_param_model
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
@@ -162,13 +162,14 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
         Depends(license_required("maintainer", [user_role.ADMIN, user_role.ANALYST])),
     ],
 )
-async def search_consolidated(param: search_consolidated_param_model = Body(...)):
+async def search_consolidated_ranked(param: search_consolidated_param_model = Body(...)):
     base_index = [
         ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_INDEX.S_EXPLOIT_INDEX,
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX,
+        ELASTIC_INDEX.S_DEFACEMENT_INDEX
     ]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
 
@@ -244,6 +245,7 @@ async def search_discussion(param: search_general_param_model = Body(...)):
     description=SEARCH_DOCS["social"]["description"],
     tags=["Search"],
     operation_id="searchAllSocialChatReports",
+    include_in_schema=False,
     response_description=SEARCH_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[
@@ -272,7 +274,7 @@ async def search_discussion(param: search_general_param_model = Body(...)):
         Depends(license_required("module:social")),
     ],
 )
-async def search_twitter(param: search_social_param_model = Body(...)):
+async def search_social(param: search_social_param_model = Body(...)):
     return await search_model.getInstance().search_social_result(param)
 
 
@@ -304,10 +306,9 @@ async def search_leak(param: search_leak_param_model = Body(...)):
 @api_routes.post(
     "/api/search/news",
     summary="Search breach news reports",
-    description=SEARCH_DOCS["news"]["description"],
     tags=["Search"],
+    include_in_schema=False,
     operation_id="searchBreachNewsReports",
-    response_description=SEARCH_DOCS["news"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
 )
@@ -329,7 +330,7 @@ async def search_news(param: search_news_param_model = Body(...)):
         Depends(license_required("module:exploit")),
     ],
 )
-async def search_leak(param: search_leak_param_model = Body(...)):
+async def search_leak(param: search_exploit_param_model = Body(...)):
     return await search_model.getInstance().search_exploit_result(param)
 
 

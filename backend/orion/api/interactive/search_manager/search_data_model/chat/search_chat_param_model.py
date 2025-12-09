@@ -9,6 +9,4 @@ class search_chat_param_model(BaseModel):
     must: Optional[bool] = False
     matchtype: Optional[str] = "or"
     daterange: Optional[str] = ""
-    entity: Optional[str] = ""
-    mitre: Optional[str] = ""
     entity_filter: Optional[Dict[str, List[str]]] = None

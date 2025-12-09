@@ -163,23 +163,21 @@ class search_model:
         )
 
     @staticmethod
-    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories):
-        if param.entity_filter:
-            filter_dict = param.entity_filter
-        else:
-            filter_dict = {}
+    async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories,
+                                                allowed_categories):
+        filter_dict = param.entity_filter if param.entity_filter else {}
 
         indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
             param, filter_dict, base_index, blocked_categories, allowed_categories
         )
 
-        response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query, indices_boost)
+        response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices, query,
+                                                                                            indices_boost)
 
         ranked_results = []
 
         if response and "hits" in response and "hits" in response["hits"]:
-            hits = response["hits"]["hits"]
-            for rank, hit in enumerate(hits):
+            for rank, hit in enumerate(response["hits"]["hits"]):
                 source = hit.get("_source", {})
                 source.pop("m_embedding", None)
                 source["rank_index"] = hit.get("_index")
@@ -191,8 +189,10 @@ class search_model:
         if response and "hits" in response:
             total_field = response["hits"].get("total", 0)
             total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
+
         size = int(query.get("size", 10))
         total_pages = (total + size - 1) // size if size > 0 else 0
+
         return {
             "Result": ranked_results,
             "Page_Count": total_pages
@@ -201,10 +201,7 @@ class search_model:
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
 
-        if param.entity_filter:
-            filter_dict = param.entity_filter
-        else:
-            filter_dict = {}
+        filter_dict = param.entity_filter if param.entity_filter else {}
 
         indices, queries, labels = elastic_request_generator().on_search_consolidated_data(param, filter_dict)
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
@@ -215,10 +212,10 @@ class search_model:
         chat_data = {}
         defacement_data = {}
         social_data = {}
-        tracking_data={}
-        news_data={}
+        tracking_data = {}
+        news_data = {}
 
-        for index, res,label in zip(indices, responses,labels):
+        for index, res, label in zip(indices, responses, labels):
             data = {"Result": [], "Suggestions": [], "Page_Count": 0}
 
             if not res:
@@ -229,13 +226,20 @@ class search_model:
                     buckets = domain_value.get("by_ioc_type", {}).get("buckets", [])
                     for bucket in buckets:
                         hits = bucket.get("top_hits_per_type", {}).get("hits", {}).get("hits", [])
-                        data["Result"].extend([hit["_source"] for hit in hits])
+                        for hit in hits:
+                            src = hit["_source"]
+                            src.pop("m_embedding", None)
+                            data["Result"].append(src)
                 data["Page_Count"] = len(data["Result"])
-
             else:
                 hits = res.get("hits", {}).get("hits", [])
-                data["Result"] = [hit["_source"] for hit in hits]
-                data["Page_Count"] = len(hits)
+                cleaned = []
+                for hit in hits:
+                    src = hit["_source"]
+                    src.pop("m_embedding", None)
+                    cleaned.append(src)
+                data["Result"] = cleaned
+                data["Page_Count"] = len(cleaned)
 
             if label == "leak_model":
                 leak_data = data
@@ -287,6 +291,9 @@ class search_model:
     async def search_social_result(self, param: search_social_param_model):
         document, data_filter = elastic_request_generator().on_search_social_data(param, param.entity_filter)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+
+        for hit in m_documents.get("hits", {}).get("hits", []):
+            hit.get("_source", {}).pop("m_embedding", None)
 
         return await self.__search_callback.search_handler(
             m_status, m_documents,

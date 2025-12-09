@@ -1,6 +1,5 @@
-from typing import Optional, Dict, List
-
-from pydantic import BaseModel
+from typing import Optional, Dict, List, Annotated
+from pydantic import BaseModel, Field, StringConstraints
 
 
 class search_social_param_model(BaseModel):
@@ -9,12 +8,14 @@ class search_social_param_model(BaseModel):
     content: Optional[str] = "all"
     category: Optional[str] = "all"
     network: str = "all"
-    daterange: Optional[str] = ""
-    entity: Optional[str] = ""
     matchtype: Optional[str] = "or"
     platform: Optional[str] = ""
-    mitre: Optional[str] = ""
     must: Optional[bool] = False
-    messagedate: Optional[str] = ""
 
-    entity_filter: Optional[Dict[str, List[str]]] = None
+    daterange: Annotated[str,
+        StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")
+    ] = ""
+    entity_filter: Optional[Dict[str, List[str]]] = Field(
+        default=None,
+        examples=[{"m_country": ["pakistan"]}]
+    )
