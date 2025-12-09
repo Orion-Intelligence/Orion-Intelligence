@@ -40,10 +40,10 @@ class auth_manager:
         if not user:
             user = await self._engine.find_one(db_user_account, db_user_account.username == mail)
 
-        status = CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password)
-        print("::::::::::::::::::::::::::::::::::::2", flush=True)
-        print(str(password) + " ::: " + str(user.password) + " ::: " + str(status) + " ::: " + str(mail), flush=True)
-        print("::::::::::::::::::::::::::::::::::::2", flush=True)
+        # status = CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password)
+        # print("::::::::::::::::::::::::::::::::::::2", flush=True)
+        # print(str(password) + " ::: " + str(user.password) + " ::: " + str(status) + " ::: " + str(mail), flush=True)
+        # print("::::::::::::::::::::::::::::::::::::2", flush=True)
 
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
             return None
