@@ -276,7 +276,7 @@ async def set_alerts_seen(data: list[AlertModel], current_user=Depends(get_curre
 @tenant_routes.post(
     "/api/alert/delete",
     summary="Delete alert",
-    description="Delete a specific alert identified by its hash for the current user.",
+    description="Delete a specific alert identified by its id for the current user.",
     tags=["Alerts"],
     operation_id="deleteAlert",
     response_description="Result of the delete alert operation.",
@@ -287,8 +287,8 @@ async def set_alerts_seen(data: list[AlertModel], current_user=Depends(get_curre
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
-async def delete_alert(hash: str = Body(..., description="Unique hash identifier of the alert to delete."), current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().delete_alert(hash, current_user)
+async def delete_alert(id: str = Body(..., description="Unique id identifier of the alert to delete."), current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().delete_alert(id, current_user)
 
 
 @tenant_routes.post(
@@ -363,6 +363,24 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
 )
 async def delete_all_alerts(current_user=Depends(get_current_user)):
     return await AlertManager.get_instance().delete_all_alerts(current_user)
+
+@tenant_routes.post(
+    "/api/profile/alerts/delete/{_type}",
+    summary="Delete all alerts",
+    description="Delete all alerts associated with the current user profile.",
+    tags=["Alerts"],
+    operation_id="deleteAllAlerts",
+    response_description="Result of the delete-all operation.",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.PROFILE])),
+        Depends(status_required([UserStatus.ACTIVE])),
+        Depends(license_required("maintainer")),
+    ],
+)
+async def delete_all_alerts(_type:str, current_user=Depends(get_current_user)):
+    return await AlertManager.get_instance().delete_alerts_by_type(current_user,_type)
 
 
 @tenant_routes.post(
