@@ -42,7 +42,7 @@ class auth_manager:
 
         status = CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password)
         print("::::::::::::::::::::::::::::::::::::2", flush=True)
-        print(status, flush=True)
+        print(str(password) + " ::: " + str(user.password) + " ::: " + str(status) + " ::: " + str(mail), flush=True)
         print("::::::::::::::::::::::::::::::::::::2", flush=True)
 
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
