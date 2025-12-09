@@ -36,17 +36,23 @@ class auth_manager:
         self._engine = mongo_controller.get_instance().get_engine()
 
     async def authenticate_user(self, mail: str, password: str):
+        print("::::::::::::::::::::::::::::::::::::2", flush=True)
         user = await self._engine.find_one(db_user_account, db_user_account.email == mail)
+        print("::::::::::::::::::::::::::::::::::::3", flush=True)
         if not user:
+            print("::::::::::::::::::::::::::::::::::::4", flush=True)
             user = await self._engine.find_one(db_user_account, db_user_account.username == mail)
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
+            print("::::::::::::::::::::::::::::::::::::5", flush=True)
             return None
+        print("::::::::::::::::::::::::::::::::::::6", flush=True)
         return user
 
     @staticmethod
     async def login(mail: str, password: str):
         user = await auth_manager.get_instance().authenticate_user(mail, password)
         if not user:
+            print("::::::::::::::::::::::::::::::::::::1", flush=True)
             raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.twofa_enabled:
             if user.twofa_secret:
