@@ -36,6 +36,7 @@ export interface User {
   email: string;
   role: 'admin' | 'crawler' | 'demo' | 'profile' | 'analyst';
   status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
+  subscription?: boolean;
   verificationDate: string;
   licenses?: string[] | null;
 }
