@@ -36,20 +36,14 @@ class auth_manager:
         self._engine = mongo_controller.get_instance().get_engine()
 
     async def authenticate_user(self, mail: str, password: str):
-        print("::::::::::::::::::::::::::::::::::::2", flush=True)
         user = await self._engine.find_one(db_user_account, db_user_account.email == mail)
-        print("::::::::::::::::::::::::::::::::::::3", flush=True)
         if not user:
             user = await self._engine.find_one(db_user_account, db_user_account.username == mail)
-            if not user:
-                print("FUCKKK ::::::::::::::::::::::::::::::::::::4", flush=True)
 
-            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
-            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
-            print(db_user_account.username, flush=True)
-            print(mail, flush=True)
-            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
-            print("XX ::::::::::::::::::::::::::::::::::::4", flush=True)
+        status = CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password)
+        print("::::::::::::::::::::::::::::::::::::2", flush=True)
+        print(status, flush=True)
+        print("::::::::::::::::::::::::::::::::::::2", flush=True)
 
         if not user or not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
             return None
