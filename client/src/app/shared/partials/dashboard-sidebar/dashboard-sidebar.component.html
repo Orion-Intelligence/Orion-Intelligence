@@ -9,7 +9,7 @@
 
   <ul class="sidebar__items">
     <ng-container
-      *ngIf="authService.getRole() === 'profile' || authService.getRole() === 'admin' && licenseService.isMaintainer()">
+      *ngIf="authService.getRole() === 'profile' || authService.getRole() === 'admin'">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
@@ -18,7 +18,7 @@
     </ng-container>
 
     <ng-container
-      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'admin') || !licenseService.isMaintainer()">
+      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'admin')">
       <li class="sidebar__item">
         <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{
         'active':

@@ -21,7 +21,5 @@ export class subscriptionGuard implements CanActivate {
       return true;
     }
     return true;
-    // this.dashboardService.showSubscription.set(true);
-    // return this.router.parseUrl('/');
   }
 }
