@@ -174,7 +174,6 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     dependencies=[
         Depends(role_required([user_role.PROFILE,user_role.ADMIN])),
         Depends(status_required([UserStatus.ACTIVE])),
-        Depends(license_required("maintainer")),
     ],
 )
 async def get_company_profile(current_user=Depends(get_current_user)):
@@ -395,7 +394,6 @@ async def delete_all_alerts(_type:str, current_user=Depends(get_current_user)):
     dependencies=[
         Depends(role_required([user_role.PROFILE])),
         Depends(status_required([UserStatus.ACTIVE])),
-        Depends(license_required("maintainer")),
     ],
 )
 async def get_alert_scan_status(current_user=Depends(get_current_user)):

@@ -19,6 +19,7 @@ import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
 import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
 import { SidebarProfileHomepageComponent } from "../sidebar-profile-homepage/sidebar-profile-homepage.component";
+import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-sidebar-profile-alerts',
@@ -34,7 +35,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
   isLoading: boolean = false;
   isConfirmationOpen$ = new BehaviorSubject<boolean>(false);
   constructor(public appService: AppService, private alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
-    private messageNotificationService: MessageNotificationService, protected authService: AuthService) {
+    private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
   }
 
   ngOnInit(): void {
@@ -105,7 +106,6 @@ export class SidebarProfileAlertsComponent implements OnInit {
       "playstore-scanning",
       "social-scanner",
       "email-breach",
-      "advanced scanning",
       "repo scanning",
       "seo scanning"
     ];

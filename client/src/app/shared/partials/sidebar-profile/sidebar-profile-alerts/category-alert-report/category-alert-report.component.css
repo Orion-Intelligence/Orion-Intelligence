@@ -312,3 +312,7 @@
     cursor: pointer;
     margin-top: 8px;
 }
+
+.dropdown-menu.category_report_alert_no-arrow::before {
+    content: none !important;
+}

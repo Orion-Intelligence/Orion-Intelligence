@@ -24,6 +24,7 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
+from orion.services.stick_manager.stick_manager import StickManager
 from routes.docs.docs import SYSTEM_INFO_DOCS, REPORT_DOCS, DYNAMIC_DOCS, SEARCH_DOCS
 
 api_routes = APIRouter(
@@ -649,3 +650,166 @@ async def parse_text(payload: DomainScanRequest):
 )
 async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "social")
+
+@api_routes.get(
+    "/api/search/breach/stick/{doc_id}",
+    summary="Get breach media intelligence report in stick format",
+    description=REPORT_DOCS["breach"]["description"],
+    tags=["Reports"],
+    operation_id="getBreachStickReport",
+    response_description=REPORT_DOCS["breach"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
+)
+async def get_breach_stick_document(
+    doc_id: str,
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
+):
+    return await StickManager.get_instance().get_leak_stick(doc_id, lang)
+
+@api_routes.get(
+    "/api/search/strategic/stick/{doc_id}",
+    summary="Get strategic media intelligence report in stick format",
+    description=REPORT_DOCS["strategic"]["description"],
+    tags=["Reports"],
+    operation_id="getStrategicStickReport",
+    response_description=REPORT_DOCS["strategic"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
+)
+async def get_strategic_stick_document(
+    doc_id: str,
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
+):
+    return await StickManager.get_instance().get_general_stick(doc_id, lang)
+
+@api_routes.get(
+    "/api/search/defacement/stick/{doc_id}",
+    summary="Get defacement media intelligence report in stick format",
+    description=REPORT_DOCS["defacement"]["description"],
+    tags=["Reports"],
+    operation_id="getDefacementStickReport",
+    response_description=REPORT_DOCS["defacement"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
+)
+async def get_defacement_stick_document(
+    doc_id: str,
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
+):
+    return await StickManager.get_instance().get_defacement_stick(doc_id)
+
+@api_routes.get(
+    "/api/search/exploit/stick/{doc_id}",
+    summary="Get exploit media intelligence report in stick format",
+    description=REPORT_DOCS["exploit"]["description"],
+    tags=["Reports"],
+    operation_id="getExploitStickReport",
+    response_description=REPORT_DOCS["exploit"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
+)
+async def get_exploit_stick_document(
+    doc_id: str,
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
+):
+    return await StickManager.get_instance().get_exploit_stick(doc_id,lang)
+
+@api_routes.get(
+    "/api/search/social/stick/{doc_id}",
+    summary="Get social media intelligence report in stick format",
+    description=REPORT_DOCS["social"]["description"],
+    tags=["Reports"],
+    operation_id="getSocialStickReport",
+    response_description=REPORT_DOCS["social"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
+)
+async def get_social_stick_document(
+    doc_id: str,
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
+):
+    return await StickManager.get_instance().get_social_stick(doc_id,lang)
+
+@api_routes.get(
+    "/api/search/news/stick/{doc_id}",
+    summary="Get news media intelligence report in stick format",
+    description=REPORT_DOCS["news"]["description"],
+    tags=["Reports"],
+    operation_id="getNewsStickReport",
+    response_description=REPORT_DOCS["news"]["response_description"],
+    status_code=200,
+    dependencies=[
+        Depends(role_required([
+            user_role.ADMIN,
+            user_role.DEMO,
+            user_role.PROFILE,
+            user_role.ANALYST,
+        ])),
+    ],
+)
+async def get_news_stick_document(
+    doc_id: str,
+    lang: Optional[str] = Query(
+        None,
+        alias="lang",
+        description="Optional language code for localized report content.",
+    ),
+):
+    return await StickManager.get_instance().get_leak_stick(doc_id,lang)
+

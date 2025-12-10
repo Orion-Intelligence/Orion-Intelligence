@@ -20,8 +20,7 @@ from orion.api.interactive.search_manager.search_data_model.chat.search_chat_cal
     result_item as ChatResultItem,
 )
 
-from orion.api.interactive.search_manager.search_callback_model import search_model
-from orion.api.controllers.mongo_controller import mongo_controller
+from orion.api.interactive.search_manager.search_model import search_model
 
 
 STICK_TEMPLATE = {
@@ -63,31 +62,38 @@ class StickManager:
         return StickManager.__instance
 
 
-    async def get_defacement_stick(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw: DefacementResultItem = await self.search_model.request_defacement_doc(doc_id)
+    async def get_defacement_stick(self, doc_id: str) -> Dict[str, Any]:
+        raw: DefacementResultItem = await self._search_model.request_defacement_doc(doc_id)
+        raw = LeakResultItem(**raw)
         return self._convert_defacement(raw)
 
     async def get_exploit_stick(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw: ExploitResultItem = await self.search_model.request_exploit_doc(doc_id, lang)
+        raw: ExploitResultItem = await self._search_model.request_exploit_doc(doc_id, lang)
+        raw = LeakResultItem(**raw)
         return self._convert_exploit(raw)
 
     async def get_leak_stick(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw: LeakResultItem = await self.search_model.request_leak_doc(doc_id, lang)
+        raw: LeakResultItem = await self._search_model.request_leak_doc(doc_id, lang)
+        raw = LeakResultItem(**raw)
+        if raw is None:
+            return {"error": "No leak document found", "doc_id": doc_id}
         return self._convert_leak(raw)
 
     async def get_social_stick(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw: SocialResultItem = await self.search_model.request_social_doc(doc_id, lang)
+        raw: SocialResultItem = await self._search_model.request_social_doc(doc_id, lang)
+        raw = LeakResultItem(**raw)
         return self._convert_social(raw)
 
     async def get_general_stick(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw: GeneralResultItem = await self.search_model.request_general_doc(doc_id, lang)
+        raw: GeneralResultItem = await self._search_model.request_general_doc(doc_id, lang)
+        raw = LeakResultItem(**raw)
         return self._convert_general(raw)
 
     async def get_chat_stick(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        raw: ChatResultItem = await self.search_model.request_chat_doc(doc_id, lang)
+        raw: ChatResultItem = await self._search_model.request_chat_doc(doc_id, lang)
+        raw = LeakResultItem(**raw)
         return self._convert_chat(raw)
 
-    @staticmethod
     def _convert_defacement(self, raw: DefacementResultItem) -> Dict[str, Any]:
         stick = STICK_TEMPLATE.copy()
         title = raw.m_url or raw.m_base_url or (raw.m_mirror_links[0] if raw.m_mirror_links else None) \
@@ -114,11 +120,10 @@ class StickManager:
         stick["CONCLUSION"] = ""
         return stick
 
-    @staticmethod
     def _convert_exploit(self, raw: ExploitResultItem) -> Dict[str, Any]:
         stick = STICK_TEMPLATE.copy()
         stick["Title"] = raw.m_title or raw.m_url or "Exploit - unknown title"
-        stick["Date"] = raw.m_update_date or raw.m_creation_date or ""
+        stick["Date"] = raw.m_leak_date or raw.m_update_date or raw.m_creation_date or ""
         stick["Network"] = raw.m_network or (raw.m_weblink[0] if raw.m_weblink else "") or ""
         stick["Country"] = ""
         summary = raw.m_important_content or raw.m_content or ""
@@ -128,7 +133,7 @@ class StickManager:
             "Scale": "Unknown",
             "Impacted Region": "Unknown",
             "Sector": "Exploit",
-            "Volume": f"{len(raw.m_document) if raw.m_document else 0} artifacts"
+            "Volume": ""
         }
         breach_type = "Exploit"
         attack_vector = "Exploit / Public-facing application"
@@ -150,7 +155,6 @@ class StickManager:
         stick["CONCLUSION"] = ""
         return stick
 
-    @staticmethod
     def _convert_leak(self, raw: LeakResultItem) -> Dict[str, Any]:
         stick = STICK_TEMPLATE.copy()
         stick["Title"] = raw.m_title or raw.m_url or "Leak - unknown title"
@@ -160,9 +164,7 @@ class StickManager:
         summary = raw.m_important_content or raw.m_content or ""
         stick["SUMMARY"] = (summary[:400] + "...") if summary and len(summary) > 400 else (summary or "No summary available")
         volume = "Unknown"
-        if raw.m_document:
-            volume = f"{len(raw.m_document)} files"
-        elif raw.m_dumplink:
+        if raw.m_dumplink:
             volume = f"{len(raw.m_dumplink)} dump links"
         stick["TRENDS"] = {
             "Dates": stick["Date"],
@@ -189,20 +191,19 @@ class StickManager:
         stick["CONCLUSION"] = ""
         return stick
 
-    @staticmethod
     def _convert_social(self, raw: SocialResultItem) -> Dict[str, Any]:
         stick = STICK_TEMPLATE.copy()
         stick["Title"] = raw.m_title or raw.m_url or "Social - unknown title"
-        stick["Date"] = raw.m_update_date or raw.m_creation_date or ""
+        stick["Date"] = raw.m_message_date or raw.m_update_date or raw.m_creation_date or ""
         stick["Network"] = raw.m_network or ""
         stick["Country"] = ""
-        stick["SUMMARY"] = (raw.m_important_content or raw.m_content or "")[:400] or "No summary available"
+        stick["SUMMARY"] = (raw.m_content or "")[:400] or "No summary available"
         stick["TRENDS"] = {
             "Dates": stick["Date"],
             "Scale": "Unknown",
             "Impacted Region": "Unknown",
             "Sector": "Social Media",
-            "Volume": f"{len(raw.m_images) if raw.m_images else 0} images"
+            "Volume": ""
         }
         stick["INSIGHTS"] = {
             "Breach Type": "Social content / activity",
@@ -213,7 +214,6 @@ class StickManager:
         stick["CONCLUSION"] = ""
         return stick
 
-    @staticmethod
     def _convert_general(self, raw: GeneralResultItem) -> Dict[str, Any]:
         stick = STICK_TEMPLATE.copy()
         stick["Title"] = raw.m_title or raw.m_url or "General - unknown title"
@@ -243,30 +243,26 @@ class StickManager:
         stick["CONCLUSION"] = ""
         return stick
 
-    @staticmethod
     def _convert_chat(self, raw: ChatResultItem) -> Dict[str, Any]:
         stick = STICK_TEMPLATE.copy()
-        stick["Title"] = raw.m_title or raw.m_url or "Chat - unknown title"
-        stick["Date"] = raw.m_update_date or raw.m_creation_date or ""
-        stick["Network"] = raw.m_network or ""
+        stick["Title"] = raw.m_caption or "Chat - unknown title"
+        stick["Date"] = raw.m_message_date or raw.m_update_date or raw.m_creation_date or ""
+        stick["Network"] = raw.m_channel_id or ""
         stick["Country"] = ""
-        stick["SUMMARY"] = (raw.m_important_content or raw.m_content or "")[:400] or "No summary available"
+        stick["SUMMARY"] = (raw.m_content or "")[:400] or "No summary available"
         stick["TRENDS"] = {
             "Dates": stick["Date"],
             "Scale": "Unknown",
             "Impacted Region": "Unknown",
             "Sector": "Chat / Messaging",
-            "Volume": f"{len(raw.m_messages) if raw.m_messages else 0} messages"
+            "Volume": raw.m_message_sharable_link
         }
         stick["INSIGHTS"] = {
             "Breach Type": "Chat content / activity",
             "Attack Vector": "Messaging platform",
-            "Data Exposed": ["messages"] if (raw.m_content or raw.m_messages) else ["Unknown"],
+            "Data Exposed": ["messages"] if (raw.m_content or raw.m_message_id) else ["Unknown"],
             "MITRE ATT&CK TTPs": []
         }
         stick["CONCLUSION"] = ""
         return stick
 
-
-
-stick_manager = StickManager.get_instance()
