@@ -5,9 +5,10 @@ from typing import List
 from fastapi import HTTPException
 
 from orion.api.interactive.search_manager.search_model import search_model
-from orion.api.interactive.alert_manager.function_map.function_maping import DOC_REQUEST_MAP
+from orion.api.interactive.alert_manager.function_map.function_maping import DOC_REQUEST_MAP, MODULE_ALERT_TYPE_MAP, SCANNING_ALERT_TYPES
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
+from configs.app_dependency import get_user_permissions
 
 class AlertManager:
     __instance = None
@@ -323,3 +324,38 @@ class AlertManager:
         return {
             "scan_running": False
         }
+    
+    @staticmethod
+    def get_allowed_alert_types(user) -> set[str]:
+        permissions = get_user_permissions(user)
+
+        allowed = set()
+        if permissions["modules"] == "all":
+            allowed.update(MODULE_ALERT_TYPE_MAP.keys())
+        else:
+            for module in permissions["modules"]:
+                if module in MODULE_ALERT_TYPE_MAP:
+                    allowed.add(module)
+
+        if permissions.get("scanning", False):
+            allowed.update(SCANNING_ALERT_TYPES)
+
+        return allowed
+    
+    def filter_alerts_by_license(self, alerts: list[AlertModel], user) -> list[AlertModel]:
+        permissions = get_user_permissions(user)
+        if permissions.get("maintainer", False):
+            return alerts
+
+
+        allowed_types = self.get_allowed_alert_types(user)
+
+        filtered = []
+        for alert in alerts:
+            alert_type = alert.type.lower().strip()
+
+            if alert_type in allowed_types:
+                filtered.append(alert)
+
+        return filtered
+

@@ -11,6 +11,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 
@@ -76,7 +77,10 @@ class ProfileManager:
             except Exception:
                 return ""
 
-        alerts_list = _alerts.alerts if _alerts and _alerts.alerts else []
+        raw_alerts = _alerts.alerts if _alerts and _alerts.alerts else []
+
+        alerts_list = AlertManager.get_instance().filter_alerts_by_license(raw_alerts, user)
+
         company = ProfileParmaModel(
             companyName=safe_decrypt(tenant.companyName),
             phone=safe_decrypt(tenant.phone),

@@ -3,7 +3,8 @@
         <app-alert-scan-loading></app-alert-scan-loading>
     </div>
     <ng-template #showContent>
-        <div class="category_report_searchbar">
+        <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')"
+            class="category_report_searchbar">
             <app-home-search [isRoleAdmin]="false"></app-home-search>
 
             <div class="category_report_flex">
@@ -25,7 +26,8 @@
         </div>
         <div class="ioc-container">
 
-            <div class="ioc-container_header">
+            <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')"
+                class="ioc-container_header">
                 <div class="ioc-container_header-title">IOC’s</div>
 
                 <div class="ioc-container_header-actions">

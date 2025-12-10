@@ -64,24 +64,32 @@
                 <div class="category_report_flex">
                     <div *ngIf="!item.seen" class="category_report_status-icon"><img
                             src="/assets/images/shared/exclamation.svg"></div>
-                    <div *ngIf="item.custom" class="dropdown">
+                    <div class="dropdown">
                         <span class="category_report_status-icon" role="button" id="dropdownMenu"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="/assets/images/shared/theme/three_dot_round.svg">
                         </span>
-                        <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenu">
-                            <li><a class="dropdown-item" (click)="showAlertPopup('edit',item.id)"> Edit Alert</a></li>
-                            <li>
-                                <hr class="dropdown-divider mx-3">
+
+                        <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownMenu">
+                            <li *ngIf="item.custom">
+                                <a class="dropdown-item" (click)="showAlertPopup('edit', item.id)">Edit Alert</a>
                             </li>
-                            <li><a class="dropdown-item" (click)="deleteAlertConfirmation(item.id)"> Delete Alert</a>
+                            <li *ngIf="item.custom">
+                                <hr class="dropdown-divider mx-3" />
+                            </li>
+                            <li><a class="dropdown-item">Export Alert</a></li>
+                            <li>
+                                <hr class="dropdown-divider mx-3" />
+                            </li>
+                            <li>
+                                <a class="dropdown-item" (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
                             </li>
                         </ul>
                     </div>
-                    <div *ngIf="!item.custom" class="category_report_status-icon"
+                    <!-- <div *ngIf="!item.custom" class="category_report_status-icon"
                         (click)="deleteAlertConfirmation(item.id)">
                         <img src="/assets/images/shared/alert_bin.svg">
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
