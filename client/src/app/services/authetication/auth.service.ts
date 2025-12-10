@@ -12,14 +12,20 @@ import { AppService } from '../core/app/app.service';
 export class AuthService {
   private username = signal<string>('');
   private role = signal<string | null>(null);
-  private onboarding = signal<boolean>(false);
+  private onboarding = signal<boolean>(this.toBool(localStorage.getItem('onboarding')));
   private subscription = signal<boolean>(false);
   private verificationDate = signal<string>('');
   private licenses = signal<string[]>([]);
 
   private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
 
-  constructor(private appService: AppService, private appStorageService: AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
+  constructor(
+    private appService: AppService,
+    private appStorageService: AppStorageService,
+    private apiService: ApiService,
+    private router: Router,
+    private tokenRefreshService: TokenRefreshService
+  ) {
     if (this.isAuthenticated()) {
       const needsSession = !this.username() && !this.role() && !this.verificationDate();
       if (needsSession) this.refreshToken().subscribe();
@@ -46,9 +52,9 @@ export class AuthService {
 
     const body = new URLSearchParams();
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-    let route = 'token'
+    let route = 'token';
     if (isDemo) {
-      route = 'token/demo'
+      route = 'token/demo';
     } else {
       body.set('username', mail);
       body.set('password', password);
@@ -58,18 +64,42 @@ export class AuthService {
       tap({
         next: (response) => {
           if (response.twofa_required) {
-            this.authState.next({ token: null, username: response.username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: '2FA required' });
+            this.authState.next({
+              token: null,
+              username: response.username,
+              role: null,
+              isAuthenticated: false,
+              isValidated: true,
+              onboarding: null,
+              error: '2FA required'
+            });
             return response.provisioning_uri || null;
           }
 
           if (!response?.access_token) {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Access denied!' });
+            this.authState.next({
+              token: null,
+              username: null,
+              role: null,
+              isAuthenticated: false,
+              isValidated: true,
+              onboarding: null,
+              error: 'Access denied!'
+            });
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Access denied!' });
+            this.authState.next({
+              token: null,
+              username: null,
+              role: null,
+              isAuthenticated: false,
+              isValidated: true,
+              onboarding: null,
+              error: 'Access denied!'
+            });
             return;
           }
 
@@ -85,10 +115,26 @@ export class AuthService {
           this.router.navigate(['/dashboard'], { replaceUrl: true }).then();
         },
         error: (error) => {
-          if (error?.error?.detail === "Verification pending.") {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: false, error: 'Access denied!', onboarding: null });
+          if (error?.error?.detail === 'Verification pending.') {
+            this.authState.next({
+              token: null,
+              username: null,
+              role: null,
+              isAuthenticated: false,
+              isValidated: false,
+              error: 'Access denied!',
+              onboarding: null
+            });
           } else {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, error: 'Access denied!', onboarding: null });
+            this.authState.next({
+              token: null,
+              username: null,
+              role: null,
+              isAuthenticated: false,
+              isValidated: true,
+              error: 'Access denied!',
+              onboarding: null
+            });
           }
         }
       })
@@ -96,23 +142,40 @@ export class AuthService {
   }
 
   verifyTwofa(code: string, tempToken: string, username: string): Observable<any> {
-    if (!tempToken) return new Observable(observer => {
-      observer.next(null);
-      observer.complete();
-    });
+    if (!tempToken)
+      return new Observable((observer) => {
+        observer.next(null);
+        observer.complete();
+      });
 
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${tempToken}` });
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json', Authorization: `Bearer ${tempToken}` });
     return this.apiService.post<any>('token/2fa/verify', { code }, { headers }).pipe(
       tap({
         next: (response) => {
           if (!response?.access_token) {
-            this.authState.next({ token: null, username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Invalid 2FA code' });
+            this.authState.next({
+              token: null,
+              username,
+              role: null,
+              isAuthenticated: false,
+              isValidated: true,
+              onboarding: null,
+              error: 'Invalid 2FA code'
+            });
             return;
           }
 
           const sessionData = response?.session || {};
           if (sessionData?.role === 'crawler') {
-            this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Access denied!' });
+            this.authState.next({
+              token: null,
+              username: null,
+              role: null,
+              isAuthenticated: false,
+              isValidated: true,
+              onboarding: null,
+              error: 'Access denied!'
+            });
             return;
           }
 
@@ -126,15 +189,32 @@ export class AuthService {
           this.setToken(response.access_token);
           this.startTokenRefresh();
         },
-        error: (error) => {
-          this.authState.next({ token: null, username, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: 'Invalid 2FA code' });
+        error: () => {
+          this.authState.next({
+            token: null,
+            username,
+            role: null,
+            isAuthenticated: false,
+            isValidated: true,
+            onboarding: null,
+            error: 'Invalid 2FA code'
+          });
         }
       })
     );
   }
 
   logout(): void {
-    this.authState.next({ token: null, username: null, role: null, isAuthenticated: false, isValidated: true, onboarding: null, error: null, licenses: [] });
+    this.authState.next({
+      token: null,
+      username: null,
+      role: null,
+      isAuthenticated: false,
+      isValidated: true,
+      onboarding: null,
+      error: null,
+      licenses: []
+    });
     this.apiService.post('logout', {}).subscribe();
     localStorage.clear();
     sessionStorage.clear();
@@ -146,13 +226,14 @@ export class AuthService {
     this.licenses.set([]);
     this.tokenRefreshService.stopTokenRefresh();
     this.router.navigate(['/login']).then();
-    this.appStorageService.clearStorage()
-    this.appService.clearAll()
-    this.appService.loadConfig()
+    localStorage.setItem('onboarding', String(false));
+    this.appStorageService.clearStorage();
+    this.appService.clearAll();
+    this.appService.loadConfig();
   }
 
   demoLogin(): void {
-    this.login("_", "_", true).subscribe(async (_) => { });
+    this.login('_', '_', true).subscribe(async (_) => {});
   }
 
   signup(username: string, email: string, password: string): Observable<any> {
@@ -205,18 +286,27 @@ export class AuthService {
 
   getSessionStatus(): { isAuthenticated: boolean; hasSession: boolean } {
     const isAuthenticated = !!this.getStoredToken();
-    const hasSession =
-      !!this.username() || !!this.role() || !!this.verificationDate();
+    const hasSession = !!this.username() || !!this.role() || !!this.verificationDate();
     return { isAuthenticated, hasSession };
   }
 
   setOnboarding(value: boolean): void {
     this.onboarding.set(value);
+    localStorage.setItem('onboarding', String(value));
   }
 
   private setToken(token: string): void {
     localStorage.setItem('token', token);
-    this.authState.next({ token, username: this.username(), role: this.role(), isAuthenticated: true, isValidated: true, onboarding: String(this.onboarding()), error: null, licenses: this.licenses(), });
+    this.authState.next({
+      token,
+      username: this.username(),
+      role: this.role(),
+      isAuthenticated: true,
+      isValidated: true,
+      onboarding: String(this.onboarding()),
+      error: null,
+      licenses: this.licenses()
+    });
   }
 
   private getStoredToken(): string | null {
@@ -225,7 +315,16 @@ export class AuthService {
 
   private loadAuthState(): AuthModel {
     const token = this.getStoredToken();
-    return { token, username: this.username(), role: this.role(), isValidated: true, isAuthenticated: !!token, onboarding: String(this.onboarding()), error: null, licenses: this.licenses() };
+    return {
+      token,
+      username: this.username(),
+      role: this.role(),
+      isValidated: true,
+      isAuthenticated: !!token,
+      onboarding: String(this.onboarding()),
+      error: null,
+      licenses: this.licenses()
+    };
   }
 
   private startTokenRefresh(): void {
@@ -234,30 +333,29 @@ export class AuthService {
 
   refreshToken(): Observable<string | null> {
     const currentToken = this.getStoredToken();
-    if (!currentToken) return new Observable(observer => {
-      observer.next(null);
-      observer.complete();
-    });
+    if (!currentToken)
+      return new Observable((observer) => {
+        observer.next(null);
+        observer.complete();
+      });
 
-    return this.apiService.post<{ access_token: string, session?: any }>(
-      'token/refresh',
-      { token: currentToken },
-      { headers: new HttpHeaders({ 'Authorization': `Bearer ${currentToken}` }) }
-    ).pipe(
-      tap((response) => {
-        if (response?.session) {
-          const sessionData = response.session;
-          this.username.set(sessionData?.username ?? this.username());
-          this.role.set(sessionData?.role ?? this.role());
-          this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding ?? this.onboarding()));
-          this.subscription.set(this.toBool(sessionData?.subscription ?? this.subscription()));
-          this.verificationDate.set(sessionData?.verificationDate ?? this.verificationDate());
-          this.licenses.set(sessionData?.licenses ?? []);
-        }
-        if (response?.access_token) this.setToken(response.access_token);
-      }),
-      map((response) => response?.access_token || null)
-    );
+    return this.apiService
+      .post<{ access_token: string; session?: any }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ Authorization: `Bearer ${currentToken}` }) })
+      .pipe(
+        tap((response) => {
+          if (response?.session) {
+            const sessionData = response.session;
+            this.username.set(sessionData?.username ?? this.username());
+            this.role.set(sessionData?.role ?? this.role());
+            this.setOnboarding(this.toBool(sessionData?.hasOnboarding ?? sessionData?.onboarding ?? this.onboarding()));
+            this.subscription.set(this.toBool(sessionData?.subscription ?? this.subscription()));
+            this.verificationDate.set(sessionData?.verificationDate ?? this.verificationDate());
+            this.licenses.set(sessionData?.licenses ?? []);
+          }
+          if (response?.access_token) this.setToken(response.access_token);
+        }),
+        map((response) => response?.access_token || null)
+      );
   }
 
   private toBool(v: any): boolean {
