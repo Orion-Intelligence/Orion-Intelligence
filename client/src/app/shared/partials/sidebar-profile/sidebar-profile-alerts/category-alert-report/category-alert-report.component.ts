@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryAlerts } from '../../../../model/alert-notification/alert.notification.model';
 import { AlertAllIoc, AlertModel } from '../../../../model/company-profile/company.profile.model';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../../constants/shared-enums';
 import { AddCustomAlertComponent } from "../add-custom-alert/add-custom-alert.component";
@@ -16,6 +16,7 @@ import { ApiService } from '../../../../services/api.service';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { ConfirmationPopupComponent } from "../../../confirmation-popup/confirmation-popup.component";
+import { HelperService } from '../../../../services/helper.service';
 
 @Component({
   selector: 'app-category-alert-report',
@@ -37,7 +38,7 @@ export class CategoryAlertReportComponent implements OnInit {
   isDeleteAlertConfirmationOpen$ = new BehaviorSubject<boolean>(false);
   selectedDeleteAlertId: string = '';
   constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService,
-    private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService) {
+    private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
   ngOnInit(): void {
@@ -91,7 +92,56 @@ export class CategoryAlertReportComponent implements OnInit {
         break;
     }
   }
+  exportAlert(hash: string) {
+    let apiUrl = '';
+    switch (this.category) {
+      case 'breach':
+        apiUrl = hash ? `search/breach/stick/${hash}` : `search/breach`;
+        break;
+      case 'strategic':
+        apiUrl = hash ? `search/strategic/stick/${hash}` : `search/strategic`;
+        break;
+      case 'defacement':
+        apiUrl = hash ? `search/defacement/stick/${hash}` : `search/defacement`;
+        break;
+      case 'exploit':
+        apiUrl = hash ? `search/exploit/stick/${hash}` : `search/exploit`;
+        break;
+      case 'social':
+        apiUrl = hash ? `search/social/stick/${hash}` : `search/social`;
+        break;
+      case 'feed':
+        apiUrl = hash ? `search/news/stick/${hash}` : `search/news`;
+        break;
+      default:
+        this.router.navigate(['/']).then();
+    }
 
+
+    this.apiService.get<any>(apiUrl).subscribe({
+      next: (response) => {
+        if (response) {
+          this.helperService.downloadStickJson(response);
+        }
+      },
+      error: (err) => {
+        console.error('Unhandled Error:', err);
+      }
+    });
+
+
+  }
+  canExportStick() {
+    const allowedCategories = [
+      'breach',
+      'strategic',
+      'defacement',
+      'exploit',
+      'social',
+      'feed'
+    ];
+    return allowedCategories.includes(this.category);
+  }
   cancleAlertPopup(refresh: boolean) {
     if (refresh)
       this.getLatestAlerts();
@@ -129,14 +179,14 @@ export class CategoryAlertReportComponent implements OnInit {
       }
     })
   }
-  seeDetails(hash: string) {
+  seeDetails(id: string, hash: string) {
     this.licenseService.loadLicenses().subscribe(licenses => {
       const hasEnterprise = licenses.includes('enterprise');
 
       if (hasEnterprise) {
 
         const alerts = this.appService.userProfile().alerts;
-        const _alert = alerts.find(a => a.data_hash === hash);
+        const _alert = alerts.find(a => a.alert_id === id);
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';
           let scanType: string;
@@ -214,15 +264,16 @@ export class CategoryAlertReportComponent implements OnInit {
         }
         if (_alert) {
           _alert.report_seen = true;
+          this.apiService.post('alert/seen', [_alert]).subscribe({
+            next: () => {
+            },
+            error: (err) => {
+              console.error(err);
+              alert(err?.error?.detail || 'Update failed');
+            },
+          });
         }
-        this.apiService.post('alert/seen', [_alert]).subscribe({
-          next: () => {
-          },
-          error: (err) => {
-            console.error(err);
-            alert(err?.error?.detail || 'Update failed');
-          },
-        });
+        else (alert("null"))
       } else {
         this.messageNotificationService.show("Please purchase enterprise license to view reports")
       }

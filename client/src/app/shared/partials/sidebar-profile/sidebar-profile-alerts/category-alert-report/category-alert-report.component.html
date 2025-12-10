@@ -77,8 +77,9 @@
                             <li *ngIf="item.custom">
                                 <hr class="dropdown-divider mx-3" />
                             </li>
-                            <li><a class="dropdown-item">Export Alert</a></li>
-                            <li>
+                            <li *ngIf="canExportStick()"><a class="dropdown-item"
+                                    (click)="exportAlert(item.hash)">Export Alert</a></li>
+                            <li *ngIf="canExportStick()">
                                 <hr class="dropdown-divider mx-3" />
                             </li>
                             <li>
@@ -86,10 +87,6 @@
                             </li>
                         </ul>
                     </div>
-                    <!-- <div *ngIf="!item.custom" class="category_report_status-icon"
-                        (click)="deleteAlertConfirmation(item.id)">
-                        <img src="/assets/images/shared/alert_bin.svg">
-                    </div> -->
                 </div>
             </div>
 
@@ -139,7 +136,7 @@
                 <div class="category_report_alert-footer-buttons">
                     <div class="category_report_alert-btn">IOCs Summary</div>
                     <div class="category_report_alert-divider-vertical"></div>
-                    <div class="category_report_alert-btn" (click)="seeDetails(item.id)">See Details</div>
+                    <div class="category_report_alert-btn" (click)="seeDetails(item.id,item.hash)">See Details</div>
                 </div>
             </div>
 

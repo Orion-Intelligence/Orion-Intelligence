@@ -64,7 +64,18 @@ export class HelperService {
     link.click();
     document.body.removeChild(link);
   }
+  downloadStickJson(data: any) {
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
 
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stick_report.json';
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+  }
   removeEmptyOrNullValues<T extends Record<string, any>>(params: T): Partial<T> {
     const defaultParams = new ConsolidatedParamModel();
     const cleanedParams: Partial<T> = {};
