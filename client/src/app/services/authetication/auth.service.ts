@@ -160,7 +160,7 @@ export class AuthService {
   }
 
   signup_verification(mail: string, password: string): Observable<any> {
-    return this.apiService.post('signup/verificaion', { mail, password });
+    return this.apiService.post('signup/verificaion', { username: mail, password });
   }
 
   forgotPassword(email: string): Observable<any> {

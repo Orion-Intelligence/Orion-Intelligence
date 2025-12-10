@@ -19,7 +19,6 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   authenticated = true;
   copied = false;
-  validated_error = false;
   private authSubscription!: Subscription;
 
   twofaRequired = false;
@@ -47,13 +46,6 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       } else {
         this.authenticated = false;
       }
-      if (authState.error != '2FA required') {
-        this.errorMessage = authState.error ?? null;
-      }
-      if (!authState.isValidated) {
-        this.validated_error = true
-        this.errorMessage = "Account not Validated";
-      }
     });
     this.route.queryParams.subscribe(params => {
       const isScreenMobile = window.innerWidth <= 480;
@@ -76,16 +68,22 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit(form: NgForm) {
-    this.validated_error = false
+    this.errorMessage = null;
     if (!form.valid) return;
-    this.authService.login(this.user.mail, this.user.password).subscribe(async res => {
-      if (res?.twofa_required) {
-        this.twofaRequired = true;
-        this.pendingUsername = res.username;
-        this.tempToken = res.temp_token || null;
-        this.otpUri = res.provisioning_uri || null;
-        this.otpSecret = res.twofa_secret || null;
-        this.otpDataUrl = this.otpUri ? await QRCode.toDataURL(this.otpUri) : null;
+
+    this.authService.login(this.user.mail, this.user.password).subscribe({
+      next: async res => {
+        if (res?.twofa_required) {
+          this.twofaRequired = true;
+          this.pendingUsername = res.username;
+          this.tempToken = res.temp_token || null;
+          this.otpUri = res.provisioning_uri || null;
+          this.otpSecret = res.twofa_secret || null;
+          this.otpDataUrl = this.otpUri ? await QRCode.toDataURL(this.otpUri) : null;
+        }
+      },
+      error: err => {
+        this.errorMessage = err?.error?.detail || err?.message || 'Login failed';
       }
     });
   }
@@ -124,7 +122,8 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     this.authService.signup_verification(this.user.mail, this.user.password).subscribe({
       next: () => this.router.navigate(['/welcome']),
       error: (err) => {
-        this.errorMessage = err?.error?.detail || 'Signup failed';
+        const vErr = err?.error?.validation_errors?.[0];
+        this.errorMessage = vErr?.message || err?.error?.detail || 'Signup failed';
       }
     });
   }

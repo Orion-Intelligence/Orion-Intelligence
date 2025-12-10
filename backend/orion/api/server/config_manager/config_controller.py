@@ -54,12 +54,11 @@ class config_controller:
 
     async def update_all(self, data: config_data):
         for key_str, value in data.settings.items():
-            if key_str not in {"logo_url", "language"}:
-                continue
-
-            try:
-                key = AllowedKeys(key_str)
-            except ValueError:
+            if key_str == "language":
+                key = AllowedKeys.LANGUAGE_ALLOWED
+            elif key_str == "logo_url":
+                key = AllowedKeys.LOGO_URL
+            else:
                 continue
 
             record = await self._engine.find_one(

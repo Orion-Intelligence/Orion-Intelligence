@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
+import {AppService} from '../../services/core/app/app.service';
 
 @Component({
   selector: 'app-welcome',
@@ -13,8 +14,9 @@ import { ApiService } from '../../shared/services/api.service';
 export class WelcomeComponent implements OnInit {
   hasToken: boolean = false;
   message: string = "Your registration has been submitted! We've received your information and are now reviewing your request. You will receive an email notification once your account has been approved by an administrator.";
-  heading: string = "Thank you for registering with Orion Intelligence!";
-  constructor(private router: Router, private route: ActivatedRoute, public apiService: ApiService) {
+  heading: string = "Thank you for registering with ";
+  constructor(private router: Router, private route: ActivatedRoute, public apiService: ApiService, appService:AppService) {
+    this.heading += appService.getConfig().appSettings.app_name + "!"
   }
   ngOnInit() {
     const token = this.route.snapshot.paramMap.get('token');

@@ -20,7 +20,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit{
     language_allowed: '',
     version: '',
     logo_url: '',
-    api_allowed: '0'
+    api_allowed: '0',
+    app_name: '0'
   };
 
   form = {
@@ -28,6 +29,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit{
     version: '',
     logo_url: '',
     api_allowed: '0',
+    app_name: '0',
     ai_endpoint: '',
     telegram_allowed: false
   };
@@ -55,6 +57,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit{
     this.form.language = settings.language_allowed;
     this.form.version = settings.version;
     this.form.api_allowed = settings.api_allowed;
+    this.form.app_name = settings.app_name;
     this.form.ai_endpoint = settings.ai_endpoint;
     this.form.telegram_allowed = settings.telegram_allowed;
   }
@@ -68,6 +71,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit{
     this.form.language = this.systemData.language_allowed;
     this.form.version = this.systemData.version;
     this.form.api_allowed = this.systemData.api_allowed;
+    this.form.app_name = this.systemData.app_name;
     this.form.ai_endpoint = this.systemData.ai_endpoint;
     this.form.telegram_allowed = this.systemData.telegram_allowed;
     this.isEditing = false;

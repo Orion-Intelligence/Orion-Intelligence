@@ -3,13 +3,14 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { franc } from 'franc-min';
 import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
+import {AppService} from '../../services/core/app/app.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
 
-  constructor(private sanitizer: DomSanitizer) {
+  constructor(private sanitizer: DomSanitizer, private appService:AppService) {
   }
 
   detectLanguageName(text: string): string {
@@ -95,7 +96,7 @@ export class HelperService {
   shareResult(url: string) {
     if (navigator.share) {
       navigator.share({
-        title: 'Orion Intelligence', text: 'Sharing a relevant CTI resource for review.', url: url
+        title: this.appService.getConfig().appSettings.app_name, text: 'Sharing a relevant CTI resource for review.', url: url
       }).catch(error => console.error('Error sharing:', error));
     } else {
       alert('Sharing is not supported on this browser.');

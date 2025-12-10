@@ -9,7 +9,7 @@
       </div>
       <div class="center-content-wrapper">
         <div class="login-content">
-          <img [src]="appService.getConfig().appSettings.logo_url || 'assets/images/shared/orion-Intelligence-logo.svg'" alt="ORION intelligence logo"
+          <img [src]="appService.getConfig().appSettings.logo_url || 'assets/images/shared/orion-Intelligence-logo.svg'" alt="logo"
             class="orion-logo" />
 
           <div class="login-heading">Login to get started!</div>
@@ -36,11 +36,16 @@
                 required type="password" />
             </div>
 
-
             <a (click)="goToForgot()" class="reset-password">Reset password?</a>
-            <div *ngIf="errorMessage"
-              class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
 
+            <div *ngIf="errorMessage == 'verification pending'" class="d-flex align-items-center justify-content-between mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
+              <span class="text-start"><b>{{ errorMessage }}</b></span>
+              <button (click)="resendMail()" class="btn btn-light btn-sm ms-3">
+                Resend mail
+              </button>
+            </div>
+
+            <div *ngIf="errorMessage && errorMessage != 'verification pending'" class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm text-center">
               <i class="bi bi-exclamation-diamond-fill me-2"></i>
               {{ errorMessage }}
             </div>
@@ -59,7 +64,7 @@
 
       <div class="footer-copyright">
         <p>Copyright &copy; 2025. Powered by</p>
-        <p>Orion Intelligence</p>
+        <p>{{ this.appService.getConfig().appSettings.app_name }}</p>
       </div>
     </div>
 

@@ -9,7 +9,7 @@
 
     <div class="center-content-wrapper">
       <div class="login-content">
-        <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="ORION intelligence logo" class="orion-logo" />
+        <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="logo" class="orion-logo" />
         <div class="login-heading">Sign Up to get started!</div>
 
         <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="login-form">
@@ -55,7 +55,7 @@
           </div>
 
           <div *ngIf="errorMessage"
-            class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm">
+               class="d-inline-block mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm text-center">
             <i class="bi bi-exclamation-diamond-fill me-2"></i>
             {{ errorMessage }}
           </div>
@@ -76,7 +76,7 @@
 
     <div class="footer-copyright">
       <p>Copyright &copy; 2025. Powered by</p>
-      <p>Orion Intelligence</p>
+      <p>{{ this.appService.getConfig().appSettings.app_name }}</p>
     </div>
   </div>
 

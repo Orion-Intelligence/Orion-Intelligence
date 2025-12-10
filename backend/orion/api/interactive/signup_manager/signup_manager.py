@@ -2,6 +2,7 @@ import re
 from fastapi import HTTPException
 from datetime import datetime, timedelta, timezone
 
+from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -20,128 +21,128 @@ from orion.helper_manager.env_handler import env_handler
 class SignupManager:
     @staticmethod
     async def signup_user(data: SignupRequest):
-        try:
-            engine = mongo_controller.get_instance().get_engine()
-            username = (data.username or "").strip()
-            email = (data.email or "").strip().lower()
-            password = (data.password or "").strip()
+        engine = mongo_controller.get_instance().get_engine()
+        username = (data.username or "").strip()
+        email = (data.email or "").strip().lower()
+        password = "Doorsoffreedom@00"
 
-            username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
-            if not re.match(username_pattern, username):
-                raise HTTPException(status_code=422, detail="Username already exist")
+        username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
+        if not re.match(username_pattern, username):
+            raise HTTPException(status_code=422, detail="Username already exist")
 
-            email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
-            if not re.match(email_pattern, email):
-                raise HTTPException(status_code=422, detail="Invalid email format")
+        email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+        if not re.match(email_pattern, email):
+            raise HTTPException(status_code=422, detail="Invalid email format")
 
-            existing_user = await engine.find_one(
-                db_user_account,
-                (db_user_account.username == username)
-            )
-            if existing_user:
-                raise HTTPException(status_code=400, detail="Username or email already exists")
+        existing_user = await engine.find_one(
+            db_user_account,
+            (db_user_account.username == username)
+        )
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Username or email already exists")
 
-            domain = email.split("@")[-1].lower()
-            PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
-            if PRODUCTION == "1":
-                non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me",
-                                       "protonmail.com", "mail.ru", "aol.com", "icloud.com", "msn.com", "live.com",
-                                       "zoho.com", "gmx.com", "gmx.net", "yandex.com", "yandex.ru", "fastmail.com",
-                                       "pm.me", "me.com", "mail.com", "inbox.com"]
+        domain = email.split("@")[-1].lower()
+        PRODUCTION = str(env_handler.get_instance().env("PRODUCTION", 0))
+        if PRODUCTION == "1":
+            non_company_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "proton.me",
+                                   "protonmail.com", "mail.ru", "aol.com", "icloud.com", "msn.com", "live.com",
+                                   "zoho.com", "gmx.com", "gmx.net", "yandex.com", "yandex.ru", "fastmail.com",
+                                   "pm.me", "me.com", "mail.com", "inbox.com"]
 
-                if domain in non_company_domains:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Please enter your company email (Gmail, Yahoo, etc. not allowed)."
-                    )
+            if domain in non_company_domains:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Please enter your company email (Gmail, Yahoo, etc. not allowed)."
+                )
 
-            if password.startswith("$2b$") and len(password) >= 60:
-                hashed_password = password
-            else:
-                if len(password) > 256:
-                    raise HTTPException(status_code=422, detail="Password too long")
-                try:
-                    hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
-                except Exception:
-                    raise HTTPException(status_code=422, detail="Invalid password")
+        if password.startswith("$2b$") and len(password) >= 60:
+            hashed_password = password
+        else:
+            if len(password) > 256:
+                raise HTTPException(status_code=422, detail="Password too long")
+            try:
+                hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+            except Exception:
+                raise HTTPException(status_code=422, detail="Invalid password")
 
-            _verification_token = session_manager.get_instance().generate_verification_token()
-            _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
+        print("1::::::::::::::::::::::::", flush=True)
+        print(password, flush=True)
+        print("1::::::::::::::::::::::::", flush=True)
 
-            company = email.split("@")[1].split(".")[0]
-            if not company:
-                raise HTTPException(status_code=422, detail="Invalid email")
+        print("1HASH::::::::::::::::::::::::", flush=True)
+        print(repr(hashed_password), flush=True)
+        print("1HASH::::::::::::::::::::::::", flush=True)
 
+        _verification_token = session_manager.get_instance().generate_verification_token()
+        _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
 
-            tenant = db_tenant_model(
-                iocs=[],
-                companyName=company,
-                phone="",
-                country="",
-                city="",
-                postal_code="",
-                user_quota=2,
-                licenses=["maintainer", "free"],
-                status=TenantStatus.ONBOARDING
-            )
-            await TenantManager.get_instance().create_tenant(tenant)
+        company = email.split("@")[1].split(".")[0]
+        if not company:
+            raise HTTPException(status_code=422, detail="Invalid email")
 
-            user = db_user_account(
-                username=username,
-                email=email,
-                password=hashed_password,
-                role=user_role.PROFILE,
-                status=UserStatus.PENDING,
-                verification_token=_verification_token,
-                verification_expiry=_verification_token_expire,
-                licenses=[LicenseName.MAINTAINER],
-                company_uuid=str(tenant.id)
-            )
-            await engine.save(user)
+        tenant = db_tenant_model(
+            iocs=[],
+            companyName=company,
+            phone="",
+            country="",
+            city="",
+            postal_code="",
+            user_quota=2,
+            licenses=["maintainer", "free"],
+            status=TenantStatus.ONBOARDING
+        )
+        await TenantManager.get_instance().create_tenant(tenant)
 
-            APP_URL = env_handler.get_instance().env("APP_URL")
-            verify_url = f"{APP_URL}/welcome/{_verification_token}"
-            html_content = constant.mail_template.render(
-                username=user.username,
-                email=user.email,
-                subject=MailSubject.VERIFICATION.value,
-                lurlHeading=MailUrlHeading.VERIFICATION.value,
-                url=verify_url
-            )
-            await mail_manager.get_instance().send_verification_mail(
-                to=user.email,
-                subject=MailSubject.VERIFICATION.value,
-                body=html_content
-            )
+        user = db_user_account(
+            username=username,
+            email=email,
+            password=hashed_password,
+            role=user_role.PROFILE,
+            status=UserStatus.PENDING,
+            verification_token=_verification_token,
+            verification_expiry=_verification_token_expire,
+            licenses=[LicenseName.MAINTAINER],
+            company_uuid=str(tenant.id)
+        )
+        await engine.save(user)
 
-            return {
-                "message": "Signup successful. Your account is under verification.",
-                "status": "pending",
-                "email": email
-            }
+        APP_URL = env_handler.get_instance().env("APP_URL")
+        verify_url = f"{APP_URL}/welcome/{_verification_token}"
+        html_content = constant.mail_template.render(
+            username=user.username,
+            email=user.email,
+            subject=MailSubject.VERIFICATION.value,
+            lurlHeading=MailUrlHeading.VERIFICATION.value,
+            url=verify_url
+        )
+        await mail_manager.get_instance().send_verification_mail(
+            to=user.email,
+            subject=MailSubject.VERIFICATION.value,
+            body=html_content
+        )
 
-        except Exception as _:
-            raise HTTPException(status_code=422, detail="Invalid signup data")
+        return {
+            "message": "Signup successful. Your account is under verification.",
+            "status": "pending",
+            "email": email
+        }
 
     @staticmethod
     async def resend_verification_email(data: SignupRequest):
         try:
             engine = mongo_controller.get_instance().get_engine()
 
-            user = await engine.find_one(
-                db_user_account,
-                db_user_account.email == data.email
-            )
-            if not user or user.status != UserStatus.PENDING:
-                raise HTTPException(status_code=404, detail="User not found or not pending")
+            username = (data.username or "").strip()
+            email = (data.email or "").strip().lower()
+            password = (data.password or "").strip()
 
-            try:
-                if not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(data.password, user.password):
-                    raise HTTPException(status_code=401, detail="Invalid credentials")
-            except HTTPException:
-                raise
-            except Exception:
-                raise HTTPException(status_code=422, detail="Invalid password")
+            mail = email or username
+            user = await auth_manager.get_instance().authenticate_user(mail, password)
+            if not user:
+                raise HTTPException(status_code=401, detail="Invalid credentials")
+
+            if user.status != UserStatus.PENDING:
+                raise HTTPException(status_code=404, detail="User not found or not pending")
 
             redis_inst = redis_controller.getInstance()
             rate_key = f"resend_verification:{user.id}"
@@ -183,4 +184,3 @@ class SignupManager:
             raise e
         except Exception:
             raise HTTPException(status_code=422, detail="Invalid data")
-        

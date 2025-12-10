@@ -41,7 +41,7 @@
         <div class="onboarding-box__content">
             <ng-container [ngSwitch]="currentStep">
                 <div *ngSwitchCase="1">
-                    <h2 class="onboarding-box__title">Welcome to Orion Intelligence</h2>
+                    <h2 class="onboarding-box__title">Welcome to {{ this.appService.getConfig().appSettings.app_name }}</h2>
                     <p class="onboarding-box__subtitle">
                         Let us know a little about your company
                     </p>

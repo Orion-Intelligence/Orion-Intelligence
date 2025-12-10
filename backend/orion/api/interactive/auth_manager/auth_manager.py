@@ -79,7 +79,7 @@ class auth_manager:
                 db_tenant_model.id == ObjectId(user.company_uuid)
             )
             if tenant and not tenant.verified:
-                raise HTTPException(status_code=401, detail="Tenant not verified yet.")
+                raise HTTPException(status_code=401, detail="account approval pending")
 
             # if tenant and tenant.status in [TenantStatus.ONBOARDING, TenantStatus.ACTIVE] and "maintainer" not in tenant.licenses:
             #     raise HTTPException(status_code=401, detail="Tenant not activated yet.")
@@ -89,13 +89,13 @@ class auth_manager:
             and acct_at is not None
             and (datetime.now(timezone.utc) - acct_at).days >= 30):
 
-            raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
+            raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue")
 
         if role_name == "profile" and user.status == UserStatus.PENDING:
-            raise HTTPException(status_code=401, detail="Verification pending.")
+            raise HTTPException(status_code=401, detail="verification pending")
 
         if user.status == UserStatus.DISABLE:
-            raise HTTPException(status_code=401, detail="Account Blocked.")
+            raise HTTPException(status_code=401, detail="Account Blocked")
 
         if user.role == user_role.CRAWLER:
             access_token_expires = timedelta(weeks=92)

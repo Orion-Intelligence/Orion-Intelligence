@@ -8,6 +8,7 @@ import {tap} from 'rxjs/operators';
 import {license_rules, search_filter_labels} from '../../../shared/constants/shared-enums';
 import {CompanyProfile} from '../../../shared/model/company-profile/company.profile.model';
 import {TenantModel} from '../../../shared/model/tenant/tenant.model';
+import { Title } from '@angular/platform-browser';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +36,7 @@ export class AppService {
   });
   public profileImageUrl = signal<string | null>(null);
 
-  constructor(private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
+  constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
     this.loadEntities()
     this.loadLicenseRules()
     this.activatedRoute.queryParams.subscribe(params => {
@@ -60,6 +61,7 @@ export class AppService {
     const current = this.configData();
     const newConfig = this.appStorageService.getStaticConfig(current.appSettings);
     this.configData.set(newConfig);
+
   }
 
   getConfig(): ConfigSettings {
@@ -73,6 +75,7 @@ export class AppService {
       const updatedLocalSettings = !isAppSetting ? {...current.localSettings, [key]: value} : current.localSettings;
       return new ConfigSettings(updatedAppSettings, updatedLocalSettings);
     });
+    this.title.setTitle(this.getConfig().appSettings.app_name);
   }
 
   updatePage(newPage: number): void {

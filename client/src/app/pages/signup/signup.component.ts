@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../services/authetication/auth.service';
+import {AppService} from '../../services/core/app/app.service';
 
 @Component({
   selector: 'app-signup',
@@ -28,7 +29,7 @@ export class SignupComponent implements OnInit {
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
   usernameSuggestion: string = '';
 
-  constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute) { }
+  constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute, protected appService:AppService) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(() => {

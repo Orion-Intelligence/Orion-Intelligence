@@ -30,7 +30,7 @@
 
       <div>
         <div class="company-profile_company-name">
-          Orion Intelligence
+          {{this.appService.getConfig().appSettings.app_name}}
         </div>
         <div class="company-profile_company-location">
           Company profile
@@ -59,6 +59,15 @@
     <div class="company-profile_box-content">
 
       <div class="row">
+
+        <div class="col-12 mt-1">
+          <div class="company-profile_info-item py-2">
+            <div class="company-profile_info-label">App Name</div>
+            <div class="company-profile_info-value mt-2">
+              {{ systemData.app_name }}
+            </div>
+          </div>
+        </div>
 
         <div class="col-12 mt-1">
           <div class="company-profile_info-item py-2">
@@ -93,6 +102,7 @@
             </div>
           </div>
         </div>
+
 
         <div class="col-12 mt-1">
           <div class="company-profile_info-item py-2">
