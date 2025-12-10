@@ -19,7 +19,7 @@ class config_controller:
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "admin-images"
+        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "system"
         self.IMAGE_DIR.mkdir(parents=True, exist_ok=True)
         self.BASE_URL='http://localhost:4200'
         if config_controller.__instance is not None:
@@ -51,9 +51,12 @@ class config_controller:
         except Exception as ex:
             log.g().e(f"Error fetching config: {ex}")
             return config_data(settings={})
-        
+
     async def update_all(self, data: config_data):
         for key_str, value in data.settings.items():
+            if key_str not in {"logo_url", "language"}:
+                continue
+
             try:
                 key = AllowedKeys(key_str)
             except ValueError:
@@ -75,29 +78,28 @@ class config_controller:
     async def upload_logo(self, file: UploadFile):
         contents = await file.read()
 
-        MAX_FILE_SIZE = 50 * 1024  
+        MAX_FILE_SIZE = 50 * 1024
 
         if len(contents) > MAX_FILE_SIZE:
             raise HTTPException(413, "File too large (max 50KB)")
 
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(415, "Only image files are allowed")
+        if file.content_type != "image/png":
+            raise HTTPException(400, "Only PNG files are allowed")
 
-        file_ext = file.filename.split(".")[-1].lower()
+        file_ext = "png"
         file_path = self.IMAGE_DIR / f"logo.{file_ext}"
 
         with open(file_path, "wb") as f:
             f.write(contents)
 
-        logo_url = f"{self.BASE_URL}{self.BASE_DIR}/static/resource/admin-images/{file_path.name}"
+        logo_url = f"{self.BASE_URL}{self.BASE_DIR}/static/resource/system/{file_path.name}"
+        logo_url = logo_url.replace("app/", "")
         await self.update_all(
-        config_data(settings={
-            AllowedKeys.LOGO_URL.value: logo_url
-        })
-    )
+            config_data(settings={
+                AllowedKeys.LOGO_URL.value: logo_url
+            })
+        )
         return {
             "success": True,
             "logo_url": logo_url
         }
-
-

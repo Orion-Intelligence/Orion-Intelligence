@@ -148,6 +148,7 @@ export class AuthService {
     this.router.navigate(['/login']).then();
     this.appStorageService.clearStorage()
     this.appService.clearAll()
+    this.appService.loadConfig()
   }
 
   demoLogin(): void {

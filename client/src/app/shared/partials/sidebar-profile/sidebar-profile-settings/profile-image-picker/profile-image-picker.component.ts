@@ -1,32 +1,31 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ApiService } from '../../../../services/api.service';
-import { AppService } from '../../../../../services/core/app/app.service';
-import { AuthService } from '../../../../../services/authetication/auth.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ApiService} from '../../../../services/api.service';
+import {AppService} from '../../../../../services/core/app/app.service';
+import {AuthService} from '../../../../../services/authetication/auth.service';
+import {NgIf} from '@angular/common';
 
 
 @Component({
   selector: 'app-profile-image-picker',
-  imports: [],
+  imports: [
+    NgIf
+  ],
   templateUrl: './profile-image-picker.component.html'
 })
 export class ProfileImagePickerComponent implements OnInit {
   @Input() userId!: string;
   @Output() onImageUploaded = new EventEmitter<string>();
 
-  currentImageUrl: any;
-  isHovering = false;
   selectedFile?: File;
   previewUrl?: string;
   isUploading = false;
 
-  constructor(private apiService: ApiService, private appService: AppService, protected authService: AuthService) { }
-  ngOnInit(): void {
-    if (this.isProfile())
-      this.currentImageUrl = this.appService.profileImageUrl();
-    else if (this.isAdmin()) {
-      this.currentImageUrl = this.appService.configData().appSettings.logo_url;
-    }
+  constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService) {
   }
+
+  ngOnInit(): void {
+  }
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (!file) return;
@@ -36,16 +35,18 @@ export class ProfileImagePickerComponent implements OnInit {
       alert('File too large! Please select an image under 50 KB.');
       return;
     }
-    const validTypes = ['image/jpeg', 'image/jpg'];
-    if (!validTypes.includes(file.type)) {
-      alert('Invalid file type! Please upload a JPEG image.');
+
+    if (file.type !== 'image/png') {
+      alert('Only PNG files are allowed.');
       return;
     }
+
     const reader = new FileReader();
     reader.onload = (e: any) => {
       this.previewUrl = e.target.result;
     };
     reader.readAsDataURL(file);
+
     this.selectedFile = file;
     this.appService.profileImageUrl = file;
     this.uploadImage();
@@ -69,8 +70,8 @@ export class ProfileImagePickerComponent implements OnInit {
           alert(err?.error?.detail || 'Upload image failed');
         },
       });
-    }
-    else if (this.isAdmin()) {
+    } else if (this.isAdmin()) {
+
       this.apiService.post('upload/logo', formData).subscribe({
         next: (res) => {
           this.appService.loadConfig();
@@ -86,10 +87,14 @@ export class ProfileImagePickerComponent implements OnInit {
       });
     }
   }
+
   isProfile(): boolean {
     return this.authService.getRole() === 'profile'
   }
+
   isAdmin(): boolean {
     return this.authService.getRole() === 'admin'
   }
+
+  protected readonly Date = Date;
 }

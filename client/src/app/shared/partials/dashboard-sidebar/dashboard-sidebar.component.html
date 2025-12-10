@@ -1,6 +1,6 @@
 <nav *ngIf="this.sidebar_default" class="sidebar">
   <div class="sidebar__header">
-    <a href=""> <img alt="Logo" height="35" src="assets/images/sidebar/search_nav_logo.png" width="197" /> </a>
+    <a href=""> <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_url || 'assets/images/sidebar/search_nav_logo.png'" width="197" /> </a>
     <button (click)="onToggleSidebar(false)" class="sidebar__header-menu">
       <img alt="Menu" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
     </button>

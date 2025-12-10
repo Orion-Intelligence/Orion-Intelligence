@@ -9,7 +9,7 @@
       </div>
       <div class="center-content-wrapper">
         <div class="login-content">
-          <img src="assets/images/shared/orion-Intelligence-logo.svg" alt="ORION intelligence logo"
+          <img [src]="appService.getConfig().appSettings.logo_url || 'assets/images/shared/orion-Intelligence-logo.svg'" alt="ORION intelligence logo"
             class="orion-logo" />
 
           <div class="login-heading">Login to get started!</div>

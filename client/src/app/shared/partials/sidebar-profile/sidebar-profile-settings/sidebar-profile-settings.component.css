@@ -140,17 +140,20 @@
 .company-profile_info-value {
     background: transparent;
     border: none;
-    border-radius: 12px;
     height: 36px;
     color: var(--color-text1);
     font-family: Inter, sans-serif;
     font-weight: 500;
     font-size: 14px;
-    width: 100%;
+    width: 200px;
     box-sizing: border-box;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.company-profile_info-value:is(select, input) {
+    border-radius: 12px;
 }
 
 .company-profile_info-value::placeholder,
@@ -229,4 +232,59 @@
 
 .company-profile_switch input:checked+.company-profile_slider::before {
     transform: translateX(20px);
+}
+
+.no-arrow-when-disabled:disabled {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none !important;
+    padding-right: 0 !important;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.delete-img-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 15, 15, 0.78);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(4px);
+  opacity: 0.95;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.delete-img-btn:hover {
+  background: rgba(255, 65, 65, 0.9);
+  opacity: 1;
+  transform: scale(1.08);
+  box-shadow: 0 3px 10px rgba(255, 0, 0, 0.35);
+}
+
+.delete-img-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 50, 50, 1);
+}
+
+/* OPTIONAL: only show button on avatar hover */
+.avatar-wrapper:hover .delete-img-btn {
+  opacity: 1;
 }
