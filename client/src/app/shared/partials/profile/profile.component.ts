@@ -79,11 +79,13 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollContainer.removeEventListener('scroll', this.scrollHandler);
     }
   }
+
   onDropdownOpen() {
     this.currentImageUrl = this.appService.profileImageUrl();
     const rawLicenses = this.authService.getLicenses();
     this.licences = rawLicenses.map(l => this.getLicenseLabel(l)).join(', ');
   }
+
   getLicenseLabel(name: string): string {
     const labels: Record<string, string> = {
       free: 'Free',

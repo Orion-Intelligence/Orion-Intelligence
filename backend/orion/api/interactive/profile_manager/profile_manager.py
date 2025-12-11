@@ -133,43 +133,52 @@ class ProfileManager:
         await self._engine.save(current_user)
         await AuditLogManager.get_instance().register(str(current_user.company_uuid), "update_user")
         return {"message": "User updated successfully"}
-    
-    async def uploadProfileImage(self,file: UploadFile, current_user):
+
+    async def uploadProfileImage(self, file: UploadFile, current_user):
         contents = await file.read()
-        MAX_FILE_SIZE=50*1024
-        
+        MAX_FILE_SIZE = 50 * 1024
+
         if len(contents) > MAX_FILE_SIZE:
             raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 50 KB.")
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
 
+        if current_user.role.lower() in ["profile"]:
+            dek = await self._dek(str(current_user.company_uuid))
+            key_id = current_user.company_uuid
+        else:
+            dek = await TenantKeyManager.get_instance().get_user_dek(str(current_user.id))
+            key_id = current_user.id
 
-        dek = await self._dek(str(current_user.company_uuid))
         enc = Fernet(dek)
-
         encrypted_data = enc.encrypt(contents)
-        
-        file_path = self.IMAGE_DIR / f"{current_user.company_uuid}.enc"
+
+        file_path = self.IMAGE_DIR / f"{key_id}.enc"
         with open(file_path, "wb") as f:
             f.write(encrypted_data)
-        await AuditLogManager.get_instance().register(str(current_user.company_uuid), "upload_image")
+
+        await AuditLogManager.get_instance().register(str(key_id), "upload_image")
         return {"Profile image": "upload complete"}
 
     async def getProfileImage(self, current_user):
-        dek = await self._dek(str(current_user.company_uuid))
-        enc = Fernet(dek)
+        if current_user.role.lower() in ["profile"]:
+            dek = await self._dek(str(current_user.company_uuid))
+            key_id = current_user.company_uuid
+        else:
+            dek = await TenantKeyManager.get_instance().get_user_dek(str(current_user.id))
+            key_id = current_user.id
 
-        file_path = self.IMAGE_DIR / f"{current_user.company_uuid}.enc"
+        enc = Fernet(dek)
+        file_path = self.IMAGE_DIR / f"{key_id}.enc"
+
         if not file_path.exists():
             default_path = self.IMAGE_DIR / "default-profile.jpg"
             with open(default_path, "rb") as f:
-                data = f.read()
-            return Response(content=data, media_type="image/jpeg")
+                return Response(content=f.read(), media_type="image/jpeg")
 
         with open(file_path, "rb") as f:
             encrypted_data = f.read()
 
         decrypted = enc.decrypt(encrypted_data)
-
         return Response(content=decrypted, media_type="image/jpeg")

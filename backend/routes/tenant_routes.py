@@ -199,7 +199,7 @@ async def update_company_profile(data: ProfileParmaModel, current_user=Depends(g
     return await ProfileManager.get_instance().updateCompanyProfile(data, current_user)
 
 
-@tenant_routes.post(
+@tenant_routes.get(
     "/api/get/image",
     summary="Get profile image",
     description="Retrieve the profile image for the current user.",
@@ -208,10 +208,7 @@ async def update_company_profile(data: ProfileParmaModel, current_user=Depends(g
     response_description="Profile image metadata or file information.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[
-        Depends(role_required([user_role.PROFILE])),
-        Depends(status_required([UserStatus.ACTIVE])),
-    ],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
 async def get_profile_image(current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().getProfileImage(current_user)
@@ -226,11 +223,7 @@ async def get_profile_image(current_user=Depends(get_current_user)):
     response_description="Result of the profile image upload operation.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[
-        Depends(role_required([user_role.PROFILE])),
-        Depends(status_required([UserStatus.ACTIVE])),
-        Depends(license_required("maintainer")),
-    ],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().uploadProfileImage(file, current_user)

@@ -2,8 +2,8 @@
 from datetime import datetime
 from odmantic import Model, Field
 
-class db_tenant_key(Model):
-    tenant_id: str = Field(index=True)
+class db_keys(Model):
+    auth_id: str = Field(index=True)
     wrapped_key: str
     created_at: datetime
     updated_at: datetime

@@ -1,5 +1,6 @@
 import re
 import threading
+from pathlib import Path
 
 from typing import List
 
@@ -11,7 +12,7 @@ from cryptography.fernet import Fernet
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_tenant_key import db_tenant_key
+from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account
 from orion.api.interactive.tenant_manager.models.user_param_model import user_param_model
@@ -32,6 +33,8 @@ class TenantManager:
         return TenantManager.__instance
 
     def __init__(self):
+        self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
+        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "company-profile-images"
         self._engine = mongo_controller.get_instance().get_engine()
         if TenantManager.__instance is not None:
             raise Exception("This class is a singleton!")
@@ -66,7 +69,7 @@ class TenantManager:
             await self._engine.save(data)
         except Exception:
             await self._engine.remove(db_user_account, db_user_account.company_uuid == str(data.id))
-            await self._engine.remove(db_tenant_key, db_tenant_key.tenant_id == str(data.id))
+            await self._engine.remove(db_keys, db_keys.tenant_id == str(data.id))
             await self._engine.delete(data)
             raise
 
@@ -76,7 +79,7 @@ class TenantManager:
             await AuditLogManager.get_instance().register(str(current_user.id), "get_tenant_failed")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found in get tenant")
 
-        dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
+        dek = await TenantKeyManager.get_instance().get_profile_dek(str(tenant.id))
         enc = Fernet(dek)
 
         ioc_models = [
@@ -139,7 +142,7 @@ class TenantManager:
             await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant_failed")
             raise HTTPException(status_code=401, detail="Onboarding record not found for this user.")
 
-        dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
+        dek = await TenantKeyManager.get_instance().get_profile_dek(str(tenant.id))
         enc = Fernet(dek)
 
         tenant.companyName = enc.encrypt((data.companyName or "").encode()).decode()
@@ -223,6 +226,12 @@ class TenantManager:
         else:
             raise HTTPException(status_code=401, detail="You are not allowed to delete users")
 
+        await self._engine.remove(db_keys, db_keys.auth_id == str(user.id))
+
+        image_path = self.IMAGE_DIR / f"{user.id}.enc"
+        if image_path.exists():
+            image_path.unlink()
+
         await self._engine.delete(user)
         await AuditLogManager.get_instance().register(str(user.id), "delete_user")
 
@@ -232,7 +241,7 @@ class TenantManager:
         tenants = await self._engine.find(db_tenant_model)
         result = []
         for tenant in tenants:
-            dek = await TenantKeyManager.get_instance().get_dek(str(tenant.id))
+            dek = await TenantKeyManager.get_instance().get_profile_dek(str(tenant.id))
             enc = Fernet(dek)
 
             tenant.companyName = enc.decrypt(tenant.companyName.encode()).decode()
@@ -310,6 +319,7 @@ class TenantManager:
             )
 
             await engine.save(user)
+            await TenantKeyManager.get_instance().create_user_dek(user.id)
 
             return {
                 "message": "User created successfully",
@@ -370,6 +380,7 @@ class TenantManager:
             )
 
             await engine.save(user)
+            await TenantKeyManager.get_instance().create_user_dek(user.id)
 
             return {
                 "message": "User created successfully",

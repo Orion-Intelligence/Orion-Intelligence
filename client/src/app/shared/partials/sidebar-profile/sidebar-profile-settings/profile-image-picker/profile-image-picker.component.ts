@@ -89,11 +89,11 @@ export class ProfileImagePickerComponent implements OnInit {
   }
 
   isProfile(): boolean {
-    return this.authService.getRole() === 'profile'
+    return this.authService.getRole() !== 'demo'
   }
 
   isAdmin(): boolean {
-    return this.authService.getRole() === 'admin'
+    return window.location.pathname.includes('/system-settings');
   }
 
   protected readonly Date = Date;
