@@ -99,7 +99,7 @@ class AlertManager:
             else:
                 doc_result = await request_func(doc_id)
         except Exception as e:
-            raise HTTPException(status_code=500,detail=f"Failed to fetch document: {str(e)}")
+            raise HTTPException(status_code=500,detail=f"Failed to fetch document")
 
  
         if not doc_result:
@@ -112,10 +112,10 @@ class AlertManager:
         elif isinstance(doc_result, dict):
             doc_dict = doc_result
         else:
-            raise HTTPException(status_code=500,detail=f"Unexpected document response type: {str(e)}")
+            raise HTTPException(status_code=500,detail=f"Unexpected document response type")
 
         if doc_dict.get("m_hash") != doc_id:
-            raise HTTPException(status_code=400,detail=f"Hash does not match the document: {str(e)}")
+            raise HTTPException(status_code=400,detail=f"Hash does not match the document")
 
         alert_id = data.alert_id or f"{data.data_hash}-{data.ioc_value}"
         new_alert = AlertModel(
@@ -144,7 +144,7 @@ class AlertManager:
                     alert.ioc_value == new_alert.ioc_value and
                     alert.type == new_alert.type
                 ):
-                    raise HTTPException(status_code=400,detail=f"Alert already exists: {str(e)}")
+                    raise HTTPException(status_code=400,detail=f"Alert already exists")
 
    
         if existing_doc:

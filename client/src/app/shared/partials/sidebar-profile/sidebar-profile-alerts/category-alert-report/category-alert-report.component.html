@@ -8,9 +8,28 @@
                     src="/assets/images/shared/cross-dark.svg"></button>
         </div>
         <div class="category_report_flex">
-            <span class="category_report_searchbar-btn" (click)="showAlertPopup('add','')">
+            <span *ngIf="!canExportStick()" class="category_report_searchbar-btn" (click)="showAlertPopup('add','')">
                 <img src="/assets/images/shared/theme/add_icon.svg">
             </span>
+            <div *ngIf="canExportStick()" class="dropdown">
+                <span class="category_report_searchbar-btn" role="button" id="dropdownAddMenu" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <img src="/assets/images/shared/theme/add_icon.svg">
+                </span>
+
+                <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownAddMenu">
+                    <li>
+                        <a class="dropdown-item" (click)="showAlertPopup('add', '')">Add Alert</a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider mx-3" />
+                    </li>
+                    <input type="file" #fileInput accept="application/json" style="display: none;"
+                        (change)="onFileUpload($event)" />
+                    <li><a class="dropdown-item" (click)="fileInput.click()">Import
+                            Alert</a></li>
+                </ul>
+            </div>
             <div (click)="flushAll()" class="side-menu-container d-flex align-items-start justify-content-start gap-3">
                 <label appTooltip="Delete all lerts" class="filters-button d-flex align-items-center">
                     <span class="ms-2">Flush All</span>
@@ -141,7 +160,7 @@
             </div>
 
 
-            <ng-container *ngIf="isDeleteAlertConfirmationOpen$ && selectedDeleteAlertId === item.id">
+            <ng-container *ngIf="isDeleteAlertConfirmationOpen() && selectedDeleteAlertId === item.id">
                 <app-confirmation-popup (confirmed)="deleteCustomAlert($event, item.id)"></app-confirmation-popup>
             </ng-container>
         </div>
@@ -164,6 +183,6 @@
         (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
 </div>
 
-<ng-container *ngIf="isFlushAllConfirmationOpen$ | async">
+<ng-container *ngIf="isFlushAllConfirmationOpen()">
     <app-confirmation-popup (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
 </ng-container>
