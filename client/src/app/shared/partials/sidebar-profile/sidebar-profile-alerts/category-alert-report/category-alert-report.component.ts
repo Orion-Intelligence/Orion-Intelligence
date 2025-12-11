@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgFor, NgIf, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryAlerts } from '../../../../model/alert-notification/alert.notification.model';
 import { AlertAllIoc, AlertModel } from '../../../../model/company-profile/company.profile.model';
-import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../../constants/shared-enums';
 import { AddCustomAlertComponent } from "../add-custom-alert/add-custom-alert.component";
@@ -34,9 +34,10 @@ export class CategoryAlertReportComponent implements OnInit {
   showEditAlertPopup: boolean = false;
   isFilterOpen$: Observable<boolean>;
   selectedAlert!: AlertModel;
-  isFlushAllConfirmationOpen$ = new BehaviorSubject<boolean>(false);
-  isDeleteAlertConfirmationOpen$ = new BehaviorSubject<boolean>(false);
+  isFlushAllConfirmationOpen = signal(false);
+  isDeleteAlertConfirmationOpen = signal(false);
   selectedDeleteAlertId: string = '';
+  importedAlert: AlertModel | null = null;
   constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService,
     private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -57,10 +58,10 @@ export class CategoryAlertReportComponent implements OnInit {
     this.filteredAlerts = this.alerts;
   }
   flushAll() {
-    this.isFlushAllConfirmationOpen$.next(true);
+    this.isFlushAllConfirmationOpen.set(true);
   }
   flushAllConfirmation(value: boolean) {
-    this.isFlushAllConfirmationOpen$.next(false);
+    this.isFlushAllConfirmationOpen.set(false);
     if (value === true) {
       this.apiService.post(`profile/alerts/delete/${this.category}`, null).subscribe({
         next: () => {
@@ -151,7 +152,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
   deleteAlertConfirmation(id: string) {
     this.selectedDeleteAlertId = id;
-    this.isDeleteAlertConfirmationOpen$.next(true);
+    this.isDeleteAlertConfirmationOpen.set(true);
   }
   deleteCustomAlert(confirmed: boolean, id: string) {
     if (confirmed) {
@@ -472,5 +473,69 @@ export class CategoryAlertReportComponent implements OnInit {
     const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
 
     return domainRegex.test(value);
+  }
+
+  onFileUpload(event: any) {
+    console.log("enter");
+    const file = event.target.files[0];
+    if (!file) return;
+    console.log("not null");
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      try {
+        const jsonData = JSON.parse(reader.result as string);
+        if (Array.isArray(jsonData)) {
+          this.messageNotificationService.show('Only one alert is allowed. Please upload a JSON with a single alert object.')
+        }
+
+        this.importedAlert = this.validateAlert(jsonData);
+        this.apiService.post('alert/add', this.importedAlert).subscribe({
+          next: () => {
+            this.getLatestAlerts();
+            this.messageNotificationService.show('Add alert successfully!')
+          },
+          error: (err) => {
+            const mess = err?.error?.detail || 'Add alert failed'
+            this.messageNotificationService.show(mess)
+          },
+        });
+        console.log("Imported Alert:", this.importedAlert);
+
+      } catch (error: any) {
+        this.messageNotificationService.show('Invalid JSON file')
+      }
+    };
+
+    reader.readAsText(file);
+  }
+
+  validateAlert(data: any): AlertModel {
+    const required = ['data_hash', 'ioc_type', 'ioc_value', 'first_seen', 'last_seen'];
+
+    for (let field of required) {
+      if (!data[field]) {
+        this.messageNotificationService.show(`Missing required field: ${field}`)
+      }
+    }
+
+    return {
+      type: data.type ?? '',
+      ioc_type: data.ioc_type,
+      ioc_value: data.ioc_value,
+      data_hash: data.data_hash,
+
+      first_seen: new Date(data.first_seen),
+      last_seen: new Date(data.last_seen),
+
+      status: 'active',
+      title: data.title ?? '',
+      description: data.description ?? '',
+      url: data.url ?? '',
+      source: data.source ?? '',
+      all_ioc: data.all_ioc ?? [],
+      content_types: data.content_types ?? [],
+    };
   }
 }

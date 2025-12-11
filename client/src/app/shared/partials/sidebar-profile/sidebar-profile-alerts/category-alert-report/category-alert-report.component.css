@@ -316,3 +316,7 @@
 .dropdown-menu.category_report_alert_no-arrow::before {
     content: none !important;
 }
+
+.dropdown .category_report_searchbar-btn {
+    margin-top: 8px;
+}
