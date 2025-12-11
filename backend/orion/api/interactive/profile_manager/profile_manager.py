@@ -150,26 +150,27 @@ class ProfileManager:
 
         encrypted_data = enc.encrypt(contents)
         
-        file_path = self.IMAGE_DIR / f"{current_user.company_uuid}.enc"
+        file_path = self.IMAGE_DIR / f"{str(current_user.id)}.enc"
         with open(file_path, "wb") as f:
             f.write(encrypted_data)
         await AuditLogManager.get_instance().register(str(current_user.company_uuid), "upload_image")
         return {"Profile image": "upload complete"}
 
-    async def getProfileImage(self, current_user):
-        dek = await self._dek(str(current_user.company_uuid))
-        enc = Fernet(dek)
+    async def getProfileImage(self, current_user,userId:str):
+        if current_user.role == 'profile':
+            dek = await self._dek(str(current_user.company_uuid))
+            enc = Fernet(dek)
 
-        file_path = self.IMAGE_DIR / f"{current_user.company_uuid}.enc"
-        if not file_path.exists():
-            default_path = self.IMAGE_DIR / "default-profile.jpg"
-            with open(default_path, "rb") as f:
-                data = f.read()
-            return Response(content=data, media_type="image/jpeg")
+            file_path = self.IMAGE_DIR / f"{userId}.enc"
+            if not file_path.exists():
+                default_path = self.IMAGE_DIR / "default-profile.jpg"
+                with open(default_path, "rb") as f:
+                    data = f.read()
+                return Response(content=data, media_type="image/jpeg")
 
-        with open(file_path, "rb") as f:
-            encrypted_data = f.read()
+            with open(file_path, "rb") as f:
+                encrypted_data = f.read()
 
-        decrypted = enc.decrypt(encrypted_data)
+            decrypted = enc.decrypt(encrypted_data)
 
-        return Response(content=decrypted, media_type="image/jpeg")
+            return Response(content=decrypted, media_type="image/jpeg")

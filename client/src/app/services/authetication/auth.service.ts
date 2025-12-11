@@ -233,7 +233,7 @@ export class AuthService {
   }
 
   demoLogin(): void {
-    this.login('_', '_', true).subscribe(async (_) => {});
+    this.login('_', '_', true).subscribe(async (_) => { });
   }
 
   signup(username: string, email: string, password: string): Observable<any> {

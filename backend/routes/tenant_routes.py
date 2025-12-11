@@ -172,7 +172,6 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE,user_role.ADMIN])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
@@ -199,8 +198,8 @@ async def update_company_profile(data: ProfileParmaModel, current_user=Depends(g
     return await ProfileManager.get_instance().updateCompanyProfile(data, current_user)
 
 
-@tenant_routes.post(
-    "/api/get/image",
+@tenant_routes.get(
+    "/api/s/static/{userId}",
     summary="Get profile image",
     description="Retrieve the profile image for the current user.",
     tags=["Profile", "Media"],
@@ -209,12 +208,11 @@ async def update_company_profile(data: ProfileParmaModel, current_user=Depends(g
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
-async def get_profile_image(current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().getProfileImage(current_user)
+async def get_profile_image(userId: str,current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().getProfileImage(current_user,userId)
 
 
 @tenant_routes.post(

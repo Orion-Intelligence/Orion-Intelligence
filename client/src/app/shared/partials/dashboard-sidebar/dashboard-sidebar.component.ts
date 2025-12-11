@@ -176,12 +176,25 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       );
     }
 
+    if (this.isProfile()) {
+      return categories.filter(
+        c => c !== ProfileSubCategory.TENANT &&
+          c !== ProfileSubCategory.SYSTEM_SETTINGS
+      );
+    }
     return categories.filter(
       c => c !== ProfileSubCategory.TENANT &&
-        c !== ProfileSubCategory.SYSTEM_SETTINGS
+        c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.USERS &&
+        c !== ProfileSubCategory.AUDITLOG &&
+        c !== ProfileSubCategory.IOC &&
+        c !== ProfileSubCategory.STATISTICS
     );
   }
   isAdmin(): boolean {
     return this.authService.getRole() === 'admin';
+  }
+  isProfile(): boolean {
+    return this.authService.getRole() === 'profile';
   }
 }
