@@ -215,6 +215,8 @@
     margin: 24px 30px 0px 0px !important;
 }
 
-.alert-loading {
+.ioc-dashboard-content-wrapper {
     position: relative;
+    width: 100%;
+    min-height: 500px;
 }

@@ -23,7 +23,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-sidebar-profile-alerts',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent],
   templateUrl: './sidebar-profile-alerts.component.html',
 })
 export class SidebarProfileAlertsComponent implements OnInit {
@@ -39,7 +39,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.isAdmin()) {
+    if (this.isProfile()) {
       this.checkScanProgress();
       this.alertService.isAlertScanLoading$.subscribe(v => this.isLoading = v);
       this.initializData()
@@ -66,6 +66,12 @@ export class SidebarProfileAlertsComponent implements OnInit {
   }
   isAdmin(): boolean {
     return this.authService.getRole() === 'admin';
+  }
+  isProfile(): boolean {
+    return this.authService.getRole() === 'profile';
+  }
+  isAnalyst(): boolean {
+    return this.authService.getRole() === 'analyst';
   }
   convertAlertsToCategories(alerts: AlertModel[]): AlertCategorySummary[] {
     const activeAlerts = alerts.filter(a => a.status !== 'ignore');

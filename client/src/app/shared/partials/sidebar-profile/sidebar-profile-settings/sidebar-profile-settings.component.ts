@@ -48,6 +48,12 @@ export class SidebarProfileSettingsComponent implements OnInit {
   isAdmin(): boolean {
     return this.authService.getRole() === 'admin';
   }
+  isAnalyst(): boolean {
+    return this.authService.getRole() == 'analyst';
+  }
+  isProfile(): boolean {
+    return this.authService.getRole() == 'profile';
+  }
   applyTheme() {
     const body = document.body;
     body.classList.remove('light-theme', 'dark-theme');

@@ -1,6 +1,8 @@
 <nav *ngIf="this.sidebar_default" class="sidebar">
   <div class="sidebar__header">
-    <a href=""> <img alt="Logo" height="35" [src]="appService.getConfig().appSettings.logo_url || 'assets/images/sidebar/search_nav_logo.png'" width="197" /> </a>
+    <a href=""> <img alt="Logo" height="35"
+        [src]="appService.getConfig().appSettings.logo_url || 'assets/images/sidebar/search_nav_logo.png'"
+        width="197" /> </a>
     <button (click)="onToggleSidebar(false)" class="sidebar__header-menu">
       <img alt="Menu" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
     </button>
@@ -9,7 +11,7 @@
 
   <ul class="sidebar__items">
     <ng-container
-      *ngIf="authService.getRole() === 'profile' || authService.getRole() === 'admin'">
+      *ngIf="authService.getRole() === 'profile' || authService.getRole() === 'admin' || authService.getRole()=='analyst'">
       <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
         (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
         [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
@@ -18,7 +20,7 @@
     </ng-container>
 
     <ng-container
-      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'admin')">
+      *ngIf="(authService.getRole() !== 'profile' && authService.getRole() !== 'admin'&& authService.getRole() !== 'analyst')">
       <li class="sidebar__item">
         <div (click)="onSectionSelected(category.HOMEPAGE)" [ngClass]="{
         'active':
