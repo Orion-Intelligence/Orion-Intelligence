@@ -49,6 +49,14 @@ class TenantKeyManager:
         await self._engine.save(db_keys(auth_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
         return dek
 
+    async def create_dek(self, tenant_id: str) -> bytes:
+        dek = self._new_dek()
+        wrapped = self._wrap(dek)
+        now = datetime.now(timezone.utc)
+        await self._engine.save(db_keys(auth_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
+        return dek
+
+
     async def create_user_dek(self, user_id: str) -> bytes:
         existing = await self._engine.find_one(
             db_keys, db_keys.auth_id == str(user_id)

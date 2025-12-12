@@ -47,7 +47,7 @@ class TenantManager:
     async def create_tenant(self, data: db_tenant_model):
         await self._engine.save(data)
         try:
-            dek = await self._dek(str(data.id))
+            dek = await TenantKeyManager.get_instance().create_dek(str(data.id))
             enc = Fernet(dek)
             data.companyName = enc.encrypt((data.companyName or "").encode()).decode()
             data.phone = enc.encrypt((data.phone or "").encode()).decode()
@@ -252,7 +252,7 @@ class TenantManager:
         tenants = await self._engine.find(db_tenant_model)
         result = []
         for tenant in tenants:
-            dek = await TenantKeyManager.get_instance().get_profile_dek(str(tenant.id))
+            dek = await TenantKeyManager.get_instance().get_profile_dek(ObjectId(tenant.id))
             enc = Fernet(dek)
 
             tenant.companyName = enc.decrypt(tenant.companyName.encode()).decode()
