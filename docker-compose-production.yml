@@ -96,7 +96,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 16G
+          memory: 36G
 
   redis_server:
     container_name: trusted-web-redis

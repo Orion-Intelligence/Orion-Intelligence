@@ -3,7 +3,7 @@ import asyncio
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from orion.management.jobs.insight_job import insight_job
-# from orion.management.jobs.alert_job import alert_job
+from orion.management.jobs.alert_job import alert_job
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
@@ -39,17 +39,16 @@ class cronjob_manager:
 
     @staticmethod
     async def iocs_alert_loop():
-        pass
-        # while True:
-        #     try:
-        #         print(f"[{datetime.utcnow()}] Running all category alert jobs (test mode, every 10 seconds)")
-        #         await alert_job.get_instance().run_all_categories()
-        #
-        #     except Exception as e:
-        #         print(f"[{datetime.utcnow()}] ALERT JOB ERROR: {e}")
-        #
-        #     # Sleep for 10 seconds
-        #     await asyncio.sleep(60)
+        while True:
+            try:
+                print(f"[{datetime.utcnow()}] Running all category alert jobs (test mode, every 10 seconds)")
+                await alert_job.get_instance().run_all_categories()
+
+            except Exception as e:
+                print(f"[{datetime.utcnow()}] ALERT JOB ERROR: {e}")
+
+            # Sleep for 10 seconds
+            await asyncio.sleep(60)
 
         tz = ZoneInfo("Australia/Sydney")
         while True:
@@ -68,6 +67,6 @@ class cronjob_manager:
 
             try:
                 print(f"[{datetime.utcnow()}] Running all category alert jobs for {next_midnight.date()}")
-                # await alert_job.get_instance().run_all_categories()
+                await alert_job.get_instance().run_all_categories()
             except Exception as e:
                 print(f"[{datetime.utcnow()}] ALERT JOB ERROR: {e}")
