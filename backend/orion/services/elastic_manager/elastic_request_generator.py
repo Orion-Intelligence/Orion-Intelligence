@@ -152,7 +152,6 @@ class elastic_request_generator:
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
             "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
             "track_total_hits": True,
-            "explain": True
         }
 
         if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1" and p_query_model.matchtype == "semantic":
@@ -1093,7 +1092,6 @@ class elastic_request_generator:
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
             "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
             "track_total_hits": True,
-            "explain": True
         }
 
         if raw_query!="" and raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
@@ -1276,6 +1274,7 @@ class elastic_request_generator:
             "from": frm,
             "size": size,
             "track_total_hits": True,
+            "collapse": {"field": "username.keyword"},
             "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]
         }
 

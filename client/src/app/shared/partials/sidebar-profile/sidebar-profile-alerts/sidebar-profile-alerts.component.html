@@ -107,7 +107,11 @@
             </div>
         </div>
     </div>
+
     <ng-template #showNonProfile>
+        <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')" class="category_report_searchbar">
+          <app-home-search [isRoleAdmin]="false"></app-home-search>
+        </div>
         <div class="sidebar-profile-homepage-container">
             <app-home-insight></app-home-insight>
         </div>
