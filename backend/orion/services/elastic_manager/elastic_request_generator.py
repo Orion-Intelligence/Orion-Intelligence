@@ -1293,6 +1293,7 @@ class elastic_request_generator:
             raw_query = helper_controller.remove_stopwords_from_string(p_query_model.q)
         else:
             raw_query = "*"
+
         if p_query_model.q == "":
             raw_query = "*"
         if not raw_query or raw_query == "":
@@ -1350,6 +1351,49 @@ class elastic_request_generator:
         if m_search_type != "all":
             must_clauses.append({"terms": {"m_content_type": [m_search_type]}})
 
+        # --------- FAST URL FILTER (NO prefix, ONLY m_url.raw exact) ----------
+        pfilter2 = pfilter
+        if pfilter and isinstance(pfilter, dict) and pfilter.get("m_url"):
+            # copy and remove m_url so _build_query_block won't add slow prefix queries
+            pfilter2 = dict(pfilter)
+            url_values = pfilter2.pop("m_url", None)
+
+            if not isinstance(url_values, list):
+                url_values = [url_values]
+
+            url_terms = []
+            for u in url_values:
+                if not isinstance(u, str):
+                    continue
+                u = u.strip()
+                if not u:
+                    continue
+
+                has_scheme = bool(re.match(r"^(?:https?://)", u, flags=re.I))
+                candidates = set()
+                if has_scheme:
+                    candidates.add(u)
+                else:
+                    candidates.add(f"https://{u}")
+                    candidates.add(f"http://{u}")
+                    candidates.add(u)
+
+                expanded = set()
+                for c in candidates:
+                    expanded.add(c)
+                    expanded.add(c.rstrip("/") + "/")
+
+                for c in expanded:
+                    url_terms.append({"term": {"m_url.raw": c}})
+
+            if url_terms:
+                must_clauses.append({
+                    "bool": {
+                        "should": url_terms,
+                        "minimum_should_match": 1
+                    }
+                })
+        # --------------------------------------------------------------------
 
         phrase_fields = [
             ("m_title", 5),
@@ -1360,7 +1404,7 @@ class elastic_request_generator:
 
         query_statement = self._build_query_block(
             p_query_model=p_query_model,
-            pfilter=pfilter,
+            pfilter=pfilter2,
             raw_query=raw_query,
             quoted_value=quoted_value,
             exact_phrases=exact_phrases,
