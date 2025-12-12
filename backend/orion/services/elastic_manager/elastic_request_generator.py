@@ -151,7 +151,7 @@ class elastic_request_generator:
             },
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
             "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-            "track_total_hits": True,
+            "track_total_hits": False,
         }
 
         if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1" and p_query_model.matchtype == "semantic":
@@ -186,6 +186,8 @@ class elastic_request_generator:
             except Exception as _:
                 pass
 
+        query_statement["_source"] = {"excludes": [ELASTIC_SEMANTIC.S_EMBED_FIELD]}
+        query_statement["track_total_hits"] = False
         return query_statement
 
     @staticmethod
@@ -1091,7 +1093,7 @@ class elastic_request_generator:
             },
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
             "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-            "track_total_hits": True,
+            "track_total_hits": False,
         }
 
         if raw_query!="" and raw_query != "*" and p_query_model.matchtype == "semantic" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1":
@@ -1140,7 +1142,7 @@ class elastic_request_generator:
                 * 1
             ),
             "size": 1,
-            "track_total_hits": True
+            "track_total_hits": False
         }
 
         return ELASTIC_INDEX.S_CREDENTIAL_INDEX, query
@@ -1273,7 +1275,7 @@ class elastic_request_generator:
             "query": {"bool": bool_query},
             "from": frm,
             "size": size,
-            "track_total_hits": True,
+            "track_total_hits": False,
             "collapse": {"field": "username.keyword"},
             "_source": ["url", "username", "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]
         }
