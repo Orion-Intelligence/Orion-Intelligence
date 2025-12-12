@@ -1284,6 +1284,7 @@ class elastic_request_generator:
             m_page_number=1,
             date_field="m_creation_date"
         )
+
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
 
     @staticmethod

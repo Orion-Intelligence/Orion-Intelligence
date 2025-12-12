@@ -1,3 +1,4 @@
+import time
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -144,17 +145,38 @@ class search_model:
         return await self.__search_callback.get_doc(result)
 
     async def search_general_result(self, param):
-        print(":::::::::::::::::::::::::::1", flush=True)
-        document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
-        print(":::::::::::::::::::::::::::2", flush=True)
-        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-        print(":::::::::::::::::::::::::::3", flush=True)
+        t0 = time.perf_counter()
+        print("SEARCH start", flush=True)
 
-        return await self.__search_callback.search_handler(
+        document, data_filter = elastic_request_generator().on_search_general_data(
+            param, param.entity_filter
+        )
+        t1 = time.perf_counter()
+        print(f"QUERY build time: {(t1 - t0) * 1000:.2f} ms", flush=True)
+
+        t2 = time.perf_counter()
+        m_status, m_documents = await elastic_controller.get_instance().search_query(
+            document, data_filter
+        )
+        t3 = time.perf_counter()
+        print(f"ELASTIC search time: {(t3 - t2) * 1000:.2f} ms", flush=True)
+
+        if isinstance(m_documents, dict):
+            took = m_documents.get("took")
+            hits = m_documents.get("hits", {}).get("total")
+            print(f"ES took={took} ms, hits={hits}", flush=True)
+
+        t4 = time.perf_counter()
+        result = await self.__search_callback.search_handler(
             m_status, m_documents,
             search_general_callback_model,
             general_listing
         )
+        t5 = time.perf_counter()
+        print(f"POST processing time: {(t5 - t4) * 1000:.2f} ms", flush=True)
+        print(f"TOTAL request time: {(t5 - t0) * 1000:.2f} ms", flush=True)
+
+        return result
 
     async def search_leak_result(self, param: search_leak_param_model):
         document, data_filter = elastic_request_generator().on_search_leakdata(param, param.entity_filter)
