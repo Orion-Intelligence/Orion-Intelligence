@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timezone, timedelta
 from string import capwords
 from elasticsearch import AsyncElasticsearch
@@ -142,11 +143,33 @@ class elastic_controller:
             return []
 
     async def search_query(self, document, data_filter):
+        start = time.perf_counter()
         try:
             conn = self.__conn_for_index(document)
-            m_data = await conn.search(index=document, body=data_filter, request_timeout=220)
-            return True, m_data
+            resp = await conn.search(
+                index=document,
+                body=data_filter,
+                request_timeout=220
+            )
+            end = time.perf_counter()
+
+            took = None
+            if isinstance(resp, dict):
+                took = resp.get("took")
+                hits = resp.get("hits", {}).get("total")
+
+            print(
+                f"[ES] wall={(end - start) * 1000:.2f}ms "
+                f"server_took={took}ms hits={hits}",
+                flush=True
+            )
+            print(resp)
+
+            return True, resp
+
         except Exception as ex:
+            end = time.perf_counter()
+            print(f"[ES] ERROR after {(end - start) * 1000:.2f}ms: {ex}", flush=True)
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return False, str(ex)
 
