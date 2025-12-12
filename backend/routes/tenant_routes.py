@@ -209,7 +209,7 @@ async def update_company_profile(data: ProfileParmaModel, current_user=Depends(g
 @tenant_routes.post(
     "/api/upload/image",
     summary="Upload profile image",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.ANALYST]))],
 )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ProfileManager.getInstance().uploadProfileImage(file, current_user)
