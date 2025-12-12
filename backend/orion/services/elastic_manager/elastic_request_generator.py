@@ -16,7 +16,19 @@ from orion.services.elastic_manager.elastic_semantic_controller import elastic_s
 class elastic_request_generator:
 
     @staticmethod
-    def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_field):
+    def _build_query_block(
+            p_query_model,
+            pfilter,
+            raw_query,
+            quoted_value,
+            exact_phrases,
+            loose_terms,
+            phrase_fields,
+            must_clauses,
+            must_not_clause,
+            m_page_number,
+            date_field
+    ):
         multi_fields = [f"{field}^{boost}" for field, boost in phrase_fields]
 
         if raw_query == "*":
@@ -119,75 +131,22 @@ class elastic_request_generator:
             items = [should_filter_clauses] if isinstance(should_filter_clauses, dict) else list(should_filter_clauses)
             base_bool_query.setdefault("should", []).extend(items)
 
-        boost_shoulds = []
-        if boost_shoulds:
-            base_bool_query.setdefault("should", []).extend(boost_shoulds)
-
-        functions_block = []
-        if p_query_model.matchtype != "semantic":
-            functions_block = [
-                {
-                    "gauss": {
-                        date_field: {
-                            "origin": "now",
-                            "scale": "45d",
-                            "offset": "7d",
-                            "decay": 0.7
-                        }
-                    },
-                    "weight": 0.1
-                }
-            ]
-
         query_statement = {
-            "min_score": 0,
-            "query": {
-                "function_score": {
-                    "query": {"bool": base_bool_query},
-                    **({"functions": functions_block} if functions_block else {}),
-                    "score_mode": "sum",
-                    "boost_mode": "multiply"
-                }
-            },
+            "query": {"bool": base_bool_query},
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
             "size": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
             "track_total_hits": False,
+            "_source": {"includes": ["m_title", "m_url", "m_update_date", "m_content_type", "m_network"]},
         }
 
-        # if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1" and p_query_model.matchtype == "semantic":
-        #     try:
-        #         qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
-        #         if qvec:
-        #             knn_clause = {
-        #                 "knn": {
-        #                     "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
-        #                     "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-        #                     "num_candidates": 1000,
-        #                     "query_vector": qvec,
-        #                     "filter": {
-        #                         "bool": {
-        #                             "filter": must_filter_clauses
-        #                         }
-        #                     }
-        #                 }
-        #             }
-        #             a_val = 10.0
-        #             t_val = 0.8
-        #             query_statement["query"]["function_score"]["query"] = knn_clause
-        #             query_statement["query"]["function_score"]["script_score"] = {
-        #                 "script": {
-        #                     "source": "double s=_score; double eps=1e-9; s=Math.max(eps, Math.min(1.0-eps, s)); double a=params.a; double t=params.t; double z=0.5*(1.0+Math.tanh(a*(s-t))); return z;",
-        #                     "params": {"a": a_val, "t": t_val}
-        #                 }
-        #             }
-        #             query_statement["query"]["function_score"]["score_mode"] = "sum"
-        #             query_statement["query"]["function_score"]["boost_mode"] = "replace"
-        #             query_statement["min_score"] = 0.4
-        #     except Exception as _:
-        #         pass
+        if raw_query == "*":
+            query_statement["query"] = {
+                "bool": {
+                    "filter": must_clauses + must_filter_clauses,
+                    "must_not": must_not_clause
+                }
+            }
 
-        query_statement["_source"] = {"includes": ["m_title", "m_url", "m_update_date", "m_content_type", "m_network"]}
-        query_statement["track_total_hits"] = False
         return query_statement
 
     @staticmethod
