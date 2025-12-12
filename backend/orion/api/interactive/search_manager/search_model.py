@@ -144,8 +144,11 @@ class search_model:
         return await self.__search_callback.get_doc(result)
 
     async def search_general_result(self, param):
+        print(":::::::::::::::::::::::::::1", flush=True)
         document, data_filter = elastic_request_generator().on_search_general_data(param, param.entity_filter)
+        print(":::::::::::::::::::::::::::2", flush=True)
         m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
+        print(":::::::::::::::::::::::::::3", flush=True)
 
         return await self.__search_callback.search_handler(
             m_status, m_documents,
