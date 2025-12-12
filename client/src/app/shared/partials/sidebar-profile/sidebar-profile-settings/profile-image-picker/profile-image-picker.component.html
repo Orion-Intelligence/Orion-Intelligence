@@ -1,11 +1,19 @@
 <div class="profile-image-container" (click)="fileInput.click()">
-  <img *ngIf="isProfile()" [src]="previewUrl || appService.profileImageUrl() || 'assets/images/sidebar/search_nav_logo.png'" class="profile-image"  alt=""/>
-  <img *ngIf="isAdmin()" [src]="appService.getConfig().appSettings.logo_url || 'assets/images/sidebar/search_nav_logo.png'" class="profile-image"  alt=""/>
+  <img *ngIf="isAdmin()"
+       [src]="appService.getConfig().appSettings.logo_url ? '/api/s/static/system/logo' : 'assets/images/sidebar/search_nav_logo.png'"
+       class="profile-image" alt=""/>
+  <img *ngIf="isProfile()" [src]=previewUrl class="profile-image" alt=""/>
 
   <div class="profile-image-overlay">
     <img src="assets/images/shared/mask.svg" alt="" class="profile-mask-svg">
-    <img src="assets/images/shared/image_pick_icon.svg" alt="Upload Icon" class="profile-image-camera-icon" />
+    <img src="assets/images/shared/image_pick_icon.svg" alt="Upload Icon" class="profile-image-camera-icon"/>
   </div>
 
-  <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" hidden />
+  <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" hidden/>
 </div>
+
+<button
+  class="delete-img-btn"
+  *ngIf="isAdmin() && appService.getConfig().appSettings.logo_url || !isDefaultImage"
+  (click)="clearLogo()"
+>✕</button>

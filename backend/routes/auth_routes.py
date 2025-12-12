@@ -83,8 +83,9 @@ async def refresh_token(request: Request, response: Response = None):
 
 
 @auth_router.post("/api/logout")
-async def logout(ptoken: str = Depends(oauth2_scheme), _: Response = None):
-    session_manager.logout_user(ptoken=ptoken)
+async def logout(request: Request):
+    token = request.cookies.get(ACCESS_COOKIE)
+    session_manager.logout_user(ptoken=token)
     resp = JSONResponse(content={"detail": "Logged out"})
     resp.delete_cookie(ACCESS_COOKIE, path="/")
     return resp

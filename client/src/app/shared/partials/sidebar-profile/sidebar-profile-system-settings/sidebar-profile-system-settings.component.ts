@@ -4,6 +4,7 @@ import { ApiService } from '../../../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { ProfileImagePickerComponent } from "../sidebar-profile-settings/profile-image-picker/profile-image-picker.component";
 import { AppService } from '../../../../services/core/app/app.service';
+import {AuthService} from '../../../../services/authetication/auth.service';
 
 @Component({
   selector: 'app-sidebar-profile-system-settings',
@@ -43,6 +44,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit{
   constructor(
     private apiService: ApiService,
     protected appService: AppService,
+    protected authService:AuthService
   ) {}
 
   ngOnInit(): void {
@@ -85,21 +87,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit{
 
     this.apiService.post('public/update', { settings: this.form }).subscribe({
       next: () => this.appService.loadConfig(),
-      error: (err) => console.log(err)
-    });
-  }
-
-  clearLogo() {
-    this.appService.configData.update(cfg => {
-      cfg.appSettings.logo_url = "";
-      return cfg;
-    });
-
-    this.apiService.post('public/update', { settings: { logo_url: '' } }).subscribe({
-      next: () => {
-        this.systemData.logo_url = '';
-        this.appService.loadConfig();
-      },
       error: (err) => console.log(err)
     });
   }

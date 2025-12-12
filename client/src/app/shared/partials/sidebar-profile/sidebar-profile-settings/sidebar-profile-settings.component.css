@@ -284,7 +284,6 @@
   background: rgba(255, 50, 50, 1);
 }
 
-/* OPTIONAL: only show button on avatar hover */
 .avatar-wrapper:hover .delete-img-btn {
   opacity: 1;
 }

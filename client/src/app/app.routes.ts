@@ -46,6 +46,7 @@ import { HomeAccessGuard } from './shared/guards/home-access.guard';
 import { ViewProfileComponent } from './pages/tenant/tenant-management/view-profile/view-profile.component';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-system-settings/sidebar-profile-system-settings.component';
+import {ConfigResolver} from './shared/resolvers/config.resolver';
 
 const consolidatedChildren = [
   {
@@ -107,16 +108,13 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    component: LoginComponent,
-    data: { animation: 'LoginPage' }
-  },
-  {
-    path: 'loginx',
+    resolve: { config: ConfigResolver },
     component: LoginComponent,
     data: { animation: 'LoginPage' }
   },
   {
     path: 'onboarding',
+    resolve: { config: ConfigResolver },
     component: TenantComponent,
     canActivate: [TenantGuard],
     data: { animation: 'TenantPage' }
@@ -161,6 +159,7 @@ export const routes: Routes = [
     component: DashboardComponent,
     canActivate: [AuthGuard],
     resolve: {
+      config: ConfigResolver,
       session: DashboardResolver,
       profile: ProfileResolver
     },

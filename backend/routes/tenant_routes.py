@@ -100,6 +100,15 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
     return await TenantManager.get_instance().update_user(user, current_user)
 
 @tenant_routes.post(
+    "/api/delete/profile/image",
+    summary="Update user",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+)
+async def update_user(current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().delete_profile_icon(current_user)
+
+@tenant_routes.post(
     "/api/delete/user",
     summary="Update user",
     description="Update user profile and access details within the tenant.",
@@ -176,7 +185,7 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     ],
 )
 async def get_company_profile(current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().getCompanyProfileData(current_user)
+    return await ProfileManager.getInstance().getCompanyProfileData(current_user)
 
 
 @tenant_routes.post(
@@ -195,43 +204,15 @@ async def get_company_profile(current_user=Depends(get_current_user)):
     ],
 )
 async def update_company_profile(data: ProfileParmaModel, current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().updateCompanyProfile(data, current_user)
-
-
-@tenant_routes.get(
-    "/api/s/static/{userId}",
-    summary="Get profile image",
-    description="Retrieve the profile image for the current user.",
-    tags=["Profile", "Media"],
-    operation_id="getProfileImage",
-    response_description="Profile image metadata or file information.",
-    status_code=200,
-    include_in_schema=False,
-    dependencies=[
-        Depends(status_required([UserStatus.ACTIVE])),
-    ],
-)
-async def get_profile_image(userId: str,current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().getProfileImage(current_user,userId)
-
+    return await ProfileManager.getInstance().updateCompanyProfile(data, current_user)
 
 @tenant_routes.post(
     "/api/upload/image",
     summary="Upload profile image",
-    description="Upload or update the profile image for the current user.",
-    tags=["Profile", "Media"],
-    operation_id="uploadProfileImage",
-    response_description="Result of the profile image upload operation.",
-    status_code=200,
-    include_in_schema=False,
-    dependencies=[
-        Depends(role_required([user_role.PROFILE])),
-        Depends(status_required([UserStatus.ACTIVE])),
-        Depends(license_required("maintainer")),
-    ],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().uploadProfileImage(file, current_user)
+    return await ProfileManager.getInstance().uploadProfileImage(file, current_user)
 
 
 @tenant_routes.post(

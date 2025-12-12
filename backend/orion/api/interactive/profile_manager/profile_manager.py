@@ -20,7 +20,7 @@ class ProfileManager:
     __instance = None
 
     @staticmethod
-    def get_instance():
+    def getInstance():
         if ProfileManager.__instance is None:
             ProfileManager.__instance = ProfileManager()
         return ProfileManager.__instance
@@ -30,8 +30,9 @@ class ProfileManager:
             raise Exception("This class is a singleton!")
         self._engine = mongo_controller.get_instance().get_engine()
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "company-profile-images"
-        self.IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+        self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "profile"
+        self.TENANT_DIR.mkdir(parents=True, exist_ok=True)
         ProfileManager.__instance = self
 
     @staticmethod
@@ -133,44 +134,39 @@ class ProfileManager:
         await self._engine.save(current_user)
         await AuditLogManager.get_instance().register(str(current_user.company_uuid), "update_user")
         return {"message": "User updated successfully"}
-    
-    async def uploadProfileImage(self,file: UploadFile, current_user):
+
+    async def uploadProfileImage(self, file: UploadFile, current_user):
         contents = await file.read()
-        MAX_FILE_SIZE=50*1024
-        
+        MAX_FILE_SIZE = 50 * 1024
+
         if len(contents) > MAX_FILE_SIZE:
             raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 50 KB.")
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
 
-
-        dek = await self._dek(str(current_user.company_uuid))
-        enc = Fernet(dek)
-
-        encrypted_data = enc.encrypt(contents)
-        
-        file_path = self.IMAGE_DIR / f"{str(current_user.id)}.enc"
+        file_path = self.TENANT_DIR / f"{str(current_user.id)}.png"
         with open(file_path, "wb") as f:
-            f.write(encrypted_data)
-        await AuditLogManager.get_instance().register(str(current_user.company_uuid), "upload_image")
+            f.write(contents)
+
+        await AuditLogManager.get_instance().register(str(current_user.id), "upload_image")
         return {"Profile image": "upload complete"}
 
-    async def getProfileImage(self, current_user,userId:str):
-        if current_user.role == 'profile':
-            dek = await self._dek(str(current_user.company_uuid))
-            enc = Fernet(dek)
+    async def getProfileResource(self, userId: str):
+        file_path = Path(self.TENANT_DIR) / f"{userId}.png"
+        default_path = Path(self.TENANT_DIR) / "default-profile.png"
 
-            file_path = self.IMAGE_DIR / f"{userId}.enc"
-            if not file_path.exists():
-                default_path = self.IMAGE_DIR / "default-profile.jpg"
-                with open(default_path, "rb") as f:
-                    data = f.read()
-                return Response(content=data, media_type="image/jpeg")
+        is_default = not file_path.is_file()
+        target_path = default_path if is_default else file_path
 
-            with open(file_path, "rb") as f:
-                encrypted_data = f.read()
+        with open(target_path, "rb") as f:
+            data = f.read()
 
-            decrypted = enc.decrypt(encrypted_data)
-
-            return Response(content=decrypted, media_type="image/jpeg")
+        return Response(
+            content=data,
+            media_type="image/png",
+            headers={
+                "X-Default-Image": "true" if is_default else "false",
+                "Access-Control-Expose-Headers": "X-Default-Image"
+            }
+        )

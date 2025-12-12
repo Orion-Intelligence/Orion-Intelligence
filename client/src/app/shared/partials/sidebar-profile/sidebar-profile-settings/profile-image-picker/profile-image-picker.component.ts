@@ -3,6 +3,7 @@ import {ApiService} from '../../../../services/api.service';
 import {AppService} from '../../../../../services/core/app/app.service';
 import {AuthService} from '../../../../../services/authetication/auth.service';
 import {NgIf} from '@angular/common';
+import * as path from 'node:path';
 
 
 @Component({
@@ -18,12 +19,24 @@ export class ProfileImagePickerComponent implements OnInit {
 
   selectedFile?: File;
   previewUrl?: string;
+  previewSystemUrl?: string;
   isUploading = false;
+  isDefaultImage = true;
 
   constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService) {
   }
 
   ngOnInit(): void {
+    fetch(`/api/s/static/${this.appService.userProfile().preferences?.['userId']}`)
+      .then(res => {
+        console.log([...res.headers.entries()]);
+        this.isDefaultImage = res.headers.get('x-default-image') === 'true';
+
+        return res.blob();
+      })
+      .then(blob => {
+        this.previewUrl = URL.createObjectURL(blob);
+      });
   }
 
   onFileSelected(event: any) {
@@ -48,7 +61,6 @@ export class ProfileImagePickerComponent implements OnInit {
     reader.readAsDataURL(file);
 
     this.selectedFile = file;
-    this.appService.profileImageUrl = file;
     this.uploadImage();
   }
 
@@ -58,42 +70,69 @@ export class ProfileImagePickerComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', this.selectedFile);
 
-    if (this.isProfile()) {
-      this.apiService.post('upload/image', formData).subscribe({
-        next: (res) => {
-          this.isUploading = false;
-        },
-        error: (err) => {
-          this.isUploading = false;
-          this.previewUrl = '';
-          console.error(err);
-          alert(err?.error?.detail || 'Upload image failed');
-        },
-      });
-    } else if (this.isAdmin()) {
-
-      this.apiService.post('upload/logo', formData).subscribe({
+    if (this.isAdmin()) {
+      this.apiService.post('upload/system', formData).subscribe({
         next: (res) => {
           this.appService.loadConfig();
           this.isUploading = false;
-
+          this.previewSystemUrl = "/api/s/static/system/logo" + "?stamp=" + Math.random().toString(36).substring(2)
         },
         error: (err) => {
           this.isUploading = false;
           this.previewUrl = '';
           console.error(err);
-          alert(err?.error?.detail || 'Upload image failed');
+        },
+      });
+    }
+    else if (this.isProfile()) {
+      this.apiService.post('upload/image', formData).subscribe({
+        next: (res) => {
+          this.isDefaultImage = false
+          this.isUploading = false;
+          this.previewUrl = `/api/s/static/${this.appService.userProfile().preferences?.['userId']}` + "?stamp=" + Math.random().toString(36).substring(2)
+        },
+        error: (err) => {
+          this.isUploading = false;
+          this.previewUrl = '';
+          console.error(err);
         },
       });
     }
   }
 
   isProfile(): boolean {
-    return this.authService.getRole() !== 'demo'
+    return window.location.pathname.includes('/profile/account');
   }
 
   isAdmin(): boolean {
     return window.location.pathname.includes('/system-settings');
+  }
+
+  clearLogo() {
+    let resource_path=""
+    if(this.isProfile()){
+      resource_path = "delete/profile/image"
+      this.apiService.post(resource_path, { settings: { logo_url: '' } }).subscribe({
+        next: () => {
+          this.isDefaultImage = true
+          this.previewUrl = `/api/s/static/${this.appService.userProfile().preferences?.['userId']}` + "?stamp=" + Math.random().toString(36).substring(2)
+        },
+        error: (err) => console.log(err)
+      });
+
+    }else {
+      resource_path = "public/update"
+      this.appService.configData.update(cfg => {
+        cfg.appSettings.logo_url = "";
+        return cfg;
+      });
+      this.apiService.post(resource_path, { settings: { logo_url: '' } }).subscribe({
+        next: () => {
+          this.appService.loadConfig();
+        },
+        error: (err) => console.log(err)
+      });
+    }
   }
 
   protected readonly Date = Date;

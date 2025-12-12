@@ -39,7 +39,6 @@ class db_system_model(Model):
             AllowedKeys.VERSION: lambda v: bool(v.strip()),
             AllowedKeys.APP_NAME: lambda v: bool(v.strip()),
             AllowedKeys.LANGUAGE_ALLOWED: lambda v: v in VALID_LANGUAGE_CODES,
-            AllowedKeys.LOGO_URL: lambda v: v == "" or bool(IMAGE_URL_REGEX.match(v)),
             AllowedKeys.AI_ENDPOINT: lambda v: v == "" or bool(ENDPOINT_URL_REGEX.match(v)),
         }
 
@@ -49,7 +48,6 @@ class db_system_model(Model):
             AllowedKeys.VERSION: "VERSION must be a non-empty string",
             AllowedKeys.APP_NAME: "APP_NAME must be a non-empty string",
             AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}",
-            AllowedKeys.LOGO_URL: "LOGO_URL must be a valid image URL ending with .png, .jpg, .svg, etc., or be empty",
             AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty",
         }
 

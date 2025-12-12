@@ -8,7 +8,11 @@ from orion.services.session_manager.session_manager import session_manager
 # from orion.api.interactive.auth_manager.rules.license_rules import LICENSE_RULES
 from orion.constants import constant
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/token",
+    auto_error=False
+)
+
 
 
 async def get_current_role(token: str = Depends(oauth2_scheme)):
@@ -36,7 +40,7 @@ def role_required(required_roles: list[user_role]):
         if role not in required_roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
         return role
-    
+
     return verify_role
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):

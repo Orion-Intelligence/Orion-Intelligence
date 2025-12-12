@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from fastapi import Depends,UploadFile
-from configs.app_dependency import license_required, role_required, status_required
+from configs.app_dependency import license_required, role_required, status_required, get_current_user
 from configs.limiter_dependency import limiter_dependency
+from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -9,12 +10,24 @@ from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.api.server.config_manager.model.config_data import config_data
-
+from fastapi import Depends, Request, HTTPException
 private_api_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))],
     tags=["Orion API"],
 )
 public_routes = APIRouter(tags=["Public"])
+
+def cookie_required(request: Request):
+    if not request.cookies.get("access_token"):
+        raise HTTPException(status_code=401, detail="Missing auth cookie")
+
+@public_routes.get("/api/s/static/{userId}", include_in_schema=False, dependencies=[Depends(cookie_required)])
+async def get_profile_resource(userId: str):
+    return await ProfileManager.getInstance().getProfileResource(userId)
+
+@public_routes.get("/api/s/static/system/{name}", include_in_schema=False, dependencies=[Depends(cookie_required)])
+async def get_system_resource(name: str):
+    return await config_controller.getInstance().getSystemResource(name)
 
 @public_routes.get(
     "/api/public",
@@ -31,11 +44,6 @@ async def get_public_config():
 @private_api_routes.post(
     "/api/public/update",
     summary="Update public configuration",
-    description="Update public configuration values used for frontend initialization.",
-    tags=["Public", "Config"],
-    operation_id="updatePublicConfig",
-    response_description="Update configuration values used at frontend startup.",
-    status_code=200,
     dependencies=[
         Depends(role_required([
             user_role.ADMIN
@@ -46,18 +54,12 @@ async def update_public_config(param:config_data):
     return {"success": True}
 
 @private_api_routes.post(
-    "/api/upload/logo",
+    "/api/upload/system",
     summary="Upload system logo",
-    tags=["System Settings", "Media"],
-    status_code=200,
-    dependencies=[
-        Depends(role_required([user_role.ADMIN])),
-        Depends(status_required([UserStatus.ACTIVE])),
-    ],
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def upload_system_logo(
-    file: UploadFile):
-    return await config_controller.getInstance().upload_logo(file)
+async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
+    return await config_controller.getInstance().uploadSystemResource(file, current_user)
 
 
 @private_api_routes.get(

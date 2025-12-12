@@ -25,7 +25,6 @@ export class AppComponent {
     const theme = localStorage.getItem('theme') || 'dark-theme';
     document.body.classList.add(theme);
 
-    appService.loadConfig();
     this.error$ = this.errorStore.error$;
 
     this.router.events.pipe(filter(event => event instanceof NavigationEnd), map(() => {

@@ -34,7 +34,7 @@ class TenantManager:
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "company-profile-images"
+        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "profile"
         self._engine = mongo_controller.get_instance().get_engine()
         if TenantManager.__instance is not None:
             raise Exception("This class is a singleton!")
@@ -208,6 +208,17 @@ class TenantManager:
         await AuditLogManager.get_instance().register(str(user.id), "update_user")
 
         return {"message": "User updated successfully"}
+
+    async def delete_profile_icon(self, current_user):
+        image_path = self.IMAGE_DIR / f"{current_user.id}.png"
+        print(":::::::::::::::::::::::::::::::::::1",flush=True)
+        print(image_path,flush=True)
+        print(":::::::::::::::::::::::::::::::::::2",flush=True)
+        if image_path.exists():
+            print(":::::::::::::::::::::::::::::::::::3", flush=True)
+            image_path.unlink()
+
+        await AuditLogManager.get_instance().register("system", f"update_user_failed:{current_user.id}")
 
     async def delete_user(self, tenant, current_user):
         user = await self._engine.find_one(db_user_account, db_user_account.username == tenant.username)

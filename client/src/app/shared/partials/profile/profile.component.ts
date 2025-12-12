@@ -30,7 +30,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   role$: Observable<string | null>;
   isNotificationOpen$ = new BehaviorSubject<boolean>(false);
 
-  currentImageUrl: any;
+  profile_image: string = "";
   licences: string = '';
   dropdownOpen = signal(false);
   isDarkTheme = true;
@@ -81,9 +81,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onDropdownOpen() {
-    this.currentImageUrl = this.appService.profileImageUrl();
     const rawLicenses = this.authService.getLicenses();
     this.licences = rawLicenses.map(l => this.getLicenseLabel(l)).join(', ');
+    this.profile_image = '/api/s/static/' + this.appService.userProfile().preferences?.['userId'] + "?stamp=" + Math.random().toString(36).substring(2)
   }
 
   getLicenseLabel(name: string): string {
