@@ -29,10 +29,15 @@ class elastic_request_generator:
             m_page_number,
             date_field
     ):
-        content_query = {"bool": {"should": [], "minimum_should_match": 1}}
+        fields = [f"{field}^{boost}" for field, boost in phrase_fields]
+
+
+        if raw_query and raw_query != "*":
+            content_query = {"multi_match": {"query": raw_query, "fields": fields}}
+        else:
+            content_query = {"match_all": {}}
 
         if exact_phrases:
-            fields = [f"{field}^{boost}" for field, boost in phrase_fields]
             for phrase in exact_phrases:
                 must_clauses.append({
                     "multi_match": {
@@ -43,7 +48,7 @@ class elastic_request_generator:
                 })
 
         base_bool_query = {
-            "must": [content_query] if isinstance(content_query, dict) else [],
+            "must": [content_query],
             "filter": must_clauses,
             "must_not": must_not_clause,
         }
