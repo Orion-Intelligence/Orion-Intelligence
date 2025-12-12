@@ -154,39 +154,39 @@ class elastic_request_generator:
             "track_total_hits": False,
         }
 
-        if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1" and p_query_model.matchtype == "semantic":
-            try:
-                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
-                if qvec:
-                    knn_clause = {
-                        "knn": {
-                            "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
-                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
-                            "num_candidates": 1000,
-                            "query_vector": qvec,
-                            "filter": {
-                                "bool": {
-                                    "filter": must_filter_clauses
-                                }
-                            }
-                        }
-                    }
-                    a_val = 10.0
-                    t_val = 0.8
-                    query_statement["query"]["function_score"]["query"] = knn_clause
-                    query_statement["query"]["function_score"]["script_score"] = {
-                        "script": {
-                            "source": "double s=_score; double eps=1e-9; s=Math.max(eps, Math.min(1.0-eps, s)); double a=params.a; double t=params.t; double z=0.5*(1.0+Math.tanh(a*(s-t))); return z;",
-                            "params": {"a": a_val, "t": t_val}
-                        }
-                    }
-                    query_statement["query"]["function_score"]["score_mode"] = "sum"
-                    query_statement["query"]["function_score"]["boost_mode"] = "replace"
-                    query_statement["min_score"] = 0.4
-            except Exception as _:
-                pass
+        # if raw_query != "*" and env_handler.get_instance().env("SEMANTIC_ENABLED") == "1" and p_query_model.matchtype == "semantic":
+        #     try:
+        #         qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+        #         if qvec:
+        #             knn_clause = {
+        #                 "knn": {
+        #                     "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
+        #                     "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
+        #                     "num_candidates": 1000,
+        #                     "query_vector": qvec,
+        #                     "filter": {
+        #                         "bool": {
+        #                             "filter": must_filter_clauses
+        #                         }
+        #                     }
+        #                 }
+        #             }
+        #             a_val = 10.0
+        #             t_val = 0.8
+        #             query_statement["query"]["function_score"]["query"] = knn_clause
+        #             query_statement["query"]["function_score"]["script_score"] = {
+        #                 "script": {
+        #                     "source": "double s=_score; double eps=1e-9; s=Math.max(eps, Math.min(1.0-eps, s)); double a=params.a; double t=params.t; double z=0.5*(1.0+Math.tanh(a*(s-t))); return z;",
+        #                     "params": {"a": a_val, "t": t_val}
+        #                 }
+        #             }
+        #             query_statement["query"]["function_score"]["score_mode"] = "sum"
+        #             query_statement["query"]["function_score"]["boost_mode"] = "replace"
+        #             query_statement["min_score"] = 0.4
+        #     except Exception as _:
+        #         pass
 
-        query_statement["_source"] = {"excludes": [ELASTIC_SEMANTIC.S_EMBED_FIELD]}
+        query_statement["_source"] = {"includes": ["m_title", "m_url", "m_update_date", "m_content_type", "m_network"]}
         query_statement["track_total_hits"] = False
         return query_statement
 
