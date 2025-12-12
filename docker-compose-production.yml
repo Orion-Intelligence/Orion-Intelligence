@@ -88,7 +88,7 @@ services:
       - bash
       - -c
       - |
-        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m"
+        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms8512m -Xmx8512m"
         exec /usr/local/bin/docker-entrypoint.sh eswrapper
     networks:
       backend:
