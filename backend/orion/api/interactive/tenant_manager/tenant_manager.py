@@ -69,7 +69,7 @@ class TenantManager:
             await self._engine.save(data)
         except Exception:
             await self._engine.remove(db_user_account, db_user_account.company_uuid == str(data.id))
-            await self._engine.remove(db_keys, db_keys.tenant_id == str(data.id))
+            await self._engine.remove(db_keys, db_keys.id == str(data.id))
             await self._engine.delete(data)
             raise
 

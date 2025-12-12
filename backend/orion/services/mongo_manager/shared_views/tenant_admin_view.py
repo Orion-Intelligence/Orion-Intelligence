@@ -34,7 +34,7 @@ class TenantAdminView(ModelView):
 
             tenant_keys = await self._engine.find(
                 db_keys,
-                db_keys.tenant_id == str(tenant.id),
+                db_keys.id == str(tenant.id),
             )
             for key in tenant_keys:
                 await self._engine.delete(key)
