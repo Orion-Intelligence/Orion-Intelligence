@@ -146,25 +146,17 @@ class elastic_controller:
         start = time.perf_counter()
         try:
             conn = self.__conn_for_index(document)
-            resp = await conn.search(
-                index=document,
-                body=data_filter,
-                request_timeout=220
-            )
+            resp = await conn.search(index=document, body=data_filter, request_timeout=220)
             end = time.perf_counter()
 
             took = None
+            hits = None
             if isinstance(resp, dict):
                 took = resp.get("took")
                 hits = resp.get("hits", {}).get("total")
 
-            print(
-                f"[ES] wall={(end - start) * 1000:.2f}ms "
-                f"server_took={took}ms hits={hits}",
-                flush=True
-            )
+            print(f"[ES] wall={(end - start) * 1000:.2f}ms server_took={took}ms hits={hits}", flush=True)
             print(resp)
-
             return True, resp
 
         except Exception as ex:
