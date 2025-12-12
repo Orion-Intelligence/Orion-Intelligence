@@ -42,13 +42,9 @@ class elastic_request_generator:
                     }
                 })
 
-        must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(
-            pfilter, p_query_model, allowed_keys
-        )
-
         base_bool_query = {
             "must": [content_query] if isinstance(content_query, dict) else [],
-            "filter": must_clauses + must_filter_clauses,
+            "filter": must_clauses,
             "must_not": must_not_clause,
         }
 
@@ -246,7 +242,7 @@ class elastic_request_generator:
             phrase_fields=phrase_fields,
             must_clauses=must_clauses,
             must_not_clause=must_not_clause,
-            m_page_number=m_page_number,
+            m_page_number=1,
             date_field="m_leak_date"
         )
 
@@ -1285,7 +1281,7 @@ class elastic_request_generator:
             phrase_fields=phrase_fields,
             must_clauses=must_clauses,
             must_not_clause=must_not_clause,
-            m_page_number=m_page_number,
+            m_page_number=1,
             date_field="m_creation_date"
         )
         return ELASTIC_INDEX.S_GENERIC_INDEX, query_statement
