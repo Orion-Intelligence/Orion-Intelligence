@@ -66,7 +66,7 @@ class TenantKeyManager:
     async def get_profile_dek(self, tenant_id: str) -> bytes:
         rec = await self._engine.find_one(db_keys, db_keys.auth_id == str(tenant_id))
         if not rec:
-            await self._engine.delete(db_tenant_model, db_tenant_model.id == str(tenant_id))
+            await self._engine.remove(db_tenant_model, db_tenant_model.id == str(tenant_id))
             return b""
         return self._unwrap(rec.wrapped_key)
 
