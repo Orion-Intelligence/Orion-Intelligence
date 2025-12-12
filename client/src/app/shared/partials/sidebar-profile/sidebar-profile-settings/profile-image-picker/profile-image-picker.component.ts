@@ -27,15 +27,13 @@ export class ProfileImagePickerComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.previewUrl =
+      `/api/s/static/${this.appService.userProfile().preferences?.['userId']}` +
+      `?stamp=${Date.now()}`;
+
     fetch(`/api/s/static/${this.appService.userProfile().preferences?.['userId']}`)
       .then(res => {
-        console.log([...res.headers.entries()]);
         this.isDefaultImage = res.headers.get('x-default-image') === 'true';
-
-        return res.blob();
-      })
-      .then(blob => {
-        this.previewUrl = URL.createObjectURL(blob);
       });
   }
 

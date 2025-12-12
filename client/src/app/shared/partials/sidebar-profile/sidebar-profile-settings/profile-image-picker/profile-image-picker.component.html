@@ -2,7 +2,7 @@
   <img *ngIf="isAdmin()"
        [src]="appService.getConfig().appSettings.logo_url ? '/api/s/static/system/logo' : 'assets/images/sidebar/search_nav_logo.png'"
        class="profile-image" alt=""/>
-  <img *ngIf="isProfile()" [src]=previewUrl class="profile-image" alt=""/>
+  <img *ngIf="isProfile()" [src]="previewUrl" class="profile-image" alt=""/>
 
   <div class="profile-image-overlay">
     <img src="assets/images/shared/mask.svg" alt="" class="profile-mask-svg">
