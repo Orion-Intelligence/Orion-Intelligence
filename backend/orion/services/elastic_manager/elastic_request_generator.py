@@ -30,16 +30,17 @@ class elastic_request_generator:
             date_field
     ):
         content_query = {"bool": {"should": [], "minimum_should_match": 1}}
-        for phrase in exact_phrases:
-            must_clauses.append({
-                "bool": {
-                    "should": [
-                        {"match_phrase": {field: {"query": phrase, "boost": boost}}}
-                        for field, boost in phrase_fields
-                    ],
-                    "minimum_should_match": 1
-                }
-            })
+
+        if exact_phrases:
+            fields = [f"{field}^{boost}" for field, boost in phrase_fields]
+            for phrase in exact_phrases:
+                must_clauses.append({
+                    "multi_match": {
+                        "query": phrase,
+                        "type": "phrase",
+                        "fields": fields
+                    }
+                })
 
         must_filter_clauses, should_filter_clauses = helper_controller.getFilterClause(
             pfilter, p_query_model, allowed_keys
