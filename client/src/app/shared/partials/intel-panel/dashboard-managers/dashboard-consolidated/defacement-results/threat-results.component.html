@@ -91,14 +91,15 @@
             <div class="home-defacement-result-divider" *ngIf="!last"></div>
         </ng-container>
 
-        <p class="home-insight-card-view-details-button"
-           appTooltip="list more results"
-           *ngIf="results_defacement.Result.length > showLimitDefacement"
-           (click)="onShowMore('defacement', $event)">
-            Show More
-        </p>
-
-        <br>
+        <ng-container *ngIf="results_defacement.Result.length > showLimitDefacement">
+          <hr class="dashboard-header-divider" />
+          <p class="home-insight-card-view-details-button"
+             appTooltip="list more results"
+             *ngIf="results_defacement.Result.length > showLimitDefacement"
+             (click)="onShowMore('defacement', $event)">
+              Show More
+          </p>
+        </ng-container>
     </ng-container>
 
     <ng-container *ngIf="isExpandable && results_stealerlog && results_stealerlog.Result">
@@ -165,13 +166,14 @@
             <div class="home-defacement-result-divider" *ngIf="!last"></div>
         </ng-container>
 
-        <p class="home-insight-card-view-details-button"
-           appTooltip="list more results"
+      <ng-container *ngIf="results_stealerlog.Result.length > showLimitStealer">
+        <hr class="dashboard-header-divider" />
+        <p class="fs-5 text-center mb-0 fw-semibold text-primary cursor-pointer"
            *ngIf="results_stealerlog.Result.length > showLimitStealer"
+           appTooltip="list more results"
            (click)="onShowMore('stealerlog', $event)">
           Show More
         </p>
-
-        <br>
+      </ng-container>
     </ng-container>
 </div>

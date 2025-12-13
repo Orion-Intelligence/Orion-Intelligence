@@ -17,7 +17,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   @Input() isExpandable = false;
 
   showLimitDefacement = 10;
-  showLimitStealer = 10;
+  showLimitStealer = 0;
 
   threatTypeCounts: { [key: string]: number } = {};
 
