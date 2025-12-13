@@ -61,7 +61,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => {
-        if (e.urlAfterRedirects.startsWith('/dashboard/profile/consolidated/')) {
+        if (e.urlAfterRedirects.startsWith('/dashboard/profile/consolidated/') || e.urlAfterRedirects.startsWith('/dashboard/profile/homepage')) {
           this.selectionStore.setSelectedSection('Profile');
           this.selectionStore.setSelectedOption('Homepage');
         }

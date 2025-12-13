@@ -18,7 +18,6 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
 import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
-import { SidebarProfileHomepageComponent } from "../sidebar-profile-homepage/sidebar-profile-homepage.component";
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
