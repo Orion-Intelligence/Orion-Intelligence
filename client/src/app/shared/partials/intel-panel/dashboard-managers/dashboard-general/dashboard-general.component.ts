@@ -151,7 +151,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
         this.dashboardService.consolidatedParamModel.category = lastSegment
       }
       let api = "search/breach"
-      if (this.type == Category.STRATEGIC) {
+      if (this.type == Category.STRATEGIC.toLowerCase()) {
         api = "search/strategic"
       }
 
@@ -165,7 +165,7 @@ export class DashboardGeneralComponent implements OnInit, AfterViewInit {
           this.isResponseLoading.set(false);
         });
     } else {
-      const apiEndpoint = this.type === Category.STRATEGIC ? 'search/strategic' : 'search/breach';
+      const apiEndpoint = this.type === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : 'search/breach';
       this.dashboardService.fetchSearchResults<GeneralCallbackModel | LeakCallbackModel>(apiEndpoint, this.dashboardService.consolidatedParamModel)
         .pipe(switchMap(response => timer(1000).pipe(map(() => response))))
         .subscribe(response => {

@@ -35,7 +35,16 @@ export class ReportHeaderComponent {
   }
 
   downloadCSV() {
-    this.helperService.downloadAsCSV(this.csv_object);
+    const tree = this.route.parseUrl(this.route.url);
+    const id = tree.root.children['primary'].segments.slice(-1)[0].path;
+
+    let ci = tree.queryParams['ci'];
+    if (ci === 'general') ci = 'strategic';
+    if (ci === 'leak' || ci ==="feed") ci = 'breach';
+
+    this.api.get<any>(`search/${ci}/stix/${id}`).subscribe((res) => {
+      this.helperService.downloadstixJson(res);
+    });
   }
 
   printPage() {

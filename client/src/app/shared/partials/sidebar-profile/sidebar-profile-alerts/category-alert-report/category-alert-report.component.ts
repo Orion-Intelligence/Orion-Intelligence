@@ -97,22 +97,22 @@ export class CategoryAlertReportComponent implements OnInit {
     let apiUrl = '';
     switch (this.category) {
       case 'breach':
-        apiUrl = hash ? `search/breach/stick/${hash}` : `search/breach`;
+        apiUrl = hash ? `search/breach/stix/${hash}` : `search/breach`;
         break;
       case 'strategic':
-        apiUrl = hash ? `search/strategic/stick/${hash}` : `search/strategic`;
+        apiUrl = hash ? `search/strategic/stix/${hash}` : `search/strategic`;
         break;
       case 'defacement':
-        apiUrl = hash ? `search/defacement/stick/${hash}` : `search/defacement`;
+        apiUrl = hash ? `search/defacement/stix/${hash}` : `search/defacement`;
         break;
       case 'exploit':
-        apiUrl = hash ? `search/exploit/stick/${hash}` : `search/exploit`;
+        apiUrl = hash ? `search/exploit/stix/${hash}` : `search/exploit`;
         break;
       case 'social':
-        apiUrl = hash ? `search/social/stick/${hash}` : `search/social`;
+        apiUrl = hash ? `search/social/stix/${hash}` : `search/social`;
         break;
       case 'feed':
-        apiUrl = hash ? `search/news/stick/${hash}` : `search/news`;
+        apiUrl = hash ? `search/news/stix/${hash}` : `search/news`;
         break;
       default:
         this.router.navigate(['/']).then();
@@ -122,7 +122,7 @@ export class CategoryAlertReportComponent implements OnInit {
     this.apiService.get<any>(apiUrl).subscribe({
       next: (response) => {
         if (response) {
-          this.helperService.downloadStickJson(response);
+          this.helperService.downloadstixJson(response);
         }
       },
       error: (err) => {
@@ -132,7 +132,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
 
   }
-  canExportStick() {
+  canExportstix() {
     const allowedCategories = [
       'breach',
       'strategic',

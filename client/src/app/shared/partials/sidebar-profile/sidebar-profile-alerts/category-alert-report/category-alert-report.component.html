@@ -8,10 +8,10 @@
                     src="/assets/images/shared/cross-dark.svg"></button>
         </div>
         <div class="category_report_flex">
-            <span *ngIf="!canExportStick()" class="category_report_searchbar-btn" (click)="showAlertPopup('add','')">
+            <span *ngIf="!canExportstix()" class="category_report_searchbar-btn" (click)="showAlertPopup('add','')">
                 <img src="/assets/images/shared/theme/add_icon.svg">
             </span>
-            <div *ngIf="canExportStick()" class="dropdown">
+            <div *ngIf="canExportstix()" class="dropdown">
                 <span class="category_report_searchbar-btn" role="button" id="dropdownAddMenu" data-bs-toggle="dropdown"
                     aria-expanded="false">
                     <img src="/assets/images/shared/theme/add_icon.svg">
@@ -96,9 +96,9 @@
                             <li *ngIf="item.custom">
                                 <hr class="dropdown-divider mx-3" />
                             </li>
-                            <li *ngIf="canExportStick()"><a class="dropdown-item"
+                            <li *ngIf="canExportstix()"><a class="dropdown-item"
                                     (click)="exportAlert(item.hash)">Export Alert</a></li>
-                            <li *ngIf="canExportStick()">
+                            <li *ngIf="canExportstix()">
                                 <hr class="dropdown-divider mx-3" />
                             </li>
                             <li>

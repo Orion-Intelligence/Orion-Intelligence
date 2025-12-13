@@ -6,7 +6,6 @@ import {TooltipDirective} from '../../../../directive/tooltip-directive.directiv
 import {SocialResultItem} from '../../../../model/results/social/social.callback.model';
 import {fadeInDashboardItem} from "../../../../animations/dashboard.item.animation";
 import {RemoveEmojisPipe} from '../../../../pipes/remove-emojis-pipe.pipe';
-import {CodeBlockComponent} from '../../../code-block/code-block.component';
 import {LicenseService} from '../../../../../services/licenses/licenses.service';
 
 @Component({

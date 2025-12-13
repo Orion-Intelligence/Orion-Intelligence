@@ -21,9 +21,6 @@ from orion.api.interactive.search_manager.search_data_model.dump.search_credenti
     search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import \
     search_stealerlog_callback_model
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_callback_model import breach_data
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import \
-    search_dynamic_param_model
 from orion.api.interactive.search_manager.search_data_model.enums import general_listing, leak_listing, \
     exploit_listing
 from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_callback_model import \
@@ -40,7 +37,6 @@ from orion.api.interactive.search_manager.search_data_model.social.search_social
     search_social_callback_model
 from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import \
     search_social_param_model
-from orion.api.server.external_request_manager.external_request_controller import external_request_controller
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX

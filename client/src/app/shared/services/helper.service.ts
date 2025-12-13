@@ -65,14 +65,15 @@ export class HelperService {
     link.click();
     document.body.removeChild(link);
   }
-  downloadStickJson(data: any) {
+
+  downloadstixJson(data: any) {
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'stick_report.json';
+    a.download = 'stix_report.json';
     a.click();
 
     window.URL.revokeObjectURL(url);

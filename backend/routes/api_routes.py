@@ -24,7 +24,7 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
-from orion.services.stick_manager.stick_manager import StickManager
+from orion.services.stix_manager.stix_manager import StixManager
 from routes.docs.docs import SYSTEM_INFO_DOCS, REPORT_DOCS, DYNAMIC_DOCS, SEARCH_DOCS
 
 api_routes = APIRouter(
@@ -652,11 +652,11 @@ async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "social")
 
 @api_routes.get(
-    "/api/search/breach/stick/{doc_id}",
-    summary="Get breach media intelligence report in stick format",
+    "/api/search/breach/stix/{doc_id}",
+    summary="Get breach media intelligence report in stix format",
     description=REPORT_DOCS["breach"]["description"],
-    tags=["Reports"],
-    operation_id="getBreachStickReport",
+    tags=["Reports","stix"],
+    operation_id="getBreachStixReport",
     response_description=REPORT_DOCS["breach"]["response_description"],
     status_code=200,
     dependencies=[
@@ -668,7 +668,7 @@ async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
         ])),
     ],
 )
-async def get_breach_stick_document(
+async def get_breach_stix_document(
     doc_id: str,
     lang: Optional[str] = Query(
         None,
@@ -676,14 +676,14 @@ async def get_breach_stick_document(
         description="Optional language code for localized report content.",
     ),
 ):
-    return await StickManager.get_instance().get_leak_stick(doc_id, lang)
+    return await StixManager.get_instance().get_leak_stix(doc_id, lang)
 
 @api_routes.get(
-    "/api/search/strategic/stick/{doc_id}",
-    summary="Get strategic media intelligence report in stick format",
+    "/api/search/strategic/stix/{doc_id}",
+    summary="Get strategic media intelligence report in stix format",
     description=REPORT_DOCS["strategic"]["description"],
-    tags=["Reports"],
-    operation_id="getStrategicStickReport",
+    tags=["Reports","stix"],
+    operation_id="getStrategicStixReport",
     response_description=REPORT_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=[
@@ -695,7 +695,7 @@ async def get_breach_stick_document(
         ])),
     ],
 )
-async def get_strategic_stick_document(
+async def get_strategic_stix_document(
     doc_id: str,
     lang: Optional[str] = Query(
         None,
@@ -703,14 +703,14 @@ async def get_strategic_stick_document(
         description="Optional language code for localized report content.",
     ),
 ):
-    return await StickManager.get_instance().get_general_stick(doc_id, lang)
+    return await StixManager.get_instance().get_general_stix(doc_id, lang)
 
 @api_routes.get(
-    "/api/search/defacement/stick/{doc_id}",
-    summary="Get defacement media intelligence report in stick format",
+    "/api/search/defacement/stix/{doc_id}",
+    summary="Get defacement media intelligence report in stix format",
     description=REPORT_DOCS["defacement"]["description"],
-    tags=["Reports"],
-    operation_id="getDefacementStickReport",
+    tags=["Reports","stix"],
+    operation_id="getDefacementStixReport",
     response_description=REPORT_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[
@@ -722,22 +722,17 @@ async def get_strategic_stick_document(
         ])),
     ],
 )
-async def get_defacement_stick_document(
+async def get_defacement_stix_document(
     doc_id: str,
-    lang: Optional[str] = Query(
-        None,
-        alias="lang",
-        description="Optional language code for localized report content.",
-    ),
 ):
-    return await StickManager.get_instance().get_defacement_stick(doc_id)
+    return await StixManager.get_instance().get_defacement_stix(doc_id)
 
 @api_routes.get(
-    "/api/search/exploit/stick/{doc_id}",
-    summary="Get exploit media intelligence report in stick format",
+    "/api/search/exploit/stix/{doc_id}",
+    summary="Get exploit media intelligence report in stix format",
     description=REPORT_DOCS["exploit"]["description"],
-    tags=["Reports"],
-    operation_id="getExploitStickReport",
+    tags=["Reports","stix"],
+    operation_id="getExploitStixReport",
     response_description=REPORT_DOCS["exploit"]["response_description"],
     status_code=200,
     dependencies=[
@@ -749,7 +744,7 @@ async def get_defacement_stick_document(
         ])),
     ],
 )
-async def get_exploit_stick_document(
+async def get_exploit_stix_document(
     doc_id: str,
     lang: Optional[str] = Query(
         None,
@@ -757,14 +752,14 @@ async def get_exploit_stick_document(
         description="Optional language code for localized report content.",
     ),
 ):
-    return await StickManager.get_instance().get_exploit_stick(doc_id,lang)
+    return await StixManager.get_instance().get_exploit_stix(doc_id, lang)
 
 @api_routes.get(
-    "/api/search/social/stick/{doc_id}",
-    summary="Get social media intelligence report in stick format",
+    "/api/search/social/stix/{doc_id}",
+    summary="Get social media intelligence report in stix format",
     description=REPORT_DOCS["social"]["description"],
-    tags=["Reports"],
-    operation_id="getSocialStickReport",
+    tags=["Reports","stix"],
+    operation_id="getSocialStixReport",
     response_description=REPORT_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[
@@ -776,7 +771,7 @@ async def get_exploit_stick_document(
         ])),
     ],
 )
-async def get_social_stick_document(
+async def get_social_stix_document(
     doc_id: str,
     lang: Optional[str] = Query(
         None,
@@ -784,14 +779,14 @@ async def get_social_stick_document(
         description="Optional language code for localized report content.",
     ),
 ):
-    return await StickManager.get_instance().get_social_stick(doc_id,lang)
+    return await StixManager.get_instance().get_social_stix(doc_id, lang)
 
 @api_routes.get(
-    "/api/search/news/stick/{doc_id}",
-    summary="Get news media intelligence report in stick format",
+    "/api/search/news/stix/{doc_id}",
+    summary="Get news media intelligence report in stix format",
     description=REPORT_DOCS["news"]["description"],
-    tags=["Reports"],
-    operation_id="getNewsStickReport",
+    tags=["Reports","stix"],
+    operation_id="getNewsStixReport",
     response_description=REPORT_DOCS["news"]["response_description"],
     status_code=200,
     dependencies=[
@@ -803,7 +798,7 @@ async def get_social_stick_document(
         ])),
     ],
 )
-async def get_news_stick_document(
+async def get_news_stix_document(
     doc_id: str,
     lang: Optional[str] = Query(
         None,
@@ -811,5 +806,5 @@ async def get_news_stick_document(
         description="Optional language code for localized report content.",
     ),
 ):
-    return await StickManager.get_instance().get_leak_stick(doc_id,lang)
+    return await StixManager.get_instance().get_leak_stix(doc_id, lang)
 

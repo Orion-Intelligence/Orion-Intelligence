@@ -318,13 +318,13 @@ export const routes: Routes = [
           {
             path: ':category',
             component: DashboardGeneralComponent,
-            data: { type: 'Strategic', animation: 'CategoryPage' }
+            data: { type: 'strategic', animation: 'CategoryPage' }
           },
           {
             path: ':category/:m_hash',
             component: ReportComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Strategic', animation: 'HashPage' }
+            data: { type: 'strategic', animation: 'HashPage' }
           }
         ]
       },
