@@ -90,11 +90,18 @@
             </div>
             <div class="home-defacement-result-divider" *ngIf="!last"></div>
         </ng-container>
+
+        <div class="home-insight-card-footer-section" *ngIf="results_defacement.Result.length > 10">
+            <p class="home-insight-card-view-details-button" appTooltip="list more results">
+                Show More
+            </p>
+        </div>
+
         <br>
     </ng-container>
 
     <ng-container *ngIf="isExpandable && results_stealerlog && results_stealerlog.Result">
-        <ng-container *ngFor="let item of results_stealerlog.Result.slice(0,3); let last = last">
+        <ng-container *ngFor="let item of results_stealerlog.Result.slice(0,10); let last = last">
             <div class="home_defacement_result__container mt-4">
                 <div class="home-defacement-result-card-container">
                     <div class="d-flex justify-content-between w-100 mb-2">
@@ -152,19 +159,17 @@
                             </div>
                         </div>
                     </div>
-
-                    <!--                    <div class="home-defacement-result-detail-row">-->
-                    <!--                        <div class="home-defacement-result-card-date-time-info">-->
-                    <!--                            <div class="home-defacement-result-card-label">Date</div>-->
-                    <!--                            <div class="home-defacement-result-card-value">-->
-                    <!--                                {{ item.timestamp || '-' }}-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
                 </div>
             </div>
             <div class="home-defacement-result-divider" *ngIf="!last"></div>
         </ng-container>
+
+        <div class="home-insight-card-footer-section" *ngIf="results_stealerlog.Result.length > 10">
+            <p class="home-insight-card-view-details-button" appTooltip="list more results">
+                Show More
+            </p>
+        </div>
+
         <br>
     </ng-container>
 </div>
