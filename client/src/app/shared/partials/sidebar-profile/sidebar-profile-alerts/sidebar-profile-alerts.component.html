@@ -9,20 +9,15 @@
                 <app-home-search [isRoleAdmin]="false"></app-home-search>
 
                 <div class="category_report_flex">
-                    <div class="side-menu-container d-flex align-items-start justify-content-start gap-3 ioc-container_scan-ioc"
-                        (click)="flushAll()">
-                        <label appTooltip="Delete all lerts" class="filters-button d-flex align-items-center">
-                            <span class="ms-2">Flush All</span>
-                        </label>
+                    <div class="btn-group report-menu-option-container">
+                      <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
+                        <img alt="Download" height="20" ngSrc="assets/images/shared/bin.svg" width="20" />
+                      </button>
+                      <div class="vr report-menu-divider"></div>
+                      <button (click)="scanIOCs()" appTooltip="scan all" class="p-0 report-menu-option">
+                        <img alt="Download" height="20" ngSrc="assets/images/sidebar/scanner.svg" width="20" />
+                      </button>
                     </div>
-                    <div class="side-menu-container d-flex align-items-start justify-content-start gap-3 ioc-container_scan-ioc"
-                        (click)="scanIOCs()">
-                        <label appTooltip="Scan all ioc and generate lerts"
-                            class="filters-button d-flex align-items-center">
-                            <span class="ms-2">Scan IOCs</span>
-                        </label>
-                    </div>
-
                 </div>
             </div>
             <div class="ioc-container">
@@ -117,7 +112,7 @@
         </div>
     </ng-template>
     <ng-container *ngIf="isConfirmationOpen$ | async">
-        <app-confirmation-popup (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
+        <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'" (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
     </ng-container>
 </div>
 <ng-template #showAdmin>

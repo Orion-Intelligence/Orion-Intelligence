@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Output, Input } from '@angular/core';
 
 @Component({
   selector: 'app-confirmation-popup',
@@ -6,6 +6,8 @@ import { Component, EventEmitter, HostListener, Output } from '@angular/core';
   templateUrl: './confirmation-popup.component.html'
 })
 export class ConfirmationPopupComponent {
+  @Input() message = 'Are you sure you want to perform this action?';
+
   @Output() confirmed = new EventEmitter<boolean>();
 
   @HostListener('click', ['$event'])

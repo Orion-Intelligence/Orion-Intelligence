@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgFor, CommonModule } from '@angular/common';
+import {NgFor, CommonModule, NgOptimizedImage} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
@@ -22,7 +22,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-sidebar-profile-alerts',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage],
   templateUrl: './sidebar-profile-alerts.component.html',
 })
 export class SidebarProfileAlertsComponent implements OnInit {

@@ -215,21 +215,24 @@ export class AuthService {
       error: null,
       licenses: []
     });
-    this.apiService.post('logout', {}).subscribe();
-    localStorage.clear();
-    sessionStorage.clear();
     this.username.set('');
-    this.role.set(null);
-    this.setOnboarding(false);
-    this.subscription.set(false);
-    this.verificationDate.set('');
-    this.licenses.set([]);
-    this.tokenRefreshService.stopTokenRefresh();
-    this.router.navigate(['/login']).then();
-    localStorage.setItem('onboarding', String(false));
-    this.appStorageService.clearStorage();
-    this.appService.clearAll();
-    this.appService.loadConfig();
+      this.router.navigate(['/login']).then();
+      this.router.navigate(['/login']).then(() => {
+      this.role.set(null);
+      this.setOnboarding(false);
+      this.subscription.set(false);
+      this.verificationDate.set('');
+      this.licenses.set([]);
+      this.apiService.post('logout', {}).subscribe();
+
+      localStorage.clear();
+      sessionStorage.clear();
+      this.tokenRefreshService.stopTokenRefresh();
+      localStorage.setItem('onboarding', String(false));
+      this.appStorageService.clearStorage();
+      this.appService.clearAll();
+      this.appService.loadConfig();
+    });
   }
 
   demoLogin(): void {

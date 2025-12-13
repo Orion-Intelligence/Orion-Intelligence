@@ -23,10 +23,10 @@
       <div class="scan_content-wrapper" @fadeInDashboardItem>
 
         <ng-container *ngFor="let result of results; let first = first">
-            <div class="right-content color-text1 cursor-pointer explore"
-                 *ngIf="!result.hasError && result.meta"
-                 @fadeInDashboardItem
-                 [routerLink]="[
+          <div class="right-content color-text1 cursor-pointer explore"
+               *ngIf="!result.hasError && result.meta"
+               @fadeInDashboardItem
+               [routerLink]="[
                    result.scanType === 'seo'
                      ? '/dashboard/scanner/seo-scan'
                      : result.scanType === 'basic'
@@ -35,17 +35,18 @@
                          ? '/dashboard/scanner/repository-scan'
                          : '/dashboard/scanner/' + result.scanType
                  ]"
-                 [queryParams]="{
+               [queryParams]="{
                    q: '',
                    page: 1,
                    matchtype: 'or',
                    domain: result.domain,
                    scanType: result.scanType
                  }"
-                 target="_blank">
+               target="_blank">
             Explore {{ result.scanType | uppercase }}
             <button appTooltip="Open Page" class="ml-2 p-0 mt-0 expand-toggle-btn">
-              <img alt="background" class="scan_explore-icon" height="20" src="/assets/images/shared/theme/explore_icon.svg" width="20">
+              <img alt="background" class="scan_explore-icon" height="20"
+                   src="/assets/images/shared/theme/explore_icon.svg" width="20">
             </button>
           </div>
 
