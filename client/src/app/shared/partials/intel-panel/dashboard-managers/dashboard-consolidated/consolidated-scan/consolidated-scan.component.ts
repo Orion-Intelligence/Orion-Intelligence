@@ -6,6 +6,7 @@ import { finalize, forkJoin, Observable, of } from 'rxjs';
 import { TooltipDirective } from '../../../../../directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../../../animations/dashboard.item.animation';
 import { RouterLink } from '@angular/router';
+import { parse } from 'tldts';
 
 @Component({
   selector: 'app-consolidated-scan',
@@ -90,7 +91,7 @@ export class ConsolidatedScanComponent {
       trimmed = trimmed.slice(4);
     }
 
-    if (!trimmed || /\s/.test(trimmed) || !trimmed.includes('.')) {
+    if (!trimmed || /\s/.test(trimmed)) {
       return '';
     }
 
@@ -99,10 +100,8 @@ export class ConsolidatedScanComponent {
       trimmed = trimmed.slice(atIdx + 1);
     }
 
-    const labels = trimmed.split('.').filter(Boolean);
-    if (labels.length < 2) return '';
-
-    const rootDomain = labels.slice(-2).join('.');
+    const parsed = parse(trimmed);
+    if (!parsed.domain) return '';
 
     const blockedDomains = new Set([
       'google.com', 'bing.com', 'yahoo.com', 'duckduckgo.com', 'baidu.com', 'yandex.ru', 'ask.com',
@@ -128,13 +127,13 @@ export class ConsolidatedScanComponent {
       'wikipedia.org', 'wikimedia.org', 'tumblr.com', 'fandom.com', 'soundcloud.com', 'bandcamp.com',
       'deviantart.com', 'behance.net', 'dribbble.com'
     ]);
-    if (blockedDomains.has(rootDomain)) {
+
+    if (blockedDomains.has(parsed.domain)) {
       return '';
     }
 
-    return rootDomain;
+    return parsed.domain;
   }
-
 
   public initAndScan(target: string, type: 'repo' | 'domain'): void {
     this.scanResult$ = of(null);
