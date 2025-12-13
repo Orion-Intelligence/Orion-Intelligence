@@ -158,6 +158,10 @@
   margin-top: 40px;
 }
 
+.home-consolidated-result .home-defacement-result-divider{
+  margin-top: 10px !important;
+}
+
 @media only screen and (width <=1000px) {
   .home-defacement-result {
     margin-left: 15px;

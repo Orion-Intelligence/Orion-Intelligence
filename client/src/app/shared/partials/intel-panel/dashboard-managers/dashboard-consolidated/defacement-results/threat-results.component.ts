@@ -16,10 +16,12 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   @Input() results_stealerlog!: StealerLogCallbackModel | undefined;
   @Input() isExpandable = false;
 
+  showLimitDefacement = 10;
+  showLimitStealer = 10;
+
   threatTypeCounts: { [key: string]: number } = {};
 
-  constructor(protected helperService: HelperService, private dashboardService: DashboardService) {
-  }
+  constructor(protected helperService: HelperService, private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     if (this.results_defacement?.Result?.length) {
@@ -32,8 +34,10 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['results_defacement'] && this.results_defacement?.Result?.length) {
       this.updateThreatTypeCounts(this.results_defacement.Result);
+      this.showLimitDefacement = 10;
     } else if (changes['results_stealerlog'] && this.results_stealerlog?.Result?.length) {
       this.updateStealerTypeCounts(this.results_stealerlog.Result);
+      this.showLimitStealer = 10;
     }
   }
 
@@ -46,7 +50,8 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   updateStealerTypeCounts(results: StealerLogResultItem[]) {
-    this.threatTypeCounts["stealerlog"] = results.length;
+    this.threatTypeCounts = {};
+    this.threatTypeCounts['stealerlog'] = results.length;
   }
 
   explore(route: string, q: string) {
@@ -71,18 +76,27 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   toggleResultsBarCollapse(): void {
     this.isExpandable = !this.isExpandable;
   }
+
+  onShowMore(category: 'defacement' | 'stealerlog', event: MouseEvent): void {
+    event.stopPropagation();
+    if (category === 'defacement') {
+      this.showLimitDefacement = Math.min(this.showLimitDefacement + 10, this.results_defacement?.Result?.length ?? this.showLimitDefacement);
+      this.onFilterTypeClick('databases', event);
+    } else {
+      this.showLimitStealer = Math.min(this.showLimitStealer + 10, this.results_stealerlog?.Result?.length ?? this.showLimitStealer);
+      this.onFilterTypeClick('stealerlog', event);
+    }
+  }
+
   onFilterTypeClick(type: string, event: MouseEvent): void {
     event.stopPropagation();
     if (type === "phishing" || type === "hacked" || type === "databases" || type === "scam" || type === "crack") {
-      if (type === "scam")
-        type = "database";
-      else if (type === "crack")
-        type = "hacked";
+      if (type === "scam") type = "database";
+      else if (type === "crack") type = "hacked";
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/${type}?q=${encodeURIComponent(query)}`;
       window.open(url, '_blank');
-    }
-    else if (type === "stealerlog") {
+    } else if (type === "stealerlog") {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const finalUrl = `/dashboard/stealerlogs?url=${encodeURIComponent(query)}&user=${''}`;
       window.open(finalUrl, '_blank');

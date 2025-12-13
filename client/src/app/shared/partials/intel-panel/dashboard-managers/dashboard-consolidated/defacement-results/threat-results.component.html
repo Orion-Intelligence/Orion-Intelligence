@@ -1,4 +1,4 @@
-<div class="home-defacement-result">
+<div class="home-defacement-result home-consolidated-result">
     <div class="home-defacement-result__top-row" (click)="toggleResultsBarCollapse()">
         <div class="home-defacement-result__title">
             {{ results_defacement ? 'IP Threat Report' : 'Stealer Log Report' }}
@@ -19,7 +19,7 @@
     </div>
 
     <ng-container *ngIf="isExpandable && results_defacement && results_defacement.Result">
-        <ng-container *ngFor="let item of results_defacement.Result.slice(0,10); let last = last">
+        <ng-container *ngFor="let item of results_defacement.Result.slice(0,showLimitDefacement); let last = last">
             <div class="home_defacement_result__container mt-4">
                 <div class="home-defacement-result-card-container">
                     <div class="d-flex justify-content-between w-100 mb-2">
@@ -91,17 +91,18 @@
             <div class="home-defacement-result-divider" *ngIf="!last"></div>
         </ng-container>
 
-        <div class="home-insight-card-footer-section" *ngIf="results_defacement.Result.length > 10">
-            <p class="home-insight-card-view-details-button" appTooltip="list more results">
-                Show More
-            </p>
-        </div>
+        <p class="home-insight-card-view-details-button"
+           appTooltip="list more results"
+           *ngIf="results_defacement.Result.length > showLimitDefacement"
+           (click)="onShowMore('defacement', $event)">
+            Show More
+        </p>
 
         <br>
     </ng-container>
 
     <ng-container *ngIf="isExpandable && results_stealerlog && results_stealerlog.Result">
-        <ng-container *ngFor="let item of results_stealerlog.Result.slice(0,10); let last = last">
+        <ng-container *ngFor="let item of results_stealerlog.Result.slice(0,showLimitStealer); let last = last">
             <div class="home_defacement_result__container mt-4">
                 <div class="home-defacement-result-card-container">
                     <div class="d-flex justify-content-between w-100 mb-2">
@@ -164,11 +165,12 @@
             <div class="home-defacement-result-divider" *ngIf="!last"></div>
         </ng-container>
 
-        <div class="home-insight-card-footer-section" *ngIf="results_stealerlog.Result.length > 10">
-            <p class="home-insight-card-view-details-button" appTooltip="list more results">
-                Show More
-            </p>
-        </div>
+        <p class="home-insight-card-view-details-button"
+           appTooltip="list more results"
+           *ngIf="results_stealerlog.Result.length > showLimitStealer"
+           (click)="onShowMore('stealerlog', $event)">
+          Show More
+        </p>
 
         <br>
     </ng-container>
