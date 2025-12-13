@@ -103,7 +103,7 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
     "/api/delete/profile/image",
     summary="Update user",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.ANALYST]))],
 )
 async def update_user(current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().delete_profile_icon(current_user)
