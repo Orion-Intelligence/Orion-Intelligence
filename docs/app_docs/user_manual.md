@@ -8,6 +8,11 @@ illustrates the secure and straightforward login process for the admin panel, wh
 personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that
 provide full control over the system's functionality, ensuring smooth and efficient management of operations.
 
+```{contents}
+:local:
+:depth: 4
+```
+
 <img width="1918" height="858" alt="login" src="https://github.com/user-attachments/assets/34afd0d9-2ef3-42b1-984b-5c54bc81201c" />
 
 
@@ -34,6 +39,8 @@ The navigation bar has been moved to the left side of the page. This adjustment 
 
 It consists of the following main menu items:
 
+:::{dropdown} Main menu items (Homepage, General Intelligence, Data Breach, …)
+:open:
 1. **Homepage:** Navigates back to the platform’s main page, serving as a central hub for all primary operations.
    It allows users to quickly restart their workflow or re-access key features without losing progress or context.
 
@@ -55,12 +62,14 @@ It consists of the following main menu items:
    This feature supports continuous monitoring and enables timely responses to evolving cybersecurity events.
 
 7. **Exploit:** The Exploit module in Orion Intelligence enables users to identify, analyze, and simulate known vulnerabilities using CVE data and integrated exploit tools. With AI-powered suggestions, Orion assists in selecting relevant exploits based on system context, helping security teams assess real-world risk faster and more efficiently.
+
 8.  **Feed:** The Feed module delivers real-time updates on cybersecurity threats, CVEs, breaches, and industry trends from trusted global sources. Orion curates and prioritizes the most relevant news, keeping your team informed about emerging risks and developments that could impact your infrastructure or applications.
+
 9.  **Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
 These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
 
    In this module, the system actively collects data from:
-   
+
  **Telegram channels:** Extracts downloadable files and shared dump links related to breaches or leaks.
 
 **Websites and forums:** Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious
@@ -68,6 +77,7 @@ These data dumps often include leaked databases, user credentials, email lists, 
 
 **Other open-source intelligence (OSINT) platforms:** Tracks and organizes dump-related information for quick
       analysis.
+
 10. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
 
 11. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
@@ -77,6 +87,7 @@ These data dumps often include leaked databases, user credentials, email lists, 
 13. **Links:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
 
 14. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
+:::
 
 ## Homepage
 
@@ -92,7 +103,7 @@ high-priority data. This well-organized structure ensures that users have an int
 - The **search bar** at the top of the interface allows users to quickly and efficiently find specific pieces of
   information. It supports keyword-based queries, making the process of locating data fast and straightforward. This
   feature enhances productivity by reducing the time spent on manual searching.
-  
+
 <img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
 
 
@@ -113,6 +124,7 @@ This option only shows results that exactly match the full query entered. If suc
 
 
 Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
+
 #### Statistics
 
 In the statistics section, when we view the chart bars, several results are displayed. The first statistic highlights the top teams that are most frequently involved in leak incidents. The next chart shows the teams associated with website defacement activities. The third statistic presents the top geographic regions with the highest number of defacement incidents. Finally, another chart displays the most frequently used hashtags, reflecting their use in social media activities and related incidents.
@@ -312,7 +324,7 @@ The news section allows users to view any news related to the data, provided the
 This section lists data breaches that involve the theft of sensitive personal, financial, or business information. It
 includes incidents where credentials, credit card dumps, and other confidential data have been exposed, often being sold
 or shared on underground platforms. Users can explore the extent of these breaches and gain insights into the
-compromised data to assess potential risks.
+compromised data to assess potential risks or security breaches.
 <img width="1365" height="411" alt="stolen-modified" src="https://github.com/user-attachments/assets/fff50b0f-c738-442c-ac67-6e4227668abc" />
 
 
@@ -868,8 +880,7 @@ MODE. These three concepts help us manage demo server access and control feature
 **TRAEFIK KEYS**
 
 1. TRAEFIK_USERNAME=admin
-2. TRAEFIK_PASSWORD=
-('SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8')
+2. TRAEFIK_PASSWORD=('<REDACTED>')
 
 **Description:** These keys are used for both Flower and Dozzle. They allow access to the demo server, enabling users to
 use it for demonstration purposes.
@@ -877,8 +888,7 @@ use it for demonstration purposes.
 **DEMO KEYS**
 
 1. DEMO_USERNAME=demo
-2. DEMO_PASSWORD=
-('contact out agent')
+2. DEMO_PASSWORD=('<REDACTED>')
 
 **Description:** Demo keys are used to provide users with a demo version of the service. By using these keys, users can
 access a limited, demo server environment to explore features.
