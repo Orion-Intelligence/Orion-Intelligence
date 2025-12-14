@@ -1,16 +1,21 @@
-import {HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest} from '@angular/common/http';
-import {inject, Injector} from '@angular/core';
-import {Router} from '@angular/router';
-import {Observable, throwError, TimeoutError, Subject} from 'rxjs';
-import {catchError, finalize, timeout, takeUntil} from 'rxjs/operators';
-import {LoadingService} from '../../shared/services/loading.service';
-import {MessageNotificationService} from '../message_notification/message-notification.service';
-import {AuthService} from '../authetication/auth.service';
+import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandlerFn,
+  HttpInterceptorFn,
+  HttpRequest,
+} from '@angular/common/http';
+import { inject, Injector } from '@angular/core';
+import { Router } from '@angular/router';
+import { Observable, throwError, TimeoutError, Subject } from 'rxjs';
+import { catchError, finalize, timeout, takeUntil } from 'rxjs/operators';
+import { LoadingService } from '../../shared/services/loading.service';
+import { MessageNotificationService } from '../message_notification/message-notification.service';
+import { AuthService } from '../authetication/auth.service';
 
 let activeRequests = 0;
 let hideTimeout: any = null;
 const inFlightCancels = new Map<string, Subject<void>>();
-
 const GLOBAL_TIMEOUT = 150000;
 
 const STATUS_MEANINGS: { [key: number]: string } = {
@@ -25,7 +30,7 @@ const STATUS_MEANINGS: { [key: number]: string } = {
   429: 'Too Many Requests',
   500: 'Internal Server Error',
   502: 'Bad Gateway',
-  503: 'Service Unavailable'
+  503: 'Service Unavailable',
 };
 
 export const httpInterceptor: HttpInterceptorFn = (
@@ -38,13 +43,13 @@ export const httpInterceptor: HttpInterceptorFn = (
   const injector = inject(Injector);
 
   const token = localStorage.getItem('token');
-
   const authReq = token
-    ? req.clone({setHeaders: {Authorization: `Bearer ${token}`}, withCredentials: true})
-    : req.clone({withCredentials: true});
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` }, withCredentials: true })
+    : req.clone({ withCredentials: true });
 
   const key = authReq.url.startsWith('api/') ? authReq.url : null;
   let cancel$: Subject<void> | null = null;
+
   if (key) {
     const existing = inFlightCancels.get(key);
     if (existing) {
@@ -57,7 +62,6 @@ export const httpInterceptor: HttpInterceptorFn = (
 
   if (activeRequests === 0) loadingService.show();
   activeRequests++;
-
   if (hideTimeout) clearTimeout(hideTimeout);
 
   return next(authReq).pipe(
@@ -89,24 +93,37 @@ export const httpInterceptor: HttpInterceptorFn = (
         if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
           const keys = Object.keys(error.error);
           if (keys.length === 1) {
-            message = `${error.error[keys[0]]}`;
+            message = `${(error.error as any)[keys[0]]}`;
           }
         }
+
+        const silentLogoutMessages = new Set([
+          'Token has expired',
+          'Logged out due to multiple active sessions',
+        ]);
+        const isSilentLogout = silentLogoutMessages.has(message);
+
         if (error instanceof HttpErrorResponse && error.status !== 400) {
           localStorage.clear();
           sessionStorage.clear();
           router.navigate(['/login']);
         }
-        msg.show(message);
+
+        if (!isSilentLogout) {
+          msg.show(message);
+        }
       }
 
       if (error instanceof TimeoutError) {
-        return throwError(() => new HttpErrorResponse({
-          error: 'Request timed out',
-          status: 408,
-          statusText: 'Request Timeout',
-          url: (error as any).url
-        }));
+        return throwError(
+          () =>
+            new HttpErrorResponse({
+              error: 'Request timed out',
+              status: 408,
+              statusText: 'Request Timeout',
+              url: (error as any).url,
+            })
+        );
       }
 
       return throwError(() => error);

@@ -269,7 +269,7 @@ class session_manager:
             return {"access_token": new_token, "token_type": "bearer", "session": session}
 
         except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail="Token has expired, please log in again")
+            raise HTTPException(status_code=401, detail="Token has expired")
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
