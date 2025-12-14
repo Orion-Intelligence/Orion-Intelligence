@@ -1,3 +1,4 @@
+(developer-documentation)=
 # Developer Documentation
 
 ## Orion Search Documentation
@@ -18,6 +19,8 @@ proxy, with **Traefik** for load balancing.
 
 Orion-Search utilizes the following key technologies and services:
 
+:::{dropdown} Components (Django, Elasticsearch, Redis, MongoDB, NGINX, Swagger UI, Traefik, Dozzle)
+:open:
 1. **Django**: Backend framework for managing APIs, data processing, and cron jobs.
 2. **Elasticsearch**: Search and indexing service for real-time data retrieval.
 3. **Redis**: In-memory caching for improved performance.
@@ -26,6 +29,7 @@ Orion-Search utilizes the following key technologies and services:
 6. **Swagger UI**: API documentation interface.
 7. **Traefik**: Load balancer and router.
 8. **Dozzle**: Log viewer for monitoring container logs.
+:::
 
 ---
 
@@ -88,34 +92,39 @@ PRODUCTION_DOMAIN=*
 
 The `docker-compose.yml` file defines the following services:
 
-### 1. **Web**
+### Web
 
-**Description**: Django-based backend service.  
-**Container Name**: `trusted-web-main`  
-**Build**: `dockerFiles/api_docker`  
-**Environment**: Configured via `.env` file  
-**Ports**: Exposed on **8070**  
-**Command**:
+:::{admonition} Description
+:class: note
+Django-based backend service.
+:::
 
+- **Container Name**: `trusted-web-main`  
+- **Build**: `dockerFiles/api_docker`  
+- **Environment**: Configured via `.env` file  
+- **Ports**: Exposed on **8070**  
+
+:::{dropdown} Command
 - Runs `gunicorn` server and cronjob manager.
+:::
 
-**Key Features**:
-
+:::{dropdown} Key Features
 - Collects static files in production.
 - Runs Django cron jobs for scheduled tasks.
 - Provides backend APIs for search functionality.
+:::
 
 ---
 
-### 2. **Run.sh**
+### Run.sh
 
 The `run.sh` file automates the process of starting the Orion system. It is typically used as the entry point script.
 
-**Contents**:
-
+:::{dropdown} Contents
 1. Ensures all services and configurations are properly initialized.
 2. Runs Django migrations, collects static files, and starts the Gunicorn server.
 3. Ensures the services are healthy before making them operational.
+:::
 
 **Usage**:
 
@@ -130,46 +139,67 @@ bash cronjobs.sh
 
 ---
 
-### 3. **Elasticsearch**
+### Elasticsearch
 
-**Description**: Search engine and indexing service.  
-**Container Name**: `trusted-web-elastic`  
-**Image**: `elasticsearch:7.17.20`  
-**Ports**: Exposed on **9400**  
-**Environment**: Configured for single-node cluster.  
-**Volumes**: Persistent storage for Elasticsearch indices.  
-**Healthcheck**: Checks cluster health.
+:::{admonition} Description
+:class: note
+Search engine and indexing service.
+:::
 
-**Key Features**:
+- **Container Name**: `trusted-web-elastic`  
+- **Image**: `elasticsearch:7.17.20`  
+- **Ports**: Exposed on **9400**  
+- **Environment**: Configured for single-node cluster.  
+- **Volumes**: Persistent storage for Elasticsearch indices.  
 
+:::{dropdown} Healthcheck
+Checks cluster health.
+:::
+
+:::{dropdown} Key Features
 - Full-text search and indexing.
 - Optimized memory usage with JVM settings.
+:::
 
 ---
 
-### 4. **Redis**
+### Redis
 
-**Description**: In-memory data store for caching.  
-**Container Name**: `trusted-web-redis`  
-**Image**: `redis:7.4.0`  
-**Environment**: Password-protected access.  
-**Healthcheck**: Verifies Redis is running.
+:::{admonition} Description
+:class: note
+In-memory data store for caching.
+:::
 
-**Key Features**:
+- **Container Name**: `trusted-web-redis`  
+- **Image**: `redis:7.4.0`  
+- **Environment**: Password-protected access.  
 
+:::{dropdown} Healthcheck
+Verifies Redis is running.
+:::
+
+:::{dropdown} Key Features
 - Caching layer to reduce database queries.
 - Secured with authentication.
+:::
 
 ---
 
-### 5. **MongoDB**
+### MongoDB
 
-**Description**: Non-relational database for data storage.  
-**Container Name**: `trustly-web-mongodb`  
-**Image**: `mongo:latest`  
-**Ports**: Exposed on **27020**  
-**Environment**: Configured for secured access.  
-**Healthcheck**: Verifies MongoDB connectivity.
+:::{admonition} Description
+:class: note
+Non-relational database for data storage.
+:::
+
+- **Container Name**: `trustly-web-mongodb`  
+- **Image**: `mongo:latest`  
+- **Ports**: Exposed on **27020**  
+- **Environment**: Configured for secured access.  
+
+:::{dropdown} Healthcheck
+Verifies MongoDB connectivity.
+:::
 
 ---
 
@@ -194,12 +224,15 @@ bash cronjobs.sh
    ```
 
 3. Access the services:
-    - **Django Backend**: `http://localhost:8070`
-    - **Swagger UI**: `http://localhost:8082`
-    - **NGINX**: `http://localhost:8080`
-    - **Traefik Dashboard**: `http://localhost:9090`
-    - **Elasticsearch**: `http://localhost:9400`
-    - **Dozzle Logs**: `http://dozzle.localhost`
+
+   :::{dropdown} Local URLs
+   - **Django Backend**: `http://localhost:8070`
+   - **Swagger UI**: `http://localhost:8082`
+   - **NGINX**: `http://localhost:8080`
+   - **Traefik Dashboard**: `http://localhost:9090`
+   - **Elasticsearch**: `http://localhost:9400`
+   - **Dozzle Logs**: `http://dozzle.localhost`
+   :::
 
 ---
 
@@ -231,12 +264,15 @@ proxies** for anonymity, it ensures scalable, distributed, and secure crawling.
 
 Orion-Crawler integrates the following components and technologies:
 
+:::{dropdown} Components (Python, Celery, Redis, MongoDB, TOR Network, Flower)
+:open:
 1. **Python**: Core programming language for crawling and data processing.
 2. **Celery**: Task queue for parallelizing crawling jobs.
 3. **Redis**: Backend for Celery task distribution and caching.
 4. **MongoDB**: Stores raw crawled data.
 5. **TOR Network**: Ensures crawling occurs anonymously over multiple TOR instances.
 6. **Flower**: Monitoring and management tool for Celery workers.
+:::
 
 ---
 
@@ -284,97 +320,136 @@ FLOWER_PASSWORD='<REDACTED>'
 
 The `docker-compose.yml` defines the following services:
 
-### 1. **App (Crawler Service)**
+### App (Crawler Service)
 
-**Description**: Main crawler service responsible for crawling and data extraction.  
-**Container Name**: `trusted-crawler-main`  
-**Build**: `dockerFiles/app_docker`  
-**Depends On**: MongoDB, Redis, and TOR proxies.  
-**Environment**: Configured via `.env` file.  
-**Command**:  
+:::{admonition} Description
+:class: note
+Main crawler service responsible for crawling and data extraction.
+:::
+
+- **Container Name**: `trusted-crawler-main`  
+- **Build**: `dockerFiles/app_docker`  
+- **Depends On**: MongoDB, Redis, and TOR proxies.  
+- **Environment**: Configured via `.env` file.  
+
+:::{dropdown} Command
 Runs the crawler entrypoint script `start_app.sh`.
+:::
 
-**Key Features**:
-
+:::{dropdown} Key Features
 - Executes crawling jobs using multithreading.
 - Handles data storage into MongoDB.
 - Maintains scalability through Celery task queues.
+:::
 
 ---
 
-### 2. **API**
+### API
 
-**Description**: Exposes a RESTful API to interact with crawler results.  
-**Container Name**: `trusted-crawler-api`  
-**Build**: `dockerFiles/api_docker`  
-**Ports**: Runs on port **8000** internally.  
-**Healthcheck**: Verifies connectivity to the API endpoint.
+:::{admonition} Description
+:class: note
+Exposes a RESTful API to interact with crawler results.
+:::
 
-**Key Features**:
+- **Container Name**: `trusted-crawler-api`  
+- **Build**: `dockerFiles/api_docker`  
+- **Ports**: Runs on port **8000** internally.  
 
+:::{dropdown} Healthcheck
+Verifies connectivity to the API endpoint.
+:::
+
+:::{dropdown} Key Features
 - Allows querying of crawled data.
 - Manages API requests efficiently.
+:::
 
 ---
 
-### 3. **Celery Worker**
+### Celery Worker
 
-**Description**: Task queue worker for executing crawl tasks.  
-**Container Name**: `trusted-crawler-celery`  
-**Command**:
+:::{admonition} Description
+:class: note
+Task queue worker for executing crawl tasks.
+:::
+
+- **Container Name**: `trusted-crawler-celery`  
 
 ```bash
 celery -A crawler.crawler_services.celery_manager worker --loglevel=DEBUG --concurrency=${CELERY_WORKER_COUNT}
 ```
 
-**Key Features**:
-
+:::{dropdown} Key Features
 - Processes crawl tasks asynchronously.
 - Distributes workload among workers.
+:::
 
 ---
 
-### 4. **Flower**
+### Flower
 
-**Description**: Celery monitoring tool to observe task execution.  
-**Container Name**: `trusted-crawler-flower`  
-**Ports**: Exposed on **5555**.  
-**Key Features**:
+:::{admonition} Description
+:class: note
+Celery monitoring tool to observe task execution.
+:::
 
+- **Container Name**: `trusted-crawler-flower`  
+- **Ports**: Exposed on **5555**.  
+
+:::{dropdown} Key Features
 - Monitors Celery worker status.
 - Provides an intuitive dashboard for managing tasks.
+:::
 
 ---
 
-### 5. **Redis**
+### Redis
 
-**Description**: In-memory task queue and cache.  
-**Container Name**: `trusted-crawler-redis`  
-**Image**: `redis:7.4.0`  
-**Environment**: Password-protected access.
+:::{admonition} Description
+:class: note
+In-memory task queue and cache.
+:::
 
----
-
-### 6. **MongoDB**
-
-**Description**: Database for storing crawled data.  
-**Container Name**: `trustly-crawler-mongodb`  
-**Ports**: Exposed on **27019**.  
-**Command**: Initializes MongoDB with root credentials.
+- **Container Name**: `trusted-crawler-redis`  
+- **Image**: `redis:7.4.0`  
+- **Environment**: Password-protected access.
 
 ---
 
-### 7. **TOR Instances**
+### MongoDB
 
-**Description**: Multiple TOR proxies for anonymous crawling.  
-**Images**: `barneybuffet/tor:latest`  
-**Ports**: Configured for each instance with separate ports (e.g., 9152, 9153).  
-**Healthcheck**: Verifies TOR proxy connectivity.
+:::{admonition} Description
+:class: note
+Database for storing crawled data.
+:::
 
-**Key Features**:
+- **Container Name**: `trustly-crawler-mongodb`  
+- **Ports**: Exposed on **27019**.  
 
+:::{dropdown} Command
+Initializes MongoDB with root credentials.
+:::
+
+---
+
+### TOR Instances
+
+:::{admonition} Description
+:class: note
+Multiple TOR proxies for anonymous crawling.
+:::
+
+- **Images**: `barneybuffet/tor:latest`  
+- **Ports**: Configured for each instance with separate ports (e.g., 9152, 9153).  
+
+:::{dropdown} Healthcheck
+Verifies TOR proxy connectivity.
+:::
+
+:::{dropdown} Key Features
 - Ensures anonymity through TOR proxy routing.
 - Runs up to **10 TOR instances** for load balancing.
+:::
 
 ---
 
@@ -497,7 +572,7 @@ The process is as follows:
 
 ## Key Components
 
-### 1. **Main Script (`main.py`)**
+### Main Script (`main.py`)
 
 The **`main.py`** file serves as the entry point for Orion Collector. Developers add the target URL here and specify the
 type of collector.
@@ -534,7 +609,7 @@ if __name__ == "__main__":
 
 ---
 
-### 2. **Static Parser (`sample.py`)**
+### Static Parser (`sample.py`)
 
 The `sample.py` script extracts data from static pages using **BeautifulSoup**.
 
@@ -552,7 +627,7 @@ def parse_leak_data(self, html_content: str, p_data_url: str) -> Tuple[leak_data
 
 ---
 
-### 3. **Dynamic Parser (`sample.py`)**
+### Dynamic Parser (`sample.py`)
 
 The dynamic parser uses **Selenium** to interact with JavaScript-heavy pages.
 
