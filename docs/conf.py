@@ -23,4 +23,6 @@ html_theme_options = {
     "color_mode": "dark",
 }
 
-html_css_files = ["custom.css"]
+html_css_files = [
+    "custom.css",
+]

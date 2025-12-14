@@ -3,7 +3,9 @@
 
 :::{admonition} At a glance
 :class: tip
+
 This page documents **Orion Search**, plus related components (**Orion Crawler**, **Collector**, **Browser**) with a focus on:
+
 - **What runs where** (services, ports, containers)
 - **How to deploy** (local + Docker)
 - **How to operate** (monitoring + troubleshooting)
@@ -25,11 +27,14 @@ proxy, with **Traefik** for load balancing.
 
 :::{admonition} Quick start (local)
 :class: note
+
 1. Configure your `.env` file (keep secrets out of git).
 2. Run setup/start:
+
    ```bash
    bash cronjobs.sh
    ```
+
 3. Open the services (see **Local URLs** under Deployment).
 :::
 
@@ -41,6 +46,7 @@ Orion-Search utilizes the following key technologies and services:
 
 :::{dropdown} Components overview
 :open:
+
 1. **Django**: Backend framework for managing APIs, data processing, and cron jobs.
 2. **Elasticsearch**: Search and indexing service for real-time data retrieval.
 3. **Redis**: In-memory caching for improved performance.
@@ -66,6 +72,7 @@ Orion-Search utilizes the following key technologies and services:
 
 :::{admonition} Tip
 :class: tip
+
 If your docs site feels “empty”, it’s usually because Sphinx **can’t discover pages** (missing `toctree`) even if the Markdown exists.
 Make sure your `index.md` (or a section page) includes `toctree` entries that point to your docs files.
 :::
@@ -77,6 +84,7 @@ Make sure your `index.md` (or a section page) includes `toctree` entries that po
 The `.env` file contains critical keys and configurations for the services.
 
 :::{warning}
+
 The credential values below were **redacted** for safety. Keep secrets out of documentation and out of git history.
 Rotate any credential that was ever committed publicly.
 :::
@@ -84,6 +92,7 @@ Rotate any credential that was ever committed publicly.
 ### Minimal safe template
 
 :::{dropdown} Copy/paste template (redacted)
+
 ```dotenv
 # Global
 S_FERNET_KEY='<REDACTED>'
@@ -124,24 +133,28 @@ The `docker-compose.yml` file defines the following services.
 
 :::{admonition} Description
 :class: note
+
 Django-based backend service.
 :::
 
-- **Container Name**: `trusted-web-main`  
-- **Build**: `dockerFiles/api_docker`  
-- **Environment**: Configured via `.env` file  
-- **Ports**: Exposed on **8070**  
+- **Container Name**: `trusted-web-main`
+- **Build**: `dockerFiles/api_docker`
+- **Environment**: Configured via `.env` file
+- **Ports**: Exposed on **8070**
 
 :::{dropdown} Command
+
 - Runs `gunicorn` server and cronjob manager.
 :::
 
 :::{dropdown} Operational notes
+
 - Ensure `.env` exists **before** starting containers.
 - If `collectstatic` is enabled, confirm volumes/paths for static assets match NGINX config.
 :::
 
 :::{dropdown} Key Features
+
 - Collects static files in production.
 - Runs Django cron jobs for scheduled tasks.
 - Provides backend APIs for search functionality.
@@ -154,6 +167,7 @@ Django-based backend service.
 The `run.sh` file automates the process of starting the Orion system. It is typically used as the entry point script.
 
 :::{dropdown} Contents
+
 1. Ensures all services and configurations are properly initialized.
 2. Runs Django migrations, collects static files, and starts the Gunicorn server.
 3. Ensures the services are healthy before making them operational.
@@ -176,20 +190,23 @@ bash cronjobs.sh
 
 :::{admonition} Description
 :class: note
+
 Search engine and indexing service.
 :::
 
-- **Container Name**: `trusted-web-elastic`  
-- **Image**: `elasticsearch:7.17.20`  
-- **Ports**: Exposed on **9400**  
-- **Environment**: Configured for single-node cluster.  
-- **Volumes**: Persistent storage for Elasticsearch indices.  
+- **Container Name**: `trusted-web-elastic`
+- **Image**: `elasticsearch:7.17.20`
+- **Ports**: Exposed on **9400**
+- **Environment**: Configured for single-node cluster.
+- **Volumes**: Persistent storage for Elasticsearch indices.
 
 :::{dropdown} Healthcheck
+
 Checks cluster health.
 :::
 
 :::{dropdown} Key Features
+
 - Full-text search and indexing.
 - Optimized memory usage with JVM settings.
 :::
@@ -200,18 +217,21 @@ Checks cluster health.
 
 :::{admonition} Description
 :class: note
+
 In-memory data store for caching.
 :::
 
-- **Container Name**: `trusted-web-redis`  
-- **Image**: `redis:7.4.0`  
-- **Environment**: Password-protected access.  
+- **Container Name**: `trusted-web-redis`
+- **Image**: `redis:7.4.0`
+- **Environment**: Password-protected access.
 
 :::{dropdown} Healthcheck
+
 Verifies Redis is running.
 :::
 
 :::{dropdown} Key Features
+
 - Caching layer to reduce database queries.
 - Secured with authentication.
 :::
@@ -222,15 +242,17 @@ Verifies Redis is running.
 
 :::{admonition} Description
 :class: note
+
 Non-relational database for data storage.
 :::
 
-- **Container Name**: `trustly-web-mongodb`  
-- **Image**: `mongo:latest`  
-- **Ports**: Exposed on **27020**  
-- **Environment**: Configured for secured access.  
+- **Container Name**: `trustly-web-mongodb`
+- **Image**: `mongo:latest`
+- **Ports**: Exposed on **27020**
+- **Environment**: Configured for secured access.
 
 :::{dropdown} Healthcheck
+
 Verifies MongoDB connectivity.
 :::
 
@@ -246,12 +268,14 @@ Verifies MongoDB connectivity.
 ### Steps to deploy
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/msmannan00/Orion-Search.git
    cd Orion-Search
    ```
 
 2. Run the setup script:
+
    ```bash
    bash cronjobs.sh
    ```
@@ -259,6 +283,7 @@ Verifies MongoDB connectivity.
 3. Access the services:
 
 :::{dropdown} Local URLs
+
 - **Django Backend**: `http://localhost:8070`
 - **Swagger UI**: `http://localhost:8082`
 - **NGINX**: `http://localhost:8080`
@@ -269,7 +294,9 @@ Verifies MongoDB connectivity.
 
 :::{admonition} Recommended validation
 :class: tip
+
 After startup, confirm:
+
 - web container is healthy / responding
 - elastic cluster is green/yellow (not red)
 - redis + mongodb accept authenticated connections
@@ -283,14 +310,10 @@ After startup, confirm:
 - Traefik's dashboard provides insights into routing and load balancing.
 
 :::{dropdown} Common operational commands
+
 ```bash
-# list containers
 docker ps
-
-# follow logs for the web container
 docker logs -f trusted-web-main
-
-# check elastic health (example)
 curl -s http://localhost:9400/_cluster/health?pretty
 ```
 :::
@@ -301,7 +324,9 @@ curl -s http://localhost:9400/_cluster/health?pretty
 
 :::{admonition} “Docs site shows only the index page”
 :class: warning
+
 This is almost always a **toctree discovery issue**. Ensure your `index.md` includes something like:
+
 ```{toctree}
 :maxdepth: 2
 
@@ -311,12 +336,15 @@ app_docs/user_manual
 app_docs/developer_documentation
 api_docs/index
 ```
+
 Then ensure the referenced files exist **relative to `docs/`** and omit file extensions (`.md`).
 :::
 
 :::{admonition} “Sphinx master_doc/index not found”
 :class: warning
+
 If Sphinx is looking for `index.rst` but you use Markdown, make sure:
+
 - `master_doc = "index"`
 - `source_suffix` includes `.md`
 - `index.md` is inside the configured `docs/` source directory
@@ -334,6 +362,7 @@ proxies** for anonymity, it ensures scalable, distributed, and secure crawling.
 
 :::{dropdown} Components (Python, Celery, Redis, MongoDB, TOR Network, Flower)
 :open:
+
 1. **Python**: Core programming language for crawling and data processing.
 2. **Celery**: Task queue for parallelizing crawling jobs.
 3. **Redis**: Backend for Celery task distribution and caching.
@@ -359,6 +388,7 @@ FLOWER_PASSWORD='<REDACTED>'
 ### Docker Compose Services
 
 :::{dropdown} Services summary
+
 - **App (Crawler Service)**: `trusted-crawler-main` (runs `start_app.sh`)
 - **API**: `trusted-crawler-api` (port **8000** internal)
 - **Celery Worker**: `trusted-crawler-celery`
@@ -380,6 +410,7 @@ scripts. The collector supports two primary crawling approaches:
    rendering.
 
 :::{important}
+
 **Important**: Orion-Collector requires the **TOR Browser** to be running locally with its SOCKS5 proxy active.
 :::
 
@@ -389,7 +420,9 @@ scripts. The collector supports two primary crawling approaches:
 ### Key Components
 
 :::{dropdown} Main Script (`main.py`)
+
 Static Collector Example:
+
 ```python
 from shared_collector.sample import sample
 
@@ -401,7 +434,9 @@ if __name__ == "__main__":
         data_model, sub_links = parser.parse_leak_data(html_content, url)
         print(data_model)
 ```
+
 Dynamic Collector Example:
+
 ```python
 from dynamic_collector.sample import sample
 
@@ -414,15 +449,19 @@ if __name__ == "__main__":
 :::
 
 :::{dropdown} Parser Examples (`sample.py`)
+
 Static parser:
+
 ```python
 def parse_leak_data(self, html_content: str, p_data_url: str) -> Tuple[leak_data_model, Set[str]]:
-    self.soup = BeautifulSoup(html_content, 'html.parser')
+    self.soup = BeautifulSoup(html_content, "html.parser")
     cards_data = self.extract_cards(p_data_url)
     sub_links = self.extract_sub_links()
     return cards_data, sub_links
 ```
+
 Dynamic parser:
+
 ```python
 driver.get(p_data_url)
 cards = driver.find_elements(By.CLASS_NAME, "card")
@@ -447,6 +486,7 @@ particularly for accessing Onion websites.
 ### Setup Instructions
 
 1. Clone the repository:
+
    ```bash
    git clone <repo-url>
    cd Orion-Browser
@@ -461,6 +501,7 @@ particularly for accessing Onion websites.
     - Click **Run** in Android Studio to launch the app.
 
 :::{note}
+
 The browser uses **Orbot** as an integrated library. There is no need to install Orbot separately.
 :::
 

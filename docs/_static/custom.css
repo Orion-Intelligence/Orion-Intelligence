@@ -45,3 +45,20 @@
 @media (max-width: 900px){
   .localtoc{ display:none; }
 }
+
+.sd-dropdown {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  margin: 1em 0;
+}
+
+.sd-dropdown > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.6em 0.8em;
+  background: var(--color-background-secondary);
+}
+
+.sd-dropdown > div {
+  padding: 0.8em 1em;
+}
