@@ -17,10 +17,11 @@ import { MessageNotificationService } from '../../../../../services/message_noti
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { ConfirmationPopupComponent } from "../../../confirmation-popup/confirmation-popup.component";
 import { HelperService } from '../../../../services/helper.service';
+import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent],
+  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective],
   templateUrl: './category-alert-report.component.html'
 })
 export class CategoryAlertReportComponent implements OnInit {

@@ -2,19 +2,21 @@
 
     <div class="category_report_searchbar">
         <div class="category_report_searchbar-input">
-            <img src="../../../../assets/images/shared/theme/magnifyingglassblack.svg" alt="search" />
+            <img src="assets/images/shared/theme/magnifyingglassblack.svg" alt="search" />
             <input type="text" placeholder="Search..." [(ngModel)]="searchText" />
-            <button *ngIf="searchText" class="category_report_searchbar-clear" (click)="searchText = ''"><img
-                    src="/assets/images/shared/cross-dark.svg"></button>
+            <button *ngIf="searchText" class="category_report_searchbar-clear" (click)="searchText = ''">
+              <img src="/assets/images/shared/cross-dark.svg" alt="close"></button>
         </div>
         <div class="category_report_flex">
-            <span *ngIf="!canExportstix()" class="category_report_searchbar-btn" (click)="showAlertPopup('add','')">
-                <img src="/assets/images/shared/theme/add_icon.svg">
-            </span>
-            <div *ngIf="canExportstix()" class="dropdown">
+          <div class="btn-group report-menu-option-container">
+            <button *ngIf="!canExportstix()" (click)="showAlertPopup('add','')" appTooltip="flush all" class="p-0 report-menu-option">
+              <img alt="flush" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
+            </button>
+            <div class="vr report-menu-divider"></div>
+            <div *ngIf="canExportstix()" class="dropdown p-0 report-menu-option" appTooltip="export stix">
                 <span class="category_report_searchbar-btn" role="button" id="dropdownAddMenu" data-bs-toggle="dropdown"
                     aria-expanded="false">
-                    <img src="/assets/images/shared/theme/add_icon.svg">
+                    <img src="/assets/images/shared/theme/add_icon.svg" alt="add icon">
                 </span>
 
                 <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownAddMenu">
@@ -30,19 +32,15 @@
                             Alert</a></li>
                 </ul>
             </div>
-            <div (click)="flushAll()" class="side-menu-container d-flex align-items-start justify-content-start gap-3">
-                <label appTooltip="Delete all lerts" class="filters-button d-flex align-items-center">
-                    <span class="ms-2">Flush All</span>
-                </label>
-            </div>
-            <div (click)="sidebarService.openSidebar()"
-                class="side-menu-container d-flex align-items-start justify-content-start gap-3">
-                <label appTooltip="Customize Results" class="filters-button d-flex align-items-center"> <img
-                        alt="Filter Icon" height="24" src="/assets/images/shared/theme/filter_icon.svg" priority
-                        width="24">
-                    <span class="ms-2">Filter</span>
-                </label>
-            </div>
+            <div class="vr report-menu-divider"></div>
+            <button (click)="flushAll()" appTooltip="Delete all alerts" class="p-0 report-menu-option">
+              <img alt="scan" height="20" src="assets/images/sidebar/scanner.svg" width="20" />
+            </button>
+            <div class="vr report-menu-divider"></div>
+            <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option">
+              <img alt="scan" height="20" src="/assets/images/shared/theme/filter_icon.svg" width="20" />
+            </button>
+          </div>
         </div>
     </div>
 
@@ -81,12 +79,12 @@
                     </span>
                 </div>
                 <div class="category_report_flex">
-                    <div *ngIf="!item.seen" class="category_report_status-icon"><img
-                            src="/assets/images/shared/exclamation.svg"></div>
+                    <div *ngIf="!item.seen" class="category_report_status-icon">
+                      <img src="/assets/images/shared/exclamation.svg" alt="report"></div>
                     <div class="dropdown">
                         <span class="category_report_status-icon" role="button" id="dropdownMenu"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="/assets/images/shared/theme/three_dot_round.svg">
+                            <img src="/assets/images/shared/theme/three_dot_round.svg" alt="menu">
                         </span>
 
                         <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownMenu">
