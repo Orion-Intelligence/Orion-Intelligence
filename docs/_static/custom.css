@@ -122,3 +122,25 @@ ul > li{
   display: none !important;
   opacity: 0 !important;
 }
+
+.sd-btn,
+a.sd-btn,
+a.btn,
+a.button{
+  font-size: 1.02rem;
+  font-weight: 800;
+  border-radius: .9rem;
+}
+
+.sd-btn.sd-btn-primary,
+a.sd-btn.sd-btn-primary{
+  background: #111827 !important;
+  border-color: #111827 !important;
+  color: #fff !important;
+}
+
+.sd-btn.sd-btn-primary:hover,
+a.sd-btn.sd-btn-primary:hover{
+  background: #0b1220 !important;
+  border-color: #0b1220 !important;
+}
