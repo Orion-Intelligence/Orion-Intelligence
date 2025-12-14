@@ -13,3 +13,8 @@ html_theme = 'shibuya'
 
 # -- Options for HTML output -------------------------------------------------
 html_static_path = ['_static']
+
+# -- Options for themes -------------------------------------------------
+html_theme_options = {
+    "color_mode": "dark",
+}
