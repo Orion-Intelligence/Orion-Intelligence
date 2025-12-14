@@ -1,7 +1,7 @@
 (orion-api-docs)=
 # Orion API Documentation
 
-This section is a **lossless** Markdown export generated from `docs.py`.
+This page highlights APIs that are publicly exposed for external use, enabling seamless integration and access.
 
 ```{contents}
 :local:
