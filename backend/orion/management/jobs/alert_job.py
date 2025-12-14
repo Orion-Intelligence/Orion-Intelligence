@@ -9,15 +9,13 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
-from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
-from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
 from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status
+from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, IocCategory
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -79,7 +77,6 @@ class alert_job:
             low_risk = counts.get("low", 0)
             
             threat_categories = list(result_data.get("threats", {}).keys())
-            scan_date = datetime.utcnow().strftime('%Y-%m-%d')
             data_hash = f"{scan_type}_{ioc_value}"
 
             title = f"{scan_type.upper()} Scan: {ioc_value} (Grade: {grade})"
@@ -190,8 +187,6 @@ class alert_job:
                                     ioc_type_name, 
                                     scan_type
                                 )
-                    dynamic_scans_to_run = []
-                    
                     for ioc_value in ioc.values or []:
                         search_payload = {}
                         scan_type = None
@@ -426,10 +421,6 @@ class alert_job:
         return iocs
 
     async def run_all_categories_for_api(self, current_user) -> dict:
-        """
-        Run alerts for all categories for the single current user/tenant.
-        """
-        
         tenant_id = current_user.company_uuid
         current_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         start_time = datetime.utcnow()
