@@ -247,6 +247,12 @@ export const routes: Routes = [
             data: { type: 'consolidated', animation: 'HashPage' }
           },
           {
+            path: ':category/social/:m_hash',
+            component: ReportChatComponent,
+            resolve: { reportdata: ReportConsolidatedResolver },
+            data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
             path: ':category',
             component: DashboardDiscussionComponent,
             data: { animation: 'Discussion' },
