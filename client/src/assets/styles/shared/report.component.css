@@ -25,9 +25,9 @@
 .report-menu-option-container {
   border: 1px solid var(--color-border);
   border-radius: 7px;
-  margin-right: 35px;
   background: var(--color-blue-750);
   margin-top: 20px;
+  margin-right: 0 !important;
   overflow: hidden;
 }
 
