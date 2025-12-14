@@ -115,3 +115,8 @@ html.dark .orion-shot-btn:hover{
   background: #141414;
   border-color: rgba(255,255,255,.22);
 }
+
+.ethical-sidebar{
+  display: none !important;
+  opacity: 0 !important;
+}
