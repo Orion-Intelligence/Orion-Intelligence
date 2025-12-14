@@ -1,3 +1,10 @@
+.sy-rside-inner{
+  padding-top: 0 !important;
+  top: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
 .localtoc{
   position: sticky;
   top: 0;
@@ -46,21 +53,70 @@
   .localtoc{ display:none; }
 }
 
-.sd-dropdown {
+ol{
+  margin: .75rem 0;
+  padding-left: 1.35rem;
+}
+
+ol > li{
+  margin: .35rem 0;
+  padding-left: .15rem;
+}
+
+ol > li::marker{
+  font-weight: 700;
+  color: var(--accent-9, currentColor);
+}
+
+ul{
+  margin: .6rem 0;
+  padding-left: 1.15rem;
+}
+
+ul > li{
+  margin: .25rem 0;
+}
+
+.sd-dropdown{
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: .85rem;
   margin: 1em 0;
+  background: var(--color-background-primary);
+  overflow: hidden;
 }
 
-.sd-dropdown > summary {
+.sd-dropdown > summary{
   cursor: pointer;
-  font-weight: 600;
-  padding: 0.6em 0.8em;
+  font-weight: 700;
+  padding: .75em .9em;
   background: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.sd-dropdown > div {
-  padding: 0.8em 1em;
+.sd-dropdown > div{
+  padding: .9em 1em;
+}
+
+.sd-card{
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-background-primary);
+  overflow: hidden;
+}
+
+.sd-card .sd-card-header{
+  padding: .85rem 1rem;
+  background: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sd-card .sd-card-body{
+  padding: .9rem 1rem;
+}
+
+.sd-card .sd-card-title{
+  font-weight: 800;
+  letter-spacing: .01em;
 }
 
 .ethical-sidebar{
