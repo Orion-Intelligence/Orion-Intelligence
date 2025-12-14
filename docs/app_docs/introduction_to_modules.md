@@ -26,13 +26,15 @@ content, and present that data for indexing, analysis, and visualization. These 
 forming an integrated pipeline where data flows from initial discovery, through processing and indexing, to final
 visualization.
 
-**Key Highlights:**
+```{admonition} Key Highlights
+:class: tip
 
 - Automated, intelligent crawling of hidden services (Onion, I2P, etc.)
 - Machine learning-driven data extraction and classification
 - High-performance indexing and search capabilities
 - Seamless integration for custom data collection scripts
 - Browser-based exploration with built-in anonymity features
+```
 
 The Active Intelligence suite is composed of four main submodules:
 
@@ -45,10 +47,17 @@ The Active Intelligence suite is composed of four main submodules:
 
 ### Orion Crawler
 
+```{admonition} Purpose
+:class: note
+
 **Purpose:**  
 The Orion Crawler is the starting point of the active intelligence pipeline. Its primary role is to automatically
 navigate through various hidden and anonymous networks (like Onion and I2P), scraping raw data from websites and forums
 that are not easily accessible by conventional search engines.
+```
+
+```{admonition} Key Features
+:class: important
 
 **Key Features:**
 
@@ -59,12 +68,20 @@ that are not easily accessible by conventional search engines.
 - **Scalable Architecture:** Easily add more workers to the Celery queue to handle increased crawling demands.
 - **Modular Design:** Pluggable components allow for integration with different data sources and protocols beyond Onion
   and I2P (e.g., ZeroNet, Freenet).
+```
+
+```{admonition} Technology Stack
+:class: tip
 
 **Technology Stack:**
 
 - **Language & Framework:** Python + Celery
 - **Data Storage:** Initial raw data dumps to local or distributed storage (e.g., AWS S3, MinIO, or local filesystem)
 - **ML Models:** Python-based (TensorFlow/PyTorch/Scikit-learn) classification and entity extraction models
+```
+
+```{admonition} Workflow
+:class: info
 
 **Workflow:**
 
@@ -74,15 +91,23 @@ that are not easily accessible by conventional search engines.
 4. **ML-driven Filtering:** Extracted content runs through ML models for classification, relevance scoring, and entity
    extraction.
 5. **Storage & Indexing Prep:** Cleaned, structured data is stored for indexing by Orion Search.
+```
 
 ---
 
 ### Orion Search
 
+```{admonition} Purpose
+:class: note
+
 **Purpose:**  
 Orion Search provides a powerful, fast, and scalable search interface on top of the collected and processed data. By
 leveraging the indexing capabilities of Elasticsearch, it allows users to quickly query, filter, and visualize insights
 from massive datasets.
+```
+
+```{admonition} Key Features
+:class: important
 
 **Key Features:**
 
@@ -90,12 +115,20 @@ from massive datasets.
 - **Advanced Querying:** Support for full-text search, keyword queries, fuzzy matches, and complex Boolean queries.
 - **Faceted Navigation:** Drill down through content by tags, categories, timeframes, or any metadata field.
 - **Data Visualization:** Integration with Kibana or custom dashboards for charts, graphs, and timeline views.
+```
+
+```{admonition} Technology Stack
+:class: tip
 
 **Technology Stack:**
 
 - **Search Engine:** Elasticsearch
 - **Indexing Connectors:** Python-based indexing scripts that batch-process crawler output.
 - **Visualization:** Kibana or custom front-end interfaces.
+```
+
+```{admonition} Workflow
+:class: info
 
 **Workflow:**
 
@@ -103,16 +136,24 @@ from massive datasets.
 2. **Index Refresh:** Automated index refresh intervals ensure newly ingested data is queryable with minimal delay.
 3. **Query & Analysis:** Users or downstream systems query Elasticsearch for specific intelligence needs.
 4. **Visualization:** Results can be displayed in interactive dashboards or integrated into analytical workflows.
+```
 
 ---
 
 ### Orion Browser
+
+```{admonition} Purpose
+:class: note
 
 **Purpose:**  
 The Orion Browser is a specialized Android-based browser designed to function as a data harvester. While Orion Crawler
 proactively fetches data programmatically, Orion Browser complements this by allowing human-driven navigation. As an
 analyst browses through target websites, Orion Browser automatically indexes and scrapes encountered data, creating a
 feedback loop for more in-depth exploration.
+```
+
+```{admonition} Key Features
+:class: important
 
 **Key Features:**
 
@@ -123,6 +164,10 @@ feedback loop for more in-depth exploration.
 - **Seamless Indexing:** Harvested data is sent back to the indexing pipeline for subsequent searching and analysis.
 - **Customizable Plugins:** Extend functionality through custom plugins for additional data extraction techniques or
   browser automation.
+```
+
+```{admonition} Technology Stack
+:class: tip
 
 **Technology Stack:**
 
@@ -130,6 +175,10 @@ feedback loop for more in-depth exploration.
 - **Languages:** Kotlin, Java
 - **Privacy & Anonymity:** Orbot integration to route traffic through Tor
 - **Data Extraction:** Local scraping tools integrated into the browser’s rendering engine
+```
+
+```{admonition} Workflow
+:class: info
 
 **Workflow:**
 
@@ -138,16 +187,24 @@ feedback loop for more in-depth exploration.
 3. **Metadata Packaging:** Structured content is packaged and securely sent to the indexing pipeline.
 4. **Index Integration:** The newly harvested data appears in Orion Search after re-indexing, allowing quick retrieval
    and analysis.
+```
 
 ---
 
 ### Orion Collector
+
+```{admonition} Purpose
+:class: note
 
 **Purpose:**  
 The Orion Collector streamlines the integration of custom collection scripts and scraping configurations. Instead of
 requiring extensive setup for each new target site, developers and OSINT engineers can simply modify or submit new
 scripts tailored to specific sources. The Orion Collector automates the rest, handling ingestion, extraction, and
 indexing without manual reconfiguration.
+```
+
+```{admonition} Key Features
+:class: important
 
 **Key Features:**
 
@@ -158,6 +215,10 @@ indexing without manual reconfiguration.
   scripts, ensuring smooth scaling to multiple, specialized data sources.
 - **Developer-Friendly:** Clear documentation, code templates, and examples help reduce the learning curve for
   contributing engineers.
+```
+
+```{admonition} Technology Stack
+:class: tip
 
 **Technology Stack:**
 
@@ -165,6 +226,10 @@ indexing without manual reconfiguration.
 - **Version Control:** Git-based workflow to track and merge changes to scraper scripts
 - **Continuous Integration (CI):** Automated testing of new scripts before deploying them into production
 - **Script Templates:** YAML/JSON configurations plus Python-based scraping logic
+```
+
+```{admonition} Workflow
+:class: info
 
 **Workflow:**
 
@@ -173,5 +238,4 @@ indexing without manual reconfiguration.
 3. **Merge & Deploy:** Once approved, changes are merged, and the Collector automatically loads the new script.
 4. **Data Pipeline Update:** The newly configured script runs within the existing pipeline, adding its data to Orion
    Search.
-
----
+```
