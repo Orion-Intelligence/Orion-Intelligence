@@ -20,7 +20,12 @@ When you start the browser, you’ll see the main screen with several options. O
 - **Dismiss**: closes the troubleshooting menu without affecting the app
 - **Reset**: closes the app and it must be restarted
 
-Screenshot: https://github.com/user-attachments/assets/2fc05f06-b525-4727-8aed-6ccdbcec60f6
+```{button-link} https://github.com/user-attachments/assets/2fc05f06-b525-4727-8aed-6ccdbcec60f6
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -28,7 +33,12 @@ Screenshot: https://github.com/user-attachments/assets/2fc05f06-b525-4727-8aed-6
 
 At the bottom of the screen, there are four options. The first one is **Tor Powered**, which allows you to check and open `.onion` links. Below that, there is a **Fast & Secure** button that lets you securely access the Orion Intelligence Tool.
 
-Screenshot: https://github.com/user-attachments/assets/107ab055-ace8-498d-a1dd-da084c218972
+```{button-link} https://github.com/user-attachments/assets/107ab055-ace8-498d-a1dd-da084c218972
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -38,7 +48,12 @@ This feature allows users to connect directly with their respective company by e
 
 If the user does not enter a company code, they can continue using the platform in **Try Free** mode with limited features.
 
-Screenshot: https://github.com/user-attachments/assets/bfac15b2-68f3-4532-a73b-a86197452112
+```{button-link} https://github.com/user-attachments/assets/bfac15b2-68f3-4532-a73b-a86197452112
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -46,11 +61,21 @@ Screenshot: https://github.com/user-attachments/assets/bfac15b2-68f3-4532-a73b-a
 
 When **Browser Mode** is enabled, the application operates entirely within the dedicated Orion Browser environment, providing a secure and controlled browsing experience.
 
-Screenshot (Browser Mode enabled): https://github.com/user-attachments/assets/efbdbb27-7ed7-47b8-87cc-36132a5c7baf
+```{button-link} https://github.com/user-attachments/assets/efbdbb27-7ed7-47b8-87cc-36132a5c7baf
+:color: primary
+:shadow:
+View screenshot (Browser Mode enabled)
+```
+
 
 If Browser Mode is disabled, the application opens a web page using **DuckDuckGo**, which is a privacy-focused search engine. DuckDuckGo does not track user activity, store personal information, or create user profiles. In this mode, the system functions like a regular web browser, allowing users to perform standard searches and access websites through DuckDuckGo while maintaining enhanced privacy.
 
-Screenshot (DuckDuckGo mode): https://github.com/user-attachments/assets/87be8ab7-b680-4315-9d85-edc8895b739d
+```{button-link} https://github.com/user-attachments/assets/87be8ab7-b680-4315-9d85-edc8895b739d
+:color: primary
+:shadow:
+View screenshot (DuckDuckGo mode)
+```
+
 
 ---
 
@@ -58,7 +83,12 @@ Screenshot (DuckDuckGo mode): https://github.com/user-attachments/assets/87be8ab
 
 In the browser settings (top right), there is a feature labeled **Support**. When you click it, a dedicated support page opens. This page provides comprehensive guidance on how to use browser-related features with step-by-step instructions, usage methods, and helpful tips.
 
-Screenshot: https://github.com/user-attachments/assets/0f23d67f-c30d-44ee-b6d0-5c2914bbddc6
+```{button-link} https://github.com/user-attachments/assets/0f23d67f-c30d-44ee-b6d0-5c2914bbddc6
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -66,7 +96,12 @@ Screenshot: https://github.com/user-attachments/assets/0f23d67f-c30d-44ee-b6d0-5
 
 Next to Support, there is a **Settings** button, where you can view and manage proxy settings. In the Proxy Settings section, the top-right action allows you to connect with support. There is also an **Enable Bridge** option, which can be turned on or off to bypass restrictions when needed.
 
-Screenshot: https://github.com/user-attachments/assets/47fb5c7f-315c-4f1a-b00b-83387f6ea8fc
+```{button-link} https://github.com/user-attachments/assets/47fb5c7f-315c-4f1a-b00b-83387f6ea8fc
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -90,7 +125,12 @@ Screenshot: https://github.com/user-attachments/assets/47fb5c7f-315c-4f1a-b00b-8
    - **Full-Screen Browsing** – toggle full-screen mode
    - **Language** – choose preferred language for the interface
 
-Screenshot: https://github.com/user-attachments/assets/e984dca7-328d-4811-b5de-b1fb59a92dd7
+```{button-link} https://github.com/user-attachments/assets/e984dca7-328d-4811-b5de-b1fb59a92dd7
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -117,7 +157,12 @@ Automatically erases cookies, history, cache, and other saved site data each tim
 - Enabled, excluding 3rd-party: blocks third-party cookies for strong privacy  
 - Disabled: maximum privacy (may break logins)
 
-Screenshot: https://github.com/user-attachments/assets/d2de3f98-6a90-4b31-851c-b9e9b28304b8
+```{button-link} https://github.com/user-attachments/assets/d2de3f98-6a90-4b31-851c-b9e9b28304b8
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -127,7 +172,12 @@ Screenshot: https://github.com/user-attachments/assets/d2de3f98-6a90-4b31-851c-b
 - **Default (Recommended)**: blocks ads, tracking scripts, and basic fingerprinting while keeping pages functional
 - **Strict Policy**: blocks advanced trackers/fingerprinting (some site features may not work)
 
-Screenshot: https://github.com/user-attachments/assets/8d608590-b7f0-4561-95b9-54367bab68e9
+```{button-link} https://github.com/user-attachments/assets/8d608590-b7f0-4561-95b9-54367bab68e9
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -135,7 +185,12 @@ Screenshot: https://github.com/user-attachments/assets/8d608590-b7f0-4561-95b9-5
 
 Local notifications are alerts/messages that the browser can show within the system—even when the app is running in the background. These notifications are triggered locally by the browser itself (not by a remote server).
 
-Screenshot: https://github.com/user-attachments/assets/7b9de283-705b-4443-b47b-01082f09cca9
+```{button-link} https://github.com/user-attachments/assets/7b9de283-705b-4443-b47b-01082f09cca9
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 Examples:
 - Download Complete Notification
@@ -152,7 +207,12 @@ Examples:
 
 Displays toggle options to enable or disable specific features.
 
-Screenshot: https://github.com/user-attachments/assets/f01d180e-6ee4-4510-8301-6801df0fb8f8
+```{button-link} https://github.com/user-attachments/assets/f01d180e-6ee4-4510-8301-6801df0fb8f8
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 - **Allow Notifications**: enables/disables Orion Browser notifications
 - **Reminder Intensity**: controls reminder strength (AI reminders, follow-ups, etc.)
@@ -169,7 +229,12 @@ Screenshot: https://github.com/user-attachments/assets/f01d180e-6ee4-4510-8301-6
 
 Allows users to customize display and interaction settings.
 
-Screenshot: https://github.com/user-attachments/assets/c72ba5d7-e7f7-41d0-9935-9781c95416e6
+```{button-link} https://github.com/user-attachments/assets/c72ba5d7-e7f7-41d0-9935-9781c95416e6
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 - **Font Scaling**: adjust on-screen text size via slider
 - **Interaction**
@@ -182,7 +247,12 @@ Screenshot: https://github.com/user-attachments/assets/c72ba5d7-e7f7-41d0-9935-9
 
 Allows users to remove browsing information to protect privacy and improve performance.
 
-Screenshot: https://github.com/user-attachments/assets/8ca3efd4-7a19-40bd-9d5b-94828918d7c6
+```{button-link} https://github.com/user-attachments/assets/8ca3efd4-7a19-40bd-9d5b-94828918d7c6
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 Options:
 - Clear Tabs
@@ -200,7 +270,12 @@ Options:
 
 Settings related to UI and browser behavior.
 
-Screenshot: https://github.com/user-attachments/assets/73a456a4-e5ce-4465-b739-697f6fca50d8
+```{button-link} https://github.com/user-attachments/assets/73a456a4-e5ce-4465-b739-697f6fca50d8
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 - **Restore Tabs**: restore previously opened tabs after restart (Enable/Disable)
 - **Toolbar Theme**: apply website-defined toolbar theme (Enable/Disable)
@@ -219,7 +294,12 @@ Screenshot: https://github.com/user-attachments/assets/73a456a4-e5ce-4465-b739-6
 
 Configure network and security-related settings to enhance privacy and connectivity. Tor routes traffic through multiple encrypted layers to protect identity and location.
 
-Screenshot: https://github.com/user-attachments/assets/c61a53cf-265d-4c66-b7f5-c1e2a1debbfe
+```{button-link} https://github.com/user-attachments/assets/c61a53cf-265d-4c66-b7f5-c1e2a1debbfe
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 - **Orion Proxy Status**: manages Tor connectivity (disabled by default)
 - **Orion & Bridge Status**
@@ -234,7 +314,12 @@ Screenshot: https://github.com/user-attachments/assets/c61a53cf-265d-4c66-b7f5-c
 
 Allows users to provide feedback via the Play Store (rating + review).
 
-Screenshot: https://github.com/user-attachments/assets/b31f251e-73ee-485e-9373-4f1a-b00b-83387f6ea8fc
+```{button-link} https://github.com/user-attachments/assets/b31f251e-73ee-485e-9373-4f1a-b00b-83387f6ea8fc
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -242,7 +327,12 @@ Screenshot: https://github.com/user-attachments/assets/b31f251e-73ee-485e-9373-4
 
 Shares the official Play Store link so others can download the browser.
 
-Screenshot: https://github.com/user-attachments/assets/703c9b37-1ddf-4c33-86b8-c0241eb480b9
+```{button-link} https://github.com/user-attachments/assets/703c9b37-1ddf-4c33-86b8-c0241eb480b9
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -250,7 +340,12 @@ Screenshot: https://github.com/user-attachments/assets/703c9b37-1ddf-4c33-86b8-c
 
 Opens the official Privacy Policy page describing how data is collected, used, stored, protected, and what user rights are supported.
 
-Screenshot: https://github.com/user-attachments/assets/72fd0559-3916-4ff5-865a-99cd26c66ca6
+```{button-link} https://github.com/user-attachments/assets/72fd0559-3916-4ff5-865a-99cd26c66ca6
+:color: primary
+:shadow:
+View screenshot
+```
+
 
 ---
 
@@ -261,4 +356,8 @@ The Fix Browser option opens a “Troubleshoot” popup with two actions:
 - **Dismiss**: closes the popup without changes
 - **Reset**: restores default settings and closes the app (reopen to continue)
 
-Screenshot: https://github.com/user-attachments/assets/6ce8c497-1575-48d6-bd88-9b38524e0d4b
+```{button-link} https://github.com/user-attachments/assets/6ce8c497-1575-48d6-bd88-9b38524e0d4b
+:color: primary
+:shadow:
+View screenshot
+```
