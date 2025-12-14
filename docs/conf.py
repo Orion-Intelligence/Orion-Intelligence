@@ -1,23 +1,26 @@
-# Configuration file for Sphinx documentation builder.
+project = "Orion Documentation"
+author = "Abdul Mannan"
+release = "1.0.0"
 
-# -- Project information -----------------------------------------------------
-project = 'Orion Documentation'
-author = 'Abdul Mannan'
-release = '1.0.0'
+extensions = [
+    "myst_parser",
+    "sphinx_design",
+]
 
-# -- General configuration ---------------------------------------------------
-extensions = ['myst_parser']
-source_suffix = ['.rst', '.md']
-master_doc = 'index'
-html_theme = 'shibuya'
+source_suffix = [".rst", ".md"]
+master_doc = "index"
+html_theme = "shibuya"
 
-# -- Options for HTML output -------------------------------------------------
-html_static_path = ['_static']
+myst_enable_extensions = [
+    "colon_fence",
+]
 
-# -- Options for themes -------------------------------------------------
+myst_heading_anchors = 3
+
+html_static_path = ["_static"]
+
 html_theme_options = {
     "color_mode": "dark",
 }
 
-# -- Custom css -------------------------------------------------
 html_css_files = ["custom.css"]

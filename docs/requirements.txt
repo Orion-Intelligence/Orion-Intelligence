@@ -1,2 +1,5 @@
 myst-parser
 shibuya
+myst-parser
+sphinx-design
+sphinx-shibuya
