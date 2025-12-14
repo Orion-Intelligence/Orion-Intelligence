@@ -23,6 +23,7 @@ COPY backend/ /app/
 COPY .env /app/.env
 COPY pyproject.toml /app/pyproject.toml
 COPY README.md /app/s.md
+COPY docs/ /app/docs/
 
 # Expose FastAPI's application port
 EXPOSE 8070

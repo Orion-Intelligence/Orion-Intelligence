@@ -9,8 +9,8 @@
         </div>
         <div class="category_report_flex">
           <div class="btn-group report-menu-option-container">
-            <button *ngIf="!canExportstix()" (click)="showAlertPopup('add','')" appTooltip="flush all" class="p-0 report-menu-option">
-              <img alt="flush" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
+            <button *ngIf="!canExportstix()" (click)="showAlertPopup('add','')" appTooltip="add icon" class="p-0 report-menu-option">
+              <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
             </button>
             <div class="vr report-menu-divider"></div>
             <div *ngIf="canExportstix()" class="dropdown p-0 report-menu-option" appTooltip="export stix">
@@ -33,7 +33,7 @@
                 </ul>
             </div>
             <div class="vr report-menu-divider"></div>
-            <button (click)="flushAll()" appTooltip="Delete all alerts" class="p-0 report-menu-option">
+            <button (click)="flushAll()" appTooltip="scan alerts" class="p-0 report-menu-option">
               <img alt="scan" height="20" src="assets/images/sidebar/scanner.svg" width="20" />
             </button>
             <div class="vr report-menu-divider"></div>

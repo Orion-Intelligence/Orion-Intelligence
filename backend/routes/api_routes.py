@@ -1,35 +1,127 @@
 import asyncio
-
+import re
+from pathlib import Path
 from typing import Optional
-from fastapi import APIRouter, Body
-from fastapi import Depends, Query
+
+from fastapi import APIRouter, Body, Depends, Query
+
 from configs.app_dependency import license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.directory_manager.directory_model import directory_model
-from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
+from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (
+    directory_param_model,
+)
 from orion.api.interactive.dump_manager.dump_model import dump_model
 from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model import dump_param_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
-from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import search_chat_param_model
-from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import search_defacement_param_model
-from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_param_model, search_dynamic_crack_model, search_dynamic_social_model
-from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import search_exploit_param_model
-from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import search_general_param_model
-from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import search_leak_param_model, search_news_param_model, search_news_internal_param_model
-from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import search_social_param_model
+from orion.api.interactive.search_manager.search_data_model.chat.search_chat_param_model import (
+    search_chat_param_model,
+)
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (
+    search_consolidated_param_model,
+)
+from orion.api.interactive.search_manager.search_data_model.defacement.search_defacement_param_model import (
+    search_defacement_param_model,
+)
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (
+    search_credential_param_model,
+)
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (
+    search_dynamic_crack_model,
+    search_dynamic_param_model,
+    search_dynamic_social_model,
+)
+from orion.api.interactive.search_manager.search_data_model.exploit.search_exploit_param_model import (
+    search_exploit_param_model,
+)
+from orion.api.interactive.search_manager.search_data_model.general.search_general_param_model import (
+    search_general_param_model,
+)
+from orion.api.interactive.search_manager.search_data_model.leak.search_leak_param_model import (
+    search_leak_param_model,
+    search_news_internal_param_model,
+    search_news_param_model,
+)
+from orion.api.interactive.search_manager.search_data_model.social.search_social_param_model import (
+    search_social_param_model,
+)
 from orion.api.interactive.search_manager.search_model import search_model
-from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
+    DomainScanRequest,
+)
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
-from orion.services.stix_manager.stix_manager import StixManager
-from routes.docs.docs import SYSTEM_INFO_DOCS, REPORT_DOCS, DYNAMIC_DOCS, SEARCH_DOCS
-
-api_routes = APIRouter(
-    dependencies=[Depends(status_required([UserStatus.ACTIVE]))]
+from orion.services.mongo_manager.shared_model.db_auth_models import (
+    UserStatus,
+    user_role,
 )
+from orion.services.stix_manager.stix_manager import StixManager
+
+_DOCS_DIR = Path(__file__).resolve().parent / "docs" / "api_docs"
+
+
+def _read_md(rel_path: str) -> str:
+    p = _DOCS_DIR / rel_path
+    try:
+        return p.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return f"Documentation file not found: {p}"
+
+
+def _doc(rel_path: str) -> dict:
+    text = _read_md(f"/app/docs/api_docs/{rel_path.lstrip('/')}")
+    m = re.search(
+        r"^##\s*Response Description\s*\n(.*?)(?:\n##\s|\Z)",
+        text,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    resp = "Success"
+    if m:
+        block = m.group(1).strip()
+        if block:
+            resp = block.splitlines()[0].strip() or "Success"
+    return {"description": text, "response_description": resp}
+
+
+SYSTEM_INFO_DOCS = {
+    "directory": _doc("system-info/directory.md"),
+    "dumps": _doc("system-info/dumps.md"),
+    "insight": _doc("system-info/insight.md"),
+}
+
+REPORT_DOCS = {
+    "defacement": _doc("reports/defacement.md"),
+    "breach": _doc("reports/breach.md"),
+    "news": _doc("reports/news.md"),
+    "exploit": _doc("reports/exploit.md"),
+    "strategic": _doc("reports/strategic.md"),
+    "chat": _doc("reports/chat.md"),
+    "social": _doc("reports/social.md"),
+    "breach_screenshot": _doc("reports/breach_screenshot.md"),
+    "stix": _doc("reports/stix.md"),
+}
+
+DYNAMIC_DOCS = {
+    "dynamic_user_email": _doc("dynamic/dynamic_user_email.md"),
+    "dynamic_cracked": _doc("dynamic/dynamic_cracked.md"),
+    "dynamic_social": _doc("dynamic/dynamic_social.md"),
+    "domain_scan": _doc("dynamic/domain_scan.md"),
+}
+
+SEARCH_DOCS = {
+    "strategic": _doc("search/strategic.md"),
+    "stealerlogs": _doc("search/stealerlogs.md"),
+    "consolidated": _doc("search/consolidated.md"),
+    "consolidated_ranked": _doc("search/consolidated_ranked.md"),
+    "telegram": _doc("search/telegram.md"),
+    "social": _doc("search/social.md"),
+    "breach": _doc("search/breach.md"),
+    "exploit": _doc("search/exploit.md"),
+    "defacement": _doc("search/defacement.md"),
+}
+
+api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+
 
 @api_routes.get(
     "/api/directory",
@@ -39,9 +131,13 @@ api_routes = APIRouter(
     operation_id="getSystemDirectory",
     response_description=SYSTEM_INFO_DOCS["directory"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([
-        user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST
-    ]))],
+    dependencies=[
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        )
+    ],
 )
 async def get_directory(param: directory_param_model = Depends()):
     return await directory_model.getInstance().invoke_directory(param)
@@ -56,7 +152,11 @@ async def get_directory(param: directory_param_model = Depends()):
     response_description=SYSTEM_INFO_DOCS["dumps"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:dumps")),
     ],
 )
@@ -72,9 +172,13 @@ async def get_directory(param: dump_param_model = Depends()):
     operation_id="getSystemInsights",
     response_description=SYSTEM_INFO_DOCS["insight"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([
-        user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST
-    ]))],
+    dependencies=[
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        )
+    ],
 )
 async def get_insight():
     insights_task = homepage_model.getInstance().invoke_analytics()
@@ -93,6 +197,7 @@ async def get_insight():
         "graph_insight": graph_insight,
     }
 
+
 @api_routes.post(
     "/api/search/strategic",
     summary="Search strategic reports",
@@ -102,7 +207,11 @@ async def get_insight():
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:general")),
     ],
 )
@@ -111,7 +220,9 @@ async def search_general(param: search_general_param_model = Body(...)):
         base_index = [
             ELASTIC_INDEX.S_GENERIC_INDEX,
         ]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+        return await search_model.getInstance().search_consolidated_ranked_result(
+            param, base_index, [], []
+        )
     else:
         return await search_model.getInstance().search_general_result(param)
 
@@ -125,7 +236,11 @@ async def search_general(param: search_general_param_model = Body(...)):
     response_description=SEARCH_DOCS["stealerlogs"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.DEMO, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.PROFILE, user_role.DEMO, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:stealer_logs")),
     ],
 )
@@ -142,7 +257,11 @@ async def search_consolidated(param: search_credential_param_model = Body(...)):
     response_description=SEARCH_DOCS["consolidated"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("maintainer", [user_role.ADMIN, user_role.ANALYST])),
     ],
 )
@@ -159,7 +278,11 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     response_description=SEARCH_DOCS["consolidated_ranked"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("maintainer", [user_role.ADMIN, user_role.ANALYST])),
     ],
 )
@@ -170,9 +293,11 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
         ELASTIC_INDEX.S_EXPLOIT_INDEX,
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX,
-        ELASTIC_INDEX.S_DEFACEMENT_INDEX
+        ELASTIC_INDEX.S_DEFACEMENT_INDEX,
     ]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+    return await search_model.getInstance().search_consolidated_ranked_result(
+        param, base_index, [], []
+    )
 
 
 @api_routes.post(
@@ -184,7 +309,11 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
     response_description=SEARCH_DOCS["telegram"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:social")),
     ],
 )
@@ -202,7 +331,11 @@ async def search_telegram(param: search_chat_param_model = Body(...)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:discussion")),
     ],
 )
@@ -211,7 +344,9 @@ async def search_leak(param: search_leak_param_model = Body(...)):
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX,
     ]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+    return await search_model.getInstance().search_consolidated_ranked_result(
+        param, base_index, [], []
+    )
 
 
 @api_routes.post(
@@ -224,7 +359,11 @@ async def search_leak(param: search_leak_param_model = Body(...)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:exploit")),
     ],
 )
@@ -237,7 +376,9 @@ async def search_discussion(param: search_general_param_model = Body(...)):
             param, base_index, [], ["cve", "tools", "zeroday"]
         )
     else:
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
+        return await search_model.getInstance().search_consolidated_ranked_result(
+            param, base_index, [], [param.category]
+        )
 
 
 @api_routes.post(
@@ -250,7 +391,11 @@ async def search_discussion(param: search_general_param_model = Body(...)):
     response_description=SEARCH_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:social")),
     ],
 )
@@ -259,7 +404,9 @@ async def search_discussion(param: search_general_param_model = Body(...)):
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX,
     ]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+    return await search_model.getInstance().search_consolidated_ranked_result(
+        param, base_index, [], []
+    )
 
 
 @api_routes.post(
@@ -271,7 +418,11 @@ async def search_discussion(param: search_general_param_model = Body(...)):
     response_description=SEARCH_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:social")),
     ],
 )
@@ -288,7 +439,11 @@ async def search_social(param: search_social_param_model = Body(...)):
     response_description=SEARCH_DOCS["breach"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:breach")),
     ],
 )
@@ -311,7 +466,13 @@ async def search_leak(param: search_leak_param_model = Body(...)):
     include_in_schema=False,
     operation_id="searchBreachNewsReports",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        )
+    ],
 )
 async def search_news(param: search_news_param_model = Body(...)):
     internal_param = search_news_internal_param_model(**param.model_dump())
@@ -327,7 +488,11 @@ async def search_news(param: search_news_param_model = Body(...)):
     response_description=SEARCH_DOCS["exploit"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:exploit")),
     ],
 )
@@ -344,7 +509,11 @@ async def search_leak(param: search_exploit_param_model = Body(...)):
     response_description=SEARCH_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:defacement")),
     ],
 )
@@ -361,12 +530,11 @@ async def search_defacement(param: search_defacement_param_model = Body(...)):
     response_description=REPORT_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_defacement_document(doc_id: str):
@@ -382,12 +550,11 @@ async def get_defacement_document(doc_id: str):
     response_description=REPORT_DOCS["breach"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_leak_document(
@@ -410,12 +577,11 @@ async def get_leak_document(
     response_description=REPORT_DOCS["news"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_leak_document(
@@ -438,12 +604,11 @@ async def get_leak_document(
     response_description=REPORT_DOCS["exploit"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_leak_document(
@@ -466,12 +631,11 @@ async def get_leak_document(
     response_description=REPORT_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_general_document(
@@ -494,12 +658,11 @@ async def get_general_document(
     response_description=REPORT_DOCS["chat"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_general_document(
@@ -522,12 +685,11 @@ async def get_general_document(
     response_description=REPORT_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_social_document(
@@ -550,17 +712,17 @@ async def get_social_document(
     response_description=REPORT_DOCS["breach_screenshot"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("module:breach")),
     ],
 )
 async def get_screenshot(filename: str):
     return await crawl_model.getInstance().get_screenshot_file(f"{filename}.webp")
+
 
 @api_routes.post(
     "/api/dynamic/user",
@@ -571,12 +733,11 @@ async def get_screenshot(filename: str):
     response_description=DYNAMIC_DOCS["dynamic_user_email"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("scanning")),
     ],
 )
@@ -593,18 +754,16 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     response_description=DYNAMIC_DOCS["dynamic_cracked"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("scanning")),
     ],
 )
 async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "cracked")
-
 
 
 @api_routes.post(
@@ -616,12 +775,11 @@ async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
     response_description=DYNAMIC_DOCS["domain_scan"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(limiter_dependency),
         Depends(license_required("scanning")),
     ],
@@ -639,17 +797,17 @@ async def parse_text(payload: DomainScanRequest):
     response_description=DYNAMIC_DOCS["dynamic_social"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
         Depends(license_required("scanning")),
     ],
 )
 async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
     return await search_model.getInstance().dynamic_search(param, "social")
+
 
 @api_routes.get(
     "/api/search/breach/stix/{doc_id}",
@@ -660,12 +818,11 @@ async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_breach_stix_document(
@@ -678,6 +835,7 @@ async def get_breach_stix_document(
 ):
     return await StixManager.get_instance().get_leak_stix(doc_id, lang)
 
+
 @api_routes.get(
     "/api/search/strategic/stix/{doc_id}",
     summary="Get strategic media intelligence report in stix format",
@@ -687,12 +845,11 @@ async def get_breach_stix_document(
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_strategic_stix_document(
@@ -705,6 +862,7 @@ async def get_strategic_stix_document(
 ):
     return await StixManager.get_instance().get_general_stix(doc_id, lang)
 
+
 @api_routes.get(
     "/api/search/defacement/stix/{doc_id}",
     summary="Get defacement media intelligence report in stix format",
@@ -714,18 +872,18 @@ async def get_strategic_stix_document(
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_defacement_stix_document(
     doc_id: str,
 ):
     return await StixManager.get_instance().get_defacement_stix(doc_id)
+
 
 @api_routes.get(
     "/api/search/exploit/stix/{doc_id}",
@@ -736,12 +894,11 @@ async def get_defacement_stix_document(
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_exploit_stix_document(
@@ -754,6 +911,7 @@ async def get_exploit_stix_document(
 ):
     return await StixManager.get_instance().get_exploit_stix(doc_id, lang)
 
+
 @api_routes.get(
     "/api/search/social/stix/{doc_id}",
     summary="Get social media intelligence report in stix format",
@@ -763,12 +921,11 @@ async def get_exploit_stix_document(
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_social_stix_document(
@@ -781,6 +938,7 @@ async def get_social_stix_document(
 ):
     return await StixManager.get_instance().get_social_stix(doc_id, lang)
 
+
 @api_routes.get(
     "/api/search/news/stix/{doc_id}",
     summary="Get news media intelligence report in stix format",
@@ -790,12 +948,11 @@ async def get_social_stix_document(
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([
-            user_role.ADMIN,
-            user_role.DEMO,
-            user_role.PROFILE,
-            user_role.ANALYST,
-        ])),
+        Depends(
+            role_required(
+                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+            )
+        ),
     ],
 )
 async def get_news_stix_document(
@@ -807,4 +964,3 @@ async def get_news_stix_document(
     ),
 ):
     return await StixManager.get_instance().get_leak_stix(doc_id, lang)
-

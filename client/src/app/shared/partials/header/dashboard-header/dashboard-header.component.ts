@@ -41,7 +41,7 @@ export class DashboardHeaderComponent implements OnInit {
     const currentUrlTree: UrlTree = this.router.parseUrl(this.router.url);
     const queryParams = currentUrlTree.queryParams;
 
-    if (this.router.url.includes('profile/consolidated/all')) {
+    if (this.router.url.includes('profile/consolidated/all') || this.router.url.includes('profile/alerts/general')) {
       this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
       return;
     }
