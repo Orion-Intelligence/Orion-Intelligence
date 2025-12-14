@@ -1,53 +1,91 @@
-# Orion API Documentation (Markdown export)
+(orion-api-docs)=
+# Orion API Documentation
 
-This folder is a **lossless** Markdown export generated from `docs.py`.
+This section is a **lossless** Markdown export generated from `docs.py`.
 
-## Contents
+```{contents}
+:local:
+:depth: 2
+```
 
-### System Info
+---
 
-- [directory](system-info/directory.md)
-- [dumps](system-info/dumps.md)
-- [insight](system-info/insight.md)
+## System Info
 
-### Reports
+```{toctree}
+:maxdepth: 1
+:caption: System Info
 
-- [defacement](reports/defacement.md)
-- [stix](reports/stix.md)
-- [breach](reports/breach.md)
-- [news](reports/news.md)
-- [exploit](reports/exploit.md)
-- [strategic](reports/strategic.md)
-- [chat](reports/chat.md)
-- [social](reports/social.md)
-- [breach_screenshot](reports/breach_screenshot.md)
+system-info/directory
+system-info/dumps
+system-info/insight
+```
+---
 
-### Search
+## Reports
 
-- [defacement](search/defacement.md)
-- [exploit](search/exploit.md)
-- [breach](search/breach.md)
-- [social](search/social.md)
-- [telegram](search/telegram.md)
-- [consolidated](search/consolidated.md)
-- [consolidated_ranked](search/consolidated_ranked.md)
-- [strategic](search/strategic.md)
-- [stealerlogs](search/stealerlogs.md)
+```{toctree}
+:maxdepth: 1
+:caption: Reports
 
-### Dynamic
+reports/defacement
+reports/stix
+reports/breach
+reports/news
+reports/exploit
+reports/strategic
+reports/chat
+reports/social
+reports/breach_screenshot
+```
 
-- [dynamic_user_email](dynamic/dynamic_user_email.md)
-- [dynamic_cracked](dynamic/dynamic_cracked.md)
-- [dynamic_social](dynamic/dynamic_social.md)
-- [domain_scan](dynamic/domain_scan.md)
+---
+
+## Search
+
+```{toctree}
+:maxdepth: 1
+:caption: Search
+
+search/defacement
+search/exploit
+search/breach
+search/social
+search/telegram
+search/consolidated
+search/consolidated_ranked
+search/strategic
+search/stealerlogs
+```
+
+---
+
+## Dynamic
+
+```{toctree}
+:maxdepth: 1
+:caption: Dynamic
+
+dynamic/dynamic_user_email
+dynamic/dynamic_cracked
+dynamic/dynamic_social
+dynamic/domain_scan
+```
+
+---
 
 ## Single-file bundle
 
-- [ALL.md](ALL.md)
+```{toctree}
+:maxdepth: 1
+:caption: Bundles
+
+ALL
+IOC_DOC
+```
+
+---
 
 ## Source
 
 - `source_docs.py` (original input)
-
-## IOC fields reference
-- [IOC_DOC.md](IOC_DOC.md)
