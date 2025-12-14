@@ -7,6 +7,7 @@
 
 ![homepage](https://github.com/user-attachments/assets/37fcf444-40be-46c9-8bd8-45a22d824141)
 
+tocdepth: 3
 # Orion Platform
 
 DOCUMENTATION  https://orion-search.readthedocs.io
