@@ -7,6 +7,11 @@ sources. Built on top of **Django** and **Elasticsearch**, it provides efficient
 customizable parsers. It also leverages **Redis** for caching, **MongoDB** for data storage, and **NGINX** for reverse
 proxy, with **Traefik** for load balancing.
 
+```{contents}
+:local:
+:depth: 3
+```
+
 ---
 
 ## Architecture
@@ -28,45 +33,49 @@ Orion-Search utilizes the following key technologies and services:
 
 The `.env` file contains critical keys and configurations for the services:
 
+:::{warning}
+The credential values below were **redacted** for safety. Keep secrets out of documentation and out of git history.
+:::
+
 ### Global Keys
 
-```plaintext
-S_FERNET_KEY='^@ve!A#(UpMVtTRDx)&ZLXfsjqmIYHCP'
-S_APP_BLOCK_KEY='vZ^BbKMzxra!ESkGfVcjLNP$sTe@RJI%Cd#yng*XD&A(UhutFq'
-S_SUPER_PASSWORD='cmUFD@CRw(MpYEj!)^rBhSAxk+HXWbu&#eGaq#ePysJNtgnVvz'
+```dotenv
+S_FERNET_KEY='<REDACTED>'
+S_APP_BLOCK_KEY='<REDACTED>'
+S_SUPER_PASSWORD='<REDACTED>'
 ```
 
 ### Elasticsearch Keys
 
-```plaintext
+```dotenv
 ELASTIC_ROOT_USERNAME='elastic'
-ELASTIC_ROOT_PASSWORD='pG)(xnx9FJbF$bFD2McpCEFCTnhHRygxQp6aT9FMQYa8HPY@5d'
+ELASTIC_ROOT_PASSWORD='<REDACTED>'
 ```
 
 ### MongoDB Keys
 
-```plaintext
+```dotenv
 MONGO_ROOT_USERNAME='admin'
-MONGO_ROOT_PASSWORD='1h8H2DrpQXBLGzULWAPBbYkO3dqgvZ21zIdOOfwTcliTXI6GBEHpp91l'
+MONGO_ROOT_PASSWORD='<REDACTED>'
 MONGO_DATABASE='trustly'
 ```
 
 ### Redis Keys
 
-```plaintext
-REDIS_PASSWORD='B8WTLk5QW69YF9VE1sV3iimCnWpYqSSjwt1ub2PPi0WMRBMpVojYCXA'
+```dotenv
+REDIS_PASSWORD='<REDACTED>'
 ```
 
 ### Logs
 
-```plaintext
+```dotenv
 DOZZLE_USERNAME=admin
-DOZZLE_PASSWORD='SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8'
+DOZZLE_PASSWORD='<REDACTED>'
 ```
 
 ### System Modes
 
-```plaintext
+```dotenv
 API_SWAGGER="1"
 PRODUCTION="0"
 MAINTAINANCE="0"
@@ -237,36 +246,36 @@ The `.env` file contains critical keys for secure and efficient operation:
 
 ### General Keys
 
-```plaintext
-S_FERNET_KEY='^@ve!A#(UpMVtTRDx)&ZLXfsjqmIYHCP'
-S_APP_BLOCK_KEY='vZ^BbKMzxra!ESkGfVcjLNP$sTe@RJI%Cd#yng*XD&A(UhutFq'
-REDIS_PASSWORD='B8WTLk5QW69YF9VE1sV3iimCnWpYqSSjwt1ub2PPi0WMRBMpVojYCXA'
+```dotenv
+S_FERNET_KEY='<REDACTED>'
+S_APP_BLOCK_KEY='<REDACTED>'
+REDIS_PASSWORD='<REDACTED>'
 ```
 
 ### MongoDB Keys
 
-```plaintext
+```dotenv
 MONGO_ROOT_USERNAME='admin'
-MONGO_ROOT_PASSWORD='rT2hzvlYnCG6nXbCrpw0f0AgssekarUw1dYEaaoZds0qfuu0VwkJi6W'
+MONGO_ROOT_PASSWORD='<REDACTED>'
 ```
 
 ### TOR Keys
 
-```plaintext
-TOR_PASSWORD='TK2JyQEU9T2K4B7eVhmx1aE7yfWZKZqqfuaI7Bb3t3RnId4N6ZTrcZl'
+```dotenv
+TOR_PASSWORD='<REDACTED>'
 ```
 
 ### Celery Keys
 
-```plaintext
+```dotenv
 CELERY_WORKER_COUNT=30
 ```
 
 ### Flower Keys
 
-```plaintext
+```dotenv
 FLOWER_USERNAME='admin'
-FLOWER_PASSWORD='qdISx1JoJto2z1lgtkXJw5myqwf5Q2BsnlgPOkQUcUg1RtS1nELQyNQ'
+FLOWER_PASSWORD='<REDACTED>'
 ```
 
 ---
@@ -477,7 +486,9 @@ The process is as follows:
 
 ## TOR Browser Requirement
 
+:::{important}
 **Important**: Orion-Collector requires the **TOR Browser** to be running locally with its SOCKS5 proxy active.
+:::
 
 - **Default Proxy**: `socks5h://localhost:9150`.
 - Start the TOR Browser before running Orion Collector to ensure anonymity.
@@ -570,7 +581,7 @@ Follow these steps to integrate a new website:
 4. **Rename Script**: Save the script with the **host URL** as the filename.
 5. **Submit Pull Request**:
     - Commit changes with a descriptive message.
-    - Submit a pull request for review.
+    - Submit a pull request for review and integration into the main repository.
 
 **Example**: If working on `example.onion`, save the script as `example_onion.py`.
 
@@ -673,6 +684,3 @@ particularly for accessing Onion websites.
 - **Automatic Tor Connectivity**: The browser handles all proxy routing through the Tor network automatically using
   Orbot libraries.
 - **Customizations**: Modify the project using Android Studio to add features as needed.
-
----
-
