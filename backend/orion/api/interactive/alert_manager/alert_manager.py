@@ -15,7 +15,7 @@ class AlertManager:
     __lock = threading.Lock()
 
     @staticmethod
-    def get_instance():
+    def getInstance():
         if AlertManager.__instance is None:
             with AlertManager.__lock:
                 if AlertManager.__instance is None:

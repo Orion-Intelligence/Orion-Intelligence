@@ -47,7 +47,7 @@ class alert_job:
     def __init__(self):
         self._engine = mongo_controller.get_instance().get_engine()
         self._tenant_manager = TenantManager.get_instance()
-        self._alert_manager = AlertManager.get_instance()
+        self._alert_manager = AlertManager.getInstance()
         self._search_model = search_model.getInstance() 
         self._crawl_model= crawl_model.getInstance()
 

@@ -11,7 +11,7 @@ import { TooltipDirective } from '../../../directive/tooltip-directive.directive
 import { ApiService } from '../../../services/api.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { BehaviorSubject } from 'rxjs';
-import { ConfirmationPopupComponent } from "../../../../shared/partials/confirmation-popup/confirmation-popup.component";
+import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
 import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
 import { AlertService } from '../../../../services/alerts/alerts.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
@@ -19,11 +19,13 @@ import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
 import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import {overlayAnimation} from '../../../animations/popup.animations';
 
 @Component({
   selector: 'app-sidebar-profile-alerts',
   imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage],
   templateUrl: './sidebar-profile-alerts.component.html',
+  animations: [overlayAnimation],
 })
 export class SidebarProfileAlertsComponent implements OnInit {
   alertCategories: AlertCategorySummary[] = [];

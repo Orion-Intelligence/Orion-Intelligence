@@ -230,7 +230,7 @@ async def upload_profile_image(file: UploadFile, current_user=Depends(get_curren
     ],
 )
 async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().add_custom_alert(data, current_user)
+    return await AlertManager.getInstance().add_custom_alert(data, current_user)
 
 
 @tenant_routes.post(
@@ -248,7 +248,7 @@ async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_us
     ],
 )
 async def set_alerts_seen(data: list[AlertModel], current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().set_alert_seen(data, current_user)
+    return await AlertManager.getInstance().set_alert_seen(data, current_user)
 
 
 @tenant_routes.post(
@@ -266,7 +266,7 @@ async def set_alerts_seen(data: list[AlertModel], current_user=Depends(get_curre
     ],
 )
 async def delete_alert(id: str = Body(..., description="Unique id identifier of the alert to delete."), current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().delete_alert(id, current_user)
+    return await AlertManager.getInstance().delete_alert(id, current_user)
 
 
 @tenant_routes.post(
@@ -284,7 +284,7 @@ async def delete_alert(id: str = Body(..., description="Unique id identifier of 
     ],
 )
 async def update_alert(data: AlertModel, current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().update_alert(data, current_user)
+    return await AlertManager.getInstance().update_alert(data, current_user)
 
 
 @tenant_routes.get(
@@ -302,7 +302,7 @@ async def update_alert(data: AlertModel, current_user=Depends(get_current_user))
     ],
 )
 async def get_user_alerts(current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().getAllAlerts(current_user)
+    return await AlertManager.getInstance().getAllAlerts(current_user)
 
 
 @tenant_routes.post(
@@ -340,7 +340,7 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
     ],
 )
 async def delete_all_alerts(current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().delete_all_alerts(current_user)
+    return await AlertManager.getInstance().delete_all_alerts(current_user)
 
 @tenant_routes.post(
     "/api/profile/alerts/delete/{_type}",
@@ -358,7 +358,7 @@ async def delete_all_alerts(current_user=Depends(get_current_user)):
     ],
 )
 async def delete_all_alerts(_type:str, current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().delete_alerts_by_type(current_user,_type)
+    return await AlertManager.getInstance().delete_alerts_by_type(current_user, _type)
 
 
 @tenant_routes.post(
@@ -376,4 +376,4 @@ async def delete_all_alerts(_type:str, current_user=Depends(get_current_user)):
     ],
 )
 async def get_alert_scan_status(current_user=Depends(get_current_user)):
-    return await AlertManager.get_instance().get_scan_status(current_user)
+    return await AlertManager.getInstance().get_scan_status(current_user)

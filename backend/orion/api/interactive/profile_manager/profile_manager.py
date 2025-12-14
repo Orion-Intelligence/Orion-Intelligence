@@ -80,7 +80,7 @@ class ProfileManager:
 
         raw_alerts = _alerts.alerts if _alerts and _alerts.alerts else []
 
-        alerts_list = AlertManager.get_instance().filter_alerts_by_license(raw_alerts, user)
+        alerts_list = AlertManager.getInstance().filter_alerts_by_license(raw_alerts, user)
 
         company = ProfileParmaModel(
             companyName=safe_decrypt(tenant.companyName),

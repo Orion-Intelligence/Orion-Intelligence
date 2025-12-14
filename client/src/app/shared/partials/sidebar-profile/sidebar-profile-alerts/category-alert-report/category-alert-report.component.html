@@ -33,12 +33,12 @@
                 </ul>
             </div>
             <div class="vr report-menu-divider"></div>
-            <button (click)="flushAll()" appTooltip="scan alerts" class="p-0 report-menu-option">
-              <img alt="scan" height="20" src="assets/images/sidebar/scanner.svg" width="20" />
+            <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
+              <img alt="scan" height="20" src="assets/images/shared/bin.svg" width="20" />
             </button>
             <div class="vr report-menu-divider"></div>
             <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option">
-              <img alt="scan" height="20" src="/assets/images/shared/theme/filter_icon.svg" width="20" />
+              <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" />
             </button>
           </div>
         </div>
@@ -182,5 +182,5 @@
 </div>
 
 <ng-container *ngIf="isFlushAllConfirmationOpen()">
-    <app-confirmation-popup (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
+  <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'" (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
 </ng-container>

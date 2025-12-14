@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, Observable, of, switchMap, takeWhile, tap, timer } from 'rxjs';
-import { Router } from '@angular/router';
+import { BehaviorSubject, switchMap, takeWhile, tap, timer } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../core/app/app.service';
 
@@ -10,26 +9,14 @@ import { AppService } from '../core/app/app.service';
 export class AlertService {
     isAlertScanLoading$ = new BehaviorSubject<boolean>(false);
     private isCheckingStatus = false;
+    private hasAutoCheckedOnce = false;
 
-    constructor(protected apiService: ApiService, private appService: AppService, private router: Router) { }
+    constructor(protected apiService: ApiService, private appService: AppService) { }
 
     scanIOCs() {
         this.isAlertScanLoading$.next(true)
         this.apiService.post<any>('profile/alert/scan', null).subscribe({
-            next: (response) => {
-                console.log('Alert Scan Job Completed:', response);
-                const status = response?.status || 'unknown';
-                const totalDuration = response?.total_duration_seconds;
-
-                let successMessage = `IOC Scan completed.`;
-
-                if (typeof totalDuration === 'number') {
-                    successMessage = `IOC Scan completed in ${totalDuration.toFixed(2)} seconds.`;
-                }
-
-                if (status === 'completed_with_errors') {
-                    successMessage += ' Some scans completed with errors.';
-                }
+            next: (_) => {
                 this.getLatestAlerts();
             },
             error: (err) => {
@@ -39,6 +26,7 @@ export class AlertService {
             },
         });
     }
+
     getLatestAlerts() {
         this.apiService.get<any>('profile/alerts').subscribe({
             next: response => {
@@ -53,16 +41,19 @@ export class AlertService {
     }
 
     autoCheckScanStatus(intervalMs = 10000) {
-        if (this.isCheckingStatus) {
+        if (this.hasAutoCheckedOnce || this.isCheckingStatus) {
             return;
         }
+        this.hasAutoCheckedOnce = true;
         this.isCheckingStatus = true;
+        this.isAlertScanLoading$.next(true);
         return timer(0, intervalMs).pipe(
             switchMap(() => this.getScanStatus()),
             takeWhile((res: any) => res.scan_running === true, true),
             tap((res) => {
                 if (!res.scan_running) {
                     this.isCheckingStatus = false;
+                    this.isAlertScanLoading$.next(false);
                 }
             })
         );
