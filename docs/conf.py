@@ -18,3 +18,6 @@ html_static_path = ['_static']
 html_theme_options = {
     "color_mode": "dark",
 }
+
+# -- Custom css -------------------------------------------------
+html_css_files = ["custom.css"]
