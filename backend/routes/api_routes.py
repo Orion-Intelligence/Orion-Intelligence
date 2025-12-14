@@ -654,10 +654,10 @@ async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
 @api_routes.get(
     "/api/search/breach/stix/{doc_id}",
     summary="Get breach media intelligence report in stix format",
-    description=REPORT_DOCS["breach"]["description"],
+    description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getBreachStixReport",
-    response_description=REPORT_DOCS["breach"]["response_description"],
+    response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([
@@ -681,10 +681,10 @@ async def get_breach_stix_document(
 @api_routes.get(
     "/api/search/strategic/stix/{doc_id}",
     summary="Get strategic media intelligence report in stix format",
-    description=REPORT_DOCS["strategic"]["description"],
+    description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getStrategicStixReport",
-    response_description=REPORT_DOCS["strategic"]["response_description"],
+    response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([
@@ -708,10 +708,10 @@ async def get_strategic_stix_document(
 @api_routes.get(
     "/api/search/defacement/stix/{doc_id}",
     summary="Get defacement media intelligence report in stix format",
-    description=REPORT_DOCS["defacement"]["description"],
+    description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getDefacementStixReport",
-    response_description=REPORT_DOCS["defacement"]["response_description"],
+    response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([
@@ -730,10 +730,10 @@ async def get_defacement_stix_document(
 @api_routes.get(
     "/api/search/exploit/stix/{doc_id}",
     summary="Get exploit media intelligence report in stix format",
-    description=REPORT_DOCS["exploit"]["description"],
+    description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getExploitStixReport",
-    response_description=REPORT_DOCS["exploit"]["response_description"],
+    response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([
@@ -757,10 +757,10 @@ async def get_exploit_stix_document(
 @api_routes.get(
     "/api/search/social/stix/{doc_id}",
     summary="Get social media intelligence report in stix format",
-    description=REPORT_DOCS["social"]["description"],
+    description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getSocialStixReport",
-    response_description=REPORT_DOCS["social"]["response_description"],
+    response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([
@@ -784,10 +784,10 @@ async def get_social_stix_document(
 @api_routes.get(
     "/api/search/news/stix/{doc_id}",
     summary="Get news media intelligence report in stix format",
-    description=REPORT_DOCS["news"]["description"],
+    description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getNewsStixReport",
-    response_description=REPORT_DOCS["news"]["response_description"],
+    response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([
