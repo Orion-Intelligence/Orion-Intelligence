@@ -119,4 +119,4 @@ https://www.canva.com/design/DAF8Sa8KkDE/1H8z3RVausdHIMcE98Kvfg/edit
 
 ## Documentation
 
-https://orion-search.readthedocs.io
+https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html
