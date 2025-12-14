@@ -62,3 +62,7 @@
 .sd-dropdown > div {
   padding: 0.8em 1em;
 }
+
+.ethical-sidebar{
+  display: none;
+}
