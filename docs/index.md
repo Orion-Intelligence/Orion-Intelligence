@@ -8,7 +8,8 @@ Welcome to the Orion Platform Documentation.
 :maxdepth: 4
 :caption: Contents:
 
-introduction_to_platform
-introduction_to_modules
-user_manual
-developer_documentation
+app_docs/introduction_to_platform
+app_docs/introduction_to_modules
+app_docs/user_manual
+app_docs/developer_documentation
+api_docs/README
