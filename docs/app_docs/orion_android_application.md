@@ -7,55 +7,38 @@ We have also developed a mobile application called **Orion Browser**, which allo
 
 - Mobile access to Orion Intelligence
 - **Tor Powered** option for `.onion` links
-- Privacy-focused browsing controls and proxy management
+- Privacy-focused controls and proxy management
 - Built-in **Support** and troubleshooting tools
 :::
 
-:::{grid} 2
-:gutter: 2
+---
 
-:::{grid-item-card} Home screen
-:::{figure} https://github.com/user-attachments/assets/2fc05f06-b525-4727-8aed-6ccdbcec60f6
-:alt: Orion Browser home screen
-:width: 300
-:align: center
-:::
-On launch, the main screen provides quick access to core actions and settings.
-:::
+### Home screen
 
-:::{grid-item-card} Quick actions
-:::{figure} https://github.com/user-attachments/assets/107ab055-ace8-498d-a1dd-da084c218972
-:alt: Orion Browser quick actions
-:width: 300
-:align: center
-:::
-At the bottom of the screen, common actions are available:
-
-- **Tor Powered**: check and open `.onion` links
-- **Fast & Secure**: securely access the Orion Intelligence Tool
-:::
-:::
-
-### Troubleshoot menu (top-right)
-
-When you tap the top-right menu button, a troubleshooting panel appears with:
+When you start the browser, you’ll see the main screen with several options. On the top-right corner, there is a menu button that provides troubleshooting options (including **Reset** and **Dismiss**).
 
 - **Dismiss**: closes the troubleshooting menu without affecting the app
-- **Reset**: closes the app and requires restarting (restores default behavior)
+- **Reset**: closes the app and it must be restarted
+
+Screenshot: https://github.com/user-attachments/assets/2fc05f06-b525-4727-8aed-6ccdbcec60f6
+
+---
+
+### Quick actions (bottom buttons)
+
+At the bottom of the screen, there are four options. The first one is **Tor Powered**, which allows you to check and open `.onion` links. Below that, there is a **Fast & Secure** button that lets you securely access the Orion Intelligence Tool.
+
+Screenshot: https://github.com/user-attachments/assets/107ab055-ace8-498d-a1dd-da084c218972
 
 ---
 
 ### Connect with Your Company
 
-This feature allows users to connect directly with their respective company by entering a unique **4-digit company code**. Once entered, the user gains access to the company’s account and can use paid features according to the organization’s subscription plan.
+This feature allows users to connect directly with their respective company by entering a unique code. Each company is assigned a distinct **4-digit code**. By entering this code in the designated field, the user gains access to the company’s account and can utilize paid features according to the subscription plan the company has purchased.
 
 If the user does not enter a company code, they can continue using the platform in **Try Free** mode with limited features.
 
-:::{figure} https://github.com/user-attachments/assets/bfac15b2-68f3-4532-a73b-a86197452112
-:alt: Connect with your company code screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/bfac15b2-68f3-4532-a73b-a86197452112
 
 ---
 
@@ -63,276 +46,219 @@ If the user does not enter a company code, they can continue using the platform 
 
 When **Browser Mode** is enabled, the application operates entirely within the dedicated Orion Browser environment, providing a secure and controlled browsing experience.
 
-:::{figure} https://github.com/user-attachments/assets/efbdbb27-7ed7-47b8-87cc-36132a5c7baf
-:alt: Browser mode enabled
-:width: 300
-:align: left
-:::
+Screenshot (Browser Mode enabled): https://github.com/user-attachments/assets/efbdbb27-7ed7-47b8-87cc-36132a5c7baf
 
-If Browser Mode is disabled, the application opens a web page using **DuckDuckGo**, a privacy-focused search engine. DuckDuckGo does not track user activity, store personal information, or create user profiles. In this mode, the system functions like a standard web browser while maintaining enhanced privacy.
+If Browser Mode is disabled, the application opens a web page using **DuckDuckGo**, which is a privacy-focused search engine. DuckDuckGo does not track user activity, store personal information, or create user profiles. In this mode, the system functions like a regular web browser, allowing users to perform standard searches and access websites through DuckDuckGo while maintaining enhanced privacy.
 
-:::{figure} https://github.com/user-attachments/assets/87be8ab7-b680-4315-9d85-edc8895b739d
-:alt: DuckDuckGo mode
-:width: 300
-:align: left
-:::
+Screenshot (DuckDuckGo mode): https://github.com/user-attachments/assets/87be8ab7-b680-4315-9d85-edc8895b739d
 
 ---
 
 ### Support
 
-In the browser settings (top right), there is an option labeled **Support**. When clicked, a dedicated support page opens with comprehensive guidance for all browser-related features. Each feature is explained in detail with step-by-step instructions, usage methods, and helpful tips.
+In the browser settings (top right), there is a feature labeled **Support**. When you click it, a dedicated support page opens. This page provides comprehensive guidance on how to use browser-related features with step-by-step instructions, usage methods, and helpful tips.
 
-:::{figure} https://github.com/user-attachments/assets/0f23d67f-c30d-44ee-b6d0-5c2914bbddc6
-:alt: Support screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/0f23d67f-c30d-44ee-b6d0-5c2914bbddc6
 
 ---
 
-### Settings
+### Settings | General (overview)
 
-Next to Support is the **Settings** area, where users can view and manage browser configuration—including proxy settings. In **Proxy Settings**, the top-right action allows users to connect with support. There is also an **Enable Bridge** option that can be toggled to bypass restrictions when needed.
+Next to Support, there is a **Settings** button, where you can view and manage proxy settings. In the Proxy Settings section, the top-right action allows you to connect with support. There is also an **Enable Bridge** option, which can be turned on or off to bypass restrictions when needed.
 
-:::{figure} https://github.com/user-attachments/assets/47fb5c7f-315c-4f1a-b00b-83387f6ea8fc
-:alt: Settings entry / proxy settings
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/47fb5c7f-315c-4f1a-b00b-83387f6ea8fc
 
-:::{dropdown} Settings | General
-:open:
+---
 
-:::{figure} https://github.com/user-attachments/assets/e984dca7-328d-4811-b5de-b1fb59a92dd7
-:alt: General settings screen
-:width: 300
-:align: left
-:::
+### General
 
 1. **Home**  
-   Customize the default homepage link.  
-   Default: `try.orionintelligence.org`  
-   You can change it to any preferred page.
+   Users can customize the default homepage link of the platform.  
+   By default, the homepage is set to: `try.orionintelligence.org`.  
+   Users can change this link to any preferred page that they want to open when accessing the platform.
 
 2. **New Tab**  
-   Open the homepage in a new tab without leaving the current page.
+   Option to open the homepage in a new tab. This allows users to navigate to the homepage without leaving their current page.
 
 3. **Theme**  
-   Choose one of the following:
-   - **Dark Theme**: best for low-light environments  
-   - **Light Theme**: standard bright interface  
-   - **System Default**: follows the device theme  
+   Users can select from three theme options:
+   - **Dark Theme** – suitable for low-light environments
+   - **Light Theme** – bright standard interface
+   - **System Default** – uses the device theme
 
 4. **General Settings**
-   - **Full-Screen Browsing**: toggle immersive full-screen mode  
-   - **Language**: choose the preferred interface language
-:::
+   - **Full-Screen Browsing** – toggle full-screen mode
+   - **Language** – choose preferred language for the interface
 
-:::{dropdown} Settings | Privacy
-This section provides tools to keep your identity, browsing activity, and data private while using the browser.
+Screenshot: https://github.com/user-attachments/assets/e984dca7-328d-4811-b5de-b1fb59a92dd7
 
-:::{figure} https://github.com/user-attachments/assets/d2de3f98-6a90-4b31-851c-b9e9b28304b8
-:alt: Privacy settings screen
-:width: 300
-:align: left
-:::
+---
 
-- **Private Browsing**: helps reduce stored browsing traces
-- **Allow JavaScript** (toggle): enables/disables interactive website scripts  
-  (Disabling can increase security, but may break some site features.)
-- **Block Popup** (toggle): blocks popup ads and unwanted windows  
-  (Some legitimate popups like login/verification may not work.)
-- **Do Not Track**: sends a request to websites not to track you  
-  (Some sites respect it; others ignore it.)
-- **Clear Private Data on Exit**: clears history, cookies, cache, and saved site data when the app closes
-- **Cookies Settings**:
-  - **Enabled**: maximum compatibility
-  - **Enabled, excluding tracking cookies**: blocks tracking cookies while keeping most sites functional
-  - **Enabled, excluding 3rd-party**: blocks third-party cookies for stronger privacy
-  - **Disabled**: maximum privacy (may break logins and sessions)
-:::
+### Settings | Privacy
 
-:::{dropdown} Tracking Protection
-:open:
+**Private Browsing**  
+Provides tools to keep identity, browsing activity, and data private while using the browser. Tracking Protection blocks elements like tracking scripts and fingerprinting techniques.
 
-:::{figure} https://github.com/user-attachments/assets/8d608590-b7f0-4561-95b9-54367bab68e9
-:alt: Tracking protection screen
-:width: 300
-:align: left
-:::
+**Allow JavaScript (Toggle to Enable/Disable JavaScript)**  
+Enables interactive elements (forms/animations). Disabling can increase security but may break some website features.
 
-- **Disable Protection**: allows tracking (lowest privacy)
-- **Default (Recommended)**: blocks ads, trackers, and basic fingerprinting while keeping most sites working
-- **Strict Policy**: blocks advanced trackers/fingerprinting (strongest privacy; some sites may break)
-:::
+**Block Popup (Toggle to Disable Popup Advert)**  
+Blocks popup ads and reduces risk from malicious windows. Some legitimate popups (login/verification) may not work.
 
-:::{dropdown} Manage Notification
-In Orion Browser, **local notifications** are device alerts shown by the browser—even when the app runs in the background.
+**Do Not Track**  
+Sends a request to websites asking them not to track activity (some sites ignore it).
 
-:::{figure} https://github.com/user-attachments/assets/7b9de283-705b-4443-b47b-01082f09cca9
-:alt: Manage notifications screen
-:width: 300
-:align: left
-:::
+**Clear Private Data on Exit**  
+Automatically erases cookies, history, cache, and other saved site data each time you close the browser.
 
-Examples of local notifications:
-- **Download complete** notification
-- **Network status change** (internet lost/restored)
-- **Security alerts** for unsafe or suspicious sites
-- **New tab / extension activity**
-- **Form auto-save reminders**
-- **Update notifications**
-- **Session restore reminders**
-:::
+**Cookies Settings**  
+- Enabled: maximum compatibility  
+- Enabled, excluding tracking cookies: blocks tracking cookies while keeping normal site functions  
+- Enabled, excluding 3rd-party: blocks third-party cookies for strong privacy  
+- Disabled: maximum privacy (may break logins)
 
-#### Device Notification Settings
+Screenshot: https://github.com/user-attachments/assets/d2de3f98-6a90-4b31-851c-b9e9b28304b8
 
-This section includes OS-level toggles to control how notifications behave on the device.
+---
 
-:::{figure} https://github.com/user-attachments/assets/f01d180e-6ee4-4510-8301-6801df0fb8f8
-:alt: Device notification settings screen
-:width: 300
-:align: left
-:::
+### Tracking Protection
 
-- **Allow Notifications**: enables or blocks all Orion Browser notifications
-- **Reminder Intensity**: controls how strongly reminders appear (e.g., follow-up prompts)
+- **Disable Protection**: allows websites to track identity/activity
+- **Default (Recommended)**: blocks ads, tracking scripts, and basic fingerprinting while keeping pages functional
+- **Strict Policy**: blocks advanced trackers/fingerprinting (some site features may not work)
+
+Screenshot: https://github.com/user-attachments/assets/8d608590-b7f0-4561-95b9-54367bab68e9
+
+---
+
+### Manage Notification
+
+Local notifications are alerts/messages that the browser can show within the system—even when the app is running in the background. These notifications are triggered locally by the browser itself (not by a remote server).
+
+Screenshot: https://github.com/user-attachments/assets/7b9de283-705b-4443-b47b-01082f09cca9
+
+Examples:
+- Download Complete Notification
+- Network Status Change (connection lost/restored)
+- Security Alerts for unsafe/suspicious sites
+- New Tab or Extension Activity
+- Form Auto-Save Reminder
+- Update Notifications
+- Session Restore Reminder
+
+---
+
+### Device Notification Settings
+
+Displays toggle options to enable or disable specific features.
+
+Screenshot: https://github.com/user-attachments/assets/f01d180e-6ee4-4510-8301-6801df0fb8f8
+
+- **Allow Notifications**: enables/disables Orion Browser notifications
+- **Reminder Intensity**: controls reminder strength (AI reminders, follow-ups, etc.)
 - **Show Badges**: shows notification counts on the app icon
-- **Banners**: shows notifications as banners at the top of the screen
-- **Lock Screen**: displays notifications on the lock screen
-- **Play Sound**: plays a sound when notifications arrive
-- **Vibrate**: enables vibration for notifications
-- **Notification Style**: defines how notifications are displayed (system style)
+- **Banners**: show notifications as banners
+- **Lock Screen**: show notifications on lock screen
+- **Play Sound**: play sound for notifications
+- **Vibrate**: device vibration for notifications
+- **Notification Style**: defines how notifications are displayed
 
 ---
 
 ### Accessibility
 
-The Accessibility menu allows users to customize display and interaction settings for a more comfortable browsing experience.
+Allows users to customize display and interaction settings.
 
-:::{figure} https://github.com/user-attachments/assets/c72ba5d7-e7f7-41d0-9935-9781c95416e6
-:alt: Accessibility settings screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/c72ba5d7-e7f7-41d0-9935-9781c95416e6
 
-- **Font Scaling**: use a slider to adjust text size across the browser
+- **Font Scaling**: adjust on-screen text size via slider
 - **Interaction**
-  - **Enable Zoom**: forces zoom support on all web pages
-  - **Voice Input**: dictation in the URL bar for hands-free entry
+  - **Enable Zoom**: forces zoom on all pages
+  - **Voice Input**: dictation in URL bar for hands-free browsing
 
 ---
 
 ### Clear Private Data
 
-The **Clear Private Data** feature removes browsing information to protect privacy, improve performance, and free storage.
+Allows users to remove browsing information to protect privacy and improve performance.
 
-:::{figure} https://github.com/user-attachments/assets/8ca3efd4-7a19-40bd-9d5b-94828918d7c6
-:alt: Clear private data screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/8ca3efd4-7a19-40bd-9d5b-94828918d7c6
 
-Available options:
-- **Clear Tabs**: closes all tabs and removes session data
-- **Clear History**: deletes visited website records
-- **Clear Bookmarks**: removes saved bookmarks/favorites
-- **Clear Cache**: removes temporary files used for faster loading
-- **Clear Site Data**: removes saved website storage (local storage)
-- **Clear Session**: ends active sessions and signs you out
-- **Clear Cookies**: removes cookies (logins/preferences)
-- **Clear Settings**: resets browser/app settings to default
+Options:
+- Clear Tabs
+- Clear History
+- Clear Bookmarks
+- Clear Cache
+- Clear Site Data
+- Clear Session
+- Clear Cookies
+- Clear Settings
 
 ---
 
 ### Advanced
 
-The Advanced menu contains settings related to the browser interface and behavior.
+Settings related to UI and browser behavior.
 
-:::{figure} https://github.com/user-attachments/assets/73a456a4-e5ce-4465-b739-697f6fca50d8
-:alt: Advanced settings screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/73a456a4-e5ce-4465-b739-697f6fca50d8
 
-- **Restore Tabs**: choose whether to restore tabs after restarting (Enable/Disable)
+- **Restore Tabs**: restore previously opened tabs after restart (Enable/Disable)
 - **Toolbar Theme**: apply website-defined toolbar theme (Enable/Disable)
 - **Tab View**
-  - **Grid Design**: visual thumbnail grid
-  - **List Design**: text-focused list layout
+  - Grid Design: thumbnails, visual identification
+  - List Design: text-focused, cleaner layout
 - **Data Saver**
-  - **Always Show Images**: full visual experience (uses more data)
-  - **Block All Images**: text-first browsing (saves data, faster loads)
-- **Show Web Fonts**: allow remote fonts for better visuals (may increase data usage)
-- **Background Sound**: allow website audio to continue while the app runs in the background
+  - Always Show Images
+  - Block All Images
+- **Show Web Fonts**: allow remote fonts for better visuals (may use more data)
+- **Background Sound**: allow audio while app runs in background
 
 ---
 
 ### Proxy Settings
 
-Proxy Settings help enhance privacy and manage Tor connectivity.
+Configure network and security-related settings to enhance privacy and connectivity. Tor routes traffic through multiple encrypted layers to protect identity and location.
 
-:::{figure} https://github.com/user-attachments/assets/c61a53cf-265d-4c66-b7f5-c1e2a1debbfe
-:alt: Proxy settings screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/c61a53cf-265d-4c66-b7f5-c1e2a1debbfe
 
-Tor routes traffic through multiple encrypted relays to help anonymize browsing activity and protect user identity.
-
-- **Orion Proxy Status**: disabled by default; enable for anonymous/Tor browsing
+- **Orion Proxy Status**: manages Tor connectivity (disabled by default)
 - **Orion & Bridge Status**
-  - **Snowflake Connectivity Status**: bypasses blocking using volunteer proxies that resemble normal HTTPS traffic
-  - **Bridge Connectivity Status**: uses non-public Tor entry points to avoid censorship blocks
+  - **Snowflake Connectivity Status**: helps connect even when Tor is blocked
+  - **Bridge Connectivity Status**: uses non-public Tor entry points for restricted networks
 
-:::{admonition} Restart required
-:class: warning
-
-After changing proxy settings, restart the application. You will be automatically navigated to the Proxy Manager for the changes to take effect.
-:::
+**Note:** After changing these settings, the application must be restarted and users will be navigated to the Proxy Manager for changes to take effect.
 
 ---
 
 ### Rate This App
 
-The Rate This App option redirects users to the Play Store page where they can leave a star rating (1–5) and review. Ratings and reviews help improve performance, usability, and feature direction.
+Allows users to provide feedback via the Play Store (rating + review).
 
-:::{figure} https://github.com/user-attachments/assets/b31f251e-73ee-485e-9373-4f9b7ae00ff8
-:alt: Rate this app screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/b31f251e-73ee-485e-9373-4f1a-b00b-83387f6ea8fc
+
+---
 
 #### Share This App
 
-Share This App generates the official Play Store link and allows users to share it via messaging apps, email, or social media so others can install the browser easily.
+Shares the official Play Store link so others can download the browser.
 
-:::{figure} https://github.com/user-attachments/assets/703c9b37-1ddf-4c33-86b8-c0241eb480b9
-:alt: Share this app screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/703c9b37-1ddf-4c33-86b8-c0241eb480b9
+
+---
 
 ### Privacy Policy
 
-Opens the official Privacy Policy page explaining what data is collected, how it is used, stored, and protected, as well as user rights for access, control, and deletion.
+Opens the official Privacy Policy page describing how data is collected, used, stored, protected, and what user rights are supported.
 
-:::{figure} https://github.com/user-attachments/assets/72fd0559-3916-4ff5-865a-99cd26c66ca6
-:alt: Privacy policy screen
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/72fd0559-3916-4ff5-865a-99cd26c66ca6
+
+---
 
 ### Fix Browser
 
-Fix Browser opens a **Troubleshoot** popup with two actions:
+The Fix Browser option opens a “Troubleshoot” popup with two actions:
 
-- **Dismiss**: closes the popup and returns to the menu without changes
-- **Reset**: restores default settings, closes the browser, and requires reopening the app
+- **Dismiss**: closes the popup without changes
+- **Reset**: restores default settings and closes the app (reopen to continue)
 
-:::{figure} https://github.com/user-attachments/assets/6ce8c497-1575-48d6-bd88-9b38524e0d4b
-:alt: Troubleshoot popup
-:width: 300
-:align: left
-:::
+Screenshot: https://github.com/user-attachments/assets/6ce8c497-1575-48d6-bd88-9b38524e0d4b
