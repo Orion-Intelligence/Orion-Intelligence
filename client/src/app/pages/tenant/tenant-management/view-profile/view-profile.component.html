@@ -60,6 +60,7 @@
                       <td>
                         <span class="label-text-dropdown no-chevron">
                           {{ getUserLicensesLabel(user) }}
+
                         </span>
                       </td>
                       <td class="text-center col-action">
@@ -187,14 +188,15 @@
                             <div class="tenant-block">
                               <div class="tenant-title">Licenses</div>
                               <div class="license-grid">
-                                <ng-container *ngFor="let license of licenseList">
-                                  <div class="license-card" [class.license-selected]="user.licenses?.includes(license)"
-                                    (click)="toggleUserLicense(user, license)">
-                                    <input type="checkbox" class="license-checkbox"
-                                      [checked]="user.licenses?.includes(license)" />
-                                    <span class="license-label">{{ getLicenseLabel(license) }}</span>
-                                  </div>
-                                </ng-container>
+                              <ng-container *ngFor="let license of licenseList">
+                                <div *ngIf="license !== 'maintainer'"
+                                     class="license-card license-btn"
+                                     [class.license-selected]="user.licenses?.includes(license)"
+                                     [class.license-disabled]="isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userProfile()?.preferences?.['licenses']?.includes(license))"
+                                     (click)="!(isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userProfile()?.preferences?.['licenses']?.includes(license))) && toggleUserLicense(user, license)">
+                                  <span class="license-label">{{ getLicenseLabel(license) }}</span>
+                                </div>
+                              </ng-container>
                               </div>
                               <hr class="tenant-divider">
                             </div>

@@ -12,8 +12,7 @@ from orion.api.interactive.profile_manager.model.profile_parma_model import Prof
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role, db_user_account
 
 
 class ProfileManager:
@@ -57,8 +56,9 @@ class ProfileManager:
             if "userId" not in empty_company.preferences:
                 empty_company.preferences["userId"] = str(user.id)
             empty_company.preferences["twoFa"] = str(user.twofa_enabled)
+            empty_company.preferences["licenses"] = []
             return empty_company
-        
+
         tenant = await self._engine.find_one(
             db_tenant_model,
             db_tenant_model.id == ObjectId(user.company_uuid)
@@ -103,10 +103,17 @@ class ProfileManager:
         if "userId" not in company.preferences:
             company.preferences["userId"] = str(user.id)
 
+        assigned_quota = await self._engine.count(
+            db_user_account,
+            db_user_account.company_uuid == str(user.company_uuid)
+        )
+
         company.preferences["twoFa"] = str(user.twofa_enabled)
+        company.preferences["licenses"] = [safe_decrypt(l) for l in (tenant.licenses or [])]
+        company.preferences["assignedQuota"] = assigned_quota
+        company.preferences["quotaExceeded"] = bool(tenant.user_quota and assigned_quota >= tenant.user_quota)
 
         return company
-
 
     async def updateCompanyProfile(self,data: ProfileParmaModel, current_user):
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.company_uuid))

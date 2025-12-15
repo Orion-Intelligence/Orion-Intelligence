@@ -12,6 +12,8 @@ import {
   ConfirmationPopupComponent
 } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { BehaviorSubject } from 'rxjs';
+import {AuthService} from '../../../../services/authetication/auth.service';
+import {AppService} from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-view-profile',
@@ -29,7 +31,7 @@ export class ViewProfileComponent implements OnInit {
   isDeleteConfirmationOpen$ = new BehaviorSubject<boolean>(false);
   userToDelete: User | null = null;
 
-  constructor(public apiService: ApiService,) {
+  constructor(public apiService: ApiService, protected appService:AppService) {
   }
 
   ngOnInit(): void {
@@ -131,9 +133,6 @@ export class ViewProfileComponent implements OnInit {
   }
 
   toggleUserLicense(user: any, license: LicenseName) {
-    if (this.isLicenseDisabled(user, license)) {
-      return;
-    }
     if (!user.licenses) user.licenses = [];
     const index = user.licenses.indexOf(license);
     if (index > -1) {

@@ -1,4 +1,4 @@
-import { Injectable, Signal, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
 import { AppStorageService } from './app-storage.service';
@@ -28,7 +28,10 @@ export class AppService {
     city: '',
     postalCode: '',
     taxId: '',
-    alerts: []
+    alerts: [],
+    licenses: [],
+    assignedQuota:0,
+    quotaExceeded:false
   });
   public tenantData = signal<TenantModel>({
     companyName: '',
@@ -128,7 +131,10 @@ export class AppService {
       postalCode: '',
       taxId: '',
       alerts: [],
-      preferences: []
+      preferences: [],
+      licenses: [],
+      assignedQuota:0,
+      quotaExceeded:false
     });
   }
 

@@ -10,6 +10,9 @@ export interface CompanyProfile {
         [key: string]: any;
     };
     alerts: AlertModel[];
+    licenses: string[];
+    assignedQuota: number;
+    quotaExceeded:false
 }
 
 export interface AlertAllIoc {

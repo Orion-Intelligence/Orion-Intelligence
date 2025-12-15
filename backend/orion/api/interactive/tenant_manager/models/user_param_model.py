@@ -7,5 +7,5 @@ class user_param_model(BaseModel):
     email: str
     role: user_role
     status: UserStatus
-    subscription:bool
+    subscription: bool
     licenses: List[LicenseName]

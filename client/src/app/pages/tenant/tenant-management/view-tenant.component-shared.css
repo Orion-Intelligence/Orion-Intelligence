@@ -106,6 +106,7 @@
 .no-licenses {
   font-size: 0.85rem;
   color: var(--color-text4);
+  height: 30px;
 }
 
 .field-equal .tenant-input {
@@ -210,3 +211,62 @@
   background: var(--color-gray-910) !important;
 }
 
+.license-btn{
+  background: var(--color-blue-820);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.16);
+  transition: background .15s ease, transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.license-btn:hover{
+  background: var(--color-blue-850);
+  border-color: var(--color-blue-640);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.24);
+}
+
+.license-btn:active{
+  background: var(--color-blue-880);
+  transform: translateY(0);
+  box-shadow: inset 0 2px 3px rgba(0,0,0,0.35);
+}
+
+.license-selected{
+  background: var(--color-blue-640);
+  border-color: var(--color-blue-630);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.45);
+}
+
+.license-selected:hover{
+  background: var(--color-blue-640);
+}
+
+.license-label{
+  color: var(--color-text3);
+  transition: color .15s ease;
+}
+
+.license-selected .license-label{
+  color: #fff;
+}
+
+.license-disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: rgba(255,255,255,0.05);
+  color: var(--color-text4);
+  background: #0a0a0a;
+}
+
+.license-disabled:hover{
+  transform: none;
+}
+
+.license-disabled .license-label{
+  color: var(--color-text4);
+}
+
+.license-disabled{
+  opacity: 0.3 !important;
+}

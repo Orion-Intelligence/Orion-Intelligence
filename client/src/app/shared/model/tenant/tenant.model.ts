@@ -24,6 +24,7 @@ export interface TenantModel {
   user_quota?: number;
   status?: TenantStatus;
   licenses?: string[];
+  quotaExceeded?: boolean;
 }
 
 export interface TenantRequest {
@@ -49,4 +50,5 @@ export interface TenantTeamModel {
   status: 'verification_pending' | 'active' | 'disable';
   subscription: boolean;
   licenses?: string[] | null;
+  quotaExceeded?: boolean;
 }

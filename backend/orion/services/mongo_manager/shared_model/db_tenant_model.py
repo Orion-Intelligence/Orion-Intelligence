@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import List
-from odmantic import Model, EmbeddedModel, Field
+from odmantic import Model, EmbeddedModel
 from pydantic import BaseModel
 
 
@@ -31,6 +31,7 @@ class db_tenant_model(Model):
     user_quota: int = 0
     status: TenantStatus = TenantStatus.DISABLE
     licenses: List[str] = []
+    quotaExceeded:bool = False
 
 
 class TenantRequest(BaseModel):

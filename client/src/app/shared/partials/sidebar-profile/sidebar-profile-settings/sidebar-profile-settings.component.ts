@@ -132,4 +132,6 @@ export class SidebarProfileSettingsComponent implements OnInit {
     event.stopPropagation();
     this.isEditing = false;
   }
+
+  protected readonly JSON = JSON;
 }

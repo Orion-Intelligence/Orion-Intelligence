@@ -4,7 +4,6 @@ import {NgFor, NgIf} from '@angular/common';
 import {LicenseName} from '../../../../shared/model/licenses/license.rules';
 import {TenantTeamModel} from '../../../../shared/model/tenant/tenant.model';
 import {ApiService} from '../../../../shared/services/api.service';
-import {MessageNotificationService} from '../../../../services/message_notification/message-notification.service';
 import {AuthService} from '../../../../services/authetication/auth.service';
 import {popupAnimation, overlayAnimation} from '../../../../shared/animations/popup.animations';
 
@@ -37,7 +36,6 @@ export class AddTenantComponent implements OnInit {
 
   constructor(
     public apiService: ApiService,
-    private messageNotificationService: MessageNotificationService,
     private authService: AuthService
   ) {
   }

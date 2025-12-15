@@ -21,7 +21,7 @@ export class AppComponent {
   error$: Observable<boolean>;
   isVisible = true;
 
-  constructor(private router: Router, private errorStore: ErrorStoreService, appService: AppService) {
+  constructor(private router: Router, private errorStore: ErrorStoreService, protected appService: AppService) {
     const theme = localStorage.getItem('theme') || 'dark-theme';
     document.body.classList.add(theme);
 
@@ -38,4 +38,6 @@ export class AppComponent {
   shouldAnimate(): boolean {
     return !this.currentRoute().startsWith('/dashboard');
   }
+
+  protected readonly JSON = JSON;
 }

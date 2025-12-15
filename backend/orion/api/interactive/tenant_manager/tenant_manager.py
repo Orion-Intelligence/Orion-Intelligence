@@ -1,9 +1,7 @@
 import re
 import threading
+
 from pathlib import Path
-
-from typing import List
-
 from orion.api.interactive.tenant_manager.models.tenant_team_model import tenant_team_model
 from bson import ObjectId
 from fastapi import HTTPException
@@ -99,6 +97,8 @@ class TenantManager:
 
         return tenant_request
 
+    from typing import List
+
     async def get_all_users(self, current_user) -> List[user_param_model]:
         if current_user.role in ["admin"]:
             collection = self._engine.get_collection(db_user_account)
@@ -154,6 +154,8 @@ class TenantManager:
         if data.verified is not None:
             tenant.verified = data.verified
 
+        if data.user_quota<1:
+            data.user_quota = 1
         tenant.user_quota = data.user_quota
 
         if data.status is not None:
@@ -171,6 +173,42 @@ class TenantManager:
         ]
 
         await self._engine.save(tenant)
+
+        allowed_licenses = set(data.licenses or [])
+        if "maintainer" in allowed_licenses and current_user.role not in ["admin"]:
+            raise HTTPException(status_code=401, detail="Only admin can assign maintainer license")
+
+        users = await self._engine.find(db_user_account, db_user_account.company_uuid == tenant_id)
+        for u in users:
+            if "maintainer" in (u.licenses or []):
+                u.status = UserStatus.ACTIVE
+                if set(allowed_licenses) == {"free"}:
+                    u.licenses = ["maintainer"]
+                await self._engine.save(u)
+            elif not set(u.licenses or []).issubset(allowed_licenses):
+                u.status = UserStatus.DISABLE
+                u.licenses = ["free"]
+                await self._engine.save(u)
+
+        active_count = await self._engine.count(
+            db_user_account,
+            (db_user_account.company_uuid == tenant_id) &
+            (db_user_account.status == UserStatus.ACTIVE.value)
+        )
+        if tenant.user_quota and active_count > tenant.user_quota:
+            excess = active_count - tenant.user_quota
+            extra_users = await self._engine.find(
+                db_user_account,
+                (db_user_account.company_uuid == tenant_id) &
+                (db_user_account.status == UserStatus.ACTIVE.value) &
+                (db_user_account.licenses != ["maintainer"]),
+                limit=excess
+            )
+            for u in extra_users:
+                u.status = UserStatus.DISABLE.value
+                u.licenses = ["free"]
+                await self._engine.save(u)
+
         await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant")
 
         return {"message": "Tenant updated", "user": current_user.username, "company": tenant.companyName}
@@ -183,12 +221,14 @@ class TenantManager:
 
         if current_user.role in ["admin"]:
             if user.role not in ["demo", "analyst"]:
-                await AuditLogManager.get_instance().register(str(current_user.id), f"update_user_denied:{request.username}")
+                await AuditLogManager.get_instance().register(str(current_user.id),
+                                                              f"update_user_denied:{request.username}")
                 raise HTTPException(status_code=401, detail="Admin can only update demo and analyst users")
         elif current_user.licenses == ["maintainer"] and user.company_uuid == current_user.company_uuid:
             pass
         else:
-            await AuditLogManager.get_instance().register(str(current_user.id), f"update_user_denied:{request.username}")
+            await AuditLogManager.get_instance().register(str(current_user.id),
+                                                          f"update_user_denied:{request.username}")
             raise HTTPException(status_code=401, detail="You are not allowed to update this user")
 
         if user.role in ["admin"]:
@@ -197,6 +237,29 @@ class TenantManager:
         if user.role in ["admin", "crawl"]:
             await AuditLogManager.get_instance().register(str(user.id), f"update_user_denied:{request.username}")
             raise HTTPException(status_code=401, detail="This user type cannot be updated")
+
+        tenant_company_uuid = user.company_uuid
+        if user.role == "profile":
+            tenant_company_uuid = getattr(current_user, "company_uuid", None) or tenant_company_uuid
+
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_company_uuid))
+        if not tenant:
+            raise HTTPException(status_code=401, detail="Tenant not found")
+
+        dek = await TenantKeyManager.get_instance().get_profile_dek(str(tenant.id))
+        enc = Fernet(dek)
+        tenant_allowed = set(enc.decrypt(l.encode()).decode() for l in (tenant.licenses or []))
+
+        req_lic = [x.value if hasattr(x, "value") else str(x) for x in (request.licenses or [])]
+        if req_lic and not set(req_lic).issubset(tenant_allowed):
+            raise HTTPException(status_code=401, detail="Tenant does not have access to assigned license")
+
+        tenant_users_count = await self._engine.count(
+            db_user_account,
+            db_user_account.company_uuid == str(tenant_company_uuid)
+        )
+        if tenant.user_quota and tenant_users_count > tenant.user_quota:
+            raise HTTPException(status_code=400, detail="User quota exceeded delete some users")
 
         if request.status.value == "disable":
             user.status = UserStatus.DISABLE.value
@@ -211,11 +274,7 @@ class TenantManager:
 
     async def delete_profile_icon(self, current_user):
         image_path = self.IMAGE_DIR / f"{current_user.id}.png"
-        print(":::::::::::::::::::::::::::::::::::1",flush=True)
-        print(image_path,flush=True)
-        print(":::::::::::::::::::::::::::::::::::2",flush=True)
         if image_path.exists():
-            print(":::::::::::::::::::::::::::::::::::3", flush=True)
             image_path.unlink()
 
         await AuditLogManager.get_instance().register("system", f"update_user_failed:{current_user.id}")
@@ -275,8 +334,7 @@ class TenantManager:
 
         return result
 
-
-    async def create_company_user(self,data: tenant_team_model, current_user):
+    async def create_company_user(self, data: tenant_team_model, current_user):
         try:
             engine = mongo_controller.get_instance().get_engine()
 
@@ -308,7 +366,6 @@ class TenantManager:
             else:
                 if len(password) > 256:
                     raise HTTPException(status_code=400, detail="Password too long")
-
                 try:
                     hashed_password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
                 except Exception:
@@ -317,6 +374,30 @@ class TenantManager:
             company_uuid = getattr(current_user, "company_uuid", None)
             if not company_uuid:
                 raise HTTPException(status_code=400, detail="Invalid company association")
+
+            tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(company_uuid))
+            if not tenant:
+                raise HTTPException(status_code=400, detail="Tenant not found")
+
+            dek = await TenantKeyManager.get_instance().get_profile_dek(str(tenant.id))
+            enc = Fernet(dek)
+
+            tenant_allowed = set(
+                enc.decrypt(l.encode()).decode()
+                for l in (tenant.licenses or [])
+            )
+
+            requested = set(data.licenses or [])
+
+            if requested and not requested.issubset(tenant_allowed):
+                raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
+
+            users_count = await engine.count(
+                db_user_account,
+                db_user_account.company_uuid == company_uuid
+            )
+            if tenant.user_quota and users_count >= tenant.user_quota:
+                raise HTTPException(status_code=400, detail="User quota exceeded")
 
             user = db_user_account(
                 username=username,
@@ -336,12 +417,15 @@ class TenantManager:
                 "message": "User created successfully",
                 "username": username,
                 "email": email,
-                "company_uuid": company_uuid
+                "company_uuid": company_uuid,
+                "allowed_licenses": list(tenant_allowed),
             }
 
+        except HTTPException as e:
+            raise e
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e) or "Error creating user")
-        
+
     async def create_demo_user(self,data: tenant_team_model):
         try:
             engine = mongo_controller.get_instance().get_engine()
