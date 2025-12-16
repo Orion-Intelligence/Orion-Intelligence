@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import {NgFor, CommonModule, NgOptimizedImage} from '@angular/common';
+import { Component, effect, OnInit, signal } from '@angular/core';
+import { NgFor, CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
@@ -19,40 +19,38 @@ import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
 import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
 import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
 import { LicenseService } from '../../../../services/licenses/licenses.service';
-import {overlayAnimation} from '../../../animations/popup.animations';
+import { overlayAnimation } from '../../../animations/popup.animations';
 
 @Component({
-  selector: 'app-sidebar-profile-alerts',
+  selector: 'app-sidebar-user-homepage',
   imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage],
-  templateUrl: './sidebar-profile-alerts.component.html',
+  templateUrl: './sidebar-user-homepage.component.html',
   animations: [overlayAnimation],
 })
-export class SidebarProfileAlertsComponent implements OnInit {
+export class SidebarUserHomepageComponent implements OnInit {
   alertCategories: AlertCategorySummary[] = [];
   criticalRisks: number = 0;
   highRisks: number = 0;
   mediumRisks: number = 0;
   lowRisks: number = 0;
-  isLoading: boolean = false;
-  isConfirmationOpen$ = new BehaviorSubject<boolean>(false);
-  constructor(public appService: AppService, private alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
+  isConfirmationOpen = signal(false);
+  constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
     private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
+    effect(() => {
+      if (this.alertService.isAlertScanLoading() === false) {
+        this.initializeData();
+      }
+    });
   }
 
   ngOnInit(): void {
     if (this.isProfile()) {
       this.checkScanProgress();
-      this.alertService.isAlertScanLoading$.subscribe(v => this.isLoading = v);
-      this.initializData()
-      this.alertService.isAlertScanLoading$
-        .subscribe(isLoading => {
-          if (!isLoading) {
-            this.initializData();
-          }
-        });
+      this.initializeData()
+
     }
   }
-  initializData() {
+  initializeData() {
     this.alertCategories = this.convertAlertsToCategories(this.appService.userSessionData().alerts);
     this.countRiskCount(this.appService.userSessionData().alerts);
   }
@@ -62,7 +60,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
       return;
     }
     stream.subscribe(res => {
-      this.alertService.isAlertScanLoading$.next(res.scan_running);
+      this.alertService.isAlertScanLoading.set(res.scan_running);
     });
   }
   isAdmin(): boolean {
@@ -70,9 +68,6 @@ export class SidebarProfileAlertsComponent implements OnInit {
   }
   isProfile(): boolean {
     return this.authService.getRole() === 'profile';
-  }
-  isAnalyst(): boolean {
-    return this.authService.getRole() === 'analyst';
   }
   convertAlertsToCategories(alerts: AlertModel[]): AlertCategorySummary[] {
     const activeAlerts = alerts.filter(a => a.status !== 'ignore');
@@ -209,21 +204,23 @@ export class SidebarProfileAlertsComponent implements OnInit {
     this.alertService.scanIOCs();
   }
   flushAll() {
-    this.isConfirmationOpen$.next(true);
+    this.isConfirmationOpen.set(true);
   }
   flushAllConfirmation(value: boolean) {
-    this.isConfirmationOpen$.next(false);
+    this.isConfirmationOpen.set(false);
     if (value === true) {
-      this.isLoading = true;
+      this.alertService.isAlertScanLoading.set(true)
       this.apiService.post('profile/alerts/delete/all', null).subscribe({
         next: () => {
           const alerts: AlertModel[] = [];
           this.appService.userSessionData().alerts = alerts;
           this.ngOnInit();
-          this.isLoading = false;
+          this.alertService.isAlertScanLoading.set(false)
+          // this.isLoading = false;
         },
         error: (err) => {
-          this.isLoading = false;
+          // this.isLoading = false;
+          this.alertService.isAlertScanLoading.set(false)
           this.messageNotificationService.show(err?.error?.detail || 'Failed to delete')
         },
       });
@@ -234,7 +231,8 @@ export class SidebarProfileAlertsComponent implements OnInit {
       next: response => {
         this.appService.userSessionData().alerts = response
         this.ngOnInit();
-        this.isLoading = false;
+        // this.isLoading = false;
+        this.alertService.isAlertScanLoading.set(false)
       }
     })
   }

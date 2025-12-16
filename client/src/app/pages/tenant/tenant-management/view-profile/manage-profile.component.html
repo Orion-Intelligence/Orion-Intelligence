@@ -74,9 +74,7 @@
                             {{ (user.role === 'admin' || user.licenses?.includes('maintainer')) ? 'View' : 'Edit' }}
                           </span>
 
-                          &nbsp;<img
-                            src="../../../../../assets/images/shared/search_side_dropdown_icon.svg"
-                            width="20"
+                          &nbsp;<img src="../../../../../assets/images/shared/search_side_dropdown_icon.svg" width="20"
                             height="20"
                             [style.transform]="expandedUserIndex === i ? 'rotate(180deg)' : 'rotate(0deg)'" />
 
@@ -136,46 +134,38 @@
                             </div>
                           </div>
 
-                          <div class="tenant-edit-section mt-4 mb-4" *ngIf="user.role !== 'admin' && !user.licenses?.includes('maintainer')">
+                          <div class="tenant-edit-section mt-4 mb-4"
+                            *ngIf="user.role !== 'admin' && !user.licenses?.includes('maintainer')">
                             <div class="section-heading">Edit user</div>
                             <div class="section-desc">Update User Data.</div>
 
                             <label class="sidebar_label mt-1">Status</label>
                             <div class="dropdown mb-3">
-                              <button
-                                aria-expanded="false"
+                              <button aria-expanded="false"
                                 class="btn dropdown-toggle sidebar_input w-100 text-start d-flex justify-content-between align-items-center dropdown-select"
-                                data-bs-toggle="dropdown"
-                                id="dropdownStatus"
-                                type="button">
+                                data-bs-toggle="dropdown" id="dropdownStatus" type="button">
                                 {{ user.status | titlecase }}
                               </button>
 
-                              <ul
-                                aria-labelledby="dropdownStatus"
+                              <ul aria-labelledby="dropdownStatus"
                                 class="dropdown-menu w-100 p-1 mt-2 border-0 shadow rounded-3">
 
                                 <li class="p-0">
-                                  <a
-                                    class="dropdown-item py-0 align-items-center"
-                                    (click)="user.status = 'active'">
+                                  <a class="dropdown-item py-0 align-items-center" (click)="user.status = 'active'">
                                     Active
                                   </a>
                                 </li>
                                 <li class="dropdown-divider m-0 mx-3"></li>
 
                                 <li class="p-0">
-                                  <a
-                                    class="dropdown-item py-0 align-items-center"
-                                    (click)="user.status = 'disable'">
+                                  <a class="dropdown-item py-0 align-items-center" (click)="user.status = 'disable'">
                                     Disable
                                   </a>
                                 </li>
                                 <li class="dropdown-divider m-0 mx-3"></li>
 
                                 <li class="p-0">
-                                  <a
-                                    class="dropdown-item py-0 align-items-center"
+                                  <a class="dropdown-item py-0 align-items-center"
                                     (click)="user.status = 'verification_pending'">
                                     Verification
                                   </a>
@@ -188,30 +178,25 @@
                             <div class="tenant-block">
                               <div class="tenant-title">Licenses</div>
                               <div class="license-grid">
-                              <ng-container *ngFor="let license of licenseList">
-                                <div *ngIf="license !== 'maintainer'"
-                                     class="license-card license-btn"
-                                     [class.license-selected]="user.licenses?.includes(license)"
-                                     [class.license-disabled]="isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData()?.preferences?.['licenses']?.includes(license))"
-                                     (click)="!(isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData()?.preferences?.['licenses']?.includes(license))) && toggleUserLicense(user, license)">
-                                  <span class="license-label">{{ getLicenseLabel(license) }}</span>
-                                </div>
-                              </ng-container>
+                                <ng-container *ngFor="let license of licenseList">
+                                  <div *ngIf="license !== 'maintainer'" class="license-card license-btn"
+                                    [class.license-selected]="user.licenses?.includes(license)"
+                                    [class.license-disabled]="isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData()?.preferences?.['licenses']?.includes(license))"
+                                    (click)="!(isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData()?.preferences?.['licenses']?.includes(license))) && toggleUserLicense(user, license)">
+                                    <span class="license-label">{{ getLicenseLabel(license) }}</span>
+                                  </div>
+                                </ng-container>
                               </div>
                               <hr class="tenant-divider">
                             </div>
 
                             <div class="d-flex justify-content-end mt-3 gap-2">
-                              <button
-                                type="button"
-                                class="btn btn-sm btn-danger expand-btn mr-2 p-2 pl-2 pr-2"
+                              <button type="button" class="btn btn-sm btn-danger expand-btn mr-2 p-2 pl-2 pr-2"
                                 (click)="deleteUser(user)">
                                 Delete User
                               </button>
 
-                              <button
-                                type="button"
-                                class="btn btn-sm btn-primary expand-btn p-2"
+                              <button type="button" class="btn btn-sm btn-primary expand-btn p-2"
                                 (click)="updateUser(user)">
                                 Save changes
                               </button>
@@ -322,6 +307,6 @@
 <ng-container *ngIf="showAddTenantPopup">
   <app-add-tenant (closs)="clossAddTenant()" (accountAdded)="ngOnInit()"></app-add-tenant>
 </ng-container>
-<ng-container *ngIf="isDeleteConfirmationOpen$ | async">
+<ng-container *ngIf="isDeleteConfirmationOpen()">
   <app-confirmation-popup (confirmed)="confirmDeleteUser($event)"></app-confirmation-popup>
 </ng-container>

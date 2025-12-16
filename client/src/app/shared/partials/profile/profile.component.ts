@@ -28,7 +28,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   username$: Observable<string | null>;
   role$: Observable<string | null>;
-  isNotificationOpen$ = new BehaviorSubject<boolean>(false);
+  isNotificationOpen = signal<boolean>(false);
 
   profile_image: string = "";
   licences: string = '';
@@ -165,10 +165,10 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openNotifications(): void {
-    this.isNotificationOpen$.next(true);
+    this.isNotificationOpen.set(true);
   }
   closeNotifications(): void {
-    this.isNotificationOpen$.next(false);
+    this.isNotificationOpen.set(false);
   }
   getUnseenAlertCount(): number {
     return this.appService.userSessionData().alerts.filter(alert => !alert.report_seen).length;

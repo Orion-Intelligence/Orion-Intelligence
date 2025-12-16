@@ -11,8 +11,9 @@
             <input type="text" class="add-tenant_input" placeholder="Enter username" [(ngModel)]="model.username"
                 name="username" />
             <div class="username-suggestion" *ngIf="usernameSuggestion">
-              <div class="suggestion-title">Username already taken, suggested usernames below</div>
-              <div class="suggestion-list">{{ usernameSuggestion.replace('Username already taken. Suggested usernames: ', '') }}</div>
+                <div class="suggestion-title">Username already taken, suggested usernames below</div>
+                <div class="suggestion-list">{{ usernameSuggestion.replace('Username already taken. Suggested usernames:
+                    ', '') }}</div>
             </div>
 
             <label class="add-tenant_label">Email</label>
@@ -66,10 +67,10 @@
             <hr class="tenant-divider">
 
             <div *ngIf="errorText"
-                 class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm d-block">
+                class="w-100 mt-2 px-3 py-2 rounded-lg bg-danger bg-opacity-75 text-white shadow-sm d-block">
 
-              <i class="bi bi-exclamation-diamond-fill me-2"></i>
-              {{ errorText }}
+                <i class="bi bi-exclamation-diamond-fill me-2"></i>
+                {{ errorText }}
             </div>
 
         </form>

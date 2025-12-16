@@ -9,11 +9,11 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-sidebar-profile-ioc',
+  selector: 'app-sidebar-user-ioc',
   imports: [NgIf, NgFor, CommonModule, FormsModule],
-  templateUrl: './sidebar-profile-ioc.component.html',
+  templateUrl: './sidebar-user-ioc.component.html',
 })
-export class SidebarProfileIocComponent implements OnInit {
+export class SidebarUserIocComponent implements OnInit {
   onboardingData!: TenantModel;
   showLeftFade = false;
   showRightFade = false;

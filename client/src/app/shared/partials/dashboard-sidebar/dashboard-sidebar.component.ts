@@ -176,7 +176,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       );
     }
 
-    if (this.isProfile()) {
+    if (this.isProfile() && !this.licenseService.getLicenses().includes('free')) {
       return categories.filter(
         c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS

@@ -1,16 +1,16 @@
-import {Component, OnInit, signal} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {AsyncPipe, NgOptimizedImage} from '@angular/common';
-import {PaginationComponent} from '../../../shared/partials/pagination/pagination.component';
-import {FiltersComponent} from '../../../shared/partials/filters/filters.component';
-import {Observable, BehaviorSubject, take} from 'rxjs';
-import {FilterModel} from '../../../shared/model/filter/filter.model';
-import {audit_filters} from '../../../shared/constants/filters';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AuditlogListComponent} from './auditlog-list/auditlog-list.component';
-import {AuditLogCallbackModel} from '../../../shared/model/auditlog/auditlog.model';
-import {AuditlogService} from '../../../services/auditlog/auditlog.service';
-import {DashboardService} from '../../../services/dashboard/dashboard.service';
+import { Component, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe, NgOptimizedImage } from '@angular/common';
+import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
+import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
+import { Observable, BehaviorSubject, take } from 'rxjs';
+import { FilterModel } from '../../../shared/model/filter/filter.model';
+import { audit_filters } from '../../../shared/constants/filters';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuditlogListComponent } from './auditlog-list/auditlog-list.component';
+import { AuditLogCallbackModel } from '../../../shared/model/auditlog/auditlog.model';
+import { AuditlogService } from '../../../services/auditlog/auditlog.service';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-auditlog',
@@ -104,7 +104,7 @@ export class AuditlogComponent implements OnInit {
       delete (this.filterModel.filters as any)[key].selected;
     });
     const currentUrl = this.router.url.split('?')[0];
-    this.router.navigateByUrl(currentUrl, {replaceUrl: true}).then(() => {
+    this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => {
       this.applyFilters(this.dashboard.selectedFilters())
     });
   }

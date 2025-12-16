@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../shared/services/api.service';
 import { HttpHeaders } from '@angular/common/http';
@@ -12,8 +12,8 @@ import {
   ConfirmationPopupComponent
 } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { BehaviorSubject } from 'rxjs';
-import {AuthService} from '../../../../services/authetication/auth.service';
-import {AppService} from '../../../../services/core/app/app.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { AppService } from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-view-profile',
@@ -28,10 +28,10 @@ export class ManageProfileComponent implements OnInit {
   selectedUserId: string | null = null;
   expandedUserIndex: number | null = null;
   showAddTenantPopup: boolean = false;
-  isDeleteConfirmationOpen$ = new BehaviorSubject<boolean>(false);
+  isDeleteConfirmationOpen = signal<boolean>(false);
   userToDelete: User | null = null;
 
-  constructor(public apiService: ApiService, protected appService:AppService) {
+  constructor(public apiService: ApiService, protected appService: AppService) {
   }
 
   ngOnInit(): void {
@@ -144,11 +144,11 @@ export class ManageProfileComponent implements OnInit {
 
   deleteUser(user: User) {
     this.userToDelete = user;
-    this.isDeleteConfirmationOpen$.next(true);
+    this.isDeleteConfirmationOpen.set(true);
   }
 
   confirmDeleteUser(value: boolean) {
-    this.isDeleteConfirmationOpen$.next(false);
+    this.isDeleteConfirmationOpen.set(false);
     if (!value || !this.userToDelete) {
       this.userToDelete = null;
       return;

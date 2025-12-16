@@ -1,11 +1,11 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {NgFor, NgIf} from '@angular/common';
-import {LicenseName} from '../../../../shared/model/licenses/license.rules';
-import {TenantTeamModel} from '../../../../shared/model/tenant/tenant.model';
-import {ApiService} from '../../../../shared/services/api.service';
-import {AuthService} from '../../../../services/authetication/auth.service';
-import {popupAnimation, overlayAnimation} from '../../../../shared/animations/popup.animations';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgFor, NgIf } from '@angular/common';
+import { LicenseName } from '../../../../shared/model/licenses/license.rules';
+import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
+import { ApiService } from '../../../../shared/services/api.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 
 @Component({
   selector: 'app-add-tenant',
