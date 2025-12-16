@@ -20,8 +20,8 @@ export class HomepageComponent implements OnInit, AfterViewInit {
     const role = this.authService.getRole();
     if (role == "profile" || role=="admin")
       this.router.navigate(['dashboard/profile/homepage']).then();
-    if (this.authService.getIsMobileDemo())
-      this.router.navigate(['dashboard/strategic/all']).then();
+    // if (this.authService.getIsMobileDemo())
+    //   this.router.navigate(['dashboard/strategic/all']).then();
 
 
     this.router.events

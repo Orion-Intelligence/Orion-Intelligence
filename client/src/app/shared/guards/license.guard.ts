@@ -14,7 +14,7 @@ export class LicenseGuard implements CanActivate {
         return this.licenseService.loadLicenses().pipe(
             map(() => {
                 const role = this.authService.getRole();
-                if (role == "profile" || role == "admin" || role == "analyst") return true;
+                if (role == "member" || role == "admin" || role == "analyst") return true;
                 this.router.navigate(['dashboard/strategic']).then();
                 return false;
             })

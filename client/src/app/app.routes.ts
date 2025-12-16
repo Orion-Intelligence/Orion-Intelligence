@@ -35,7 +35,7 @@ import { PaymentGatewayComponent } from './shared/partials/payment-gateway/payme
 import { NotificationComponent } from './shared/partials/notification/notification.component';
 import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
 import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/account-settings.component';
-import { SessionDataResolver } from './shared/resolvers/session-data-resolver.service';
+import { NodeResolver } from './shared/resolvers/session-data-resolver.service';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
 import { LicenseGuard } from './shared/guards/license.guard';
@@ -161,7 +161,7 @@ export const routes: Routes = [
     resolve: {
       config: ConfigResolver,
       session: DashboardResolver,
-      profile: SessionDataResolver
+      profile: NodeResolver
     },
     data: { animation: 'DashboardPage' },
     children: [

@@ -22,10 +22,10 @@ export class HomeAccessGuard implements CanActivate {
         const role = this.authService.getRole();
 
         if (role === 'demo' && mode === 'free') {
-            return of(this.router.createUrlTree(
-                ['dashboard/strategic/all'],
-                { queryParams: Object.fromEntries(urlParams) }
-            ));
+            // return of(this.router.createUrlTree(
+            //     ['dashboard/strategic/all'],
+            //     { queryParams: Object.fromEntries(urlParams) }
+            // ));
         }
 
         if (role === 'admin' || role === 'demo') {
