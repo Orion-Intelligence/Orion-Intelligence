@@ -7,12 +7,10 @@ class UserStatus(str, Enum):
     ACTIVE = "active"
     DISABLE = "disable"
 
-class tenant_param_model(BaseModel):
+class user_param_model(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
     status: Optional[UserStatus] = None
     subscription: Optional[bool] = None
     licenses: Optional[List[LicenseName]] = None
     preferences: Optional[Dict[str, Any]] = None
-
-    model_config = ConfigDict(extra="allow")

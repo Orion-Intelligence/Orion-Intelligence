@@ -34,8 +34,8 @@ import { DashboardResolver } from './shared/resolvers/dashboard.resolver';
 import { PaymentGatewayComponent } from './shared/partials/payment-gateway/payment-gateway.component';
 import { NotificationComponent } from './shared/partials/notification/notification.component';
 import { TrailNotificationComponent } from './shared/partials/trail-notification/trail-notification.component';
-import { SidebarProfileSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component';
-import { ProfileResolver } from './shared/resolvers/profile.resolver';
+import { AccountSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-settings/account-settings.component';
+import { SessionDataResolver } from './shared/resolvers/session-data-resolver.service';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
 import { LicenseGuard } from './shared/guards/license.guard';
@@ -43,7 +43,7 @@ import { SidebarProfileAlertsComponent } from './shared/partials/sidebar-profile
 import { CategoryAlertReportComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component';
 import { AddCustomAlertComponent } from './shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component';
 import { HomeAccessGuard } from './shared/guards/home-access.guard';
-import { ViewProfileComponent } from './pages/tenant/tenant-management/view-profile/view-profile.component';
+import { ManageProfileComponent } from './pages/tenant/tenant-management/view-profile/manage-profile.component';
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-profile/sidebar-profile-system-settings/sidebar-profile-system-settings.component';
 import {ConfigResolver} from './shared/resolvers/config.resolver';
@@ -161,7 +161,7 @@ export const routes: Routes = [
     resolve: {
       config: ConfigResolver,
       session: DashboardResolver,
-      profile: ProfileResolver
+      profile: SessionDataResolver
     },
     data: { animation: 'DashboardPage' },
     children: [
@@ -576,7 +576,7 @@ export const routes: Routes = [
           },
           {
             path: 'view-profiles',
-            component: ViewProfileComponent,
+            component: ManageProfileComponent,
             data: { type: 'view', animation: 'CategoryPage' }
           },
           {
@@ -647,12 +647,12 @@ export const routes: Routes = [
           },
           {
             path: 'users',
-            component: ViewProfileComponent,
+            component: ManageProfileComponent,
             data: { type: 'profile', animation: 'CategoryPage' }
           },
           {
             path: 'account',
-            component: SidebarProfileSettingsComponent,
+            component: AccountSettingsComponent,
             data: { type: 'account', animation: 'CategoryPage' }
           },
           {

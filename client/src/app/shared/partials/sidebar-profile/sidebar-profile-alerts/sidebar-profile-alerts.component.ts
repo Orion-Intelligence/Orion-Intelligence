@@ -53,8 +53,8 @@ export class SidebarProfileAlertsComponent implements OnInit {
     }
   }
   initializData() {
-    this.alertCategories = this.convertAlertsToCategories(this.appService.userProfile().alerts);
-    this.countRiskCount(this.appService.userProfile().alerts);
+    this.alertCategories = this.convertAlertsToCategories(this.appService.userSessionData().alerts);
+    this.countRiskCount(this.appService.userSessionData().alerts);
   }
   checkScanProgress() {
     const stream = this.alertService.autoCheckScanStatus();
@@ -218,7 +218,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
       this.apiService.post('profile/alerts/delete/all', null).subscribe({
         next: () => {
           const alerts: AlertModel[] = [];
-          this.appService.userProfile().alerts = alerts;
+          this.appService.userSessionData().alerts = alerts;
           this.ngOnInit();
           this.isLoading = false;
         },
@@ -232,7 +232,7 @@ export class SidebarProfileAlertsComponent implements OnInit {
   getLatestAlerts() {
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
-        this.appService.userProfile().alerts = response
+        this.appService.userSessionData().alerts = response
         this.ngOnInit();
         this.isLoading = false;
       }

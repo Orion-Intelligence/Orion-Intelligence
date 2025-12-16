@@ -55,7 +55,7 @@ export class CategoryAlertReportComponent implements OnInit {
       this.category = lastSegment;
     });
     this.iocTypes = { ...search_filter_labels };
-    this.alerts = this.convertAlertsList(this.appService.userProfile().alerts, this.category);
+    this.alerts = this.convertAlertsList(this.appService.userSessionData().alerts, this.category);
     this.filteredAlerts = this.alerts;
   }
   flushAll() {
@@ -78,7 +78,7 @@ export class CategoryAlertReportComponent implements OnInit {
   showAlertPopup(action: string, id: string) {
     switch (action) {
       case 'edit':
-        const alert = this.appService.userProfile().alerts.find(a => a.alert_id === id);
+        const alert = this.appService.userSessionData().alerts.find(a => a.alert_id === id);
         if (alert) {
           this.selectedAlert = alert;
           this.showEditAlertPopup = true;
@@ -175,8 +175,8 @@ export class CategoryAlertReportComponent implements OnInit {
   getLatestAlerts() {
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
-        this.appService.userProfile().alerts = response
-        this.alerts = this.convertAlertsList(this.appService.userProfile().alerts, this.category);
+        this.appService.userSessionData().alerts = response
+        this.alerts = this.convertAlertsList(this.appService.userSessionData().alerts, this.category);
         this.filteredAlerts = this.alerts;
       }
     })
@@ -187,7 +187,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
       if (hasEnterprise) {
 
-        const alerts = this.appService.userProfile().alerts;
+        const alerts = this.appService.userSessionData().alerts;
         const _alert = alerts.find(a => a.alert_id === id);
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';

@@ -1,24 +1,26 @@
 from fastapi import APIRouter, Body
 from fastapi import Depends, UploadFile
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
+from orion.api.interactive.account_manager.account_manager import AccountManager
+from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
+from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
+from orion.api.interactive.profile_manager.model.profile_parma_model import AccountParmaModel
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert_job import alert_job
-from orion.api.interactive.tenant_manager.models.tenant_team_model import tenant_team_model
+from orion.api.interactive.account_manager.models.user_model import user_model
 
 tenant_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))],
     tags=["Orion API"],
 )
-public_routes = APIRouter(tags=["Public"])
 
 
 @tenant_routes.post(
@@ -37,7 +39,7 @@ async def get_tenant(current_user=Depends(get_current_user)):
 
 
 @tenant_routes.post(
-    "/api/tenants/update",
+    "/api/update/tenants",
     summary="Update tenant",
     description="Update tenant configuration and metadata for the current user's tenant.",
     tags=["Tenant"],
@@ -67,7 +69,7 @@ async def update_tenant(data: TenantRequest, current_user=Depends(get_current_us
     dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN]))],
 )
 async def get_tenant_users(current_user=Depends(get_current_user)):
-    return await TenantManager.get_instance().get_all_users(current_user)
+    return await AccountManager.get_instance().get_all_users(current_user)
 
 
 @tenant_routes.post(
@@ -97,7 +99,21 @@ async def get_all_tenants():
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
 async def update_user(user: tenant_param_model, current_user=Depends(get_current_user)):
-    return await TenantManager.get_instance().update_user(user, current_user)
+    return await AccountManager.get_instance().update_user(user, current_user)
+
+@tenant_routes.post(
+    "/api/update/current/user",
+    summary="Update user",
+    description="Update user profile and access details within the tenant.",
+    tags=["Users"],
+    operation_id="updateUser",
+    response_description="Updated user information.",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+)
+async def update_user(user: user_meta_model, current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().update_current_user(user, current_user)
 
 @tenant_routes.post(
     "/api/delete/profile/image",
@@ -106,7 +122,7 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.ANALYST]))],
 )
 async def update_user(current_user=Depends(get_current_user)):
-    return await TenantManager.get_instance().delete_profile_icon(current_user)
+    return await TenantManager.get_instance().delete_user_icon(current_user)
 
 @tenant_routes.post(
     "/api/delete/user",
@@ -119,7 +135,7 @@ async def update_user(current_user=Depends(get_current_user)):
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
-async def delete_user(user: tenant_param_model, current_user=Depends(get_current_user)):
+async def delete_user(user: user_param_model, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().delete_user(user, current_user)
 
 
@@ -137,8 +153,8 @@ async def delete_user(user: tenant_param_model, current_user=Depends(get_current
         Depends(license_required("maintainer")),
     ],
 )
-async def create_tenant_user(data: tenant_team_model, current_user=Depends(get_current_user)):
-    return await TenantManager.get_instance().create_company_user(data, current_user)
+async def create_tenant_user(data: user_model, current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().create_tenant_user(data, current_user)
 
 
 @tenant_routes.post(
@@ -152,7 +168,7 @@ async def create_tenant_user(data: tenant_team_model, current_user=Depends(get_c
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def create_admin_demo_user(data: tenant_team_model):
+async def create_admin_demo_user(data: user_model):
     return await TenantManager.get_instance().create_demo_user(data)
 
 
@@ -189,7 +205,7 @@ async def get_company_profile(current_user=Depends(get_current_user)):
 
 
 @tenant_routes.post(
-    "/api/update/company/profile",
+    "/api/update/profile/account",
     summary="Update company profile",
     description="Update company profile data for the current tenant.",
     tags=["Profile", "Company"],
@@ -197,14 +213,10 @@ async def get_company_profile(current_user=Depends(get_current_user)):
     response_description="Updated company profile data.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[
-        Depends(role_required([user_role.PROFILE])),
-        Depends(status_required([UserStatus.ACTIVE])),
-        Depends(license_required("maintainer")),
-    ],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
 )
-async def update_company_profile(data: ProfileParmaModel, current_user=Depends(get_current_user)):
-    return await ProfileManager.getInstance().updateCompanyProfile(data, current_user)
+async def update_profile_account(data: AccountParmaModel, current_user=Depends(get_current_user)):
+    return await ProfileManager.getInstance().updateProfile(data, current_user)
 
 @tenant_routes.post(
     "/api/upload/image",

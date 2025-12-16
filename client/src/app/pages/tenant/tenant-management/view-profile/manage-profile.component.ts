@@ -19,9 +19,9 @@ import {AppService} from '../../../../services/core/app/app.service';
   selector: 'app-view-profile',
   imports: [NgFor, FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
-  templateUrl: './view-profile.component.html'
+  templateUrl: './manage-profile.component.html'
 })
-export class ViewProfileComponent implements OnInit {
+export class ManageProfileComponent implements OnInit {
   users: User[] = [];
   licenseList = Object.values(LicenseName);
   isLoading = true;

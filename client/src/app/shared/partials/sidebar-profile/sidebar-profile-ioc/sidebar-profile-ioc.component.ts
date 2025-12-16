@@ -84,7 +84,7 @@ export class SidebarProfileIocComponent implements OnInit {
     };
     this.setIocLocal();
     this.appService.tenantData.set({ ...filteredOnboardingData });
-    this.apiService.post('tenants/update', filteredOnboardingData).subscribe({
+    this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => {
         this.authService.setOnboarding(true);
         this.router.navigate(['/dashboard']).then();

@@ -12,7 +12,7 @@
 @use 'app/pages/homepage/selected-filter-bar/selected-filter-bar.component.css';
 @use 'app/pages/tenant/tenant.component.css';
 @use 'app/pages/tenant/tenant-management/view-tenant.component-shared.css';
-@use 'app/pages/tenant/tenant-management/view-profile/view-profile.component.css';
+@use 'app/pages/tenant/tenant-management/view-profile/manage-profile.component.css';
 @use 'app/pages/tenant/tenant-management/add-tenant/add-tenant.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/alert-scan-loading/alert-scan-loading.component.css';
@@ -21,7 +21,7 @@
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/sidebar-profile-settings.component.css';
+@use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/account-settings.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/profile-image-picker/profile-image-picker.component.css';
 @use 'app/shared/partials/sidebar-profile/sidebar-profile-system-settings/sidebar-profile-system-settings.component.css';
 @use 'app/pages/welcome/welcome.component.css';

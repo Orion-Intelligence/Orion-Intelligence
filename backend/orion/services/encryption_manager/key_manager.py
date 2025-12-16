@@ -8,14 +8,14 @@ from orion.services.encryption_manager.encryption_manager import encryption_mana
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
 
-class TenantKeyManager:
+class KeyManager:
     _instance = None
 
     @staticmethod
     def get_instance():
-        if TenantKeyManager._instance is None:
-            TenantKeyManager._instance = TenantKeyManager()
-        return TenantKeyManager._instance
+        if KeyManager._instance is None:
+            KeyManager._instance = KeyManager()
+        return KeyManager._instance
 
     def __init__(self):
         self._engine: AIOEngine = mongo_controller.get_instance().get_engine()

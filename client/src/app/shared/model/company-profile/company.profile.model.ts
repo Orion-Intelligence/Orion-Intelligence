@@ -1,4 +1,4 @@
-export interface CompanyProfile {
+export interface userSessionData {
     companyName: string;
     email: string;
     phone: number | null;
@@ -6,6 +6,7 @@ export interface CompanyProfile {
     city: string;
     postalCode: string;
     taxId: string;
+    twofa_enabled: boolean;
     preferences?: {
         [key: string]: any;
     };
@@ -13,6 +14,14 @@ export interface CompanyProfile {
     licenses: string[];
     assignedQuota: number;
     quotaExceeded:false
+}
+
+export interface userMetaData {
+    username: string;
+    twofa_enabled:boolean
+    preferences?: {
+        [key: string]: any;
+    };
 }
 
 export interface AlertAllIoc {

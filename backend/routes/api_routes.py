@@ -50,6 +50,8 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
     DomainScanRequest,
 )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
+from orion.api.server.entity_manager.entity_manager import entity_manager
+from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import (
     UserStatus,
@@ -938,6 +940,20 @@ async def get_social_stix_document(
 ):
     return await StixManager.get_instance().get_social_stix(doc_id, lang)
 
+@api_routes.get(
+    "/api/graph",
+    summary="Get entity graph relationships",
+    description="Fetch graph relationships for a given entity based on its type and value.",
+    tags=["Graph", "Entities"],
+    operation_id="getEntityRelations",
+    response_description="Graph structure representing relationships for the requested entity.",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(license_required("cti_graph"))],
+)
+async def get_entity_relations(query: EntityQueryModel = Depends()):
+    manager = entity_manager.get_instance()
+    return await manager.get_entity_relations(query)
 
 @api_routes.get(
     "/api/search/news/stix/{doc_id}",

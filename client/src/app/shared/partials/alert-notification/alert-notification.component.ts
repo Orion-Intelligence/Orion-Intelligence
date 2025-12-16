@@ -31,7 +31,7 @@ export class AlertNotificationComponent implements OnChanges {
     if (changes['isNotificationOpen']) {
       const value = changes['isNotificationOpen'].currentValue;
       if (value === true) {
-        this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
+        this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
       }
     }
   }
@@ -107,7 +107,7 @@ export class AlertNotificationComponent implements OnChanges {
       const hasEnterprise = licenses.includes('enterprise');
 
       if (hasEnterprise) {
-        const alerts = this.appService.userProfile().alerts;
+        const alerts = this.appService.userSessionData().alerts;
         const _alert = alerts.find(a => a.data_hash === hash);
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';
@@ -203,7 +203,7 @@ export class AlertNotificationComponent implements OnChanges {
     this.closeNotification.emit();
   }
   clearAll() {
-    const alerts = this.appService.userProfile().alerts;
+    const alerts = this.appService.userSessionData().alerts;
 
     if (!alerts) return;
 
@@ -229,8 +229,8 @@ export class AlertNotificationComponent implements OnChanges {
   getLatestAlerts() {
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
-        this.appService.userProfile().alerts = response
-        this.alertNotifications = this.convertToAlertNotifications(this.appService.userProfile().alerts);
+        this.appService.userSessionData().alerts = response
+        this.alertNotifications = this.convertToAlertNotifications(this.appService.userSessionData().alerts);
       }
     })
   }

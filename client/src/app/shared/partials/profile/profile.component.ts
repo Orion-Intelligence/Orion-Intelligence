@@ -83,7 +83,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   onDropdownOpen() {
     const rawLicenses = this.authService.getLicenses();
     this.licences = rawLicenses.map(l => this.getLicenseLabel(l)).join(', ');
-    this.profile_image = '/api/s/static/' + this.appService.userProfile().preferences?.['userId'] + "?stamp=" + Math.random().toString(36).substring(2)
+    this.profile_image = '/api/s/static/' + this.appService.userSessionData().preferences?.['userId'] + "?stamp=" + Math.random().toString(36).substring(2)
   }
 
   getLicenseLabel(name: string): string {
@@ -171,7 +171,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isNotificationOpen$.next(false);
   }
   getUnseenAlertCount(): number {
-    return this.appService.userProfile().alerts.filter(alert => !alert.report_seen).length;
+    return this.appService.userSessionData().alerts.filter(alert => !alert.report_seen).length;
   }
 
 }

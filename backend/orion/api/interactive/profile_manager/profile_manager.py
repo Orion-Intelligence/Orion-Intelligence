@@ -5,10 +5,10 @@ from fastapi import UploadFile,HTTPException
 from fastapi.responses import Response
 from pathlib import Path
 from cryptography.fernet import Fernet
-from orion.services.encryption_manager.tenant_key_manager import TenantKeyManager
+from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.api.interactive.profile_manager.model.profile_parma_model import ProfileParmaModel
+from orion.api.interactive.profile_manager.model.profile_parma_model import AccountParmaModel
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
@@ -36,11 +36,11 @@ class ProfileManager:
 
     @staticmethod
     async def _dek(user_id: str) -> bytes:
-        return await TenantKeyManager.get_instance().get_or_create_dek(user_id)
+        return await KeyManager.get_instance().get_or_create_dek(user_id)
 
-    async def getCompanyProfileData(self, current_user) -> ProfileParmaModel:
+    async def getCompanyProfileData(self, current_user) -> AccountParmaModel:
         user = current_user
-        empty_company = ProfileParmaModel(
+        empty_company = AccountParmaModel(
             companyName="",
             phone="",
             email=user.email,
@@ -48,6 +48,7 @@ class ProfileManager:
             city="",
             postalCode="",
             taxId="",
+            twofa_enabled = False,
             preferences=deepcopy(user.preferences) or {},
             alerts=[]
         )
@@ -55,8 +56,10 @@ class ProfileManager:
         if user.role != user_role.PROFILE:
             if "userId" not in empty_company.preferences:
                 empty_company.preferences["userId"] = str(user.id)
-            empty_company.preferences["twoFa"] = str(user.twofa_enabled)
             empty_company.preferences["licenses"] = []
+            empty_company.preferences = user.preferences
+            empty_company.twofa_enabled = current_user.twofa_enabled
+
             return empty_company
 
         tenant = await self._engine.find_one(
@@ -82,7 +85,7 @@ class ProfileManager:
 
         alerts_list = AlertManager.getInstance().filter_alerts_by_license(raw_alerts, user)
 
-        company = ProfileParmaModel(
+        company = AccountParmaModel(
             companyName=safe_decrypt(tenant.companyName),
             phone=safe_decrypt(tenant.phone),
             email=user.email,
@@ -91,8 +94,11 @@ class ProfileManager:
             postalCode=safe_decrypt(tenant.postal_code),
             taxId=safe_decrypt(tenant.id),
             preferences=deepcopy(user.preferences) or {},
+            twofa_enabled = user.twofa_enabled,
             alerts=alerts_list
         )
+        print(user.twofa_enabled, flush=True)
+        print(":::::::::::::::::::::::::::", flush=True)
         for key, value in company.preferences.items():
             if value and isinstance(value, str):
                 try:
@@ -108,14 +114,32 @@ class ProfileManager:
             db_user_account.company_uuid == str(user.company_uuid)
         )
 
-        company.preferences["twoFa"] = str(user.twofa_enabled)
         company.preferences["licenses"] = [safe_decrypt(l) for l in (tenant.licenses or [])]
         company.preferences["assignedQuota"] = assigned_quota
         company.preferences["quotaExceeded"] = bool(tenant.user_quota and assigned_quota >= tenant.user_quota)
 
         return company
 
-    async def updateCompanyProfile(self,data: ProfileParmaModel, current_user):
+    async def updateUser(self, data: AccountParmaModel, current_user):
+        dek = await self._dek(str(current_user.id))
+        enc = Fernet(dek)
+
+        if data.preferences and "twoFa" in data.preferences:
+            value = data.preferences["twoFa"]
+            if isinstance(value, str):
+                current_user.twofa_enabled = value.lower() == "true"
+
+        if data.preferences:
+            for key, value in data.preferences.items():
+                if value and isinstance(value, str):
+                    data.preferences[key] = enc.encrypt(value.encode()).decode()
+
+        current_user.preferences = data.preferences
+        await self._engine.save(current_user)
+        await AuditLogManager.get_instance().register(str(current_user.id), "update_user")
+        return {"message": "User updated successfully"}
+
+    async def updateProfile(self, data: AccountParmaModel, current_user):
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.company_uuid))
         dek = await self._dek(str(tenant.id))
         enc = Fernet(dek)
@@ -127,8 +151,10 @@ class ProfileManager:
             value = data.preferences["twoFa"]
             if isinstance(value, str):
                 current_user.twofa_enabled = value.lower() == "true"
+
+
         for key, value in data.preferences.items():
-            if value: 
+            if value:
                 if isinstance(value, str):
                     data.preferences[key] = enc.encrypt(value.encode()).decode()
 

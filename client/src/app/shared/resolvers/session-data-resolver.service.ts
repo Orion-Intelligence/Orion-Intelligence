@@ -3,19 +3,19 @@ import {Resolve} from '@angular/router';
 import {Observable, of} from 'rxjs';
 import {catchError, shareReplay, tap} from 'rxjs/operators';
 import {ApiService} from '../services/api.service';
-import {CompanyProfile} from '../model/company-profile/company.profile.model';
+import {userSessionData} from '../model/company-profile/company.profile.model';
 import {AppService} from '../../services/core/app/app.service';
 
 @Injectable({providedIn: 'root'})
-export class ProfileResolver implements Resolve<CompanyProfile> {
-  private cache$?: Observable<CompanyProfile>;
+export class SessionDataResolver implements Resolve<userSessionData> {
+  private cache$?: Observable<userSessionData>;
 
   constructor(private apiService: ApiService, private appService: AppService) {
   }
 
-  resolve(): Observable<CompanyProfile> {
+  resolve(): Observable<userSessionData> {
     return this.apiService
-      .post<CompanyProfile>('get/company/profile', {})
+      .post<userSessionData>('get/company/profile', {})
       .pipe(
         catchError(err => {
           console.error('Failed to load profile', err);
@@ -23,8 +23,8 @@ export class ProfileResolver implements Resolve<CompanyProfile> {
         }),
         tap(profile => {
           if (profile) {
-            this.appService.userProfile.set(profile);
-            console.log(this.appService.userProfile().preferences?.['userId']);
+            this.appService.userSessionData.set(profile);
+            console.log(this.appService.userSessionData().preferences?.['userId']);
           }
         }),
         shareReplay(1)

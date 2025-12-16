@@ -1,4 +1,4 @@
-<div *ngIf="appService.userProfile()?.preferences?.['quotaExceeded']"
+<div *ngIf="appService.userSessionData()?.preferences?.['quotaExceeded']"
      class="alert alert-warning text-center rounded-0 mb-0 quota-banner"
      role="alert">
   <strong>User quota exceeded.</strong>

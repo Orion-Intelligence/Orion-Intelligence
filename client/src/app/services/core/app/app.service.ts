@@ -6,7 +6,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
-import { CompanyProfile } from '../../../shared/model/company-profile/company.profile.model';
+import { userSessionData } from '../../../shared/model/company-profile/company.profile.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
 
@@ -20,7 +20,7 @@ export class AppService {
 
   private entitiesCache: any[] | null = null;
 
-  public userProfile = signal<CompanyProfile>({
+  public userSessionData = signal<userSessionData>({
     companyName: '',
     email: '',
     phone: null,
@@ -30,6 +30,7 @@ export class AppService {
     taxId: '',
     alerts: [],
     licenses: [],
+    twofa_enabled: false,
     assignedQuota:0,
     quotaExceeded:false
   });
@@ -37,7 +38,7 @@ export class AppService {
     companyName: '',
     iocs: []
   });
-  public profileImageUrl = signal<string | null>(null);
+  public userImageUrl = signal<string | null>(null);
 
   constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
     this.loadEntities()
@@ -121,8 +122,8 @@ export class AppService {
   clearAll(): void {
     this.appStorageService.clearStorage();
     this.configData.set(new ConfigSettings());
-    this.profileImageUrl.set(null);
-    this.userProfile.set({
+    this.userImageUrl.set(null);
+    this.userSessionData.set({
       companyName: '',
       email: '',
       phone: null,
@@ -132,6 +133,7 @@ export class AppService {
       taxId: '',
       alerts: [],
       preferences: [],
+      twofa_enabled: false,
       licenses: [],
       assignedQuota:0,
       quotaExceeded:false

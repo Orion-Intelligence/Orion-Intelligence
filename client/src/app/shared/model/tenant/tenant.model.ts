@@ -42,6 +42,14 @@ export interface User {
   licenses?: string[] | null;
 }
 
+export interface UserMeta {
+  username: string;
+  email: string;
+  preferences?: {
+    [key: string]: any;
+  };
+}
+
 export interface TenantTeamModel {
   username: string;
   email: string;

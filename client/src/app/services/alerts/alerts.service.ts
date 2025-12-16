@@ -30,7 +30,7 @@ export class AlertService {
     getLatestAlerts() {
         this.apiService.get<any>('profile/alerts').subscribe({
             next: response => {
-                this.appService.userProfile().alerts = response
+                this.appService.userSessionData().alerts = response
                 this.isAlertScanLoading$.next(false)
             }
         })

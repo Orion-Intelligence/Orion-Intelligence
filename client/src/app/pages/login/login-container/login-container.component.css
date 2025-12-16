@@ -22,7 +22,6 @@
 }
 
 .login_container {
-  min-height: 1750px;
   background: var(--color-blue-830);
   height: 100vh;
   position: relative;

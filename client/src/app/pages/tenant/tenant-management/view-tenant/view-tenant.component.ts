@@ -84,7 +84,7 @@ export class ViewTenantComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.apiService.post('tenants/update', tenant).subscribe({
+    this.apiService.post('update/tenants', tenant).subscribe({
       next: () => {
         this.isLoading = false;
       },

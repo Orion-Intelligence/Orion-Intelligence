@@ -5,7 +5,7 @@
     </span>
 
     <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-         class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isProfileOpen" alt=""/>
+         class="company-profile_arrow-icon" [class.company-profile_arrow-icon--rotated]="isAccountSectionOpen" alt=""/>
   </div>
 
   <span class="company-profile_section-description">
@@ -16,7 +16,7 @@
     }}
   </span>
 
-  <div *ngIf="isProfileOpen">
+  <div *ngIf="isAccountSectionOpen">
     <div class="company-profile_card">
       <div class="company-profile_info">
         <div class="company-profile_avatar">
@@ -40,7 +40,7 @@
           </ng-template>
           <ng-template #companyProfileBlock>
             <div class="company-profile_company-name">
-              <input type="text" [(ngModel)]="profile.companyName" class="company-profile_input" disabled placeholder="Enter company name"/>
+              <input type="text" [(ngModel)]="userSessionData.companyName" class="company-profile_input" disabled placeholder="Enter company name"/>
             </div>
 
             <div class="company-profile_company-location">
@@ -48,7 +48,7 @@
             </div>
 
             <div class="company-profile_company-location">
-              Licenses〡{{ profile.preferences?.['licenses']?.join(', ') || 'No licenses assigned' }}
+              Licenses〡{{ userSessionData.preferences?.['licenses']?.join(', ') || 'No licenses assigned' }}
             </div>
 
           </ng-template>
@@ -70,12 +70,12 @@
         <div class="company-profile_row">
           <div class="company-profile_info-item">
             <div class="company-profile_info-label">Email address</div>
-            <input type="email" [(ngModel)]="profile.email" class="company-profile_info-value" disabled/>
+            <input type="email" [(ngModel)]="userSessionData.email" class="company-profile_info-value" disabled/>
           </div>
 
           <div class="company-profile_info-item">
             <div class="company-profile_info-label">Phone</div>
-            <input type="text" [(ngModel)]="profile.phone" class="company-profile_info-value" [disabled]="!isEditing"
+            <input type="text" [(ngModel)]="userSessionData.phone" class="company-profile_info-value" [disabled]="!isEditing"
                    [ngClass]="{ 'company-profile_editable': isEditing }" placeholder="Enter phone"/>
           </div>
         </div>
@@ -89,7 +89,7 @@
           <div class="company-profile_info-item">
             <div class="company-profile_info-label">Assigned User Quota</div>
             <div class="company-profile_info-value mt-2">
-              {{ profile.preferences?.['userQuota'] ?? 0 }}
+              {{ userSessionData.preferences?.['userQuota'] ?? 0 }}
 
             </div>
           </div>
@@ -103,13 +103,13 @@
         <div class="company-profile_row">
           <div class="company-profile_info-item">
             <div class="company-profile_info-label">Country</div>
-            <input type="text" [(ngModel)]="profile.country" class="company-profile_info-value" [disabled]="!isEditing"
+            <input type="text" [(ngModel)]="userSessionData.country" class="company-profile_info-value" [disabled]="!isEditing"
                    placeholder="Enter country"/>
           </div>
 
           <div class="company-profile_info-item">
             <div class="company-profile_info-label">City/State</div>
-            <input type="text" [(ngModel)]="profile.city" class="company-profile_info-value" [disabled]="!isEditing"
+            <input type="text" [(ngModel)]="userSessionData.city" class="company-profile_info-value" [disabled]="!isEditing"
                    placeholder="Enter city/state"/>
           </div>
         </div>
@@ -130,9 +130,9 @@
   <div *ngIf="is2FAOpen">
     <div class="company-profile_toggle-row">
       <div class="company-profile_toggle-label">
-        {{ twoFactorEnabled ? 'Enabled' : 'Disabled' }}
+        {{ this.userSessionData.twofa_enabled ? 'Enabled' : 'Disabled' }}
       </div>
-      <label class="company-profile_switch" (click)="toggleTwoFa()">
+      <label class="company-profile_switch">
         <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()"/>
         <span class="company-profile_slider"></span>
       </label>

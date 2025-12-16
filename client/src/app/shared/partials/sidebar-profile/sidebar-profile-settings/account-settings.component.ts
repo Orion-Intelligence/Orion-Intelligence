@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { ApiService } from '../../../services/api.service';
-import { CompanyProfile } from '../../../model/company-profile/company.profile.model';
+import {userMetaData, userSessionData } from '../../../model/company-profile/company.profile.model';
 import { ProfileImagePickerComponent } from "./profile-image-picker/profile-image-picker.component";
 import { AppStorageService } from '../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -12,26 +12,29 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 @Component({
   selector: 'app-sidebar-profile-settings',
   imports: [FormsModule, NgIf, CommonModule, ProfileImagePickerComponent],
-  templateUrl: './sidebar-profile-settings.component.html'
+  templateUrl: './account-settings.component.html'
 })
-export class SidebarProfileSettingsComponent implements OnInit {
-  isProfileOpen = true;
+export class AccountSettingsComponent implements OnInit {
+  isAccountSectionOpen = true;
   is2FAOpen = true;
   isThemeOpen = true;
   isEditing = false;
-  profile: CompanyProfile;
+  userSessionData: userSessionData;
   twoFactorEnabled = true;
   isDarkMode = true;
   userId: string = '';
-  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService, protected authService: AuthService) { this.profile = this.appService.userProfile(); }
+  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService, protected authService: AuthService) {
+    this.userSessionData = this.appService.userSessionData();
+  }
   ngOnInit(): void {
-    if (this.profile) {
+    if (this.userSessionData) {
       this.setItemsFromPreferences();
+      this.twoFactorEnabled = this.userSessionData.twofa_enabled
     }
   }
   setItemsFromPreferences() {
-    if (this.profile?.preferences?.["theme"]) {
-      this.isDarkMode = this.profile?.preferences?.["theme"] === 'dark-theme';
+    if (this.userSessionData?.preferences?.["theme"]) {
+      this.isDarkMode = this.userSessionData?.preferences?.["theme"] === 'dark-theme';
     } else {
       const storedTheme = this.appStorage.getTheme();
       if (storedTheme === 'dark-theme') {
@@ -40,10 +43,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
         this.isDarkMode = false;
       }
     }
-    if (this.profile?.preferences?.["twoFa"]) {
-      this.twoFactorEnabled = this.profile?.preferences?.["twoFa"] === 'true';
-    }
-    this.userId = this.profile?.preferences?.["userId"]
+    this.userId = this.userSessionData?.preferences?.["userId"]
   }
   isAdmin(): boolean {
     return this.authService.getRole() === 'admin';
@@ -60,7 +60,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
     body.classList.add(this.isDarkMode ? 'dark-theme' : 'light-theme');
   }
   toggleSection(section: string) {
-    if (section === 'profile') this.isProfileOpen = !this.isProfileOpen;
+    if (section === 'profile') this.isAccountSectionOpen = !this.isAccountSectionOpen;
     if (section === 'twoFA') this.is2FAOpen = !this.is2FAOpen;
     if (section === 'theme') this.isThemeOpen = !this.isThemeOpen;
   }
@@ -68,7 +68,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
   toggleEdit(event: Event) {
     event.stopPropagation();
     if (this.isEditing) {
-      this.updateCompanyProfile()
+      this.updateUser()
     }
     this.isEditing = !this.isEditing;
   }
@@ -79,7 +79,7 @@ export class SidebarProfileSettingsComponent implements OnInit {
 
     this.appStorage.setTheme(theme);
 
-    this.appService.userProfile.update(profile => {
+    this.appService.userSessionData.update(profile => {
       if (!profile) return profile;
       return {
         ...profile,
@@ -93,22 +93,12 @@ export class SidebarProfileSettingsComponent implements OnInit {
     this.applyTheme();
   }
   toggleTwoFa() {
-    this.twoFactorEnabled = !this.twoFactorEnabled;
-
-    this.appService.userProfile.update(profile => {
-      if (!profile) return profile;
-      return {
-        ...profile,
-        preferences: {
-          ...profile.preferences,
-          twoFa: String(this.twoFactorEnabled)
-        }
-      };
-    });
+    this.userSessionData.twofa_enabled = !this.userSessionData.twofa_enabled
+    this.updateUser()
   }
 
   getLocationDisplay(): string {
-    const profile = this.profile;
+    const profile = this.userSessionData;
     if (!profile) return '';
 
     const { city, country } = profile;
@@ -118,8 +108,15 @@ export class SidebarProfileSettingsComponent implements OnInit {
     return '';
   }
 
-  updateCompanyProfile() {
-    this.apiService.post('update/company/profile', this.profile).subscribe({
+  updateUser() {
+    let route = "update/current/user"
+    const userMeta: userMetaData = {
+      username: this.authService.getUsername(),
+      twofa_enabled: this.userSessionData.twofa_enabled,
+      preferences: this.userSessionData.preferences,
+    };
+
+    this.apiService.post(route, userMeta).subscribe({
       next: () => {
       },
       error: (err) => {

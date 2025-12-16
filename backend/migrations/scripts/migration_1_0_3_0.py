@@ -2,7 +2,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model, AllowedKeys
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
-from orion.services.encryption_manager.tenant_key_manager import TenantKeyManager
+from orion.services.encryption_manager.key_manager import KeyManager
 
 
 class migration_1_0_3_0:
@@ -42,4 +42,4 @@ class migration_1_0_3_0:
                 db_keys.auth_id == user_id,
             )
             if not existing_key:
-                await TenantKeyManager.get_instance().create_user_dek(user_id)
+                await KeyManager.get_instance().create_user_dek(user_id)

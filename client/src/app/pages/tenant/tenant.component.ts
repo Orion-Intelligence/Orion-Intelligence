@@ -101,7 +101,7 @@ export class TenantComponent implements OnInit {
     });
     this.appService.set('entityfilterCategories', this.categories);
 
-    this.apiService.post('tenants/update', filteredOnboardingData).subscribe({
+    this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => {
         this.auth_service.setOnboarding(false);
         this.router.navigate(['/dashboard']).then();
