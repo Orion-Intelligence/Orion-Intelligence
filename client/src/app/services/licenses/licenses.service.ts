@@ -88,7 +88,7 @@ export class LicenseService {
 
     canUseModule(moduleName: string): boolean {
         const rule = this.getCombinedRule();
-        if (this.subscriptionService.isDemo()) {
+        if (this.subscriptionService.isDemo() || this.auth.getRole() == "admin") {
             return true
         } else
             return (rule.modules === 'all' || rule.modules.has(moduleName))

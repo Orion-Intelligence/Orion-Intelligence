@@ -18,6 +18,7 @@ class user_role(str, Enum):
     ADMIN = "admin"
     CRAWLER = "crawler"
     MEMBER = "member"
+    ANALYST = "analyst"
 
 class UserStatus(str, Enum):
     PENDING = "verification_pending"

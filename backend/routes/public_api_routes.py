@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
 from orion.api.interactive.account_manager.account_manager import AccountManager
-from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.api.server.config_manager.config_controller import config_controller
 from fastapi import Depends, Request, HTTPException
 public_routes = APIRouter(tags=["Public"])

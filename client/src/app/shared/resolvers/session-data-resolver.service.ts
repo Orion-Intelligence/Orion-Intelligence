@@ -15,7 +15,7 @@ export class SessionDataResolver implements Resolve<userSessionData> {
 
   resolve(): Observable<userSessionData> {
     return this.apiService
-      .post<userSessionData>('get/company/profile', {})
+      .post<userSessionData>('get/tenant/node', {})
       .pipe(
         catchError(err => {
           console.error('Failed to load profile', err);

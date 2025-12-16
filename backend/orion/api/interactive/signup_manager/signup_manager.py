@@ -91,7 +91,7 @@ class SignupManager:
             licenses=["maintainer", "free"],
             status=TenantStatus.ONBOARDING
         )
-        await TenantManager.get_instance().tenant_boostrap(tenant)
+        await TenantManager.get_instance().create_tenant(tenant)
 
         user = db_user_account(
             username=username,

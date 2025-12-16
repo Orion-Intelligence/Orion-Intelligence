@@ -10,8 +10,6 @@ from orion.api.interactive.tenant_manager.models.tenant_param_model import tenan
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-from orion.api.interactive.profile_manager.model.profile_parma_model import AccountParmaModel
-from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert_job import alert_job
@@ -136,7 +134,7 @@ async def update_user(current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def delete_user(user: user_param_model, current_user=Depends(get_current_user)):
-    return await TenantManager.get_instance().delete_user(user, current_user)
+    return await AccountManager.get_instance().delete_user(user, current_user)
 
 
 @tenant_routes.post(
@@ -168,8 +166,8 @@ async def create_tenant_user(data: user_model, current_user=Depends(get_current_
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def create_admin_demo_user(data: user_model):
-    return await TenantManager.get_instance().create_demo_user(data)
+async def create_admin_demo_user(data: user_model, current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().create_user(data, current_user)
 
 
 @tenant_routes.post(
@@ -188,36 +186,15 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
 
 
 @tenant_routes.post(
-    "/api/get/company/profile",
-    summary="Get company profile",
-    description="Retrieve company profile data for the current tenant.",
-    tags=["Profile", "Company"],
-    operation_id="getCompanyProfile",
-    response_description="Company profile data.",
+    "/api/get/tenant/node",
     status_code=200,
     include_in_schema=False,
     dependencies=[
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
-async def get_company_profile(current_user=Depends(get_current_user)):
-    return await ProfileManager.getInstance().getCompanyProfileData(current_user)
-
-
-@tenant_routes.post(
-    "/api/update/profile/account",
-    summary="Update company profile",
-    description="Update company profile data for the current tenant.",
-    tags=["Profile", "Company"],
-    operation_id="updateCompanyProfile",
-    response_description="Updated company profile data.",
-    status_code=200,
-    include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
-)
-async def update_profile_account(data: AccountParmaModel, current_user=Depends(get_current_user)):
-    pass
-    # return await ProfileManager.getInstance().updateProfile(data, current_user)
+async def get_node(current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().get_node(current_user)
 
 @tenant_routes.post(
     "/api/upload/image",
@@ -226,7 +203,6 @@ async def update_profile_account(data: AccountParmaModel, current_user=Depends(g
 )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().uploadProfileImage(file, current_user)
-
 
 @tenant_routes.post(
     "/api/alert/add",

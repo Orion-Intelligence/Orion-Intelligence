@@ -19,7 +19,7 @@ class UserAdminView(ModelView):
     self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "company-profile-images"
 
   async def before_edit(self, request: Request, data: dict, obj: Any):
-    if obj.tenant_uuid and "tenant_uuid" in data:
+    if obj.tenant_uuid and "tenant_uuid" in data and data["tenant_uuid"] != str(obj.tenant_uuid):
       raise FormValidationError({"tenant_uuid": "tenant_uuid cannot be changed"})
 
   async def delete(self, request: Request, pks: list[Any]) -> Optional[int]:
