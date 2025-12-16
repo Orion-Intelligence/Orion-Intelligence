@@ -3,7 +3,7 @@ from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from pydantic import BaseModel, Field
 
 class AccountParmaModel(BaseModel):
-    companyName: str
+    name: str
     phone: str
     email: str
     country:str

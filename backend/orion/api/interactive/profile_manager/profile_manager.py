@@ -1,8 +1,5 @@
 from copy import deepcopy
-
 from bson import ObjectId
-from fastapi import UploadFile,HTTPException
-from fastapi.responses import Response
 from pathlib import Path
 from cryptography.fernet import Fernet
 from orion.services.encryption_manager.key_manager import KeyManager
@@ -29,7 +26,6 @@ class ProfileManager:
             raise Exception("This class is a singleton!")
         self._engine = mongo_controller.get_instance().get_engine()
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-
         self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "profile"
         self.TENANT_DIR.mkdir(parents=True, exist_ok=True)
         ProfileManager.__instance = self
@@ -41,7 +37,7 @@ class ProfileManager:
     async def getCompanyProfileData(self, current_user) -> AccountParmaModel:
         user = current_user
         empty_company = AccountParmaModel(
-            companyName="",
+            name="",
             phone="",
             email=user.email,
             country="",
@@ -53,7 +49,7 @@ class ProfileManager:
             alerts=[]
         )
 
-        if user.role != user_role.PROFILE:
+        if user.role != user_role.MEMBER:
             if "userId" not in empty_company.preferences:
                 empty_company.preferences["userId"] = str(user.id)
             empty_company.preferences["licenses"] = []
@@ -64,11 +60,11 @@ class ProfileManager:
 
         tenant = await self._engine.find_one(
             db_tenant_model,
-            db_tenant_model.id == ObjectId(user.company_uuid)
+            db_tenant_model.id == ObjectId(user.tenant_uuid)
         )
         _alerts = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.tenant_id == str(user.company_uuid)
+            db_alert_model.tenant_id == str(user.tenant_uuid)
         )
         dek = await self._dek(str(tenant.id))
         enc = Fernet(dek)
@@ -86,7 +82,7 @@ class ProfileManager:
         alerts_list = AlertManager.getInstance().filter_alerts_by_license(raw_alerts, user)
 
         company = AccountParmaModel(
-            companyName=safe_decrypt(tenant.companyName),
+            name=safe_decrypt(tenant.name),
             phone=safe_decrypt(tenant.phone),
             email=user.email,
             country=safe_decrypt(tenant.country),
@@ -97,8 +93,6 @@ class ProfileManager:
             twofa_enabled = user.twofa_enabled,
             alerts=alerts_list
         )
-        print(user.twofa_enabled, flush=True)
-        print(":::::::::::::::::::::::::::", flush=True)
         for key, value in company.preferences.items():
             if value and isinstance(value, str):
                 try:
@@ -111,7 +105,7 @@ class ProfileManager:
 
         assigned_quota = await self._engine.count(
             db_user_account,
-            db_user_account.company_uuid == str(user.company_uuid)
+            db_user_account.tenant_uuid == str(user.tenant_uuid)
         )
 
         company.preferences["licenses"] = [safe_decrypt(l) for l in (tenant.licenses or [])]
@@ -120,27 +114,8 @@ class ProfileManager:
 
         return company
 
-    async def updateUser(self, data: AccountParmaModel, current_user):
-        dek = await self._dek(str(current_user.id))
-        enc = Fernet(dek)
-
-        if data.preferences and "twoFa" in data.preferences:
-            value = data.preferences["twoFa"]
-            if isinstance(value, str):
-                current_user.twofa_enabled = value.lower() == "true"
-
-        if data.preferences:
-            for key, value in data.preferences.items():
-                if value and isinstance(value, str):
-                    data.preferences[key] = enc.encrypt(value.encode()).decode()
-
-        current_user.preferences = data.preferences
-        await self._engine.save(current_user)
-        await AuditLogManager.get_instance().register(str(current_user.id), "update_user")
-        return {"message": "User updated successfully"}
-
     async def updateProfile(self, data: AccountParmaModel, current_user):
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.company_uuid))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.tenant_uuid))
         dek = await self._dek(str(tenant.id))
         enc = Fernet(dek)
         encrypted_country = enc.encrypt(data.country.encode()).decode()
@@ -165,41 +140,5 @@ class ProfileManager:
         current_user.preferences=data.preferences
         await self._engine.save(tenant)
         await self._engine.save(current_user)
-        await AuditLogManager.get_instance().register(str(current_user.company_uuid), "update_user")
+        await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), "update_user")
         return {"message": "User updated successfully"}
-
-    async def uploadProfileImage(self, file: UploadFile, current_user):
-        contents = await file.read()
-        MAX_FILE_SIZE = 50 * 1024
-
-        if len(contents) > MAX_FILE_SIZE:
-            raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 50 KB.")
-
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
-
-        file_path = self.TENANT_DIR / f"{str(current_user.id)}.png"
-        with open(file_path, "wb") as f:
-            f.write(contents)
-
-        await AuditLogManager.get_instance().register(str(current_user.id), "upload_image")
-        return {"Profile image": "upload complete"}
-
-    async def getProfileResource(self, userId: str):
-        file_path = Path(self.TENANT_DIR) / f"{userId}.png"
-        default_path = Path(self.TENANT_DIR) / "default-profile.png"
-
-        is_default = not file_path.is_file()
-        target_path = default_path if is_default else file_path
-
-        with open(target_path, "rb") as f:
-            data = f.read()
-
-        return Response(
-            content=data,
-            media_type="image/png",
-            headers={
-                "X-Default-Image": "true" if is_default else "false",
-                "Access-Control-Expose-Headers": "X-Default-Image"
-            }
-        )

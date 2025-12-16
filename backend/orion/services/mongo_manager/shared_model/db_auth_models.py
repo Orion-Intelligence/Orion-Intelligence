@@ -10,7 +10,6 @@ from passlib.context import CryptContext
 from fastapi import HTTPException
 from pydantic import field_validator, model_validator
 from pydantic_core.core_schema import FieldValidationInfo
-from starlette_admin.exceptions import FormValidationError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -18,10 +17,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class user_role(str, Enum):
     ADMIN = "admin"
     CRAWLER = "crawler"
-    DEMO = "demo"
-    PROFILE = "profile"
-    ANALYST = "analyst"
-
+    MEMBER = "member"
 
 class UserStatus(str, Enum):
     PENDING = "verification_pending"
@@ -46,10 +42,10 @@ class db_user_account(Model):
     username: str = Field(unique=True)
     password: str
     email: str = Field(default="")
-    role: user_role = Field(default=user_role.DEMO)
+    role: user_role = Field(default=user_role.MEMBER)
     status: Optional[UserStatus] = Field(default=None)
 
-    company_uuid: str = Field(default="")
+    tenant_uuid: str = Field(default="")
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
 
@@ -71,7 +67,7 @@ class db_user_account(Model):
     def validate_username(cls, value: str, info: FieldValidationInfo) -> str:
         value = value.strip()
         role = info.data.get("role")
-        if role == user_role.PROFILE:
+        if role == user_role.MEMBER:
             username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
             if not re.match(username_pattern, value):
                 raise ValueError("Username already exist")
@@ -104,20 +100,7 @@ class db_user_account(Model):
         return pwd_context.hash(password)
 
     @model_validator(mode="before")
-    def validate_email(cls, values):
-        role = values.get("role")
-        email = values.get("email", "")
-        if role == user_role.PROFILE:
-            if not email or "@" not in email or "." not in email.split("@")[-1]:
-                raise HTTPException(status_code=400, detail="Invalid or missing email address for profile users")
-        elif email:
-            if "@" not in email or "." not in email.split("@")[-1]:
-                raise HTTPException(status_code=400, detail="Invalid email format")
-        return values
-
-    @model_validator(mode="before")
     def validate_licenses(cls, values):
-        role = values.get("role")
         licenses = values.get("licenses")
 
         if licenses is not None:
@@ -135,9 +118,6 @@ class db_user_account(Model):
                 if not set(licenses).issubset(allowed_combo):
                     raise HTTPException(status_code=400, detail="Enterprise license can only be combined with Maintainer")
 
-            if any(l == LicenseName.MAINTAINER for l in licenses) and role != user_role.PROFILE:
-                raise FormValidationError({"licenses": "Only profile users can have maintainer license"})
-
         return values
 
     @staticmethod
@@ -151,7 +131,7 @@ class db_user_account(Model):
         return self.role == user_role.CRAWLER
 
     def is_demo(self) -> bool:
-        return self.role == user_role.DEMO
+        return self.role == user_role.MEMBER
 
     def verify_2fa(self, code: str) -> bool:
         if not self.twofa_enabled or not self.twofa_secret:
@@ -168,7 +148,7 @@ class db_user_account(Model):
 
     @model_validator(mode="after")
     def finalize(self):
-        if self.role != user_role.PROFILE:
+        if self.role != user_role.MEMBER:
             pass
         else:
             if self.status is None:

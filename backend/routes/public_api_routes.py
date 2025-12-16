@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+
+from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.api.server.config_manager.config_controller import config_controller
 from fastapi import Depends, Request, HTTPException
@@ -10,7 +12,7 @@ def cookie_required(request: Request):
 
 @public_routes.get("/api/s/static/{userId}", include_in_schema=False, dependencies=[Depends(cookie_required)])
 async def get_profile_resource(userId: str):
-    return await ProfileManager.getInstance().getProfileResource(userId)
+    return await AccountManager.get_instance().getProfileImage(userId)
 
 @public_routes.get("/api/s/static/system/{name}", include_in_schema=False, dependencies=[Depends(cookie_required)])
 async def get_system_resource(name: str):

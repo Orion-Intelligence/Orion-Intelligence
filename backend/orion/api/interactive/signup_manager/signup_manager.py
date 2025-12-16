@@ -82,7 +82,7 @@ class SignupManager:
 
         tenant = db_tenant_model(
             iocs=[],
-            companyName=company,
+            name=company,
             phone="",
             country="",
             city="",
@@ -91,18 +91,18 @@ class SignupManager:
             licenses=["maintainer", "free"],
             status=TenantStatus.ONBOARDING
         )
-        await TenantManager.get_instance().create_tenant(tenant)
+        await TenantManager.get_instance().tenant_boostrap(tenant)
 
         user = db_user_account(
             username=username,
             email=email,
             password=hashed_password,
-            role=user_role.PROFILE,
+            role=user_role.MEMBER,
             status=UserStatus.PENDING,
             verification_token=_verification_token,
             verification_expiry=_verification_token_expire,
             licenses=[LicenseName.MAINTAINER],
-            company_uuid=str(tenant.id)
+            tenant_uuid=str(tenant.id)
         )
         await engine.save(user)
 

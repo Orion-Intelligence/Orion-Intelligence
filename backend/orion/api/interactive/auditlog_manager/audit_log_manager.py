@@ -64,7 +64,7 @@ class AuditLogManager:
         elif end:
             filters.append(db_audit_log.ts <= end)
 
-        if getattr(current_user, "role", None) == user_role.PROFILE:
+        if getattr(current_user, "role", None) == user_role.MEMBER:
             filters.append(db_audit_log.actor_id == str(current_user.id))
 
         query = filters[0] if filters else {}

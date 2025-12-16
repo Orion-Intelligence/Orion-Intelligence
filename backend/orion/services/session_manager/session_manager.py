@@ -61,7 +61,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
             session_id = payload.get("sid")
-            if user.role in (user_role.DEMO, user_role.CRAWLER):
+            if user.role in (user_role.CRAWLER):
                 return user
             if not session_id:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
@@ -120,13 +120,13 @@ class session_manager:
         if username:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
 
-        if user and user.role not in (user_role.DEMO, user_role.CRAWLER) and expires_delta > timedelta(minutes=30):
+        if user and user.role not in (user_role.CRAWLER) and expires_delta > timedelta(minutes=30):
             expires_delta = timedelta(minutes=30)
 
         expire = datetime.now(timezone.utc) + expires_delta
 
         session_id = None
-        if user and user.role not in (user_role.DEMO, user_role.CRAWLER):
+        if user and user.role not in (user_role.CRAWLER):
             session_id = secrets.token_urlsafe(32)
             user.current_session_id = session_id
             await self._engine.save(user)
@@ -182,11 +182,11 @@ class session_manager:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
-            if user.role not in (user_role.DEMO, user_role.CRAWLER) and access_ttl > timedelta(minutes=30):
+            if user.role not in (user_role.CRAWLER) and access_ttl > timedelta(minutes=30):
                 access_ttl = timedelta(minutes=30)
 
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
-            onboarding_exists = await self.get_instance().has_onboarding(str(user.company_uuid))
+            onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
             session = {
                 "username": user.username,
                 "role": user.role.value if hasattr(user.role, "value") else str(user.role),
@@ -220,7 +220,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="User not found")
 
             session_id = payload.get("sid")
-            if user.role not in (user_role.DEMO, user_role.CRAWLER):
+            if user.role not in (user_role.CRAWLER):
                 if not session_id:
                     raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -243,13 +243,13 @@ class session_manager:
             if role_name == "profile" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (datetime.now(timezone.utc) - acct_at).days >= 30:
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
-            onboarding_exists = await self.has_onboarding(str(user.company_uuid))
+            onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))
 
             base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
-            if user.role not in (user_role.DEMO, user_role.CRAWLER):
+            if user.role not in (user_role.CRAWLER):
                 base_expiry = time.time() + 3 * 60
 
-            if user.role in (user_role.DEMO, user_role.CRAWLER):
+            if user.role in (user_role.CRAWLER):
                 new_token_payload = {"sub": username, "exp": base_expiry}
             else:
                 new_token_payload = {"sub": username, "exp": base_expiry, "sid": session_id}

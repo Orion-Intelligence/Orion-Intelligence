@@ -5,7 +5,7 @@ from orion.api.interactive.account_manager.models.user_meta_model import user_me
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from pathlib import Path
 from orion.api.interactive.account_manager.models.user_model import user_model
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -13,6 +13,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import db_user_acc
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
+from fastapi.responses import Response
 
 
 class AccountManager:
@@ -22,6 +23,10 @@ class AccountManager:
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
         self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "profile"
         self._engine = mongo_controller.get_instance().get_engine()
+
+        self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
+        self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "profile"
+        self.TENANT_DIR.mkdir(parents=True, exist_ok=True)
         if AccountManager.__instance is not None:
             raise Exception("This class is a singleton!")
         AccountManager.__instance = self
@@ -49,16 +54,16 @@ class AccountManager:
             )
             return [user_param_model(**u.dict()) for u in users]
         else:
-            company_uuid = current_user.company_uuid
+            tenant_uuid = current_user.tenant_uuid
 
         collection = self._engine.get_collection(db_user_account)
         await collection.update_many(
-            {"company_uuid": company_uuid, "status": {"$nin": ["active", "disable"]}},
+            {"tenant_uuid": tenant_uuid, "status": {"$nin": ["active", "disable"]}},
             {"$set": {"status": "disable"}},
         )
         users = await self._engine.find(
             db_user_account,
-            db_user_account.company_uuid == company_uuid
+            db_user_account.tenant_uuid == tenant_uuid
         )
         return [user_param_model(**u.dict()) for u in users]
 
@@ -134,7 +139,7 @@ class AccountManager:
             if user.role not in ["demo", "analyst"] or user.licenses == ["maintainer"]:
                 raise HTTPException(status_code=401, detail="Admin can only delete demo or analyst users")
         elif current_user.licenses == ["maintainer"]:
-            if user.company_uuid != current_user.company_uuid or user.licenses == ["maintainer"]:
+            if user.tenant_uuid != current_user.tenant_uuid or user.licenses == ["maintainer"]:
                 raise HTTPException(status_code=401, detail="Maintainer can only delete non-maintainer users from the same company")
         else:
             raise HTTPException(status_code=401, detail="You are not allowed to delete users")
@@ -168,7 +173,7 @@ class AccountManager:
                 await AuditLogManager.get_instance().register(str(current_user.id),
                                                               f"update_user_denied:{request.username}")
                 raise HTTPException(status_code=401, detail="Admin can only update demo and analyst users")
-        elif current_user.licenses == ["maintainer"] and user.company_uuid == current_user.company_uuid:
+        elif current_user.licenses == ["maintainer"] and user.tenant_uuid == current_user.tenant_uuid:
             pass
         else:
             await AuditLogManager.get_instance().register(str(current_user.id),
@@ -210,11 +215,45 @@ class AccountManager:
             user.preferences = request.preferences
 
         if request.twofa_enabled is not None:
-            print(":::::::::::::::::::::::::::::1", flush=True)
             user.twofa_enabled = request.twofa_enabled
-        print(":::::::::::::::::::::::::::::2", flush=True)
 
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(str(user.id), "update_user_self")
 
         return {"message": "User updated successfully"}
+
+    async def getProfileImage(self, userId: str):
+        file_path = Path(self.TENANT_DIR) / f"{userId}.png"
+        default_path = Path(self.TENANT_DIR) / "default-profile.png"
+
+        is_default = not file_path.is_file()
+        target_path = default_path if is_default else file_path
+
+        with open(target_path, "rb") as f:
+            data = f.read()
+
+        return Response(
+            content=data,
+            media_type="image/png",
+            headers={
+                "X-Default-Image": "true" if is_default else "false",
+                "Access-Control-Expose-Headers": "X-Default-Image"
+            }
+        )
+
+    async def uploadProfileImage(self, file: UploadFile, current_user):
+        contents = await file.read()
+        MAX_FILE_SIZE = 50 * 1024
+
+        if len(contents) > MAX_FILE_SIZE:
+            raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 50 KB.")
+
+        if not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
+
+        file_path = self.TENANT_DIR / f"{str(current_user.id)}.png"
+        with open(file_path, "wb") as f:
+            f.write(contents)
+
+        await AuditLogManager.get_instance().register(str(current_user.id), "upload_image")
+        return {"Profile image": "upload complete"}

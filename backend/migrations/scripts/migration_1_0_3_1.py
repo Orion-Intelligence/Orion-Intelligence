@@ -1,11 +1,11 @@
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model, AllowedKeys
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
-from orion.services.mongo_manager.shared_model.db_keys import db_keys
-from orion.services.encryption_manager.key_manager import KeyManager
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from bson import ObjectId
 
 
-class migration_1_0_3_0:
+class migration_1_0_3_1:
 
     @staticmethod
     async def migrate(version):
@@ -14,7 +14,7 @@ class migration_1_0_3_0:
         if engine is None:
             raise Exception("MongoDB is not connected. Migration cannot proceed.")
 
-        await migration_1_0_3_0.update_version(engine, version)
+        await migration_1_0_3_1.update_version(engine, version)
 
     @staticmethod
     async def update_version(engine, version):
@@ -29,12 +29,18 @@ class migration_1_0_3_0:
             existing_version_entry.value = str(version)
             await engine.save(existing_version_entry)
 
+        default_tenant = await engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
+        default_tenant_id = str(default_tenant.id) if default_tenant else ""
+
+        print("::::::::::::::::::::::::::::::::::1", flush=True)
+        print("::::::::::::::::::::::::::::::::::1", flush=True)
         users = await engine.find(db_user_account)
+        print("::::::::::::::::::::::::::::::::::1", flush=True)
+        print("::::::::::::::::::::::::::::::::::1", flush=True)
         for user in users:
-            user_id = str(user.id)
-            existing_key = await engine.find_one(
-                db_keys,
-                db_keys.auth_id == user_id,
-            )
-            if not existing_key:
-                await KeyManager.get_instance().create_user_dek(user_id)
+            print("::::::::::::::::::::::::::::::::::12", flush=True)
+            if not user.tenant_uuid and default_tenant_id:
+                print("::::::::::::::::::::::::::::::::::13", flush=True)
+                user.tenant_uuid = default_tenant_id
+                print("::::::::::::::::::::::::::::::::::14", flush=True)
+                await engine.save(user)

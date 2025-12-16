@@ -136,7 +136,7 @@ api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         )
     ],
@@ -156,7 +156,7 @@ async def get_directory(param: directory_param_model = Depends()):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:dumps")),
@@ -177,7 +177,7 @@ async def get_directory(param: dump_param_model = Depends()):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         )
     ],
@@ -211,7 +211,7 @@ async def get_insight():
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:general")),
@@ -240,7 +240,7 @@ async def search_general(param: search_general_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.PROFILE, user_role.DEMO, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:stealer_logs")),
@@ -261,10 +261,10 @@ async def search_consolidated(param: search_credential_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
-        Depends(license_required("maintainer", [user_role.ADMIN, user_role.ANALYST])),
+        Depends(license_required("maintainer", [user_role.ADMIN])),
     ],
 )
 async def search_consolidated(param: search_consolidated_param_model = Body(...)):
@@ -282,10 +282,10 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
-        Depends(license_required("maintainer", [user_role.ADMIN, user_role.ANALYST])),
+        Depends(license_required("maintainer", [user_role.ADMIN])),
     ],
 )
 async def search_consolidated_ranked(param: search_consolidated_param_model = Body(...)):
@@ -313,7 +313,7 @@ async def search_consolidated_ranked(param: search_consolidated_param_model = Bo
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:social")),
@@ -335,7 +335,7 @@ async def search_telegram(param: search_chat_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:discussion")),
@@ -363,7 +363,7 @@ async def search_leak(param: search_leak_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:exploit")),
@@ -395,7 +395,7 @@ async def search_discussion(param: search_general_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:social")),
@@ -422,7 +422,7 @@ async def search_discussion(param: search_general_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:social")),
@@ -443,7 +443,7 @@ async def search_social(param: search_social_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:breach")),
@@ -471,7 +471,7 @@ async def search_leak(param: search_leak_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         )
     ],
@@ -492,7 +492,7 @@ async def search_news(param: search_news_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:exploit")),
@@ -513,7 +513,7 @@ async def search_leak(param: search_exploit_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:defacement")),
@@ -534,7 +534,7 @@ async def search_defacement(param: search_defacement_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -554,7 +554,7 @@ async def get_defacement_document(doc_id: str):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -581,7 +581,7 @@ async def get_leak_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -608,7 +608,7 @@ async def get_leak_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -635,7 +635,7 @@ async def get_leak_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -662,7 +662,7 @@ async def get_general_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -689,7 +689,7 @@ async def get_general_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -716,7 +716,7 @@ async def get_social_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("module:breach")),
@@ -737,7 +737,7 @@ async def get_screenshot(filename: str):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("scanning")),
@@ -758,7 +758,7 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("scanning")),
@@ -779,7 +779,7 @@ async def search_dynamic_email(param: search_dynamic_crack_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(limiter_dependency),
@@ -801,7 +801,7 @@ async def parse_text(payload: DomainScanRequest):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
         Depends(license_required("scanning")),
@@ -822,7 +822,7 @@ async def search_dynamic_email(param: search_dynamic_social_model = Body(...)):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -849,7 +849,7 @@ async def get_breach_stix_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -876,7 +876,7 @@ async def get_strategic_stix_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -898,7 +898,7 @@ async def get_defacement_stix_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -925,7 +925,7 @@ async def get_exploit_stix_document(
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],
@@ -966,7 +966,7 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
     dependencies=[
         Depends(
             role_required(
-                [user_role.ADMIN, user_role.DEMO, user_role.PROFILE, user_role.ANALYST]
+                [user_role.ADMIN, user_role.MEMBER]
             )
         ),
     ],

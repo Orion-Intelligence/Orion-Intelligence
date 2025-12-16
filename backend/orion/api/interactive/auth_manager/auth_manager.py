@@ -71,12 +71,12 @@ class auth_manager:
             acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
 
         if role_name == "profile":
-            if not getattr(user, "company_uuid", None):
+            if not getattr(user, "tenant_uuid", None):
                 raise HTTPException(status_code=401, detail="Invalid tenant.")
             engine = mongo_controller.get_instance().get_engine()
             tenant = await engine.find_one(
                 db_tenant_model,
-                db_tenant_model.id == ObjectId(user.company_uuid)
+                db_tenant_model.id == ObjectId(user.tenant_uuid)
             )
             if tenant and not tenant.verified:
                 raise HTTPException(status_code=401, detail="account approval pending")
@@ -105,7 +105,7 @@ class auth_manager:
         access_token, role = await session_manager.get_instance().create_access_token(
             data={"sub": user.username}, expires_delta=access_token_expires
         )
-        onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.company_uuid))
+        onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.tenant_uuid))
 
 
         subscription = user.subscription

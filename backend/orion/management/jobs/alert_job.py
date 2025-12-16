@@ -421,7 +421,7 @@ class alert_job:
         return iocs
 
     async def run_all_categories_for_api(self, current_user) -> dict:
-        tenant_id = current_user.company_uuid
+        tenant_id = current_user.tenant_uuid
         current_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         start_time = datetime.utcnow()
         await self._alert_manager.getInstance().set_scan_running(tenant_id, True)

@@ -32,7 +32,7 @@ tenant_routes = APIRouter(
     response_description="Tenant information for the current user.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def get_tenant(current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().get_tenant(current_user)
@@ -48,7 +48,7 @@ async def get_tenant(current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE, user_role.ADMIN])),
+        Depends(role_required([user_role.MEMBER, user_role.ADMIN])),
         Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer", [user_role.ADMIN])),
     ],
@@ -66,7 +66,7 @@ async def update_tenant(data: TenantRequest, current_user=Depends(get_current_us
     response_description="List of users in the tenant.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN]))],
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN]))],
 )
 async def get_tenant_users(current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().get_all_users(current_user)
@@ -81,7 +81,7 @@ async def get_tenant_users(current_user=Depends(get_current_user)):
     response_description="List of all tenants.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.PROFILE, user_role.ADMIN]))],
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN]))],
 )
 async def get_all_tenants():
     return await TenantManager.get_instance().get_all_tenant()
@@ -96,7 +96,7 @@ async def get_all_tenants():
     response_description="Updated user information.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def update_user(user: tenant_param_model, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().update_user(user, current_user)
@@ -110,7 +110,7 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
     response_description="Updated user information.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def update_user(user: user_meta_model, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().update_current_user(user, current_user)
@@ -119,10 +119,10 @@ async def update_user(user: user_meta_model, current_user=Depends(get_current_us
     "/api/delete/profile/image",
     summary="Update user",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def update_user(current_user=Depends(get_current_user)):
-    return await TenantManager.get_instance().delete_user_icon(current_user)
+    return await AccountManager.get_instance().delete_user_icon(current_user)
 
 @tenant_routes.post(
     "/api/delete/user",
@@ -133,7 +133,7 @@ async def update_user(current_user=Depends(get_current_user)):
     response_description="Updated user information.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def delete_user(user: user_param_model, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().delete_user(user, current_user)
@@ -149,7 +149,7 @@ async def delete_user(user: user_param_model, current_user=Depends(get_current_u
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(license_required("maintainer")),
     ],
 )
@@ -181,7 +181,7 @@ async def create_admin_demo_user(data: user_model):
     response_description="Audit log entries matching the filter.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=Depends(get_current_user)):
     return await AuditLogManager.get_instance().get(param, current_user)
@@ -213,18 +213,19 @@ async def get_company_profile(current_user=Depends(get_current_user)):
     response_description="Updated company profile data.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def update_profile_account(data: AccountParmaModel, current_user=Depends(get_current_user)):
-    return await ProfileManager.getInstance().updateProfile(data, current_user)
+    pass
+    # return await ProfileManager.getInstance().updateProfile(data, current_user)
 
 @tenant_routes.post(
     "/api/upload/image",
     summary="Upload profile image",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.PROFILE, user_role.ANALYST]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
-    return await ProfileManager.getInstance().uploadProfileImage(file, current_user)
+    return await AccountManager.get_instance().uploadProfileImage(file, current_user)
 
 
 @tenant_routes.post(
@@ -237,7 +238,7 @@ async def upload_profile_image(file: UploadFile, current_user=Depends(get_curren
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
@@ -255,7 +256,7 @@ async def add_custom_alert(data: AlertModel, current_user=Depends(get_current_us
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
@@ -273,7 +274,7 @@ async def set_alerts_seen(data: list[AlertModel], current_user=Depends(get_curre
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
@@ -291,7 +292,7 @@ async def delete_alert(id: str = Body(..., description="Unique id identifier of 
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
@@ -309,7 +310,7 @@ async def update_alert(data: AlertModel, current_user=Depends(get_current_user))
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
@@ -327,7 +328,7 @@ async def get_user_alerts(current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")),
     ],
@@ -346,7 +347,7 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")),
     ],
@@ -364,7 +365,7 @@ async def delete_all_alerts(current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")),
     ],
@@ -383,7 +384,7 @@ async def delete_all_alerts(_type:str, current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.PROFILE])),
+        Depends(role_required([user_role.MEMBER])),
         Depends(status_required([UserStatus.ACTIVE])),
     ],
 )
