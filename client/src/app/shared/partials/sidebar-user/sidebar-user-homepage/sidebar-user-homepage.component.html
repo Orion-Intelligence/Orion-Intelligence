@@ -1,0 +1,129 @@
+<div *ngIf="!isAdmin(); else showAdmin">
+    <div *ngIf="!licenseService.getLicenses().includes('free');else showFree">
+        <div class="ioc-dashboard-content-wrapper">
+            <div *ngIf="alertService.isAlertScanLoading()">
+                <app-alert-scan-loading></app-alert-scan-loading>
+            </div>
+            <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')"
+                class="category_report_searchbar">
+                <app-home-search [isRoleAdmin]="false"></app-home-search>
+
+                <div class="category_report_flex category_report_flex-margin">
+                    <div class="btn-group report-menu-option-container mr-0">
+                        <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
+                            <img alt="flush" height="20" ngSrc="assets/images/shared/bin.svg" width="20" />
+                        </button>
+                        <div class="vr report-menu-divider"></div>
+                        <button (click)="scanIOCs()" appTooltip="scan all" class="p-0 report-menu-option">
+                            <img alt="scan" height="20" ngSrc="assets/images/sidebar/scanner.svg" width="20" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="user-homepage">
+
+                <div *ngIf="licenseService.isMaintainer() || licenseService.getLicenses().includes('enterprise')"
+                    class="user-homepage_header">
+
+                    <div class="user-homepage_header-title">IOC’s</div>
+
+                    <div class="user-homepage_header-actions">
+                        <button class="user-homepage_header-actions-entity-btn">
+                            Entity ({{ entityFiltersCount() }})
+                        </button>
+
+                        <button class="user-homepage_header-actions-edit-btn" (click)="editIocs()">
+                            <img alt="edit-icon" src="../../../../../../assets/images/shared/theme/edit.svg">
+                            <i class="fa fa-edit"></i>
+                            Edit
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="user-homepage_alerts">
+
+                    <div class="user-homepage_alerts-card critical">
+                        <div class="user-homepage_alerts-card-count">{{ criticalRisks }}</div>
+                        <div class="user-homepage_alerts-card-label">Critical Alerts</div>
+                    </div>
+
+                    <div class="user-homepage_alerts-card high">
+                        <div class="user-homepage_alerts-card-count">{{ highRisks }}</div>
+                        <div class="user-homepage_alerts-card-label">High Risk Alerts</div>
+                    </div>
+
+                    <div class="user-homepage_alerts-card medium">
+                        <div class="user-homepage_alerts-card-count">{{ mediumRisks }}</div>
+                        <div class="user-homepage_alerts-card-label">Medium Risk</div>
+                    </div>
+
+                    <div class="user-homepage_alerts-card low">
+                        <div class="user-homepage_alerts-card-count">{{ lowRisks }}</div>
+                        <div class="user-homepage_alerts-card-label">Low Risk</div>
+                    </div>
+
+                </div>
+
+                <div class="user-homepage_cards">
+
+                    <ng-container *ngFor="let category of alertCategories">
+
+                        <div class="user-homepage_cards-card" (click)="openAlerts(category.categoryName)"
+                            [class.disabled]="category.iocCount === 0">
+
+                            <div class="user-homepage_cards-card-header">
+
+                                <div class="user-homepage_cards-card-header-title">
+                                    <img alt="icon"
+                                        src="../../../../../../assets/images/shared/theme/alert-categories-icon.svg">
+                                    {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
+                                </div>
+
+                                <div class="user-homepage_cards-card-header-badge"
+                                    [ngClass]="category.risk.toLowerCase()">
+                                    {{ category.risk }} Risk
+                                </div>
+
+                            </div>
+
+                            <div class="user-homepage_cards-card-row">
+                                <span>IOC’s found</span>
+                                <span class="value">{{ category.iocCount }}</span>
+                            </div>
+
+                            <div class="user-homepage_cards-card-row">
+                                <span>Detected on</span>
+                                <span class="value">
+                                    {{ category.detectedDate ? (category.detectedDate | date:'dd/MM/yyyy') : '-' }}
+                                </span>
+                            </div>
+
+                            <div class="user-homepage_cards-card-tags">
+                                <span *ngFor="let tag of category.tags">{{ tag }}</span>
+                            </div>
+
+                        </div>
+
+                    </ng-container>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <ng-template #showFree>
+        <div class="sidebar-profile-statistics-container">
+            <app-home-insight></app-home-insight>
+        </div>
+    </ng-template>
+    <ng-container *ngIf="isConfirmationOpen()">
+        <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
+            (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
+    </ng-container>
+</div>
+<ng-template #showAdmin>
+    <app-index></app-index>
+</ng-template>

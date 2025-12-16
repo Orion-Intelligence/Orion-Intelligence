@@ -1,8 +1,8 @@
-<div class="sidebar-profile-settings-container">
+<div class="sidebar-user-ioc-container">
     <div class="onboarding-step2">
 
         <div class="onboarding-step2__description-row">
-            <h2 class="profile-ioc-title">Manage IOCs</h2>
+            <h2 class="user-ioc-title">Manage IOCs</h2>
 
             <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
                 placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
@@ -49,7 +49,7 @@
         <div class="onboarding-step2__divider2"></div>
 
         <p class="onboarding-step2__added-title">Added IOCs</p>
-        <div class="onboarding-step2__added profile-ioc-height">
+        <div class="onboarding-step2__added user-ioc-height">
 
             <div *ngIf="hasIocsWithValues(); else _noEntity">
                 <div *ngFor="let ioc of onboardingData?.iocs">
@@ -77,7 +77,7 @@
                 Back
             </button>
 
-            <button class="sidebar-profile-settings-save-button" (click)="update()">
+            <button class="sidebar-user-ioc-save-button" (click)="update()">
                 Update
             </button>
         </div>

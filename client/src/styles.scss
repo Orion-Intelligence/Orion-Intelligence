@@ -14,16 +14,16 @@
 @use 'app/pages/tenant/tenant-management/view-tenant.component-shared.css';
 @use 'app/pages/tenant/tenant-management/view-profile/manage-profile.component.css';
 @use 'app/pages/tenant/tenant-management/add-tenant/add-tenant.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/sidebar-profile-alerts.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/alert-scan-loading/alert-scan-loading.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/category-alert-report/category-alert-report.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/alert-scan-loading/alert-scan-loading.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component.css';
 @use 'app/shared/partials/confirmation-popup/confirmation-popup.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-alerts/add-custom-alert/add-custom-alert.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-homepage/sidebar-profile-homepage.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-ioc/sidebar-profile-ioc.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/account-settings.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-settings/profile-image-picker/profile-image-picker.component.css';
-@use 'app/shared/partials/sidebar-profile/sidebar-profile-system-settings/sidebar-profile-system-settings.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-settings/account-settings.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-settings/user-image-picker/user-image-picker.component.css';
+@use 'app/shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component.css';
 @use 'app/pages/welcome/welcome.component.css';
 @use 'app/shared/partials/loader/loader.component.css';
 @use 'app/shared/partials/security-scan-results/security-scan-results.component.css';
@@ -411,7 +411,7 @@ table tr:last-child td {
   max-height: 400px !important;
 }
 
-.quota-banner{
+.quota-banner {
   background: #2E2600;
   border: 0;
   border-bottom: 1px solid #6B5600;

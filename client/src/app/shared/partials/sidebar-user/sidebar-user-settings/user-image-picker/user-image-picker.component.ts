@@ -1,19 +1,19 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {ApiService} from '../../../../services/api.service';
-import {AppService} from '../../../../../services/core/app/app.service';
-import {AuthService} from '../../../../../services/authetication/auth.service';
-import {NgIf} from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ApiService } from '../../../../services/api.service';
+import { AppService } from '../../../../../services/core/app/app.service';
+import { AuthService } from '../../../../../services/authetication/auth.service';
+import { NgIf } from '@angular/common';
 import * as path from 'node:path';
 
 
 @Component({
-  selector: 'app-profile-image-picker',
+  selector: 'app-user-image-picker',
   imports: [
     NgIf
   ],
-  templateUrl: './profile-image-picker.component.html'
+  templateUrl: './user-image-picker.component.html'
 })
-export class ProfileImagePickerComponent implements OnInit {
+export class UserImagePickerComponent implements OnInit {
   @Input() userId!: string;
   @Output() onImageUploaded = new EventEmitter<string>();
 
@@ -107,8 +107,8 @@ export class ProfileImagePickerComponent implements OnInit {
   }
 
   clearLogo() {
-    let resource_path=""
-    if(this.isProfile()){
+    let resource_path = ""
+    if (this.isProfile()) {
       resource_path = "delete/profile/image"
       this.apiService.post(resource_path, { settings: { logo_url: '' } }).subscribe({
         next: () => {
@@ -118,7 +118,7 @@ export class ProfileImagePickerComponent implements OnInit {
         error: (err) => console.log(err)
       });
 
-    }else {
+    } else {
       resource_path = "public/update"
       this.appService.configData.update(cfg => {
         cfg.appSettings.logo_url = "";

@@ -3,15 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { ApiService } from '../../../services/api.service';
-import {userMetaData, userSessionData } from '../../../model/company-profile/company.profile.model';
-import { ProfileImagePickerComponent } from "./profile-image-picker/profile-image-picker.component";
+import { userMetaData, userSessionData } from '../../../model/company-profile/company.profile.model';
+import { UserImagePickerComponent } from "./user-image-picker/user-image-picker.component";
 import { AppStorageService } from '../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
-  imports: [FormsModule, NgIf, CommonModule, ProfileImagePickerComponent],
+  imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
   templateUrl: './account-settings.component.html'
 })
 export class AccountSettingsComponent implements OnInit {
@@ -23,7 +24,7 @@ export class AccountSettingsComponent implements OnInit {
   twoFactorEnabled = true;
   isDarkMode = true;
   userId: string = '';
-  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService, protected authService: AuthService) {
+  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
     this.userSessionData = this.appService.userSessionData();
   }
   ngOnInit(): void {
@@ -47,9 +48,6 @@ export class AccountSettingsComponent implements OnInit {
   }
   isAdmin(): boolean {
     return this.authService.getRole() === 'admin';
-  }
-  isAnalyst(): boolean {
-    return this.authService.getRole() == 'analyst';
   }
   isProfile(): boolean {
     return this.authService.getRole() == 'profile';

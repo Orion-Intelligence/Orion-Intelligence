@@ -68,9 +68,9 @@
       <span>Sign out</span>
     </li>
   </ul>
-  <div [class.sidebar_container-disable]="!(isNotificationOpen$ | async)"
-    [class.filter__container-enable]="isNotificationOpen$ | async" class="sidebar_container">
-    <app-alert-notification [isNotificationOpen]="isNotificationOpen$ |async"
+  <div [class.sidebar_container-disable]="!isNotificationOpen()" [class.filter__container-enable]="isNotificationOpen()"
+    class="sidebar_container">
+    <app-alert-notification [isNotificationOpen]="isNotificationOpen()"
       (closeNotification)="closeNotifications()"></app-alert-notification>
   </div>
 </div>

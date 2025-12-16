@@ -1,18 +1,18 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgIf, CommonModule } from '@angular/common';
 import { ApiService } from '../../../services/api.service';
 import { FormsModule } from '@angular/forms';
-import { ProfileImagePickerComponent } from "../sidebar-profile-settings/profile-image-picker/profile-image-picker.component";
+import { UserImagePickerComponent } from "../sidebar-user-settings/user-image-picker/user-image-picker.component";
 import { AppService } from '../../../../services/core/app/app.service';
-import {AuthService} from '../../../../services/authetication/auth.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
 
 @Component({
-  selector: 'app-sidebar-profile-system-settings',
-  imports: [ProfileImagePickerComponent, FormsModule, NgIf, CommonModule],
-  templateUrl: './sidebar-profile-system-settings.component.html',
-  styleUrls: ['./sidebar-profile-system-settings.component.css']
+  selector: 'app-sidebar-user-system-settings',
+  imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
+  templateUrl: './sidebar-user-system-settings.component.html',
+  styleUrls: ['./sidebar-user-system-settings.component.css']
 })
-export class SidebarProfileSystemSettingsComponent implements OnInit{
+export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
 
   systemData = {
@@ -44,8 +44,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit{
   constructor(
     private apiService: ApiService,
     protected appService: AppService,
-    protected authService:AuthService
-  ) {}
+    protected authService: AuthService
+  ) { }
 
   ngOnInit(): void {
     this.loadSettings();
