@@ -27,7 +27,7 @@ export interface userMetaData {
 export interface AlertAllIoc {
     name: string;
     values: string[];
-};
+}
 
 export interface AlertModel {
     alert_id?: string;

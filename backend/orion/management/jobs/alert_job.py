@@ -57,7 +57,9 @@ class alert_job:
             if not clean_domain.endswith("/"):
                 clean_domain += "/"
             payload = DomainScanRequest(domain=clean_domain, scanType=scan_type)
+
             response = await self._crawl_model.scan_domain(payload)
+
             scan_result = {}
             if isinstance(response, dict):
                 scan_result = response
