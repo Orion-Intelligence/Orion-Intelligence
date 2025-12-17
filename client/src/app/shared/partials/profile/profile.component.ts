@@ -1,7 +1,6 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, Signal, } from '@angular/core';
-import { AsyncPipe, NgIf, NgOptimizedImage, NgClass } from "@angular/common";
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect} from '@angular/core';
+import { NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { Router } from '@angular/router';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
@@ -16,7 +15,6 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   selector: 'app-profile',
   standalone: true,
   imports: [
-    AsyncPipe,
     NgOptimizedImage,
     NgIf,
     TooltipDirective,

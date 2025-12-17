@@ -41,7 +41,6 @@ class TenantAdminView(ModelView):
             if existing:
                 raise FormValidationError({"is_default": "Only one default tenant is allowed"})
 
-
     async def delete(self, request: Request, pks: list[Any]) -> Optional[int]:
         tenants = await self.find_by_pks(request, pks)
 
@@ -50,26 +49,16 @@ class TenantAdminView(ModelView):
                 raise ActionFailed("Default tenant cannot be deleted")
 
             users = await self._engine.find(
-                db_user_account,
-                db_user_account.tenant_uuid == str(tenant.id),
-            )
+                db_user_account, db_user_account.tenant_uuid == str(tenant.id), )
 
             for user in users:
-                await self._engine.remove(
-                    db_keys,
-                    db_keys.auth_id == str(user.id),
-                )
-
                 image_path = self.IMAGE_DIR / f"{user.id}.enc"
                 if image_path.exists():
                     image_path.unlink()
 
                 await self._engine.delete(user)
 
-            tenant_keys = await self._engine.find(
-                db_keys,
-                db_keys.id == str(tenant.id),
-            )
+            tenant_keys = await self._engine.find(db_keys)
             for key in tenant_keys:
                 await self._engine.delete(key)
 
