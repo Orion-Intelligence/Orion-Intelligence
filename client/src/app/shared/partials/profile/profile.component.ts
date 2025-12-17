@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, signal, effect, Signal, } from '@angular/core';
 import { AsyncPipe, NgIf, NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -26,8 +26,8 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
-  username$: Observable<string | null>;
-  role$: Observable<string | null>;
+  username = signal<string>('');
+  role = signal<string>('');
   isNotificationOpen = signal<boolean>(false);
 
   profile_image: string = "";
@@ -48,8 +48,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     private appStorage: AppStorageService,
     protected licenseService: LicenseService
   ) {
-    this.username$ = this.authService.getUsername$();
-    this.role$ = this.authService.getRole$();
+    this.username.set(this.appService.userSessionData().user.username);
+    this.role.set(this.appService.userSessionData().user.role);
     effect(() => {
       if (this.dropdownOpen()) {
         this.onDropdownOpen();
@@ -81,9 +81,9 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onDropdownOpen() {
-    const rawLicenses = this.authService.getLicenses();
+    const rawLicenses = this.appService.userSessionData().user.license;
     this.licences = rawLicenses.map(l => this.getLicenseLabel(l)).join(', ');
-    this.profile_image = '/api/s/static/' + this.appService.userSessionData().preferences?.['userId'] + "?stamp=" + Math.random().toString(36).substring(2)
+    this.profile_image = '/api/s/static/' + this.appService.userSessionData().user.preferences?.['userId'] + "?stamp=" + Math.random().toString(36).substring(2)
   }
 
   getLicenseLabel(name: string): string {
@@ -113,20 +113,12 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isAdmin(): boolean {
-    const currentRole = this.authService.getRole();
+    const currentRole = this.appService.userSessionData().user.role;
     return currentRole === 'admin';
   }
-  isDemo(): boolean {
-    const currentRole = this.authService.getRole();
-    return currentRole === 'demo';
-  }
-  isProfile(): boolean {
-    const currentRole = this.authService.getRole();
-    return currentRole === 'profile';
-  }
-  isAnalyst(): boolean {
-    const currentRole = this.authService.getRole();
-    return currentRole === 'analyst';
+  isMember(): boolean {
+    const currentRole = this.appService.userSessionData().user.role;
+    return currentRole === 'member';
   }
 
   toggleDropdown(event: Event) {

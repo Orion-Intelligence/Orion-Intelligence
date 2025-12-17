@@ -21,21 +21,33 @@ export class AppService {
   private entitiesCache: any[] | null = null;
 
   public userSessionData = signal<userSessionData>({
-    companyName: '',
-    email: '',
-    phone: null,
-    country: '',
-    city: '',
-    postalCode: '',
-    taxId: '',
-    alerts: [],
-    licenses: [],
-    twofa_enabled: false,
-    assignedQuota:0,
-    quotaExceeded:false
+    user: {
+      email: '',
+      twofa_enabled: false,
+      username: '',
+      role: '',
+      status: '',
+      hasOnboarding: false,
+      subscription: false,
+      verificationDate: '',
+      license: []
+    },
+    tenant: {
+      name: '',
+      phone: '',
+      country: '',
+      city: '',
+      postalCode: '',
+      taxId: '',
+      userId: '',
+      licenses: [],
+      assignedQuota: '0',
+      quotaExceeded: false
+    },
+    alerts: []
   });
   public tenantData = signal<TenantModel>({
-    companyName: '',
+    name: '',
     iocs: []
   });
   public userImageUrl = signal<string | null>(null);
@@ -124,24 +136,49 @@ export class AppService {
     this.configData.set(new ConfigSettings());
     this.userImageUrl.set(null);
     this.userSessionData.set({
-      companyName: '',
-      email: '',
-      phone: null,
-      country: '',
-      city: '',
-      postalCode: '',
-      taxId: '',
-      alerts: [],
-      preferences: [],
-      twofa_enabled: false,
-      licenses: [],
-      assignedQuota:0,
-      quotaExceeded:false
+      user: {
+        email: '',
+        twofa_enabled: false,
+        username: '',
+        role: '',
+        status: '',
+        hasOnboarding: false,
+        subscription: false,
+        verificationDate: '',
+        license: []
+      },
+      tenant: {
+        name: '',
+        phone: '',
+        country: '',
+        city: '',
+        postalCode: '',
+        taxId: '',
+        userId: '',
+        licenses: [],
+        assignedQuota: '0',
+        quotaExceeded: false
+      },
+      alerts: []
     });
   }
 
   isMobileMode(): boolean {
     return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+  }
+
+  setOnboardingStatus(value: boolean) {
+    this.userSessionData.update(state => {
+      if (!state) return state;
+      localStorage.setItem('onboarding', String(value));
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          hasOnboarding: value
+        }
+      };
+    });
   }
 
 }

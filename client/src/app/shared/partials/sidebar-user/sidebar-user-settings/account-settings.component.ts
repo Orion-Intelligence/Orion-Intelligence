@@ -24,18 +24,18 @@ export class AccountSettingsComponent implements OnInit {
   twoFactorEnabled = true;
   isDarkMode = true;
   userId: string = '';
-  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, private appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
     this.userSessionData = this.appService.userSessionData();
   }
   ngOnInit(): void {
     if (this.userSessionData) {
       this.setItemsFromPreferences();
-      this.twoFactorEnabled = this.userSessionData.twofa_enabled
+      this.twoFactorEnabled = this.userSessionData.user.twofa_enabled
     }
   }
   setItemsFromPreferences() {
-    if (this.userSessionData?.preferences?.["theme"]) {
-      this.isDarkMode = this.userSessionData?.preferences?.["theme"] === 'dark-theme';
+    if (this.userSessionData?.user.preferences?.["theme"]) {
+      this.isDarkMode = this.userSessionData?.user.preferences?.["theme"] === 'dark-theme';
     } else {
       const storedTheme = this.appStorage.getTheme();
       if (storedTheme === 'dark-theme') {
@@ -44,13 +44,13 @@ export class AccountSettingsComponent implements OnInit {
         this.isDarkMode = false;
       }
     }
-    this.userId = this.userSessionData?.preferences?.["userId"]
+    this.userId = this.userSessionData?.user.preferences?.["userId"]
   }
   isAdmin(): boolean {
-    return this.authService.getRole() === 'admin';
+    return this.appService.userSessionData().user.role === 'admin';
   }
-  isProfile(): boolean {
-    return this.authService.getRole() == 'profile';
+  isMember(): boolean {
+    return this.appService.userSessionData().user.role == 'member';
   }
   applyTheme() {
     const body = document.body;
@@ -77,29 +77,33 @@ export class AccountSettingsComponent implements OnInit {
 
     this.appStorage.setTheme(theme);
 
-    this.appService.userSessionData.update(profile => {
-      if (!profile) return profile;
+    this.appService.userSessionData.update(state => {
+      if (!state) return state;
+
       return {
-        ...profile,
-        preferences: {
-          ...profile.preferences,
-          theme: theme
+        ...state,
+        user: {
+          ...state.user,
+          preferences: {
+            ...(state.user.preferences || {}),
+            theme: theme
+          }
         }
       };
-    });
+    })
 
     this.applyTheme();
   }
   toggleTwoFa() {
-    this.userSessionData.twofa_enabled = !this.userSessionData.twofa_enabled
+    this.userSessionData.user.twofa_enabled = !this.userSessionData.user.twofa_enabled
     this.updateUser()
   }
 
   getLocationDisplay(): string {
-    const profile = this.userSessionData;
-    if (!profile) return '';
+    const tenant = this.userSessionData.tenant;
+    if (!tenant) return '';
 
-    const { city, country } = profile;
+    const { city, country } = tenant;
     if (city && country) return `${city}, ${country}`;
     if (city) return city;
     if (country) return country;
@@ -109,9 +113,9 @@ export class AccountSettingsComponent implements OnInit {
   updateUser() {
     let route = "update/current/user"
     const userMeta: userMetaData = {
-      username: this.authService.getUsername(),
-      twofa_enabled: this.userSessionData.twofa_enabled,
-      preferences: this.userSessionData.preferences,
+      username: this.appService.userSessionData().user.username,
+      twofa_enabled: this.userSessionData.user.twofa_enabled,
+      preferences: this.userSessionData.user.preferences,
     };
 
     this.apiService.post(route, userMeta).subscribe({

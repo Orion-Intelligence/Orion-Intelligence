@@ -6,6 +6,7 @@ import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
+import { AppService } from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-add-tenant',
@@ -36,12 +37,12 @@ export class AddTenantComponent implements OnInit {
 
   constructor(
     public apiService: ApiService,
-    private authService: AuthService
+    private appService: AppService
   ) {
   }
 
   ngOnInit(): void {
-    this.isAdmin = this.authService.getRole() === 'admin';
+    this.isAdmin = this.appService.userSessionData().user.role === 'admin';
     this.isAdmin ? (this.model.role = 'member') : (this.model.role = 'analyst');
   }
 

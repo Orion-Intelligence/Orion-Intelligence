@@ -29,90 +29,86 @@
 
           <ng-template #adminProfileBlock>
             <div class="user-settings_company-name">
-              {{ getLocationDisplay() || authService.getUsername() }}
+              {{ getLocationDisplay() || this.appService.userSessionData().user.username }}
             </div>
             <div class="user-settings_company-location">
-              {{ getLocationDisplay() || authService.getLicenses() }}
+              {{ getLocationDisplay() || this.appService.userSessionData().user.username }}
             </div>
           </ng-template>
 
           <ng-template #companyProfileBlock>
             <div class="user-settings_company-name">
-              <input type="text" [(ngModel)]="userSessionData.companyName" class="user-settings_input" disabled
+              <input type="text" [(ngModel)]="userSessionData.tenant.name" class="user-settings_input" disabled
                 placeholder="Enter company name" />
             </div>
 
             <div class="user-settings_company-location">
-              {{ getLocationDisplay() || 'Location will appear here' }}
-            </div>
-
-            <div class="user-settings_company-location">
-              Licenses〡{{ userSessionData.preferences?.['licenses']?.join(', ') || 'No licenses assigned' }}
+              Licenses〡{{ userSessionData.user.preferences?.['licenses']?.join(', ') || 'No licenses assigned' }}
             </div>
           </ng-template>
         </div>
       </div>
 
-      <div class="user-settings_action-buttons" *ngIf="isProfile() && !licenseService.getLicenses().includes('free')">
+      <!-- <div class="user-settings_action-buttons" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
         <button class="user-settings_edit-btn" *ngIf="isEditing" (click)="cancelEdit($event)">
           Cancel
         </button>
         <button class="user-settings_edit-btn" (click)="toggleEdit($event)">
           {{ isEditing ? 'Save' : 'Edit' }}
         </button>
-      </div>
+      </div> -->
     </div>
 
-    <div class="user-settings_box" *ngIf="isProfile() && !licenseService.getLicenses().includes('free')">
+    <!-- <div class="user-settings_box" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
       <div class="user-settings_box-header">Contacts</div>
       <div class="user-settings_box-content">
         <div class="user-settings_row">
           <div class="user-settings_info-item">
             <div class="user-settings_info-label">Email address</div>
-            <input type="email" [(ngModel)]="userSessionData.email" class="user-settings_info-value" disabled />
+            <input type="email" [(ngModel)]="userSessionData.user.email" class="user-settings_info-value" disabled />
           </div>
 
           <div class="user-settings_info-item">
             <div class="user-settings_info-label">Phone</div>
-            <input type="text" [(ngModel)]="userSessionData.phone" class="user-settings_info-value"
+            <input type="text" [(ngModel)]="userSessionData.tenant.phone" class="user-settings_info-value"
               [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }" placeholder="Enter phone" />
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
-    <div class="user-settings_box" *ngIf="isProfile() && !licenseService.getLicenses().includes('free')">
+    <!-- <div class="user-settings_box" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
       <div class="user-settings_box-header">Users</div>
       <div class="user-settings_box-content">
         <div class="user-settings_row">
           <div class="user-settings_info-item">
             <div class="user-settings_info-label">Assigned User Quota</div>
             <div class="user-settings_info-value mt-2">
-              {{ userSessionData.preferences?.['userQuota'] ?? 0 }}
+              {{ userSessionData.user.preferences?.['userQuota'] ?? 0 }}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
-    <div class="user-settings_box" *ngIf="isProfile() && !licenseService.getLicenses().includes('free')">
+    <!-- <div class="user-settings_box" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
       <div class="user-settings_box-header">Address</div>
       <div class="user-settings_box-content">
         <div class="user-settings_row">
           <div class="user-settings_info-item">
             <div class="user-settings_info-label">Country</div>
-            <input type="text" [(ngModel)]="userSessionData.country" class="user-settings_info-value"
+            <input type="text" [(ngModel)]="userSessionData.tenant.country" class="user-settings_info-value"
               [disabled]="!isEditing" placeholder="Enter country" />
           </div>
 
           <div class="user-settings_info-item">
             <div class="user-settings_info-label">City/State</div>
-            <input type="text" [(ngModel)]="userSessionData.city" class="user-settings_info-value"
+            <input type="text" [(ngModel)]="userSessionData.tenant .city" class="user-settings_info-value"
               [disabled]="!isEditing" placeholder="Enter city/state" />
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -130,7 +126,7 @@
   <div *ngIf="is2FAOpen">
     <div class="user-settings_toggle-row">
       <div class="user-settings_toggle-label">
-        {{ userSessionData.twofa_enabled ? 'Enabled' : 'Disabled' }}
+        {{ userSessionData.user.twofa_enabled ? 'Enabled' : 'Disabled' }}
       </div>
       <label class="user-settings_switch">
         <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()" />

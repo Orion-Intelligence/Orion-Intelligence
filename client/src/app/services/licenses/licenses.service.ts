@@ -6,6 +6,7 @@ import { map, Observable, of } from 'rxjs';
 import { SubscriptionService } from '../dashboard/subscription.service';
 import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/dashboard.service';
+import { AppService } from '../core/app/app.service';
 
 type CombinedRule = {
     modules: Set<string> | 'all';
@@ -21,19 +22,15 @@ type CombinedRule = {
 export class LicenseService {
 
 
-    constructor(protected dashboardService: DashboardService, private auth: AuthService, private subscriptionService: SubscriptionService, private router: Router) { }
+    constructor(protected dashboardService: DashboardService, private appService: AppService, private subscriptionService: SubscriptionService, private router: Router) { }
 
     getLicenses(): string[] {
-        return this.auth.getLicenses() ?? [];
+        return this.appService.userSessionData().user.license ?? [];
     }
 
     loadLicenses(): Observable<string[]> {
-        if (this.auth.getLicenses().length > 0) {
-            return of(this.auth.getLicenses());
-        }
-        return this.auth.refreshToken().pipe(
-            map(() => this.auth.getLicenses())
-        );
+        return of(this.appService.userSessionData().user.license);
+
     }
 
     private getCombinedRule(): CombinedRule {
@@ -69,26 +66,26 @@ export class LicenseService {
     }
 
     demoSubscription(moduleName: string) {
-      if (!this.canAccess(moduleName)) {
-        this.dashboardService.showSubscription.set(true);
-        this.router.navigate(['/']).then();
-      }
+        if (!this.canAccess(moduleName)) {
+            this.dashboardService.showSubscription.set(true);
+            this.router.navigate(['/']).then();
+        }
     }
 
     canAccess(moduleName: string): boolean {
-      if (moduleName === 'Stealerlogs') moduleName = 'stealer_logs';
-      if (moduleName === 'Strategic') moduleName = 'general';
+        if (moduleName === 'Stealerlogs') moduleName = 'stealer_logs';
+        if (moduleName === 'Strategic') moduleName = 'general';
 
-      const rule = this.getCombinedRule();
-      const key = moduleName.toLowerCase();
-      const access = rule.modules === 'all' || rule.modules.has(key);
+        const rule = this.getCombinedRule();
+        const key = moduleName.toLowerCase();
+        const access = rule.modules === 'all' || rule.modules.has(key);
 
-      return !(this.subscriptionService.isDemo() && !access);
+        return !(this.subscriptionService.isDemo() && !access);
     }
 
     canUseModule(moduleName: string): boolean {
         const rule = this.getCombinedRule();
-        if (this.subscriptionService.isDemo() || this.auth.getRole() == "admin") {
+        if (this.subscriptionService.isDemo() || this.appService.userSessionData().user.role == "admin") {
             return true
         } else
             return (rule.modules === 'all' || rule.modules.has(moduleName))
@@ -98,21 +95,21 @@ export class LicenseService {
         if (this.subscriptionService.isDemo()) {
             return true
         } else
-          return this.getCombinedRule().cti_graph;
+            return this.getCombinedRule().cti_graph;
     }
 
     canUseMapping(): boolean {
         if (this.subscriptionService.isDemo()) {
             return true
         } else
-          return this.getCombinedRule().mapping;
+            return this.getCombinedRule().mapping;
     }
 
     canUseScanning(): boolean {
         if (this.subscriptionService.isDemo()) {
             return true
         } else
-          return this.getCombinedRule().scanning;
+            return this.getCombinedRule().scanning;
     }
 
     isMaintainer(): boolean {

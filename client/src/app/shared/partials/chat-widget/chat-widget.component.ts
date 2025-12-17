@@ -5,7 +5,8 @@ import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { chatBotAnimation } from '../../animations/chat.bot.animation';
-import {SubscriptionService} from '../../../services/dashboard/subscription.service';
+import { SubscriptionService } from '../../../services/dashboard/subscription.service';
+import { AppService } from '../../../services/core/app/app.service';
 
 type ChatApiResponse = {
   result?: string;
@@ -36,20 +37,21 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   private io?: IntersectionObserver;
   private mo?: MutationObserver;
 
-  constructor(private api: ApiService, private authService: AuthService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService) { }
+  constructor(private api: ApiService, private appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService) { }
 
   ngOnInit(): void {
-    this.authService.getUsername$().subscribe(u => {
-      this.sessionId = (u || '').trim() || crypto.randomUUID();
-      if (this.chatMessages.length === 0) {
-        this.chatMessages.push({
-          id: this.sessionId,
-          sender: 'bot',
-          text: 'Hi there! How can I help you today?',
-          time: new Date()
-        });
-      }
-    });
+    const username = this.appService.userSessionData()?.user.username || '';
+
+    this.sessionId = username.trim() || crypto.randomUUID();
+
+    if (this.chatMessages.length === 0) {
+      this.chatMessages.push({
+        id: this.sessionId,
+        sender: 'bot',
+        text: 'Hi there! How can I help you today?',
+        time: new Date()
+      });
+    }
   }
 
   ngAfterViewInit(): void {

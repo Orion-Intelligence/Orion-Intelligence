@@ -13,7 +13,7 @@
     <app-dashboard-sidebar-items (optionSelected)="onOptionSelected($event)"
       (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
       [icon]="'assets/images/sidebar/dump.svg'" [items]="getProfileCategories()" [routePrefix]="'profile'"
-      [title]="authService.getUsername()">
+      [title]="this.appService.userSessionData().user.username">
     </app-dashboard-sidebar-items>
 
     <!-- <ng-container
@@ -155,7 +155,8 @@
     <app-dashboard-sidebar-collapsed (optionSelected)="onOptionSelected($event)"
       (sectionSelected)="onSectionSelected($event)" [category]="category.PROFILE"
       [icon]="'assets/images/sidebar/dump.svg'" [items]="profileCategories" [routePrefix]="'profile'"
-      [selectionStore]="selectionStore" [title]="authService.getUsername()"></app-dashboard-sidebar-collapsed>
+      [selectionStore]="selectionStore"
+      [title]="appService.userSessionData().user.username"></app-dashboard-sidebar-collapsed>
 
     <!-- <ng-template #homeTemplate>
       <li class="sidebar__item">

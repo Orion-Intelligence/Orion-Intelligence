@@ -22,7 +22,7 @@ from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from fastapi.responses import Response
 
-from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
 
 
 class AccountManager:
@@ -250,15 +250,22 @@ class AccountManager:
     raw_alerts = alerts.alerts if alerts and alerts.alerts else []
     alerts_list = AlertManager.getInstance().filter_alerts_by_license(raw_alerts, user)
 
+    hasOnboarding=False
+    onboarding = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+    if onboarding and onboarding.status == TenantStatus.ONBOARDING:
+        hasOnboarding = True
+    else:
+        hasOnboarding = False
+
     node = NodeCallbackModel.model_validate(
-      {"user": {"email": user.email, "twofa_enabled": user.twofa_enabled}, "tenant": {"name": self.safe_decrypt(
-        enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone), "country": self.safe_decrypt(
-        enc,
-        tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
-        enc,
-        tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
-        self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
-        assigned_quota), "quotaExceeded": bool(
-        tenant.user_quota and assigned_quota >= tenant.user_quota), }, "alerts": alerts_list, })
+      {"user": {"email": user.email, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status,
+        "hasOnboarding": hasOnboarding, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
+        "license": [license.value for license in user.licenses]}, 
+       "tenant": {"name": self.safe_decrypt(enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone),
+        "country": self.safe_decrypt(enc,tenant.country), "city": self.safe_decrypt(enc, tenant.city),
+        "postalCode": self.safe_decrypt(enc,tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), 
+        "userId": "", "licenses": [self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(assigned_quota),
+        "quotaExceeded": bool(tenant.user_quota and assigned_quota >= tenant.user_quota), }, 
+        "alerts": alerts_list, })
 
     return node

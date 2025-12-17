@@ -86,16 +86,16 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   onSectionSelected(section: Category) {
     if (this.selectionStore.getSelectedSection() === section) {
-      this.authService.getRole$().pipe(take(1)).subscribe((role) => {
-        if (role === 'profile') {
-          this.selectionStore.setSelectedSection('Profile');
-          this.selectionStore.setSelectedOption('Dashboard');
-        } else {
-          this.selectionStore.setSelectedSection('');
-          this.selectionStore.setSelectedOption('');
-        }
-        this.router.navigateByUrl('/').then();
-      });
+      // this.authService.getRole$().pipe(take(1)).subscribe((role) => {
+      //   if (role === 'profile') {
+      this.selectionStore.setSelectedSection('Profile');
+      this.selectionStore.setSelectedOption('Dashboard');
+      // } else {
+      //   this.selectionStore.setSelectedSection('');
+      //   this.selectionStore.setSelectedOption('');
+      // }
+      this.router.navigateByUrl('/').then();
+      // });
     } else {
       this.dashboardService.resetParams()
       this.selectionStore.setSelectedSection(section);
@@ -172,11 +172,12 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       return categories.filter(
         c =>
           c !== ProfileSubCategory.IOC &&
-          c !== ProfileSubCategory.STATISTICS
+          c !== ProfileSubCategory.STATISTICS &&
+          c !== ProfileSubCategory.TENANT_SETTINGS
       );
     }
 
-    if (this.isProfile() && !this.licenseService.getLicenses().includes('free')) {
+    if (this.isMember() && !this.licenseService.getLicenses().includes('free')) {
       return categories.filter(
         c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS
@@ -188,13 +189,14 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         c !== ProfileSubCategory.USERS &&
         c !== ProfileSubCategory.AUDITLOG &&
         c !== ProfileSubCategory.IOC &&
-        c !== ProfileSubCategory.STATISTICS
+        c !== ProfileSubCategory.STATISTICS &&
+        c !== ProfileSubCategory.TENANT_SETTINGS
     );
   }
   isAdmin(): boolean {
-    return this.authService.getRole() === 'admin';
+    return this.appService.userSessionData().user.role === 'admin';
   }
-  isProfile(): boolean {
-    return this.authService.getRole() === 'profile';
+  isMember(): boolean {
+    return this.appService.userSessionData().user.role === 'member';
   }
 }

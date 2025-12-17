@@ -28,7 +28,7 @@ export class SidebarUserIocComponent implements OnInit {
 
     if (backendData && backendData.iocs) {
       this.onboardingData = {
-        companyName: backendData.companyName,
+        name: backendData.name,
         iocs: Array.from(search_filter_keys).map(key => {
           const backendIoc = backendData.iocs.find(i => i.ioc_id === key);
           return {
@@ -79,14 +79,14 @@ export class SidebarUserIocComponent implements OnInit {
   }
   update() {
     const filteredOnboardingData: TenantModel = {
-      companyName: this.onboardingData?.companyName || '',
+      name: this.onboardingData?.name || '',
       iocs: this.onboardingData?.iocs.filter(ioc => ioc.values && ioc.values.length > 0) || []
     };
     this.setIocLocal();
     this.appService.tenantData.set({ ...filteredOnboardingData });
     this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => {
-        this.authService.setOnboarding(true);
+        this.appService.setOnboardingStatus(true);
         this.router.navigate(['/dashboard']).then();
       },
       error: (err) => {

@@ -271,8 +271,8 @@ export class ResultComponent implements OnInit, OnChanges {
     this.app_service.set('entityFilterCondition', newValue);
     this.onFormSubmit();
   }
-  checkProfile(): boolean {
-    return this.authService.getRole() === 'profile';
+  checkMember(): boolean {
+    return this.app_service.userSessionData().user.role === 'member';
   }
   hasIOCs(): boolean {
     const categories = this.app_service.configData().localSettings.entityfilterCategories;

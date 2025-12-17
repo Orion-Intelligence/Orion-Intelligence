@@ -1,19 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ChatResultItem} from '../../../model/results/chat/chat.callback.model';
-import {CommonModule, NgForOf, NgIf, SlicePipe,} from '@angular/common';
-import {ResultListComponent} from '../../result-components/result-list/result-list.component';
-import {ResultSectionComponent} from '../../result-components/result-section/result-section.component';
-import {fadeInDashboardItem} from '../../../animations/dashboard.item.animation';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
-import {JsonApiViewerComponent} from '../../json-api-viewer/json-api-viewer.component';
-import {last, Observable} from 'rxjs';
-import {AuthService} from '../../../../services/authetication/auth.service';
-import {SocialResultItem} from '../../../model/results/social/social.callback.model';
-import {ReportHeaderComponent} from '../../report-header/report-header.component';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {ChatWidgetComponent} from '../../chat-widget/chat-widget.component';
-import {AppService} from '../../../../services/core/app/app.service';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ChatResultItem } from '../../../model/results/chat/chat.callback.model';
+import { CommonModule, NgForOf, NgIf, SlicePipe, } from '@angular/common';
+import { ResultListComponent } from '../../result-components/result-list/result-list.component';
+import { ResultSectionComponent } from '../../result-components/result-section/result-section.component';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { JsonApiViewerComponent } from '../../json-api-viewer/json-api-viewer.component';
+import { last, Observable } from 'rxjs';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { SocialResultItem } from '../../../model/results/social/social.callback.model';
+import { ReportHeaderComponent } from '../../report-header/report-header.component';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { ChatWidgetComponent } from '../../chat-widget/chat-widget.component';
+import { AppService } from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-report-chat',
@@ -39,16 +39,12 @@ export class ReportChatComponent implements OnInit {
   content = '';
   summary = '';
   isExpandedMetadata = true
-  username$!: Observable<string | null>;
-  role$!: Observable<string | null>;
 
   constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router,) {
-    this.username$ = this.authService.getUsername$();
-    this.role$ = this.authService.getRole$();
   }
 
   ngOnInit(): void {
-    this.route.data.subscribe(({reportdata}) => {
+    this.route.data.subscribe(({ reportdata }) => {
       this.resultItem = reportdata;
       this.processResultItem();
     });

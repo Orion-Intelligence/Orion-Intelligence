@@ -1,24 +1,40 @@
 export interface userSessionData {
-    companyName: string;
+    user: UserDataModel;
+    tenant: TenantDataModel;
+    alerts: AlertModel[];
+}
+
+export interface UserDataModel {
     email: string;
-    phone: number | null;
+    twofa_enabled: boolean;
+    username: string;
+    role: string;
+    status: string;
+    hasOnboarding: boolean;
+    subscription: boolean;
+    verificationDate: string;
+    license: string[];
+    preferences?: {
+        [key: string]: any;
+    };
+}
+
+export interface TenantDataModel {
+    name: string;
+    phone: string;
     country: string;
     city: string;
     postalCode: string;
     taxId: string;
-    twofa_enabled: boolean;
-    preferences?: {
-        [key: string]: any;
-    };
-    alerts: AlertModel[];
+    userId: string;
     licenses: string[];
-    assignedQuota: number;
-    quotaExceeded:false
+    assignedQuota: string;
+    quotaExceeded: boolean;
 }
 
 export interface userMetaData {
     username: string;
-    twofa_enabled:boolean
+    twofa_enabled: boolean
     preferences?: {
         [key: string]: any;
     };

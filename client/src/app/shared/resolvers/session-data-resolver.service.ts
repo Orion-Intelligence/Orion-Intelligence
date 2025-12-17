@@ -1,12 +1,12 @@
-import {Injectable} from '@angular/core';
-import {Resolve} from '@angular/router';
-import {Observable, of} from 'rxjs';
-import {catchError, shareReplay, tap} from 'rxjs/operators';
-import {ApiService} from '../services/api.service';
-import {userSessionData} from '../model/company-profile/company.profile.model';
-import {AppService} from '../../services/core/app/app.service';
+import { Injectable } from '@angular/core';
+import { Resolve } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, shareReplay, tap } from 'rxjs/operators';
+import { ApiService } from '../services/api.service';
+import { userSessionData } from '../model/company-profile/company.profile.model';
+import { AppService } from '../../services/core/app/app.service';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class NodeResolver implements Resolve<userSessionData> {
   private cache$?: Observable<userSessionData>;
 
@@ -18,13 +18,13 @@ export class NodeResolver implements Resolve<userSessionData> {
       .post<userSessionData>('get/tenant/node', {})
       .pipe(
         catchError(err => {
-          console.error('Failed to load profile', err);
+          console.error('Failed to load session data', err);
           return of(null as any);
         }),
-        tap(profile => {
-          if (profile) {
-            this.appService.userSessionData.set(profile);
-            console.log(this.appService.userSessionData().preferences?.['userId']);
+        tap(sessionData => {
+          if (sessionData) {
+            this.appService.userSessionData.set(sessionData);
+            console.log(this.appService.userSessionData().user.preferences?.['userId']);
           }
         }),
         shareReplay(1)

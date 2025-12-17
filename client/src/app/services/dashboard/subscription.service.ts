@@ -1,33 +1,34 @@
-import {Injectable} from '@angular/core';
-import {AuthService} from '../authetication/auth.service';
+import { Injectable } from '@angular/core';
+import { AuthService } from '../authetication/auth.service';
+import { AppService } from '../core/app/app.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SubscriptionService {
-  constructor(private authService: AuthService) {
+  constructor(private appService: AppService) {
   }
 
   public accountExpirable(): boolean {
-    return this.authService.getRole()!="profile" || this.checkSubscription();
+    return this.appService.userSessionData().user.role != "member" || this.checkSubscription();
   }
 
   public checkSubscription(): boolean {
-    return this.authService.getSubscriptionStatus();
+    return this.appService.userSessionData().user.subscription;
   }
 
   public isDemo(): boolean {
-    const role = this.authService.getRole();
+    const role = this.appService.userSessionData().user.role;
     return role === 'demo';
   }
 
   public checkAdmin(): boolean {
-    const role = this.authService.getRole();
+    const role = this.appService.userSessionData().user.role;
     return role === 'admin';
   }
 
   public getTrialDaysLeft(): number {
-    const verifyDate = this.authService.getVerificationDate();
+    const verifyDate = this.appService.userSessionData().user.verificationDate;
     if (!verifyDate) return 0;
 
     const expiry = new Date(verifyDate);

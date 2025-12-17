@@ -28,10 +28,10 @@ export class UserImagePickerComponent implements OnInit {
 
   ngOnInit(): void {
     this.previewUrl =
-      `/api/s/static/${this.appService.userSessionData().preferences?.['userId']}` +
+      `/api/s/static/${this.appService.userSessionData().user.preferences?.['userId']}` +
       `?stamp=${Date.now()}`;
 
-    fetch(`/api/s/static/${this.appService.userSessionData().preferences?.['userId']}`)
+    fetch(`/api/s/static/${this.appService.userSessionData().user.preferences?.['userId']}`)
       .then(res => {
         this.isDefaultImage = res.headers.get('x-default-image') === 'true';
       });
@@ -87,7 +87,7 @@ export class UserImagePickerComponent implements OnInit {
         next: (res) => {
           this.isDefaultImage = false
           this.isUploading = false;
-          this.previewUrl = `/api/s/static/${this.appService.userSessionData().preferences?.['userId']}` + "?stamp=" + Math.random().toString(36).substring(2)
+          this.previewUrl = `/api/s/static/${this.appService.userSessionData().user.preferences?.['userId']}` + "?stamp=" + Math.random().toString(36).substring(2)
         },
         error: (err) => {
           this.isUploading = false;
@@ -113,7 +113,7 @@ export class UserImagePickerComponent implements OnInit {
       this.apiService.post(resource_path, { settings: { logo_url: '' } }).subscribe({
         next: () => {
           this.isDefaultImage = true
-          this.previewUrl = `/api/s/static/${this.appService.userSessionData().preferences?.['userId']}` + "?stamp=" + Math.random().toString(36).substring(2)
+          this.previewUrl = `/api/s/static/${this.appService.userSessionData().user.preferences?.['userId']}` + "?stamp=" + Math.random().toString(36).substring(2)
         },
         error: (err) => console.log(err)
       });

@@ -21,12 +21,9 @@ export class ReportMappingComponent implements OnInit {
   result: any[] = [];
   filteredItems: any[] = [];
   isExpanded = false;
-  username$!: Observable<string | null>;
-  role$!: Observable<string | null>;
 
   constructor(private api: ApiService, protected dashboardservice: DashboardService, protected authService: AuthService, protected subscriptionService: SubscriptionService, protected licenseService: LicenseService) {
-    this.username$ = this.authService.getUsername$();
-    this.role$ = this.authService.getRole$();
+
   }
 
   ngOnInit(): void {

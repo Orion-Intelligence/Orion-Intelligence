@@ -181,8 +181,8 @@
                                 <ng-container *ngFor="let license of licenseList">
                                   <div *ngIf="license !== 'maintainer'" class="license-card license-btn"
                                     [class.license-selected]="user.licenses?.includes(license)"
-                                    [class.license-disabled]="isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData()?.preferences?.['licenses']?.includes(license))"
-                                    (click)="!(isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData()?.preferences?.['licenses']?.includes(license))) && toggleUserLicense(user, license)">
+                                    [class.license-disabled]="isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData().user.preferences?.['licenses']?.includes(license))"
+                                    (click)="!(isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData().user.preferences?.['licenses']?.includes(license))) && toggleUserLicense(user, license)">
                                     <span class="license-label">{{ getLicenseLabel(license) }}</span>
                                   </div>
                                 </ng-container>

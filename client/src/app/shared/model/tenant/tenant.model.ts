@@ -13,7 +13,8 @@ export const TenantStatusValues = {
 };
 
 export interface TenantModel {
-  companyName: string;
+  id?: string;
+  name: string;
   iocs: IocCategory[];
   phone?: string;
   country?: string;
@@ -26,7 +27,6 @@ export interface TenantModel {
   licenses?: string[];
   quotaExceeded?: boolean;
 }
-
 export interface TenantRequest {
   companyName: string;
   iocs: IocCategory[];

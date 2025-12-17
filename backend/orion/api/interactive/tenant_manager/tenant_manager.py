@@ -115,10 +115,12 @@ class TenantManager:
     if data.status is not None:
       tenant.status = data.status
 
-    tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
+    if data.licenses is not None and len(data.licenses) > 0:
+      tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
-    tenant.iocs = [IocCategory(ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(), name=enc.encrypt(ioc.name.encode()).decode(), values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])])
-      for ioc in (data.iocs or [])]
+    if data.iocs is not None and len(data.iocs) > 0:
+      tenant.iocs = [IocCategory(ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(), name=enc.encrypt(ioc.name.encode()).decode(), values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])])
+        for ioc in (data.iocs or [])]
 
     await self._engine.save(tenant)
 

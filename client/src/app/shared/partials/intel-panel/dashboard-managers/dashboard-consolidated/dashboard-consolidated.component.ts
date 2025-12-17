@@ -141,7 +141,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.dashboardService.consolidatedParamModel.category = category
     }
 
-    if (this.checkProfile()) {
+    if (this.checkMember()) {
       this.dashboardService.consolidatedParamModel.profile = true
     }
 
@@ -183,7 +183,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchRanked() {
-    if (this.checkProfile() && !this.hasIOCs()) {
+    if (this.checkMember() && !this.hasIOCs()) {
       return;
     }
     this.isLoading.set(true);
@@ -317,8 +317,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  checkProfile(): boolean {
-    return this.authService.getRole() === 'profile';
+  checkMember(): boolean {
+    return this.appService.userSessionData().user.role === 'member';
   }
 
   hasIOCs(): boolean {
@@ -331,7 +331,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   shouldShowSection(): boolean {
     const totalResults = this.getTotalResultCount();
     const hasAnyData = totalResults > 0;
-    if (!this.checkProfile()) {
+    if (!this.checkMember()) {
       return hasAnyData;
     }
     return hasAnyData && this.hasIOCs();

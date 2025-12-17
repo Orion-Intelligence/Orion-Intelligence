@@ -240,7 +240,7 @@ class session_manager:
             acct_at = user.account_verify_at
             if isinstance(acct_at, datetime):
                 acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
-            if role_name == "profile" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (datetime.now(timezone.utc) - acct_at).days >= 30:
+            if role_name == "member" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (datetime.now(timezone.utc) - acct_at).days >= 30:
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
             onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))

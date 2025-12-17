@@ -47,6 +47,8 @@ import { ManageProfileComponent } from './pages/tenant/tenant-management/view-pr
 import { ViewTenantComponent } from './pages/tenant/tenant-management/view-tenant/view-tenant.component';
 import { SidebarProfileSystemSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
+import { TenantSettingsComponent } from './shared/partials/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component';
+import { OnboardingGuard } from './shared/guards/onboarding-guar';
 
 const consolidatedChildren = [
   {
@@ -593,7 +595,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        canActivate: [subscriptionGuard, LicenseGuard],
+        canActivate: [subscriptionGuard, OnboardingGuard],
         data: { animation: 'ProifilePage' },
         children: [
           {
@@ -654,6 +656,11 @@ export const routes: Routes = [
             path: 'account',
             component: AccountSettingsComponent,
             data: { type: 'account', animation: 'CategoryPage' }
+          },
+          {
+            path: 'tenant_settings',
+            component: TenantSettingsComponent,
+            data: { type: 'settings', animation: 'CategoryPage' }
           },
           {
             path: 'tenant',

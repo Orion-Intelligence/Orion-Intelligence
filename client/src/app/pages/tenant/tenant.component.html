@@ -41,7 +41,8 @@
         <div class="onboarding-box__content">
             <ng-container [ngSwitch]="currentStep">
                 <div *ngSwitchCase="1">
-                    <h2 class="onboarding-box__title">Welcome to {{ this.appService.getConfig().appSettings.app_name }}</h2>
+                    <h2 class="onboarding-box__title">Welcome to {{ this.appService.getConfig().appSettings.app_name }}
+                    </h2>
                     <p class="onboarding-box__subtitle">
                         Let us know a little about your company
                     </p>
@@ -49,7 +50,7 @@
                     <div class="onboarding-box__form-group">
                         <label for="company" class="onboarding-box__form-label">Company name</label>
                         <input type="text" id="company" class="onboarding-box__form-input"
-                            placeholder="Enter company name" [(ngModel)]="onboardingData.companyName" />
+                            placeholder="Enter company name" [(ngModel)]="onboardingData.name" />
                     </div>
                 </div>
 
@@ -70,8 +71,7 @@
 
                             <div class="filter-panel__scroll-btn filter-panel__show" (click)="scrollLeft()">
                                 <div class="filter-panel__click-hitbox filter-panel__show">
-                                    <img src="assets/images/shared/onboarding_leftButton.svg"
-                                        alt="filter icon" />
+                                    <img src="assets/images/shared/onboarding_leftButton.svg" alt="filter icon" />
                                 </div>
                             </div>
 
@@ -141,7 +141,7 @@
 
                         <div class="section">
                             <p class="onboarding-step2__added-title">Company Name</p>
-                            <p class="company-value">{{ onboardingData.companyName }}</p>
+                            <p class="company-value">{{ onboardingData.name }}</p>
                         </div>
 
                         <hr class="onboarding-step2__divider2" />
@@ -184,7 +184,7 @@
 
             <ng-container [ngSwitch]="currentStep">
                 <button *ngSwitchCase="1" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()"
-                    [disabled]="!onboardingData.companyName">
+                    [disabled]="!onboardingData.name">
                     Next
                 </button>
                 <button *ngSwitchCase="2" class="onboarding-box__btn onboarding-box__btn--next" (click)="goNext()">

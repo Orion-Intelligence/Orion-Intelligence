@@ -64,10 +64,10 @@ export class SidebarUserHomepageComponent implements OnInit {
     });
   }
   isAdmin(): boolean {
-    return this.authService.getRole() === 'admin';
+    return this.appService.userSessionData().user.role === 'admin';
   }
   isMember(): boolean {
-    return this.authService.getRole() === 'member';
+    return this.appService.userSessionData().user.role === 'member';
   }
   convertAlertsToCategories(alerts: AlertModel[]): AlertCategorySummary[] {
     const activeAlerts = alerts.filter(a => a.status !== 'ignore');

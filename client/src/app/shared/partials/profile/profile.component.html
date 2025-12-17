@@ -1,6 +1,6 @@
-<div *ngIf="this.username$|async" class="profile">
+<div *ngIf="this.username()" class="profile">
   <ng-container *ngIf="licenseService.isMaintainer()">
-    <a *ngIf="isProfile()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
+    <a *ngIf="isMember()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
       <div class="profile_category profile_logout_icon">
         <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24">
         <span class="notification-badge" [ngClass]="getUnseenAlertCount() === 0 ? 'green-badge' : 'red-badge'">
@@ -22,7 +22,7 @@
         <img [src]="profile_image" alt="" />
       </div>
       <div class="profile-name-mail-container">
-        <div class="profile-name">{{ username$ | async}}</div>
+        <div class="profile-name">{{ username()}}</div>
         <div class="profile-email" appTooltip="Active License">{{ licences }}</div>
       </div>
     </li>
@@ -49,7 +49,7 @@
     <li><a *ngIf="isAdmin()" class="profile-item" href="admin/" target="_blank"> <img alt="Settings" height="15"
           ngSrc="assets/images/shared/settings.svg" priority width="15"> <span>Settings</span></a>
     </li>
-    <li *ngIf="authService.getOnboardingStatus()" (click)="toggleThemeByClick()">
+    <li *ngIf="appService.userSessionData().user.hasOnboarding" (click)="toggleThemeByClick()">
       <div class=" profile_theme-toggle profile-item">
         <img alt="Settings" (click)="toggleThemeByClick()" src="assets/images/shared/theme.svg">
         <span> Theme</span>

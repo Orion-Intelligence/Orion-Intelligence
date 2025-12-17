@@ -117,6 +117,7 @@ export enum TenantSubCategory {
 export enum ProfileSubCategory {
   HOMEPAGE = 'Homepage',
   IOC = 'IOC',
+  TENANT_SETTINGS = 'Tenant_Settings',
   ACCOUNT = 'Account',
   USERS = 'Users',
   STATISTICS = 'Statistics',
