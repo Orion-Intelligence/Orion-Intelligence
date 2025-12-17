@@ -44,7 +44,7 @@ export class SidebarUserHomepageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.isProfile()) {
+    if (this.isMember() && !this.licenseService.getLicenses().includes('free')) {
       this.checkScanProgress();
       this.initializeData()
 
@@ -66,8 +66,8 @@ export class SidebarUserHomepageComponent implements OnInit {
   isAdmin(): boolean {
     return this.authService.getRole() === 'admin';
   }
-  isProfile(): boolean {
-    return this.authService.getRole() === 'profile';
+  isMember(): boolean {
+    return this.authService.getRole() === 'member';
   }
   convertAlertsToCategories(alerts: AlertModel[]): AlertCategorySummary[] {
     const activeAlerts = alerts.filter(a => a.status !== 'ignore');

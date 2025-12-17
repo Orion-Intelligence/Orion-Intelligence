@@ -24,7 +24,7 @@ class SignupManager:
         engine = mongo_controller.get_instance().get_engine()
         username = (data.username or "").strip()
         email = (data.email or "").strip().lower()
-        password = "Doorsoffreedom@00"
+        password = data.password
 
         username_pattern = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
         if not re.match(username_pattern, username):
