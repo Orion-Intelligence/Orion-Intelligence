@@ -3,7 +3,7 @@ import { Resolve } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, shareReplay, tap } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
-import { userSessionData } from '../model/company-profile/company.profile.model';
+import { userSessionData } from '../model/company-profile/node.model';
 import { AppService } from '../../services/core/app/app.service';
 
 @Injectable({ providedIn: 'root' })

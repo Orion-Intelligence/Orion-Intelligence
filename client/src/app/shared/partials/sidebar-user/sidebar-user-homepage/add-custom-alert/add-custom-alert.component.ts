@@ -1,6 +1,6 @@
-import { Component, EventEmitter, input, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AlertModel } from '../../../../model/company-profile/company.profile.model';
+import { AlertModel } from '../../../../model/company-profile/node.model';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../../constants/shared-enums';

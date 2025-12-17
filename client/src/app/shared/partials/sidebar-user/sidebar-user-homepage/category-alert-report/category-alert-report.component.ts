@@ -3,7 +3,7 @@ import { NgFor, NgIf, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryAlerts } from '../../../../model/alert-notification/alert.notification.model';
-import { AlertAllIoc, AlertModel } from '../../../../model/company-profile/company.profile.model';
+import { AlertAllIoc, AlertModel } from '../../../../model/company-profile/node.model';
 import { map, Observable } from 'rxjs';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../../constants/shared-enums';

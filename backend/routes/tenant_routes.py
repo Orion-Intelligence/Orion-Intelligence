@@ -6,6 +6,7 @@ from orion.api.interactive.account_manager.models.user_meta_model import user_me
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
+from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
@@ -113,14 +114,40 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
 async def update_user(user: user_meta_model, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().update_current_user(user, current_user)
 
-@tenant_routes.post(
-    "/api/delete/profile/image",
+@tenant_routes.delete(
+    "/api/tenant/image",
     summary="Update user",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
 )
 async def update_user(current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().delete_user_icon(current_user)
+    return await ResourceManager.get_instance().delete_user_icon(current_user)
+
+@tenant_routes.put(
+    "/api/tenant/image",
+    summary="Upload profile image",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
+)
+async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
+    return await ResourceManager.get_instance().uploadTenantImage(file, current_user)
+
+@tenant_routes.delete(
+    "/api/user/image",
+    summary="Update user",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
+)
+async def update_user(current_user=Depends(get_current_user)):
+    return await ResourceManager.get_instance().delete_user_image(current_user)
+
+@tenant_routes.put(
+    "/api/user/image",
+    summary="Upload profile image",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
+)
+async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
+    return await ResourceManager.get_instance().update_user_image(file, current_user)
+
 
 @tenant_routes.post(
     "/api/delete/user",
@@ -195,14 +222,6 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
 )
 async def get_node(current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().get_node(current_user)
-
-@tenant_routes.post(
-    "/api/upload/image",
-    summary="Upload profile image",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
-)
-async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().uploadProfileImage(file, current_user)
 
 @tenant_routes.post(
     "/api/alert/add",

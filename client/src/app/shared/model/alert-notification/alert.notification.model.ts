@@ -1,4 +1,4 @@
-import { AlertAllIoc } from "../company-profile/company.profile.model";
+import { AlertAllIoc } from "../company-profile/node.model";
 
 export interface AlertCategorySummary {
     categoryName: string;

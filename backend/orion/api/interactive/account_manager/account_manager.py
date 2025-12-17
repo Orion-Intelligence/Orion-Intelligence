@@ -1,6 +1,7 @@
 import re
 from typing import List
 
+from aiohttp.web_fileresponse import FileResponse
 from bson import ObjectId
 from cryptography.fernet import Fernet
 
@@ -34,7 +35,7 @@ class AccountManager:
     self._engine = mongo_controller.get_instance().get_engine()
 
     self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-    self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "profile"
+    self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "tenant"
     self.TENANT_DIR.mkdir(parents=True, exist_ok=True)
     if AccountManager.__instance is not None:
       raise Exception("This class is a singleton!")
@@ -139,13 +140,6 @@ class AccountManager:
 
     return {"message": "User deleted successfully"}
 
-  async def delete_user_icon(self, current_user):
-    image_path = self.IMAGE_DIR / f"{current_user.id}.png"
-    if image_path.exists():
-      image_path.unlink()
-
-    await AuditLogManager.get_instance().register("system", f"update_user_failed:{current_user.id}")
-
   async def update_user(self, request: tenant_param_model, current_user):
     user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
     if not user:
@@ -199,7 +193,7 @@ class AccountManager:
 
   async def getProfileImage(self, userId: str):
     file_path = Path(self.TENANT_DIR) / f"{userId}.png"
-    default_path = Path(self.TENANT_DIR) / "default-profile.png"
+    default_path = Path(self.TENANT_DIR) / "default.png"
 
     is_default = not file_path.is_file()
     target_path = default_path if is_default else file_path
@@ -211,23 +205,6 @@ class AccountManager:
       content=data,
       media_type="image/png",
       headers={"X-Default-Image": "true" if is_default else "false", "Access-Control-Expose-Headers": "X-Default-Image"})
-
-  async def uploadProfileImage(self, file: UploadFile, current_user):
-    contents = await file.read()
-    MAX_FILE_SIZE = 50 * 1024
-
-    if len(contents) > MAX_FILE_SIZE:
-      raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 50 KB.")
-
-    if not file.content_type.startswith("image/"):
-      raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
-
-    file_path = self.TENANT_DIR / f"{str(current_user.id)}.png"
-    with open(file_path, "wb") as f:
-      f.write(contents)
-
-    await AuditLogManager.get_instance().register(str(current_user.id), "upload_image")
-    return {"Profile image": "upload complete"}
 
   def safe_decrypt(self, enc: Fernet, value: str | None) -> str:
     if not value:
@@ -250,22 +227,31 @@ class AccountManager:
     raw_alerts = alerts.alerts if alerts and alerts.alerts else []
     alerts_list = AlertManager.getInstance().filter_alerts_by_license(raw_alerts, user)
 
-    hasOnboarding=False
     onboarding = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
     if onboarding and onboarding.status == TenantStatus.ONBOARDING:
         hasOnboarding = True
     else:
         hasOnboarding = False
 
+    tenant_image_file = self.TENANT_DIR / f"{str(tenant.id)}.png"
+    tenant_image_path = str("/api/s/static/tenant/"+f"{str(tenant.id)}")
+    if not (tenant_image_file).is_file():
+      tenant_image_path = str("/api/s/static/tenant/default")
+
+    user_image_file = self.IMAGE_DIR / f"{str(user.id)}.png"
+    user_image_path = str("/api/s/static/user/"+f"{str(user.id)}")
+    if not user_image_file.is_file():
+      user_image_path = str("/api/s/static/user/default")
+
     node = NodeCallbackModel.model_validate(
       {"user": {"email": user.email, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status,
         "hasOnboarding": hasOnboarding, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
-        "license": [license.value for license in user.licenses]}, 
-       "tenant": {"name": self.safe_decrypt(enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone),
+        "license": [license.value for license in user.licenses], "image": user_image_path},
+        "tenant": {"id": str(tenant.id),"name": self.safe_decrypt(enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone),
         "country": self.safe_decrypt(enc,tenant.country), "city": self.safe_decrypt(enc, tenant.city),
-        "postalCode": self.safe_decrypt(enc,tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), 
+        "postalCode": self.safe_decrypt(enc,tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id),
         "userId": "", "licenses": [self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(assigned_quota),
-        "quotaExceeded": bool(tenant.user_quota and assigned_quota >= tenant.user_quota), }, 
+        "quotaExceeded": bool(tenant.user_quota and assigned_quota >= tenant.user_quota), "image": tenant_image_path},
         "alerts": alerts_list, })
 
     return node

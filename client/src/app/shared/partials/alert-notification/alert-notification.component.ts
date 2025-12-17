@@ -4,7 +4,7 @@ import { filterAnimation } from '../../animations/filter.animation';
 import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
-import { AlertModel } from '../../model/company-profile/company.profile.model';
+import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';

@@ -16,7 +16,7 @@ class UserAdminView(ModelView):
     super().__init__(model, **kwargs)
     self._engine = engine
     self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-    self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "company-profile-images"
+    self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "tenant"
 
   async def before_edit(self, request: Request, data: dict, obj: Any):
     if obj.tenant_uuid and "tenant_uuid" in data and data["tenant_uuid"] != str(obj.tenant_uuid):

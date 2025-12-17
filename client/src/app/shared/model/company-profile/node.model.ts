@@ -14,12 +14,14 @@ export interface UserDataModel {
     subscription: boolean;
     verificationDate: string;
     license: string[];
+    image?: string;
     preferences?: {
         [key: string]: any;
     };
 }
 
 export interface TenantDataModel {
+    id: string;
     name: string;
     phone: string;
     country: string;
@@ -30,11 +32,12 @@ export interface TenantDataModel {
     licenses: string[];
     assignedQuota: string;
     quotaExceeded: boolean;
+    image?: string;
 }
 
 export interface userMetaData {
     username: string;
-    twofa_enabled: boolean
+    twofa_enabled: boolean;
     preferences?: {
         [key: string]: any;
     };
@@ -58,7 +61,7 @@ export interface AlertModel {
     url?: string;
     source?: string;
     all_ioc?: AlertAllIoc[];
-    content_types?: string[]
+    content_types?: string[];
     status?: 'ignore' | 'active';
     first_seen?: Date;
     last_seen?: Date;

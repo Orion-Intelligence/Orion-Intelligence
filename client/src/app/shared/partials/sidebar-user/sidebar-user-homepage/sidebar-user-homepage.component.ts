@@ -6,7 +6,7 @@ import { DashboardService } from '../../../../services/dashboard/dashboard.servi
 import { Router } from '@angular/router';
 import { HomeSearchComponent } from "../../../../pages/homepage/home-search/home-search.component";
 import { AlertCategorySummary } from '../../../model/alert-notification/alert.notification.model';
-import { AlertModel } from '../../../model/company-profile/company.profile.model';
+import { AlertModel } from '../../../model/company-profile/node.model';
 import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
 import { ApiService } from '../../../services/api.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';

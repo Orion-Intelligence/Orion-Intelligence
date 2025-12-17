@@ -81,7 +81,7 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   onDropdownOpen() {
     const rawLicenses = this.appService.userSessionData().user.license;
     this.licences = rawLicenses.map(l => this.getLicenseLabel(l)).join(', ');
-    this.profile_image = '/api/s/static/' + this.appService.userSessionData().user.preferences?.['userId'] + "?stamp=" + Math.random().toString(36).substring(2)
+    this.profile_image = this.appService.userSessionData().user.image || ""
   }
 
   getLicenseLabel(name: string): string {

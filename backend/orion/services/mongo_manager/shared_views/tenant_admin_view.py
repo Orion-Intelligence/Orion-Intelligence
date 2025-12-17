@@ -15,7 +15,7 @@ class TenantAdminView(ModelView):
         super().__init__(model, **kwargs)
         self._engine = engine
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "company-profile-images"
+        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "tenant"
 
     async def before_create(self, request: Request, data: dict, obj: Any):
         if data.get("is_default") is True:
@@ -48,17 +48,18 @@ class TenantAdminView(ModelView):
             if getattr(tenant, "is_default", False):
                 raise ActionFailed("Default tenant cannot be deleted")
 
-            users = await self._engine.find(
-                db_user_account, db_user_account.tenant_uuid == str(tenant.id), )
-
+            users = await self._engine.find(db_user_account)
             for user in users:
+                if str(tenant.id) != str(user.tenant_uuid):
+                    continue
+
                 image_path = self.IMAGE_DIR / f"{user.id}.enc"
                 if image_path.exists():
                     image_path.unlink()
 
                 await self._engine.delete(user)
 
-            tenant_keys = await self._engine.find(db_keys)
+            tenant_keys = await self._engine.find(db_keys, db_keys.auth_id == str(tenant.id))
             for key in tenant_keys:
                 await self._engine.delete(key)
 

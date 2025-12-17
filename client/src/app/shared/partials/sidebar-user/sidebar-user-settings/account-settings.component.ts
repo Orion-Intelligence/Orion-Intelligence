@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { ApiService } from '../../../services/api.service';
-import { userMetaData, userSessionData } from '../../../model/company-profile/company.profile.model';
+import { userMetaData, userSessionData } from '../../../model/company-profile/node.model';
 import { UserImagePickerComponent } from "./user-image-picker/user-image-picker.component";
 import { AppStorageService } from '../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -127,9 +127,15 @@ export class AccountSettingsComponent implements OnInit {
       },
     });
   }
-  cancelEdit(event: Event) {
-    event.stopPropagation();
-    this.isEditing = false;
+
+  updateUserResource(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.put('user/image', formData).subscribe();
+  }
+
+  deleteUserResource() {
+    return this.apiService.delete('user/image').subscribe();
   }
 
   protected readonly JSON = JSON;

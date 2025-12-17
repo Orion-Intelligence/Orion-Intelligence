@@ -16,8 +16,12 @@
             <div class="user-settings_info">
                 <div class="user-avatar">
                     <div class="avatar-wrapper">
-                        <app-user-image-picker></app-user-image-picker>
-                    </div>
+                      <app-user-image-picker
+                        [imageUrl]="userSessionData.tenant.image || ''"
+                        (onImageSelected)="updateUserResource($event)"
+                        (onClear)="deleteUserResource()">
+                      </app-user-image-picker>
+                   </div>
                 </div>
 
                 <div>
@@ -32,7 +36,7 @@
                     </div>
 
                     <div class="user-settings_company-location">
-                        Licenses〡{{ userSessionData.user.preferences?.['licenses']?.join(', ') || 'No licensesassigned'
+                        Licenses〡{{ userSessionData.tenant.licenses?.join(', ') || 'No licenses assigned'
                         }}
                     </div>
                 </div>
@@ -75,7 +79,7 @@
                     <div class="user-settings_info-item">
                         <div class="user-settings_info-label">Assigned User Quota</div>
                         <div class="user-settings_info-value mt-2">
-                            {{ userSessionData.user.preferences?.['userQuota'] ?? 0 }}
+                            {{ userSessionData.tenant.assignedQuota ?? 0 }}
                         </div>
                     </div>
                 </div>

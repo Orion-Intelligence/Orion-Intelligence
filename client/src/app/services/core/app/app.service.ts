@@ -6,7 +6,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
-import { userSessionData } from '../../../shared/model/company-profile/company.profile.model';
+import { userSessionData } from '../../../shared/model/company-profile/node.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
 
@@ -33,6 +33,7 @@ export class AppService {
       license: []
     },
     tenant: {
+      id: '',
       name: '',
       phone: '',
       country: '',
@@ -148,6 +149,7 @@ export class AppService {
         license: []
       },
       tenant: {
+        id: '',
         name: '',
         phone: '',
         country: '',

@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../services/api.service';
-import { AppStorageService } from '../../../../../services/core/app/app-storage.service';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { AuthService } from '../../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
-import { userMetaData, userSessionData } from '../../../../model/company-profile/company.profile.model';
+import { userSessionData } from '../../../../model/company-profile/node.model';
 import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
 import { TenantModel } from '../../../../model/tenant/tenant.model';
 
@@ -21,10 +20,8 @@ export class TenantSettingsComponent implements OnInit {
 
   isEditing = false;
   userSessionData: userSessionData;
-  twoFactorEnabled = true;
-  isDarkMode = true;
   userId: string = '';
-  constructor(protected apiService: ApiService, protected appStorage: AppStorageService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService) {
     this.userSessionData = this.appService.userSessionData();
   }
   ngOnInit(): void {
@@ -35,11 +32,7 @@ export class TenantSettingsComponent implements OnInit {
   isMember(): boolean {
     return this.appService.userSessionData().user.role == 'member';
   }
-  applyTheme() {
-    const body = document.body;
-    body.classList.remove('light-theme', 'dark-theme');
-    body.classList.add(this.isDarkMode ? 'dark-theme' : 'light-theme');
-  }
+
   toggleSection(section: string) {
     if (section === 'profile') this.isAccountSectionOpen = !this.isAccountSectionOpen;
   }
@@ -89,5 +82,14 @@ export class TenantSettingsComponent implements OnInit {
     this.isEditing = false;
   }
 
-  protected readonly JSON = JSON;
+  updateUserResource(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.put('tenant/image', formData).subscribe();
+  }
+
+  deleteUserResource() {
+    return this.apiService.delete('tenant/image').subscribe();
+  }
+
 }

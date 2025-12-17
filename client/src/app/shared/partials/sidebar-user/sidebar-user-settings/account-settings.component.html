@@ -1,16 +1,18 @@
 <div class="user-settings_section">
   <div class="user-settings_section-header" (click)="toggleSection('profile')">
     <span class="user-settings_section-title">
-      {{ isAdmin() ? 'Admin Profile' : 'Company Profile' }}
+      {{ isAdmin() ? 'Admin Profile' : 'User Profile' }}
     </span>
     <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon"
-      [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
+         [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt=""/>
   </div>
 
   <span class="user-settings_section-description">
-    {{ isAdmin()
-    ? 'Manage profile information.'
-    : 'Manage and edit your company details, including phone, address, and profile information.' }}
+    {{
+      isAdmin()
+        ? 'Manage profile information.'
+        : 'Manage and edit your company details, including phone, address, and profile information.'
+    }}
   </span>
 
   <div *ngIf="isAccountSectionOpen">
@@ -18,7 +20,11 @@
       <div class="user-settings_info">
         <div class="user-avatar">
           <div class="avatar-wrapper">
-            <app-user-image-picker></app-user-image-picker>
+            <app-user-image-picker
+              [imageUrl]="userSessionData.user.image || ''"
+              (onImageSelected)="updateUserResource($event)"
+              (onClear)="deleteUserResource()">
+            </app-user-image-picker>
           </div>
         </div>
 
@@ -38,8 +44,8 @@
 
           <ng-template #companyProfileBlock>
             <div class="user-settings_company-name">
-              <input type="text" [(ngModel)]="userSessionData.tenant.name" class="user-settings_input" disabled
-                placeholder="Enter company name" />
+              <input type="text" [(ngModel)]="userSessionData.user.username" class="user-settings_input" disabled
+                     placeholder="Enter company name"/>
             </div>
 
             <div class="user-settings_company-location">
@@ -48,67 +54,7 @@
           </ng-template>
         </div>
       </div>
-
-      <!-- <div class="user-settings_action-buttons" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-        <button class="user-settings_edit-btn" *ngIf="isEditing" (click)="cancelEdit($event)">
-          Cancel
-        </button>
-        <button class="user-settings_edit-btn" (click)="toggleEdit($event)">
-          {{ isEditing ? 'Save' : 'Edit' }}
-        </button>
-      </div> -->
     </div>
-
-    <!-- <div class="user-settings_box" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-      <div class="user-settings_box-header">Contacts</div>
-      <div class="user-settings_box-content">
-        <div class="user-settings_row">
-          <div class="user-settings_info-item">
-            <div class="user-settings_info-label">Email address</div>
-            <input type="email" [(ngModel)]="userSessionData.user.email" class="user-settings_info-value" disabled />
-          </div>
-
-          <div class="user-settings_info-item">
-            <div class="user-settings_info-label">Phone</div>
-            <input type="text" [(ngModel)]="userSessionData.tenant.phone" class="user-settings_info-value"
-              [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }" placeholder="Enter phone" />
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- <div class="user-settings_box" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-      <div class="user-settings_box-header">Users</div>
-      <div class="user-settings_box-content">
-        <div class="user-settings_row">
-          <div class="user-settings_info-item">
-            <div class="user-settings_info-label">Assigned User Quota</div>
-            <div class="user-settings_info-value mt-2">
-              {{ userSessionData.user.preferences?.['userQuota'] ?? 0 }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- <div class="user-settings_box" *ngIf="isMember() && !licenseService.getLicenses().includes('free')">
-      <div class="user-settings_box-header">Address</div>
-      <div class="user-settings_box-content">
-        <div class="user-settings_row">
-          <div class="user-settings_info-item">
-            <div class="user-settings_info-label">Country</div>
-            <input type="text" [(ngModel)]="userSessionData.tenant.country" class="user-settings_info-value"
-              [disabled]="!isEditing" placeholder="Enter country" />
-          </div>
-
-          <div class="user-settings_info-item">
-            <div class="user-settings_info-label">City/State</div>
-            <input type="text" [(ngModel)]="userSessionData.tenant .city" class="user-settings_info-value"
-              [disabled]="!isEditing" placeholder="Enter city/state" />
-          </div>
-        </div>
-      </div>
-    </div> -->
   </div>
 </div>
 
@@ -116,7 +62,7 @@
   <div class="user-settings_section-header" (click)="toggleSection('twoFA')">
     <span class="user-settings_section-title">2 Factor Authentication</span>
     <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt="" />
+         class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt=""/>
   </div>
 
   <span class="user-settings_section-description">
@@ -129,7 +75,7 @@
         {{ userSessionData.user.twofa_enabled ? 'Enabled' : 'Disabled' }}
       </div>
       <label class="user-settings_switch">
-        <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()" />
+        <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()"/>
         <span class="user-settings_slider"></span>
       </label>
     </div>
@@ -140,7 +86,7 @@
   <div class="user-settings_section-header" (click)="toggleSection('theme')">
     <span class="user-settings_section-title">Theme</span>
     <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt="" />
+         class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt=""/>
   </div>
 
   <span class="user-settings_section-description">
@@ -151,7 +97,7 @@
     <div class="user-settings_toggle-row">
       <div class="user-settings_toggle-label">Dark Mode</div>
       <label class="user-settings_switch">
-        <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()" />
+        <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()"/>
         <span class="user-settings_slider"></span>
       </label>
     </div>
