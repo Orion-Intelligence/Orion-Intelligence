@@ -65,14 +65,6 @@ class SignupManager:
             except Exception:
                 raise HTTPException(status_code=422, detail="Invalid password")
 
-        print("1::::::::::::::::::::::::", flush=True)
-        print(password, flush=True)
-        print("1::::::::::::::::::::::::", flush=True)
-
-        print("1HASH::::::::::::::::::::::::", flush=True)
-        print(repr(hashed_password), flush=True)
-        print("1HASH::::::::::::::::::::::::", flush=True)
-
         _verification_token = session_manager.get_instance().generate_verification_token()
         _verification_token_expire = datetime.now(timezone.utc) + timedelta(days=1)
 

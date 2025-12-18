@@ -18,7 +18,7 @@ export class OnboardingGuard implements CanActivate {
         if (session.user?.hasOnboarding && state.url !== '/onboarding') {
             this.router.navigate(['/onboarding'], {
                 queryParams: { redirect: state.url }
-            });
+            }).then();
             return false;
         }
 

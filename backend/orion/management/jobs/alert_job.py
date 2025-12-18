@@ -63,10 +63,8 @@ class alert_job:
             payload = DomainScanRequest(domain=clean_domain, scanType=scan_type)
 
             while True:
-                print("1:::::::::::::::::::::::::",flush=True)
                 response = await self._crawl_model.scan_domain(payload)
 
-                print("2:::::::::::::::::::::::::",flush=True)
                 if isinstance(response, dict):
                     scan_result = response
                 elif hasattr(response, "body"):
@@ -75,16 +73,11 @@ class alert_job:
                 else:
                     return False
 
-                print("3:::::::::::::::::::::::::",flush=True)
                 result = scan_result.get("result")
                 if not result:
                     return False
 
-                print("4:::::::::::::::::::::::::",flush=True)
                 status = result
-                print("5:::::::::::::::::::::::::",flush=True)
-                print(status,flush=True)
-                print("5:::::::::::::::::::::::::",flush=True)
                 if status == "pending":
                     await asyncio.sleep(5)
                     continue
@@ -297,7 +290,6 @@ class alert_job:
             else:
                 return
 
-            print(":::::::::::::::::::::::::kk")
             total_alerts_processed = 0
             for ioc in iocs:
                 ioc_type_name = ioc.ioc_id
@@ -331,11 +323,9 @@ class alert_job:
                         elif hasattr(es_response, 'dict'):
                             es_response_dict = es_response.dict()
                         else:
-                            print(f"[{datetime.now().strftime('%H:%M:%S')}] -> WARNING: Unexpected response type for {category}:{ioc_type_name}:{ioc_value}. Skipping.")
                             continue
 
                         results = es_response_dict.get("Result", [])
-                        print(":::::::::::::::::::::::::kkj")
 
                         if results:
                             for result in results:

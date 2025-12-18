@@ -38,7 +38,6 @@ import { AccountSettingsComponent } from './shared/partials/sidebar-user/sidebar
 import { NodeResolver } from './shared/resolvers/session-data-resolver.service';
 import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { DashboardDiscussionComponent } from './shared/partials/intel-panel/dashboard-managers/dashboard-discussion/dashboard-discussion.component';
-import { LicenseGuard } from './shared/guards/license.guard';
 import { SidebarUserHomepageComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component';
 import { CategoryAlertReportComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component';
 import { AddCustomAlertComponent } from './shared/partials/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component';

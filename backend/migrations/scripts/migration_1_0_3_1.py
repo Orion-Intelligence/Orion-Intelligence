@@ -32,15 +32,8 @@ class migration_1_0_3_1:
         default_tenant = await engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
         default_tenant_id = str(default_tenant.id) if default_tenant else ""
 
-        print("::::::::::::::::::::::::::::::::::1", flush=True)
-        print("::::::::::::::::::::::::::::::::::1", flush=True)
         users = await engine.find(db_user_account)
-        print("::::::::::::::::::::::::::::::::::1", flush=True)
-        print("::::::::::::::::::::::::::::::::::1", flush=True)
         for user in users:
-            print("::::::::::::::::::::::::::::::::::12", flush=True)
             if not user.tenant_uuid and default_tenant_id:
-                print("::::::::::::::::::::::::::::::::::13", flush=True)
                 user.tenant_uuid = default_tenant_id
-                print("::::::::::::::::::::::::::::::::::14", flush=True)
                 await engine.save(user)
