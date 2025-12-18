@@ -37,8 +37,7 @@ async def custom_edit_api_trailing(id: str, request: Request):
         ])),
     ],)
 async def update_public_config(param:config_data):
-    await config_controller.getInstance().update_all(param)
-    return {"success": True}
+    return await config_controller.getInstance().update_public_config(param)
 
 @admin_routes.post(
     "/api/upload/system",

@@ -9,14 +9,13 @@ import { NgIf } from '@angular/common';
 export class UserImagePickerComponent implements OnInit {
   @Input() id!: string;
   @Input() imageUrl!: string;
+  @Input() defaultImage: string = 'assets/images/tenant/default.png';
 
   @Output() onImageSelected = new EventEmitter<File>();
   @Output() onClear = new EventEmitter<string>();
 
   selectedFile?: File;
   selectedImage?: string;
-
-  private readonly defaultImage = 'assets/images/tenant/default.png';
 
   ngOnInit(): void {
     this.selectedImage = this.imageUrl || this.defaultImage;

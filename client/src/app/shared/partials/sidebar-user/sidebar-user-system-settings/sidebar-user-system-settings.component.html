@@ -14,16 +14,21 @@
 
       <div class="user-avatar">
         <div class="avatar-wrapper">
-          <app-user-image-picker></app-user-image-picker>
+          <app-user-image-picker
+              [imageUrl]="this.appService.getConfig().appSettings.logo_url"
+              [defaultImage]="'/api/s/static/system/default'"
+              (onImageSelected)="updateUserResource($event)"
+              (onClear)="deleteUserResource()">
+          </app-user-image-picker>
         </div>
       </div>
 
       <div>
         <div class="user-settings_company-name">
-          {{ this.appService.getConfig().appSettings.app_name }}
+          {{ systemData.app_name }}
         </div>
         <div class="user-settings_company-location">
-          User profile
+          System Administrator
         </div>
       </div>
 
@@ -54,9 +59,16 @@
         <div class="col-12 mt-1">
           <div class="user-settings_info-item py-2">
             <div class="user-settings_info-label">App Name</div>
-            <div class="user-settings_info-value mt-2">
+
+            <div class="user-settings_info-value mt-2" *ngIf="!isEditing">
               {{ systemData.app_name }}
             </div>
+
+            <input
+              *ngIf="isEditing"
+              class="user-settings_info-value mt-2 user-settings_editable"
+              type="text"
+              [(ngModel)]="form.app_name" />
           </div>
         </div>
 
@@ -97,15 +109,6 @@
             <div class="user-settings_info-label">AI Endpoint</div>
             <div class="user-settings_info-value mt-2">
               {{ systemData.ai_endpoint }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 mt-1">
-          <div class="user-settings_info-item py-2">
-            <div class="user-settings_info-label">Logo URL</div>
-            <div class="user-settings_info-value mt-2">
-              {{ systemData.logo_url || 'N/A' }}
             </div>
           </div>
         </div>

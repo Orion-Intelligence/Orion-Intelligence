@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UserImagePickerComponent } from "../sidebar-user-settings/user-image-picker/user-image-picker.component";
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { ConfigSettings } from '../../../model/app/config';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
@@ -20,7 +21,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     telegram_allowed: false,
     language_allowed: '',
     version: '',
-    logo_url: '',
     api_allowed: '0',
     app_name: '0'
   };
@@ -28,7 +28,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   form = {
     language: '',
     version: '',
-    logo_url: '',
     api_allowed: '0',
     app_name: '0',
     ai_endpoint: '',
@@ -79,14 +78,38 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.isEditing = false;
   }
 
-  save() {
-    this.appService.configData.update(cfg => {
-      cfg.appSettings.logo_url = this.form.logo_url;
-      return cfg;
-    });
+  updateUserResource(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.apiService.put('system/image', formData).subscribe();
+  }
 
-    this.apiService.post('public/update', { settings: this.form }).subscribe({
-      next: () => this.appService.loadConfig(),
+  deleteUserResource() {
+    return this.apiService.delete('system/image').subscribe();
+  }
+
+  save() {
+    this.apiService.post<any>('public/update', { settings: this.form }).subscribe({
+      next: (response) => {
+        if (response?.settings) {
+          const current = this.appService.configData();
+          this.appService.configData.set(
+            new ConfigSettings(response.settings, current.localSettings)
+          );
+
+          const s = this.appService.configData()?.appSettings;
+          if (s) {
+            this.systemData = {
+              ai_endpoint: s.ai_endpoint,
+              telegram_allowed: s.telegram_allowed,
+              language_allowed: s.language_allowed,
+              version: s.version,
+              api_allowed: s.api_allowed,
+              app_name: s.app_name
+            };
+          }
+        }
+      },
       error: (err) => console.log(err)
     });
   }
