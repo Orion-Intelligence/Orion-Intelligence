@@ -77,8 +77,8 @@ class AlertManager:
             doc_to_save = existing_doc
 
 
-        save_result = await self._engine.save(doc_to_save)
-        
+        await self._engine.save(doc_to_save)
+
         return "Updated" if alert_updated else "Created"
     
 

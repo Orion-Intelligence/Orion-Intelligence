@@ -1,7 +1,6 @@
 import re
 from typing import List
 
-from aiohttp.web_fileresponse import FileResponse
 from bson import ObjectId
 from cryptography.fernet import Fernet
 
@@ -10,7 +9,7 @@ from orion.api.interactive.account_manager.models.user_meta_model import user_me
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from pathlib import Path
 from orion.api.interactive.account_manager.models.user_model import user_model
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException
 
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
