@@ -16,12 +16,10 @@
             <div class="user-settings_info">
                 <div class="user-avatar">
                     <div class="avatar-wrapper">
-                      <app-user-image-picker
-                        [imageUrl]="userSessionData.tenant.image || ''"
-                        (onImageSelected)="updateUserResource($event)"
-                        (onClear)="deleteUserResource()">
-                      </app-user-image-picker>
-                   </div>
+                        <app-user-image-picker [imageUrl]="userSessionData.tenant.image || ''"
+                            (onImageSelected)="updateUserResource($event)" (onClear)="deleteUserResource()">
+                        </app-user-image-picker>
+                    </div>
                 </div>
 
                 <div>
@@ -67,7 +65,7 @@
                         <div class="user-settings_info-label">Phone</div>
                         <input type="text" [(ngModel)]="userSessionData.tenant.phone" class="user-settings_info-value"
                             [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }"
-                            placeholder="Enter phone" />
+                            placeholder="Enter phone..." />
                     </div>
                 </div>
             </div>
@@ -93,14 +91,14 @@
                         <div class="user-settings_info-label">Country</div>
                         <input type="text" [(ngModel)]="userSessionData.tenant.country" class="user-settings_info-value"
                             [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }"
-                            placeholder="Enter country" />
+                            placeholder="Enter country..." />
                     </div>
 
                     <div class="user-settings_info-item">
                         <div class="user-settings_info-label">City/State</div>
                         <input type="text" [(ngModel)]="userSessionData.tenant .city" class="user-settings_info-value"
                             [disabled]="!isEditing" [ngClass]="{ 'user-settings_editable': isEditing }"
-                            placeholder="Enter city/state" />
+                            placeholder="Enter city/state..." />
                     </div>
                 </div>
             </div>

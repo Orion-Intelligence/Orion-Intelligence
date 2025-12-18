@@ -5,42 +5,43 @@
             <img src="assets/images/shared/theme/magnifyingglassblack.svg" alt="search" />
             <input type="text" placeholder="Search..." [(ngModel)]="searchText" />
             <button *ngIf="searchText" class="category_report_searchbar-clear" (click)="searchText = ''">
-              <img src="/assets/images/shared/cross-dark.svg" alt="close"></button>
+                <img src="/assets/images/shared/cross-dark.svg" alt="close"></button>
         </div>
         <div class="category_report_flex">
-          <div class="btn-group report-menu-option-container mr-0">
-            <button *ngIf="!canExportstix()" (click)="showAlertPopup('add','')" appTooltip="add icon" class="p-0 report-menu-option">
-              <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
-            </button>
-            <div class="vr report-menu-divider"></div>
-            <div *ngIf="canExportstix()" class="dropdown p-0 report-menu-option" appTooltip="export stix">
-                <span class="category_report_searchbar-btn" role="button" id="dropdownAddMenu" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <img src="/assets/images/shared/theme/add_icon.svg" alt="add icon">
-                </span>
+            <div class="btn-group report-menu-option-container mr-0">
+                <button *ngIf="!canExportstix()" (click)="showAlertPopup('add','')" appTooltip="add icon"
+                    class="p-0 report-menu-option">
+                    <img alt="add" height="20" src="/assets/images/shared/theme/add_icon.svg" width="20" />
+                </button>
+                <div *ngIf="!canExportstix()" class="vr report-menu-divider"></div>
+                <div *ngIf="canExportstix()" class="dropdown p-0 report-menu-option" appTooltip="add or import alert">
+                    <div class="category_report_searchbar-btn" role="button" id="dropdownAddMenu"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="/assets/images/shared/theme/burger_icon.svg" alt="add icon">
+                    </div>
 
-                <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownAddMenu">
-                    <li>
-                        <a class="dropdown-item" (click)="showAlertPopup('add', '')">Add Alert</a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider mx-3" />
-                    </li>
-                    <input type="file" #fileInput accept="application/json" style="display: none;"
-                        (change)="onFileUpload($event)" />
-                    <li><a class="dropdown-item" (click)="fileInput.click()">Import
-                            Alert</a></li>
-                </ul>
+                    <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownAddMenu">
+                        <li>
+                            <a class="dropdown-item" (click)="showAlertPopup('add', '')">Add Alert</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider mx-3" />
+                        </li>
+                        <input type="file" #fileInput accept="application/json" style="display: none;"
+                            (change)="onFileUpload($event)" />
+                        <li><a class="dropdown-item" (click)="fileInput.click()">Import
+                                Alert</a></li>
+                    </ul>
+                </div>
+                <div class="vr report-menu-divider"></div>
+                <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
+                    <img alt="scan" height="20" src="assets/images/shared/bin.svg" width="20" />
+                </button>
+                <div class="vr report-menu-divider"></div>
+                <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option">
+                    <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" />
+                </button>
             </div>
-            <div class="vr report-menu-divider"></div>
-            <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
-              <img alt="scan" height="20" src="assets/images/shared/bin.svg" width="20" />
-            </button>
-            <div class="vr report-menu-divider"></div>
-            <button (click)="sidebarService.openSidebar()" appTooltip="open sidebar" class="p-0 report-menu-option">
-              <img alt="scan" height="17" src="/assets/images/shared/theme/filter_icon.svg" width="17" />
-            </button>
-          </div>
         </div>
     </div>
 
@@ -50,22 +51,38 @@
 
     <div class="category_report_summary-row">
         <div class="category_report_summary-card">
-            <span class="category_report_summary-card-heading">Total IOC</span>
+            <div class="user-homepage_alerts-card-content">
+                <span class="category_report_summary-card-heading">Total IOC</span>
+                <img src="/assets/images/shared/info-light.svg" alt="Critical Alert"
+                    class="user-homepage_alerts-card-icon" appTooltip="Total unique IOCs found in alerts" />
+            </div>
             <span class="category_report_summary-card-value">{{getTotalUniqueIocValueCount(filteredAlerts)}}</span>
         </div>
 
         <div class="category_report_summary-card">
-            <span class="category_report_summary-card-heading">Newly Found</span>
+            <div class="user-homepage_alerts-card-content">
+                <span class="category_report_summary-card-heading">Newly Found</span>
+                <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                    class="user-homepage_alerts-card-icon" appTooltip="Total non seen alert report" />
+            </div>
             <span class="category_report_summary-card-value">{{getNewAlertCount()}}</span>
         </div>
 
         <div class="category_report_summary-card">
-            <span class="category_report_summary-card-heading">Last Update</span>
+            <div class="user-homepage_alerts-card-content">
+                <span class="category_report_summary-card-heading">Last Update</span>
+                <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                    class="user-homepage_alerts-card-icon" appTooltip="Alerts update on" />
+            </div>
             <span class="category_report_summary-card-value">{{getLatestDetectedDate(filteredAlerts)}}</span>
         </div>
 
         <div class="category_report_summary-card">
-            <span class="category_report_summary-card-heading">Sources</span>
+            <div class="user-homepage_alerts-card-content">
+                <span class="category_report_summary-card-heading">Sources</span>
+                <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                    class="user-homepage_alerts-card-icon" appTooltip="Total sources found in alerts" />
+            </div>
             <span class="category_report_summary-card-value">{{countUniqueSources(filteredAlerts)}}</span>
         </div>
     </div>
@@ -74,36 +91,36 @@
         <div class="category_report_alert-card" *ngFor="let item of filteredAlerts">
             <div class="category_report_searchbar">
                 <div class="category_report_alert-card-top">
-                    <span [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
+                    <span class="category_report_flex"
+                        [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
+                        <div *ngIf="!item.seen" class="category_report_status-icon">
+                            <img src="/assets/images/shared/exclamation.svg" alt="report">
+                        </div>
                         {{ item.risk }} Risk
                     </span>
                 </div>
-                <div class="category_report_flex">
-                    <div *ngIf="!item.seen" class="category_report_status-icon">
-                      <img src="/assets/images/shared/exclamation.svg" alt="report"></div>
-                    <div class="dropdown">
-                        <span class="category_report_status-icon" role="button" id="dropdownMenu"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="/assets/images/shared/theme/three_dot_round.svg" alt="menu">
-                        </span>
+                <div class="dropdown">
+                    <span class="category_report_burger-icon" role="button" id="dropdownMenu" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <img src="/assets/images/shared/theme/burger_icon.svg" alt="menu">
+                    </span>
 
-                        <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownMenu">
-                            <li *ngIf="item.custom">
-                                <a class="dropdown-item" (click)="showAlertPopup('edit', item.id)">Edit Alert</a>
-                            </li>
-                            <li *ngIf="item.custom">
-                                <hr class="dropdown-divider mx-3" />
-                            </li>
-                            <li *ngIf="canExportstix()"><a class="dropdown-item"
-                                    (click)="exportAlert(item.hash)">Export Alert</a></li>
-                            <li *ngIf="canExportstix()">
-                                <hr class="dropdown-divider mx-3" />
-                            </li>
-                            <li>
-                                <a class="dropdown-item" (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
-                            </li>
-                        </ul>
-                    </div>
+                    <ul class="dropdown-menu mt-3 category_report_alert_no-arrow" aria-labelledby="dropdownMenu">
+                        <li *ngIf="item.custom">
+                            <a class="dropdown-item" (click)="showAlertPopup('edit', item.id)">Edit Alert</a>
+                        </li>
+                        <li *ngIf="item.custom">
+                            <hr class="dropdown-divider mx-3" />
+                        </li>
+                        <li *ngIf="canExportstix()"><a class="dropdown-item" (click)="exportAlert(item.hash)">Export
+                                Alert</a></li>
+                        <li *ngIf="canExportstix()">
+                            <hr class="dropdown-divider mx-3" />
+                        </li>
+                        <li>
+                            <a class="dropdown-item" (click)="deleteAlertConfirmation(item.id)">Delete Alert</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
@@ -153,7 +170,7 @@
                 <div class="category_report_alert-footer-buttons">
                     <div class="category_report_alert-btn">IOCs Summary</div>
                     <div class="category_report_alert-divider-vertical"></div>
-                    <div class="category_report_alert-btn" (click)="seeDetails(item.id,item.hash)">See Details</div>
+                    <div class="category_report_alert-btn" (click)="seeJDetailJson(item.id)">See Details</div>
                 </div>
             </div>
 
@@ -182,5 +199,6 @@
 </div>
 
 <ng-container *ngIf="isFlushAllConfirmationOpen()">
-  <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'" (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
+    <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
+        (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
 </ng-container>

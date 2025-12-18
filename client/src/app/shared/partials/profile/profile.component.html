@@ -32,7 +32,7 @@
       <span>Auditlog</span>
     </li>
 
-    <li *ngIf="licenseService.isMaintainer()" class="profile-item" (click)="manageIocs()">
+    <li *ngIf="!isAdmin() &&licenseService.isMaintainer()" class="profile-item" (click)="manageIocs()">
       <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" />
       <span>Manage IOC’s</span>
     </li>

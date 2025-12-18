@@ -76,16 +76,21 @@
 }
 
 .category_report_searchbar-btn {
-    background: none;
+    /* background: none;
     border: none;
     cursor: pointer;
     display: flex;
+    align-items: center; */
+    display: flex;
     align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    cursor: pointer;
 }
 
 .category_report_searchbar-btn img {
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
 }
 
 .category_report_summary-header {
@@ -205,6 +210,11 @@
     height: 16px;
 }
 
+.category_report_burger-icon img {
+    width: 25px;
+    height: 25px;
+}
+
 .category_report_alert-title {
     display: block;
     font-weight: 500;
@@ -321,6 +331,10 @@
     content: none !important;
 }
 
-.dropdown .category_report_searchbar-btn {
+/* .dropdown .category_report_searchbar-btn {
     margin-top: 8px;
+} */
+
+.category_report_flex .report-menu-option-container {
+    overflow: visible !important;
 }

@@ -1,5 +1,5 @@
-<div class="add-alert-wrapper">
-    <div class="add-alert-container">
+<div class="add-alert-wrapper" (click)="cancleAlert(false)">
+    <div class="add-alert-container" (click)="$event.stopPropagation()">
         <div class="add-alert-header">
             <span class="add-alert-heading">{{heading}}</span>
             <span class="add-alert-close" (click)="cancleAlert(false)">✕</span>

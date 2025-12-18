@@ -72,6 +72,13 @@
     color: var(--color-text1);
 }
 
+.user-homepage_alerts-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
 .user-homepage_alerts-card-label {
     font-size: 16px;
     font-weight: 600;

@@ -12,8 +12,9 @@
                 name="username" />
             <div class="username-suggestion" *ngIf="usernameSuggestion">
                 <div class="suggestion-title">Username already taken, suggested usernames below</div>
-                <div class="suggestion-list">{{ usernameSuggestion.replace('Username already taken. Suggested usernames:
-                    ', '') }}</div>
+                <div class="suggestion-list">
+                    {{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}
+                </div>
             </div>
 
             <label class="add-tenant_label">Email</label>

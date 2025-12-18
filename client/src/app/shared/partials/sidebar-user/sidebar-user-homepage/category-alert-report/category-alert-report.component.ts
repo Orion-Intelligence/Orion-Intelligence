@@ -17,7 +17,7 @@ import { MessageNotificationService } from '../../../../../services/message_noti
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { ConfirmationPopupComponent } from "../../../confirmation-popup/confirmation-popup.component";
 import { HelperService } from '../../../../services/helper.service';
-import {TooltipDirective} from '../../../../directive/tooltip-directive.directive';
+import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-category-alert-report',
@@ -137,6 +137,7 @@ export class CategoryAlertReportComponent implements OnInit {
     const allowedCategories = [
       'breach',
       'strategic',
+      'general',
       'defacement',
       'exploit',
       'social',
@@ -180,6 +181,45 @@ export class CategoryAlertReportComponent implements OnInit {
         this.filteredAlerts = this.alerts;
       }
     })
+  }
+  seeJDetailJson(alertId: string) {
+    const alerts = this.appService.userSessionData().alerts;
+    const alert = this.appService
+      .userSessionData()
+      ?.alerts
+      ?.find(a => a.alert_id === alertId);
+    const alertJson = JSON.stringify(alert, null, 2);
+    const newWindow = window.open('', '_blank');
+    if (!newWindow) return;
+
+    newWindow.document.write(`
+    <html>
+      <head>
+        <title>Alert JSON</title>
+        <style>
+          body {
+            font-family: monospace;
+            white-space: pre;
+            padding: 16px;
+            background: #0f172a;
+            color: #e5e7eb;
+          }
+        </style>
+      </head>
+      <body>${alertJson}
+  `);
+
+    newWindow.document.close();
+    if (alert) {
+      alert.report_seen = true;
+      this.apiService.post('alert/seen', [alert]).subscribe({
+        next: () => {
+        },
+        error: (err) => {
+          console.error(err);
+        },
+      });
+    }
   }
   seeDetails(id: string, hash: string) {
     this.licenseService.loadLicenses().subscribe(licenses => {
