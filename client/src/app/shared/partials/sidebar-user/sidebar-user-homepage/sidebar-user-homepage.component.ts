@@ -20,10 +20,11 @@ import { HomepageComponent } from "../../../../pages/homepage/homepage.component
 import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { overlayAnimation } from '../../../animations/popup.animations';
+import { MessagePopupComponent } from "../../message-popup/message-popup.component";
 
 @Component({
   selector: 'app-sidebar-user-homepage',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent],
   templateUrl: './sidebar-user-homepage.component.html',
   animations: [overlayAnimation],
 })
@@ -34,6 +35,7 @@ export class SidebarUserHomepageComponent implements OnInit {
   mediumRisks: number = 0;
   lowRisks: number = 0;
   isConfirmationOpen = signal(false);
+  noIocPopup = signal(false);
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
     private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
     effect(() => {
@@ -186,7 +188,7 @@ export class SidebarUserHomepageComponent implements OnInit {
   }
 
   entityFiltersCount(): number {
-    const categories = this.appService.configData().localSettings.entityfilterCategories;
+    const categories = this.appService.tenantData().iocs;
     return Object.values(categories).reduce((count, val) => {
       if (Array.isArray(val)) return count + val.length;
       return count + 1;
@@ -201,7 +203,15 @@ export class SidebarUserHomepageComponent implements OnInit {
     this.router.navigate([`/dashboard/profile/alerts/${type}`]);
   }
   scanIOCs() {
+    const iocs = this.appService.tenantData().iocs;
+    if (!iocs || iocs.length === 0) {
+      this.noIocPopup.set(true);
+      return;
+    }
     this.alertService.scanIOCs();
+  }
+  clossNoIocPopup() {
+    this.noIocPopup.set(false);
   }
   flushAll() {
     this.isConfirmationOpen.set(true);

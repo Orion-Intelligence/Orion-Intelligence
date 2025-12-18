@@ -12,7 +12,8 @@
     background: var(--color-blue-830);
     width: 100%;
     max-width: 1000px;
-    border: 1px solid var(--color-border);;
+    border: 1px solid var(--color-border);
+    ;
     max-height: 800px;
     border-radius: 14px;
     padding: 35px;
@@ -96,21 +97,21 @@
 }
 
 .username-suggestion {
-  background: #fff4e5;
-  border: 1px solid #ffcc80;
-  color: #a66300;
-  padding: 10px 12px;
-  border-radius: 6px;
-  margin-top: 6px;
-  font-size: 13px;
+    background: #fff4e5;
+    border: 1px solid #ffcc80;
+    color: #a66300;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: 13px;
 }
 
 .username-suggestion .suggestion-title {
-  font-weight: 600;
-  margin-bottom: 4px;
+    font-weight: 600;
+    margin-bottom: 4px;
 }
 
 .username-suggestion .suggestion-list {
-  font-size: 12px;
-  opacity: 0.9;
+    font-size: 12px;
+    opacity: 0.9;
 }

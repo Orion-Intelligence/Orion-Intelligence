@@ -42,24 +42,43 @@
                 </div>
 
                 <div class="user-homepage_alerts">
-
                     <div class="user-homepage_alerts-card critical">
-                        <div class="user-homepage_alerts-card-count">{{ criticalRisks }}</div>
-                        <div class="user-homepage_alerts-card-label">Critical Alerts</div>
+                        <div class="user-homepage_alerts-card-content">
+                            <div class="user-homepage_alerts-card-count">
+                                {{ criticalRisks }}
+                            </div>
+                            <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                                class="user-homepage_alerts-card-icon" appTooltip="Total critical alert types" />
+                        </div>
+                        <div class="user-homepage_alerts-card-label">
+                            Critical Alerts
+                        </div>
                     </div>
 
                     <div class="user-homepage_alerts-card high">
-                        <div class="user-homepage_alerts-card-count">{{ highRisks }}</div>
+                        <div class="user-homepage_alerts-card-content">
+                            <div class="user-homepage_alerts-card-count">{{ highRisks }}</div>
+                            <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                                class="user-homepage_alerts-card-icon" appTooltip="Total high risk alert types" />
+                        </div>
                         <div class="user-homepage_alerts-card-label">High Risk Alerts</div>
                     </div>
 
                     <div class="user-homepage_alerts-card medium">
-                        <div class="user-homepage_alerts-card-count">{{ mediumRisks }}</div>
+                        <div class="user-homepage_alerts-card-content">
+                            <div class="user-homepage_alerts-card-count">{{ mediumRisks }}</div>
+                            <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                                class="user-homepage_alerts-card-icon" appTooltip="Total medium risk alert types" />
+                        </div>
                         <div class="user-homepage_alerts-card-label">Medium Risk</div>
                     </div>
 
                     <div class="user-homepage_alerts-card low">
-                        <div class="user-homepage_alerts-card-count">{{ lowRisks }}</div>
+                        <div class="user-homepage_alerts-card-content">
+                            <div class="user-homepage_alerts-card-count">{{ lowRisks }}</div>
+                            <img src="../../../../../../assets/images/shared/info-light.svg" alt="Critical Alert"
+                                class="user-homepage_alerts-card-icon" appTooltip="Total low rish alert types" />
+                        </div>
                         <div class="user-homepage_alerts-card-label">Low Risk</div>
                     </div>
 
@@ -122,6 +141,10 @@
     <ng-container *ngIf="isConfirmationOpen()">
         <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
             (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
+    </ng-container>
+    <ng-container *ngIf="noIocPopup()">
+        <app-message-popup [message]="'There are no IOCs in your tenant'"
+            (confirmed)="clossNoIocPopup()"></app-message-popup>
     </ng-container>
 </div>
 <ng-template #showAdmin>
