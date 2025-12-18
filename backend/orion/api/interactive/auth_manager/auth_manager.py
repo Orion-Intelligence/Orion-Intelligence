@@ -70,28 +70,23 @@ class auth_manager:
         if isinstance(acct_at, datetime):
             acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
 
-        if role_name == "profile":
-            if not getattr(user, "tenant_uuid", None):
-                raise HTTPException(status_code=401, detail="Invalid tenant.")
-            engine = mongo_controller.get_instance().get_engine()
-            tenant = await engine.find_one(
-                db_tenant_model,
-                db_tenant_model.id == ObjectId(user.tenant_uuid)
-            )
-            if tenant and not tenant.verified:
-                raise HTTPException(status_code=401, detail="account approval pending")
+        if not getattr(user, "tenant_uuid", None):
+            raise HTTPException(status_code=401, detail="account not found")
+        engine = mongo_controller.get_instance().get_engine()
+        tenant = await engine.find_one(
+            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        if tenant and not tenant.verified:
+            raise HTTPException(status_code=401, detail="account approval pending")
 
-            # if tenant and tenant.status in [TenantStatus.ONBOARDING, TenantStatus.ACTIVE] and "maintainer" not in tenant.licenses:
-            #     raise HTTPException(status_code=401, detail="Tenant not activated yet.")
 
-        if (role_name == "profile"
+        if (role_name == "member"
             and not bool(getattr(user, "subscription", False))
             and acct_at is not None
             and (datetime.now(timezone.utc) - acct_at).days >= 30):
 
             raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue")
 
-        if role_name == "profile" and user.status == UserStatus.PENDING:
+        if role_name == "member" and user.status == UserStatus.PENDING:
             raise HTTPException(status_code=401, detail="verification pending")
 
         if user.status == UserStatus.DISABLE:

@@ -20,7 +20,7 @@ def cookie_required(request: Request):
     response_description="Public configuration values used at frontend startup.",
 )
 async def get_public_config():
-    return await config_controller.getInstance().get_all_alerts()
+    return await config_controller.getInstance().get_system_info()
 
 
 @public_routes.get("/api/s/static/tenant/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
@@ -30,3 +30,7 @@ async def get_tenant_resource(id: str):
 @public_routes.get("/api/s/static/user/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
 async def get_user_resource(id: str):
   return await ResourceManager.get_instance().get_user_image(id)
+
+@public_routes.get("/api/s/static/system/logo", include_in_schema=False, dependencies=[Depends(cookie_required)])
+async def get_user_resource():
+  return await ResourceManager.get_instance().get_system_image(id)
