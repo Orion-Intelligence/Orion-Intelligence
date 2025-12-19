@@ -3,7 +3,6 @@ import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {ErrorStoreService} from '../../shared/services/error-store.service';
 import {filter, map, Observable} from 'rxjs';
 import {NgIf} from '@angular/common';
-import {LoaderComponent} from '../../shared/partials/loader/loader.component';
 import {AppService} from '../../services/core/app/app.service';
 import {appAnimation} from '../../shared/animations/app.animations';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -12,7 +11,7 @@ import {MessageNotificationComponent} from '../../shared/partials/message-notifi
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NgIf, LoaderComponent, FormsModule, ReactiveFormsModule, MessageNotificationComponent,],
+  imports: [RouterOutlet, NgIf, FormsModule, ReactiveFormsModule, MessageNotificationComponent,],
   templateUrl: './app.component.html',
   animations: [appAnimation],
 })

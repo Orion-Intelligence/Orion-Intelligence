@@ -34,7 +34,7 @@
                     </div>
 
                     <div class="user-settings_company-location">
-                        Licenses〡{{ userSessionData.tenant.licenses?.join(', ') || 'No licenses assigned'
+                        Licenses〡{{ userSessionData.tenant.licenses.join(', ') || 'No licenses assigned'
                         }}
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                     <div class="user-settings_info-item">
                         <div class="user-settings_info-label">Assigned User Quota</div>
                         <div class="user-settings_info-value mt-2">
-                            {{ userSessionData.tenant.assignedQuota ?? 0 }}
+                            {{ userSessionData.tenant.assignedQuota || '0' }}
                         </div>
                     </div>
                 </div>
