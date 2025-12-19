@@ -46,7 +46,7 @@ class ResourceManager:
     with open(file_path, "wb") as f:
       f.write(contents)
 
-    await AuditLogManager.get_instance().register(current_user.tenant_uuid, "upload_tenant_image")
+    await AuditLogManager.get_instance().register(current_user.tenant_uuid, current_user.id, "upload_tenant_image")
     return {"tenant_image": "upload complete"}
 
 

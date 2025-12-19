@@ -10,6 +10,7 @@ class UserStatus(str, Enum):
 class user_param_model(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
+    role: Optional[str] = None
     status: Optional[UserStatus] = None
     subscription: Optional[bool] = None
     licenses: Optional[List[LicenseName]] = None

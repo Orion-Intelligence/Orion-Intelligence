@@ -6,7 +6,7 @@
 </div>
 
 <div *ngIf="isVisible">
-<!--  <app-loader></app-loader>-->
+  <app-loader></app-loader>
   <div [@appAnimation]="shouldAnimate()">
     <router-outlet></router-outlet>
   </div>

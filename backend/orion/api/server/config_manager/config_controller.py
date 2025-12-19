@@ -120,5 +120,5 @@ class config_controller:
             new_record = db_system_model(key=AllowedKeys.LOGO_URL, value="logo")
             await self._engine.save(new_record)
 
-        await AuditLogManager.get_instance().register(str(current_user.id), "upload_image")
+        await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "upload_image")
         return {"Profile image": "upload complete"}

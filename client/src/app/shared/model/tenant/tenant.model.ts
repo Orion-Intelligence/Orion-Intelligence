@@ -35,7 +35,7 @@ export interface TenantRequest {
 export interface User {
   username: string;
   email: string;
-  role: 'admin' | 'crawler' | 'demo' | 'profile' | 'analyst';
+  role: string;
   status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
   subscription?: boolean;
   verificationDate: string;

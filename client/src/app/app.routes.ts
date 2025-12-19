@@ -288,6 +288,10 @@ export const routes: Routes = [
             component: ReportDefacementComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
             data: { type: 'consolidated', animation: 'HashPage' }
+          },
+          {
+            path: '**',
+            redirectTo: 'all'
           }
         ]
       },
@@ -670,6 +674,10 @@ export const routes: Routes = [
             path: 'system-settings',
             component: SidebarProfileSystemSettingsComponent,
             data: { type: 'srttings', animation: 'CategoryPage' }
+          },
+          {
+            path: '**',
+            redirectTo: 'consolidated/all'
           }
         ]
       }

@@ -1,5 +1,5 @@
 <form #searchForm="ngForm" (submit)="onSearchSubmit()" action=""
-  class="default-input-container directory-listing-search" enctype="multipart/form-data" method="GET">
+  class="default-input-container directory-listing-search security-scan-container" enctype="multipart/form-data" method="GET">
   <div class="row dashboard__api-search-input-div">
     <div class="col-xl-9 col-12 input-container">
       <div class="input-group default-input-sub-container">
@@ -31,7 +31,7 @@
   </div>
 
   <div class="d-flex justify-content-end" *ngIf="!hasError && !isLoading">
-    <div class="btn-group report-menu-option-container mr-0">
+    <div class="btn-group report-menu-option-container mr-2">
       <button (click)="exportReport()" appTooltip="Download" class="p-0 report-menu-option">
         <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" />
       </button>

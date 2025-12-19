@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import { AlertService } from '../../../../../services/alerts/alerts.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { AlertService } from '../../../../../services/alerts/alerts.service';
   imports: [],
   templateUrl: './alert-scan-loading.component.html'
 })
-export class AlertScanLoadingComponent {
+export class AlertScanLoadingComponent implements AfterViewInit{
   @ViewChild('overlay') overlayRef!: ElementRef;
 
   constructor(private el: ElementRef, private alertService: AlertService) { }

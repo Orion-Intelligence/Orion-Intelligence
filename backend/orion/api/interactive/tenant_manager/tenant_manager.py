@@ -2,6 +2,8 @@ import re
 import threading
 
 from pathlib import Path
+from typing import List
+
 from orion.api.interactive.account_manager.models.user_model import user_model
 from bson import ObjectId
 from fastapi import HTTPException
@@ -53,8 +55,10 @@ class TenantManager:
       data.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
       data.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
-      data.iocs = [IocCategory(ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(), name=enc.encrypt(ioc.name.encode()).decode(), values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])])
-        for ioc in (data.iocs or [])]
+      data.iocs = [IocCategory(
+        ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
+        name=enc.encrypt(ioc.name.encode()).decode(),
+        values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (data.iocs or [])]
 
       data.status = TenantStatus.ONBOARDING
       await self._engine.save(data)
@@ -67,20 +71,21 @@ class TenantManager:
   async def get_tenant(self, current_user) -> TenantRequest:
     tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.tenant_uuid))
     if not tenant:
-      await AuditLogManager.get_instance().register(str(current_user.id), "get_tenant_failed")
+      await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "failed to get tenant")
       raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found in get tenant")
 
     dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
     enc = Fernet(dek)
 
-    ioc_models = [IocCategory(ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(), name=enc.decrypt(ioc.name.encode()).decode(), values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for
-      ioc in (tenant.iocs or [])]
+    ioc_models = [IocCategory(
+      ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
+      name=enc.decrypt(ioc.name.encode()).decode(),
+      values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (tenant.iocs or [])]
 
-    tenant_request = TenantRequest(id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models)
+    tenant_request = TenantRequest(
+      id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models)
 
     return tenant_request
-
-  from typing import List
 
   async def update_tenant(self, data: TenantRequest, current_user):
 
@@ -93,7 +98,7 @@ class TenantManager:
 
     tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
     if not tenant:
-      await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant_failed")
+      await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "failed to update tenant")
       raise HTTPException(status_code=401, detail="Onboarding record not found for this user.")
 
     dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
@@ -120,8 +125,10 @@ class TenantManager:
       tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
     if data.iocs is not None and len(data.iocs) > 0:
-      tenant.iocs = [IocCategory(ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(), name=enc.encrypt(ioc.name.encode()).decode(), values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])])
-        for ioc in (data.iocs or [])]
+      tenant.iocs = [IocCategory(
+        ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
+        name=enc.encrypt(ioc.name.encode()).decode(),
+        values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (data.iocs or [])]
 
     await self._engine.save(tenant)
 
@@ -141,17 +148,20 @@ class TenantManager:
         u.licenses = ["free"]
         await self._engine.save(u)
 
-    active_count = await self._engine.count(db_user_account, (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
+    active_count = await self._engine.count(
+      db_user_account, (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
     if tenant.user_quota and active_count > tenant.user_quota:
       excess = active_count - tenant.user_quota
-      extra_users = await self._engine.find(db_user_account,
-        (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value) & (db_user_account.licenses != ["maintainer"]),
+      extra_users = await self._engine.find(
+        db_user_account,
+        (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value) & (
+            db_user_account.licenses != ["maintainer"]),
         limit=excess)
       for u in extra_users:
         u.status = UserStatus.DISABLE.value
         u.licenses = ["free"]
         await self._engine.save(u)
-    await AuditLogManager.get_instance().register(str(current_user.id), "update_tenant")
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id),"tenant updated successfully")
 
     return {"message": "Tenant updated", "user": current_user.username, "company": tenant.name}
 
@@ -169,8 +179,10 @@ class TenantManager:
       tenant.postal_code = enc.decrypt(tenant.postal_code.encode()).decode()
       tenant.licenses = [enc.decrypt(l.encode()).decode() for l in (tenant.licenses or [])]
 
-      tenant.iocs = [IocCategory(ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(), name=enc.decrypt(ioc.name.encode()).decode(), values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])])
-        for ioc in (tenant.iocs or [])]
+      tenant.iocs = [IocCategory(
+        ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
+        name=enc.decrypt(ioc.name.encode()).decode(),
+        values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (tenant.iocs or [])]
 
       result.append(tenant)
 
@@ -192,7 +204,8 @@ class TenantManager:
       if not re.match(email_pattern, email):
         raise HTTPException(status_code=400, detail="Invalid email format")
 
-      existing_user = await engine.find_one(db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
+      existing_user = await engine.find_one(
+        db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
       existing_mail = await engine.find_one(db_user_account, (db_user_account.email == email))
       if existing_user or existing_mail:
         raise HTTPException(status_code=400, detail="Username or email already exists")
@@ -229,7 +242,8 @@ class TenantManager:
       if tenant.user_quota and users_count >= tenant.user_quota:
         raise HTTPException(status_code=400, detail="User quota exceeded")
 
-      user = db_user_account(username=username,
+      user = db_user_account(
+        username=username,
         email=email,
         password=hashed_password,
         role=data.role,
@@ -240,8 +254,10 @@ class TenantManager:
 
       await engine.save(user)
       await KeyManager.get_instance().create_user_dek(user.id)
+      await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "tenent created successfully")
 
-      return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(tenant_allowed), }
+      return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
+        tenant_allowed), }
 
     except HTTPException as e:
       raise e

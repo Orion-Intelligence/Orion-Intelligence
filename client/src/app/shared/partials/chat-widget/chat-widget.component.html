@@ -58,10 +58,9 @@
       </div>
 
       <form class="chat-support__input" (submit)="sendMessage($event)">
-        <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message"
-          class="chat-support__input-field" required />
-        <button #submitBtn type="submit" class="chat-support__send-btn chat-support__push"
-          (click)="pushButton(submitBtn)">
+        <input type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="chat-support__input-field" [disabled]="isBotTyping" required />
+
+        <button #submitBtn type="submit" class="chat-support__send-btn chat-support__push" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
           <img src="assets/images/shared/chat_small.svg" alt="chat">
         </button>
       </form>

@@ -69,7 +69,7 @@
 .view-tenant-container .list__container table td,
 .view-tenant-container .list__container table th {
   vertical-align: middle !important;
-  overflow: visible !important;
+  overflow: clip !important;
 }
 
 .view-tenant-container .dropdown {

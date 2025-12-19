@@ -1,4 +1,3 @@
-# orion/services/audit/auditlog_manager.py
 import threading
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
@@ -9,7 +8,7 @@ from odmantic.query import desc
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_audit_log import db_audit_log
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role, LicenseName
 
 
 class AuditLogManager:
@@ -30,8 +29,8 @@ class AuditLogManager:
             raise Exception("This class is a singleton!")
         AuditLogManager.__instance = self
 
-    async def register(self, actor_id: str, event: str) -> str:
-        log = db_audit_log(actor_id=actor_id, event=event)
+    async def register(self, tenant_id, actor_id: str, event: str) -> str:
+        log = db_audit_log(tenant_id=tenant_id, actor_id=actor_id, event=event)
         await self._engine.save(log)
         return str(log.id)
 
@@ -66,6 +65,8 @@ class AuditLogManager:
 
         if getattr(current_user, "role", None) == user_role.MEMBER:
             filters.append(db_audit_log.actor_id == str(current_user.id))
+        elif LicenseName.MAINTAINER in (current_user.licenses or []):
+            filters.append(db_audit_log.tenant_id == str(current_user.tenant_uuid))
 
         query = filters[0] if filters else {}
 
@@ -77,4 +78,3 @@ class AuditLogManager:
             items = await self._engine.find(db_audit_log, query, sort=sort_by, skip=skip, limit=page_size)
 
         return {"items": [{**i.model_dump(), "id": str(i.id)} for i in items], "page": page}
-

@@ -190,4 +190,6 @@ export class ManageProfileComponent implements OnInit {
   clossAddTenant() {
     this.showAddTenantPopup = false;
   }
+
+  protected readonly JSON = JSON;
 }

@@ -66,8 +66,11 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   sendMessage(event: Event): void {
     event.preventDefault();
+    if (this.isBotTyping) return;
+
     const text = this.newMessage.trim();
     if (!text) return;
+
     this.chatMessages.push({ id: this.sessionId, sender: 'user', text, time: new Date() });
     this.newMessage = '';
     this.isBotTyping = true;
