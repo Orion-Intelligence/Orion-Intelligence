@@ -1,26 +1,25 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
-import { NgFor, CommonModule, NgOptimizedImage } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { AppService } from '../../../../services/core/app/app.service';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { Router } from '@angular/router';
-import { HomeSearchComponent } from "../../../../pages/homepage/home-search/home-search.component";
-import { AlertCategorySummary } from '../../../model/alert-notification/alert.notification.model';
-import { AlertModel } from '../../../model/company-profile/node.model';
-import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
-import { ApiService } from '../../../services/api.service';
-import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
-import { BehaviorSubject } from 'rxjs';
-import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
-import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
-import { AlertService } from '../../../../services/alerts/alerts.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
-import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
-import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
-import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
-import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { overlayAnimation } from '../../../animations/popup.animations';
-import { MessagePopupComponent } from "../../message-popup/message-popup.component";
+import {Component, effect, OnInit, signal} from '@angular/core';
+import {CommonModule, NgFor, NgOptimizedImage} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {AppService} from '../../../../services/core/app/app.service';
+import {DashboardService} from '../../../../services/dashboard/dashboard.service';
+import {Router} from '@angular/router';
+import {HomeSearchComponent} from "../../../../pages/homepage/home-search/home-search.component";
+import {AlertCategorySummary} from '../../../model/alert-notification/alert.notification.model';
+import {AlertModel} from '../../../model/company-profile/node.model';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import {ApiService} from '../../../services/api.service';
+import {MessageNotificationService} from '../../../../services/message_notification/message-notification.service';
+import {ConfirmationPopupComponent} from "../../confirmation-popup/confirmation-popup.component";
+import {AlertScanLoadingComponent} from "./alert-scan-loading/alert-scan-loading.component";
+import {AlertService} from '../../../../services/alerts/alerts.service';
+import {AuthService} from '../../../../services/authetication/auth.service';
+import {NgbCarouselModule} from "@ng-bootstrap/ng-bootstrap";
+import {HomepageComponent} from "../../../../pages/homepage/homepage.component";
+import {HomeInsightComponent} from "../../../../pages/homepage/home-insight/home-insight.component";
+import {LicenseService} from '../../../../services/licenses/licenses.service';
+import {overlayAnimation} from '../../../animations/popup.animations';
+import {MessagePopupComponent} from "../../message-popup/message-popup.component";
 
 @Component({
   selector: 'app-sidebar-user-homepage',
@@ -39,7 +38,7 @@ export class SidebarUserHomepageComponent implements OnInit {
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
     private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
     effect(() => {
-      if (this.alertService.isAlertScanLoading() === false) {
+      if (!this.alertService.isAlertScanLoading()) {
         this.initializeData();
       }
     });
@@ -218,32 +217,19 @@ export class SidebarUserHomepageComponent implements OnInit {
   }
   flushAllConfirmation(value: boolean) {
     this.isConfirmationOpen.set(false);
-    if (value === true) {
+    if (value) {
       this.alertService.isAlertScanLoading.set(true)
       this.apiService.post('profile/alerts/delete/all', null).subscribe({
         next: () => {
-          const alerts: AlertModel[] = [];
-          this.appService.userSessionData().alerts = alerts;
+          this.appService.userSessionData().alerts = [];
           this.ngOnInit();
           this.alertService.isAlertScanLoading.set(false)
-          // this.isLoading = false;
         },
         error: (err) => {
-          // this.isLoading = false;
           this.alertService.isAlertScanLoading.set(false)
           this.messageNotificationService.show(err?.error?.detail || 'Failed to delete')
         },
       });
     }
-  }
-  getLatestAlerts() {
-    this.apiService.get<any>('profile/alerts').subscribe({
-      next: response => {
-        this.appService.userSessionData().alerts = response
-        this.ngOnInit();
-        // this.isLoading = false;
-        this.alertService.isAlertScanLoading.set(false)
-      }
-    })
   }
 }

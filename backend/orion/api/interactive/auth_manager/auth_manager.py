@@ -77,6 +77,8 @@ class auth_manager:
             db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
         if tenant and not tenant.verified:
             raise HTTPException(status_code=401, detail="account approval pending")
+        if tenant and tenant.status == TenantStatus.DISABLE:
+            raise HTTPException(status_code=401, detail="account blocked")
 
 
         if (role_name == "member"

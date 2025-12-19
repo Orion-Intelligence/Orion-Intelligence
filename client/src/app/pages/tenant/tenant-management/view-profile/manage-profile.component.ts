@@ -14,10 +14,11 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { AppService } from '../../../../services/core/app/app.service';
+import {TooltipDirective} from '../../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-view-profile',
-  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent],
+  imports: [NgFor, FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective],
   animations: [fadeInDashboardItem],
   templateUrl: './manage-profile.component.html'
 })

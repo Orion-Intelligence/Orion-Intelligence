@@ -7,10 +7,11 @@ import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../constants/shared-enums';
 import { AppService } from '../../../../services/core/app/app.service';
 import { Router } from '@angular/router';
+import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-sidebar-user-ioc',
-  imports: [NgIf, NgFor, CommonModule, FormsModule],
+  imports: [NgIf, NgFor, CommonModule, FormsModule, TooltipDirective],
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {
@@ -60,12 +61,14 @@ export class SidebarUserIocComponent implements OnInit {
     if (category && !category.values.includes(value.trim())) {
       category.values.push(value.trim());
     }
+    this.update()
   }
   removeIoc(iocId: string, value: string): void {
     const ioc = this.onboardingData?.iocs.find(i => i.ioc_id === iocId);
     if (ioc) {
       ioc.values = ioc.values.filter(v => v !== value);
     }
+    this.update()
   }
   scrollLeft() {
     this.categoryScroll.nativeElement.scrollBy({ left: -250, behavior: 'smooth' });
@@ -87,7 +90,6 @@ export class SidebarUserIocComponent implements OnInit {
     this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => {
         this.appService.setOnboardingStatus(true);
-        this.router.navigate(['/dashboard']).then();
       },
       error: (err) => {
         console.error(err);

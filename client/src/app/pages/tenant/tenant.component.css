@@ -275,17 +275,38 @@
   margin-bottom: 8px;
 }
 
+.onboarding-step2__input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .onboarding-step2__input {
   width: 100%;
   max-width: 100%;
   height: 44px;
   border-radius: 8px;
   border: 1px solid #D0D5DD;
-  padding: 10px 16px;
+  padding: 10px 56px 10px 16px;
   background: #fff;
   font-family: Inter, sans-serif;
   font-size: 14px;
   box-shadow: 0 1px 2px 0 #1018280d;
+}
+
+.onboarding-step2__add-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 35px;
+  width: 80px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(92.32deg, #4ea2f1 2.58%, #2c7ac5);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .onboarding-step2__added {
@@ -318,6 +339,7 @@
 .onboarding-step2__chip {
   display: flex;
   align-items: center;
+  cursor: pointer;
   background: #FCFCFC0D;
   border: 1px solid var(--color-border);
   border-radius: 5px;
@@ -327,6 +349,10 @@
   font-weight: 400;
   font-size: 12px;
   gap: 8px;
+}
+
+.onboarding-step2__chip:hover{
+  background: #FCFCFC20;
 }
 
 .onboarding-step2-remove {

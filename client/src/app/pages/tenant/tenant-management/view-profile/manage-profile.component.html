@@ -6,10 +6,19 @@
         <div class="directory-listing_upper-heading">
           <div class="directory-listing_pagination-heading">
             <p class="directory-listing_header">Tenant Users</p>
-            <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn"
-                    (click)="addtenant()">
-              <span class="flex-grow-1 text-center">Add User</span>
-            </button>
+            <span
+              class="d-inline-block"
+              [appTooltip]="appService.userSessionData().tenant.quotaExceeded ? 'Access blocked' : ''">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
+                [disabled]="appService.userSessionData().tenant.quotaExceeded"
+                [class.opacity-50]="appService.userSessionData().tenant.quotaExceeded"
+                [class.pe-none]="appService.userSessionData().tenant.quotaExceeded"
+                (click)="addtenant()">
+                <span class="flex-grow-1 text-center">Add User</span>
+              </button>
+            </span>
           </div>
         </div>
 
@@ -64,11 +73,11 @@
                         </span>
                     </td>
                     <td class="text-center col-action">
-                      <img (click)="toggleExpandedUser(i)"
+                      <img (click)="toggleExpandedUser(i)" class="cursor-pointer"
                            *ngIf="(user.role === 'admin' || user.licenses?.includes('maintainer'))"
                            src="assets/images/shared/view.svg" width="20" alt="view"/>
 
-                      <img (click)="toggleExpandedUser(i)"
+                      <img (click)="toggleExpandedUser(i)" class="cursor-pointer"
                            *ngIf="!(user.role === 'admin' || user.licenses?.includes('maintainer'))"
                            src="assets/images/shared/edit.svg" width="20" alt="edit"/>
                     </td>

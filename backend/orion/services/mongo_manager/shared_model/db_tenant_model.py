@@ -48,6 +48,6 @@ class TenantRequest(BaseModel):
     city: str = ""
     postal_code: str = ""
     verified: Optional[bool] = None
-    user_quota: int = 0
-    status: TenantStatus = TenantStatus.DISABLE
+    user_quota: Optional[int] = None
+    status: Optional[TenantStatus] = None
     licenses: List[str] = []

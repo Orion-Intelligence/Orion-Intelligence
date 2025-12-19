@@ -68,19 +68,8 @@
                       </td>
 
                       <td class="text-center col-action">
-                        <button type="button"
-                          class="btn btn-sm btn-outline-primary d-inline-flex align-items-center expand-btn"
-                          (click)="tenant._expanded = !tenant._expanded">
+                        <img (click)="tenant._expanded = !tenant._expanded" class="cursor-pointer" src="assets/images/shared/edit.svg" width="20" alt="edit"/>
 
-                          <span class="flex-grow-1 text-center me-1">Edit</span>
-
-                          <img
-                            src="../../../../../assets/images/shared/search_side_dropdown_icon.svg"
-                            width="20"
-                            height="20"
-                            [style.transform]="tenant._expanded ? 'rotate(180deg)' : 'rotate(0deg)'" />
-
-                        </button>
                       </td>
                     </tr>
 

@@ -32,6 +32,13 @@ export class AlertService {
             next: response => {
                 this.appService.userSessionData().alerts = response
                 this.isAlertScanLoading.set(false)
+            },
+            error: err => {
+                if (err.status === 202) {
+                    this.isAlertScanLoading.set(true)
+                } else {
+                    this.isAlertScanLoading.set(false)
+                }
             }
         })
     }

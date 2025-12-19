@@ -108,9 +108,10 @@ class TenantManager:
     if data.verified is not None:
       tenant.verified = data.verified
 
-    if data.user_quota < 1:
-      data.user_quota = 1
-    tenant.user_quota = data.user_quota
+    if data.user_quota:
+      if data.user_quota < 1:
+        data.user_quota = 1
+      tenant.user_quota = data.user_quota
 
     if data.status is not None:
       tenant.status = data.status

@@ -1,5 +1,5 @@
-from typing import Optional, Annotated
-from pydantic import BaseModel, StringConstraints
+from typing import Optional, Annotated, Dict, List
+from pydantic import BaseModel, StringConstraints, Field
 
 
 class search_credential_param_model(BaseModel):
@@ -14,3 +14,8 @@ class search_credential_param_model(BaseModel):
     page: Optional[int] = 1
     category: Optional[str] = ""
     fullsearch: Optional[bool] = False
+
+    entity_filter: Optional[Dict[str, List[str]]] = Field(
+        default=None,
+        examples=[{"m_country": ["pakistan"]}]
+    )

@@ -244,15 +244,18 @@ class AlertManager:
         await self._engine.save(existing_doc)
 
         return {"message": "Alert deleted successfully", "id": id}
-    
+
     async def getAllAlerts(self, current_user):
         alerts_data = await self._engine.find_one(
-            db_alert_model,
-            db_alert_model.tenant_id == str(current_user.tenant_uuid)
-        )
-        
+            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
+
+        scan_status = await self.get_scan_status(current_user)
+        if scan_status.get("scan_running", False):
+            raise HTTPException(
+                status_code=202, detail="Scan is still processing")
+
         if not alerts_data:
-            return [] 
+            return []
 
         return alerts_data.alerts
 
@@ -305,26 +308,34 @@ class AlertManager:
         }
     
     async def set_scan_running(self,tenant_id: str, value: bool) -> dict:
-        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
+        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant_id))
 
         if alert_doc:
+            print("1:::::::::::::::::::::::::::::::::", flush=True)
+            print(tenant_id, flush=True)
+            print(value, flush=True)
+            print("1:::::::::::::::::::::::::::::::::", flush=True)
             alert_doc.scan_running = value
             await self._engine.save(alert_doc)
 
         return {"tenant_id": tenant_id, "scan_running": value}
     
     async def get_scan_status(self, current_user):
-        tenant_uuid = str(current_user.tenant_uuid)
-        alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+        alerts_data = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
 
-        if alert_doc:
+        if alerts_data:
+            print("2:::::::::::::::::::::::::::::::::", flush=True)
+            print(current_user.tenant_uuid, flush=True)
+            print(alerts_data.scan_running, flush=True)
+            print("2:::::::::::::::::::::::::::::::::", flush=True)
             return {
-                "scan_running": alert_doc.scan_running
+                "scan_running": alerts_data.scan_running
             }
         return {
             "scan_running": False
         }
-    
+
+
     @staticmethod
     def get_allowed_alert_types(user) -> set[str]:
         permissions = get_user_permissions(user)

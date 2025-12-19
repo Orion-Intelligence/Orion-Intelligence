@@ -657,7 +657,7 @@ export const routes: Routes = [
             data: { type: 'account', animation: 'CategoryPage' }
           },
           {
-            path: 'tenant_settings',
+            path: 'tenant-settings',
             component: TenantSettingsComponent,
             data: { type: 'settings', animation: 'CategoryPage' }
           },

@@ -43,8 +43,12 @@
         <div class="onboarding-step2__divider1"></div>
 
         <label class="onboarding-step2__label">Enter IOCs</label>
-        <input type="text" class="onboarding-step2__input" placeholder="Type"
+        <div class="onboarding-step2__input-wrapper">
+          <input type="text" class="onboarding-step2__input" placeholder="Type"
             (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+          <button type="button" class="onboarding-step2__add-btn"
+            (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
+        </div>
 
         <div class="onboarding-step2__divider2"></div>
 
@@ -57,9 +61,9 @@
                         <p class="onboarding-step2__heading">{{ ioc.name }}</p>
 
                         <div class="onboarding-step2__chips">
-                            <div class="onboarding-step2__chip" *ngFor="let value of ioc.values">
+                            <div class="onboarding-step2__chip" appTooltip="remove IOC" *ngFor="let value of ioc.values" (click)="removeIoc(ioc.ioc_id, value)">
                                 <span>{{ value }}</span>
-                                <span class="onboarding-step2__chip-remove" (click)="removeIoc(ioc.ioc_id, value)">
+                                <span class="onboarding-step2__chip-remove">
                                     ✕
                                 </span>
                             </div>
@@ -75,10 +79,6 @@
         <div class="onboarding-box__actions mt-5">
             <button class="onboarding-box__btn onboarding-box__btn--back" (click)="goBack()">
                 Back
-            </button>
-
-            <button class="sidebar-user-ioc-save-button" (click)="update()">
-                Update
             </button>
         </div>
     </div>

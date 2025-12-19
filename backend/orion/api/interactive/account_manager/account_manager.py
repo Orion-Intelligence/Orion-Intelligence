@@ -250,7 +250,7 @@ class AccountManager:
         "country": self.safe_decrypt(enc,tenant.country), "city": self.safe_decrypt(enc, tenant.city),
         "postalCode": self.safe_decrypt(enc,tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id),
         "userId": "", "licenses": [self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(assigned_quota),
-        "quotaExceeded": bool(tenant.user_quota and assigned_quota >= tenant.user_quota), "image": tenant_image_path},
+        "quotaExceeded": bool(not tenant.is_default and tenant.user_quota and assigned_quota >= tenant.user_quota) , "image": tenant_image_path},
         "alerts": alerts_list, })
 
     return node

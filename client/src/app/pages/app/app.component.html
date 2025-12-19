@@ -1,12 +1,12 @@
-<!--<div *ngIf="appService.userSessionData()?.preferences?.['quotaExceeded']"-->
-<!--     class="alert alert-warning text-center rounded-0 mb-0 quota-banner"-->
-<!--     role="alert">-->
-<!--  <strong>User quota exceeded.</strong>-->
-<!--  Access is restricted until existing users are removed or the quota is increased.-->
-<!--</div>-->
+<div *ngIf="appService.userSessionData().tenant.quotaExceeded"
+     class="alert alert-warning text-center rounded-0 mb-0 quota-banner"
+     role="alert">
+  <strong>User quota exceeded.</strong>
+  Access is restricted until existing users are removed or the quota is increased.
+</div>
 
 <div *ngIf="isVisible">
-  <app-loader></app-loader>
+<!--  <app-loader></app-loader>-->
   <div [@appAnimation]="shouldAnimate()">
     <router-outlet></router-outlet>
   </div>

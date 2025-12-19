@@ -24,14 +24,14 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 
 ALERT_CATEGORIES = [
-    "general",
-    "defacement",
-    "breach",
-    "exploit",
-    "social",
-    "discussion",
-    "stealerlogs",
-    "feed",
+    # "general",
+    # "defacement",
+    # "breach",
+    # "exploit",
+    # "social",
+    # "discussion",
+    # "stealerlogs",
+    # "feed",
     "scanning"
 ]
 
@@ -68,19 +68,18 @@ class alert_job:
                 if isinstance(response, dict):
                     scan_result = response
                 elif hasattr(response, "body"):
-                    import json
                     scan_result = json.loads(response.body)
                 else:
-                    return False
+                    break
 
-                result = scan_result.get("result")
-                if not result:
-                    return False
-
-                status = result
+                status = scan_result.get("status")
                 if status == "pending":
                     await asyncio.sleep(5)
                     continue
+
+                result = scan_result.get("result")
+                if not isinstance(result, dict):
+                    return False
 
                 break
 
@@ -191,7 +190,6 @@ class alert_job:
                                 if "github" in ioc_value.lower():
                                     scans_to_run = ["repo"]
                             for scan_type in scans_to_run:
-                                print(f"Processing {ioc_type_name} | Value: {ioc_value} | Scan: {scan_type}")
                                 await self._handle_scanning_alert(
                                     str(tenant.id),
                                     ioc_value,
@@ -248,6 +246,7 @@ class alert_job:
                                     )
 
                             except Exception as dynamic_e:
+                                print("11_22x2 :::::::::::::::::::::::::::::", flush=True)
                                 print(f"[{datetime.now().strftime('%H:%M:%S')}] -> DYNAMIC SEARCH CALL ERROR for {scan_type}:{ioc_type_name}:{ioc_value}. Error: {dynamic_e}")
 
                 return
@@ -309,7 +308,13 @@ class alert_job:
 
                     try:
                         search_param = ParamModel(**search_data)
-                        if category=="social":
+                        if category=="stealerlogs":
+                            if ioc_type_name == "m_domain":
+                                search_param.url = ioc_value
+                            elif ioc_type_name == "m_user":
+                                search_param.user = ioc_value
+                            es_response = await search_func(search_param)
+                        elif category=="social":
                             es_response = await search_func(search_param,base_index,[],[])
                         elif category=="discussion":
                             es_response = await search_func(search_param,base_index,[],[])
@@ -383,19 +388,24 @@ class alert_job:
         except Exception as e:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] -> CRONJOB FATAL ERROR for tenant {tenant.id} in category {category}. Error: {e}")
 
-
     async def run_all_categories(self):
-        """Run alerts for all categories at once (nightly job)."""
         all_tenants = await self._tenant_manager.get_all_tenant()
         if not all_tenants:
-            print("[INFO] No tenants found for daily check.")
             return
 
-        for category in ALERT_CATEGORIES:
-            print(f"[INFO] Processing category: {category}")
-            tasks = [self._process_tenant_alerts(tenant, category) for tenant in all_tenants]
-            await asyncio.gather(*tasks)
-            print(f"[INFO] Completed category: {category}")
+        for tenant in all_tenants:
+            if not tenant.is_default:
+                continue
+
+            await self._alert_manager.getInstance().set_scan_running(tenant.id, True)
+
+            try:
+                for category in ALERT_CATEGORIES:
+                    await self._process_tenant_alerts(tenant, category)
+            except Exception as ex:
+                pass
+            finally:
+                await self._alert_manager.getInstance().set_scan_running(tenant.id, False)
 
     def get_additional_result_keys(self, result: any) -> list[tuple[str, any]]:
         EXCLUDED_KEYS = {
@@ -441,71 +451,75 @@ class alert_job:
 
     async def run_all_categories_for_api(self, current_user) -> dict:
         tenant_id = current_user.tenant_uuid
+        await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
         current_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         start_time = datetime.now(timezone.utc)
-        await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
 
-        if not current_tenant:
+        try:
+            if not current_tenant:
+                return {
+                    "status": "error",
+                    "message": "Invalid tenant/user object provided.",
+                    "duration_seconds": (datetime.now(timezone.utc) - start_time).total_seconds(),
+                    "results": []
+                }
+
+            dek = await KeyManager.get_instance().get_profile_dek(ObjectId(current_tenant.id))
+            enc = Fernet(dek)
+
+            current_tenant.name = enc.decrypt(current_tenant.name.encode()).decode()
+            current_tenant.phone = enc.decrypt(current_tenant.phone.encode()).decode()
+            current_tenant.country = enc.decrypt(current_tenant.country.encode()).decode()
+            current_tenant.city = enc.decrypt(current_tenant.city.encode()).decode()
+            current_tenant.postal_code = enc.decrypt(current_tenant.postal_code.encode()).decode()
+            current_tenant.licenses = [enc.decrypt(l.encode()).decode() for l in (current_tenant.licenses or [])]
+
+            current_tenant.iocs = [IocCategory(
+                ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
+                name=enc.decrypt(ioc.name.encode()).decode(),
+                values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (current_tenant.iocs or [])]
+
+            category_statuses = []
+            overall_success = True
+
+            for category in ALERT_CATEGORIES:
+                category_start_time = datetime.now(timezone.utc)
+                print(f"[INFO] Processing category: {category} for Tenant: {tenant_id}")
+                try:
+                    await self._process_tenant_alerts(current_tenant, category)
+
+                    category_status = {
+                        "category": category,
+                        "status": "completed_successfully",
+                        "tenant_count": 1,
+                        "duration_seconds": (datetime.now(timezone.utc) - category_start_time).total_seconds(),
+                        "error_count": 0
+                    }
+
+                except Exception as e:
+                    overall_success = False
+                    print(f"[ERROR] Category {category} failed for tenant {tenant_id}: {e}")
+                    category_status = {
+                        "category": category,
+                        "status": "completed_with_errors",
+                        "tenant_count": 1,
+                        "duration_seconds": (datetime.now(timezone.utc) - category_start_time).total_seconds(),
+                        "error_count": 1
+                    }
+
+                category_statuses.append(category_status)
+                print(f"[INFO] Completed category: {category} for Tenant: {tenant_id}")
+
+            end_time = datetime.now(timezone.utc)
             return {
-                "status": "error",
-                "message": "Invalid tenant/user object provided.",
-                "duration_seconds": (datetime.now(timezone.utc) - start_time).total_seconds(),
-                "results": []
+                "status": "success" if overall_success else "completed_with_errors",
+                "message": f"Alert generation job finished for tenant {tenant_id}.",
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
+                "total_duration_seconds": (end_time - start_time).total_seconds(),
+                "results": category_statuses
             }
-
-        dek = await KeyManager.get_instance().get_profile_dek(ObjectId(current_tenant.id))
-        enc = Fernet(dek)
-
-        current_tenant.name = enc.decrypt(current_tenant.name.encode()).decode()
-        current_tenant.phone = enc.decrypt(current_tenant.phone.encode()).decode()
-        current_tenant.country = enc.decrypt(current_tenant.country.encode()).decode()
-        current_tenant.city = enc.decrypt(current_tenant.city.encode()).decode()
-        current_tenant.postal_code = enc.decrypt(current_tenant.postal_code.encode()).decode()
-        current_tenant.licenses = [enc.decrypt(l.encode()).decode() for l in (current_tenant.licenses or [])]
-
-        current_tenant.iocs = [IocCategory(
-            ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
-            name=enc.decrypt(ioc.name.encode()).decode(),
-            values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (current_tenant.iocs or [])]
-
-        category_statuses = []
-        overall_success = True
-
-        for category in ALERT_CATEGORIES:
-            category_start_time = datetime.now(timezone.utc)
-            print(f"[INFO] Processing category: {category} for Tenant: {tenant_id}")
-            try:
-                await self._process_tenant_alerts(current_tenant, category)
-
-                category_status = {
-                    "category": category,
-                    "status": "completed_successfully",
-                    "tenant_count": 1,
-                    "duration_seconds": (datetime.now(timezone.utc) - category_start_time).total_seconds(),
-                    "error_count": 0
-                }
-
-            except Exception as e:
-                overall_success = False
-                print(f"[ERROR] Category {category} failed for tenant {tenant_id}: {e}")
-                category_status = {
-                    "category": category,
-                    "status": "completed_with_errors",
-                    "tenant_count": 1,
-                    "duration_seconds": (datetime.now(timezone.utc) - category_start_time).total_seconds(),
-                    "error_count": 1
-                }
-
-            category_statuses.append(category_status)
-            print(f"[INFO] Completed category: {category} for Tenant: {tenant_id}")
-
-        end_time = datetime.now(timezone.utc)
-        await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
-        return {
-            "status": "success" if overall_success else "completed_with_errors",
-            "message": f"Alert generation job finished for tenant {tenant_id}.",
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat(),
-            "total_duration_seconds": (end_time - start_time).total_seconds(),
-            "results": category_statuses
-        }
+        except Exception as _:
+            pass
+        finally:
+            await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
