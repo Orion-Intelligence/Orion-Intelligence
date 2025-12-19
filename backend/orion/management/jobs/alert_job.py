@@ -24,14 +24,14 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 
 ALERT_CATEGORIES = [
-    # "general",
-    # "defacement",
-    # "breach",
-    # "exploit",
-    # "social",
-    # "discussion",
-    # "stealerlogs",
-    # "feed",
+    "general",
+    "defacement",
+    "breach",
+    "exploit",
+    "social",
+    "discussion",
+    "stealerlogs",
+    "feed",
     "scanning"
 ]
 
