@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { NgFor, NgIf, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,10 +18,12 @@ import { LicenseService } from '../../../../../services/licenses/licenses.servic
 import { ConfirmationPopupComponent } from "../../../confirmation-popup/confirmation-popup.component";
 import { HelperService } from '../../../../services/helper.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
+import { NgxPrintModule } from 'ngx-print';
+import { AlertExportComponentComponent } from "../alert-export-component/alert-export-component.component";
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective],
+  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, NgxPrintModule, AlertExportComponentComponent],
   templateUrl: './category-alert-report.component.html'
 })
 export class CategoryAlertReportComponent implements OnInit {
@@ -39,6 +41,10 @@ export class CategoryAlertReportComponent implements OnInit {
   isDeleteAlertConfirmationOpen = signal(false);
   selectedDeleteAlertId: string = '';
   importedAlert: AlertModel | null = null;
+  alertToShowReport: AlertModel | null = null;
+
+  @ViewChild('printBtn') printBtn!: ElementRef<HTMLButtonElement>;
+
   constructor(private router: Router, private route: ActivatedRoute, private appService: AppService, public sidebarService: SidebarService, private apiService: ApiService,
     private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -182,43 +188,24 @@ export class CategoryAlertReportComponent implements OnInit {
       }
     })
   }
-  seeJDetailJson(alertId: string) {
-    const alerts = this.appService.userSessionData().alerts;
-    const alert = this.appService
-      .userSessionData()
-      ?.alerts
-      ?.find(a => a.alert_id === alertId);
-    const alertJson = JSON.stringify(alert, null, 2);
-    const newWindow = window.open('', '_blank');
-    if (!newWindow) return;
+  seeDetailReprot(alertId: string) {
+    this.alertToShowReport =
+      this.appService
+        .userSessionData()
+        ?.alerts
+        ?.find(a => a.alert_id === alertId) || null;
 
-    newWindow.document.write(`
-    <html>
-      <head>
-        <title>Alert JSON</title>
-        <style>
-          body {
-            font-family: monospace;
-            white-space: pre;
-            padding: 16px;
-            background: #0f172a;
-            color: #e5e7eb;
-          }
-        </style>
-      </head>
-      <body>${alertJson}
-  `);
-
-    newWindow.document.close();
-    if (alert) {
-      alert.report_seen = true;
-      this.apiService.post('alert/seen', [alert]).subscribe({
-        next: () => {
-        },
-        error: (err) => {
-          console.error(err);
-        },
+    if (!this.alertToShowReport) return;
+    console.log(this.alertToShowReport)
+    if (this.alertToShowReport) {
+      this.alertToShowReport.report_seen = true;
+      this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
+        error: err => console.error(err),
       });
+
+      setTimeout(() => {
+        this.printBtn.nativeElement.click();
+      }, 0);
     }
   }
   seeDetails(id: string, hash: string) {

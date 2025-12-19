@@ -1,0 +1,62 @@
+<div class="alert-report-container">
+    <h1 class="alert-report-h1">Alert Report</h1>
+
+    <div class="alert-report-meta">
+        <div><strong>Total Alerts:</strong> {{ viewAlerts.length }}</div>
+        <div><strong>Printed:</strong> {{ printedNow }}</div>
+    </div>
+
+    <ng-container *ngIf="viewAlerts.length; else noAlerts">
+        <section *ngFor="let alert of viewAlerts; let i = index" class="alert-report-card"
+            [ngClass]="statusClass(alert.status)">
+            <header class="alert-report-head">
+                <div class="alert-report-title">
+                    <span class="alert-report-num">{{ i + 1 }}.</span>
+                    <span>{{ alert.title || 'Untitled Alert' }}</span>
+                </div>
+
+                <div class="alert-report-badges">
+                    <span class="alert-risk-badge" [ngClass]="riskClass(alert.type)">
+                        {{ getRiskLevel(alert.type) }}
+                    </span>
+
+                    <span class="alert-status-badge" [ngClass]="statusClass(alert.status)">
+                        {{ alert.status || 'info' | uppercase }}
+                    </span>
+                </div>
+            </header>
+
+
+            <div class="alert-report-row">
+                <span class="label">Type:</span> {{ alert.type || '—' }}
+            </div>
+
+            <div class="alert-report-row">
+                <span class="label">IOC:</span>
+                {{ alert.ioc_type }} → {{ alert.ioc_value }}
+            </div>
+
+            <div class="alert-report-row">
+                <span class="label">Source:</span> {{ alert.source || '—' }}
+            </div>
+
+            <div class="alert-report-row">
+                <span class="label">URL:</span> {{ alert.url || '—' }}
+            </div>
+
+            <div class="alert-report-desc" *ngIf="alert.description">
+                <span class="label">Description:</span>
+                <div class="prewrap">{{ alert.description }}</div>
+            </div>
+
+            <div class="alert-report-dates">
+                <div><strong>First Seen:</strong> {{ formatDate(alert.first_seen) }}</div>
+                <div><strong>Last Seen:</strong> {{ formatDate(alert.last_seen) }}</div>
+            </div>
+        </section>
+    </ng-container>
+
+    <ng-template #noAlerts>
+        <div class="alert-report-empty">No alerts available.</div>
+    </ng-template>
+</div>

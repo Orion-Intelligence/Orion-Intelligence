@@ -26,6 +26,17 @@ export class AlertService {
             },
         });
     }
+    cancelScanIOCs() {
+        this.apiService.post<any>('profile/alert/scan/cancel', null).subscribe({
+            next: (_) => {
+                this.isAlertScanLoading.set(false)
+            },
+            error: (err) => {
+                console.error('Cancel scan failed with an error:', err);
+                alert(err?.error?.detail || 'Failed to cancel IOC Scan.');
+            },
+        });
+    }
 
     getLatestAlerts() {
         this.apiService.get<any>('profile/alerts').subscribe({

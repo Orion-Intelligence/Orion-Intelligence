@@ -595,6 +595,7 @@ export const routes: Routes = [
       {
         path: 'profile',
         canActivate: [subscriptionGuard, OnboardingGuard],
+        resolve: { ioc: IocResolver },
         data: { animation: 'ProifilePage' },
         children: [
           {
@@ -633,7 +634,6 @@ export const routes: Routes = [
           {
             path: 'ioc',
             component: SidebarUserIocComponent,
-            resolve: { ioc: IocResolver },
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {

@@ -1,0 +1,134 @@
+.alert-report-container {
+    font-family: Inter, Arial, sans-serif;
+    color: #f0f0f0;
+}
+
+.alert-report-h1 {
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.alert-report-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 6px;
+}
+
+.alert-report-card {
+    border: 1px solid #e5e7eb;
+    border-left: 6px solid transparent;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+}
+
+.alert-report-head {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.alert-report-title {
+    display: flex;
+    gap: 6px;
+}
+
+.alert-report-status {
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.alert-report-row {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.alert-report-desc {
+    margin-top: 6px;
+}
+
+.label {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.prewrap {
+    white-space: pre-wrap;
+    font-size: 13px;
+}
+
+.alert-report-dates {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* Status colors */
+.alert-active {
+    border-left-color: #dc2626;
+}
+
+.alert-ignore {
+    border-left-color: #6b7280;
+}
+
+.alert-info {
+    border-left-color: #2563eb;
+}
+
+.alert-report-empty {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.alert-report-badges {
+    display: flex;
+    gap: 6px;
+}
+
+/* Risk badges */
+.alert-risk-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.risk-critical {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.risk-high {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.risk-medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.risk-low {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.risk-unknown {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.alert-status-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}

@@ -35,6 +35,26 @@
     font-size: 20px;
 }
 
+.sidebar-user-ioc-container .report-menu-option-container {
+    margin-top: 0px;
+}
+
+.cancel-btn {
+    margin-top: 20px;
+    padding: 8px 16px;
+    background-color: var(--color-danger, #ff4d4f);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+    background-color: #e03e3e;
+}
+
 @media (width <=1024px) {
     .sidebar-user-ioc-save-button {
         margin-top: 20px;

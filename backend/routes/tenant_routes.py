@@ -349,6 +349,24 @@ async def get_user_alerts(current_user=Depends(get_current_user)):
 async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
     return await alert_job.get_instance().run_all_categories_for_api(current_user)
 
+@tenant_routes.post(
+    "/api/profile/alert/scan/cancel",
+    summary="Cancel IOC alert scan",
+    description="Cancel alert scanning for all categories for the current user.",
+    tags=["Alerts", "Scanning"],
+    operation_id="cancelUserIOCAlerts",
+    response_description="Cancel Scan job execution information.",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.MEMBER])),
+        Depends(status_required([UserStatus.ACTIVE])),
+        Depends(license_required("maintainer")),
+    ],
+)
+async def calcel_user_ioc_alerts(current_user=Depends(get_current_user)):
+    return await AlertManager.getInstance().set_scan_running(current_user.tenant_uuid,False)
+
 
 @tenant_routes.post(
     "/api/profile/alerts/delete/all",

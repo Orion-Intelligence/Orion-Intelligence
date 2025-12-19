@@ -118,7 +118,7 @@
 }
 
 .filter-panel__show {
-  z-index: 100;
+  /* z-index: 100; */
 }
 
 

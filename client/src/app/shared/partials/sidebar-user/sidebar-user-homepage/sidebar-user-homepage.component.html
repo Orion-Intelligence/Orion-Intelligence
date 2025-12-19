@@ -10,6 +10,11 @@
 
                 <div class="category_report_flex category_report_flex-margin">
                     <div class="btn-group report-menu-option-container mr-0">
+                        <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true"
+                            appTooltip="Print Alerts" class="p-0 report-menu-option">
+                            <img src="assets/images/shared/theme/print.svg" height="25" />
+                        </button>
+                        <div class="vr report-menu-divider"></div>
                         <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
                             <img alt="flush" height="20" ngSrc="assets/images/shared/bin.svg" width="20" />
                         </button>
@@ -146,6 +151,9 @@
         <app-message-popup [message]="'There are no IOCs in your tenant'"
             (confirmed)="clossNoIocPopup()"></app-message-popup>
     </ng-container>
+    <div id="allAlertsReport" class="d-none">
+        <app-alert-export-component [alerts]="appService.userSessionData().alerts"></app-alert-export-component>
+    </div>
 </div>
 <ng-template #showAdmin>
     <app-index></app-index>

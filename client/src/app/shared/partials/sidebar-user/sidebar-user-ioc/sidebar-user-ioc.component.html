@@ -3,9 +3,15 @@
 
         <div class="onboarding-step2__description-row">
             <h2 class="user-ioc-title">Manage IOCs</h2>
-
-            <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
-                placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+            <div class="onboarding-step2__description-row">
+                <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
+                    placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+                <div class="btn-group report-menu-option-container mr-0" (click)="openConfirmationPopup()">
+                    <button appTooltip="clear all" class="p-0 report-menu-option">
+                        <img alt="scan" height="10" src="../../../../../assets/images/shared/cross.svg" width="10" />
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="onboarding-step2__category-scroll-container">
@@ -44,10 +50,10 @@
 
         <label class="onboarding-step2__label">Enter IOCs</label>
         <div class="onboarding-step2__input-wrapper">
-          <input type="text" class="onboarding-step2__input" placeholder="Type"
-            (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-          <button type="button" class="onboarding-step2__add-btn"
-            (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
+            <input type="text" class="onboarding-step2__input" placeholder="Type"
+                (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+            <button type="button" class="onboarding-step2__add-btn"
+                (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
         </div>
 
         <div class="onboarding-step2__divider2"></div>
@@ -61,7 +67,8 @@
                         <p class="onboarding-step2__heading">{{ ioc.name }}</p>
 
                         <div class="onboarding-step2__chips">
-                            <div class="onboarding-step2__chip" appTooltip="remove IOC" *ngFor="let value of ioc.values" (click)="removeIoc(ioc.ioc_id, value)">
+                            <div class="onboarding-step2__chip" appTooltip="remove IOC" *ngFor="let value of ioc.values"
+                                (click)="removeIoc(ioc.ioc_id, value)">
                                 <span>{{ value }}</span>
                                 <span class="onboarding-step2__chip-remove">
                                     ✕
@@ -83,3 +90,7 @@
         </div>
     </div>
 </div>
+<ng-container *ngIf="isConfirmationOpen">
+    <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
+        (confirmed)="clearAllIocs($event)"></app-confirmation-popup>
+</ng-container>

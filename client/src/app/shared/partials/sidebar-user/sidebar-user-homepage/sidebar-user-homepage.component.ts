@@ -1,29 +1,33 @@
-import {Component, effect, OnInit, signal} from '@angular/core';
-import {CommonModule, NgFor, NgOptimizedImage} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {AppService} from '../../../../services/core/app/app.service';
-import {DashboardService} from '../../../../services/dashboard/dashboard.service';
-import {Router} from '@angular/router';
-import {HomeSearchComponent} from "../../../../pages/homepage/home-search/home-search.component";
-import {AlertCategorySummary} from '../../../model/alert-notification/alert.notification.model';
-import {AlertModel} from '../../../model/company-profile/node.model';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
-import {ApiService} from '../../../services/api.service';
-import {MessageNotificationService} from '../../../../services/message_notification/message-notification.service';
-import {ConfirmationPopupComponent} from "../../confirmation-popup/confirmation-popup.component";
-import {AlertScanLoadingComponent} from "./alert-scan-loading/alert-scan-loading.component";
-import {AlertService} from '../../../../services/alerts/alerts.service';
-import {AuthService} from '../../../../services/authetication/auth.service';
-import {NgbCarouselModule} from "@ng-bootstrap/ng-bootstrap";
-import {HomepageComponent} from "../../../../pages/homepage/homepage.component";
-import {HomeInsightComponent} from "../../../../pages/homepage/home-insight/home-insight.component";
-import {LicenseService} from '../../../../services/licenses/licenses.service';
-import {overlayAnimation} from '../../../animations/popup.animations';
-import {MessagePopupComponent} from "../../message-popup/message-popup.component";
+import { Component, effect, OnInit, signal } from '@angular/core';
+import { NgFor, CommonModule, NgOptimizedImage } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AppService } from '../../../../services/core/app/app.service';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { Router } from '@angular/router';
+import { HomeSearchComponent } from "../../../../pages/homepage/home-search/home-search.component";
+import { AlertCategorySummary } from '../../../model/alert-notification/alert.notification.model';
+import { AlertModel } from '../../../model/company-profile/node.model';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { ApiService } from '../../../services/api.service';
+import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
+import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
+import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
+import { AlertService } from '../../../../services/alerts/alerts.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { NgbCarouselModule } from "@ng-bootstrap/ng-bootstrap";
+import { HomepageComponent } from "../../../../pages/homepage/homepage.component";
+import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/home-insight.component";
+import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { overlayAnimation } from '../../../animations/popup.animations';
+import { MessagePopupComponent } from "../../message-popup/message-popup.component";
+import { HelperService } from '../../../services/helper.service';
+import { AlertExportComponentComponent } from "./alert-export-component/alert-export-component.component";
+import { NgxPrintModule } from 'ngx-print';
+
 
 @Component({
   selector: 'app-sidebar-user-homepage',
-  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent],
+  imports: [NgFor, CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, NgbCarouselModule, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, AlertExportComponentComponent, NgxPrintModule],
   templateUrl: './sidebar-user-homepage.component.html',
   animations: [overlayAnimation],
 })
@@ -36,7 +40,7 @@ export class SidebarUserHomepageComponent implements OnInit {
   isConfirmationOpen = signal(false);
   noIocPopup = signal(false);
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
-    private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
+    private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private helperService: HelperService) {
     effect(() => {
       if (!this.alertService.isAlertScanLoading()) {
         this.initializeData();
@@ -231,5 +235,14 @@ export class SidebarUserHomepageComponent implements OnInit {
         },
       });
     }
+  }
+  getLatestAlerts() {
+    this.apiService.get<any>('profile/alerts').subscribe({
+      next: response => {
+        this.appService.userSessionData().alerts = response
+        this.ngOnInit();
+        this.alertService.isAlertScanLoading.set(false)
+      }
+    })
   }
 }

@@ -7,11 +7,12 @@ import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../constants/shared-enums';
 import { AppService } from '../../../../services/core/app/app.service';
 import { Router } from '@angular/router';
-import {TooltipDirective} from '../../../directive/tooltip-directive.directive';
+import { TooltipDirective } from '../../../directive/tooltip-directive.directive';
+import { ConfirmationPopupComponent } from "../../confirmation-popup/confirmation-popup.component";
 
 @Component({
   selector: 'app-sidebar-user-ioc',
-  imports: [NgIf, NgFor, CommonModule, FormsModule, TooltipDirective],
+  imports: [NgIf, NgFor, CommonModule, FormsModule, TooltipDirective, ConfirmationPopupComponent],
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {
@@ -21,6 +22,7 @@ export class SidebarUserIocComponent implements OnInit {
   selectedCategoryId = '';
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
+  isConfirmationOpen: boolean = false;
   @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
   constructor(private router: Router, protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
   ngOnInit(): void {
@@ -106,5 +108,40 @@ export class SidebarUserIocComponent implements OnInit {
       this.categories[ioc.ioc_id] = ioc.values;
     });
     this.appService.set('entityfilterCategories', this.categories);
+  }
+
+  clearAllIocs(value: boolean): void {
+    if (value) {
+      if (this.onboardingData?.iocs) {
+        this.onboardingData.iocs.forEach(ioc => {
+          ioc.values = [];
+        });
+      }
+
+      this.setIocLocal();
+
+      const filteredOnboardingData: TenantModel = {
+        name: this.onboardingData?.name || '',
+        iocs: []
+      };
+
+      this.appService.tenantData.set({ ...filteredOnboardingData });
+      this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
+        next: () => {
+          this.appService.setOnboardingStatus(true);
+        },
+        error: (err) => {
+          console.error(err);
+          alert(err?.error?.detail || 'Clearing IOCs failed');
+        },
+      });
+      this.isConfirmationOpen = false;
+    }
+    else {
+      this.isConfirmationOpen = false;
+    }
+  }
+  openConfirmationPopup() {
+    this.isConfirmationOpen = true;
   }
 }
