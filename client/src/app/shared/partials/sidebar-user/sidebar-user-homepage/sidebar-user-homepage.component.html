@@ -1,5 +1,5 @@
 <div *ngIf="!isAdmin(); else showAdmin">
-    <div *ngIf="!licenseService.getLicenses().includes('free');else showFree">
+    <div *ngIf="!licenseService.getLicenses().includes('free') && !isAnalyst();else showFree">
         <div class="ioc-dashboard-content-wrapper">
             <div *ngIf="alertService.isAlertScanLoading()">
                 <app-alert-scan-loading></app-alert-scan-loading>
@@ -12,7 +12,7 @@
                     <div class="btn-group report-menu-option-container mr-0">
                         <button ngxPrint printSectionId="allAlertsReport" [useExistingCss]="true"
                             appTooltip="Print Alerts" class="p-0 report-menu-option">
-                            <img src="assets/images/shared/theme/print.svg" height="25"  alt="print"/>
+                            <img src="assets/images/shared/theme/print.svg" height="25" />
                         </button>
                         <div class="vr report-menu-divider"></div>
                         <button (click)="flushAll()" appTooltip="flush all" class="p-0 report-menu-option">
