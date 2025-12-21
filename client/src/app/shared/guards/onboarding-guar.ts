@@ -11,11 +11,7 @@ export class OnboardingGuard implements CanActivate {
     ) { }
 
     canActivate(_: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-        const session = this.appService.userSessionData();
-
-        if (!session) return true;
-
-        if (session.user?.hasOnboarding && state.url !== '/onboarding') {
+        if (this.appService.userSessionData() && this.appService.userSessionData().tenant.hasOnboarding && state.url !== '/onboarding') {
             this.router.navigate(['/onboarding'], {
                 queryParams: { redirect: state.url }
             }).then();

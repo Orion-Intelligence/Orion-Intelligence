@@ -6,7 +6,7 @@ from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, UserStatus, LicenseName
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role, LicenseName
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -90,7 +90,6 @@ class SignupManager:
             email=email,
             password=hashed_password,
             role=user_role.MEMBER,
-            status=UserStatus.PENDING,
             verification_token=_verification_token,
             verification_expiry=_verification_token_expire,
             licenses=[LicenseName.MAINTAINER],
@@ -132,9 +131,6 @@ class SignupManager:
             user = await auth_manager.get_instance().authenticate_user(mail, password)
             if not user:
                 raise HTTPException(status_code=401, detail="Invalid credentials")
-
-            if user.status != UserStatus.PENDING:
-                raise HTTPException(status_code=404, detail="User not found or not pending")
 
             redis_inst = redis_controller.getInstance()
             rate_key = f"resend_verification:{user.id}"

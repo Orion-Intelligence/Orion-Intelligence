@@ -93,7 +93,6 @@ class alert_job:
             low_risk = counts.get("low", 0)
 
             threat_categories = list(result.get("threats", {}).keys())
-            data_hash = f"{scan_type}_{ioc_value}"
 
             title = f"{scan_type.upper()} Scan: {ioc_value} (Grade: {grade})"
 
@@ -106,7 +105,6 @@ class alert_job:
 
             await self._alert_manager.upsert_alert(
                 tenantId=tenant_id,
-                data_hash=data_hash,
                 category=f"{scan_type} scanning",
                 ioc_type=ioc_type,
                 ioc_value=ioc_value,
@@ -133,7 +131,6 @@ class alert_job:
                     _url = result.get("m_url") or result.get("m_base_url") or "-"
                     _source = result.get("m_network", "-")
                     _content_types = result.get("m_content_type") or []
-                    _data_hash = f"{scan_type}_{ioc_value}_{result.get('m_base_url') or result.get('m_url')}"
 
                 elif scan_type == "playstore-scanning":
                     _title = result.get("m_app_name", "Playstore App Found")
@@ -145,7 +142,6 @@ class alert_job:
                     _url = result.get("m_app_url", "-")
                     _source = result.get("m_network", "-")
                     _content_types = result.get("m_content_type") or []
-                    _data_hash = f"{scan_type}_{result.get('m_package_id')}_{result.get('m_version')}" # Unique hash
                 else:
                     continue
 
@@ -155,7 +151,6 @@ class alert_job:
 
                 await self._alert_manager.upsert_alert(
                     tenantId=tenant_id,
-                    data_hash=_data_hash,
                     category=scan_type,
                     ioc_type=ioc_type,
                     ioc_value=ioc_value,
@@ -334,7 +329,6 @@ class alert_job:
 
                         if results:
                             for result in results:
-                                _data_hash = result.get("m_hash", "NO_HASH")
                                 _content_types=result.get("m_content_type") or []
                                 raw = result.get("raw") or ""
                                 m_title = result.get("m_title")
@@ -371,7 +365,6 @@ class alert_job:
 
                                 await self._alert_manager.upsert_alert(
                                     tenantId=str(tenant.id),
-                                    data_hash=_data_hash,
                                     category=category,
                                     ioc_type=ioc_type_name,
                                     ioc_value=ioc_value,

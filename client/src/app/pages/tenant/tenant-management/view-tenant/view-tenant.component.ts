@@ -57,7 +57,7 @@ export class ViewTenantComponent implements OnInit {
   getStatusLabel(status: TenantStatus): string {
     switch (status) {
       case TenantStatusValues.ONBOARDING:
-        return 'Onboarding';
+        return 'Disable';
       case TenantStatusValues.ACTIVE:
         return 'Active';
       case TenantStatusValues.DISABLE:

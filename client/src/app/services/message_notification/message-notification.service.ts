@@ -1,15 +1,18 @@
 import { Injectable, signal, computed } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
+type MessageType = 'success' | 'fail';
+
+@Injectable({ providedIn: 'root' })
 export class MessageNotificationService {
-
   private messageSignal = signal<string | null>(null);
-  message = computed(() => this.messageSignal());
+  private typeSignal = signal<MessageType>('fail');
 
-  show(message: string, duration: number = 3000) {
+  message = computed(() => this.messageSignal());
+  type = computed(() => this.typeSignal());
+
+  show(message: string, type: MessageType = 'fail', duration: number = 3000) {
     this.messageSignal.set(message);
+    this.typeSignal.set(type);
     setTimeout(() => this.messageSignal.set(null), duration);
   }
 }

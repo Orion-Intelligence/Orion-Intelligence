@@ -21,7 +21,6 @@ class user_role(str, Enum):
     ANALYST = "analyst"
 
 class UserStatus(str, Enum):
-    PENDING = "verification_pending"
     ACTIVE = "active"
     DISABLE = "disable"
 
@@ -146,12 +145,3 @@ class db_user_account(Model):
             name=self.username,
             issuer_name=issuer,
         )
-
-    @model_validator(mode="after")
-    def finalize(self):
-        if self.role != user_role.MEMBER:
-            pass
-        else:
-            if self.status is None:
-                raise HTTPException(status_code=400, detail="Status is required for profile users")
-        return self

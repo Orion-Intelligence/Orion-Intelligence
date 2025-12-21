@@ -31,9 +31,11 @@
                     <select class="add-tenant_select" [(ngModel)]="model.role" name="role">
                         <ng-container *ngIf="isAdmin; else nonAdminRoles">
                             <option [ngValue]="'analyst'">Analyst</option>
+                            <option [ngValue]="'member'">Member</option>
                         </ng-container>
                         <ng-template #nonAdminRoles>
-                            <option [ngValue]="'profile'">Profile</option>
+                            <option [ngValue]="'analyst'">Analyst</option>
+                            <option [ngValue]="'member'">Member</option>
                         </ng-template>
                     </select>
                 </div>
@@ -50,19 +52,23 @@
             <div class="add-tenant_label">Licenses</div>
 
             <div class="license-grid">
-                <ng-container *ngFor="let license of licenseList">
-                    <div class="license-card" *ngIf="getLicenseLabel(license) !== 'maintainer'"
-                        [class.license-selected]="model.licenses?.includes(license)"
-                        (click)="toggleTenantLicense(model, license)">
+              <ng-container *ngFor="let license of licenseList">
+                <div
+                  class="license-card"
+                  *ngIf="getLicenseLabel(license) !== 'maintainer'"
+                  [class.license-selected]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')"
+                  (click)="toggleTenantLicense(model, license)">
 
-                        <input type="checkbox" class="license-checkbox" [checked]="model.licenses?.includes(license)" />
+                  <input
+                    type="checkbox"
+                    class="license-checkbox"
+                    [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
 
-                        <span class="license-label">
-                            {{ getLicenseLabel(license) }}
-                        </span>
-
-                    </div>
-                </ng-container>
+                  <span class="license-label">
+                    {{ getLicenseLabel(license) }}
+                  </span>
+                </div>
+              </ng-container>
             </div>
 
             <hr class="tenant-divider">

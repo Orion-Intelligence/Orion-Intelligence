@@ -45,11 +45,11 @@
         </div>
     </div>
 
-    <div class="category_report_summary-header">
+    <div class="category_report_summary-header" *ngIf="filteredAlerts.length>0">
         <span class="category_report_summary-title">Summary</span>
     </div>
 
-    <div class="category_report_summary-row">
+    <div class="category_report_summary-row" *ngIf="filteredAlerts.length>0">
         <div class="category_report_summary-card">
             <div class="user-homepage_alerts-card-content">
                 <span class="category_report_summary-card-heading">Total IOC</span>
@@ -86,6 +86,10 @@
             <span class="category_report_summary-card-value">{{countUniqueSources(filteredAlerts)}}</span>
         </div>
     </div>
+
+    <ng-container *ngIf="filteredAlerts.length==0">
+      <app-empty-result class="p-0 m-0"></app-empty-result>
+    </ng-container>
 
     <div class="category_report_alerts">
         <div class="category_report_alert-card" *ngFor="let item of filteredAlerts">

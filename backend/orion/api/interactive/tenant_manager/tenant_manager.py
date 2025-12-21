@@ -44,7 +44,6 @@ class TenantManager:
     return await KeyManager.get_instance().get_or_create_dek(tenant_id)
 
   async def create_tenant(self, data: db_tenant_model):
-    await self._engine.save(data)
     try:
       dek = await KeyManager.get_instance().create_dek(str(data.id))
       enc = Fernet(dek)
@@ -62,7 +61,7 @@ class TenantManager:
 
       data.status = TenantStatus.ONBOARDING
       await self._engine.save(data)
-    except Exception:
+    except Exception as _:
       await self._engine.remove(db_user_account, db_user_account.tenant_uuid == str(data.id))
       await self._engine.remove(db_keys, db_keys.id == str(data.id))
       await self._engine.delete(data)
@@ -101,6 +100,9 @@ class TenantManager:
       await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "failed to update tenant")
       raise HTTPException(status_code=401, detail="Onboarding record not found for this user.")
 
+    if tenant.is_default:
+      raise HTTPException(status_code=401, detail="Default account cant be updated")
+
     dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
     enc = Fernet(dek)
 
@@ -113,9 +115,9 @@ class TenantManager:
     if data.verified is not None:
       tenant.verified = data.verified
 
-    if data.user_quota:
-      if data.user_quota < 1:
-        data.user_quota = 1
+    if data.user_quota is not None:
+      if data.user_quota < 0:
+        data.user_quota = 0
       tenant.user_quota = data.user_quota
 
     if data.status is not None:
@@ -148,8 +150,8 @@ class TenantManager:
         u.licenses = ["free"]
         await self._engine.save(u)
 
-    active_count = await self._engine.count(
-      db_user_account, (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
+    active_count = await self._engine.count(db_user_account, (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
+
     if tenant.user_quota and active_count > tenant.user_quota:
       excess = active_count - tenant.user_quota
       extra_users = await self._engine.find(
@@ -159,14 +161,13 @@ class TenantManager:
         limit=excess)
       for u in extra_users:
         u.status = UserStatus.DISABLE.value
-        u.licenses = ["free"]
         await self._engine.save(u)
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id),"tenant updated successfully")
 
     return {"message": "Tenant updated", "user": current_user.username, "company": tenant.name}
 
   async def get_all_tenant(self) -> List[db_tenant_model]:
-    tenants = await self._engine.find(db_tenant_model)
+    tenants = await self._engine.find(db_tenant_model, db_tenant_model.is_default == False)
     result = []
     for tenant in tenants:
       dek = await KeyManager.get_instance().get_profile_dek(ObjectId(tenant.id))
@@ -200,6 +201,7 @@ class TenantManager:
       if not re.match(username_pattern, username):
         raise HTTPException(status_code=400, detail="Username already exist")
 
+
       email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
       if not re.match(email_pattern, email):
         raise HTTPException(status_code=400, detail="Invalid email format")
@@ -228,6 +230,11 @@ class TenantManager:
       if not tenant:
         raise HTTPException(status_code=400, detail="Tenant not found")
 
+      users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)
+
+      if tenant.is_default == False and tenant.user_quota is not None and (users_count + 1) > tenant.user_quota:
+        raise HTTPException(status_code=400, detail="User allocated quota exceeded")
+
       dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
       enc = Fernet(dek)
 
@@ -239,7 +246,7 @@ class TenantManager:
         raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
 
       users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)
-      if tenant.user_quota and users_count >= tenant.user_quota:
+      if tenant.is_default == False and tenant.user_quota and users_count >= tenant.user_quota:
         raise HTTPException(status_code=400, detail="User quota exceeded")
 
       user = db_user_account(

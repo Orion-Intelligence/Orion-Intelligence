@@ -12,6 +12,7 @@
               <button
                 type="button"
                 class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
+                [class.expand-btn]="!appService.userSessionData().tenant.quotaExceeded"
                 [disabled]="appService.userSessionData().tenant.quotaExceeded"
                 [class.opacity-50]="appService.userSessionData().tenant.quotaExceeded"
                 [class.pe-none]="appService.userSessionData().tenant.quotaExceeded"
@@ -56,7 +57,7 @@
 
                     <td>
                         <span class="label-text-dropdown no-chevron">
-                          {{ user.status === 'verification_pending' ? 'verification' : user.status }}
+                          {{ user.status }}
                         </span>
                     </td>
 
@@ -165,13 +166,7 @@
                               </li>
                               <li class="dropdown-divider m-0 mx-3"></li>
 
-                              <li class="p-0">
-                                <a class="dropdown-item py-0 align-items-center"
-                                   (click)="user.status = 'verification_pending'">
-                                  Verification
-                                </a>
-                              </li>
-                            </ul>
+                           </ul>
 
                             <hr class="tenant-divider">
                           </div>
@@ -179,14 +174,21 @@
                           <div class="tenant-block">
                             <div class="tenant-title">Licenses</div>
                             <div class="license-grid">
-                              <ng-container *ngFor="let license of licenseList">
-                                <div *ngIf="license !== 'maintainer'" class="license-card license-btn"
-                                     [class.license-selected]="user.licenses?.includes(license)"
-                                     [class.license-disabled]="isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData().user.preferences?.['licenses']?.includes(license))"
-                                     (click)="!(isLicenseDisabled(user, license) || (user.role === 'profile' && !this.appService.userSessionData().user.preferences?.['licenses']?.includes(license))) && toggleUserLicense(user, license)">
-                                  <span class="license-label">{{ getLicenseLabel(license) }}</span>
-                                </div>
-                              </ng-container>
+                            <ng-container *ngFor="let license of licenseList">
+                              <div *ngIf="
+                                    license !== 'maintainer' &&
+                                    (
+                                      this.appService.userSessionData().user.role === 'admin' ||
+                                      (this.appService.userSessionData().tenant.licenses || []).indexOf(license) > -1
+                                    )
+                                  "
+                                   class="license-card license-btn"
+                                   [class.license-selected]="(user.licenses || []).indexOf(license) > -1"
+                                   [class.license-disabled]="isLicenseDisabled(user, license)"
+                                   (click)="!isLicenseDisabled(user, license) && toggleUserLicense(user, license)">
+                                <span class="license-label">{{ getLicenseLabel(license) }}</span>
+                              </div>
+                            </ng-container>
                             </div>
                             <hr class="tenant-divider">
                           </div>

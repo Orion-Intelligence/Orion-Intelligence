@@ -11,7 +11,6 @@ class UserDataModel(BaseModel):
     username: str
     role: user_role
     status: UserStatus
-    hasOnboarding: bool
     subscription: bool
     verificationDate: Optional[datetime]
     license: List[LicenseName]
@@ -26,6 +25,7 @@ class TenantDataModel(BaseModel):
     city: str
     postalCode: str
     taxId: str
+    hasOnboarding: bool
     userId: str
     licenses: list[str]
     assignedQuota: str

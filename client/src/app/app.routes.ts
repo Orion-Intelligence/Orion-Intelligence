@@ -161,8 +161,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     resolve: {
       config: ConfigResolver,
-      session: DashboardResolver,
-      profile: NodeResolver
+      session: DashboardResolver
     },
     data: { animation: 'DashboardPage' },
     children: [

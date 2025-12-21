@@ -11,10 +11,10 @@ import { AddTenantComponent } from "../add-tenant/add-tenant.component";
 import {
   ConfirmationPopupComponent
 } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
-import { BehaviorSubject } from 'rxjs';
-import { AuthService } from '../../../../services/authetication/auth.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import {TooltipDirective} from '../../../../shared/directive/tooltip-directive.directive';
+import {finalize, switchMap, tap} from 'rxjs';
+import {NodeResolver} from '../../../../shared/resolvers/session-data-resolver.service';
 
 @Component({
   selector: 'app-view-profile',
@@ -23,6 +23,7 @@ import {TooltipDirective} from '../../../../shared/directive/tooltip-directive.d
   templateUrl: './manage-profile.component.html'
 })
 export class ManageProfileComponent implements OnInit {
+
   users: User[] = [];
   licenseList = Object.values(LicenseName);
   isLoading = true;
@@ -32,7 +33,7 @@ export class ManageProfileComponent implements OnInit {
   isDeleteConfirmationOpen = signal<boolean>(false);
   userToDelete: User | null = null;
 
-  constructor(public apiService: ApiService, protected appService: AppService) {
+  constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver) {
   }
 
   ngOnInit(): void {
@@ -68,14 +69,17 @@ export class ManageProfileComponent implements OnInit {
     if (!user.licenses || user.licenses.length === 0) {
       user.licenses = [LicenseName.FREE];
     }
+
     this.isLoading = true;
-    this.apiService.post('update/user', user).subscribe({
-      next: () => {
-        this.isLoading = false;
+
+    this.apiService.post('update/user', user).pipe(
+      switchMap(() => this.nodeResolver.resolve()),
+      finalize(() => (this.isLoading = false))
+    ).subscribe({
+      next: (ok) => {
       },
-      error: (err) => {
-        this.isLoading = false;
-      },
+      error: () => {
+      }
     });
   }
 
@@ -154,28 +158,20 @@ export class ManageProfileComponent implements OnInit {
       this.userToDelete = null;
       return;
     }
+
     this.isLoading = true;
-    this.apiService.post('delete/user', this.userToDelete).subscribe({
-      next: () => {
-        const headers = new HttpHeaders({});
-        this.apiService.post<User[]>('users', headers).subscribe({
-          next: (data) => {
-            this.users = data;
-            this.isLoading = false;
-            this.userToDelete = null;
-          },
-          error: () => {
-            this.isLoading = false;
-            this.userToDelete = null;
-          }
-        });
-      },
-      error: () => {
+
+    this.apiService.post('delete/user', this.userToDelete).pipe(
+      switchMap(() => this.apiService.post<User[]>('users', new HttpHeaders({}))),
+      tap(data => this.users = data),
+      switchMap(() => this.nodeResolver.resolve()),
+      finalize(() => {
         this.isLoading = false;
         this.userToDelete = null;
-      },
-    });
+      })
+    ).subscribe();
   }
+
 
   getUserLicensesLabel(user: any): string {
     if (!user.licenses || user.licenses.length === 0) return 'None';

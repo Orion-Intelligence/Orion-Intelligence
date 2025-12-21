@@ -80,8 +80,8 @@ class auth_manager:
         datetime.now(timezone.utc) - acct_at).days >= 30):
       raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue")
 
-    if role_name == "member" and user.status == UserStatus.PENDING:
-      raise HTTPException(status_code=401, detail="verification pending")
+    if role_name == "member" and user.status != UserStatus.ACTIVE:
+      raise HTTPException(status_code=401, detail="user currently disabled")
 
     if user.status == UserStatus.DISABLE:
       raise HTTPException(status_code=401, detail="Account Blocked")

@@ -20,7 +20,6 @@ import { HomeInsightComponent } from "../../../../pages/homepage/home-insight/ho
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { overlayAnimation } from '../../../animations/popup.animations';
 import { MessagePopupComponent } from "../../message-popup/message-popup.component";
-import { HelperService } from '../../../services/helper.service';
 import { AlertExportComponentComponent } from "./alert-export-component/alert-export-component.component";
 import { NgxPrintModule } from 'ngx-print';
 
@@ -40,7 +39,7 @@ export class SidebarUserHomepageComponent implements OnInit {
   isConfirmationOpen = signal(false);
   noIocPopup = signal(false);
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService,
-    private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private helperService: HelperService) {
+    private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService) {
     effect(() => {
       if (!this.alertService.isAlertScanLoading()) {
         this.initializeData();
@@ -201,12 +200,12 @@ export class SidebarUserHomepageComponent implements OnInit {
     }, 0);
   }
   editIocs() {
-    this.router.navigate(['/dashboard/profile/ioc']);
+    this.router.navigate(['/dashboard/profile/ioc']).then();
   }
   openAlerts(type: string) {
     const cat = this.alertCategories.find(c => c.categoryName === type);
-    if (!cat || cat.iocCount === 0) return;
-    this.router.navigate([`/dashboard/profile/alerts/${type}`]);
+    if (!cat) return;
+    this.router.navigate([`/dashboard/profile/alerts/${type}`]).then();
   }
   scanIOCs() {
     const iocs = this.appService.tenantData().iocs;
@@ -238,14 +237,5 @@ export class SidebarUserHomepageComponent implements OnInit {
         },
       });
     }
-  }
-  getLatestAlerts() {
-    this.apiService.get<any>('profile/alerts').subscribe({
-      next: response => {
-        this.appService.userSessionData().alerts = response
-        this.ngOnInit();
-        this.alertService.isAlertScanLoading.set(false)
-      }
-    })
   }
 }

@@ -1,7 +1,7 @@
 <div *ngIf="this.username()" class="profile">
   <ng-container *ngIf="licenseService.isMaintainer()">
     <a *ngIf="isMember()" (click)="openNotifications()" class="profile-dropdown-toggle notification-icon">
-      <div class="profile_category profile_logout_icon">
+      <div class="profile_category profile_logout_icon" *ngIf="!this.appService.userSessionData().tenant.hasOnboarding">
         <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="24">
         <span class="notification-badge" [ngClass]="getUnseenAlertCount() === 0 ? 'green-badge' : 'red-badge'">
           {{ getUnseenAlertCount() }}
@@ -27,12 +27,12 @@
       </div>
     </li>
 
-    <li *ngIf="licenseService.isMaintainer() || isAdmin()" class="profile-item" (click)="auditlog()">
+    <li *ngIf="!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() || isAdmin())" class="profile-item" (click)="auditlog()">
       <img src="assets/images/shared/profile.svg" alt="Auditlog" />
       <span>Auditlog</span>
     </li>
 
-    <li *ngIf="!isAdmin() &&licenseService.isMaintainer()" class="profile-item" (click)="manageIocs()">
+    <li *ngIf="!isAdmin() &&licenseService.isMaintainer() && !this.appService.userSessionData().tenant.hasOnboarding" class="profile-item" (click)="manageIocs()">
       <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" />
       <span>Manage IOC’s</span>
     </li>
@@ -42,14 +42,14 @@
       <span>Change Password</span>
     </li>
 
-    <li *ngIf="licenseService.isMaintainer() ||isAdmin()" class="profile-item" (click)="openAccountSettings()">
+    <li *ngIf="!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() ||isAdmin())" class="profile-item" (click)="openAccountSettings()">
       <img src="assets/images/shared/settings.svg" alt="Account settings" />
       <span>Account settings</span>
     </li>
     <li><a *ngIf="isAdmin()" class="profile-item" href="admin/" target="_blank"> <img alt="Settings" height="15"
           ngSrc="assets/images/shared/settings.svg" priority width="15"> <span>Settings</span></a>
     </li>
-    <li *ngIf="appService.userSessionData().user.hasOnboarding" (click)="toggleThemeByClick()">
+    <li *ngIf="appService.userSessionData().tenant.hasOnboarding" (click)="toggleThemeByClick()">
       <div class=" profile_theme-toggle profile-item">
         <img alt="Settings" (click)="toggleThemeByClick()" src="assets/images/shared/theme.svg">
         <span> Theme</span>

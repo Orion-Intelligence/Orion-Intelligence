@@ -64,7 +64,7 @@ export class AddTenantComponent implements OnInit {
       this.errorText = 'Password is required';
       return;
     }
-    const endpoint = this.isAdmin ? 'admin/create/user' : 'tenant/create/user';
+    const endpoint = this.isAdmin ? 'tenant/create/user' : 'tenant/create/user';
     this.apiService.post(endpoint, this.model).subscribe({
       next: () => {
         this.accountAdded.emit();

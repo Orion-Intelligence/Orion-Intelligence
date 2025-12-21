@@ -9,6 +9,7 @@ import { license_rules, search_filter_labels } from '../../../shared/constants/s
 import { userSessionData } from '../../../shared/model/company-profile/node.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,6 @@ export class AppService {
       username: '',
       role: '',
       status: '',
-      hasOnboarding: false,
       subscription: false,
       verificationDate: '',
       license: []
@@ -36,6 +36,7 @@ export class AppService {
       id: '',
       name: '',
       phone: '',
+      hasOnboarding: false,
       country: '',
       city: '',
       postalCode: '',
@@ -63,6 +64,41 @@ export class AppService {
 
     this.loadStaticConfig();
     this.appStorageService.setupWatcher(this.configData);
+  }
+
+  async loadSession(): Promise<void> {
+    try {
+      const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
+      if (session) this.userSessionData.set(session);
+    } catch {
+      this.userSessionData.set({
+        user: {
+          email: '',
+          twofa_enabled: false,
+          username: '',
+          role: '',
+          status: '',
+          subscription: false,
+          verificationDate: '',
+          license: []
+        },
+        tenant: {
+          id: '',
+          name: '',
+          phone: '',
+          hasOnboarding: false,
+          country: '',
+          city: '',
+          postalCode: '',
+          taxId: '',
+          userId: '',
+          licenses: [],
+          assignedQuota: '0',
+          quotaExceeded: false
+        },
+        alerts: []
+      });
+    }
   }
 
   loadConfig(): void {
@@ -143,7 +179,6 @@ export class AppService {
         username: '',
         role: '',
         status: '',
-        hasOnboarding: false,
         subscription: false,
         verificationDate: '',
         license: []
@@ -152,6 +187,7 @@ export class AppService {
         id: '',
         name: '',
         phone: '',
+        hasOnboarding: false,
         country: '',
         city: '',
         postalCode: '',
@@ -175,8 +211,8 @@ export class AppService {
       localStorage.setItem('onboarding', String(value));
       return {
         ...state,
-        user: {
-          ...state.user,
+        tenant: {
+          ...state.tenant,
           hasOnboarding: value
         }
       };

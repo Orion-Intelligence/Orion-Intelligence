@@ -192,28 +192,12 @@ async def delete_user(user: user_param_model, current_user=Depends(get_current_u
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(role_required([user_role.MEMBER])),
+        Depends(role_required([user_role.MEMBER, user_role.ADMIN])),
         Depends(license_required("maintainer")),
     ],
 )
 async def create_tenant_user(data: user_model, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().create_tenant_user(data, current_user)
-
-
-@tenant_routes.post(
-    "/api/admin/create/user",
-    summary="Create admin demo user",
-    description="Create a new demo user with admin privileges.",
-    tags=["Users", "Admin"],
-    operation_id="createAdminDemoUser",
-    response_description="Created demo user information.",
-    status_code=200,
-    include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))],
-)
-async def create_admin_demo_user(data: user_model, current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().create_user(data, current_user)
-
 
 @tenant_routes.post(
     "/api/audit/logs",
@@ -364,7 +348,7 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
         Depends(license_required("maintainer")),
     ],
 )
-async def calcel_user_ioc_alerts(current_user=Depends(get_current_user)):
+async def cancel_user_ioc_alerts(current_user=Depends(get_current_user)):
     return await AlertManager.getInstance().set_scan_running(current_user.tenant_uuid,False)
 
 

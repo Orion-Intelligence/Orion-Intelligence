@@ -10,7 +10,6 @@ export interface UserDataModel {
     username: string;
     role: string;
     status: string;
-    hasOnboarding: boolean;
     subscription: boolean;
     verificationDate: string;
     license: string[];
@@ -27,6 +26,7 @@ export interface TenantDataModel {
     country: string;
     city: string;
     postalCode: string;
+    hasOnboarding: boolean;
     taxId: string;
     userId: string;
     licenses: string[];

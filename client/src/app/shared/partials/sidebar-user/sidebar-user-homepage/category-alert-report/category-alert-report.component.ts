@@ -20,10 +20,11 @@ import { HelperService } from '../../../../services/helper.service';
 import { TooltipDirective } from '../../../../directive/tooltip-directive.directive';
 import { NgxPrintModule } from 'ngx-print';
 import { AlertExportComponentComponent } from "../alert-export-component/alert-export-component.component";
+import {EmptyResultComponent} from '../../../empty-result/empty-result.component';
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, NgxPrintModule, AlertExportComponentComponent],
+  imports: [NgFor, NgIf, CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, NgxPrintModule, AlertExportComponentComponent, EmptyResultComponent],
   templateUrl: './category-alert-report.component.html'
 })
 export class CategoryAlertReportComponent implements OnInit {
@@ -166,7 +167,7 @@ export class CategoryAlertReportComponent implements OnInit {
     if (confirmed) {
       this.apiService.post('alert/delete', id).subscribe({
         next: () => {
-          this.messageNotificationService.show("Alert deleted successfully!")
+          this.messageNotificationService.show('Alert deleted successfully!', 'success');
           this.getLatestAlerts();
         },
         error: (err) => {

@@ -36,7 +36,7 @@ export interface User {
   username: string;
   email: string;
   role: string;
-  status: 'verification_pending' | 'onboarding' | 'active' | 'disable';
+  status: 'active' | 'disable';
   subscription?: boolean;
   verificationDate: string;
   licenses?: string[] | null;
@@ -55,7 +55,7 @@ export interface TenantTeamModel {
   email: string;
   password: string;
   role: 'member' | 'analyst';
-  status: 'verification_pending' | 'active' | 'disable';
+  status: 'active' | 'disable';
   subscription: boolean;
   licenses?: string[] | null;
   quotaExceeded?: boolean;

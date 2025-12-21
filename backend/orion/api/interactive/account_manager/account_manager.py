@@ -164,6 +164,10 @@ class AccountManager:
     if request.status.value == "disable":
       user.status = UserStatus.DISABLE.value
     else:
+      tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+      active_count = await self._engine.count(db_user_account, (db_user_account.tenant_uuid == str(user.tenant_uuid)) & (db_user_account.status == UserStatus.ACTIVE.value))
+      if tenant and (not tenant.is_default) and tenant.user_quota is not None and active_count >= tenant.user_quota:
+        raise HTTPException(status_code=400, detail="User quota exceeded")
       user.status = UserStatus.ACTIVE.value
 
     user.licenses = request.licenses
@@ -228,13 +232,11 @@ class AccountManager:
     dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
     enc = Fernet(dek)
 
-    assigned_quota = await self._engine.count(db_user_account, db_user_account.tenant_uuid == str(user.tenant_uuid))
+    assigned_quota = tenant.user_quota
+    total_user = await self._engine.count(db_user_account, (db_user_account.tenant_uuid == str(user.tenant_uuid)))
 
     raw_alerts = alerts.alerts if alerts and alerts.alerts else []
     alerts_list = AlertManager.getInstance().filter_alerts_by_license(raw_alerts, user)
-
-    onboarding = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
-    hasOnboarding = bool(onboarding and onboarding.status == TenantStatus.ONBOARDING)
 
     tenant_image_file = self.TENANT_DIR / f"{str(tenant.id)}.png"
     tenant_image_path = "/api/s/static/tenant/" + (str(tenant.id) if tenant_image_file.is_file() else "default")
@@ -250,13 +252,13 @@ class AccountManager:
           "username": user.username,
           "role": user.role,
           "status": user.status,
-          "hasOnboarding": hasOnboarding,
           "subscription": user.subscription,
           "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
           "license": [license.value for license in user.licenses],
           "image": user_image_path,
         },
         "tenant": {
+          "hasOnboarding": tenant.status == TenantStatus.ONBOARDING,
           "id": str(tenant.id),
           "name": self.safe_decrypt(enc, tenant.name),
           "phone": self.safe_decrypt(enc, tenant.phone),
@@ -267,7 +269,7 @@ class AccountManager:
           "userId": "",
           "licenses": [self.safe_decrypt(enc, l) for l in (tenant.licenses or [])],
           "assignedQuota": str(assigned_quota),
-          "quotaExceeded": bool(not tenant.is_default and tenant.user_quota and assigned_quota >= tenant.user_quota),
+          "quotaExceeded": bool(not tenant.is_default and tenant.user_quota is not None and assigned_quota < total_user),
           "image": tenant_image_path,
         },
         "alerts": alerts_list,

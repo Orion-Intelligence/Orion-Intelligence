@@ -62,8 +62,15 @@
                                 Add IOCs description here...
                             </p>
 
-                            <input type="text" class="onboarding-step2__search-input" placeholder="Search IOCs..."
-                                [(ngModel)]="iocSearchText" />
+                            <div class="onboarding-step2__description-row">
+                                <input type="text" class="onboarding-step2__search-input profile-ioc-search-input"
+                                    placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+                                <div class="btn-group report-menu-option-container m-0" (click)="openConfirmationPopup()">
+                                    <button appTooltip="clear all" class="p-0 report-menu-option">
+                                        <img alt="scan" src="assets/images/shared/bin.svg" />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="onboarding-step2__category-scroll-container">
@@ -101,8 +108,12 @@
                         <div class="onboarding-step2__divider1"></div>
 
                         <label class="onboarding-step2__label">Enter IOCs</label>
-                        <input type="text" class="onboarding-step2__input" placeholder="Type"
-                            (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+                        <div class="onboarding-step2__input-wrapper">
+                            <input type="text" class="onboarding-step2__input" placeholder="Type"
+                                (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+                            <button type="button" class="onboarding-step2__add-btn"
+                                (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
+                        </div>
 
                         <div class="onboarding-step2__divider2"></div>
 
@@ -197,3 +208,7 @@
         </div>
     </div>
 </div>
+<ng-container *ngIf="isConfirmationOpen">
+    <app-confirmation-popup [message]="'Are you sure you want to clear all of your iocs?'"
+        (confirmed)="clearAllIocs($event)"></app-confirmation-popup>
+</ng-container>

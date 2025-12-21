@@ -44,3 +44,9 @@
         transform: translateY(-10px);
     }
 }
+
+.notification-card.success {
+  background: #1b5e20;
+  border: 1px solid #ccffcc55;
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.4);
+}
