@@ -25,7 +25,7 @@ information gathering, Orion provides a unified ecosystem that enhances the work
 actionable insights.<br>
 <br>
 
-## 1. Repository Quality and Build Status
+## Repository Quality and Build Status
 
 | Repository                                                                 | Codacy                                                                                                                                                                                                                         | CodeQL                                                                                                                                                                             | MDN HTTP Observatory                                                                                                                                               | Security Headers                                                                                                                                                                | SSLLabs                                                                                                                                                                         |
 |----------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -35,7 +35,7 @@ actionable insights.<br>
 | [Orion Micros](https://github.com/Orion-Intelligence/Orion-Micros)         | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/5737f50b6feb4069b95e208bde905fcc)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Micros/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)       | -                                                                                                                                                                                    | -                                                                                                                                                                  | -                                                                                                                                                                               | -                                                                                                                                                                               |
 | [Orion Browser](https://github.com/Orion-Intelligence/Orion-Browser)       | [![Codacy Badge](https://app.codacy.com/project/badge/Grade/37df35b2d275406e9fe466818bc7d779)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Browser/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)     | ![CodeQL](https://github.com/Orion-Intelligence/Orion-Browser/actions/workflows/github-code-scanning/codeql/badge.svg)       | -                                                                                                                                                                  | -                                                                                                                                                                               | -                                                                                                                                                                               |
 
-## 2. Technology Stack
+## Technology Stack
 
 The Orion platform is built using various technologies to provide optimal search capabilities and data handling. Below
 is the list of libraries and frameworks used:
@@ -50,7 +50,7 @@ is the list of libraries and frameworks used:
 ![java](https://badgen.net/badge/browser/java/cyan)
 ![kotlin](https://badgen.net/badge/browser/kotlin/yellow)
 
-## 3. Associated Repositories
+## Associated Repositories
 
 | Repository                                                               | Description                                                                    | Stats                                                                                                                                                                           |
 |--------------------------------------------------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -59,7 +59,7 @@ is the list of libraries and frameworks used:
 | [Orion Collector](https://github.com/Orion-Intelligence/Orion-Collector) | Simplifies the task of creating custom crawling scripts for multiple websites. | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Collector?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Collector?style=social)     |
 | [Orion Micros](https://github.com/Orion-Intelligence/Orion-Micros)       | Lightweight modular microservices supporting Orion components.                 | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Micros?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Micros?style=social)           |
 | [Orion Browser](https://github.com/Orion-Intelligence/Orion-Browser)     | A harvester-based browser used to scrape data as you browse.                   | ![Stars](https://img.shields.io/github/stars/Orion-Intelligence/Orion-Browser?style=social) ![Forks](https://img.shields.io/github/forks/Orion-Intelligence/Orion-Browser?style=social)         |
-## 4. Data Extraction Techniques
+## Data Extraction Techniques
 
 This is a comprehensive flow diagram illustrating the functioning of the multithreaded crawler. It outlines the entire
 process, from initializing threads and managing task distribution to efficiently retrieving and processing data from
@@ -69,7 +69,7 @@ operational flow
 
 ![image(1)](https://github.com/user-attachments/assets/696cf009-a0f3-4995-91fe-58e53b128825)
 
-## 5. Deep Data Linting Roadmap
+## Deep Data Linting Roadmap
 
 This document outlines the proposed solution and future roadmap for deep data linting, focusing on integrating insights
 from multiple sources into a unified platform. The solution emphasizes advanced data validation, cross-source
@@ -79,7 +79,7 @@ data insight and linting
 
 ![linting(2)](https://github.com/user-attachments/assets/ce1885dc-e701-45f6-89ab-9f412b057373)
 
-## 6. Browser Support
+## Browser Support
 
 Orion Browser is an Android application designed to provide a secure, private browsing experience by leveraging onion
 routing technology. This browser empowers users to access hidden web content anonymously, unblock restricted sites, and
@@ -87,7 +87,7 @@ browse freely while safeguarding their online identity.
 
 ![JPJ pdf](https://github.com/user-attachments/assets/399fd130-988d-4e0d-acef-2f60d6220a81)
 
-## 🌟Contribution
+## Contribution
 
 We welcome contributions to improve Orion Search. If you'd like to contribute, please fork the repository and submit a
 pull request.
