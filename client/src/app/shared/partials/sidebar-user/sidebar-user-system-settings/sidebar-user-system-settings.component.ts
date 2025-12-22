@@ -6,10 +6,12 @@ import { UserImagePickerComponent } from "../sidebar-user-settings/user-image-pi
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ConfigSettings } from '../../../model/app/config';
+import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
   imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
+  animations: [fadeInDashboardItem],
   templateUrl: './sidebar-user-system-settings.component.html',
   styleUrls: ['./sidebar-user-system-settings.component.css']
 })
@@ -18,7 +20,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   systemData = {
     ai_endpoint: '',
-    telegram_allowed: false,
     language_allowed: '',
     version: '',
     api_allowed: '0',
@@ -31,7 +32,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     api_allowed: '0',
     app_name: '0',
     ai_endpoint: '',
-    telegram_allowed: false
   };
 
   languageOptions = [
@@ -60,7 +60,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.api_allowed = settings.api_allowed;
     this.form.app_name = settings.app_name;
     this.form.ai_endpoint = settings.ai_endpoint;
-    this.form.telegram_allowed = settings.telegram_allowed;
   }
 
   toggleEdit() {
@@ -74,7 +73,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.api_allowed = this.systemData.api_allowed;
     this.form.app_name = this.systemData.app_name;
     this.form.ai_endpoint = this.systemData.ai_endpoint;
-    this.form.telegram_allowed = this.systemData.telegram_allowed;
     this.isEditing = false;
   }
 
@@ -101,7 +99,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           if (s) {
             this.systemData = {
               ai_endpoint: s.ai_endpoint,
-              telegram_allowed: s.telegram_allowed,
               language_allowed: s.language_allowed,
               version: s.version,
               api_allowed: s.api_allowed,

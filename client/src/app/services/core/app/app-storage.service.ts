@@ -1,5 +1,5 @@
-import {effect, Injectable, WritableSignal} from '@angular/core';
-import {AppSettingsModel, ConfigSettings, LocalSettingsModel} from '../../../shared/model/app/config';
+import { effect, Injectable, WritableSignal } from '@angular/core';
+import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +41,6 @@ export class AppStorageService {
   getStaticConfig(baseAppSettings: AppSettingsModel): ConfigSettings {
     const localSettings = this.getLocalSettings();
     const app: Partial<AppSettingsModel> = {
-      telegram_allowed: baseAppSettings.telegram_allowed,
       version: baseAppSettings.version,
       language_allowed: baseAppSettings.language_allowed,
       logo_url: baseAppSettings.logo_url

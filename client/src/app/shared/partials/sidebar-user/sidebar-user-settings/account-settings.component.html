@@ -1,17 +1,17 @@
-<div class="user-settings_section">
+<div class="user-settings_section" @fadeInDashboardItem>
   <div class="user-settings_section-header" (click)="toggleSection('profile')">
     <span class="user-settings_section-title">
       {{ isAdmin() ? 'Admin Profile' : 'User Profile' }}
     </span>
     <img src="assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="user-settings_arrow-icon"
-         [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt=""/>
+      [class.user-settings_arrow-icon--rotated]="isAccountSectionOpen" alt="" />
   </div>
 
   <span class="user-settings_section-description">
     {{
-      isAdmin()
-        ? 'Manage profile information.'
-        : 'Manage and edit your company details, including phone, address, and profile information.'
+    isAdmin()
+    ? 'Manage profile information.'
+    : 'Manage and edit your company details, including phone, address, and profile information.'
     }}
   </span>
 
@@ -20,10 +20,8 @@
       <div class="user-settings_info">
         <div class="user-avatar">
           <div class="avatar-wrapper">
-            <app-user-image-picker
-              [imageUrl]="userSessionData.user.image || ''"
-              (onImageSelected)="updateUserResource($event)"
-              (onClear)="deleteUserResource()">
+            <app-user-image-picker [imageUrl]="userSessionData.user.image || ''"
+              (onImageSelected)="updateUserResource($event)" (onClear)="deleteUserResource()">
             </app-user-image-picker>
           </div>
         </div>
@@ -45,7 +43,7 @@
           <ng-template #companyProfileBlock>
             <div class="user-settings_company-name">
               <input type="text" [(ngModel)]="userSessionData.user.username" class="user-settings_input" disabled
-                     placeholder="Enter company name"/>
+                placeholder="Enter company name" />
             </div>
 
             <div class="user-settings_company-location">
@@ -58,11 +56,11 @@
   </div>
 </div>
 
-<div class="user-settings_section">
+<div class="user-settings_section" @fadeInDashboardItem>
   <div class="user-settings_section-header" (click)="toggleSection('twoFA')">
     <span class="user-settings_section-title">2 Factor Authentication</span>
     <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-         class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt=""/>
+      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="is2FAOpen" alt="" />
   </div>
 
   <span class="user-settings_section-description">
@@ -75,18 +73,18 @@
         {{ userSessionData.user.twofa_enabled ? 'Enabled' : 'Disabled' }}
       </div>
       <label class="user-settings_switch">
-        <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()"/>
+        <input type="checkbox" [(ngModel)]="twoFactorEnabled" (change)="toggleTwoFa()" />
         <span class="user-settings_slider"></span>
       </label>
     </div>
   </div>
 </div>
 
-<div class="user-settings_section">
+<div class="user-settings_section" @fadeInDashboardItem>
   <div class="user-settings_section-header" (click)="toggleSection('theme')">
     <span class="user-settings_section-title">Theme</span>
     <img src="../../../../../assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-         class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt=""/>
+      class="user-settings_arrow-icon" [class.user-settings_arrow-icon--rotated]="isThemeOpen" alt="" />
   </div>
 
   <span class="user-settings_section-description">
@@ -97,7 +95,7 @@
     <div class="user-settings_toggle-row">
       <div class="user-settings_toggle-label">Dark Mode</div>
       <label class="user-settings_switch">
-        <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()"/>
+        <input type="checkbox" [(ngModel)]="isDarkMode" (change)="toggleTheme()" />
         <span class="user-settings_slider"></span>
       </label>
     </div>

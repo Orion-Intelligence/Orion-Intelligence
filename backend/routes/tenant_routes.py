@@ -109,7 +109,7 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
     response_description="Updated user information.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER,user_role.ANALYST]))],
 )
 async def update_user(user: user_meta_model, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().update_current_user(user, current_user)
@@ -153,7 +153,7 @@ async def upload_profile_image(file: UploadFile, current_user=Depends(get_curren
     "/api/user/image",
     summary="Update user",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER,user_role.ANALYST]))],
 )
 async def update_user(current_user=Depends(get_current_user)):
     return await ResourceManager.get_instance().delete_user_image(current_user)
@@ -161,7 +161,7 @@ async def update_user(current_user=Depends(get_current_user)):
 @tenant_routes.put(
     "/api/user/image",
     summary="Upload profile image",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER,user_role.ANALYST]))],
 )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ResourceManager.get_instance().update_user_image(file, current_user)

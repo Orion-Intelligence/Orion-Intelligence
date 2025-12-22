@@ -8,10 +8,12 @@ import { LicenseService } from '../../../../../services/licenses/licenses.servic
 import { userSessionData } from '../../../../model/company-profile/node.model';
 import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
 import { TenantModel } from '../../../../model/tenant/tenant.model';
+import { fadeInDashboardItem } from '../../../../animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-tenant-settings',
   imports: [FormsModule, NgIf, CommonModule, UserImagePickerComponent],
+  animations: [fadeInDashboardItem],
   templateUrl: './tenant-settings.component.html',
   styleUrl: './tenant-settings.component.css'
 })

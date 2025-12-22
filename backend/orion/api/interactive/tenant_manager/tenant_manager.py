@@ -260,7 +260,6 @@ class TenantManager:
         tenant_uuid=tenant_uuid, )
 
       await engine.save(user)
-      await KeyManager.get_instance().create_user_dek(user.id)
       await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), "tenent created successfully")
 
       return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
